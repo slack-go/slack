@@ -1,0 +1,30 @@
+package slack
+
+import (
+	"errors"
+	"net/url"
+)
+
+type oAuthResponseFull struct {
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
+	SlackResponse
+}
+
+func (api *Slack) GetOAuthToken(clientId, clientSecret, code, redirectUri string) (accessToken string, scope string, err error) {
+	values := url.Values{
+		"client_id":     {clientId},
+		"client_secret": {clientSecret},
+		"code":          {code},
+		"redirect_uri":  {redirectUri},
+	}
+	response := &oAuthResponseFull{}
+	err = ParseResponse("oauth.access", values, response, api.debug)
+	if err != nil {
+		return "", "", err
+	}
+	if !response.Ok {
+		return "", "", errors.New(response.Error)
+	}
+	return response.AccessToken, response.Scope, nil
+}
