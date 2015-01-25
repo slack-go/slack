@@ -2,7 +2,7 @@ package slack
 
 type OutgoingMessage struct {
 	Id        int    `json:"id"`
-	ChannelID string `json:"channel,omitempty"`
+	ChannelId string `json:"channel,omitempty"`
 	Text      string `json:"text,omitempty"`
 	Type      string `json:"type,omitempty"`
 }
@@ -14,8 +14,8 @@ type Message struct {
 
 type Msg struct {
 	Id        string `json:"id"`
-	UserID    string `json:"user,omitempty"`
-	ChannelID string `json:"channel,omitempty"`
+	UserId    string `json:"user,omitempty"`
+	ChannelId string `json:"channel,omitempty"`
 	Timestamp string `json:"ts,omitempty"`
 	Text      string `json:"text,omitempty"`
 	Team      string `json:"team,omitempty"`
@@ -31,7 +31,7 @@ type Msg struct {
 
 type Presence struct {
 	Presence string `json:"presence"`
-	UserID   string `json:"user"`
+	UserId   string `json:"user"`
 }
 
 type Event struct {
@@ -57,7 +57,7 @@ func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMes
 	return &OutgoingMessage{
 		Id:        api.messageId,
 		Type:      "message",
-		ChannelID: channel,
+		ChannelId: channel,
 		Text:      text,
 	}
 }

@@ -153,7 +153,7 @@ func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
 		//      Allows us to have stats about latency and what not
 		return
 	case "presence_change":
-		//log.Printf("`%s is %s`\n", info.GetUserById(event.PUserID).Name, event.Presence)
+		//log.Printf("`%s is %s`\n", info.GetUserById(event.PUserId).Name, event.Presence)
 	case "message":
 		handleMessage(ch, event)
 	case "channel_marked":

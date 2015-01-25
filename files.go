@@ -20,7 +20,7 @@ const (
 type Comment struct {
 	Id        string   `json:"id"`
 	Timestamp JSONTime `json:"timestamp"`
-	UserID    string   `json:"user"`
+	UserId    string   `json:"user"`
 	Comment   string   `json:"comment"`
 }
 
@@ -34,7 +34,7 @@ type File struct {
 	Mimetype   string `json:"mimetype"`
 	Filetype   string `json:"filetype"`
 	PrettyType string `json:"pretty_type"`
-	UserID     string `json:"user"`
+	UserId     string `json:"user"`
 
 	Mode         string `json:"mode"`
 	Editable     bool   `json:"editable"`

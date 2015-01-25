@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
@@ -17,10 +18,35 @@ const (
 )
 
 type chatResponseFull struct {
-	ChannelID string `json:"channel"`
+	ChannelId string `json:"channel"`
 	Timestamp string `json:"ts"`
 	Text      string `json:"text"`
 	SlackResponse
+}
+
+type AttachmentField struct {
+	Title string `json:"title"`
+	Value string `json:"value"`
+	Short string `json:"short"`
+}
+
+type Attachment struct {
+	Fallback string `json:"fallback"`
+
+	Color string `json:"color,omitempty"`
+
+	Pretext string `json:"pretext,omitempty"`
+
+	AuthorName string `json:"author_name,omitempty"`
+	AuthorLink string `json:"author_link,omitempty"`
+	AuthorIcon string `json:"author_icon,omitempty"`
+
+	Title     string `json:"title,omitempty"`
+	TitleLink string `json:"title_link,omitempty"`
+
+	Text string `json:"text"`
+
+	Fields []AttachmentField `json:"fields,omitempty"`
 }
 
 type PostMessageParameters struct {
@@ -28,7 +54,7 @@ type PostMessageParameters struct {
 	Username    string
 	Parse       string
 	LinkNames   int
-	Attachments []byte
+	Attachments []Attachment
 	UnfurlLinks bool
 	UnfurlMedia bool
 	IconURL     string
@@ -70,7 +96,7 @@ func (api *Slack) DeleteMessage(channelId, messageTimestamp string) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	return response.ChannelID, response.Timestamp, nil
+	return response.ChannelId, response.Timestamp, nil
 }
 
 func EscapeMessage(message string) string {
@@ -83,7 +109,7 @@ func EscapeMessage(message string) string {
 	return replacer.Replace(message)
 }
 
-func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (string, string, error) {
+func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
@@ -99,7 +125,11 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 		values.Set("link_names", "1")
 	}
 	if params.Attachments != nil {
-		values.Set("attachments", string(params.Attachments))
+		attachments, err := json.Marshal(params.Attachments)
+		if err != nil {
+			return "", "", err
+		}
+		values.Set("attachments", string(attachments))
 	}
 	if params.UnfurlLinks == DEFAULT_MESSAGE_UNFURL_LINKS {
 		values.Set("unfurl_links", "false")
@@ -118,7 +148,7 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 	if err != nil {
 		return "", "", err
 	}
-	return response.ChannelID, response.Timestamp, nil
+	return response.ChannelId, response.Timestamp, nil
 }
 
 func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, string, string, error) {
@@ -132,6 +162,6 @@ func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, stri
 	if err != nil {
 		return "", "", "", err
 	}
-	return response.ChannelID, response.Timestamp, response.Text, nil
+	return response.ChannelId, response.Timestamp, response.Text, nil
 
 }

@@ -9,8 +9,8 @@ var SLACK_API string = "https://slack.com/api/"
 
 type UserTyping struct {
 	Type      string `json:"type"`
-	UserID    string `json:"user"`
-	ChannelID string `json:"channel"`
+	UserId    string `json:"user"`
+	ChannelId string `json:"channel"`
 }
 
 type SlackEvent struct {
