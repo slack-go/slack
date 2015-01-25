@@ -1,6 +1,9 @@
 package slack
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
 
 /*
   Added as a var so that we can change this for testing purposes
@@ -57,6 +60,9 @@ func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 	err := ParseResponse("auth.test", url.Values{"token": {api.config.token}}, response_full, api.debug)
 	if err != nil {
 		return nil, err
+	}
+	if !response_full.Ok {
+		return nil, errors.New(response_full.Error)
 	}
 	return &response_full.AuthTestResponse, nil
 }
