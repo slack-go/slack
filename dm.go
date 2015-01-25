@@ -30,7 +30,7 @@ type IM struct {
 
 func imRequest(path string, values url.Values, debug bool) (*imResponseFull, error) {
 	response := &imResponseFull{}
-	err := ParseResponse(path, values, response, debug)
+	err := parseResponse(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}

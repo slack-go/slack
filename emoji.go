@@ -15,7 +15,7 @@ func (api *Slack) GetEmoji() (map[string]string, error) {
 		"token": {api.config.token},
 	}
 	response := &emojiResponseFull{}
-	err := ParseResponse("emoji.list", values, response, api.debug)
+	err := parseResponse("emoji.list", values, response, api.debug)
 	if err != nil {
 		return nil, err
 	}

@@ -86,7 +86,7 @@ func parseResponseMultipart(path string, filepath string, values url.Values, int
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func ParseResponse(path string, values url.Values, intf interface{}, debug bool) error {
+func parseResponse(path string, values url.Values, intf interface{}, debug bool) error {
 	resp, err := http.PostForm(SLACK_API+path, values)
 	if err != nil {
 		return err

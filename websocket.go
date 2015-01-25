@@ -41,7 +41,7 @@ func fixUrlPort(orig string) (string, error) {
 
 func (api *Slack) StartRTM(protocol, origin string) (*SlackWS, error) {
 	response := &infoResponseFull{}
-	err := ParseResponse("rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
+	err := parseResponse("rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
 	if err != nil {
 		return nil, err
 	}

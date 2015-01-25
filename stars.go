@@ -65,7 +65,7 @@ func (api *Slack) GetStarred(params StarsParameters) ([]StarredItem, *Paging, er
 	if params.Page != DEFAULT_STARS_PAGE {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
-	err := ParseResponse("stars.list", values, response, api.debug)
+	err := parseResponse("stars.list", values, response, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}

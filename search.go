@@ -101,7 +101,7 @@ func search(token, path, query string, params SearchParameters, files, messages,
 		values.Add("page", strconv.Itoa(params.Page))
 	}
 	response = &searchResponseFull{}
-	err := ParseResponse(path, values, response, debug)
+	err := parseResponse(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}

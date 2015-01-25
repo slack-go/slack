@@ -76,7 +76,7 @@ func NewPostMessageParameters() PostMessageParameters {
 
 func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
-	err := ParseResponse(path, values, response, debug)
+	err := parseResponse(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}

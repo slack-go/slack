@@ -57,7 +57,7 @@ func (api *Slack) GetInfo() Info {
 
 func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 	response_full := &authTestResponseFull{}
-	err := ParseResponse("auth.test", url.Values{"token": {api.config.token}}, response_full, api.debug)
+	err := parseResponse("auth.test", url.Values{"token": {api.config.token}}, response_full, api.debug)
 	if err != nil {
 		return nil, err
 	}
