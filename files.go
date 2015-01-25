@@ -2,9 +2,9 @@ package slack
 
 import (
 	"errors"
-	"log"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -69,6 +69,16 @@ type File struct {
 	InitialComment  Comment  `json:"initial_comment"`
 	NumStars        int      `json:"num_stars"`
 	IsStarred       bool     `json:"is_starred"`
+}
+
+type FileUploadParameters struct {
+	File           string
+	Content        string
+	Filetype       string
+	Filename       string
+	Title          string
+	InitialComment string
+	Channels       []string
 }
 
 type GetFilesParameters struct {
@@ -156,6 +166,43 @@ func (api *Slack) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	return response.Files, &response.Paging, nil
 }
 
-func (api *Slack) UploadFile() {
-	log.Fatal("Not implemented yet")
+func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error) {
+	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
+	// investigation needed, but for now this will do.
+	_, err = api.AuthTest()
+	if err != nil {
+		return nil, err
+	}
+	response := &fileResponseFull{}
+	values := url.Values{
+		"token": {api.config.token},
+	}
+	if params.Filetype != "" {
+		values.Add("filetype", params.Filetype)
+	}
+	if params.Filename != "" {
+		values.Add("filename", params.Filename)
+	}
+	if params.Title != "" {
+		values.Add("title", params.Title)
+	}
+	if params.InitialComment != "" {
+		values.Add("initial_comment", params.InitialComment)
+	}
+	if len(params.Channels) != 0 {
+		values.Add("channels", strings.Join(params.Channels, ","))
+	}
+	if params.Content != "" {
+		values.Add("content", params.Content)
+		err = ParseResponse("files.upload", values, response, api.debug)
+	} else if params.File != "" {
+		err = parseResponseMultipart("files.upload", params.File, values, response, api.debug)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return &response.File, nil
 }

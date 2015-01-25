@@ -1,7 +1,5 @@
 - Add more tests!!!
 - Add timeouts
-- Add examples
 - Fix the Websocket mess
-- Implement Upload File
 - Add support to have markdown hints
   - See section Message Formatting at https://api.slack.com/docs/formatting
