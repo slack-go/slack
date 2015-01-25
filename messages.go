@@ -15,6 +15,7 @@ type Message struct {
 type Msg struct {
 	Id        string `json:"id"`
 	UserId    string `json:"user,omitempty"`
+	Username  string `json:"username,omitempty"`
 	ChannelId string `json:"channel,omitempty"`
 	Timestamp string `json:"ts,omitempty"`
 	Text      string `json:"text,omitempty"`
