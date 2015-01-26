@@ -27,7 +27,7 @@ type chatResponseFull struct {
 type AttachmentField struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
-	Short string `json:"short"`
+	Short bool   `json:"short"`
 }
 
 type Attachment struct {

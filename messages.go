@@ -14,6 +14,7 @@ type Message struct {
 
 type Msg struct {
 	Id        string `json:"id"`
+	BotId     string `json:"bot_id,omitempty"`
 	UserId    string `json:"user,omitempty"`
 	Username  string `json:"username,omitempty"`
 	ChannelId string `json:"channel,omitempty"`
@@ -25,9 +26,10 @@ type Msg struct {
 	Type      string `json:"type,omitempty"`
 	IsStarred bool   `json:"is_starred,omitempty"`
 	// Submessage
-	SubType          string `json:"subtype,omitempty"`
-	Hidden           bool   `json:"bool,omitempty"`
-	DeletedTimestamp string `json:"deleted_ts,omitempty"`
+	SubType          string       `json:"subtype,omitempty"`
+	Hidden           bool         `json:"bool,omitempty"`
+	DeletedTimestamp string       `json:"deleted_ts,omitempty"`
+	Attachments      []Attachment `json:"attachments,omitempty"`
 }
 
 type Presence struct {
