@@ -125,17 +125,38 @@ type Team struct {
 	Domain string `json:"name"`
 }
 
+type Icons struct {
+	Image48 string `json:"image_48"`
+}
+
+type Bot struct {
+	Id      string `json:"id"`
+	Name    string `json:"name"`
+	Deleted bool   `json:"deleted"`
+	Icons   Icons  `json:"icons"`
+}
+
 type Info struct {
 	Url      string      `json:"url,omitempty"`
 	User     UserDetails `json:"self,omitempty"`
 	Team     Team        `json:"team,omitempty"`
 	Users    []User      `json:"users,omitempty"`
 	Channels []Channel   `json:"channels,omitempty"`
+	Bots     []Bot       `json:"bots,omitempty"`
 }
 
 type infoResponseFull struct {
 	Info
 	SlackResponse
+}
+
+func (info Info) GetBotById(id string) *Bot {
+	for _, bot := range info.Bots {
+		if bot.Id == id {
+			return &bot
+		}
+	}
+	return nil
 }
 
 func (info Info) GetUserById(id string) *User {
