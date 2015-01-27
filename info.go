@@ -104,6 +104,7 @@ type UserPrefs struct {
 	// "fuzzy_matching":false
 }
 
+// UserDetails contains user details coming in the initial response from StartRTM
 type UserDetails struct {
 	Id             string    `json:"id"`
 	Name           string    `json:"name"`
@@ -112,23 +113,28 @@ type UserDetails struct {
 	Prefs          UserPrefs `json:"prefs"`
 }
 
+// JSONTime exists so that we can have a String method converting the date
 type JSONTime int64
 
+// String converts the unix timestamp into a string
 func (t JSONTime) String() string {
 	tm := time.Unix(int64(t), 0)
 	return fmt.Sprintf("\"%s\"", tm.Format("Mon Jan _2"))
 }
 
+// Team contains details about a team
 type Team struct {
 	Id     string `json:"id"`
 	Name   string `json:"name"`
 	Domain string `json:"name"`
 }
 
+// Icons XXX: needs further investigation
 type Icons struct {
 	Image48 string `json:"image_48"`
 }
 
+// Bot contains information about a bot
 type Bot struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`
@@ -136,6 +142,8 @@ type Bot struct {
 	Icons   Icons  `json:"icons"`
 }
 
+// Info contains various details about Users, Channels, Bots and the authenticated
+// It is returned by StartRTM
 type Info struct {
 	Url      string      `json:"url,omitempty"`
 	User     UserDetails `json:"self,omitempty"`
@@ -150,27 +158,30 @@ type infoResponseFull struct {
 	SlackResponse
 }
 
-func (info Info) GetBotById(id string) *Bot {
+// GetBotById returns a bot given a bot id
+func (info Info) GetBotById(botId string) *Bot {
 	for _, bot := range info.Bots {
-		if bot.Id == id {
+		if bot.Id == botId {
 			return &bot
 		}
 	}
 	return nil
 }
 
-func (info Info) GetUserById(id string) *User {
+// GetUserById returns a user given a user id
+func (info Info) GetUserById(userId string) *User {
 	for _, user := range info.Users {
-		if user.Id == id {
+		if user.Id == userId {
 			return &user
 		}
 	}
 	return nil
 }
 
-func (info Info) GetChannelById(id string) *Channel {
+// GetChannelById returns a channel given a channel id
+func (info Info) GetChannelById(channelId string) *Channel {
 	for _, channel := range info.Channels {
-		if channel.Id == id {
+		if channel.Id == channelId {
 			return &channel
 		}
 	}

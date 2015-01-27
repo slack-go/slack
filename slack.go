@@ -55,18 +55,22 @@ func (api *Slack) GetInfo() Info {
 	return api.info
 }
 
+// AuthTest tests if the user is able to do authenticated requests or not
 func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
-	response_full := &authTestResponseFull{}
-	err := parseResponse("auth.test", url.Values{"token": {api.config.token}}, response_full, api.debug)
+	responseFull := &authTestResponseFull{}
+	err := parseResponse("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
 		return nil, err
 	}
-	if !response_full.Ok {
-		return nil, errors.New(response_full.Error)
+	if !responseFull.Ok {
+		return nil, errors.New(responseFull.Error)
 	}
-	return &response_full.AuthTestResponse, nil
+	return &responseFull.AuthTestResponse, nil
 }
 
+// SetDebug switches the api into debug mode
+// When in debug mode, it logs various info about what its doing
+// If you ever use this in production, don't call SetDebug(true)
 func (api *Slack) SetDebug(debug bool) {
 	api.debug = debug
 }

@@ -11,12 +11,13 @@ type oAuthResponseFull struct {
 	SlackResponse
 }
 
-func GetOAuthToken(clientId, clientSecret, code, redirectUri string, debug bool) (accessToken string, scope string, err error) {
+// GetOAuthToken retrieves an AccessToken
+func GetOAuthToken(clientId, clientSecret, code, redirectURI string, debug bool) (accessToken string, scope string, err error) {
 	values := url.Values{
 		"client_id":     {clientId},
 		"client_secret": {clientSecret},
 		"code":          {code},
-		"redirect_uri":  {redirectUri},
+		"redirect_uri":  {redirectURI},
 	}
 	response := &oAuthResponseFull{}
 	err = parseResponse("oauth.access", values, response, debug)

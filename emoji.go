@@ -10,6 +10,7 @@ type emojiResponseFull struct {
 	SlackResponse
 }
 
+// GetEmoji retrieves all the emojis
 func (api *Slack) GetEmoji() (map[string]string, error) {
 	values := url.Values{
 		"token": {api.config.token},

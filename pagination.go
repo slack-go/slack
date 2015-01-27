@@ -1,5 +1,6 @@
 package slack
 
+// Paging contains paging information
 type Paging struct {
 	Count int `json:"count"`
 	Total int `json:"total"`
@@ -7,6 +8,8 @@ type Paging struct {
 	Pages int `json:"pages"`
 }
 
+// Pagination contains pagination information
+// This is different from Paging in that it contains additional details
 type Pagination struct {
 	TotalCount int `json:"total_count"`
 	Page       int `json:"page"`

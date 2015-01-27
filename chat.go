@@ -24,12 +24,15 @@ type chatResponseFull struct {
 	SlackResponse
 }
 
+// AttachmentField contains information for an attachment field
+// An Attachment can contain multiple of these
 type AttachmentField struct {
 	Title string `json:"title"`
 	Value string `json:"value"`
 	Short bool   `json:"short"`
 }
 
+// Attachment contains all the information for an attachment
 type Attachment struct {
 	Fallback string `json:"fallback"`
 
@@ -49,6 +52,7 @@ type Attachment struct {
 	Fields []AttachmentField `json:"fields,omitempty"`
 }
 
+// PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
 type PostMessageParameters struct {
 	Text        string
 	Username    string
@@ -61,6 +65,7 @@ type PostMessageParameters struct {
 	IconEmoji   string
 }
 
+// NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
 		Username:    DEFAULT_MESSAGE_USERNAME,
@@ -86,6 +91,7 @@ func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull,
 	return response, nil
 }
 
+// DeleteMessage deletes a message in a channel
 func (api *Slack) DeleteMessage(channelId, messageTimestamp string) (string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -99,7 +105,7 @@ func (api *Slack) DeleteMessage(channelId, messageTimestamp string) (string, str
 	return response.ChannelId, response.Timestamp, nil
 }
 
-func EscapeMessage(message string) string {
+func escapeMessage(message string) string {
 	/*
 		& replaced with &amp;
 		< replaced with &lt;
@@ -109,11 +115,12 @@ func EscapeMessage(message string) string {
 	return replacer.Replace(message)
 }
 
+// PostMessage sends a message to a channel
 func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
-		"text":    {EscapeMessage(text)},
+		"text":    {escapeMessage(text)},
 	}
 	if params.Username != DEFAULT_MESSAGE_USERNAME {
 		values.Set("username", string(params.Username))
@@ -151,11 +158,12 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 	return response.ChannelId, response.Timestamp, nil
 }
 
+// UpdateMessage updates a message in a channel
 func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
-		"text":    {EscapeMessage(text)},
+		"text":    {escapeMessage(text)},
 		"ts":      {timestamp},
 	}
 	response, err := chatRequest("chat.update", values, api.debug)
@@ -163,5 +171,4 @@ func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, stri
 		return "", "", "", err
 	}
 	return response.ChannelId, response.Timestamp, response.Text, nil
-
 }

@@ -16,18 +16,21 @@ type channelResponseFull struct {
 	SlackResponse
 }
 
+// ChannelTopic contains information about the channel topic
 type ChannelTopic struct {
 	Value   string   `json:"value"`
 	Creator string   `json:"creator"`
 	LastSet JSONTime `json:"last_set"`
 }
 
+// ChannelPurpose contains information about the channel purpose
 type ChannelPurpose struct {
 	Value   string   `json:"value"`
 	Creator string   `json:"creator"`
 	LastSet JSONTime `json:"last_set"`
 }
 
+// Channel contains information about the channel
 type Channel struct {
 	Id          string         `json:"id"`
 	Name        string         `json:"name"`
@@ -59,6 +62,7 @@ func channelRequest(path string, values url.Values, debug bool) (*channelRespons
 	return response, nil
 }
 
+// ArchiveChannel archives the given channel
 func (api *Slack) ArchiveChannel(channelId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -71,6 +75,7 @@ func (api *Slack) ArchiveChannel(channelId string) error {
 	return nil
 }
 
+// UnarchiveChannel unarchives the given channel
 func (api *Slack) UnarchiveChannel(channelId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -83,6 +88,7 @@ func (api *Slack) UnarchiveChannel(channelId string) error {
 	return nil
 }
 
+// CreateChannel creates a channel with the given name and returns a *Channel
 func (api *Slack) CreateChannel(channel string) (*Channel, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -95,6 +101,7 @@ func (api *Slack) CreateChannel(channel string) (*Channel, error) {
 	return &response.Channel, nil
 }
 
+// GetChannelHistory retrieves the channel history
 func (api *Slack) GetChannelHistory(channelId string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -117,6 +124,7 @@ func (api *Slack) GetChannelHistory(channelId string, params HistoryParameters) 
 	return &channelHistory, nil
 }
 
+// GetChannelInfo retrieves the given channel
 func (api *Slack) GetChannelInfo(channelId string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -129,6 +137,7 @@ func (api *Slack) GetChannelInfo(channelId string) (*Channel, error) {
 	return &response.Channel, nil
 }
 
+// InviteUserToChannel invites a user to a given channel and returns a *Channel
 func (api *Slack) InviteUserToChannel(channelId, userId string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -142,6 +151,7 @@ func (api *Slack) InviteUserToChannel(channelId, userId string) (*Channel, error
 	return &response.Channel, nil
 }
 
+// JoinChannel joins the currently authenticated user to a channel
 func (api *Slack) JoinChannel(channel string) (*Channel, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -154,6 +164,7 @@ func (api *Slack) JoinChannel(channel string) (*Channel, error) {
 	return &response.Channel, nil
 }
 
+// LeaveChannel makes the authenticated user leave the given channel
 func (api *Slack) LeaveChannel(channelId string) (bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -169,6 +180,7 @@ func (api *Slack) LeaveChannel(channelId string) (bool, error) {
 	return false, nil
 }
 
+// KickUserFromChannel kicks a user from a given channel
 func (api *Slack) KickUserFromChannel(channelId, userId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -182,6 +194,7 @@ func (api *Slack) KickUserFromChannel(channelId, userId string) error {
 	return nil
 }
 
+// GetChannels retrieves all the channels
 func (api *Slack) GetChannels(excludeArchived bool) ([]Channel, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -196,10 +209,11 @@ func (api *Slack) GetChannels(excludeArchived bool) ([]Channel, error) {
 	return response.Channels, nil
 }
 
-/* Clients should try to avoid making this call too often. When needing to mark a read position, a client should set a
-timer before making the call. In this way, any further updates needed during the timeout will not generate extra calls
-(just one per channel). This is useful for when reading scroll-back history, or following a busy live channel. A
-timeout of 5 seconds is a good starting point. Be sure to flush these calls on shutdown/logout.  */
+// SetChannelReadMark sets the read mark of a given channel to a specific point
+// Clients should try to avoid making this call too often. When needing to mark a read position, a client should set a
+// timer before making the call. In this way, any further updates needed during the timeout will not generate extra calls
+// (just one per channel). This is useful for when reading scroll-back history, or following a busy live channel. A
+// timeout of 5 seconds is a good starting point. Be sure to flush these calls on shutdown/logout.
 func (api *Slack) SetChannelReadMark(channelId, ts string) error {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -213,6 +227,7 @@ func (api *Slack) SetChannelReadMark(channelId, ts string) error {
 	return nil
 }
 
+// RenameChannel renames a given channel
 func (api *Slack) RenameChannel(channelId, name string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -229,6 +244,8 @@ func (api *Slack) RenameChannel(channelId, name string) (*Channel, error) {
 
 }
 
+// SetChannelPurpose sets the channel purpose and returns the purpose that was
+// successfully set
 func (api *Slack) SetChannelPurpose(channelId, purpose string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -242,6 +259,7 @@ func (api *Slack) SetChannelPurpose(channelId, purpose string) (string, error) {
 	return response.Purpose, nil
 }
 
+// SetChannelTopic sets the channel topic and returns the topic that was successfully set
 func (api *Slack) SetChannelTopic(channelId, topic string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},

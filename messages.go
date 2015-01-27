@@ -7,11 +7,13 @@ type OutgoingMessage struct {
 	Type      string `json:"type,omitempty"`
 }
 
+// Message is an auxiliary type to allow us to have a message containing sub messages
 type Message struct {
 	Msg
 	SubMessage Msg `json:"message,omitempty"`
 }
 
+// Msg contains information about a slack message
 type Msg struct {
 	Id        string `json:"id"`
 	BotId     string `json:"bot_id,omitempty"`
@@ -32,20 +34,24 @@ type Msg struct {
 	Attachments      []Attachment `json:"attachments,omitempty"`
 }
 
+// Presence XXX: not used yet
 type Presence struct {
 	Presence string `json:"presence"`
 	UserId   string `json:"user"`
 }
 
+// Event contains the event type
 type Event struct {
 	Type string `json:"type,omitempty"`
 }
 
+// Ping contains information about a Ping Event
 type Ping struct {
 	Id   int    `json:"id"`
 	Type string `json:"type"`
 }
 
+// AckMessage is used for messages received in reply to other messages
 type AckMessage struct {
 	ReplyTo   int    `json:"reply_to"`
 	Timestamp string `json:"ts"`
@@ -53,6 +59,7 @@ type AckMessage struct {
 	SlackResponse
 }
 
+// NewOutGoingMessage prepares an OutgoingMessage that the user can use to send a message
 func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
 	api.mutex.Lock()
 	defer api.mutex.Unlock()

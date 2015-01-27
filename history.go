@@ -6,18 +6,21 @@ const (
 	DEFAULT_HISTORY_COUNT  = 100
 )
 
+// HistoryParameters contains all the necessary information to help in the retrieval of history for Channels/Groups/DMs
 type HistoryParameters struct {
 	Latest string
 	Oldest string
 	Count  int
 }
 
+// History contains message history information needed to navigate a Channel / Group / DM history
 type History struct {
 	Latest   string    `json:"latest"`
 	Messages []Message `json:"messages"`
 	HasMore  bool      `json:"has_more"`
 }
 
+// NewHistoryParameters provides an instance of HistoryParameters with all the sane default values set
 func NewHistoryParameters() HistoryParameters {
 	return HistoryParameters{
 		Latest: DEFAULT_HISTORY_LATEST,

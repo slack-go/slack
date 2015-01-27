@@ -17,6 +17,7 @@ const (
 	DEFAULT_FILES_PAGE    = 1
 )
 
+// Comment contains all the information relative to a comment
 type Comment struct {
 	Id        string   `json:"id"`
 	Timestamp JSONTime `json:"timestamp"`
@@ -24,6 +25,7 @@ type Comment struct {
 	Comment   string   `json:"comment"`
 }
 
+// File contains all the information for a file
 type File struct {
 	Id        string   `json:"id"`
 	Created   JSONTime `json:"created"`
@@ -43,10 +45,10 @@ type File struct {
 
 	Size int `json:"size"`
 
-	Url                string `json:"url"`
-	UrlDownload        string `json:"url_download"`
-	UrlPrivate         string `json:"url_private"`
-	UrlPrivateDownload string `json:"url_private_download"`
+	URL                string `json:"url"`
+	URLDownload        string `json:"url_download"`
+	URLPrivate         string `json:"url_private"`
+	URLPrivateDownload string `json:"url_private_download"`
 
 	Thumb64     string `json:"thumb_64"`
 	Thumb80     string `json:"thumb_80"`
@@ -63,7 +65,7 @@ type File struct {
 	LinesMore        int    `json:"lines_more"`
 
 	IsPublic        bool     `json:"is_public"`
-	PublicUrlShared bool     `json:"public_url_shared"`
+	PublicURLShared bool     `json:"public_url_shared"`
 	Channels        []string `json:"channels"`
 	Groups          []string `json:"groups"`
 	InitialComment  Comment  `json:"initial_comment"`
@@ -71,6 +73,7 @@ type File struct {
 	IsStarred       bool     `json:"is_starred"`
 }
 
+// FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request
 type FileUploadParameters struct {
 	File           string
 	Content        string
@@ -81,6 +84,7 @@ type FileUploadParameters struct {
 	Channels       []string
 }
 
+// GetFilesParameters contains all the parameters necessary (including the optional ones) for a GetFiles() request
 type GetFilesParameters struct {
 	UserId        string
 	TimestampFrom JSONTime
@@ -99,6 +103,7 @@ type fileResponseFull struct {
 	SlackResponse
 }
 
+// NewGetFilesParameters provides an instance of GetFilesParameters with all the sane default values set
 func NewGetFilesParameters() GetFilesParameters {
 	return GetFilesParameters{
 		UserId:        DEFAULT_FILES_USERID,
@@ -122,6 +127,7 @@ func fileRequest(path string, values url.Values, debug bool) (*fileResponseFull,
 	return response, nil
 }
 
+// GetFileInfo retrieves a file and related comments
 func (api *Slack) GetFileInfo(fileId string, count, page int) (*File, []Comment, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -136,6 +142,7 @@ func (api *Slack) GetFileInfo(fileId string, count, page int) (*File, []Comment,
 	return &response.File, response.Comments, &response.Paging, nil
 }
 
+// GetFiles retrieves all files according to the parameters given
 func (api *Slack) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -166,6 +173,7 @@ func (api *Slack) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	return response.Files, &response.Paging, nil
 }
 
+// UploadFile uploads a file
 func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
 	// investigation needed, but for now this will do.

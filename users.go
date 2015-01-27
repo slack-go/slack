@@ -5,6 +5,7 @@ import (
 	"net/url"
 )
 
+// UserProfile contains all the information details of a given user
 type UserProfile struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
@@ -19,6 +20,7 @@ type UserProfile struct {
 	Image192  string `json:"image_192"`
 }
 
+// User contains all the information of a user
 type User struct {
 	Id                string      `json:"id"`
 	Name              string      `json:"name"`
@@ -33,6 +35,7 @@ type User struct {
 	HasFiles          bool        `json:"has_files"`
 }
 
+// UserPresence contains details about a user online status
 type UserPresence struct {
 	Presence        string   `json:"presence,omitempty"`
 	Online          bool     `json:"online,omitempty"`
@@ -61,6 +64,7 @@ func userRequest(path string, values url.Values, debug bool) (*userResponseFull,
 	return response, nil
 }
 
+// GetUserPresence will retrieve the current presence status of given user.
 func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -73,6 +77,7 @@ func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
 	return &response.UserPresence, nil
 }
 
+// GetUserInfo will retrive the complete user information
 func (api *Slack) GetUserInfo(userId string) (*User, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -85,6 +90,7 @@ func (api *Slack) GetUserInfo(userId string) (*User, error) {
 	return &response.User, nil
 }
 
+// GetUsers returns the list of users (with their detailed information)
 func (api *Slack) GetUsers() ([]User, error) {
 	values := url.Values{
 		"token": {api.config.token},
@@ -96,6 +102,7 @@ func (api *Slack) GetUsers() ([]User, error) {
 	return response.Members, nil
 }
 
+// SetUserAsActive marks the currently authenticated user as active
 func (api *Slack) SetUserAsActive() error {
 	values := url.Values{
 		"token": {api.config.token},
@@ -107,6 +114,7 @@ func (api *Slack) SetUserAsActive() error {
 	return nil
 }
 
+// SetUserPresence changes the currently authenticated user presence
 func (api *Slack) SetUserPresence(presence string) error {
 	values := url.Values{
 		"token":    {api.config.token},
