@@ -19,5 +19,12 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("Name: %s, Url: %s\n", file.Name, file.Url)
+	fmt.Printf("Name: %s, Url: %s\n", file.Name, file.URL)
+
+	err = api.DeleteFile(file.Id)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+	fmt.Printf("File %s deleted successfully.\n", file.Name)
 }

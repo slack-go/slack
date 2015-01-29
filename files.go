@@ -214,3 +214,17 @@ func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error
 	}
 	return &response.File, nil
 }
+
+// DeleteFile deletes a file
+func (api *Slack) DeleteFile(fileId string) error {
+	values := url.Values{
+		"token": {api.config.token},
+		"file":  {fileId},
+	}
+	_, err := fileRequest("files.delete", values, api.debug)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
