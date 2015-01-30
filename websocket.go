@@ -79,6 +79,7 @@ func (api *SlackWS) Ping() error {
 
 func (api *SlackWS) Keepalive(interval time.Duration) {
 	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
 	for {
 		select {
