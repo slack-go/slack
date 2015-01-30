@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -89,8 +90,12 @@ func (api *SlackWS) Keepalive(interval time.Duration) {
 	}
 }
 
-func (api *SlackWS) SendMessage(msg OutgoingMessage) error {
-	if err := websocket.JSON.Send(api.conn, msg); err != nil {
+func (api *SlackWS) SendMessage(msg *OutgoingMessage) error {
+	if msg == nil {
+		return fmt.Errorf("Can't send a nil message")
+	}
+
+	if err := websocket.JSON.Send(api.conn, *msg); err != nil {
 		return err
 	}
 	return nil
