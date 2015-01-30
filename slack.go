@@ -1,9 +1,6 @@
 package slack
 
-import (
-	"errors"
-	"net/url"
-)
+import "net/url"
 
 /*
   Added as a var so that we can change this for testing purposes
@@ -22,8 +19,17 @@ type SlackEvent struct {
 }
 
 type SlackResponse struct {
-	Ok    bool   `json:"ok"`
-	Error string `json:"error"`
+	Ok    bool        `json:"ok"`
+	Error *SlackError `json:"error"`
+}
+
+type SlackError struct {
+	Code int
+	Msg  string
+}
+
+func (s SlackError) Error() string {
+	return s.Msg
 }
 
 type AuthTestResponse struct {
@@ -63,7 +69,7 @@ func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 		return nil, err
 	}
 	if !responseFull.Ok {
-		return nil, errors.New(responseFull.Error)
+		return nil, responseFull.Error
 	}
 	return &responseFull.AuthTestResponse, nil
 }

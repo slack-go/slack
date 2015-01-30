@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"net/url"
 	"strings"
 )
@@ -86,7 +85,7 @@ func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull,
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, errors.New(response.Error)
+		return nil, response.Error
 	}
 	return response, nil
 }

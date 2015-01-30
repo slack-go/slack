@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -47,7 +46,7 @@ func (api *Slack) StartRTM(protocol, origin string) (*SlackWS, error) {
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, errors.New(response.Error)
+		return nil, response.Error
 	}
 	api.info = response.Info
 	// websocket.Dial does not accept url without the port (yet)
