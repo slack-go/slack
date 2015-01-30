@@ -102,7 +102,7 @@ func (api *SlackWS) SendMessage(msg *OutgoingMessage) error {
 	return nil
 }
 
-func (api *SlackWS) HandleIncomingEvents(ch *chan SlackEvent) {
+func (api *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
 	event := json.RawMessage{}
 	for {
 		if err := websocket.JSON.Receive(api.conn, &event); err == io.EOF {
@@ -133,7 +133,7 @@ func (api *SlackWS) HandleIncomingEvents(ch *chan SlackEvent) {
 	}
 }
 
-func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
+func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	em := Event{}
 	err := json.Unmarshal(event, &em)
 	if err != nil {
@@ -171,19 +171,19 @@ func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
 	}
 }
 
-func handleUserTyping(ch *chan SlackEvent, event json.RawMessage) {
+func handleUserTyping(ch chan SlackEvent, event json.RawMessage) {
 	msg := UserTyping{}
 	if err := json.Unmarshal(event, &msg); err != nil {
 		log.Fatal(err)
 	}
-	*ch <- SlackEvent{Type: EV_USER_TYPING, Data: msg}
+	ch <- SlackEvent{Type: EV_USER_TYPING, Data: msg}
 }
 
-func handleMessage(ch *chan SlackEvent, event json.RawMessage) {
+func handleMessage(ch chan SlackEvent, event json.RawMessage) {
 	msg := Message{}
 	err := json.Unmarshal(event, &msg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	*ch <- SlackEvent{Type: EV_MESSAGE, Data: msg}
+	ch <- SlackEvent{Type: EV_MESSAGE, Data: msg}
 }
