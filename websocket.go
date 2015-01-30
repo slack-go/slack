@@ -148,7 +148,7 @@ func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		if ack.Ok {
 			log.Printf("Received an ok for: %d", ack.ReplyTo)
 		} else {
-			log.Println(event)
+			log.Println(string(event))
 			log.Println("XXX: ?")
 		}
 	case "hello":
