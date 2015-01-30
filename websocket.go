@@ -138,6 +138,7 @@ func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	switch em.Type {
 	case "":
 		// try ok
@@ -145,12 +146,14 @@ func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		if err = json.Unmarshal(event, &ack); err != nil {
 			log.Fatal(err)
 		}
+
 		if ack.Ok {
 			log.Printf("Received an ok for: %d", ack.ReplyTo)
-		} else {
-			log.Println(string(event))
-			log.Println("XXX: ?")
+			return
 		}
+
+		// TODO: errors end up in this bucket. They shouldn't.
+		log.Printf("Got error(?): %s", event)
 	case "hello":
 		return
 	case "pong":
