@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"net/url"
 	"strconv"
 )
@@ -69,7 +70,7 @@ func (api *Slack) GetStarred(params StarsParameters) ([]StarredItem, *Paging, er
 		return nil, nil, err
 	}
 	if !response.Ok {
-		return nil, nil, response.Error
+		return nil, nil, errors.New(response.Error)
 	}
 	return response.Items, &response.Paging, nil
 }

@@ -1,6 +1,9 @@
 package slack
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
 
 type oAuthResponseFull struct {
 	AccessToken string `json:"access_token"`
@@ -22,7 +25,7 @@ func GetOAuthToken(clientId, clientSecret, code, redirectURI string, debug bool)
 		return "", "", err
 	}
 	if !response.Ok {
-		return "", "", response.Error
+		return "", "", errors.New(response.Error)
 	}
 	return response.AccessToken, response.Scope, nil
 }

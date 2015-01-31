@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"net/url"
 	"strconv"
 )
@@ -49,7 +50,7 @@ func groupRequest(path string, values url.Values, debug bool) (*groupResponseFul
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, response.Error
+		return nil, errors.New(response.Error)
 	}
 	return response, nil
 }

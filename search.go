@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"net/url"
 	"strconv"
 )
@@ -105,7 +106,7 @@ func search(token, path, query string, params SearchParameters, files, messages,
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, response.Error
+		return nil, errors.New(response.Error)
 	}
 	return response, nil
 

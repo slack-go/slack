@@ -1,6 +1,9 @@
 package slack
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
 
 type emojiResponseFull struct {
 	Emoji map[string]string `json:"emoji"`
@@ -18,7 +21,7 @@ func (api *Slack) GetEmoji() (map[string]string, error) {
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, response.Error
+		return nil, errors.New(response.Error)
 	}
 	return response.Emoji, nil
 }
