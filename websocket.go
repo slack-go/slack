@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -26,6 +25,20 @@ type SlackWS struct {
 	Slack
 }
 
+type SlackWSResponse struct {
+	Ok    bool          `json:"ok"`
+	Error *SlackWSError `json:"error"`
+}
+
+type SlackWSError struct {
+	Code int
+	Msg  string
+}
+
+func (s SlackWSError) Error() string {
+	return s.Msg
+}
+
 var portMapping = map[string]string{"ws": "80", "wss": "443"}
 
 func fixUrlPort(orig string) (string, error) {
@@ -47,7 +60,7 @@ func (api *Slack) StartRTM(protocol, origin string) (*SlackWS, error) {
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, errors.New(response.Error)
+		return nil, response.Error
 	}
 	api.info = response.Info
 	// websocket.Dial does not accept url without the port (yet)
