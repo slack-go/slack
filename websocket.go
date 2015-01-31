@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -47,7 +46,7 @@ func (api *Slack) StartRTM(protocol, origin string) (*SlackWS, error) {
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, errors.New(response.Error)
+		return nil, response.Error
 	}
 	api.info = response.Info
 	// websocket.Dial does not accept url without the port (yet)
@@ -79,6 +78,7 @@ func (api *SlackWS) Ping() error {
 
 func (api *SlackWS) Keepalive(interval time.Duration) {
 	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
 	for {
 		select {
@@ -101,7 +101,7 @@ func (api *SlackWS) SendMessage(msg *OutgoingMessage) error {
 	return nil
 }
 
-func (api *SlackWS) HandleIncomingEvents(ch *chan SlackEvent) {
+func (api *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
 	event := json.RawMessage{}
 	for {
 		if err := websocket.JSON.Receive(api.conn, &event); err == io.EOF {
@@ -132,12 +132,13 @@ func (api *SlackWS) HandleIncomingEvents(ch *chan SlackEvent) {
 	}
 }
 
-func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
+func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	em := Event{}
 	err := json.Unmarshal(event, &em)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	switch em.Type {
 	case "":
 		// try ok
@@ -145,12 +146,14 @@ func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
 		if err = json.Unmarshal(event, &ack); err != nil {
 			log.Fatal(err)
 		}
+
 		if ack.Ok {
 			log.Printf("Received an ok for: %d", ack.ReplyTo)
-		} else {
-			log.Println(event)
-			log.Println("XXX: ?")
+			return
 		}
+
+		// TODO: errors end up in this bucket. They shouldn't.
+		log.Printf("Got error(?): %s", event)
 	case "hello":
 		return
 	case "pong":
@@ -170,19 +173,19 @@ func handleEvent(ch *chan SlackEvent, event json.RawMessage) {
 	}
 }
 
-func handleUserTyping(ch *chan SlackEvent, event json.RawMessage) {
+func handleUserTyping(ch chan SlackEvent, event json.RawMessage) {
 	msg := UserTyping{}
 	if err := json.Unmarshal(event, &msg); err != nil {
 		log.Fatal(err)
 	}
-	*ch <- SlackEvent{Type: EV_USER_TYPING, Data: msg}
+	ch <- SlackEvent{Type: EV_USER_TYPING, Data: msg}
 }
 
-func handleMessage(ch *chan SlackEvent, event json.RawMessage) {
+func handleMessage(ch chan SlackEvent, event json.RawMessage) {
 	msg := Message{}
 	err := json.Unmarshal(event, &msg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	*ch <- SlackEvent{Type: EV_MESSAGE, Data: msg}
+	ch <- SlackEvent{Type: EV_MESSAGE, Data: msg}
 }

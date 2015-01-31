@@ -1,9 +1,6 @@
 package slack
 
-import (
-	"errors"
-	"net/url"
-)
+import "net/url"
 
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
@@ -64,7 +61,7 @@ func userRequest(path string, values url.Values, debug bool) (*userResponseFull,
 		return nil, err
 	}
 	if !response.Ok {
-		return nil, errors.New(response.Error)
+		return nil, response.Error
 	}
 	return response, nil
 }
