@@ -55,8 +55,8 @@ type File struct {
 	Thumb80     string `json:"thumb_80"`
 	Thumb360    string `json:"thumb_360"`
 	Thumb360Gif string `json:"thumb_360_gif"`
-	Thumb360W   string `json:"thumb_360_w"`
-	Thumb360H   string `json:"thumb_360_h"`
+	Thumb360W   int    `json:"thumb_360_w"`
+	Thumb360H   int    `json:"thumb_360_h"`
 
 	Permalink        string `json:"permalink"`
 	EditLink         string `json:"edit_link"`
