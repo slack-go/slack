@@ -245,7 +245,6 @@ func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(em.Type)
 	switch em.Type {
 	case "":
 		// try ok
