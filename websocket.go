@@ -47,7 +47,6 @@ var eventMapping map[string]interface{} = map[string]interface{}{
 	"group_unarchive":       &GroupUnarchiveEvent{},
 	"group_history_changed": &GroupHistoryChangedEvent{},
 
-	// XXX: Not implemented below here
 	"file_created":         &FileCreatedEvent{},
 	"file_shared":          &FileSharedEvent{},
 	"file_unshared":        &FileUnsharedEvent{},
@@ -59,6 +58,12 @@ var eventMapping map[string]interface{} = map[string]interface{}{
 	"file_comment_edited":  &FileCommentEditedEvent{},
 	"file_comment_deleted": &FileCommentDeletedEvent{},
 
+	"star_added":   &StarAddedEvent{},
+	"star_removed": &StarRemovedEvent{},
+
+	"pref_change": &PrefChangeEvent{},
+
+	// XXX: Not implemented below here
 	"team_join":              &TeamJoinEvent{},
 	"team_rename":            &TeamRenameEvent{},
 	"team_pref_change":       &TeamPrefChangeEvent{},
@@ -67,11 +72,7 @@ var eventMapping map[string]interface{} = map[string]interface{}{
 
 	"manual_presence_change": &ManualPresenceChangeEvent{},
 
-	"pref_change": &PrefChangeEvent{},
 	"user_change": &UserChangeEvent{},
-
-	"star_added":   &StarAddedEvent{},
-	"star_removed": &StarRemovedEvent{},
 
 	"emoji_changed": &EmojiChangedEvent{},
 
