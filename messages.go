@@ -23,6 +23,7 @@ type Msg struct {
 	Timestamp string `json:"ts,omitempty"`
 	Text      string `json:"text,omitempty"`
 	Team      string `json:"team,omitempty"`
+	File      File   `json:"file,omitempty"`
 	// Type may come if it's part of a message list
 	// e.g.: channel.history
 	Type      string `json:"type,omitempty"`
@@ -32,6 +33,8 @@ type Msg struct {
 	Hidden           bool         `json:"bool,omitempty"`
 	DeletedTimestamp string       `json:"deleted_ts,omitempty"`
 	Attachments      []Attachment `json:"attachments,omitempty"`
+	ReplyTo          int          `json:"reply_to,omitempty"`
+	Upload           bool         `json:"upload,omitempty"`
 }
 
 // Presence XXX: not used yet
@@ -49,6 +52,12 @@ type Event struct {
 type Ping struct {
 	Id   int    `json:"id"`
 	Type string `json:"type"`
+}
+
+// Pong contains information about a Pong Event
+type Pong struct {
+	Type    string `json:"type"`
+	ReplyTo int    `json:"reply_to"`
 }
 
 // AckMessage is used for messages received in reply to other messages

@@ -23,6 +23,7 @@ type Comment struct {
 	Timestamp JSONTime `json:"timestamp"`
 	UserId    string   `json:"user"`
 	Comment   string   `json:"comment"`
+	Created   JSONTime `json:"created,omitempty"`
 }
 
 // File contains all the information for a file

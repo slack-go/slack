@@ -18,13 +18,14 @@ type StarsParameters struct {
 	Page  int
 }
 
-// XXX: Verify this. The whole thing is complicated. I don't like the way they mixed things
+// TODO: Verify this. The whole thing is complicated. I don't like the way they mixed things
+// It also appears to be a bug in parsing the message
 type StarredItem struct {
 	Type      string `json:"type"`
 	ChannelId string `json:"channel"`
-	Message   `json:"message"`
-	File      `json:"file"`
-	Comment   `json:"comment"`
+	Message   `json:"message,omitempty"`
+	File      `json:"file,omitempty"`
+	Comment   `json:"comment,omitempty"`
 }
 
 type starsResponseFull struct {

@@ -10,17 +10,6 @@ import (
 */
 var SLACK_API string = "https://slack.com/api/"
 
-type UserTyping struct {
-	Type      string `json:"type"`
-	UserId    string `json:"user"`
-	ChannelId string `json:"channel"`
-}
-
-type SlackEvent struct {
-	Type int
-	Data interface{}
-}
-
 type SlackResponse struct {
 	Ok    bool   `json:"ok"`
 	Error string `json:"error"`

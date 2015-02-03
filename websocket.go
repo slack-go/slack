@@ -7,21 +7,89 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"strconv"
 	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
 )
 
-const (
-	EV_MESSAGE = iota
-	EV_USER_TYPING
-)
+type MessageEvent Message
+
+var eventMapping map[string]interface{} = map[string]interface{}{
+	"message":         &MessageEvent{},
+	"presence_change": &PresenceChangeEvent{},
+	"user_typing":     &UserTypingEvent{},
+
+	"channel_marked":          &ChannelMarkedEvent{},
+	"channel_created":         &ChannelCreatedEvent{},
+	"channel_joined":          &ChannelJoinedEvent{},
+	"channel_left":            &ChannelLeftEvent{},
+	"channel_deleted":         &ChannelDeletedEvent{},
+	"channel_rename":          &ChannelRenameEvent{},
+	"channel_archive":         &ChannelArchiveEvent{},
+	"channel_unarchive":       &ChannelUnarchiveEvent{},
+	"channel_history_changed": &ChannelHistoryChangedEvent{},
+
+	"im_created":         &IMCreatedEvent{},
+	"im_open":            &IMOpenEvent{},
+	"im_close":           &IMCloseEvent{},
+	"im_marked":          &IMMarkedEvent{},
+	"im_history_changed": &IMHistoryChangedEvent{},
+
+	"group_marked":          &GroupMarkedEvent{},
+	"group_open":            &GroupOpenEvent{},
+	"group_joined":          &GroupJoinedEvent{},
+	"group_left":            &GroupLeftEvent{},
+	"group_close":           &GroupCloseEvent{},
+	"group_rename":          &GroupRenameEvent{},
+	"group_archive":         &GroupArchiveEvent{},
+	"group_unarchive":       &GroupUnarchiveEvent{},
+	"group_history_changed": &GroupHistoryChangedEvent{},
+
+	// XXX: Not implemented below here
+	"file_created":         &FileCreatedEvent{},
+	"file_shared":          &FileSharedEvent{},
+	"file_unshared":        &FileUnsharedEvent{},
+	"file_public":          &FilePublicEvent{},
+	"file_private":         &FilePrivateEvent{},
+	"file_change":          &FileChangeEvent{},
+	"file_deleted":         &FileDeletedEvent{},
+	"file_comment_added":   &FileCommentAddedEvent{},
+	"file_comment_edited":  &FileCommentEditedEvent{},
+	"file_comment_deleted": &FileCommentDeletedEvent{},
+
+	"team_join":              &TeamJoinEvent{},
+	"team_rename":            &TeamRenameEvent{},
+	"team_pref_change":       &TeamPrefChangeEvent{},
+	"team_domain_change":     &TeamDomainChangeEvent{},
+	"team_migration_started": &TeamMigrationStartedEvent{},
+
+	"manual_presence_change": &ManualPresenceChangeEvent{},
+
+	"pref_change": &PrefChangeEvent{},
+	"user_change": &UserChangeEvent{},
+
+	"star_added":   &StarAddedEvent{},
+	"star_removed": &StarRemovedEvent{},
+
+	"emoji_changed": &EmojiChangedEvent{},
+
+	"commands_changed": &CommandsChangedEvent{},
+
+	"email_domain_changed": &EmailDomainChangedEvent{},
+
+	"bot_added":   &BotAddedEvent{},
+	"bot_changed": &BotChangedEvent{},
+
+	"accounts_changed": &AccountsChangedEvent{},
+}
 
 type SlackWS struct {
 	conn      *websocket.Conn
 	messageId int
 	mutex     sync.Mutex
+	pings     map[int]time.Time
 	Slack
 }
 
@@ -33,6 +101,28 @@ type SlackWSResponse struct {
 type SlackWSError struct {
 	Code int
 	Msg  string
+}
+
+type SlackEvent struct {
+	Type uint64
+	Data interface{}
+}
+
+type JSONTimeString string
+
+// String converts the unix timestamp into a string
+func (t JSONTimeString) String() string {
+	if t == "" {
+		return ""
+	}
+	floatN, err := strconv.ParseFloat(string(t), 64)
+	if err != nil {
+		log.Panicln(err)
+		return ""
+	}
+	timeStr := int64(floatN)
+	tm := time.Unix(int64(timeStr), 0)
+	return fmt.Sprintf("\"%s\"", tm.Format("Mon Jan _2"))
 }
 
 func (s SlackWSError) Error() string {
@@ -76,6 +166,7 @@ func (api *Slack) StartRTM(protocol, origin string) (*SlackWS, error) {
 	if err != nil {
 		return nil, err
 	}
+	wsApi.pings = make(map[int]time.Time)
 	return wsApi, nil
 }
 
@@ -87,6 +178,8 @@ func (api *SlackWS) Ping() error {
 	if err := websocket.JSON.Send(api.conn, msg); err != nil {
 		return err
 	}
+	// TODO: What happens if we already have this id?
+	api.pings[api.messageId] = time.Now()
 	return nil
 }
 
@@ -140,19 +233,19 @@ func (api *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
 			if api.debug {
 				log.Println(string(event[:]))
 			}
-			handleEvent(ch, event)
+			api.handleEvent(ch, event)
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
 }
 
-func handleEvent(ch chan SlackEvent, event json.RawMessage) {
+func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	em := Event{}
 	err := json.Unmarshal(event, &em)
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	log.Println(em.Type)
 	switch em.Type {
 	case "":
 		// try ok
@@ -162,6 +255,8 @@ func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		}
 
 		if ack.Ok {
+			// TODO: Send the ack back (is this useful?)
+			//ch <- SlackEvent{Type: EventAck, Data: ack}
 			log.Printf("Received an ok for: %d", ack.ReplyTo)
 			return
 		}
@@ -169,37 +264,28 @@ func handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		// TODO: errors end up in this bucket. They shouldn't.
 		log.Printf("Got error(?): %s", event)
 	case "hello":
-		return
+		ch <- SlackEvent{Data: HelloEvent{}}
 	case "pong":
-		// XXX: Eventually check to which ping this matched with
-		//      Allows us to have stats about latency and what not
-		return
-	case "presence_change":
-		//log.Printf("`%s is %s`\n", info.GetUserById(event.PUserId).Name, event.Presence)
-	case "message":
-		handleMessage(ch, event)
-	case "channel_marked":
-		log.Printf("XXX: To implement %s", em)
-	case "user_typing":
-		handleUserTyping(ch, event)
+		pong := Pong{}
+		if err = json.Unmarshal(event, &pong); err != nil {
+			log.Fatal(err)
+		}
+		api.mutex.Lock()
+		latency := time.Since(api.pings[pong.ReplyTo])
+		api.mutex.Unlock()
+		ch <- SlackEvent{Data: LatencyReport{Value: latency}}
 	default:
-		log.Println("XXX: " + string(event))
+		callEvent(em.Type, ch, event)
 	}
 }
 
-func handleUserTyping(ch chan SlackEvent, event json.RawMessage) {
-	msg := UserTyping{}
+func callEvent(eventType string, ch chan SlackEvent, event json.RawMessage) {
+	msg := eventMapping[eventType]
+	if msg == nil {
+		log.Printf("XXX: Not implemented yet: %s -> %v", eventType, event)
+	}
 	if err := json.Unmarshal(event, &msg); err != nil {
 		log.Fatal(err)
 	}
-	ch <- SlackEvent{Type: EV_USER_TYPING, Data: msg}
-}
-
-func handleMessage(ch chan SlackEvent, event json.RawMessage) {
-	msg := Message{}
-	err := json.Unmarshal(event, &msg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	ch <- SlackEvent{Type: EV_MESSAGE, Data: msg}
+	ch <- SlackEvent{Data: msg}
 }
