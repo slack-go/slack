@@ -22,11 +22,13 @@ type imResponseFull struct {
 
 // IM contains information related to the Direct Message channel
 type IM struct {
-	Id            string   `json:"id"`
-	IsIM          bool     `json:"is_im"`
-	UserId        string   `json:"user"`
-	Created       JSONTime `json:"created"`
-	IsUserDeleted bool     `json:"is_user_deleted"`
+	Id                 string   `json:"id"`
+	IsIM               bool     `json:"is_im"`
+	UserId             string   `json:"user"`
+	Created            JSONTime `json:"created"`
+	IsUserDeleted      bool     `json:"is_user_deleted"`
+	UnreadCount        int      `json:"unread_count,omitempty"`
+	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
 }
 
 func imRequest(path string, values url.Values, debug bool) (*imResponseFull, error) {
@@ -96,6 +98,13 @@ func (api *Slack) GetIMHistory(channelId string, params HistoryParameters) (*His
 	}
 	if params.Count != DEFAULT_HISTORY_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))
+	}
+	if params.Inclusive != DEFAULT_HISTORY_INCLUSIVE {
+		if params.Inclusive {
+			values.Add("inclusive", "1")
+		} else {
+			values.Add("inclusive", "0")
+		}
 	}
 	response, err := imRequest("im.history", values, api.debug)
 	if err != nil {

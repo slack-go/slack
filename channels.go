@@ -32,23 +32,24 @@ type ChannelPurpose struct {
 
 // Channel contains information about the channel
 type Channel struct {
-	Id          string         `json:"id"`
-	Name        string         `json:"name"`
-	IsChannel   bool           `json:"is_channel"`
-	Created     JSONTime       `json:"created"`
-	Creator     string         `json:"creator"`
-	IsArchived  bool           `json:"is_archived"`
-	IsGeneral   bool           `json:"is_general"`
-	IsGroup     bool           `json:"is_group"`
-	IsStarred   bool           `json:"is_starred"`
-	Members     []string       `json:"members"`
-	Topic       ChannelTopic   `json:"topic"`
-	Purpose     ChannelPurpose `json:"purpose"`
-	IsMember    bool           `json:"is_member"`
-	LastRead    string         `json:"last_read,omitempty"`
-	Latest      Message        `json:"latest,omitempty"`
-	UnreadCount int            `json:"unread_count,omitempty"`
-	NumMembers  int            `json:"num_members,omitempty"`
+	Id                 string         `json:"id"`
+	Name               string         `json:"name"`
+	IsChannel          bool           `json:"is_channel"`
+	Created            JSONTime       `json:"created"`
+	Creator            string         `json:"creator"`
+	IsArchived         bool           `json:"is_archived"`
+	IsGeneral          bool           `json:"is_general"`
+	IsGroup            bool           `json:"is_group"`
+	IsStarred          bool           `json:"is_starred"`
+	Members            []string       `json:"members"`
+	Topic              ChannelTopic   `json:"topic"`
+	Purpose            ChannelPurpose `json:"purpose"`
+	IsMember           bool           `json:"is_member"`
+	LastRead           string         `json:"last_read,omitempty"`
+	Latest             Message        `json:"latest,omitempty"`
+	UnreadCount        int            `json:"unread_count,omitempty"`
+	NumMembers         int            `json:"num_members,omitempty"`
+	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
 }
 
 func channelRequest(path string, values url.Values, debug bool) (*channelResponseFull, error) {
@@ -117,12 +118,18 @@ func (api *Slack) GetChannelHistory(channelId string, params HistoryParameters) 
 	if params.Count != DEFAULT_HISTORY_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))
 	}
+	if params.Inclusive != DEFAULT_HISTORY_INCLUSIVE {
+		if params.Inclusive {
+			values.Add("inclusive", "1")
+		} else {
+			values.Add("inclusive", "0")
+		}
+	}
 	response, err := channelRequest("channels.history", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
-	channelHistory := response.History
-	return &channelHistory, nil
+	return &response.History, nil
 }
 
 // GetChannelInfo retrieves the given channel

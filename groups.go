@@ -8,21 +8,22 @@ import (
 
 // Group contains all the information for a group
 type Group struct {
-	Id          string         `json:"id"`
-	Name        string         `json:"name"`
-	IsGroup     bool           `json:"is_group"`
-	Created     JSONTime       `json:"created"`
-	Creator     string         `json:"creator"`
-	IsArchived  bool           `json:"is_archived"`
-	IsGeneral   bool           `json:"is_general"`
-	IsOpen      bool           `json:"is_open,omitempty"`
-	Members     []string       `json:"members"`
-	Topic       ChannelTopic   `json:"topic"`
-	Purpose     ChannelPurpose `json:"purpose"`
-	LastRead    string         `json:"last_read,omitempty"`
-	Latest      Message        `json:"latest,omitempty"`
-	UnreadCount int            `json:"unread_count,omitempty"`
-	NumMembers  int            `json:"num_members,omitempty"`
+	Id                 string         `json:"id"`
+	Name               string         `json:"name"`
+	IsGroup            bool           `json:"is_group"`
+	Created            JSONTime       `json:"created"`
+	Creator            string         `json:"creator"`
+	IsArchived         bool           `json:"is_archived"`
+	IsGeneral          bool           `json:"is_general"`
+	IsOpen             bool           `json:"is_open,omitempty"`
+	Members            []string       `json:"members"`
+	Topic              ChannelTopic   `json:"topic"`
+	Purpose            ChannelPurpose `json:"purpose"`
+	LastRead           string         `json:"last_read,omitempty"`
+	Latest             Message        `json:"latest,omitempty"`
+	UnreadCount        int            `json:"unread_count,omitempty"`
+	NumMembers         int            `json:"num_members,omitempty"`
+	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
 
 	// XXX: does this exist for a group too?
 	IsMember bool `json:"is_member"`
@@ -140,12 +141,18 @@ func (api *Slack) GetGroupHistory(groupId string, params HistoryParameters) (*Hi
 	if params.Count != DEFAULT_HISTORY_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))
 	}
+	if params.Inclusive != DEFAULT_HISTORY_INCLUSIVE {
+		if params.Inclusive {
+			values.Add("inclusive", "1")
+		} else {
+			values.Add("inclusive", "0")
+		}
+	}
 	response, err := groupRequest("groups.history", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
-	groupHistory := response.History
-	return &groupHistory, nil
+	return &response.History, nil
 }
 
 // InviteUserToGroup invites a user to a group

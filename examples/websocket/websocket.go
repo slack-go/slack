@@ -36,15 +36,15 @@ func main() {
 				// Ignore hello
 			case *slack.MessageEvent:
 				a := msg.Data.(*slack.MessageEvent)
-				fmt.Printf("%v\n", a)
+				fmt.Printf("Message: %v\n", a)
 			case *slack.PresenceChangeEvent:
 				a := msg.Data.(*slack.PresenceChangeEvent)
-				fmt.Printf("%v\n", a)
+				fmt.Printf("Presence Change: %v\n", a)
 			case slack.LatencyReport:
 				a := msg.Data.(slack.LatencyReport)
 				fmt.Printf("Current latency: %v\n", a.Value)
 			default:
-				fmt.Printf("Unknown: %v\n", msg.Data)
+				fmt.Printf("Unexpected: %v\n", msg.Data)
 			}
 		}
 	}

@@ -116,6 +116,7 @@ func escapeMessage(message string) string {
 }
 
 // PostMessage sends a message to a channel
+// Message is automatically escaped according to https://api.slack.com/docs/formatting
 func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
 	values := url.Values{
 		"token":   {api.config.token},
