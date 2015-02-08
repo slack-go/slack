@@ -31,12 +31,35 @@ type PrefChangeEvent struct {
 	Value json.RawMessage `json:"value"`
 }
 
-// TODO
-type ManualPresenceChangeEvent struct{}
-type UserChangeEvent struct{}
-type EmojiChangedEvent struct{}
-type CommandsChangedEvent struct{}
-type EmailDomainChangedEvent struct{}
-type BotAddedEvent struct{}
-type BotChangedEvent struct{}
-type AccountsChangedEvent struct{}
+type ManualPresenceChangeEvent struct {
+	Type     string `json:"type"`
+	Presence string `json:"presence"`
+}
+type UserChangeEvent struct {
+	Type string `json:"type"`
+	User User   `json:"user"`
+}
+type EmojiChangedEvent struct {
+	Type           string         `json:"type"`
+	EventTimestamp JSONTimeString `json:"event_ts"`
+}
+type CommandsChangedEvent struct {
+	Type           string         `json:"type"`
+	EventTimestamp JSONTimeString `json:"event_ts"`
+}
+type EmailDomainChangedEvent struct {
+	Type           string         `json:"type"`
+	EventTimestamp JSONTimeString `json:"event_ts"`
+	EmailDomain    string         `json:"email_domain"`
+}
+type BotAddedEvent struct {
+	Type string `json:"type"`
+	Bot  Bot    `json:"bot"`
+}
+type BotChangedEvent struct {
+	Type string `json:"type"`
+	Bot  Bot    `json:"bot"`
+}
+type AccountsChangedEvent struct {
+	Type string `json:"type"`
+}
