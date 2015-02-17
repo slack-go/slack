@@ -49,6 +49,8 @@ type Attachment struct {
 
 	Text string `json:"text"`
 
+	ImageURL string `json:"image_url,omitempty"`
+
 	Fields []AttachmentField `json:"fields,omitempty"`
 }
 
