@@ -16,76 +16,6 @@ import (
 
 type MessageEvent Message
 
-var eventMapping map[string]interface{} = map[string]interface{}{
-	"message":         &MessageEvent{},
-	"presence_change": &PresenceChangeEvent{},
-	"user_typing":     &UserTypingEvent{},
-
-	"channel_marked":          &ChannelMarkedEvent{},
-	"channel_created":         &ChannelCreatedEvent{},
-	"channel_joined":          &ChannelJoinedEvent{},
-	"channel_left":            &ChannelLeftEvent{},
-	"channel_deleted":         &ChannelDeletedEvent{},
-	"channel_rename":          &ChannelRenameEvent{},
-	"channel_archive":         &ChannelArchiveEvent{},
-	"channel_unarchive":       &ChannelUnarchiveEvent{},
-	"channel_history_changed": &ChannelHistoryChangedEvent{},
-
-	"im_created":         &IMCreatedEvent{},
-	"im_open":            &IMOpenEvent{},
-	"im_close":           &IMCloseEvent{},
-	"im_marked":          &IMMarkedEvent{},
-	"im_history_changed": &IMHistoryChangedEvent{},
-
-	"group_marked":          &GroupMarkedEvent{},
-	"group_open":            &GroupOpenEvent{},
-	"group_joined":          &GroupJoinedEvent{},
-	"group_left":            &GroupLeftEvent{},
-	"group_close":           &GroupCloseEvent{},
-	"group_rename":          &GroupRenameEvent{},
-	"group_archive":         &GroupArchiveEvent{},
-	"group_unarchive":       &GroupUnarchiveEvent{},
-	"group_history_changed": &GroupHistoryChangedEvent{},
-
-	"file_created":         &FileCreatedEvent{},
-	"file_shared":          &FileSharedEvent{},
-	"file_unshared":        &FileUnsharedEvent{},
-	"file_public":          &FilePublicEvent{},
-	"file_private":         &FilePrivateEvent{},
-	"file_change":          &FileChangeEvent{},
-	"file_deleted":         &FileDeletedEvent{},
-	"file_comment_added":   &FileCommentAddedEvent{},
-	"file_comment_edited":  &FileCommentEditedEvent{},
-	"file_comment_deleted": &FileCommentDeletedEvent{},
-
-	"star_added":   &StarAddedEvent{},
-	"star_removed": &StarRemovedEvent{},
-
-	"pref_change": &PrefChangeEvent{},
-
-	// XXX: Not implemented below here
-	"team_join":              &TeamJoinEvent{},
-	"team_rename":            &TeamRenameEvent{},
-	"team_pref_change":       &TeamPrefChangeEvent{},
-	"team_domain_change":     &TeamDomainChangeEvent{},
-	"team_migration_started": &TeamMigrationStartedEvent{},
-
-	"manual_presence_change": &ManualPresenceChangeEvent{},
-
-	"user_change": &UserChangeEvent{},
-
-	"emoji_changed": &EmojiChangedEvent{},
-
-	"commands_changed": &CommandsChangedEvent{},
-
-	"email_domain_changed": &EmailDomainChangedEvent{},
-
-	"bot_added":   &BotAddedEvent{},
-	"bot_changed": &BotChangedEvent{},
-
-	"accounts_changed": &AccountsChangedEvent{},
-}
-
 type SlackWS struct {
 	conn      *websocket.Conn
 	messageId int
@@ -210,8 +140,8 @@ func (api *SlackWS) SendMessage(msg *OutgoingMessage) error {
 }
 
 func (api *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
-	event := json.RawMessage{}
 	for {
+		event := json.RawMessage{}
 		if err := websocket.JSON.Receive(api.conn, &event); err == io.EOF {
 			//log.Println("Derpi derp, should we destroy conn and start over?")
 			//if err = api.StartRTM(); err != nil {
@@ -280,6 +210,76 @@ func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 }
 
 func callEvent(eventType string, ch chan SlackEvent, event json.RawMessage) {
+	eventMapping := map[string]interface{}{
+		"message":         &MessageEvent{},
+		"presence_change": &PresenceChangeEvent{},
+		"user_typing":     &UserTypingEvent{},
+
+		"channel_marked":          &ChannelMarkedEvent{},
+		"channel_created":         &ChannelCreatedEvent{},
+		"channel_joined":          &ChannelJoinedEvent{},
+		"channel_left":            &ChannelLeftEvent{},
+		"channel_deleted":         &ChannelDeletedEvent{},
+		"channel_rename":          &ChannelRenameEvent{},
+		"channel_archive":         &ChannelArchiveEvent{},
+		"channel_unarchive":       &ChannelUnarchiveEvent{},
+		"channel_history_changed": &ChannelHistoryChangedEvent{},
+
+		"im_created":         &IMCreatedEvent{},
+		"im_open":            &IMOpenEvent{},
+		"im_close":           &IMCloseEvent{},
+		"im_marked":          &IMMarkedEvent{},
+		"im_history_changed": &IMHistoryChangedEvent{},
+
+		"group_marked":          &GroupMarkedEvent{},
+		"group_open":            &GroupOpenEvent{},
+		"group_joined":          &GroupJoinedEvent{},
+		"group_left":            &GroupLeftEvent{},
+		"group_close":           &GroupCloseEvent{},
+		"group_rename":          &GroupRenameEvent{},
+		"group_archive":         &GroupArchiveEvent{},
+		"group_unarchive":       &GroupUnarchiveEvent{},
+		"group_history_changed": &GroupHistoryChangedEvent{},
+
+		"file_created":         &FileCreatedEvent{},
+		"file_shared":          &FileSharedEvent{},
+		"file_unshared":        &FileUnsharedEvent{},
+		"file_public":          &FilePublicEvent{},
+		"file_private":         &FilePrivateEvent{},
+		"file_change":          &FileChangeEvent{},
+		"file_deleted":         &FileDeletedEvent{},
+		"file_comment_added":   &FileCommentAddedEvent{},
+		"file_comment_edited":  &FileCommentEditedEvent{},
+		"file_comment_deleted": &FileCommentDeletedEvent{},
+
+		"star_added":   &StarAddedEvent{},
+		"star_removed": &StarRemovedEvent{},
+
+		"pref_change": &PrefChangeEvent{},
+
+		// XXX: Not implemented below here
+		"team_join":              &TeamJoinEvent{},
+		"team_rename":            &TeamRenameEvent{},
+		"team_pref_change":       &TeamPrefChangeEvent{},
+		"team_domain_change":     &TeamDomainChangeEvent{},
+		"team_migration_started": &TeamMigrationStartedEvent{},
+
+		"manual_presence_change": &ManualPresenceChangeEvent{},
+
+		"user_change": &UserChangeEvent{},
+
+		"emoji_changed": &EmojiChangedEvent{},
+
+		"commands_changed": &CommandsChangedEvent{},
+
+		"email_domain_changed": &EmailDomainChangedEvent{},
+
+		"bot_added":   &BotAddedEvent{},
+		"bot_changed": &BotChangedEvent{},
+
+		"accounts_changed": &AccountsChangedEvent{},
+	}
+
 	msg := eventMapping[eventType]
 	if msg == nil {
 		log.Printf("XXX: Not implemented yet: %s -> %v", eventType, event)
