@@ -58,6 +58,7 @@ type Attachment struct {
 type PostMessageParameters struct {
 	Text        string
 	Username    string
+	AsUser      bool `json:"as_user,omitempty"`
 	Parse       string
 	LinkNames   int
 	Attachments []Attachment
