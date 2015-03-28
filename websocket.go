@@ -265,7 +265,6 @@ func callEvent(eventType string, ch chan SlackEvent, event json.RawMessage) {
 
 		"pref_change": &PrefChangeEvent{},
 
-		// XXX: Not implemented below here
 		"team_join":              &TeamJoinEvent{},
 		"team_rename":            &TeamRenameEvent{},
 		"team_pref_change":       &TeamPrefChangeEvent{},
