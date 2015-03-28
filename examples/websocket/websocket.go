@@ -43,6 +43,9 @@ func main() {
 			case slack.LatencyReport:
 				a := msg.Data.(slack.LatencyReport)
 				fmt.Printf("Current latency: %v\n", a.Value)
+			case *slack.SlackWSError:
+				error := msg.Data.(*slack.SlackWSError)
+				fmt.Printf("Error: %d - %s\n", error.Code, error.Msg)
 			default:
 				fmt.Printf("Unexpected: %v\n", msg.Data)
 			}

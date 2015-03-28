@@ -60,14 +60,6 @@ type Pong struct {
 	ReplyTo int    `json:"reply_to"`
 }
 
-// AckMessage is used for messages received in reply to other messages
-type AckMessage struct {
-	ReplyTo   int    `json:"reply_to"`
-	Timestamp string `json:"ts"`
-	Text      string `json:"text"`
-	SlackResponse
-}
-
 // NewOutGoingMessage prepares an OutgoingMessage that the user can use to send a message
 func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
 	api.mutex.Lock()

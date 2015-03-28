@@ -24,6 +24,14 @@ type SlackWS struct {
 	Slack
 }
 
+// AckMessage is used for messages received in reply to other messages
+type AckMessage struct {
+	ReplyTo   int    `json:"reply_to"`
+	Timestamp string `json:"ts"`
+	Text      string `json:"text"`
+	SlackWSResponse
+}
+
 type SlackWSResponse struct {
 	Ok    bool          `json:"ok"`
 	Error *SlackWSError `json:"error"`
@@ -191,8 +199,8 @@ func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 			return
 		}
 
-		// TODO: errors end up in this bucket. They shouldn't.
-		log.Printf("Got error(?): %s", event)
+		// Send the error to the user
+		ch <- SlackEvent{Data: ack.Error}
 	case "hello":
 		ch <- SlackEvent{Data: HelloEvent{}}
 	case "pong":
