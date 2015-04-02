@@ -36,6 +36,7 @@ type User struct {
 	IsPrimaryOwner    bool        `json:"is_primary_owner"`
 	IsRestricted      bool        `json:"is_restricted"`
 	IsUltraRestricted bool        `json:"is_ultra_restricted"`
+	Has2FA            bool        `json:"has_2fa"`
 	HasFiles          bool        `json:"has_files"`
 	Presence          string      `json:"presence"`
 }
