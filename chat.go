@@ -129,6 +129,9 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 	if params.Username != DEFAULT_MESSAGE_USERNAME {
 		values.Set("username", string(params.Username))
 	}
+	if params.AsUser != false {
+		values.Set("as_user", "true")
+	}
 	if params.Parse != DEFAULT_MESSAGE_PARSE {
 		values.Set("parse", string(params.Parse))
 	}
