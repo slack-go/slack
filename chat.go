@@ -9,6 +9,7 @@ import (
 
 const (
 	DEFAULT_MESSAGE_USERNAME     = ""
+	DEFAULT_MESSAGE_ASUSER       = false
 	DEFAULT_MESSAGE_PARSE        = ""
 	DEFAULT_MESSAGE_LINK_NAMES   = 0
 	DEFAULT_MESSAGE_UNFURL_LINKS = true
@@ -58,7 +59,7 @@ type Attachment struct {
 type PostMessageParameters struct {
 	Text        string
 	Username    string
-	AsUser      bool `json:"as_user,omitempty"`
+	AsUser      bool
 	Parse       string
 	LinkNames   int
 	Attachments []Attachment
@@ -72,6 +73,7 @@ type PostMessageParameters struct {
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
 		Username:    DEFAULT_MESSAGE_USERNAME,
+		AsUser:      DEFAULT_MESSAGE_ASUSER,
 		Parse:       DEFAULT_MESSAGE_PARSE,
 		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
 		Attachments: nil,
@@ -128,6 +130,9 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 	}
 	if params.Username != DEFAULT_MESSAGE_USERNAME {
 		values.Set("username", string(params.Username))
+	}
+	if params.AsUser != DEFAULT_MESSAGE_ASUSER {
+		values.Set("as_user", string(params.AsUser))
 	}
 	if params.Parse != DEFAULT_MESSAGE_PARSE {
 		values.Set("parse", string(params.Parse))
