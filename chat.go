@@ -16,6 +16,7 @@ const (
 	DEFAULT_MESSAGE_UNFURL_MEDIA = false
 	DEFAULT_MESSAGE_ICON_URL     = ""
 	DEFAULT_MESSAGE_ICON_EMOJI   = ""
+	DEFAULT_MESSAGE_MARKDOWN     = true
 )
 
 type chatResponseFull struct {
@@ -53,6 +54,8 @@ type Attachment struct {
 	ImageURL string `json:"image_url,omitempty"`
 
 	Fields []AttachmentField `json:"fields,omitempty"`
+
+	MarkdownIn []string `json:"mrkdwn_in,omitempty"`
 }
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
@@ -67,6 +70,7 @@ type PostMessageParameters struct {
 	UnfurlMedia bool
 	IconURL     string
 	IconEmoji   string
+	Markdown    bool `json:"mrkdwn,omitempty"`
 }
 
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
@@ -81,6 +85,7 @@ func NewPostMessageParameters() PostMessageParameters {
 		UnfurlMedia: DEFAULT_MESSAGE_UNFURL_MEDIA,
 		IconURL:     DEFAULT_MESSAGE_ICON_URL,
 		IconEmoji:   DEFAULT_MESSAGE_ICON_EMOJI,
+		Markdown:    DEFAULT_MESSAGE_MARKDOWN,
 	}
 }
 
@@ -158,6 +163,9 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 	}
 	if params.IconEmoji != DEFAULT_MESSAGE_ICON_EMOJI {
 		values.Set("icon_emoji", params.IconEmoji)
+	}
+	if params.Markdown != DEFAULT_MESSAGE_MARKDOWN {
+		values.Set("mrkdwn", "false")
 	}
 
 	response, err := chatRequest("chat.postMessage", values, api.debug)
