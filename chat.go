@@ -17,6 +17,7 @@ const (
 	DEFAULT_MESSAGE_ICON_URL     = ""
 	DEFAULT_MESSAGE_ICON_EMOJI   = ""
 	DEFAULT_MESSAGE_MARKDOWN     = true
+	DEFAULT_MESSAGE_ESCAPE_TEXT  = true
 )
 
 type chatResponseFull struct {
@@ -71,6 +72,7 @@ type PostMessageParameters struct {
 	IconURL     string
 	IconEmoji   string
 	Markdown    bool `json:"mrkdwn,omitempty"`
+	EscapeText  bool
 }
 
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
@@ -86,6 +88,7 @@ func NewPostMessageParameters() PostMessageParameters {
 		IconURL:     DEFAULT_MESSAGE_ICON_URL,
 		IconEmoji:   DEFAULT_MESSAGE_ICON_EMOJI,
 		Markdown:    DEFAULT_MESSAGE_MARKDOWN,
+		EscapeText:  DEFAULT_MESSAGE_ESCAPE_TEXT,
 	}
 }
 
@@ -126,12 +129,15 @@ func escapeMessage(message string) string {
 }
 
 // PostMessage sends a message to a channel
-// Message is automatically escaped according to https://api.slack.com/docs/formatting
+// Message is escaped by default according to https://api.slack.com/docs/formatting
 func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
+	if params.EscapeText {
+		text = escapeMessage(text)
+	}
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
-		"text":    {escapeMessage(text)},
+		"text":    {text},
 	}
 	if params.Username != DEFAULT_MESSAGE_USERNAME {
 		values.Set("username", string(params.Username))
@@ -176,11 +182,14 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, string, string, error) {
+func (api *Slack) UpdateMessage(channelId, timestamp, text string, escape bool) (string, string, string, error) {
+	if escape {
+		text = escapeMessage(text)
+	}
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
-		"text":    {escapeMessage(text)},
+		"text":    {text},
 		"ts":      {timestamp},
 	}
 	response, err := chatRequest("chat.update", values, api.debug)
