@@ -182,14 +182,11 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Slack) UpdateMessage(channelId, timestamp, text string, escape bool) (string, string, string, error) {
-	if escape {
-		text = escapeMessage(text)
-	}
+func (api *Slack) UpdateMessage(channelId, timestamp, text string) (string, string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelId},
-		"text":    {text},
+		"text":    {escapeMessage(text)},
 		"ts":      {timestamp},
 	}
 	response, err := chatRequest("chat.update", values, api.debug)
