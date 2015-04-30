@@ -33,7 +33,7 @@ type Msg struct {
 	Hidden           bool         `json:"bool,omitempty"`
 	DeletedTimestamp string       `json:"deleted_ts,omitempty"`
 	Attachments      []Attachment `json:"attachments,omitempty"`
-	ReplyTo          int          `json:"reply_to,omitempty"`
+	ReplyTo          string       `json:"reply_to,omitempty"`
 	Upload           bool         `json:"upload,omitempty"`
 }
 
