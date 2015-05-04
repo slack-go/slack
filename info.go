@@ -150,6 +150,7 @@ type Info struct {
 	Team     Team        `json:"team,omitempty"`
 	Users    []User      `json:"users,omitempty"`
 	Channels []Channel   `json:"channels,omitempty"`
+	Groups   []Group     `json:"groups,omitempty"`
 	Bots     []Bot       `json:"bots,omitempty"`
 	IMs      []IM        `json:"ims,omitempty"`
 }
