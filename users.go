@@ -30,7 +30,7 @@ type User struct {
 	Deleted           bool        `json:"deleted"`
 	Color             string      `json:"color"`
 	RealName          string      `json:"real_name"`
-	TZ                string      `json:"tz"`
+	TZ                string      `json:"tz,omitempty"`
 	TZLabel           string      `json:"tz_label"`
 	TZOffset          int         `json:"tz_offset"`
 	Profile           UserProfile `json:"profile"`
