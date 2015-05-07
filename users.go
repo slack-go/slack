@@ -29,6 +29,10 @@ type User struct {
 	Name              string      `json:"name"`
 	Deleted           bool        `json:"deleted"`
 	Color             string      `json:"color"`
+	RealName          string      `json:"real_name"`
+	TZ                string      `json:"tz,omitempty"`
+	TZLabel           string      `json:"tz_label"`
+	TZOffset          int         `json:"tz_offset"`
 	Profile           UserProfile `json:"profile"`
 	IsBot             bool        `json:"is_bot"`
 	IsAdmin           bool        `json:"is_admin"`
