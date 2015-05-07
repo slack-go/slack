@@ -20,7 +20,7 @@ type Group struct {
 	Topic              ChannelTopic   `json:"topic"`
 	Purpose            ChannelPurpose `json:"purpose"`
 	LastRead           string         `json:"last_read,omitempty"`
-	Latest             Message        `json:"latest,omitempty"`
+	Latest             *Message       `json:"latest,omitempty"`
 	UnreadCount        int            `json:"unread_count,omitempty"`
 	NumMembers         int            `json:"num_members,omitempty"`
 	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`

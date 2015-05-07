@@ -46,7 +46,7 @@ type Channel struct {
 	Purpose            ChannelPurpose `json:"purpose"`
 	IsMember           bool           `json:"is_member"`
 	LastRead           string         `json:"last_read,omitempty"`
-	Latest             Message        `json:"latest,omitempty"`
+	Latest             *Message       `json:"latest,omitempty"`
 	UnreadCount        int            `json:"unread_count,omitempty"`
 	NumMembers         int            `json:"num_members,omitempty"`
 	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`

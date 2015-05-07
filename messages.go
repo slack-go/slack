@@ -10,7 +10,7 @@ type OutgoingMessage struct {
 // Message is an auxiliary type to allow us to have a message containing sub messages
 type Message struct {
 	Msg
-	SubMessage Msg `json:"message,omitempty"`
+	SubMessage *Msg `json:"message,omitempty"`
 }
 
 // Msg contains information about a slack message
@@ -23,7 +23,7 @@ type Msg struct {
 	Timestamp string `json:"ts,omitempty"`
 	Text      string `json:"text,omitempty"`
 	Team      string `json:"team,omitempty"`
-	File      File   `json:"file,omitempty"`
+	File      *File  `json:"file,omitempty"`
 	// Type may come if it's part of a message list
 	// e.g.: channel.history
 	Type      string `json:"type,omitempty"`
