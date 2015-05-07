@@ -23,9 +23,6 @@ type Group struct {
 	UnreadCount        int            `json:"unread_count,omitempty"`
 	NumMembers         int            `json:"num_members,omitempty"`
 	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
-
-	// XXX: does this exist for a group too?
-	IsMember bool `json:"is_member"`
 }
 
 type groupResponseFull struct {
