@@ -14,7 +14,6 @@ type Group struct {
 	Created            JSONTime       `json:"created"`
 	Creator            string         `json:"creator"`
 	IsArchived         bool           `json:"is_archived"`
-	IsGeneral          bool           `json:"is_general"`
 	IsOpen             bool           `json:"is_open,omitempty"`
 	Members            []string       `json:"members"`
 	Topic              ChannelTopic   `json:"topic"`
