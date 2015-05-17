@@ -39,7 +39,6 @@ type Channel struct {
 	Creator            string         `json:"creator"`
 	IsArchived         bool           `json:"is_archived"`
 	IsGeneral          bool           `json:"is_general"`
-	IsGroup            bool           `json:"is_group"`
 	Members            []string       `json:"members"`
 	Topic              ChannelTopic   `json:"topic"`
 	Purpose            ChannelPurpose `json:"purpose"`
