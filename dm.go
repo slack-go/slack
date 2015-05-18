@@ -22,13 +22,10 @@ type imResponseFull struct {
 
 // IM contains information related to the Direct Message channel
 type IM struct {
-	Id                 string   `json:"id"`
+	BaseChannel
 	IsIM               bool     `json:"is_im"`
 	UserId             string   `json:"user"`
-	Created            JSONTime `json:"created"`
 	IsUserDeleted      bool     `json:"is_user_deleted"`
-	UnreadCount        int      `json:"unread_count,omitempty"`
-	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
 }
 
 func imRequest(path string, values url.Values, debug bool) (*imResponseFull, error) {

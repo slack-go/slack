@@ -30,12 +30,21 @@ type ChannelPurpose struct {
 	LastSet JSONTime `json:"last_set"`
 }
 
+type BaseChannel struct {
+	Id                 string         `json:"id"`
+	Created            JSONTime       `json:"created"`
+	IsOpen             bool           `json:"is_open"`
+	LastRead           string         `json:"last_read,omitempty"`
+	Latest             Message        `json:"latest,omitempty"`
+	UnreadCount        int            `json:"unread_count,omitempty"`
+	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
+}
+
 // Channel contains information about the channel
 type Channel struct {
-	Id                 string         `json:"id"`
+	BaseChannel
 	Name               string         `json:"name"`
 	IsChannel          bool           `json:"is_channel"`
-	Created            JSONTime       `json:"created"`
 	Creator            string         `json:"creator"`
 	IsArchived         bool           `json:"is_archived"`
 	IsGeneral          bool           `json:"is_general"`
@@ -45,11 +54,7 @@ type Channel struct {
 	Topic              ChannelTopic   `json:"topic"`
 	Purpose            ChannelPurpose `json:"purpose"`
 	IsMember           bool           `json:"is_member"`
-	LastRead           string         `json:"last_read,omitempty"`
-	Latest             Message        `json:"latest,omitempty"`
-	UnreadCount        int            `json:"unread_count,omitempty"`
 	NumMembers         int            `json:"num_members,omitempty"`
-	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
 }
 
 func channelRequest(path string, values url.Values, debug bool) (*channelResponseFull, error) {
