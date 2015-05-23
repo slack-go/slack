@@ -202,6 +202,19 @@ func (api *Slack) GetGroups(excludeArchived bool) ([]Group, error) {
 	return response.Groups, nil
 }
 
+// GetGroupInfo retrieves the given group
+func (api *Slack) GetGroupInfo(groupId string) (*Group, error) {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {groupId},
+	}
+	response, err := groupRequest("groups.info", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	return &response.Group, nil
+}
+
 // SetGroupReadMark sets the read mark on a private group
 // Clients should try to avoid making this call too often. When needing to mark a read position, a client should set a
 // timer before making the call. In this way, any further updates needed during the timeout will not generate extra
