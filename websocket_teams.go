@@ -2,13 +2,13 @@ package slack
 
 type TeamJoinEvent struct {
 	Type string `json:"type"`
-	User User   `json:"user,omitempty"`
+	User *User  `json:"user,omitempty"`
 }
 
 type TeamRenameEvent struct {
-	Type           string         `json:"type"`
-	Name           string         `json:"name,omitempty"`
-	EventTimestamp JSONTimeString `json:"event_ts,omitempty"`
+	Type           string          `json:"type"`
+	Name           string          `json:"name,omitempty"`
+	EventTimestamp *JSONTimeString `json:"event_ts,omitempty"`
 }
 
 type TeamPrefChangeEvent struct {

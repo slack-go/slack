@@ -24,10 +24,10 @@ type ChannelInfoEvent struct {
 	// channel_deleted
 	// channel_archive
 	// channel_unarchive
-	Type      string         `json:"type"`
-	ChannelId string         `json:"channel"`
-	UserId    string         `json:"user,omitempty"`
-	Timestamp JSONTimeString `json:"ts,omitempty"`
+	Type      string          `json:"type"`
+	ChannelId string          `json:"channel"`
+	UserId    string          `json:"user,omitempty"`
+	Timestamp *JSONTimeString `json:"ts,omitempty"`
 }
 
 type ChannelRenameEvent struct {

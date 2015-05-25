@@ -13,11 +13,15 @@ type Group struct {
 	IsGroup            bool           `json:"is_group"`
 	Creator            string         `json:"creator"`
 	IsArchived         bool           `json:"is_archived"`
-	IsGeneral          bool           `json:"is_general"`
+	IsOpen             bool           `json:"is_open,omitempty"`
 	Members            []string       `json:"members"`
 	Topic              ChannelTopic   `json:"topic"`
 	Purpose            ChannelPurpose `json:"purpose"`
+	LastRead           string         `json:"last_read,omitempty"`
+	Latest             *Message       `json:"latest,omitempty"`
+	UnreadCount        int            `json:"unread_count,omitempty"`
 	NumMembers         int            `json:"num_members,omitempty"`
+	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
 }
 
 type groupResponseFull struct {
