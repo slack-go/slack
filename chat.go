@@ -13,7 +13,7 @@ const (
 	DEFAULT_MESSAGE_PARSE        = ""
 	DEFAULT_MESSAGE_LINK_NAMES   = 0
 	DEFAULT_MESSAGE_UNFURL_LINKS = false
-	DEFAULT_MESSAGE_UNFURL_MEDIA = false
+	DEFAULT_MESSAGE_UNFURL_MEDIA = true
 	DEFAULT_MESSAGE_ICON_URL     = ""
 	DEFAULT_MESSAGE_ICON_EMOJI   = ""
 	DEFAULT_MESSAGE_MARKDOWN     = true
@@ -162,7 +162,7 @@ func (api *Slack) PostMessage(channelId string, text string, params PostMessageP
 		values.Set("unfurl_links", "true")
 	}
 	if params.UnfurlMedia != DEFAULT_MESSAGE_UNFURL_MEDIA {
-		values.Set("unfurl_media", "true")
+		values.Set("unfurl_media", "false")
 	}
 	if params.IconURL != DEFAULT_MESSAGE_ICON_URL {
 		values.Set("icon_url", params.IconURL)
