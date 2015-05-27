@@ -1,9 +1,6 @@
 package slack
 
-import (
-	"encoding/json"
-	"time"
-)
+import "encoding/json"
 
 // TODO: Probably need an error event
 
@@ -24,12 +21,6 @@ type UserTypingEvent struct {
 	Channel string `json:"channel"`
 }
 
-// LatencyReport represents the latency report
-type LatencyReport struct {
-	Value time.Duration
-}
-
-// PrefChangeEvent represents the preference change event
 type PrefChangeEvent struct {
 	Type  string          `json:"type"`
 	Name  string          `json:"name"`
