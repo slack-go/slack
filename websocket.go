@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"reflect"
 	"strconv"
 	"sync"
 	"time"
@@ -22,6 +23,12 @@ type SlackWS struct {
 	mutex     sync.Mutex
 	pings     map[int]time.Time
 	Slack
+}
+
+// SlackEvent is the main wrapper. You will find all the other messages attached
+type SlackEvent struct {
+	Type string
+	Data interface{}
 }
 
 // AckMessage is used for messages received in reply to other messages
@@ -40,11 +47,6 @@ type SlackWSResponse struct {
 type SlackWSError struct {
 	Code int
 	Msg  string
-}
-
-type SlackEvent struct {
-	Type uint64
-	Data interface{}
 }
 
 type JSONTimeString string
@@ -137,6 +139,9 @@ func (api *SlackWS) Keepalive(interval time.Duration) {
 }
 
 func (api *SlackWS) SendMessage(msg *OutgoingMessage) error {
+	api.mutex.Lock()
+	defer api.mutex.Unlock()
+
 	if msg == nil {
 		return fmt.Errorf("Can't send a nil message")
 	}
@@ -189,20 +194,17 @@ func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		// try ok
 		ack := AckMessage{}
 		if err = json.Unmarshal(event, &ack); err != nil {
+			// FIXME: never do that mama!
 			log.Fatal(err)
 		}
 
 		if ack.Ok {
-			// TODO: Send the ack back (is this useful?)
-			//ch <- SlackEvent{Type: EventAck, Data: ack}
-			log.Printf("Received an ok for: %d", ack.ReplyTo)
-			return
+			ch <- SlackEvent{"ack", ack}
+		} else {
+			ch <- SlackEvent{"error", ack.Error}
 		}
-
-		// Send the error to the user
-		ch <- SlackEvent{Data: ack.Error}
 	case "hello":
-		ch <- SlackEvent{Data: HelloEvent{}}
+		ch <- SlackEvent{"hello", HelloEvent{}}
 	case "pong":
 		pong := Pong{}
 		if err = json.Unmarshal(event, &pong); err != nil {
@@ -211,88 +213,93 @@ func (api *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		api.mutex.Lock()
 		latency := time.Since(api.pings[pong.ReplyTo])
 		api.mutex.Unlock()
-		ch <- SlackEvent{Data: LatencyReport{Value: latency}}
+		ch <- SlackEvent{"latency-report", LatencyReport{Value: latency}}
 	default:
 		callEvent(em.Type, ch, event)
 	}
 }
 
 func callEvent(eventType string, ch chan SlackEvent, event json.RawMessage) {
-	eventMapping := map[string]interface{}{
-		"message":         &MessageEvent{},
-		"presence_change": &PresenceChangeEvent{},
-		"user_typing":     &UserTypingEvent{},
-
-		"channel_marked":          &ChannelMarkedEvent{},
-		"channel_created":         &ChannelCreatedEvent{},
-		"channel_joined":          &ChannelJoinedEvent{},
-		"channel_left":            &ChannelLeftEvent{},
-		"channel_deleted":         &ChannelDeletedEvent{},
-		"channel_rename":          &ChannelRenameEvent{},
-		"channel_archive":         &ChannelArchiveEvent{},
-		"channel_unarchive":       &ChannelUnarchiveEvent{},
-		"channel_history_changed": &ChannelHistoryChangedEvent{},
-
-		"im_created":         &IMCreatedEvent{},
-		"im_open":            &IMOpenEvent{},
-		"im_close":           &IMCloseEvent{},
-		"im_marked":          &IMMarkedEvent{},
-		"im_history_changed": &IMHistoryChangedEvent{},
-
-		"group_marked":          &GroupMarkedEvent{},
-		"group_open":            &GroupOpenEvent{},
-		"group_joined":          &GroupJoinedEvent{},
-		"group_left":            &GroupLeftEvent{},
-		"group_close":           &GroupCloseEvent{},
-		"group_rename":          &GroupRenameEvent{},
-		"group_archive":         &GroupArchiveEvent{},
-		"group_unarchive":       &GroupUnarchiveEvent{},
-		"group_history_changed": &GroupHistoryChangedEvent{},
-
-		"file_created":         &FileCreatedEvent{},
-		"file_shared":          &FileSharedEvent{},
-		"file_unshared":        &FileUnsharedEvent{},
-		"file_public":          &FilePublicEvent{},
-		"file_private":         &FilePrivateEvent{},
-		"file_change":          &FileChangeEvent{},
-		"file_deleted":         &FileDeletedEvent{},
-		"file_comment_added":   &FileCommentAddedEvent{},
-		"file_comment_edited":  &FileCommentEditedEvent{},
-		"file_comment_deleted": &FileCommentDeletedEvent{},
-
-		"star_added":   &StarAddedEvent{},
-		"star_removed": &StarRemovedEvent{},
-
-		"pref_change": &PrefChangeEvent{},
-
-		"team_join":              &TeamJoinEvent{},
-		"team_rename":            &TeamRenameEvent{},
-		"team_pref_change":       &TeamPrefChangeEvent{},
-		"team_domain_change":     &TeamDomainChangeEvent{},
-		"team_migration_started": &TeamMigrationStartedEvent{},
-
-		"manual_presence_change": &ManualPresenceChangeEvent{},
-
-		"user_change": &UserChangeEvent{},
-
-		"emoji_changed": &EmojiChangedEvent{},
-
-		"commands_changed": &CommandsChangedEvent{},
-
-		"email_domain_changed": &EmailDomainChangedEvent{},
-
-		"bot_added":   &BotAddedEvent{},
-		"bot_changed": &BotChangedEvent{},
-
-		"accounts_changed": &AccountsChangedEvent{},
+	for k, v := range eventMapping {
+		if eventType == k {
+			t := reflect.TypeOf(v)
+			recvEvent := reflect.New(t).Interface()
+			err := json.Unmarshal(event, recvEvent)
+			if err != nil {
+				log.Println("Unable to unmarshal event:", eventType, event)
+			}
+			ch <- SlackEvent{k, recvEvent}
+			return
+		}
 	}
+	log.Printf("XXX: Not implemented yet: %s -> %v", eventType, event)
+}
 
-	msg := eventMapping[eventType]
-	if msg == nil {
-		log.Printf("XXX: Not implemented yet: %s -> %v", eventType, event)
-	}
-	if err := json.Unmarshal(event, &msg); err != nil {
-		log.Fatal(err)
-	}
-	ch <- SlackEvent{Data: msg}
+var eventMapping = map[string]interface{}{
+	"message":         &MessageEvent{},
+	"presence_change": &PresenceChangeEvent{},
+	"user_typing":     &UserTypingEvent{},
+
+	"channel_marked":          &ChannelMarkedEvent{},
+	"channel_created":         &ChannelCreatedEvent{},
+	"channel_joined":          &ChannelJoinedEvent{},
+	"channel_left":            &ChannelLeftEvent{},
+	"channel_deleted":         &ChannelDeletedEvent{},
+	"channel_rename":          &ChannelRenameEvent{},
+	"channel_archive":         &ChannelArchiveEvent{},
+	"channel_unarchive":       &ChannelUnarchiveEvent{},
+	"channel_history_changed": &ChannelHistoryChangedEvent{},
+
+	"im_created":         &IMCreatedEvent{},
+	"im_open":            &IMOpenEvent{},
+	"im_close":           &IMCloseEvent{},
+	"im_marked":          &IMMarkedEvent{},
+	"im_history_changed": &IMHistoryChangedEvent{},
+
+	"group_marked":          &GroupMarkedEvent{},
+	"group_open":            &GroupOpenEvent{},
+	"group_joined":          &GroupJoinedEvent{},
+	"group_left":            &GroupLeftEvent{},
+	"group_close":           &GroupCloseEvent{},
+	"group_rename":          &GroupRenameEvent{},
+	"group_archive":         &GroupArchiveEvent{},
+	"group_unarchive":       &GroupUnarchiveEvent{},
+	"group_history_changed": &GroupHistoryChangedEvent{},
+
+	"file_created":         &FileCreatedEvent{},
+	"file_shared":          &FileSharedEvent{},
+	"file_unshared":        &FileUnsharedEvent{},
+	"file_public":          &FilePublicEvent{},
+	"file_private":         &FilePrivateEvent{},
+	"file_change":          &FileChangeEvent{},
+	"file_deleted":         &FileDeletedEvent{},
+	"file_comment_added":   &FileCommentAddedEvent{},
+	"file_comment_edited":  &FileCommentEditedEvent{},
+	"file_comment_deleted": &FileCommentDeletedEvent{},
+
+	"star_added":   &StarAddedEvent{},
+	"star_removed": &StarRemovedEvent{},
+
+	"pref_change": &PrefChangeEvent{},
+
+	"team_join":              &TeamJoinEvent{},
+	"team_rename":            &TeamRenameEvent{},
+	"team_pref_change":       &TeamPrefChangeEvent{},
+	"team_domain_change":     &TeamDomainChangeEvent{},
+	"team_migration_started": &TeamMigrationStartedEvent{},
+
+	"manual_presence_change": &ManualPresenceChangeEvent{},
+
+	"user_change": &UserChangeEvent{},
+
+	"emoji_changed": &EmojiChangedEvent{},
+
+	"commands_changed": &CommandsChangedEvent{},
+
+	"email_domain_changed": &EmailDomainChangedEvent{},
+
+	"bot_added":   &BotAddedEvent{},
+	"bot_changed": &BotChangedEvent{},
+
+	"accounts_changed": &AccountsChangedEvent{},
 }

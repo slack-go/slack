@@ -119,16 +119,11 @@ func (api *Slack) DeleteMessage(channelId, messageTimestamp string) (string, str
 }
 
 func escapeMessage(message string) string {
-	/*
-		& replaced with &amp;
-		< replaced with &lt;
-		> replaced with &gt;
-	*/
 	replacer := strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;")
 	return replacer.Replace(message)
 }
 
-// PostMessage sends a message to a channel
+// PostMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
 	if params.EscapeText {
