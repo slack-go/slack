@@ -1,4 +1,6 @@
-Slack API in Go
+# Slack API in Go
+
+[![GoDoc](https://godoc.org/github.com/nlopes/slack?status.png)](https://godoc.org/github.com/nlopes/slack)
 
 ## Installing
 
