@@ -7,22 +7,11 @@ import (
 )
 
 func main() {
-	chSender := make(chan slack.OutgoingMessage)
-
 	api := slack.New("YOUR TOKEN HERE")
 	api.SetDebug(true)
 
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
-
-	go func(rtm *slack.RTM, chSender chan slack.OutgoingMessage) {
-		for {
-			select {
-			case msg := <-chSender:
-				rtm.SendMessage(&msg)
-			}
-		}
-	}(rtm, chSender)
 
 	for {
 		select {

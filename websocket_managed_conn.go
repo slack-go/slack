@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"time"
 
@@ -115,6 +116,7 @@ func (rtm *RTM) ping(conn *websocket.Conn, errors chan error) {
 	rtm.pings[rtm.messageId] = time.Now()
 
 	msg := &Ping{Id: rtm.messageId, Type: "ping"}
+	rtm.Debugln("Sending PING")
 	if err := websocket.JSON.Send(conn, msg); err != nil {
 		errors <- fmt.Errorf("error sending 'ping': %s", err)
 	}
@@ -154,12 +156,14 @@ func (rtm *RTM) handleIncomingEvents(conn *websocket.Conn, killCh chan bool, err
 
 		event := json.RawMessage{}
 		err := websocket.JSON.Receive(conn, &event)
-		if err != nil {
+		if err == io.EOF {
+			rtm.Debugln("GOT EOF, are we killing ??")
+		} else if err != nil {
 			errors <- err
 			return
 		}
 		if len(event) == 0 {
-			//log.Println("Event Empty. WTF?")
+			rtm.Debugln("Event Empty. WTF?")
 			continue
 		}
 

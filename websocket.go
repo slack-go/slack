@@ -10,6 +10,8 @@ import (
 
 // RTM represents a managed websocket connection. It also supports
 // all the methods of the `Slack` type.
+//
+// Create this element with Client's NewRTM().
 type RTM struct {
 	mutex     sync.Mutex
 	messageId int
