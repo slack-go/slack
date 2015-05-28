@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"log"
 	"net/url"
 )
 
@@ -29,7 +30,7 @@ type authTestResponseFull struct {
 	AuthTestResponse
 }
 
-type Slack struct {
+type Client struct {
 	config struct {
 		token string
 	}
@@ -37,14 +38,14 @@ type Slack struct {
 	debug bool
 }
 
-func New(token string) *Slack {
-	s := &Slack{}
+func New(token string) *Client {
+	s := &Client{}
 	s.config.token = token
 	return s
 }
 
 // AuthTest tests if the user is able to do authenticated requests or not
-func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
+func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
 	err := post("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
@@ -59,6 +60,18 @@ func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 // SetDebug switches the api into debug mode
 // When in debug mode, it logs various info about what its doing
 // If you ever use this in production, don't call SetDebug(true)
-func (api *Slack) SetDebug(debug bool) {
+func (api *Client) SetDebug(debug bool) {
 	api.debug = debug
+}
+
+func (api *Client) Debugf(format string, v ...interface{}) {
+	if api.debug {
+		log.Printf(format, v...)
+	}
+}
+
+func (api *Client) Debugln(v ...interface{}) {
+	if api.debug {
+		log.Println(v...)
+	}
 }

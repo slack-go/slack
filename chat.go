@@ -73,7 +73,7 @@ func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull,
 }
 
 // DeleteMessage deletes a message in a channel
-func (api *Slack) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
+func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
@@ -94,7 +94,7 @@ func escapeMessage(message string) string {
 // PostMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Slack) PostMessage(channel string, text string, params PostMessageParameters) (string, string, error) {
+func (api *Client) PostMessage(channel, text string, params PostMessageParameters) (channel, timestamp string, err error) {
 	if params.EscapeText {
 		text = escapeMessage(text)
 	}
@@ -146,7 +146,7 @@ func (api *Slack) PostMessage(channel string, text string, params PostMessagePar
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Slack) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
+func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},

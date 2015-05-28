@@ -143,7 +143,7 @@ type Bot struct {
 }
 
 // Info contains various details about Users, Channels, Bots and the authenticated user.
-// It is returned by StartRTM
+// It is returned by StartRTM or included in the "ConnectedEvent" RTM event.
 type Info struct {
 	URL      string       `json:"url,omitempty"`
 	User     *UserDetails `json:"self,omitempty"`

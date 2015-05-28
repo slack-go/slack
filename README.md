@@ -1,6 +1,12 @@
-# Slack API For Go [![Build Status](https://travis-ci.org/nlopes/slack.svg)](https://travis-ci.org/nlopes/slack)
+Slack API in Go [![GoDoc](https://godoc.org/github.com/nlopes/slack?status.png)](https://godoc.org/github.com/nlopes/slack) [![Build Status](https://travis-ci.org/nlopes/slack.svg)](https://travis-ci.org/nlopes/slack)
+===============
 
-[![GoDoc](https://godoc.org/github.com/nlopes/slack?status.png)](https://godoc.org/github.com/nlopes/slack)
+This library supports most if not all of the `api.slack.com` REST
+calls, as well as the Real-Time Messaging protocol over websocket, in
+a fully managed way.
+
+This fork breaks many things `github.com/nlopes/slack`, and improves
+the RTM a lot.
 
 ## Installing
 
@@ -51,14 +57,16 @@
 	    fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
     }
 
-## Why?
-I am currently learning Go and this seemed like a good idea.
+## Minimal RTM usage:
 
-## Stability
-As with any other piece of software expect bugs. Also, the design isn't finalized yet because I am not happy with how I laid out some things. Especially the websocket stuff. It is functional but very incomplete and buggy.
 
-## Help
-Anyone is welcome to contribute. Either open a PR or create an issue.
+
+
+## Contributing
+
+You are more than welcome to contribute to this project.  Fork and
+make a Pull Request, or create an Issue if you see any problem.
 
 ## License
+
 BSD 2 Clause license

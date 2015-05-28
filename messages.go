@@ -102,15 +102,17 @@ type Pong struct {
 	ReplyTo int    `json:"reply_to"`
 }
 
-// NewOutgoingMessage prepares an OutgoingMessage that the user can use to send a message
-func (api *WS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
-	api.mutex.Lock()
-	defer api.mutex.Unlock()
-	api.messageID++
+// NewOutgoingMessage prepares an OutgoingMessage that the user can
+// use to send a message. Use this function to properly set the
+// messageID.
+func (rtm *RTM) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
+	rtm.mutex.Lock()
+	defer rtm.mutex.Unlock()
+	rtm.messageID++
 	return &OutgoingMessage{
-		ID:      api.messageID,
-		Type:    "message",
-		Channel: channel,
-		Text:    text,
+		Id:        rtm.messageID,
+		Type:      "message",
+		ChannelId: channel,
+		Text:      text,
 	}
 }

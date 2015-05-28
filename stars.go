@@ -47,7 +47,7 @@ func NewStarsParameters() StarsParameters {
 //             ...
 //        }
 //    }
-func (api *Slack) GetStarred(params StarsParameters) ([]StarredItem, *Paging, error) {
+func (api *Client) GetStarred(params StarsParameters) ([]StarredItem, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}

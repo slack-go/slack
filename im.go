@@ -41,7 +41,7 @@ func imRequest(path string, values url.Values, debug bool) (*imResponseFull, err
 }
 
 // CloseIMChannel closes the direct message channel
-func (api *Slack) CloseIMChannel(channel string) (bool, bool, error) {
+func (api *Client) CloseIMChannel(channel string) (bool, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
@@ -54,8 +54,8 @@ func (api *Slack) CloseIMChannel(channel string) (bool, bool, error) {
 }
 
 // OpenIMChannel opens a direct message channel to the user provided as argument
-// Returns some status and the channel
-func (api *Slack) OpenIMChannel(user string) (bool, bool, string, error) {
+// Returns some status and the channel ID
+func (api *Client) OpenIMChannel(user string) (bool, bool, string, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"user":  {user},
@@ -68,7 +68,7 @@ func (api *Slack) OpenIMChannel(user string) (bool, bool, string, error) {
 }
 
 // MarkIMChannel sets the read mark of a direct message channel to a specific point
-func (api *Slack) MarkIMChannel(channel, ts string) (err error) {
+func (api *Client) MarkIMChannel(channel, ts string) (err error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
@@ -82,7 +82,7 @@ func (api *Slack) MarkIMChannel(channel, ts string) (err error) {
 }
 
 // GetIMHistory retrieves the direct message channel history
-func (api *Slack) GetIMHistory(channel string, params HistoryParameters) (*History, error) {
+func (api *Client) GetIMHistory(channel string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
@@ -111,7 +111,7 @@ func (api *Slack) GetIMHistory(channel string, params HistoryParameters) (*Histo
 }
 
 // GetIMChannels returns the list of direct message channels
-func (api *Slack) GetIMChannels() ([]IM, error) {
+func (api *Client) GetIMChannels() ([]IM, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}

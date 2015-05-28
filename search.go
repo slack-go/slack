@@ -80,7 +80,7 @@ func NewSearchParameters() SearchParameters {
 	}
 }
 
-func (api *Slack) _search(path, query string, params SearchParameters, files, messages bool) (response *searchResponseFull, error error) {
+func (api *Client) _search(path, query string, params SearchParameters, files, messages bool) (response *searchResponseFull, error error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"query": {query},
@@ -112,7 +112,7 @@ func (api *Slack) _search(path, query string, params SearchParameters, files, me
 
 }
 
-func (api *Slack) Search(query string, params SearchParameters) (*SearchMessages, *SearchFiles, error) {
+func (api *Client) Search(query string, params SearchParameters) (*SearchMessages, *SearchFiles, error) {
 	response, err := api._search("search.all", query, params, true, true)
 	if err != nil {
 		return nil, nil, err
@@ -120,7 +120,7 @@ func (api *Slack) Search(query string, params SearchParameters) (*SearchMessages
 	return &response.SearchMessages, &response.SearchFiles, nil
 }
 
-func (api *Slack) SearchFiles(query string, params SearchParameters) (*SearchFiles, error) {
+func (api *Client) SearchFiles(query string, params SearchParameters) (*SearchFiles, error) {
 	response, err := api._search("search.files", query, params, true, false)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (api *Slack) SearchFiles(query string, params SearchParameters) (*SearchFil
 	return &response.SearchFiles, nil
 }
 
-func (api *Slack) SearchMessages(query string, params SearchParameters) (*SearchMessages, error) {
+func (api *Client) SearchMessages(query string, params SearchParameters) (*SearchMessages, error) {
 	response, err := api._search("search.messages", query, params, false, true)
 	if err != nil {
 		return nil, err

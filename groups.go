@@ -39,8 +39,7 @@ func groupRequest(path string, values url.Values, debug bool) (*groupResponseFul
 	return response, nil
 }
 
-// ArchiveGroup archives a private group
-func (api *Slack) ArchiveGroup(group string) error {
+func (api *Client) ArchiveGroup(group string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -53,7 +52,7 @@ func (api *Slack) ArchiveGroup(group string) error {
 }
 
 // UnarchiveGroup unarchives a private group
-func (api *Slack) UnarchiveGroup(group string) error {
+func (api *Client) UnarchiveGroup(group string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -66,7 +65,7 @@ func (api *Slack) UnarchiveGroup(group string) error {
 }
 
 // CreateGroup creates a private group
-func (api *Slack) CreateGroup(group string) (*Group, error) {
+func (api *Client) CreateGroup(group string) (*Group, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"name":  {group},
@@ -84,7 +83,7 @@ func (api *Slack) CreateGroup(group string) (*Group, error) {
 //   2. Archives the existing group.
 //   3. Creates a new group with the name of the existing group.
 //   4. Adds all members of the existing group to the new group.
-func (api *Slack) CreateChildGroup(group string) (*Group, error) {
+func (api *Client) CreateChildGroup(group string) (*Group, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -96,8 +95,7 @@ func (api *Slack) CreateChildGroup(group string) (*Group, error) {
 	return &response.Group, nil
 }
 
-// CloseGroup closes a private group
-func (api *Slack) CloseGroup(group string) (bool, bool, error) {
+func (api *Client) CloseGroup(group string) (bool, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -109,8 +107,7 @@ func (api *Slack) CloseGroup(group string) (bool, bool, error) {
 	return response.NoOp, response.AlreadyClosed, nil
 }
 
-// GetGroupHistory retrieves message history for a give group
-func (api *Slack) GetGroupHistory(group string, params HistoryParameters) (*History, error) {
+func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -138,8 +135,7 @@ func (api *Slack) GetGroupHistory(group string, params HistoryParameters) (*Hist
 	return &response.History, nil
 }
 
-// InviteUserToGroup invites a user to a group
-func (api *Slack) InviteUserToGroup(group, user string) (*Group, bool, error) {
+func (api *Client) InviteUserToGroup(group, user string) (*Group, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -153,7 +149,7 @@ func (api *Slack) InviteUserToGroup(group, user string) (*Group, bool, error) {
 }
 
 // LeaveGroup makes authenticated user leave the group
-func (api *Slack) LeaveGroup(group string) error {
+func (api *Client) LeaveGroup(group string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -166,7 +162,7 @@ func (api *Slack) LeaveGroup(group string) error {
 }
 
 // KickUserFromGroup kicks a user from a group
-func (api *Slack) KickUserFromGroup(group, user string) error {
+func (api *Client) KickUserFromGroup(group, user string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -180,7 +176,7 @@ func (api *Slack) KickUserFromGroup(group, user string) error {
 }
 
 // GetGroups retrieves all groups
-func (api *Slack) GetGroups(excludeArchived bool) ([]Group, error) {
+func (api *Client) GetGroups(excludeArchived bool) ([]Group, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -195,7 +191,7 @@ func (api *Slack) GetGroups(excludeArchived bool) ([]Group, error) {
 }
 
 // GetGroupInfo retrieves the given group
-func (api *Slack) GetGroupInfo(group string) (*Group, error) {
+func (api *Client) GetGroupInfo(group string) (*Group, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -212,7 +208,7 @@ func (api *Slack) GetGroupInfo(group string) (*Group, error) {
 // timer before making the call. In this way, any further updates needed during the timeout will not generate extra
 // calls (just one per channel). This is useful for when reading scroll-back history, or following a busy live
 // channel. A timeout of 5 seconds is a good starting point. Be sure to flush these calls on shutdown/logout.
-func (api *Slack) SetGroupReadMark(group, ts string) error {
+func (api *Client) SetGroupReadMark(group, ts string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -226,7 +222,7 @@ func (api *Slack) SetGroupReadMark(group, ts string) error {
 }
 
 // OpenGroup opens a private group
-func (api *Slack) OpenGroup(group string) (bool, bool, error) {
+func (api *Client) OpenGroup(group string) (bool, bool, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"user":  {group},
@@ -241,7 +237,7 @@ func (api *Slack) OpenGroup(group string) (bool, bool, error) {
 // RenameGroup renames a group
 // XXX: They return a channel, not a group. What is this crap? :(
 // Inconsistent api it seems.
-func (api *Slack) RenameGroup(group, name string) (*Channel, error) {
+func (api *Client) RenameGroup(group, name string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -258,7 +254,7 @@ func (api *Slack) RenameGroup(group, name string) (*Channel, error) {
 }
 
 // SetGroupPurpose sets the group purpose
-func (api *Slack) SetGroupPurpose(group, purpose string) (string, error) {
+func (api *Client) SetGroupPurpose(group, purpose string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},
@@ -272,7 +268,7 @@ func (api *Slack) SetGroupPurpose(group, purpose string) (string, error) {
 }
 
 // SetGroupTopic sets the group topic
-func (api *Slack) SetGroupTopic(group, topic string) (string, error) {
+func (api *Client) SetGroupTopic(group, topic string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {group},

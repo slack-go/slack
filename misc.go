@@ -64,6 +64,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 		return err
 	}
 
+	// FIXME: will be api.Debugf
 	if debug {
 		log.Printf("parseResponseBody: %s\n", string(response))
 	}
