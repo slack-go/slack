@@ -75,7 +75,7 @@ func userRequest(path string, values url.Values, debug bool) (*userResponseFull,
 }
 
 // GetUserPresence will retrieve the current presence status of given user.
-func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
+func (api *Client) GetUserPresence(userId string) (*UserPresence, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"user":  {userId},
@@ -88,7 +88,7 @@ func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
 }
 
 // GetUserInfo will retrive the complete user information
-func (api *Slack) GetUserInfo(userId string) (*User, error) {
+func (api *Client) GetUserInfo(userId string) (*User, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"user":  {userId},
@@ -101,7 +101,7 @@ func (api *Slack) GetUserInfo(userId string) (*User, error) {
 }
 
 // GetUsers returns the list of users (with their detailed information)
-func (api *Slack) GetUsers() ([]User, error) {
+func (api *Client) GetUsers() ([]User, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -113,7 +113,7 @@ func (api *Slack) GetUsers() ([]User, error) {
 }
 
 // SetUserAsActive marks the currently authenticated user as active
-func (api *Slack) SetUserAsActive() error {
+func (api *Client) SetUserAsActive() error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -125,7 +125,7 @@ func (api *Slack) SetUserAsActive() error {
 }
 
 // SetUserPresence changes the currently authenticated user presence
-func (api *Slack) SetUserPresence(presence string) error {
+func (api *Client) SetUserPresence(presence string) error {
 	values := url.Values{
 		"token":    {api.config.token},
 		"presence": {presence},

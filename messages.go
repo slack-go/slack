@@ -60,13 +60,15 @@ type Pong struct {
 	ReplyTo int    `json:"reply_to"`
 }
 
-// NewOutGoingMessage prepares an OutgoingMessage that the user can use to send a message
-func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
-	api.mutex.Lock()
-	defer api.mutex.Unlock()
-	api.messageId++
+// NewOutgoingMessage prepares an OutgoingMessage that the user can
+// use to send a message. Use this function to properly set the
+// messageId.
+func (rtm *RTM) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
+	rtm.mutex.Lock()
+	defer rtm.mutex.Unlock()
+	rtm.messageId++
 	return &OutgoingMessage{
-		Id:        api.messageId,
+		Id:        rtm.messageId,
 		Type:      "message",
 		ChannelId: channel,
 		Text:      text,

@@ -9,19 +9,14 @@ import (
 // Group contains all the information for a group
 type Group struct {
 	BaseChannel
-	Name               string         `json:"name"`
-	IsGroup            bool           `json:"is_group"`
-	Creator            string         `json:"creator"`
-	IsArchived         bool           `json:"is_archived"`
-	IsOpen             bool           `json:"is_open,omitempty"`
-	Members            []string       `json:"members"`
-	Topic              ChannelTopic   `json:"topic"`
-	Purpose            ChannelPurpose `json:"purpose"`
-	LastRead           string         `json:"last_read,omitempty"`
-	Latest             *Message       `json:"latest,omitempty"`
-	UnreadCount        int            `json:"unread_count,omitempty"`
-	NumMembers         int            `json:"num_members,omitempty"`
-	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
+	Name       string         `json:"name"`
+	IsGroup    bool           `json:"is_group"`
+	Creator    string         `json:"creator"`
+	IsArchived bool           `json:"is_archived"`
+	Members    []string       `json:"members"`
+	Topic      ChannelTopic   `json:"topic"`
+	Purpose    ChannelPurpose `json:"purpose"`
+	NumMembers int            `json:"num_members,omitempty"`
 }
 
 type groupResponseFull struct {
@@ -52,7 +47,7 @@ func groupRequest(path string, values url.Values, debug bool) (*groupResponseFul
 }
 
 // ArchiveGroup archives a private group
-func (api *Slack) ArchiveGroup(groupId string) error {
+func (api *Client) ArchiveGroup(groupId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -65,7 +60,7 @@ func (api *Slack) ArchiveGroup(groupId string) error {
 }
 
 // UnarchiveGroup unarchives a private group
-func (api *Slack) UnarchiveGroup(groupId string) error {
+func (api *Client) UnarchiveGroup(groupId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -78,7 +73,7 @@ func (api *Slack) UnarchiveGroup(groupId string) error {
 }
 
 // CreateGroup creates a private group
-func (api *Slack) CreateGroup(group string) (*Group, error) {
+func (api *Client) CreateGroup(group string) (*Group, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"name":  {group},
@@ -96,7 +91,7 @@ func (api *Slack) CreateGroup(group string) (*Group, error) {
 //   2. Archives the existing group.
 //   3. Creates a new group with the name of the existing group.
 //   4. Adds all members of the existing group to the new group.
-func (api *Slack) CreateChildGroup(groupId string) (*Group, error) {
+func (api *Client) CreateChildGroup(groupId string) (*Group, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -109,7 +104,7 @@ func (api *Slack) CreateChildGroup(groupId string) (*Group, error) {
 }
 
 // CloseGroup closes a private group
-func (api *Slack) CloseGroup(groupId string) (bool, bool, error) {
+func (api *Client) CloseGroup(groupId string) (bool, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -122,7 +117,7 @@ func (api *Slack) CloseGroup(groupId string) (bool, bool, error) {
 }
 
 // GetGroupHistory retrieves message history for a give group
-func (api *Slack) GetGroupHistory(groupId string, params HistoryParameters) (*History, error) {
+func (api *Client) GetGroupHistory(groupId string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -151,7 +146,7 @@ func (api *Slack) GetGroupHistory(groupId string, params HistoryParameters) (*Hi
 }
 
 // InviteUserToGroup invites a user to a group
-func (api *Slack) InviteUserToGroup(groupId, userId string) (*Group, bool, error) {
+func (api *Client) InviteUserToGroup(groupId, userId string) (*Group, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -165,7 +160,7 @@ func (api *Slack) InviteUserToGroup(groupId, userId string) (*Group, bool, error
 }
 
 // LeaveGroup makes authenticated user leave the group
-func (api *Slack) LeaveGroup(groupId string) error {
+func (api *Client) LeaveGroup(groupId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -178,7 +173,7 @@ func (api *Slack) LeaveGroup(groupId string) error {
 }
 
 // KickUserFromGroup kicks a user from a group
-func (api *Slack) KickUserFromGroup(groupId, userId string) error {
+func (api *Client) KickUserFromGroup(groupId, userId string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -192,7 +187,7 @@ func (api *Slack) KickUserFromGroup(groupId, userId string) error {
 }
 
 // GetGroups retrieves all groups
-func (api *Slack) GetGroups(excludeArchived bool) ([]Group, error) {
+func (api *Client) GetGroups(excludeArchived bool) ([]Group, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -207,7 +202,7 @@ func (api *Slack) GetGroups(excludeArchived bool) ([]Group, error) {
 }
 
 // GetGroupInfo retrieves the given group
-func (api *Slack) GetGroupInfo(groupId string) (*Group, error) {
+func (api *Client) GetGroupInfo(groupId string) (*Group, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -224,7 +219,7 @@ func (api *Slack) GetGroupInfo(groupId string) (*Group, error) {
 // timer before making the call. In this way, any further updates needed during the timeout will not generate extra
 // calls (just one per channel). This is useful for when reading scroll-back history, or following a busy live
 // channel. A timeout of 5 seconds is a good starting point. Be sure to flush these calls on shutdown/logout.
-func (api *Slack) SetGroupReadMark(groupId, ts string) error {
+func (api *Client) SetGroupReadMark(groupId, ts string) error {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -238,7 +233,7 @@ func (api *Slack) SetGroupReadMark(groupId, ts string) error {
 }
 
 // OpenGroup opens a private group
-func (api *Slack) OpenGroup(groupId string) (bool, bool, error) {
+func (api *Client) OpenGroup(groupId string) (bool, bool, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"user":  {groupId},
@@ -253,7 +248,7 @@ func (api *Slack) OpenGroup(groupId string) (bool, bool, error) {
 // RenameGroup renames a group
 // XXX: They return a channel, not a group. What is this crap? :(
 // Inconsistent api it seems.
-func (api *Slack) RenameGroup(groupId, name string) (*Channel, error) {
+func (api *Client) RenameGroup(groupId, name string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -270,7 +265,7 @@ func (api *Slack) RenameGroup(groupId, name string) (*Channel, error) {
 }
 
 // SetGroupPurpose sets the group purpose
-func (api *Slack) SetGroupPurpose(groupId, purpose string) (string, error) {
+func (api *Client) SetGroupPurpose(groupId, purpose string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},
@@ -284,7 +279,7 @@ func (api *Slack) SetGroupPurpose(groupId, purpose string) (string, error) {
 }
 
 // SetGroupTopic sets the group topic
-func (api *Slack) SetGroupTopic(groupId, topic string) (string, error) {
+func (api *Client) SetGroupTopic(groupId, topic string) (string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {groupId},

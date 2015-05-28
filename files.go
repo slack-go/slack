@@ -129,7 +129,7 @@ func fileRequest(path string, values url.Values, debug bool) (*fileResponseFull,
 }
 
 // GetFileInfo retrieves a file and related comments
-func (api *Slack) GetFileInfo(fileId string, count, page int) (*File, []Comment, *Paging, error) {
+func (api *Client) GetFileInfo(fileId string, count, page int) (*File, []Comment, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 		"file":  {fileId},
@@ -144,7 +144,7 @@ func (api *Slack) GetFileInfo(fileId string, count, page int) (*File, []Comment,
 }
 
 // GetFiles retrieves all files according to the parameters given
-func (api *Slack) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
+func (api *Client) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -175,7 +175,7 @@ func (api *Slack) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 }
 
 // UploadFile uploads a file
-func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error) {
+func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
 	// investigation needed, but for now this will do.
 	_, err = api.AuthTest()
@@ -217,7 +217,7 @@ func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error
 }
 
 // DeleteFile deletes a file
-func (api *Slack) DeleteFile(fileId string) error {
+func (api *Client) DeleteFile(fileId string) error {
 	values := url.Values{
 		"token": {api.config.token},
 		"file":  {fileId},

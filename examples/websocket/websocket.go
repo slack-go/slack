@@ -2,52 +2,56 @@ package main
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/nlopes/slack"
+	"github.com/abourget/slack"
 )
 
 func main() {
 	chSender := make(chan slack.OutgoingMessage)
-	chReceiver := make(chan slack.SlackEvent)
 
 	api := slack.New("YOUR TOKEN HERE")
 	api.SetDebug(true)
-	wsAPI, err := api.StartRTM("", "http://example.com")
-	if err != nil {
-		fmt.Errorf("%s\n", err)
-	}
-	go wsAPI.HandleIncomingEvents(chReceiver)
-	go wsAPI.Keepalive(20 * time.Second)
-	go func(wsAPI *slack.SlackWS, chSender chan slack.OutgoingMessage) {
+
+	rtm := api.NewRTM()
+	go rtm.ManageConnection()
+
+	go func(rtm *slack.RTM, chSender chan slack.OutgoingMessage) {
 		for {
 			select {
 			case msg := <-chSender:
-				wsAPI.SendMessage(&msg)
+				rtm.SendMessage(&msg)
 			}
 		}
-	}(wsAPI, chSender)
+	}(rtm, chSender)
+
 	for {
 		select {
-		case msg := <-chReceiver:
+		case msg := <-rtm.IncomingEvents:
 			fmt.Print("Event Received: ")
-			switch msg.Data.(type) {
-			case slack.HelloEvent:
+			switch ev := msg.Data.(type) {
+			case *slack.HelloEvent:
 				// Ignore hello
+
+			case *slack.ConnectedEvent:
+				fmt.Println("Infos:", ev.Info)
+				fmt.Println("Connection counter:", ev.ConnectionCount)
+				rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "#general"))
+
 			case *slack.MessageEvent:
-				a := msg.Data.(*slack.MessageEvent)
-				fmt.Printf("Message: %v\n", a)
+				fmt.Printf("Message: %v\n", ev)
+
 			case *slack.PresenceChangeEvent:
-				a := msg.Data.(*slack.PresenceChangeEvent)
-				fmt.Printf("Presence Change: %v\n", a)
-			case slack.LatencyReport:
-				a := msg.Data.(slack.LatencyReport)
-				fmt.Printf("Current latency: %v\n", a.Value)
+				fmt.Printf("Presence Change: %v\n", ev)
+
+			case *slack.LatencyReport:
+				fmt.Printf("Current latency: %v\n", ev.Value)
+
 			case *slack.SlackWSError:
-				error := msg.Data.(*slack.SlackWSError)
-				fmt.Printf("Error: %d - %s\n", error.Code, error.Msg)
+				fmt.Printf("Error: %d - %s\n", ev.Code, ev.Msg)
+
 			default:
-				fmt.Printf("Unexpected: %v\n", msg.Data)
+				// Ignore other events..
+				//fmt.Printf("Unexpected: %v\n", msg.Data)
 			}
 		}
 	}
