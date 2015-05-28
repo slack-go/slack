@@ -142,7 +142,7 @@ type Bot struct {
 	Icons   Icons  `json:"icons"`
 }
 
-// Info contains various details about Users, Channels, Bots and the authenticated user
+// Info contains various details about Users, Channels, Bots and the authenticated user.
 // It is returned by StartRTM
 type Info struct {
 	URL      string       `json:"url,omitempty"`

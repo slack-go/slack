@@ -43,10 +43,6 @@ func New(token string) *Slack {
 	return s
 }
 
-func (api *Slack) GetInfo() Info {
-	return api.info
-}
-
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
