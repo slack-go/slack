@@ -5,8 +5,8 @@ This library supports most if not all of the `api.slack.com` REST
 calls, as well as the Real-Time Messaging protocol over websocket, in
 a fully managed way.
 
-This fork breaks many things `github.com/nlopes/slack`, and improves
-the RTM a lot.
+This fork breaks many things in `github.com/nlopes/slack`, and
+improves the RTM a lot.
 
 
 ## Installing
@@ -22,7 +22,7 @@ the RTM a lot.
     import (
 		"fmt"
 
-		"github.com/nlopes/slack"
+		"github.com/abourget/slack"
 	)
 
     func main() {
@@ -45,7 +45,7 @@ the RTM a lot.
     import (
 	    "fmt"
 
-	    "github.com/nlopes/slack"
+	    "github.com/abourget/slack"
     )
 
     func main() {
