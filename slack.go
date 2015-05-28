@@ -16,7 +16,7 @@ type SlackResponse struct {
 }
 
 type AuthTestResponse struct {
-	Url    string `json:"url"`
+	URL    string `json:"url"`
 	Team   string `json:"team"`
 	User   string `json:"user"`
 	TeamId string `json:"team_id"`
@@ -40,10 +40,6 @@ func New(token string) *Slack {
 	s := &Slack{}
 	s.config.token = token
 	return s
-}
-
-func (api *Slack) GetInfo() Info {
-	return api.info
 }
 
 // AuthTest tests if the user is able to do authenticated requests or not

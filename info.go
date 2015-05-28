@@ -142,10 +142,10 @@ type Bot struct {
 	Icons   Icons  `json:"icons"`
 }
 
-// Info contains various details about Users, Channels, Bots and the authenticated user
+// Info contains various details about Users, Channels, Bots and the authenticated user.
 // It is returned by StartRTM
 type Info struct {
-	Url      string       `json:"url,omitempty"`
+	URL      string       `json:"url,omitempty"`
 	User     *UserDetails `json:"self,omitempty"`
 	Team     *Team        `json:"team,omitempty"`
 	Users    []User       `json:"users,omitempty"`

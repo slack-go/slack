@@ -27,6 +27,9 @@ type SlackWS struct {
 
 	// Slack is the main API, embedded
 	Slack
+
+	// UserDetails upon connection
+	info *Info
 }
 
 // StartRTM starts a Websocket used to do all common chat client operations.
@@ -39,16 +42,21 @@ func (api *Slack) StartRTM() (*SlackWS, error) {
 	if !response.Ok {
 		return nil, response.Error
 	}
-	api.info = response.Info
+
 	// websocket.Dial does not accept url without the port (yet)
 	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
 	// but slack returns the address with no port, so we have to fix it
-	websocketUrl, err := websocketizeUrlPort(api.info.Url)
+	websocketUrl, err := websocketizeUrlPort(response.Info.URL)
 	if err != nil {
 		return nil, err
 	}
-	ws := &SlackWS{Slack: *api}
+
+	ws := &SlackWS{
+		Slack: *api,
+		info:  &response.Info,
+	}
 	ws.pings = make(map[int]time.Time)
+
 	ws.conn, err = websocket.Dial(websocketUrl, "", "")
 	if err != nil {
 		return nil, err
@@ -62,8 +70,28 @@ func (api *Slack) StartRTM() (*SlackWS, error) {
 }
 
 func (ws *SlackWS) manageConnection(url string) {
+	// launch keepalive with fixed timings
+	// listen on
 	// receive any connectionErrors, killall goroutines
 	// reconnect and restart them all
+}
+
+// Disconnect and wait, blocking until a successful disconnection.
+func (ws *SlackWS) Disconnect() error {
+	return nil
+}
+
+// Reconnect, only makes sense if you've successfully disconnectd with Disconnect().
+func (ws *SlackWS) Reconnect() error {
+	return nil
+}
+
+// GetInfo returns the info structure received when calling
+// "startrtm", holding all channels, groups and other metadata needed
+// to implement a full chat client. It will be non-nil after a call to
+// StartRTM().
+func (ws *SlackWS) GetInfo() *Info {
+	return ws.info
 }
 
 func (ws *SlackWS) Ping() error {
@@ -117,7 +145,9 @@ func (ws *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
 			//}
 			// should we reconnect here?
 			if !ws.conn.IsClientConn() {
-				ws.conn, err = websocket.Dial(ws.info.Url, "", "")
+				// FIXME: take the URL from the connection manager.
+				url := "boo"
+				ws.conn, err = websocket.Dial(url, "", "")
 				if err != nil {
 					log.Panic(err)
 				}
