@@ -34,9 +34,10 @@ type RTM struct {
 // Slack's websocket-based Real-Time Messaging protocol.
 func newRTM(api *Client) *RTM {
 	return &RTM{
-		Client:         *api,
-		pings:          make(map[int]time.Time),
-		IncomingEvents: make(chan SlackEvent, 50),
+		Client:           *api,
+		pings:            make(map[int]time.Time),
+		IncomingEvents:   make(chan SlackEvent, 50),
+		outgoingMessages: make(chan OutgoingMessage, 20),
 	}
 }
 
