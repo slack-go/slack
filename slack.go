@@ -30,15 +30,17 @@ type authTestResponseFull struct {
 }
 
 type Slack struct {
-	config Config
-	info   Info
-	debug  bool
+	config struct {
+		token string
+	}
+	info  Info
+	debug bool
 }
 
 func New(token string) *Slack {
-	return &Slack{
-		config: Config{token: token},
-	}
+	s := &Slack{}
+	s.config.token = token
+	return s
 }
 
 func (api *Slack) GetInfo() Info {
@@ -48,7 +50,7 @@ func (api *Slack) GetInfo() Info {
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Slack) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
-	err := parseResponse("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
+	err := post("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
 		return nil, err
 	}

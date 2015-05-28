@@ -5,93 +5,34 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"net/url"
 	"reflect"
-	"strconv"
 	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
 )
 
-// MessageEvent represents the Message event
-type MessageEvent Message
-
-// WS contains websocket metadata
-type WS struct {
-	conn      *websocket.Conn
-	messageID int
+// SlackWS represents a managed websocket connection. It also supports all the methods of the `Slack` type.
+type SlackWS struct {
 	mutex     sync.Mutex
+	messageId int
 	pings     map[int]time.Time
+
+	// Connection life-cycle
+	conn             *websocket.Conn
+	IncomingEvents   chan SlackEvent
+	connectionErrors chan error
+	killRoutines     chan bool
+
+	// Slack is the main API, embedded
 	Slack
 }
 
-// SlackEvent is the main wrapper. You will find all the other messages attached
-type SlackEvent struct {
-	Type string
-	Data interface{}
-}
-
-// AckMessage is used for messages received in reply to other messages
-type AckMessage struct {
-	ReplyTo   int    `json:"reply_to"`
-	Timestamp string `json:"ts"`
-	Text      string `json:"text"`
-	WSResponse
-}
-
-// WSResponse is a websocket response
-type WSResponse struct {
-	Ok    bool     `json:"ok"`
-	Error *WSError `json:"error"`
-}
-
-// WSError is a websocket error
-type WSError struct {
-	Code int
-	Msg  string
-}
-
-// JSONTimeString is a JSON unix timestamp
-type JSONTimeString string
-
-// String converts the unix timestamp into a string
-func (t JSONTimeString) String() string {
-	if t == "" {
-		return ""
-	}
-	floatN, err := strconv.ParseFloat(string(t), 64)
-	if err != nil {
-		log.Panicln(err)
-		return ""
-	}
-	timeStr := int64(floatN)
-	tm := time.Unix(int64(timeStr), 0)
-	return fmt.Sprintf("\"%s\"", tm.Format("Mon Jan _2"))
-}
-
-func (s WSError) Error() string {
-	return s.Msg
-}
-
-var portMapping = map[string]string{"ws": "80", "wss": "443"}
-
-func fixURLPort(orig string) (string, error) {
-	urlObj, err := url.ParseRequestURI(orig)
-	if err != nil {
-		return "", err
-	}
-	_, _, err = net.SplitHostPort(urlObj.Host)
-	if err != nil {
-		return urlObj.Scheme + "://" + urlObj.Host + ":" + portMapping[urlObj.Scheme] + urlObj.Path, nil
-	}
-	return orig, nil
-}
-
-func (api *Slack) StartRTM(protocol, origin string) (*WS, error) {
+// StartRTM starts a Websocket used to do all common chat client operations.
+func (api *Slack) StartRTM() (*SlackWS, error) {
 	response := &infoResponseFull{}
-	err := parseResponse("rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
+	err := post("rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -102,72 +43,82 @@ func (api *Slack) StartRTM(protocol, origin string) (*WS, error) {
 	// websocket.Dial does not accept url without the port (yet)
 	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
 	// but slack returns the address with no port, so we have to fix it
-	api.info.URL, err = fixURLPort(api.info.URL)
+	websocketUrl, err := websocketizeUrlPort(api.info.Url)
 	if err != nil {
 		return nil, err
 	}
-	api.config.protocol, api.config.origin = protocol, origin
-	wsAPI := &WS{Slack: *api}
-	wsAPI.conn, err = websocket.Dial(api.info.URL, api.config.protocol, api.config.origin)
+	ws := &SlackWS{Slack: *api}
+	ws.pings = make(map[int]time.Time)
+	ws.conn, err = websocket.Dial(websocketUrl, "", "")
 	if err != nil {
 		return nil, err
 	}
-	wsAPI.pings = make(map[int]time.Time)
-	return wsAPI, nil
+
+	ws.IncomingEvents = make(chan SlackEvent, 50)
+	ws.killRoutines = make(chan bool, 10)
+	ws.connectionErrors = make(chan error, 10)
+	go ws.manageConnection(websocketUrl)
+	return ws, nil
 }
 
-func (api *WS) Ping() error {
-	api.mutex.Lock()
-	defer api.mutex.Unlock()
-	api.messageID++
-	msg := &Ping{ID: api.messageID, Type: "ping"}
-	if err := websocket.JSON.Send(api.conn, msg); err != nil {
+func (ws *SlackWS) manageConnection(url string) {
+	// receive any connectionErrors, killall goroutines
+	// reconnect and restart them all
+}
+
+func (ws *SlackWS) Ping() error {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
+	ws.messageId++
+	msg := &Ping{Id: ws.messageId, Type: "ping"}
+	if err := websocket.JSON.Send(ws.conn, msg); err != nil {
 		return err
 	}
 	// TODO: What happens if we already have this id?
-	api.pings[api.messageID] = time.Now()
+	ws.pings[ws.messageId] = time.Now()
 	return nil
 }
 
-func (api *WS) Keepalive(interval time.Duration) {
+func (ws *SlackWS) Keepalive(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			if err := api.Ping(); err != nil {
+			if err := ws.Ping(); err != nil {
 				log.Fatal(err)
 			}
 		}
 	}
 }
 
-func (api *WS) SendMessage(msg *OutgoingMessage) error {
-	api.mutex.Lock()
-	defer api.mutex.Unlock()
+func (ws *SlackWS) SendMessage(msg *OutgoingMessage) error {
+	ws.mutex.Lock()
+	defer ws.mutex.Unlock()
 
 	if msg == nil {
 		return fmt.Errorf("Can't send a nil message")
 	}
 
-	if err := websocket.JSON.Send(api.conn, *msg); err != nil {
+	if err := websocket.JSON.Send(ws.conn, *msg); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (api *WS) HandleIncomingEvents(ch chan SlackEvent) {
+func (ws *SlackWS) HandleIncomingEvents(ch chan SlackEvent) {
 	for {
 		event := json.RawMessage{}
-		if err := websocket.JSON.Receive(api.conn, &event); err == io.EOF {
+		if err := websocket.JSON.Receive(ws.conn, &event); err == io.EOF {
 			//log.Println("Derpi derp, should we destroy conn and start over?")
-			//if err = api.StartRTM(); err != nil {
+			//if err = ws.StartRTM(); err != nil {
 			//	log.Fatal(err)
 			//}
 			// should we reconnect here?
-			if !api.conn.IsClientConn() {
-				api.conn, err = websocket.Dial(api.info.URL, api.config.protocol, api.config.origin)
+
+			if !ws.conn.IsClientConn() {
+				ws.conn, err = websocket.Dial(ws.info.Url, "", "")
 				if err != nil {
 					log.Panic(err)
 				}
@@ -177,20 +128,20 @@ func (api *WS) HandleIncomingEvents(ch chan SlackEvent) {
 			log.Panic(err)
 		}
 		if len(event) == 0 {
-			if api.debug {
+			if ws.debug {
 				log.Println("Event Empty. WTF?")
 			}
 		} else {
-			if api.debug {
+			if ws.debug {
 				log.Println(string(event[:]))
 			}
-			api.handleEvent(ch, event)
+			ws.handleEvent(ch, event)
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
 }
 
-func (api *WS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
+func (ws *SlackWS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 	em := Event{}
 	err := json.Unmarshal(event, &em)
 	if err != nil {
@@ -217,9 +168,9 @@ func (api *WS) handleEvent(ch chan SlackEvent, event json.RawMessage) {
 		if err = json.Unmarshal(event, &pong); err != nil {
 			log.Fatal(err)
 		}
-		api.mutex.Lock()
-		latency := time.Since(api.pings[pong.ReplyTo])
-		api.mutex.Unlock()
+		ws.mutex.Lock()
+		latency := time.Since(ws.pings[pong.ReplyTo])
+		ws.mutex.Unlock()
 		ch <- SlackEvent{"latency-report", LatencyReport{Value: latency}}
 	default:
 		callEvent(em.Type, ch, event)

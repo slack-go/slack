@@ -64,7 +64,7 @@ type userResponseFull struct {
 
 func userRequest(path string, values url.Values, debug bool) (*userResponseFull, error) {
 	response := &userResponseFull{}
-	err := parseResponse(path, values, response, debug)
+	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}

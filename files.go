@@ -109,7 +109,7 @@ func NewGetFilesParameters() GetFilesParameters {
 
 func fileRequest(path string, values url.Values, debug bool) (*fileResponseFull, error) {
 	response := &fileResponseFull{}
-	err := parseResponse(path, values, response, debug)
+	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -194,9 +194,9 @@ func (api *Slack) UploadFile(params FileUploadParameters) (file *File, err error
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
-		err = parseResponse("files.upload", values, response, api.debug)
+		err = post("files.upload", values, response, api.debug)
 	} else if params.File != "" {
-		err = parseResponseMultipart("files.upload", params.File, values, response, api.debug)
+		err = postWithMultipartResponse("files.upload", params.File, values, response, api.debug)
 	}
 	if err != nil {
 		return nil, err

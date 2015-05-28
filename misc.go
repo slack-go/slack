@@ -59,25 +59,24 @@ func fileUploadReq(path, fpath string, values url.Values) (*http.Request, error)
 }
 
 func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error {
-	var decoder *json.Decoder
-	if debug {
-		response, err := ioutil.ReadAll(body)
-		if err != nil {
-			return err
-		}
-		log.Println(string(response))
-		decoder = json.NewDecoder(bytes.NewReader(response))
-	} else {
-		decoder = json.NewDecoder(body)
-	}
-	if err := decoder.Decode(&intf); err != nil {
+	response, err := ioutil.ReadAll(body)
+	if err != nil {
 		return err
 	}
-	return nil
 
+	if debug {
+		log.Printf("parseResponseBody: %s\n", string(response))
+	}
+
+	err = json.Unmarshal(response, &intf)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func parseResponseMultipart(path string, filepath string, values url.Values, intf interface{}, debug bool) error {
+func postWithMultipartResponse(path string, filepath string, values url.Values, intf interface{}, debug bool) error {
 	req, err := fileUploadReq(SLACK_API+path, filepath, values)
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -97,7 +96,7 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func parseResponse(path string, values url.Values, intf interface{}, debug bool) error {
+func post(path string, values url.Values, intf interface{}, debug bool) error {
 	return postForm(SLACK_API+path, values, intf, debug)
 }
 
