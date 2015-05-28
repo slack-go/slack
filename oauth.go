@@ -20,7 +20,7 @@ func GetOAuthToken(clientId, clientSecret, code, redirectURI string, debug bool)
 		"redirect_uri":  {redirectURI},
 	}
 	response := &oAuthResponseFull{}
-	err = parseResponse("oauth.access", values, response, debug)
+	err = post("oauth.access", values, response, debug)
 	if err != nil {
 		return "", "", err
 	}

@@ -94,7 +94,7 @@ func NewPostMessageParameters() PostMessageParameters {
 
 func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
-	err := parseResponse(path, values, response, debug)
+	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +125,7 @@ func escapeMessage(message string) string {
 
 // PostMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
 func (api *Slack) PostMessage(channelId string, text string, params PostMessageParameters) (channel string, timestamp string, err error) {
 	if params.EscapeText {
 		text = escapeMessage(text)

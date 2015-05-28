@@ -2,7 +2,36 @@ package slack
 
 import "encoding/json"
 
-// TODO: Probably need an error event
+
+// AckMessage is used for messages received in reply to other messages
+type AckMessage struct {
+	ReplyTo   int    `json:"reply_to"`
+	Timestamp string `json:"ts"`
+	Text      string `json:"text"`
+	SlackWSResponse
+}
+
+type SlackWSResponse struct {
+	Ok    bool          `json:"ok"`
+	Error *SlackWSError `json:"error"`
+}
+
+type SlackWSError struct {
+	Code int
+	Msg  string
+}
+
+func (s SlackWSError) Error() string {
+	return s.Msg
+}
+
+type MessageEvent Message
+
+// SlackEvent is the main wrapper. You will find all the other messages attached
+type SlackEvent struct {
+	Type string
+	Data interface{}
+}
 
 type HelloEvent struct{}
 

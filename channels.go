@@ -31,36 +31,36 @@ type ChannelPurpose struct {
 }
 
 type BaseChannel struct {
-	Id                 string         `json:"id"`
-	Created            JSONTime       `json:"created"`
-	IsOpen             bool           `json:"is_open"`
-	LastRead           string         `json:"last_read,omitempty"`
-	Latest             Message        `json:"latest,omitempty"`
-	UnreadCount        int            `json:"unread_count,omitempty"`
-	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
+	Id                 string   `json:"id"`
+	Created            JSONTime `json:"created"`
+	IsOpen             bool     `json:"is_open"`
+	LastRead           string   `json:"last_read,omitempty"`
+	Latest             Message  `json:"latest,omitempty"`
+	UnreadCount        int      `json:"unread_count,omitempty"`
+	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
 }
 
 // Channel contains information about the channel
 type Channel struct {
 	BaseChannel
-	Name               string         `json:"name"`
-	IsChannel          bool           `json:"is_channel"`
-	Creator            string         `json:"creator"`
-	IsArchived         bool           `json:"is_archived"`
-	IsGeneral          bool           `json:"is_general"`
-	Members            []string       `json:"members"`
-	Topic              ChannelTopic   `json:"topic"`
-	Purpose            ChannelPurpose `json:"purpose"`
-	IsMember           bool           `json:"is_member"`
-	LastRead           string         `json:"last_read,omitempty"`
-	Latest             *Message       `json:"latest,omitempty"`
-	UnreadCount        int            `json:"unread_count,omitempty"`
-	NumMembers         int            `json:"num_members,omitempty"`
+	Name        string         `json:"name"`
+	IsChannel   bool           `json:"is_channel"`
+	Creator     string         `json:"creator"`
+	IsArchived  bool           `json:"is_archived"`
+	IsGeneral   bool           `json:"is_general"`
+	Members     []string       `json:"members"`
+	Topic       ChannelTopic   `json:"topic"`
+	Purpose     ChannelPurpose `json:"purpose"`
+	IsMember    bool           `json:"is_member"`
+	LastRead    string         `json:"last_read,omitempty"`
+	Latest      *Message       `json:"latest,omitempty"`
+	UnreadCount int            `json:"unread_count,omitempty"`
+	NumMembers  int            `json:"num_members,omitempty"`
 }
 
 func channelRequest(path string, values url.Values, debug bool) (*channelResponseFull, error) {
 	response := &channelResponseFull{}
-	err := parseResponse(path, values, response, debug)
+	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}

@@ -41,7 +41,7 @@ type groupResponseFull struct {
 
 func groupRequest(path string, values url.Values, debug bool) (*groupResponseFull, error) {
 	response := &groupResponseFull{}
-	err := parseResponse(path, values, response, debug)
+	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
