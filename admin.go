@@ -50,3 +50,29 @@ func (api *Slack) InviteGuest(
 
 	return nil
 }
+
+func (api *Slack) InviteRestricted(
+	teamName string,
+	channelID string,
+	firstName string,
+	lastName string,
+	emailAddress string,
+) error {
+	values := url.Values{
+		"email":      {emailAddress},
+		"channels":   {channelID},
+		"first_name": {firstName},
+		"last_name":  {lastName},
+		"restricted": {"1"},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("invite", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to restricted account: %s", err)
+	}
+
+	return nil
+}
