@@ -23,12 +23,12 @@ type SearchParameters struct {
 }
 
 type CtxChannel struct {
-	Id   string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type CtxMessage struct {
-	UserId    string `json:"user"`
+	User      string `json:"user"`
 	Username  string `json:"username"`
 	Text      string `json:"text"`
 	Timestamp string `json:"ts"`
@@ -38,7 +38,7 @@ type CtxMessage struct {
 type SearchMessage struct {
 	Type      string     `json:"type"`
 	Channel   CtxChannel `json:"channel"`
-	UserId    string     `json:"user"`
+	User      string     `json:"user"`
 	Username  string     `json:"username"`
 	Timestamp string     `json:"ts"`
 	Text      string     `json:"text"`

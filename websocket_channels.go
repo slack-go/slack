@@ -7,7 +7,7 @@ type ChannelCreatedEvent struct {
 }
 
 type ChannelCreatedInfo struct {
-	Id        string         `json:"id"`
+	ID        string         `json:"id"`
 	IsChannel bool           `json:"is_channel"`
 	Name      string         `json:"name"`
 	Created   JSONTimeString `json:"created"`
@@ -25,8 +25,8 @@ type ChannelInfoEvent struct {
 	// channel_archive
 	// channel_unarchive
 	Type      string          `json:"type"`
-	ChannelId string          `json:"channel"`
-	UserId    string          `json:"user,omitempty"`
+	Channel   string          `json:"channel"`
+	User      string          `json:"user,omitempty"`
 	Timestamp *JSONTimeString `json:"ts,omitempty"`
 }
 
@@ -36,7 +36,7 @@ type ChannelRenameEvent struct {
 }
 
 type ChannelRenameInfo struct {
-	Id      string         `json:"id"`
+	ID      string         `json:"id"`
 	Name    string         `json:"name"`
 	Created JSONTimeString `json:"created"`
 }

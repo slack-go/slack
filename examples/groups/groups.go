@@ -17,6 +17,6 @@ func main() {
 		return
 	}
 	for _, group := range groups {
-		fmt.Printf("Id: %s, Name: %s\n", group.Id, group.Name)
+		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
 	}
 }

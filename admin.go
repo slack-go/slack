@@ -25,16 +25,17 @@ func adminRequest(method string, teamName string, values url.Values, debug bool)
 	return adminResponse, nil
 }
 
+// InviteGuest invites a user to Slack as a single-channel guest
 func (api *Slack) InviteGuest(
 	teamName string,
-	channelID string,
+	channel string,
 	firstName string,
 	lastName string,
 	emailAddress string,
 ) error {
 	values := url.Values{
 		"email":            {emailAddress},
-		"channels":         {channelID},
+		"channels":         {channel},
 		"first_name":       {firstName},
 		"last_name":        {lastName},
 		"ultra_restricted": {"1"},
@@ -51,16 +52,17 @@ func (api *Slack) InviteGuest(
 	return nil
 }
 
+// InviteRestricted invites a user to Slack as a restricted account
 func (api *Slack) InviteRestricted(
 	teamName string,
-	channelID string,
+	channel string,
 	firstName string,
 	lastName string,
 	emailAddress string,
 ) error {
 	values := url.Values{
 		"email":      {emailAddress},
-		"channels":   {channelID},
+		"channels":   {channel},
 		"first_name": {firstName},
 		"last_name":  {lastName},
 		"restricted": {"1"},

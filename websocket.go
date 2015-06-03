@@ -113,7 +113,7 @@ func (api *SlackWS) Ping() error {
 	api.mutex.Lock()
 	defer api.mutex.Unlock()
 	api.messageId++
-	msg := &Ping{Id: api.messageId, Type: "ping"}
+	msg := &Ping{ID: api.messageId, Type: "ping"}
 	if err := websocket.JSON.Send(api.conn, msg); err != nil {
 		return err
 	}

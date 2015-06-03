@@ -25,7 +25,7 @@ type UserProfile struct {
 
 // User contains all the information of a user
 type User struct {
-	Id                string      `json:"id"`
+	ID                string      `json:"id"`
 	Name              string      `json:"name"`
 	Deleted           bool        `json:"deleted"`
 	Color             string      `json:"color"`
@@ -75,10 +75,10 @@ func userRequest(path string, values url.Values, debug bool) (*userResponseFull,
 }
 
 // GetUserPresence will retrieve the current presence status of given user.
-func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
+func (api *Slack) GetUserPresence(user string) (*UserPresence, error) {
 	values := url.Values{
 		"token": {api.config.token},
-		"user":  {userId},
+		"user":  {user},
 	}
 	response, err := userRequest("users.getPresence", values, api.debug)
 	if err != nil {
@@ -88,10 +88,10 @@ func (api *Slack) GetUserPresence(userId string) (*UserPresence, error) {
 }
 
 // GetUserInfo will retrive the complete user information
-func (api *Slack) GetUserInfo(userId string) (*User, error) {
+func (api *Slack) GetUserInfo(user string) (*User, error) {
 	values := url.Values{
 		"token": {api.config.token},
-		"user":  {userId},
+		"user":  {user},
 	}
 	response, err := userRequest("users.info", values, api.debug)
 	if err != nil {
