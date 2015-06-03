@@ -1,10 +1,11 @@
 package slack
 
+// OutgoingMessage is used for the realtime API, and seems incomplete.
 type OutgoingMessage struct {
-	Id        int    `json:"id"`
-	ChannelId string `json:"channel,omitempty"`
-	Text      string `json:"text,omitempty"`
-	Type      string `json:"type,omitempty"`
+	ID      int    `json:"id"`
+	Channel string `json:"channel,omitempty"`
+	Text    string `json:"text,omitempty"`
+	Type    string `json:"type,omitempty"`
 }
 
 // Message is an auxiliary type to allow us to have a message containing sub messages
@@ -15,32 +16,72 @@ type Message struct {
 
 // Msg contains information about a slack message
 type Msg struct {
-	Id        string `json:"id"`
-	BotId     string `json:"bot_id,omitempty"`
-	UserId    string `json:"user,omitempty"`
-	Username  string `json:"username,omitempty"`
-	ChannelId string `json:"channel,omitempty"`
-	Timestamp string `json:"ts,omitempty"`
-	Text      string `json:"text,omitempty"`
-	Team      string `json:"team,omitempty"`
-	File      *File  `json:"file,omitempty"`
-	// Type may come if it's part of a message list
-	// e.g.: channel.history
-	Type      string `json:"type,omitempty"`
-	IsStarred bool   `json:"is_starred,omitempty"`
-	// Submessage
-	SubType          string       `json:"subtype,omitempty"`
-	Hidden           bool         `json:"bool,omitempty"`
-	DeletedTimestamp string       `json:"deleted_ts,omitempty"`
-	Attachments      []Attachment `json:"attachments,omitempty"`
-	ReplyTo          int          `json:"reply_to,omitempty"`
-	Upload           bool         `json:"upload,omitempty"`
+	// Basic Message
+	Type        string       `json:"type,omitempty"`
+	Channel     string       `json:"channel,omitempty"`
+	User        string       `json:"user,omitempty"`
+	Text        string       `json:"text,omitempty"`
+	Timestamp   string       `json:"ts,omitempty"`
+	IsStarred   bool         `json:"is_starred,omitempty"`
+	Attachments []Attachment `json:"attachments,omitempty"`
+	Edited      *Edited      `json:"edited,omitempty"`
+
+	// Message Subtypes
+	SubType string `json:"subtype,omitempty"`
+
+	// Hidden Subtypes
+	Hidden           bool   `json:"hidden,omitempty"`     // message_changed, message_deleted, unpinned_item
+	DeletedTimestamp string `json:"deleted_ts,omitempty"` // message_deleted
+	EventTimestamp   string `json:"event_ts,omitempty"`
+
+	// bot_message (https://api.slack.com/events/message/bot_message)
+	BotID    string `json:"bot_id,omitempty"`
+	Username string `json:"username,omitempty"`
+	Icons    *Icon  `json:"icons,omitempty"`
+
+	// channel_join, group_join
+	Inviter string `json:"inviter,omitempty"`
+
+	// channel_topic, group_topic
+	Topic string `json:"topic,omitempty"`
+
+	// channel_purpose, group_purpose
+	Purpose string `json:"purpose,omitempty"`
+
+	// channel_name, group_name
+	Name    string `json:"name,omitempty"`
+	OldName string `json:"old_name,omitempty"`
+
+	// channel_archive, group_archive
+	Members []string `json:"members,omitempty"`
+
+	// file_share, file_comment, file_mention
+	File *File `json:"file,omitempty"`
+
+	// file_share
+	Upload bool `json:"upload,omitempty"`
+
+	// file_comment
+	Comment *Comment `json:"comment,omitempty"`
+
+	// pinned_item
+	ItemType string `json:"item_type,omitempty"`
+
+	// https://api.slack.com/rtm
+	ReplyTo int    `json:"reply_to,omitempty"`
+	Team    string `json:"team,omitempty"`
 }
 
-// Presence XXX: not used yet
-type Presence struct {
-	Presence string `json:"presence"`
-	UserId   string `json:"user"`
+// Icon is used for bot messages
+type Icon struct {
+	IconURL   string `json:"icon_url,omitempty"`
+	IconEmoji string `json:"icon_emoji,omitempty"`
+}
+
+// Edited indicates that a message has been edited.
+type Edited struct {
+	User      string `json:"user,omitempty"`
+	Timestamp string `json:"ts,omitempty"`
 }
 
 // Event contains the event type
@@ -50,7 +91,7 @@ type Event struct {
 
 // Ping contains information about a Ping Event
 type Ping struct {
-	Id   int    `json:"id"`
+	ID   int    `json:"id"`
 	Type string `json:"type"`
 }
 
@@ -60,15 +101,15 @@ type Pong struct {
 	ReplyTo int    `json:"reply_to"`
 }
 
-// NewOutGoingMessage prepares an OutgoingMessage that the user can use to send a message
+// NewOutgoingMessage prepares an OutgoingMessage that the user can use to send a message
 func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
 	api.mutex.Lock()
 	defer api.mutex.Unlock()
 	api.messageId++
 	return &OutgoingMessage{
-		Id:        api.messageId,
-		Type:      "message",
-		ChannelId: channel,
-		Text:      text,
+		ID:      api.messageId,
+		Type:    "message",
+		Channel: channel,
+		Text:    text,
 	}
 }
