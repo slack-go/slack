@@ -25,6 +25,23 @@ func adminRequest(method string, teamName string, values url.Values, debug bool)
 	return adminResponse, nil
 }
 
+// DisableUser disabled a user account
+func (api *Slack) DisableUser(teamName string, user string) error {
+	values := url.Values{
+		"user":       {user},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setInactive", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to disable user (%s): %s", user, err)
+	}
+
+	return nil
+}
+
 // InviteGuest invites a user to Slack as a single-channel guest
 func (api *Slack) InviteGuest(
 	teamName string,
@@ -74,6 +91,23 @@ func (api *Slack) InviteRestricted(
 	_, err := adminRequest("invite", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to restricted account: %s", err)
+	}
+
+	return nil
+}
+
+// SendSSOBindingEmail sends an SSO binding email to the specified user
+func (api *Slack) SendSSOBindingEmail(teamName string, user string) error {
+	values := url.Values{
+		"user":       {user},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("sendSSOBind", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
 	}
 
 	return nil
