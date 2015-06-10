@@ -96,6 +96,23 @@ func (api *Slack) InviteRestricted(
 	return nil
 }
 
+// SetRegular enables the specified user
+func (api *Slack) SetRegular(teamName string, user string) error {
+	values := url.Values{
+		"user":       {user},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setRegular", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to change the user (%s) to a regular user: %s", user, err)
+	}
+
+	return nil
+}
+
 // SendSSOBindingEmail sends an SSO binding email to the specified user
 func (api *Slack) SendSSOBindingEmail(teamName string, user string) error {
 	values := url.Values{
