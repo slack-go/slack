@@ -37,7 +37,7 @@ func main() {
 				fmt.Printf("Current latency: %v\n", ev.Value)
 
 			case *slack.SlackWSError:
-				fmt.Printf("Error: %d - %s\n", ev.Code, ev.Msg)
+				fmt.Printf("Error: %s\n", ev.Error())
 
 			default:
 				// Ignore other events..
