@@ -2,7 +2,6 @@ package slack
 
 import "encoding/json"
 
-
 // AckMessage is used for messages received in reply to other messages
 type AckMessage struct {
 	ReplyTo   int    `json:"reply_to"`
@@ -16,13 +15,10 @@ type SlackWSResponse struct {
 	Error *SlackWSError `json:"error"`
 }
 
-type SlackWSError struct {
-	Code int
-	Msg  string
-}
+type SlackWSError string
 
 func (s SlackWSError) Error() string {
-	return s.Msg
+	return string(s)
 }
 
 type MessageEvent Message

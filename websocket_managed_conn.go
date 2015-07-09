@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"reflect"
 	"time"
 
@@ -48,6 +49,13 @@ func (rtm *RTM) ManageConnection() {
 			info, conn, err = rtm.startRTMAndDial()
 			if err == nil {
 				break // connected
+			} else if sErr, ok := err.(*SlackWSError); ok {
+				if sErr.Error() == "invalid_auth" {
+					rtm.IncomingEvents <- SlackEvent{"invalid_auth", &InvalidAuthEvent{}}
+					return
+				}
+			} else {
+				log.Println(err.Error())
 			}
 
 			dur := boff.Duration()
@@ -90,7 +98,6 @@ func (rtm *RTM) startRTMAndDial() (*Info, *websocket.Conn, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-
 	return info, conn, err
 }
 
@@ -219,24 +226,21 @@ func (rtm *RTM) handleEvent(event json.RawMessage) {
 		rtm.IncomingEvents <- SlackEvent{"latency-report", &LatencyReport{Value: latency}}
 
 	default:
-		for k, v := range eventMapping {
-			if em.Type == k {
-				t := reflect.TypeOf(v)
-				recvEvent := reflect.New(t).Interface()
+		if v, ok := eventMapping[em.Type]; ok {
+			t := reflect.TypeOf(v)
+			recvEvent := reflect.New(t).Interface()
 
-				err := json.Unmarshal(event, recvEvent)
-				if err != nil {
-					rtm.Debugf("RTM Error unmarshalling %q event: %s", em.Type, err)
-					rtm.Debugf(" -> Erroneous %q event: %s", em.Type, string(event))
-					return
-				}
-
-				rtm.IncomingEvents <- SlackEvent{em.Type, recvEvent}
+			err := json.Unmarshal(event, recvEvent)
+			if err != nil {
+				rtm.Debugf("RTM Error unmarshalling %q event: %s", em.Type, err)
+				rtm.Debugf(" -> Erroneous %q event: %s", em.Type, string(event))
 				return
 			}
-		}
 
-		rtm.Debugf("RTM Error, received unmapped event %q: %s\n", em.Type, string(event))
+			rtm.IncomingEvents <- SlackEvent{em.Type, recvEvent}
+		} else {
+			rtm.Debugf("RTM Error, received unmapped event %q: %s\n", em.Type, string(event))
+		}
 	}
 }
 

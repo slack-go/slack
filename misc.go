@@ -94,6 +94,7 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 		return err
 	}
 	defer resp.Body.Close()
+
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 

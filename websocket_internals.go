@@ -20,3 +20,5 @@ type DisconnectedEvent struct{}
 type LatencyReport struct {
 	Value time.Duration
 }
+
+type InvalidAuthEvent struct{}

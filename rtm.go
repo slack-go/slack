@@ -17,7 +17,7 @@ func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 		return nil, "", fmt.Errorf("post: %s", err)
 	}
 	if !response.Ok {
-		return nil, "", fmt.Errorf("post response: %s", response.Error)
+		return nil, "", response.Error
 	}
 
 	// websocket.Dial does not accept url without the port (yet)
