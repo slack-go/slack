@@ -49,7 +49,7 @@ func (rtm *RTM) ManageConnection() {
 			info, conn, err = rtm.startRTMAndDial()
 			if err == nil {
 				break // connected
-			} else if sErr, ok := err.(*SlackWSError); ok {
+			} else if sErr, ok := err.(*SlackWebError); ok {
 				if sErr.Error() == "invalid_auth" {
 					rtm.IncomingEvents <- SlackEvent{"invalid_auth", &InvalidAuthEvent{}}
 					return
