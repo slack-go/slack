@@ -15,10 +15,20 @@ type ConnectingEvent struct {
 	ConnectionCount int
 }
 
-type DisconnectedEvent struct{}
+type DisconnectedEvent struct {
+	Intentional bool
+}
 
 type LatencyReport struct {
 	Value time.Duration
 }
 
 type InvalidAuthEvent struct{}
+
+type UnmarshallingErrorEvent struct {
+	ErrorObj error
+}
+
+func (u UnmarshallingErrorEvent) Error() string {
+	return u.ErrorObj.Error()
+}

@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -21,6 +22,8 @@ type RTM struct {
 	conn             *websocket.Conn
 	IncomingEvents   chan SlackEvent
 	outgoingMessages chan OutgoingMessage
+	keepRunning      chan bool
+	isRunning        bool
 
 	// Client is the main API, embedded
 	Client
@@ -38,13 +41,17 @@ func newRTM(api *Client) *RTM {
 		pings:            make(map[int]time.Time),
 		IncomingEvents:   make(chan SlackEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
+		keepRunning:      make(chan bool),
+		isRunning:        true,
 	}
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
 func (rtm *RTM) Disconnect() error {
-	log.Println("RTM::Disconnect not implemented!")
-	return nil
+	if !rtm.isRunning {
+		return errors.New("Invalid call to Disconnect - Slack API is already disconnected")
+	}
+	return rtm.killConnection(true)
 }
 
 // Reconnect only makes sense if you've successfully disconnectd with Disconnect().

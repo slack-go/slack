@@ -70,22 +70,28 @@ func (rtm *RTM) ManageConnection() {
 			Info:            info,
 		}}
 
-		killCh := make(chan bool, 3)
 		connErrors := make(chan error, 10) // in case we get many such errors
 
-		go rtm.keepalive(30*time.Second, conn, killCh, connErrors)
-		go rtm.handleIncomingEvents(conn, killCh, connErrors)
-		go rtm.handleOutgoingMessages(conn, killCh, connErrors)
+		go rtm.keepalive(30*time.Second, conn, connErrors)
+		go rtm.handleIncomingEvents(conn, connErrors)
+		go rtm.handleOutgoingMessages(conn, connErrors)
 
 		// Here, block and await for disconnection, if it ever happens.
 		err = <-connErrors
 
 		rtm.Debugln("RTM connection error:", err)
-		rtm.IncomingEvents <- SlackEvent{"disconnected", &DisconnectedEvent{}}
-		killCh <- true // 3 child go-routines
-		killCh <- true
-		killCh <- true
+		rtm.killConnection(false)
 	}
+}
+
+func (rtm *RTM) killConnection(intentional bool) error {
+	rtm.mutex.Lock()
+	rtm.IncomingEvents <- SlackEvent{"disconnected", &DisconnectedEvent{}}
+	close(rtm.keepRunning)
+	err := rtm.conn.Close()
+	rtm.isRunning = false
+	rtm.mutex.Unlock()
+	return err
 }
 
 func (rtm *RTM) startRTMAndDial() (*Info, *websocket.Conn, error) {
@@ -101,13 +107,13 @@ func (rtm *RTM) startRTMAndDial() (*Info, *websocket.Conn, error) {
 	return info, conn, err
 }
 
-func (rtm *RTM) keepalive(interval time.Duration, conn *websocket.Conn, killCh chan bool, errors chan error) {
+func (rtm *RTM) keepalive(interval time.Duration, conn *websocket.Conn, errors chan error) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <-killCh:
+		case <-rtm.keepRunning:
 			return
 		case <-ticker.C:
 			rtm.ping(conn, errors)
@@ -129,13 +135,13 @@ func (rtm *RTM) ping(conn *websocket.Conn, errors chan error) {
 	}
 }
 
-func (rtm *RTM) handleOutgoingMessages(conn *websocket.Conn, killCh chan bool, errors chan error) {
+func (rtm *RTM) handleOutgoingMessages(conn *websocket.Conn, errors chan error) {
 	// we pass "conn" in case we do a reconnection, in that case we'll
 	// have a new `conn` even though we're dealing with the same
 	// incoming and outgoing channels for messages/events.
 	for {
 		select {
-		case <-killCh:
+		case <-rtm.keepRunning:
 			return
 
 		case msg := <-rtm.outgoingMessages:
@@ -152,11 +158,11 @@ func (rtm *RTM) handleOutgoingMessages(conn *websocket.Conn, killCh chan bool, e
 	}
 }
 
-func (rtm *RTM) handleIncomingEvents(conn *websocket.Conn, killCh chan bool, errors chan error) {
+func (rtm *RTM) handleIncomingEvents(conn *websocket.Conn, errors chan error) {
 	for {
 
 		select {
-		case <-killCh:
+		case <-rtm.keepRunning:
 			return
 		default:
 		}
@@ -234,12 +240,15 @@ func (rtm *RTM) handleEvent(event json.RawMessage) {
 			if err != nil {
 				rtm.Debugf("RTM Error unmarshalling %q event: %s", em.Type, err)
 				rtm.Debugf(" -> Erroneous %q event: %s", em.Type, string(event))
+				rtm.IncomingEvents <- SlackEvent{"unmarshalling-error", &UnmarshallingErrorEvent{err}}
 				return
 			}
 
 			rtm.IncomingEvents <- SlackEvent{em.Type, recvEvent}
 		} else {
 			rtm.Debugf("RTM Error, received unmapped event %q: %s\n", em.Type, string(event))
+			err := fmt.Errorf("RTM Error, received unmapped event %q: %s\n", em.Type, string(event))
+			rtm.IncomingEvents <- SlackEvent{"unmarshalling-error", &UnmarshallingErrorEvent{err}}
 		}
 	}
 }
