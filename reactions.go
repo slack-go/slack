@@ -50,6 +50,8 @@ func reactionRequest(path string, values url.Values, debug bool) (*reactionRespo
 }
 
 // AddReaction adds a reaction emoji to a message, file or file comment.
+// One of file, file_comment, or the combination of channel and timestamp
+// must be specified.
 func (api *Slack) AddReaction(params ReactionParameters) error {
 	values := url.Values{
 		"token": {api.config.token},
@@ -61,7 +63,7 @@ func (api *Slack) AddReaction(params ReactionParameters) error {
 		values.Set("file", string(params.File))
 	}
 	if params.FileComment != DEFAULT_REACTION_FILE_COMMENT {
-		values.Set("file", string(params.FileComment))
+		values.Set("file_comment", string(params.FileComment))
 	}
 	if params.Channel != DEFAULT_REACTION_CHANNEL {
 		values.Set("channel", string(params.Channel))
