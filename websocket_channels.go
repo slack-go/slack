@@ -7,11 +7,11 @@ type ChannelCreatedEvent struct {
 }
 
 type ChannelCreatedInfo struct {
-	Id        string         `json:"id"`
-	IsChannel bool           `json:"is_channel"`
-	Name      string         `json:"name"`
-	Created   JSONTimeString `json:"created"`
-	Creator   string         `json:"creator"`
+	Id        string `json:"id"`
+	IsChannel bool   `json:"is_channel"`
+	Name      string `json:"name"`
+	Created   int    `json:"created"`
+	Creator   string `json:"creator"`
 }
 
 type ChannelJoinedEvent struct {
