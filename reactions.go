@@ -45,43 +45,41 @@ func NewRemoveReactionParameters(name string, ref ItemRef) RemoveReactionParamet
 	return RemoveReactionParameters{Name: name, ItemRef: ref}
 }
 
-// GetReactionParameters is the inputs to get reactions to an item.
-type GetReactionParameters struct {
+// GetReactionsParameters is the inputs to get reactions to an item.
+type GetReactionsParameters struct {
 	Full bool
 	ItemRef
 }
 
-// NewGetReactionParameters initializes the inputs to get reactions to an item.
-func NewGetReactionParameters(ref ItemRef) GetReactionParameters {
-	return GetReactionParameters{ItemRef: ref}
+// NewGetReactionsParameters initializes the inputs to get reactions to an item.
+func NewGetReactionsParameters(ref ItemRef) GetReactionsParameters {
+	return GetReactionsParameters{ItemRef: ref}
 }
 
 type getReactionsResponseFull struct {
-	M struct {
-		Type string
-		M    struct {
-			Reactions []ItemReaction
-		} `json:"message"`
-		F struct {
-			Reactions []ItemReaction
-		} `json:"file"`
-		FC struct {
-			Comment struct {
-				Reactions []ItemReaction
-			}
-		} `json:"file_comment"`
+	Type string
+	M    struct {
+		Reactions []ItemReaction
 	} `json:"message"`
+	F struct {
+		Reactions []ItemReaction
+	} `json:"file"`
+	FC struct {
+		Comment struct {
+			Reactions []ItemReaction
+		}
+	} `json:"file_comment"`
 	SlackResponse
 }
 
 func (res getReactionsResponseFull) extractReactions() []ItemReaction {
-	switch res.M.Type {
+	switch res.Type {
 	case "message":
-		return res.M.M.Reactions
+		return res.M.Reactions
 	case "file":
-		return res.M.F.Reactions
+		return res.F.Reactions
 	case "file_comment":
-		return res.M.FC.Comment.Reactions
+		return res.FC.Comment.Reactions
 	}
 	return []ItemReaction{}
 }
@@ -217,7 +215,7 @@ func (api *Slack) RemoveReaction(params RemoveReactionParameters) error {
 }
 
 // GetReactions returns details about the reactions on an item.
-func (api *Slack) GetReactions(params GetReactionParameters) ([]ItemReaction, error) {
+func (api *Slack) GetReactions(params GetReactionsParameters) ([]ItemReaction, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}

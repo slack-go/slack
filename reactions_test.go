@@ -134,35 +134,33 @@ func TestSlack_GetReactions(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
-		params        GetReactionParameters
+		params        GetReactionsParameters
 		wantParams    map[string]string
 		json          string
 		wantReactions []ItemReaction
 	}{
 		{
 
-			GetReactionParameters{ItemRef: NewRefToMessage("ChannelID", "123")},
+			GetReactionsParameters{ItemRef: NewRefToMessage("ChannelID", "123")},
 			map[string]string{
 				"channel":   "ChannelID",
 				"timestamp": "123",
 			},
 			`{"ok": true,
+    "type": "message",
     "message": {
-        "type": "message",
-        "message": {
-            "reactions": [
-                {
-                    "name": "astonished",
-                    "count": 3,
-                    "users": [ "U1", "U2", "U3" ]
-                },
-                {
-                    "name": "clock1",
-                    "count": 3,
-                    "users": [ "U1", "U2" ]
-                }
-            ]
-        }
+        "reactions": [
+            {
+                "name": "astonished",
+                "count": 3,
+                "users": [ "U1", "U2", "U3" ]
+            },
+            {
+                "name": "clock1",
+                "count": 3,
+                "users": [ "U1", "U2" ]
+            }
+        ]
     }}`,
 			[]ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
@@ -170,28 +168,26 @@ func TestSlack_GetReactions(t *testing.T) {
 			},
 		},
 		{
-			GetReactionParameters{ItemRef: NewRefToFile("FileID"), Full: true},
+			GetReactionsParameters{ItemRef: NewRefToFile("FileID"), Full: true},
 			map[string]string{
 				"file": "FileID",
 				"full": "true",
 			},
 			`{"ok": true,
-    "message": {
-        "type": "file",
-        "file": {
-            "reactions": [
-                {
-                    "name": "astonished",
-                    "count": 3,
-                    "users": [ "U1", "U2", "U3" ]
-                },
-                {
-                    "name": "clock1",
-                    "count": 3,
-                    "users": [ "U1", "U2" ]
-                }
-            ]
-        }
+    "type": "file",
+    "file": {
+        "reactions": [
+            {
+                "name": "astonished",
+                "count": 3,
+                "users": [ "U1", "U2", "U3" ]
+            },
+            {
+                "name": "clock1",
+                "count": 3,
+                "users": [ "U1", "U2" ]
+            }
+        ]
     }}`,
 			[]ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
@@ -200,28 +196,26 @@ func TestSlack_GetReactions(t *testing.T) {
 		},
 		{
 
-			GetReactionParameters{ItemRef: NewRefToFileComment("FileCommentID")},
+			GetReactionsParameters{ItemRef: NewRefToFileComment("FileCommentID")},
 			map[string]string{
 				"file_comment": "FileCommentID",
 			},
 			`{"ok": true,
-    "message": {
-        "type": "file_comment",
-        "file_comment": {
-	    "comment": {
-                "reactions": [
-                    {
-                        "name": "astonished",
-                        "count": 3,
-                        "users": [ "U1", "U2", "U3" ]
-                    },
-                    {
-                        "name": "clock1",
-                        "count": 3,
-                        "users": [ "U1", "U2" ]
-                    }
-                ]
-            }
+    "type": "file_comment",
+    "file_comment": {
+        "comment": {
+            "reactions": [
+                {
+                    "name": "astonished",
+                    "count": 3,
+                    "users": [ "U1", "U2", "U3" ]
+                },
+                {
+                    "name": "clock1",
+                    "count": 3,
+                    "users": [ "U1", "U2" ]
+                }
+            ]
         }
     }}`,
 			[]ItemReaction{
