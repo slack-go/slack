@@ -247,7 +247,7 @@ func (api *Slack) GetReactions(params GetReactionParameters) ([]ItemReaction, er
 }
 
 // ListReactions returns information about the items a user reacted to.
-func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, Paging, error) {
+func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -266,10 +266,10 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, 
 	response := &listReactionsResponseFull{}
 	err := parseResponse("reactions.list", values, response, api.debug)
 	if err != nil {
-		return nil, Paging{}, err
+		return nil, nil, err
 	}
 	if !response.Ok {
-		return nil, Paging{}, errors.New(response.Error)
+		return nil, nil, errors.New(response.Error)
 	}
-	return response.extractReactedItems(), response.Paging, nil
+	return response.extractReactedItems(), &response.Paging, nil
 }
