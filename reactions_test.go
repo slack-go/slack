@@ -141,11 +141,24 @@ func TestSlack_RemoveReaction(t *testing.T) {
 	}
 }
 
-func TestSlack_GetReaction_ToMessage(t *testing.T) {
+func TestSlack_GetReactions(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	getReactionRes = `{"ok": true,
+	tests := []struct {
+		params        GetReactionParameters
+		wantParams    map[string]string
+		json          string
+		wantReactions []ItemReaction
+	}{
+		{
+
+			GetReactionParameters{ItemRef: NewRefToMessage("ChannelID", "123")},
+			map[string]string{
+				"channel":   "ChannelID",
+				"timestamp": "123",
+			},
+			`{"ok": true,
     "message": {
         "type": "message",
         "message": {
@@ -162,34 +175,19 @@ func TestSlack_GetReaction_ToMessage(t *testing.T) {
                 }
             ]
         }
-    }}`
-	want := []ItemReaction{
-		ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-		ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
-	}
-	wantParams := map[string]string{
-		"channel":   "ChannelID",
-		"timestamp": "123",
-	}
-	gotParams = map[string]string{}
-	params := NewGetReactionParameters(NewRefToMessage("ChannelID", "123"))
-	got, err := api.GetReactions(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got reaction %#v, want %#v", got, want)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
-	}
-}
-
-func TestSlack_GetReaction_ToFile(t *testing.T) {
-	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
-	getReactionRes = `{"ok": true,
+    }}`,
+			[]ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		},
+		{
+			GetReactionParameters{ItemRef: NewRefToFile("FileID"), Full: true},
+			map[string]string{
+				"file": "FileID",
+				"full": "true",
+			},
+			`{"ok": true,
     "message": {
         "type": "file",
         "file": {
@@ -206,35 +204,19 @@ func TestSlack_GetReaction_ToFile(t *testing.T) {
                 }
             ]
         }
-    }}`
-	want := []ItemReaction{
-		ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-		ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
-	}
-	wantParams := map[string]string{
-		"file": "FileID",
-		"full": "true",
-	}
-	gotParams = map[string]string{}
-	params := NewGetReactionParameters(NewRefToFile("FileID"))
-	params.Full = true
-	got, err := api.GetReactions(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got reaction %#v, want %#v", got, want)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
-	}
-}
+    }}`,
+			[]ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		},
+		{
 
-func TestSlack_GetReaction_ToFileComment(t *testing.T) {
-	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
-	getReactionRes = `{"ok": true,
+			GetReactionParameters{ItemRef: NewRefToFileComment("FileCommentID")},
+			map[string]string{
+				"file_comment": "FileCommentID",
+			},
+			`{"ok": true,
     "message": {
         "type": "file_comment",
         "file_comment": {
@@ -253,25 +235,26 @@ func TestSlack_GetReaction_ToFileComment(t *testing.T) {
                 ]
             }
         }
-    }}`
-	want := []ItemReaction{
-		ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-		ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+    }}`,
+			[]ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		},
 	}
-	wantParams := map[string]string{
-		"file_comment": "FileCommentID",
-	}
-	gotParams = map[string]string{}
-	params := NewGetReactionParameters(NewRefToFileComment("FileCommentID"))
-	got, err := api.GetReactions(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("Got reaction %#v, want %#v", got, want)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	for i, test := range tests {
+		gotParams = map[string]string{}
+		getReactionRes = test.json
+		got, err := api.GetReactions(test.params)
+		if err != nil {
+			t.Fatalf("%d: Unexpected error: %s", i, err)
+		}
+		if !reflect.DeepEqual(got, test.wantReactions) {
+			t.Errorf("%d: Got reaction %#v, want %#v", i, got, test.wantReactions)
+		}
+		if !reflect.DeepEqual(gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		}
 	}
 }
 
