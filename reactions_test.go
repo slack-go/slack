@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
@@ -9,13 +10,13 @@ import (
 func init() {
 	http.HandleFunc("/reactions.add", addReactionHandler)
 	http.HandleFunc("/reactions.get", getReactionHandler)
+	http.HandleFunc("/reactions.list", listReactionHandler)
 }
 
 var (
-	gotParams         map[string]string
-	addedReaction     Reaction
-	getReactionRes    string
-	gottenReactionRef ItemRef
+	gotParams       map[string]string
+	getReactionRes  string
+	listReactionRes string
 )
 
 func accumulateFormValue(k string, r *http.Request) {
@@ -42,6 +43,15 @@ func getReactionHandler(w http.ResponseWriter, r *http.Request) {
 	accumulateFormValue("full", r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(getReactionRes))
+}
+
+func listReactionHandler(w http.ResponseWriter, r *http.Request) {
+	accumulateFormValue("user", r)
+	accumulateFormValue("count", r)
+	accumulateFormValue("full", r)
+	accumulateFormValue("page", r)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(listReactionRes))
 }
 
 func TestSlack_AddReaction_ToMessage(t *testing.T) {
@@ -233,5 +243,122 @@ func TestSlack_GetReaction_ToFileComment(t *testing.T) {
 	}
 	if !reflect.DeepEqual(gotParams, wantParams) {
 		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	}
+}
+
+func TestSlack_ListReactions(t *testing.T) {
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	listReactionRes = `{"ok": true,
+    "items": [
+        {
+            "type": "message",
+            "message": {
+                "text": "hello",
+                "reactions": [
+                    {
+                        "name": "astonished",
+                        "count": 3,
+                        "users": [ "U1", "U2", "U3" ]
+                    },
+                    {
+                        "name": "clock1",
+                        "count": 3,
+                        "users": [ "U1", "U2" ]
+                    }
+                ]
+            }
+        },
+        {
+            "type": "file",
+            "file": {
+                "name": "toy",
+                "reactions": [
+                    {
+                        "name": "clock1",
+                        "count": 3,
+                        "users": [ "U1", "U2" ]
+                    }
+                ]
+            }
+        },
+        {
+            "type": "file_comment",
+            "file_comment": {
+                "file": {},
+                "comment": {
+                    "comment": "cool toy",
+                    "reactions": [
+                        {
+                            "name": "astonished",
+                            "count": 3,
+                            "users": [ "U1", "U2", "U3" ]
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "paging": {
+        "count": 100,
+        "total": 4,
+        "page": 1,
+        "pages": 1
+    }}`
+	want := []ReactedItem{
+		ReactedItem{
+			Type:    "message",
+			Message: &Message{Msg: Msg{Text: "hello"}},
+			Reactions: []ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		},
+		ReactedItem{
+			Type: "file",
+			File: &File{Name: "toy"},
+			Reactions: []ItemReaction{
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		},
+		ReactedItem{
+			Type:    "file_comment",
+			Comment: &Comment{Comment: "cool toy"},
+			Reactions: []ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+			},
+		},
+	}
+	wantParams := map[string]string{
+		"user":  "UserID",
+		"count": "200",
+		"page":  "2",
+		"full":  "true",
+	}
+	gotParams = map[string]string{}
+	params := NewListReactionsParameters("UserID")
+	params.Count = 200
+	params.Page = 2
+	params.Full = true
+	got, paging, err := api.ListReactions(params)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("Got reaction %#v, want %#v", got, want)
+		for i, item := range got {
+			fmt.Printf("Item %d, Type: %s\n", i, item.Type)
+			fmt.Printf("Message  %#v\n", item.Message)
+			fmt.Printf("File     %#v\n", item.File)
+			fmt.Printf("Comment  %#v\n", item.Comment)
+			fmt.Printf("Reactions %#v\n", item.Reactions)
+		}
+	}
+	if !reflect.DeepEqual(gotParams, wantParams) {
+		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	}
+	if reflect.DeepEqual(paging, Paging{}) {
+		t.Errorf("Want paging data, got empty struct")
 	}
 }

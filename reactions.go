@@ -6,12 +6,6 @@ import (
 	"net/url"
 )
 
-// Reaction is the act of reacting to an item.
-type Reaction struct {
-	Name string `json:"name"`
-	ItemRef
-}
-
 // ItemReaction is the reactions that have happened on an item.
 type ItemReaction struct {
 	Name  string   `json:"name"`
@@ -19,17 +13,20 @@ type ItemReaction struct {
 	Users []string `json:"users"`
 }
 
-// ReactedToItem is an item that was reacted to, and the details of the
-// reaction.
-type ReactedToItem struct {
-	Item
-	ItemReaction
+// ReactedItem is an item that was reacted to, and the details of the
+// reactions.
+type ReactedItem struct {
+	Type      string
+	Message   *Message
+	File      *File
+	Comment   *Comment
+	Reactions []ItemReaction
 }
 
 // AddReactionParameters is the inputs to create a new reaction.
 type AddReactionParameters struct {
-	ItemRef
 	Name string
+	ItemRef
 }
 
 // NewAddReactionParameters initialies the inputs to react to an item.
@@ -37,43 +34,43 @@ func NewAddReactionParameters(name string, ref ItemRef) AddReactionParameters {
 	return AddReactionParameters{Name: name, ItemRef: ref}
 }
 
-// GetReactionParameters is the inputs to get reactions on an item.
+// GetReactionParameters is the inputs to get reactions to an item.
 type GetReactionParameters struct {
-	ItemRef
 	Full bool
+	ItemRef
 }
 
-// NewGetReactionParameters initializes the inputs to get reactions on an item.
+// NewGetReactionParameters initializes the inputs to get reactions to an item.
 func NewGetReactionParameters(ref ItemRef) GetReactionParameters {
 	return GetReactionParameters{ItemRef: ref}
 }
 
 type getReactionsResponseFull struct {
-	Message struct {
-		Type    string
-		Message struct {
+	M struct {
+		Type string
+		M    struct {
 			Reactions []ItemReaction
-		}
-		File struct {
+		} `json:"message"`
+		F struct {
 			Reactions []ItemReaction
-		}
-		FileComment struct {
+		} `json:"file"`
+		FC struct {
 			Comment struct {
 				Reactions []ItemReaction
 			}
 		} `json:"file_comment"`
-	}
+	} `json:"message"`
 	SlackResponse
 }
 
-func (res getReactionsResponseFull) FindReactions() []ItemReaction {
-	switch res.Message.Type {
+func (res getReactionsResponseFull) extractReactions() []ItemReaction {
+	switch res.M.Type {
 	case "message":
-		return res.Message.Message.Reactions
+		return res.M.M.Reactions
 	case "file":
-		return res.Message.File.Reactions
+		return res.M.F.Reactions
 	case "file_comment":
-		return res.Message.FileComment.Comment.Reactions
+		return res.M.FC.Comment.Reactions
 	}
 	return []ItemReaction{}
 }
@@ -93,7 +90,8 @@ type ListReactionsParameters struct {
 	Full  bool
 }
 
-// NewListReactionsParameters initializes the inputs to find all reactions by a user.
+// NewListReactionsParameters initializes the inputs to find all reactions
+// performed by a user.
 func NewListReactionsParameters(userID string) ListReactionsParameters {
 	return ListReactionsParameters{
 		User:  userID,
@@ -105,11 +103,46 @@ func NewListReactionsParameters(userID string) ListReactionsParameters {
 
 type listReactionsResponseFull struct {
 	Items []struct {
-		Message struct {
+		Type string
+		M    struct {
+			*Message
 			Reactions []ItemReaction
-		}
+		} `json:"message"`
+		F struct {
+			*File
+			Reactions []ItemReaction
+		} `json:"file"`
+		FC struct {
+			C struct {
+				*Comment
+				Reactions []ItemReaction
+			} `json:"comment"`
+		} `json:"file_comment"`
 	}
+	Paging `json:"paging"`
 	SlackResponse
+}
+
+func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
+	items := make([]ReactedItem, len(res.Items))
+	for i, input := range res.Items {
+		item := ReactedItem{
+			Type: input.Type,
+		}
+		switch input.Type {
+		case "message":
+			item.Message = input.M.Message
+			item.Reactions = input.M.Reactions
+		case "file":
+			item.File = input.F.File
+			item.Reactions = input.F.Reactions
+		case "file_comment":
+			item.Comment = input.FC.C.Comment
+			item.Reactions = input.FC.C.Reactions
+		}
+		items[i] = item
+	}
+	return items
 }
 
 // AddReaction adds a reaction emoji to a message, file or file comment.
@@ -169,11 +202,11 @@ func (api *Slack) GetReactions(params GetReactionParameters) ([]ItemReaction, er
 	if !response.Ok {
 		return nil, errors.New(response.Error)
 	}
-	return response.FindReactions(), nil
+	return response.extractReactions(), nil
 }
 
 // ListReactions returns information about the items a user reacted to.
-func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedToItem, Paging, error) {
+func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -181,13 +214,13 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedToItem
 		values.Add("user", params.User)
 	}
 	if params.Count != DEFAULT_REACTIONS_COUNT {
-		values.Add("count", string(params.Count))
+		values.Add("count", fmt.Sprintf("%d", params.Count))
 	}
 	if params.Page != DEFAULT_REACTIONS_PAGE {
-		values.Add("count", string(params.Page))
+		values.Add("page", fmt.Sprintf("%d", params.Page))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
-		values.Add("count", fmt.Sprintf("%t", params.Full))
+		values.Add("full", fmt.Sprintf("%t", params.Full))
 	}
 	response := &listReactionsResponseFull{}
 	err := parseResponse("reactions.list", values, response, api.debug)
@@ -197,5 +230,5 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedToItem
 	if !response.Ok {
 		return nil, Paging{}, errors.New(response.Error)
 	}
-	return nil, Paging{}, nil
+	return response.extractReactedItems(), response.Paging, nil
 }
