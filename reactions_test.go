@@ -202,21 +202,20 @@ func TestSlack_GetReactions(t *testing.T) {
 			},
 			`{"ok": true,
     "type": "file_comment",
-    "file_comment": {
-        "comment": {
-            "reactions": [
-                {
-                    "name": "astonished",
-                    "count": 3,
-                    "users": [ "U1", "U2", "U3" ]
-                },
-                {
-                    "name": "clock1",
-                    "count": 3,
-                    "users": [ "U1", "U2" ]
-                }
-            ]
-        }
+    "file": {},
+    "comment": {
+        "reactions": [
+            {
+                "name": "astonished",
+                "count": 3,
+                "users": [ "U1", "U2", "U3" ]
+            },
+            {
+                "name": "clock1",
+                "count": 3,
+                "users": [ "U1", "U2" ]
+            }
+        ]
     }}`,
 			[]ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
@@ -283,18 +282,16 @@ func TestSlack_ListReactions(t *testing.T) {
         },
         {
             "type": "file_comment",
-            "file_comment": {
-                "file": {},
-                "comment": {
-                    "comment": "cool toy",
-                    "reactions": [
-                        {
-                            "name": "astonished",
-                            "count": 3,
-                            "users": [ "U1", "U2", "U3" ]
-                        }
-                    ]
-                }
+            "file": {},
+            "comment": {
+                "comment": "cool toy",
+                "reactions": [
+                    {
+                        "name": "astonished",
+                        "count": 3,
+                        "users": [ "U1", "U2", "U3" ]
+                    }
+                ]
             }
         }
     ],

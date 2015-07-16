@@ -65,10 +65,8 @@ type getReactionsResponseFull struct {
 		Reactions []ItemReaction
 	} `json:"file"`
 	FC struct {
-		Comment struct {
-			Reactions []ItemReaction
-		}
-	} `json:"file_comment"`
+		Reactions []ItemReaction
+	} `json:"comment"`
 	SlackResponse
 }
 
@@ -79,7 +77,7 @@ func (res getReactionsResponseFull) extractReactions() []ItemReaction {
 	case "file":
 		return res.F.Reactions
 	case "file_comment":
-		return res.FC.Comment.Reactions
+		return res.FC.Reactions
 	}
 	return []ItemReaction{}
 }
@@ -122,11 +120,9 @@ type listReactionsResponseFull struct {
 			Reactions []ItemReaction
 		} `json:"file"`
 		FC struct {
-			C struct {
-				*Comment
-				Reactions []ItemReaction
-			} `json:"comment"`
-		} `json:"file_comment"`
+			*Comment
+			Reactions []ItemReaction
+		} `json:"comment"`
 	}
 	Paging `json:"paging"`
 	SlackResponse
@@ -146,8 +142,8 @@ func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 			item.File = input.F.File
 			item.Reactions = input.F.Reactions
 		case "file_comment":
-			item.Comment = input.FC.C.Comment
-			item.Reactions = input.FC.C.Reactions
+			item.Comment = input.FC.Comment
+			item.Reactions = input.FC.Reactions
 		}
 		items[i] = item
 	}
