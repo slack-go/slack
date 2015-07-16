@@ -34,6 +34,17 @@ func NewAddReactionParameters(name string, ref ItemRef) AddReactionParameters {
 	return AddReactionParameters{Name: name, ItemRef: ref}
 }
 
+// RemoveReactionParameters is the inputs to remove an existing reaction.
+type RemoveReactionParameters struct {
+	Name string
+	ItemRef
+}
+
+// NewAddReactionParameters initialies the inputs to react to an item.
+func NewRemoveReactionParameters(name string, ref ItemRef) RemoveReactionParameters {
+	return RemoveReactionParameters{Name: name, ItemRef: ref}
+}
+
 // GetReactionParameters is the inputs to get reactions to an item.
 type GetReactionParameters struct {
 	Full bool
@@ -167,6 +178,36 @@ func (api *Slack) AddReaction(params AddReactionParameters) error {
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.add", values, response, api.debug); err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
+}
+
+// RemoveReaction removes a reaction emoji from a message, file or file comment.
+func (api *Slack) RemoveReaction(params RemoveReactionParameters) error {
+	values := url.Values{
+		"token": {api.config.token},
+	}
+	if params.Name != "" {
+		values.Set("name", params.Name)
+	}
+	if params.ChannelId != "" {
+		values.Set("channel", string(params.ChannelId))
+	}
+	if params.Timestamp != "" {
+		values.Set("timestamp", string(params.Timestamp))
+	}
+	if params.FileId != "" {
+		values.Set("file", string(params.FileId))
+	}
+	if params.FileCommentId != "" {
+		values.Set("file_comment", string(params.FileCommentId))
+	}
+	response := &SlackResponse{}
+	if err := parseResponse("reactions.remove", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {

@@ -8,7 +8,8 @@ import (
 )
 
 func init() {
-	http.HandleFunc("/reactions.add", addReactionHandler)
+	http.HandleFunc("/reactions.add", reactionHandler)
+	http.HandleFunc("/reactions.remove", reactionHandler)
 	http.HandleFunc("/reactions.get", getReactionHandler)
 	http.HandleFunc("/reactions.list", listReactionHandler)
 }
@@ -25,21 +26,21 @@ func accumulateFormValue(k string, r *http.Request) {
 	}
 }
 
-func addReactionHandler(w http.ResponseWriter, r *http.Request) {
+func reactionHandler(w http.ResponseWriter, r *http.Request) {
 	accumulateFormValue("name", r)
-	accumulateFormValue("file", r)
-	accumulateFormValue("file_comment", r)
 	accumulateFormValue("channel", r)
 	accumulateFormValue("timestamp", r)
+	accumulateFormValue("file", r)
+	accumulateFormValue("file_comment", r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{ "ok": true }`))
 }
 
 func getReactionHandler(w http.ResponseWriter, r *http.Request) {
-	accumulateFormValue("file", r)
-	accumulateFormValue("file_comment", r)
 	accumulateFormValue("channel", r)
 	accumulateFormValue("timestamp", r)
+	accumulateFormValue("file", r)
+	accumulateFormValue("file_comment", r)
 	accumulateFormValue("full", r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(getReactionRes))
@@ -54,61 +55,89 @@ func listReactionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(listReactionRes))
 }
 
-func TestSlack_AddReaction_ToMessage(t *testing.T) {
+func TestSlack_AddReaction(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	wantParams := map[string]string{
-		"name":      "thumbsup",
-		"channel":   "ChannelID",
-		"timestamp": "123",
+	tests := []struct {
+		params     AddReactionParameters
+		wantParams map[string]string
+	}{
+		{
+			NewAddReactionParameters("thumbsup", NewRefToMessage("ChannelID", "123")),
+			map[string]string{
+				"name":      "thumbsup",
+				"channel":   "ChannelID",
+				"timestamp": "123",
+			},
+		},
+		{
+			NewAddReactionParameters("thumbsup", NewRefToFile("FileID")),
+			map[string]string{
+				"name": "thumbsup",
+				"file": "FileID",
+			},
+		},
+		{
+			NewAddReactionParameters("thumbsup", NewRefToFileComment("FileCommentID")),
+			map[string]string{
+				"name":         "thumbsup",
+				"file_comment": "FileCommentID",
+			},
+		},
 	}
-	gotParams = map[string]string{}
-	params := NewAddReactionParameters("thumbsup", NewRefToMessage("ChannelID", "123"))
-	err := api.AddReaction(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	for i, test := range tests {
+		gotParams = map[string]string{}
+		err := api.AddReaction(test.params)
+		if err != nil {
+			t.Fatalf("%d: Unexpected error: %s", i, err)
+		}
+		if !reflect.DeepEqual(gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		}
 	}
 }
 
-func TestSlack_AddReaction_ToFile(t *testing.T) {
+func TestSlack_RemoveReaction(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	wantParams := map[string]string{
-		"name": "thumbsup",
-		"file": "FileID",
+	tests := []struct {
+		params     RemoveReactionParameters
+		wantParams map[string]string
+	}{
+		{
+			NewRemoveReactionParameters("thumbsup", NewRefToMessage("ChannelID", "123")),
+			map[string]string{
+				"name":      "thumbsup",
+				"channel":   "ChannelID",
+				"timestamp": "123",
+			},
+		},
+		{
+			NewRemoveReactionParameters("thumbsup", NewRefToFile("FileID")),
+			map[string]string{
+				"name": "thumbsup",
+				"file": "FileID",
+			},
+		},
+		{
+			NewRemoveReactionParameters("thumbsup", NewRefToFileComment("FileCommentID")),
+			map[string]string{
+				"name":         "thumbsup",
+				"file_comment": "FileCommentID",
+			},
+		},
 	}
-	gotParams = map[string]string{}
-	params := NewAddReactionParameters("thumbsup", NewRefToFile("FileID"))
-	err := api.AddReaction(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
-	}
-}
-
-func TestSlack_AddReaction_ToFileComment(t *testing.T) {
-	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
-	wantParams := map[string]string{
-		"name":         "thumbsup",
-		"file_comment": "FileCommentID",
-	}
-	gotParams = map[string]string{}
-	params := NewAddReactionParameters("thumbsup", NewRefToFileComment("FileCommentID"))
-	err := api.AddReaction(params)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	for i, test := range tests {
+		gotParams = map[string]string{}
+		err := api.RemoveReaction(test.params)
+		if err != nil {
+			t.Fatalf("%d: Unexpected error: %s", i, err)
+		}
+		if !reflect.DeepEqual(gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		}
 	}
 }
 
