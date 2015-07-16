@@ -7,52 +7,36 @@ import (
 	"testing"
 )
 
-func init() {
-	http.HandleFunc("/reactions.add", reactionHandler)
-	http.HandleFunc("/reactions.remove", reactionHandler)
-	http.HandleFunc("/reactions.get", getReactionHandler)
-	http.HandleFunc("/reactions.list", listReactionHandler)
+type reactionsHandler struct {
+	gotParams map[string]string
+	response  string
 }
 
-var (
-	gotParams       map[string]string
-	getReactionRes  string
-	listReactionRes string
-)
-
-func accumulateFormValue(k string, r *http.Request) {
-	if v := r.FormValue(k); v != "" {
-		gotParams[k] = v
+func newReactionsHandler() *reactionsHandler {
+	return &reactionsHandler{
+		gotParams: make(map[string]string),
+		response:  `{ "ok": true }`,
 	}
 }
 
-func reactionHandler(w http.ResponseWriter, r *http.Request) {
-	accumulateFormValue("name", r)
-	accumulateFormValue("channel", r)
-	accumulateFormValue("timestamp", r)
-	accumulateFormValue("file", r)
-	accumulateFormValue("file_comment", r)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{ "ok": true }`))
+func (rh *reactionsHandler) accumulateFormValue(k string, r *http.Request) {
+	if v := r.FormValue(k); v != "" {
+		rh.gotParams[k] = v
+	}
 }
 
-func getReactionHandler(w http.ResponseWriter, r *http.Request) {
-	accumulateFormValue("channel", r)
-	accumulateFormValue("timestamp", r)
-	accumulateFormValue("file", r)
-	accumulateFormValue("file_comment", r)
-	accumulateFormValue("full", r)
+func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
+	rh.accumulateFormValue("channel", r)
+	rh.accumulateFormValue("count", r)
+	rh.accumulateFormValue("file", r)
+	rh.accumulateFormValue("file_comment", r)
+	rh.accumulateFormValue("full", r)
+	rh.accumulateFormValue("name", r)
+	rh.accumulateFormValue("page", r)
+	rh.accumulateFormValue("timestamp", r)
+	rh.accumulateFormValue("user", r)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(getReactionRes))
-}
-
-func listReactionHandler(w http.ResponseWriter, r *http.Request) {
-	accumulateFormValue("user", r)
-	accumulateFormValue("count", r)
-	accumulateFormValue("full", r)
-	accumulateFormValue("page", r)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(listReactionRes))
+	w.Write([]byte(rh.response))
 }
 
 func TestSlack_AddReaction(t *testing.T) {
@@ -86,14 +70,16 @@ func TestSlack_AddReaction(t *testing.T) {
 			},
 		},
 	}
+	var rh *reactionsHandler
+	http.HandleFunc("/reactions.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
-		gotParams = map[string]string{}
+		rh = newReactionsHandler()
 		err := api.AddReaction(test.params)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
-		if !reflect.DeepEqual(gotParams, test.wantParams) {
-			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
 		}
 	}
 }
@@ -129,14 +115,16 @@ func TestSlack_RemoveReaction(t *testing.T) {
 			},
 		},
 	}
+	var rh *reactionsHandler
+	http.HandleFunc("/reactions.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
-		gotParams = map[string]string{}
+		rh = newReactionsHandler()
 		err := api.RemoveReaction(test.params)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
-		if !reflect.DeepEqual(gotParams, test.wantParams) {
-			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
 		}
 	}
 }
@@ -242,9 +230,11 @@ func TestSlack_GetReactions(t *testing.T) {
 			},
 		},
 	}
+	var rh *reactionsHandler
+	http.HandleFunc("/reactions.get", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
-		gotParams = map[string]string{}
-		getReactionRes = test.json
+		rh = newReactionsHandler()
+		rh.response = test.json
 		got, err := api.GetReactions(test.params)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
@@ -252,8 +242,8 @@ func TestSlack_GetReactions(t *testing.T) {
 		if !reflect.DeepEqual(got, test.wantReactions) {
 			t.Errorf("%d: Got reaction %#v, want %#v", i, got, test.wantReactions)
 		}
-		if !reflect.DeepEqual(gotParams, test.wantParams) {
-			t.Errorf("%d: Got params %#v, want %#v", i, gotParams, test.wantParams)
+		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
 		}
 	}
 }
@@ -262,7 +252,9 @@ func TestSlack_ListReactions(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	listReactionRes = `{"ok": true,
+	rh := newReactionsHandler()
+	http.HandleFunc("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	rh.response = `{"ok": true,
     "items": [
         {
             "type": "message",
@@ -348,7 +340,6 @@ func TestSlack_ListReactions(t *testing.T) {
 		"page":  "2",
 		"full":  "true",
 	}
-	gotParams = map[string]string{}
 	params := NewListReactionsParameters("UserID")
 	params.Count = 200
 	params.Page = 2
@@ -367,8 +358,8 @@ func TestSlack_ListReactions(t *testing.T) {
 			fmt.Printf("Reactions %#v\n", item.Reactions)
 		}
 	}
-	if !reflect.DeepEqual(gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", gotParams, wantParams)
+	if !reflect.DeepEqual(rh.gotParams, wantParams) {
+		t.Errorf("Got params %#v, want %#v", rh.gotParams, wantParams)
 	}
 	if reflect.DeepEqual(paging, Paging{}) {
 		t.Errorf("Want paging data, got empty struct")
