@@ -15,19 +15,38 @@ var starsTests = struct {
     "items": [
         {
             "type": "message",
-            "channel": "C2147483705"
+            "channel": "C2147483705",
+            "message": {
+                "text": "hello"
+            }
         },
         {
-            "type": "file"
+            "type": "file",
+            "file": {
+                "name": "toy"
+            }
         },
         {
-            "type": "file_comment"
+            "type": "file_comment",
+            "file": {
+                "name": "toy"
+            },
+            "comment": {
+                "comment": "nice"
+            }
         },
         {
             "type": "channel",
             "channel": "C2147483705"
+        },
+        {
+            "type": "im",
+            "channel": "D1"
+        },
+        {
+            "type": "group",
+            "channel": "G1"
         }
-
     ],
     "paging": {
         "count": 100,
@@ -36,20 +55,12 @@ var starsTests = struct {
         "pages": 1
     }}`),
 	[]StarredItem{
-		{
-			Type:      "message",
-			ChannelId: "C2147483705",
-		},
-		{
-			Type: "file",
-		},
-		{
-			Type: "file_comment",
-		},
-		{
-			Type:      "channel",
-			ChannelId: "C2147483705",
-		},
+		{Item: NewMessageItem("C2147483705", &Message{Msg: Msg{Text: "hello"}})},
+		{Item: NewFileItem(&File{Name: "toy"})},
+		{Item: NewFileCommentItem(&File{Name: "toy"}, &Comment{Comment: "nice"})},
+		{Item: NewChannelItem("C2147483705")},
+		{Item: NewIMItem("D1")},
+		{Item: NewGroupItem("G1")},
 	},
 	&Paging{
 		Count: 100,
