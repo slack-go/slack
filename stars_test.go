@@ -7,12 +7,29 @@ import (
 )
 
 type starsHandler struct {
-	response string
+	gotParams map[string]string
+	response  string
 }
 
-func (rh *starsHandler) handler(w http.ResponseWriter, r *http.Request) {
+func newStarsHandler() *starsHandler {
+	return &starsHandler{
+		gotParams: make(map[string]string),
+		response:  `{ "ok": true }`,
+	}
+}
+
+func (sh *starsHandler) accumulateFormValue(k string, r *http.Request) {
+	if v := r.FormValue(k); v != "" {
+		sh.gotParams[k] = v
+	}
+}
+
+func (sh *starsHandler) handler(w http.ResponseWriter, r *http.Request) {
+	sh.accumulateFormValue("user", r)
+	sh.accumulateFormValue("count", r)
+	sh.accumulateFormValue("page", r)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(rh.response))
+	w.Write([]byte(sh.response))
 }
 
 func TestSlack_GetStarred(t *testing.T) {
@@ -20,11 +37,23 @@ func TestSlack_GetStarred(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
+		params       StarsParameters
+		wantParams   map[string]string
 		json         string
 		starredItems []StarredItem
 		paging       *Paging
 	}{
 		{
+			StarsParameters{
+				User:  "U1",
+				Count: 10,
+				Page:  100,
+			},
+			map[string]string{
+				"user":  "U1",
+				"count": "10",
+				"page":  "100",
+			},
 			`{"ok": true,
     "items": [
         {
@@ -87,11 +116,14 @@ func TestSlack_GetStarred(t *testing.T) {
 	var sh *starsHandler
 	http.HandleFunc("/stars.list", func(w http.ResponseWriter, r *http.Request) { sh.handler(w, r) })
 	for i, test := range tests {
-		sh = &starsHandler{}
+		sh = newStarsHandler()
 		sh.response = test.json
-		response_items, response_paging, err := api.GetStarred(NewStarsParameters())
+		response_items, response_paging, err := api.GetStarred(test.params)
 		if err != nil {
 			t.Fatalf("%d Unexpected error: %s", i, err)
+		}
+		if !reflect.DeepEqual(sh.gotParams, test.wantParams) {
+			t.Errorf("%d got %v; want %v", i, sh.gotParams, test.wantParams)
 		}
 		if !reflect.DeepEqual(response_items, test.starredItems) {
 			t.Errorf("%d got %v; want %v", i, response_items, test.starredItems)
