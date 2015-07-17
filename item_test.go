@@ -43,6 +43,39 @@ func TestNewFileCommentItem(t *testing.T) {
 	}
 }
 
+func TestNewChannelItem(t *testing.T) {
+	c := "C1"
+	ci := NewChannelItem(c)
+	if ci.Type != TYPE_CHANNEL {
+		t.Errorf("got Type %s, want %s", ci.Type, TYPE_CHANNEL)
+	}
+	if ci.Channel != "C1" {
+		t.Errorf("got Channel %v, want %v", ci.Channel, "C1")
+	}
+}
+
+func TestNewIMItem(t *testing.T) {
+	c := "D1"
+	ci := NewIMItem(c)
+	if ci.Type != TYPE_IM {
+		t.Errorf("got Type %s, want %s", ci.Type, TYPE_IM)
+	}
+	if ci.Channel != "D1" {
+		t.Errorf("got Channel %v, want %v", ci.Channel, "D1")
+	}
+}
+
+func TestNewGroupItem(t *testing.T) {
+	c := "G1"
+	ci := NewGroupItem(c)
+	if ci.Type != TYPE_GROUP {
+		t.Errorf("got Type %s, want %s", ci.Type, TYPE_GROUP)
+	}
+	if ci.Channel != "G1" {
+		t.Errorf("got Channel %v, want %v", ci.Channel, "G1")
+	}
+}
+
 func TestNewRefToMessage(t *testing.T) {
 	ref := NewRefToMessage("chan", "ts")
 	if got, want := ref.ChannelId, "chan"; got != want {
