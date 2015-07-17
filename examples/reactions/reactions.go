@@ -67,22 +67,19 @@ func main() {
 	msgRef := slack.NewRefToMessage(channelID, timestamp)
 
 	// React with :+1:
-	reactionParams := slack.NewAddReactionParameters("+1", msgRef)
-	if err := api.AddReaction(reactionParams); err != nil {
+	if err := api.AddReaction("+1", msgRef); err != nil {
 		fmt.Printf("Error adding reaction: %s\n", err)
 		return
 	}
 
 	// React with :-1:
-	reactionParams = slack.NewAddReactionParameters("cry", msgRef)
-	if err := api.AddReaction(reactionParams); err != nil {
+	if err := api.AddReaction("cry", msgRef); err != nil {
 		fmt.Printf("Error adding reaction: %s\n", err)
 		return
 	}
 
 	// Get all reactions on the message.
-	getReactionsParams := slack.NewGetReactionsParameters(msgRef)
-	msgReactions, err := api.GetReactions(getReactionsParams)
+	msgReactions, err := api.GetReactions(msgRef, slack.NewGetReactionsParameters())
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return
@@ -94,8 +91,7 @@ func main() {
 	}
 
 	// List all of the users reactions.
-	listReactionsParams := slack.NewListReactionsParameters(postAsUserID)
-	listReactions, _, err := api.ListReactions(listReactionsParams)
+	listReactions, _, err := api.ListReactions(slack.NewListReactionsParameters())
 	if err != nil {
 		fmt.Printf("Error listing reactions: %s\n", err)
 		return
@@ -110,16 +106,14 @@ func main() {
 	}
 
 	// Remove the :cry: reaction.
-	removeReactionParams := slack.NewRemoveReactionParameters("cry", msgRef)
-	err = api.RemoveReaction(removeReactionParams)
+	err = api.RemoveReaction("cry", msgRef)
 	if err != nil {
 		fmt.Printf("Error remove reaction: %s\n", err)
 		return
 	}
 
 	// Get all reactions on the message.
-	getReactionsParams = slack.NewGetReactionsParameters(msgRef)
-	msgReactions, err = api.GetReactions(getReactionsParams)
+	msgReactions, err = api.GetReactions(msgRef, slack.NewGetReactionsParameters())
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return

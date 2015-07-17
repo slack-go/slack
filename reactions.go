@@ -23,37 +23,16 @@ type ReactedItem struct {
 	Reactions []ItemReaction
 }
 
-// AddReactionParameters is the inputs to create a new reaction.
-type AddReactionParameters struct {
-	Name string
-	ItemRef
-}
-
-// NewAddReactionParameters initialies the inputs to react to an item.
-func NewAddReactionParameters(name string, ref ItemRef) AddReactionParameters {
-	return AddReactionParameters{Name: name, ItemRef: ref}
-}
-
-// RemoveReactionParameters is the inputs to remove an existing reaction.
-type RemoveReactionParameters struct {
-	Name string
-	ItemRef
-}
-
-// NewAddReactionParameters initialies the inputs to react to an item.
-func NewRemoveReactionParameters(name string, ref ItemRef) RemoveReactionParameters {
-	return RemoveReactionParameters{Name: name, ItemRef: ref}
-}
-
 // GetReactionsParameters is the inputs to get reactions to an item.
 type GetReactionsParameters struct {
 	Full bool
-	ItemRef
 }
 
 // NewGetReactionsParameters initializes the inputs to get reactions to an item.
-func NewGetReactionsParameters(ref ItemRef) GetReactionsParameters {
-	return GetReactionsParameters{ItemRef: ref}
+func NewGetReactionsParameters() GetReactionsParameters {
+	return GetReactionsParameters{
+		Full: false,
+	}
 }
 
 type getReactionsResponseFull struct {
@@ -91,20 +70,20 @@ const (
 
 // ListReactionsParameters is the inputs to find all reactions by a user.
 type ListReactionsParameters struct {
-	User  string
-	Count int
-	Page  int
-	Full  bool
+	UserId string
+	Count  int
+	Page   int
+	Full   bool
 }
 
 // NewListReactionsParameters initializes the inputs to find all reactions
 // performed by a user.
-func NewListReactionsParameters(userID string) ListReactionsParameters {
+func NewListReactionsParameters() ListReactionsParameters {
 	return ListReactionsParameters{
-		User:  userID,
-		Count: DEFAULT_REACTIONS_COUNT,
-		Page:  DEFAULT_REACTIONS_PAGE,
-		Full:  DEFAULT_REACTIONS_FULL,
+		UserId: DEFAULT_REACTIONS_USERID,
+		Count:  DEFAULT_REACTIONS_COUNT,
+		Page:   DEFAULT_REACTIONS_PAGE,
+		Full:   DEFAULT_REACTIONS_FULL,
 	}
 }
 
@@ -151,24 +130,24 @@ func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 }
 
 // AddReaction adds a reaction emoji to a message, file or file comment.
-func (api *Slack) AddReaction(params AddReactionParameters) error {
+func (api *Slack) AddReaction(name string, item ItemRef) error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.Name != "" {
-		values.Set("name", params.Name)
+	if name != "" {
+		values.Set("name", name)
 	}
-	if params.ChannelId != "" {
-		values.Set("channel", string(params.ChannelId))
+	if item.ChannelId != "" {
+		values.Set("channel", string(item.ChannelId))
 	}
-	if params.Timestamp != "" {
-		values.Set("timestamp", string(params.Timestamp))
+	if item.Timestamp != "" {
+		values.Set("timestamp", string(item.Timestamp))
 	}
-	if params.FileId != "" {
-		values.Set("file", string(params.FileId))
+	if item.FileId != "" {
+		values.Set("file", string(item.FileId))
 	}
-	if params.FileCommentId != "" {
-		values.Set("file_comment", string(params.FileCommentId))
+	if item.FileCommentId != "" {
+		values.Set("file_comment", string(item.FileCommentId))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.add", values, response, api.debug); err != nil {
@@ -181,24 +160,24 @@ func (api *Slack) AddReaction(params AddReactionParameters) error {
 }
 
 // RemoveReaction removes a reaction emoji from a message, file or file comment.
-func (api *Slack) RemoveReaction(params RemoveReactionParameters) error {
+func (api *Slack) RemoveReaction(name string, item ItemRef) error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.Name != "" {
-		values.Set("name", params.Name)
+	if name != "" {
+		values.Set("name", name)
 	}
-	if params.ChannelId != "" {
-		values.Set("channel", string(params.ChannelId))
+	if item.ChannelId != "" {
+		values.Set("channel", string(item.ChannelId))
 	}
-	if params.Timestamp != "" {
-		values.Set("timestamp", string(params.Timestamp))
+	if item.Timestamp != "" {
+		values.Set("timestamp", string(item.Timestamp))
 	}
-	if params.FileId != "" {
-		values.Set("file", string(params.FileId))
+	if item.FileId != "" {
+		values.Set("file", string(item.FileId))
 	}
-	if params.FileCommentId != "" {
-		values.Set("file_comment", string(params.FileCommentId))
+	if item.FileCommentId != "" {
+		values.Set("file_comment", string(item.FileCommentId))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.remove", values, response, api.debug); err != nil {
@@ -211,21 +190,21 @@ func (api *Slack) RemoveReaction(params RemoveReactionParameters) error {
 }
 
 // GetReactions returns details about the reactions on an item.
-func (api *Slack) GetReactions(params GetReactionsParameters) ([]ItemReaction, error) {
+func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]ItemReaction, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.ChannelId != "" {
-		values.Set("channel", string(params.ChannelId))
+	if item.ChannelId != "" {
+		values.Set("channel", string(item.ChannelId))
 	}
-	if params.Timestamp != "" {
-		values.Set("timestamp", string(params.Timestamp))
+	if item.Timestamp != "" {
+		values.Set("timestamp", string(item.Timestamp))
 	}
-	if params.FileId != "" {
-		values.Set("file", string(params.FileId))
+	if item.FileId != "" {
+		values.Set("file", string(item.FileId))
 	}
-	if params.FileCommentId != "" {
-		values.Set("file_comment", string(params.FileCommentId))
+	if item.FileCommentId != "" {
+		values.Set("file_comment", string(item.FileCommentId))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
 		values.Set("full", fmt.Sprintf("%t", params.Full))
@@ -245,8 +224,8 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, 
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.User != DEFAULT_REACTIONS_USERID {
-		values.Add("user", params.User)
+	if params.UserId != DEFAULT_REACTIONS_USERID {
+		values.Add("user", params.UserId)
 	}
 	if params.Count != DEFAULT_REACTIONS_COUNT {
 		values.Add("count", fmt.Sprintf("%d", params.Count))

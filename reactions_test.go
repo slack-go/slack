@@ -44,11 +44,13 @@ func TestSlack_AddReaction(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
-		params     AddReactionParameters
+		name       string
+		ref        ItemRef
 		wantParams map[string]string
 	}{
 		{
-			NewAddReactionParameters("thumbsup", NewRefToMessage("ChannelID", "123")),
+			"thumbsup",
+			NewRefToMessage("ChannelID", "123"),
 			map[string]string{
 				"name":      "thumbsup",
 				"channel":   "ChannelID",
@@ -56,14 +58,16 @@ func TestSlack_AddReaction(t *testing.T) {
 			},
 		},
 		{
-			NewAddReactionParameters("thumbsup", NewRefToFile("FileID")),
+			"thumbsup",
+			NewRefToFile("FileID"),
 			map[string]string{
 				"name": "thumbsup",
 				"file": "FileID",
 			},
 		},
 		{
-			NewAddReactionParameters("thumbsup", NewRefToFileComment("FileCommentID")),
+			"thumbsup",
+			NewRefToFileComment("FileCommentID"),
 			map[string]string{
 				"name":         "thumbsup",
 				"file_comment": "FileCommentID",
@@ -74,7 +78,7 @@ func TestSlack_AddReaction(t *testing.T) {
 	http.HandleFunc("/reactions.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newReactionsHandler()
-		err := api.AddReaction(test.params)
+		err := api.AddReaction(test.name, test.ref)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
@@ -89,11 +93,13 @@ func TestSlack_RemoveReaction(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
-		params     RemoveReactionParameters
+		name       string
+		ref        ItemRef
 		wantParams map[string]string
 	}{
 		{
-			NewRemoveReactionParameters("thumbsup", NewRefToMessage("ChannelID", "123")),
+			"thumbsup",
+			NewRefToMessage("ChannelID", "123"),
 			map[string]string{
 				"name":      "thumbsup",
 				"channel":   "ChannelID",
@@ -101,14 +107,16 @@ func TestSlack_RemoveReaction(t *testing.T) {
 			},
 		},
 		{
-			NewRemoveReactionParameters("thumbsup", NewRefToFile("FileID")),
+			"thumbsup",
+			NewRefToFile("FileID"),
 			map[string]string{
 				"name": "thumbsup",
 				"file": "FileID",
 			},
 		},
 		{
-			NewRemoveReactionParameters("thumbsup", NewRefToFileComment("FileCommentID")),
+			"thumbsup",
+			NewRefToFileComment("FileCommentID"),
 			map[string]string{
 				"name":         "thumbsup",
 				"file_comment": "FileCommentID",
@@ -119,7 +127,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 	http.HandleFunc("/reactions.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newReactionsHandler()
-		err := api.RemoveReaction(test.params)
+		err := api.RemoveReaction(test.name, test.ref)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
@@ -134,14 +142,15 @@ func TestSlack_GetReactions(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
+		ref           ItemRef
 		params        GetReactionsParameters
 		wantParams    map[string]string
 		json          string
 		wantReactions []ItemReaction
 	}{
 		{
-
-			GetReactionsParameters{ItemRef: NewRefToMessage("ChannelID", "123")},
+			NewRefToMessage("ChannelID", "123"),
+			GetReactionsParameters{},
 			map[string]string{
 				"channel":   "ChannelID",
 				"timestamp": "123",
@@ -168,7 +177,8 @@ func TestSlack_GetReactions(t *testing.T) {
 			},
 		},
 		{
-			GetReactionsParameters{ItemRef: NewRefToFile("FileID"), Full: true},
+			NewRefToFile("FileID"),
+			GetReactionsParameters{Full: true},
 			map[string]string{
 				"file": "FileID",
 				"full": "true",
@@ -196,7 +206,8 @@ func TestSlack_GetReactions(t *testing.T) {
 		},
 		{
 
-			GetReactionsParameters{ItemRef: NewRefToFileComment("FileCommentID")},
+			NewRefToFileComment("FileCommentID"),
+			GetReactionsParameters{},
 			map[string]string{
 				"file_comment": "FileCommentID",
 			},
@@ -228,7 +239,7 @@ func TestSlack_GetReactions(t *testing.T) {
 	for i, test := range tests {
 		rh = newReactionsHandler()
 		rh.response = test.json
-		got, err := api.GetReactions(test.params)
+		got, err := api.GetReactions(test.ref, test.params)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
@@ -331,7 +342,8 @@ func TestSlack_ListReactions(t *testing.T) {
 		"page":  "2",
 		"full":  "true",
 	}
-	params := NewListReactionsParameters("UserID")
+	params := NewListReactionsParameters()
+	params.UserId = "UserID"
 	params.Count = 200
 	params.Page = 2
 	params.Full = true
