@@ -146,8 +146,8 @@ func (api *Slack) AddReaction(name string, item ItemRef) error {
 	if item.FileId != "" {
 		values.Set("file", string(item.FileId))
 	}
-	if item.FileCommentId != "" {
-		values.Set("file_comment", string(item.FileCommentId))
+	if item.CommentId != "" {
+		values.Set("file_comment", string(item.CommentId))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.add", values, response, api.debug); err != nil {
@@ -176,8 +176,8 @@ func (api *Slack) RemoveReaction(name string, item ItemRef) error {
 	if item.FileId != "" {
 		values.Set("file", string(item.FileId))
 	}
-	if item.FileCommentId != "" {
-		values.Set("file_comment", string(item.FileCommentId))
+	if item.CommentId != "" {
+		values.Set("file_comment", string(item.CommentId))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.remove", values, response, api.debug); err != nil {
@@ -203,8 +203,8 @@ func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]I
 	if item.FileId != "" {
 		values.Set("file", string(item.FileId))
 	}
-	if item.FileCommentId != "" {
-		values.Set("file_comment", string(item.FileCommentId))
+	if item.CommentId != "" {
+		values.Set("file_comment", string(item.CommentId))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
 		values.Set("full", fmt.Sprintf("%t", params.Full))

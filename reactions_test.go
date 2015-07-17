@@ -67,7 +67,7 @@ func TestSlack_AddReaction(t *testing.T) {
 		},
 		{
 			"thumbsup",
-			NewRefToFileComment("FileCommentID"),
+			NewRefToComment("FileCommentID"),
 			map[string]string{
 				"name":         "thumbsup",
 				"file_comment": "FileCommentID",
@@ -116,7 +116,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 		},
 		{
 			"thumbsup",
-			NewRefToFileComment("FileCommentID"),
+			NewRefToComment("FileCommentID"),
 			map[string]string{
 				"name":         "thumbsup",
 				"file_comment": "FileCommentID",
@@ -206,7 +206,7 @@ func TestSlack_GetReactions(t *testing.T) {
 		},
 		{
 
-			NewRefToFileComment("FileCommentID"),
+			NewRefToComment("FileCommentID"),
 			GetReactionsParameters{},
 			map[string]string{
 				"file_comment": "FileCommentID",
