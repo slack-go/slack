@@ -16,10 +16,7 @@ type ItemReaction struct {
 // ReactedItem is an item that was reacted to, and the details of the
 // reactions.
 type ReactedItem struct {
-	Type      string
-	Message   *Message
-	File      *File
-	Comment   *Comment
+	Item
 	Reactions []ItemReaction
 }
 
@@ -110,9 +107,8 @@ type listReactionsResponseFull struct {
 func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 	items := make([]ReactedItem, len(res.Items))
 	for i, input := range res.Items {
-		item := ReactedItem{
-			Type: input.Type,
-		}
+		item := ReactedItem{}
+		item.Type = input.Type
 		switch input.Type {
 		case "message":
 			item.Message = input.M.Message

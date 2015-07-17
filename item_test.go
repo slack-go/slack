@@ -2,6 +2,39 @@ package slack
 
 import "testing"
 
+func TestNewMessageItem(t *testing.T) {
+	m := &Message{}
+	mi := NewMessageItem(m)
+	if mi.Type != TYPE_MESSAGE {
+		t.Errorf("want Type %s, got %s", TYPE_MESSAGE, mi.Type)
+	}
+	if m != mi.Message {
+		t.Errorf("want Message %v, got %v", m, mi.Message)
+	}
+}
+
+func TestNewFileItem(t *testing.T) {
+	f := &File{}
+	fi := NewFileItem(f)
+	if fi.Type != TYPE_FILE {
+		t.Errorf("want Type %s, got %s", TYPE_FILE, fi.Type)
+	}
+	if f != fi.File {
+		t.Errorf("want File %v, got %v", f, fi.File)
+	}
+}
+
+func TestNewCommentItem(t *testing.T) {
+	c := &Comment{}
+	ci := NewCommentItem(c)
+	if ci.Type != TYPE_COMMENT {
+		t.Errorf("want Type %s, got %s", TYPE_COMMENT, ci.Type)
+	}
+	if c != ci.Comment {
+		t.Errorf("want Comment %v, got %v", c, ci.Comment)
+	}
+}
+
 func TestNewRefToMessage(t *testing.T) {
 	ref := NewRefToMessage("chan", "ts")
 	if got, want := ref.ChannelId, "chan"; got != want {
