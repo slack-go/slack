@@ -2,8 +2,8 @@ package slack
 
 import (
 	"errors"
-	"fmt"
 	"net/url"
+	"strconv"
 )
 
 // ItemReaction is the reactions that have happened on an item.
@@ -206,7 +206,7 @@ func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]I
 		values.Set("file_comment", string(item.CommentId))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
-		values.Set("full", fmt.Sprintf("%t", params.Full))
+		values.Set("full", strconv.FormatBool(params.Full))
 	}
 	response := &getReactionsResponseFull{}
 	if err := parseResponse("reactions.get", values, response, api.debug); err != nil {
@@ -227,13 +227,13 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, 
 		values.Add("user", params.UserId)
 	}
 	if params.Count != DEFAULT_REACTIONS_COUNT {
-		values.Add("count", fmt.Sprintf("%d", params.Count))
+		values.Add("count", strconv.Itoa(params.Count))
 	}
 	if params.Page != DEFAULT_REACTIONS_PAGE {
-		values.Add("page", fmt.Sprintf("%d", params.Page))
+		values.Add("page", strconv.Itoa(params.Page))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
-		values.Add("full", fmt.Sprintf("%t", params.Full))
+		values.Add("full", strconv.FormatBool(params.Full))
 	}
 	response := &listReactionsResponseFull{}
 	err := parseResponse("reactions.list", values, response, api.debug)
