@@ -1,22 +1,23 @@
 package slack
 
 const (
-	TYPE_MESSAGE = "message"
-	TYPE_FILE    = "file"
-	TYPE_COMMENT = "comment"
+	TYPE_MESSAGE      = "message"
+	TYPE_FILE         = "file"
+	TYPE_FILE_COMMENT = "file_comment"
 )
 
-// Item is any type of slack message - message, file, or comment.
+// Item is any type of slack message - message, file, or file comment.
 type Item struct {
-	Type    string
-	Message *Message
-	File    *File
-	Comment *Comment
+	Type    string   `json:"type"`
+	Channel string   `json:"channel,omitempty"`
+	Message *Message `json:"message,omitempty"`
+	File    *File    `json:"file,omitempty"`
+	Comment *Comment `json:"comment,omitempty"`
 }
 
-// NewMessageItem turns a message into a typed message struct.
-func NewMessageItem(m *Message) Item {
-	return Item{Type: TYPE_MESSAGE, Message: m}
+// NewMessageItem turns a message on a channel into a typed message struct.
+func NewMessageItem(ch string, m *Message) Item {
+	return Item{Type: TYPE_MESSAGE, Channel: ch, Message: m}
 }
 
 // NewFileItem turns a file into a typed file struct.
@@ -24,9 +25,9 @@ func NewFileItem(f *File) Item {
 	return Item{Type: TYPE_FILE, File: f}
 }
 
-// NewCommentItem turns a comment into a typed comment struct.
-func NewCommentItem(c *Comment) Item {
-	return Item{Type: TYPE_COMMENT, Comment: c}
+// NewFileCommentItem turns a file and comment into a typed file_comment struct.
+func NewFileCommentItem(f *File, c *Comment) Item {
+	return Item{Type: TYPE_FILE_COMMENT, File: f, Comment: c}
 }
 
 // ItemRef is a reference to a message of any type. One of FileID,

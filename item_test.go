@@ -3,13 +3,17 @@ package slack
 import "testing"
 
 func TestNewMessageItem(t *testing.T) {
+	c := "C1"
 	m := &Message{}
-	mi := NewMessageItem(m)
+	mi := NewMessageItem(c, m)
 	if mi.Type != TYPE_MESSAGE {
-		t.Errorf("want Type %s, got %s", TYPE_MESSAGE, mi.Type)
+		t.Errorf("want Type %s, got %s", mi.Type, TYPE_MESSAGE)
 	}
-	if m != mi.Message {
-		t.Errorf("want Message %v, got %v", m, mi.Message)
+	if mi.Channel != c {
+		t.Errorf("got Channel %s, want %s", mi.Channel, c)
+	}
+	if mi.Message != m {
+		t.Errorf("got Message %v, want %v", mi.Message, m)
 	}
 }
 
@@ -17,21 +21,25 @@ func TestNewFileItem(t *testing.T) {
 	f := &File{}
 	fi := NewFileItem(f)
 	if fi.Type != TYPE_FILE {
-		t.Errorf("want Type %s, got %s", TYPE_FILE, fi.Type)
+		t.Errorf("got Type %s, want %s", fi.Type, TYPE_FILE)
 	}
-	if f != fi.File {
-		t.Errorf("want File %v, got %v", f, fi.File)
+	if fi.File != f {
+		t.Errorf("got File %v, want %v", fi.File, f)
 	}
 }
 
-func TestNewCommentItem(t *testing.T) {
+func TestNewFileCommentItem(t *testing.T) {
+	f := &File{}
 	c := &Comment{}
-	ci := NewCommentItem(c)
-	if ci.Type != TYPE_COMMENT {
-		t.Errorf("want Type %s, got %s", TYPE_COMMENT, ci.Type)
+	fci := NewFileCommentItem(f, c)
+	if fci.Type != TYPE_FILE_COMMENT {
+		t.Errorf("got Type %s, want %s", fci.Type, TYPE_FILE_COMMENT)
 	}
-	if c != ci.Comment {
-		t.Errorf("want Comment %v, got %v", c, ci.Comment)
+	if fci.File != f {
+		t.Errorf("got File %v, want %v", fci.File, f)
+	}
+	if fci.Comment != c {
+		t.Errorf("got Comment %v, want %v", fci.Comment, c)
 	}
 }
 

@@ -86,8 +86,9 @@ func NewListReactionsParameters() ListReactionsParameters {
 
 type listReactionsResponseFull struct {
 	Items []struct {
-		Type string
-		M    struct {
+		Type    string
+		Channel string
+		M       struct {
 			*Message
 			Reactions []ItemReaction
 		} `json:"message"`
@@ -111,12 +112,14 @@ func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 		item.Type = input.Type
 		switch input.Type {
 		case "message":
+			item.Channel = input.Channel
 			item.Message = input.M.Message
 			item.Reactions = input.M.Reactions
 		case "file":
 			item.File = input.F.File
 			item.Reactions = input.F.Reactions
 		case "file_comment":
+			item.File = input.F.File
 			item.Comment = input.FC.Comment
 			item.Reactions = input.FC.Reactions
 		}

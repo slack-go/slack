@@ -262,6 +262,7 @@ func TestSlack_ListReactions(t *testing.T) {
     "items": [
         {
             "type": "message",
+            "channel": "C1",
             "message": {
                 "text": "hello",
                 "reactions": [
@@ -293,7 +294,9 @@ func TestSlack_ListReactions(t *testing.T) {
         },
         {
             "type": "file_comment",
-            "file": {},
+            "file": {
+                "name": "toy"
+            },
             "comment": {
                 "comment": "cool toy",
                 "reactions": [
@@ -314,7 +317,7 @@ func TestSlack_ListReactions(t *testing.T) {
     }}`
 	want := []ReactedItem{
 		ReactedItem{
-			Item: NewMessageItem(&Message{Msg: Msg{Text: "hello"}}),
+			Item: NewMessageItem("C1", &Message{Msg: Msg{Text: "hello"}}),
 			Reactions: []ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
 				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
@@ -327,7 +330,7 @@ func TestSlack_ListReactions(t *testing.T) {
 			},
 		},
 		ReactedItem{
-			Item: NewCommentItem(&Comment{Comment: "cool toy"}),
+			Item: NewFileCommentItem(&File{Name: "toy"}, &Comment{Comment: "cool toy"}),
 			Reactions: []ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
 			},
