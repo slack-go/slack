@@ -4,6 +4,9 @@ const (
 	TYPE_MESSAGE      = "message"
 	TYPE_FILE         = "file"
 	TYPE_FILE_COMMENT = "file_comment"
+	TYPE_CHANNEL      = "channel"
+	TYPE_IM           = "im"
+	TYPE_GROUP        = "group"
 )
 
 // Item is any type of slack message - message, file, or file comment.
@@ -28,6 +31,21 @@ func NewFileItem(f *File) Item {
 // NewFileCommentItem turns a file and comment into a typed file_comment struct.
 func NewFileCommentItem(f *File, c *Comment) Item {
 	return Item{Type: TYPE_FILE_COMMENT, File: f, Comment: c}
+}
+
+// NewChannelItem turns a channel id into a typed channel struct.
+func NewChannelItem(ch string) Item {
+	return Item{Type: TYPE_CHANNEL, Channel: ch}
+}
+
+// NewIMItem turns a channel id into a typed im struct.
+func NewIMItem(ch string) Item {
+	return Item{Type: TYPE_IM, Channel: ch}
+}
+
+// NewGroupItem turns a channel id into a typed group struct.
+func NewGroupItem(ch string) Item {
+	return Item{Type: TYPE_GROUP, Channel: ch}
 }
 
 // ItemRef is a reference to a message of any type. One of FileID,
