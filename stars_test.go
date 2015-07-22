@@ -118,18 +118,18 @@ func TestSlack_GetStarred(t *testing.T) {
 	for i, test := range tests {
 		sh = newStarsHandler()
 		sh.response = test.json
-		response_items, response_paging, err := api.GetStarred(test.params)
+		responseItems, responsePaging, err := api.GetStarred(test.params)
 		if err != nil {
 			t.Fatalf("%d Unexpected error: %s", i, err)
 		}
 		if !reflect.DeepEqual(sh.gotParams, test.wantParams) {
 			t.Errorf("%d got %v; want %v", i, sh.gotParams, test.wantParams)
 		}
-		if !reflect.DeepEqual(response_items, test.starredItems) {
-			t.Errorf("%d got %v; want %v", i, response_items, test.starredItems)
+		if !reflect.DeepEqual(responseItems, test.starredItems) {
+			t.Errorf("%d got %v; want %v", i, responseItems, test.starredItems)
 		}
-		if !reflect.DeepEqual(response_paging, test.paging) {
-			t.Errorf("%d got %v; want %v", i, response_paging, test.paging)
+		if !reflect.DeepEqual(responsePaging, test.paging) {
+			t.Errorf("%d got %v; want %v", i, responsePaging, test.paging)
 		}
 	}
 }

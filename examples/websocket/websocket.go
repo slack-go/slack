@@ -19,7 +19,7 @@ func main() {
 	}
 	go wsAPI.HandleIncomingEvents(chReceiver)
 	go wsAPI.Keepalive(20 * time.Second)
-	go func(wsAPI *slack.SlackWS, chSender chan slack.OutgoingMessage) {
+	go func(wsAPI *slack.WS, chSender chan slack.OutgoingMessage) {
 		for {
 			select {
 			case msg := <-chSender:
@@ -43,8 +43,8 @@ func main() {
 			case slack.LatencyReport:
 				a := msg.Data.(slack.LatencyReport)
 				fmt.Printf("Current latency: %v\n", a.Value)
-			case *slack.SlackWSError:
-				error := msg.Data.(*slack.SlackWSError)
+			case *slack.WSError:
+				error := msg.Data.(*slack.WSError)
 				fmt.Printf("Error: %d - %s\n", error.Code, error.Msg)
 			default:
 				fmt.Printf("Unexpected: %v\n", msg.Data)

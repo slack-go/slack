@@ -102,12 +102,12 @@ type Pong struct {
 }
 
 // NewOutgoingMessage prepares an OutgoingMessage that the user can use to send a message
-func (api *SlackWS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
+func (api *WS) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
 	api.mutex.Lock()
 	defer api.mutex.Unlock()
-	api.messageId++
+	api.messageID++
 	return &OutgoingMessage{
-		ID:      api.messageId,
+		ID:      api.messageID,
 		Type:    "message",
 		Channel: channel,
 		Text:    text,

@@ -59,28 +59,28 @@ func (res getReactionsResponseFull) extractReactions() []ItemReaction {
 }
 
 const (
-	DEFAULT_REACTIONS_USERID = ""
-	DEFAULT_REACTIONS_COUNT  = 100
-	DEFAULT_REACTIONS_PAGE   = 1
-	DEFAULT_REACTIONS_FULL   = false
+	DEFAULT_REACTIONS_USER  = ""
+	DEFAULT_REACTIONS_COUNT = 100
+	DEFAULT_REACTIONS_PAGE  = 1
+	DEFAULT_REACTIONS_FULL  = false
 )
 
 // ListReactionsParameters is the inputs to find all reactions by a user.
 type ListReactionsParameters struct {
-	UserId string
-	Count  int
-	Page   int
-	Full   bool
+	User  string
+	Count int
+	Page  int
+	Full  bool
 }
 
 // NewListReactionsParameters initializes the inputs to find all reactions
 // performed by a user.
 func NewListReactionsParameters() ListReactionsParameters {
 	return ListReactionsParameters{
-		UserId: DEFAULT_REACTIONS_USERID,
-		Count:  DEFAULT_REACTIONS_COUNT,
-		Page:   DEFAULT_REACTIONS_PAGE,
-		Full:   DEFAULT_REACTIONS_FULL,
+		User:  DEFAULT_REACTIONS_USER,
+		Count: DEFAULT_REACTIONS_COUNT,
+		Page:  DEFAULT_REACTIONS_PAGE,
+		Full:  DEFAULT_REACTIONS_FULL,
 	}
 }
 
@@ -136,17 +136,17 @@ func (api *Slack) AddReaction(name string, item ItemRef) error {
 	if name != "" {
 		values.Set("name", name)
 	}
-	if item.ChannelId != "" {
-		values.Set("channel", string(item.ChannelId))
+	if item.Channel != "" {
+		values.Set("channel", string(item.Channel))
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", string(item.Timestamp))
 	}
-	if item.FileId != "" {
-		values.Set("file", string(item.FileId))
+	if item.File != "" {
+		values.Set("file", string(item.File))
 	}
-	if item.CommentId != "" {
-		values.Set("file_comment", string(item.CommentId))
+	if item.Comment != "" {
+		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.add", values, response, api.debug); err != nil {
@@ -166,17 +166,17 @@ func (api *Slack) RemoveReaction(name string, item ItemRef) error {
 	if name != "" {
 		values.Set("name", name)
 	}
-	if item.ChannelId != "" {
-		values.Set("channel", string(item.ChannelId))
+	if item.Channel != "" {
+		values.Set("channel", string(item.Channel))
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", string(item.Timestamp))
 	}
-	if item.FileId != "" {
-		values.Set("file", string(item.FileId))
+	if item.File != "" {
+		values.Set("file", string(item.File))
 	}
-	if item.CommentId != "" {
-		values.Set("file_comment", string(item.CommentId))
+	if item.Comment != "" {
+		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
 	if err := parseResponse("reactions.remove", values, response, api.debug); err != nil {
@@ -193,17 +193,17 @@ func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]I
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if item.ChannelId != "" {
-		values.Set("channel", string(item.ChannelId))
+	if item.Channel != "" {
+		values.Set("channel", string(item.Channel))
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", string(item.Timestamp))
 	}
-	if item.FileId != "" {
-		values.Set("file", string(item.FileId))
+	if item.File != "" {
+		values.Set("file", string(item.File))
 	}
-	if item.CommentId != "" {
-		values.Set("file_comment", string(item.CommentId))
+	if item.Comment != "" {
+		values.Set("file_comment", string(item.Comment))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
 		values.Set("full", strconv.FormatBool(params.Full))
@@ -223,8 +223,8 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, 
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.UserId != DEFAULT_REACTIONS_USERID {
-		values.Add("user", params.UserId)
+	if params.User != DEFAULT_REACTIONS_USER {
+		values.Add("user", params.User)
 	}
 	if params.Count != DEFAULT_REACTIONS_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))

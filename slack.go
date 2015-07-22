@@ -17,7 +17,7 @@ type SlackResponse struct {
 }
 
 type AuthTestResponse struct {
-	Url    string `json:"url"`
+	URL    string `json:"url"`
 	Team   string `json:"team"`
 	User   string `json:"user"`
 	TeamID string `json:"team_id"`

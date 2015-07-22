@@ -39,11 +39,11 @@ func main() {
 
 	// Post as the authenticated user.
 	postAsUserName = authTest.User
-	postAsUserID = authTest.UserId
+	postAsUserID = authTest.UserID
 
 	// Posting to DM with self causes a conversation with slackbot.
 	postToUserName = authTest.User
-	postToUserID = authTest.UserId
+	postToUserID = authTest.UserID
 
 	// Find the channel.
 	_, _, chanID, err := api.OpenIMChannel(postToUserID)

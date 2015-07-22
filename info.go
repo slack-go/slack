@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// XXX: Need to implement
+// UserPrefs needs to be implemented
 type UserPrefs struct {
 	// "highlight_words":"",
 	// "user_colors":"",
@@ -145,7 +145,7 @@ type Bot struct {
 // Info contains various details about Users, Channels, Bots and the authenticated user
 // It is returned by StartRTM
 type Info struct {
-	Url      string       `json:"url,omitempty"`
+	URL      string       `json:"url,omitempty"`
 	User     *UserDetails `json:"self,omitempty"`
 	Team     *Team        `json:"team,omitempty"`
 	Users    []User       `json:"users,omitempty"`
@@ -157,7 +157,7 @@ type Info struct {
 
 type infoResponseFull struct {
 	Info
-	SlackWSResponse
+	WSResponse
 }
 
 // GetBotByID returns a bot given a bot id
@@ -190,10 +190,10 @@ func (info Info) GetChannelByID(channelID string) *Channel {
 	return nil
 }
 
-// GetGroupById returns a group given a group id
-func (info Info) GetGroupById(groupId string) *Group {
+// GetGroupByID returns a group given a group id
+func (info Info) GetGroupByID(groupID string) *Group {
 	for _, group := range info.Groups {
-		if group.Id == groupId {
+		if group.ID == groupID {
 			return &group
 		}
 	}
