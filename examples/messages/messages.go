@@ -23,10 +23,10 @@ func main() {
 		*/
 	}
 	params.Attachments = []slack.Attachment{attachment}
-	channelId, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", params)
+	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("Message successfully sent to channel %s at %s", channelId, timestamp)
+	fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
 }

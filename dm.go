@@ -7,7 +7,7 @@ import (
 )
 
 type imChannel struct {
-	Id string `json:"id"`
+	ID string `json:"id"`
 }
 
 type imResponseFull struct {
@@ -22,10 +22,10 @@ type imResponseFull struct {
 
 // IM contains information related to the Direct Message channel
 type IM struct {
-	BaseChannel
-	IsIM               bool     `json:"is_im"`
-	UserId             string   `json:"user"`
-	IsUserDeleted      bool     `json:"is_user_deleted"`
+	baseChannel
+	IsIM          bool   `json:"is_im"`
+	User          string `json:"user"`
+	IsUserDeleted bool   `json:"is_user_deleted"`
 }
 
 func imRequest(path string, values url.Values, debug bool) (*imResponseFull, error) {
@@ -41,10 +41,10 @@ func imRequest(path string, values url.Values, debug bool) (*imResponseFull, err
 }
 
 // CloseIMChannel closes the direct message channel
-func (api *Slack) CloseIMChannel(channelId string) (bool, bool, error) {
+func (api *Slack) CloseIMChannel(channel string) (bool, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
-		"channel": {channelId},
+		"channel": {channel},
 	}
 	response, err := imRequest("im.close", values, api.debug)
 	if err != nil {
@@ -54,24 +54,24 @@ func (api *Slack) CloseIMChannel(channelId string) (bool, bool, error) {
 }
 
 // OpenIMChannel opens a direct message channel to the user provided as argument
-// Returns some status and the channelId
-func (api *Slack) OpenIMChannel(userId string) (bool, bool, string, error) {
+// Returns some status and the channel
+func (api *Slack) OpenIMChannel(user string) (bool, bool, string, error) {
 	values := url.Values{
 		"token": {api.config.token},
-		"user":  {userId},
+		"user":  {user},
 	}
 	response, err := imRequest("im.open", values, api.debug)
 	if err != nil {
 		return false, false, "", err
 	}
-	return response.NoOp, response.AlreadyOpen, response.Channel.Id, nil
+	return response.NoOp, response.AlreadyOpen, response.Channel.ID, nil
 }
 
 // MarkIMChannel sets the read mark of a direct message channel to a specific point
-func (api *Slack) MarkIMChannel(channelId, ts string) (err error) {
+func (api *Slack) MarkIMChannel(channel, ts string) (err error) {
 	values := url.Values{
 		"token":   {api.config.token},
-		"channel": {channelId},
+		"channel": {channel},
 		"ts":      {ts},
 	}
 	_, err = imRequest("im.mark", values, api.debug)
@@ -82,10 +82,10 @@ func (api *Slack) MarkIMChannel(channelId, ts string) (err error) {
 }
 
 // GetIMHistory retrieves the direct message channel history
-func (api *Slack) GetIMHistory(channelId string, params HistoryParameters) (*History, error) {
+func (api *Slack) GetIMHistory(channel string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
-		"channel": {channelId},
+		"channel": {channel},
 	}
 	if params.Latest != DEFAULT_HISTORY_LATEST {
 		values.Add("latest", params.Latest)

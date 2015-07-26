@@ -12,13 +12,13 @@ type HelloEvent struct{}
 type PresenceChangeEvent struct {
 	Type     string `json:"type"`
 	Presence string `json:"presence"`
-	UserId   string `json:"user"`
+	User     string `json:"user"`
 }
 
 type UserTypingEvent struct {
-	Type      string `json:"type"`
-	UserId    string `json:"user"`
-	ChannelId string `json:"channel"`
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
 }
 
 type LatencyReport struct {

@@ -2,7 +2,7 @@ package slack
 
 type GroupCreatedEvent struct {
 	Type    string             `json:"type"`
-	UserId  string             `json:"user"`
+	User    string             `json:"user"`
 	Channel ChannelCreatedInfo `json:"channel"`
 }
 
