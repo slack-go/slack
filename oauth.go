@@ -12,9 +12,9 @@ type oAuthResponseFull struct {
 }
 
 // GetOAuthToken retrieves an AccessToken
-func GetOAuthToken(clientId, clientSecret, code, redirectURI string, debug bool) (accessToken string, scope string, err error) {
+func GetOAuthToken(clientID, clientSecret, code, redirectURI string, debug bool) (accessToken string, scope string, err error) {
 	values := url.Values{
-		"client_id":     {clientId},
+		"client_id":     {clientID},
 		"client_secret": {clientSecret},
 		"code":          {code},
 		"redirect_uri":  {redirectURI},

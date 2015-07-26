@@ -337,13 +337,13 @@ func TestSlack_ListReactions(t *testing.T) {
 		},
 	}
 	wantParams := map[string]string{
-		"user":  "UserID",
+		"user":  "User",
 		"count": "200",
 		"page":  "2",
 		"full":  "true",
 	}
 	params := NewListReactionsParameters()
-	params.UserId = "UserID"
+	params.User = "User"
 	params.Count = 200
 	params.Page = 2
 	params.Full = true

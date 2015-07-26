@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	DEFAULT_STARS_USERID = ""
-	DEFAULT_STARS_COUNT  = 100
-	DEFAULT_STARS_PAGE   = 1
+	DEFAULT_STARS_USER  = ""
+	DEFAULT_STARS_COUNT = 100
+	DEFAULT_STARS_PAGE  = 1
 )
 
 type StarsParameters struct {
@@ -31,7 +31,7 @@ type starsResponseFull struct {
 
 func NewStarsParameters() StarsParameters {
 	return StarsParameters{
-		User:  DEFAULT_STARS_USERID,
+		User:  DEFAULT_STARS_USER,
 		Count: DEFAULT_STARS_COUNT,
 		Page:  DEFAULT_STARS_PAGE,
 	}
@@ -51,7 +51,7 @@ func (api *Slack) GetStarred(params StarsParameters) ([]StarredItem, *Paging, er
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	if params.User != DEFAULT_STARS_USERID {
+	if params.User != DEFAULT_STARS_USER {
 		values.Add("user", params.User)
 	}
 	if params.Count != DEFAULT_STARS_COUNT {
