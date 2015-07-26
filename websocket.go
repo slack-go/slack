@@ -262,6 +262,9 @@ func callEvent(eventType string, ch chan SlackEvent, event json.RawMessage) {
 		"file_comment_edited":  &FileCommentEditedEvent{},
 		"file_comment_deleted": &FileCommentDeletedEvent{},
 
+		"reaction_added":   &ReactionAddedEvent{},
+		"reaction_removed": &ReactionAddedEvent{},
+
 		"star_added":   &StarAddedEvent{},
 		"star_removed": &StarRemovedEvent{},
 

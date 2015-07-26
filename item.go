@@ -11,11 +11,12 @@ const (
 
 // Item is any type of slack message - message, file, or file comment.
 type Item struct {
-	Type    string   `json:"type"`
-	Channel string   `json:"channel,omitempty"`
-	Message *Message `json:"message,omitempty"`
-	File    *File    `json:"file,omitempty"`
-	Comment *Comment `json:"comment,omitempty"`
+	Type      string   `json:"type"`
+	Channel   string   `json:"channel,omitempty"`
+	Message   *Message `json:"message,omitempty"`
+	File      *File    `json:"file,omitempty"`
+	Comment   *Comment `json:"comment,omitempty"`
+	Timestamp string   `json:"ts,omitempty"`
 }
 
 // NewMessageItem turns a message on a channel into a typed message struct.
