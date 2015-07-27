@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"reflect"
 	"time"
 
@@ -35,7 +34,6 @@ func (rtm *RTM) ManageConnection() {
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
 		info, conn, err := rtm.connect(connectionCount)
-		log.Println(err)
 		// if err != nil then the connection is sucessful
 		// otherwise we need to send a Disconnected event
 		if err != nil {
