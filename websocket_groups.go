@@ -32,7 +32,18 @@ type GroupLeftEvent ChannelInfoEvent
 type GroupJoinedEvent ChannelJoinedEvent
 
 // GroupRenameEvent represents the Group rename event
-type GroupRenameEvent ChannelRenameEvent
+type GroupRenameEvent struct {
+	Type      string          `json:"type"`
+	Group     GroupRenameInfo `json:"channel"`
+	Timestamp string          `json:"ts"`
+}
+
+// GroupRenameInfo represents the group info related to the renamed group
+type GroupRenameInfo struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Created string `json:"created"`
+}
 
 // GroupHistoryChangedEvent represents the Group history changed event
 type GroupHistoryChangedEvent ChannelHistoryChangedEvent

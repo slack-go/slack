@@ -36,15 +36,16 @@ type ChannelInfoEvent struct {
 
 // ChannelRenameEvent represents the Channel rename event
 type ChannelRenameEvent struct {
-	Type    string            `json:"type"`
-	Channel ChannelRenameInfo `json:"channel"`
+	Type      string            `json:"type"`
+	Channel   ChannelRenameInfo `json:"channel"`
+	Timestamp string            `json:"event_ts"`
 }
 
 // ChannelRenameInfo represents the information associated with a Channel rename event
 type ChannelRenameInfo struct {
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Created JSONTimeString `json:"created"`
+	ID      string          `json:"id"`
+	Name    string          `json:"name"`
+	Created *JSONTimeString `json:"created"`
 }
 
 // ChannelHistoryChangedEvent represents the Channel history changed event

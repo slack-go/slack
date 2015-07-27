@@ -389,7 +389,7 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 	recvEvent := reflect.New(t).Interface()
 	err := json.Unmarshal(event, recvEvent)
 	if err != nil {
-		rtm.Debugf("RTM Error, received unmapped event %q: %s\n", typeStr, string(event))
+		rtm.Debugf("RTM Error, could not unmarshall event %q: %s\n", typeStr, string(event))
 		err := fmt.Errorf("RTM Error: Could not unmarshall event %q: %s\n", typeStr, string(event))
 		rtm.IncomingEvents <- SlackEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
 		return
