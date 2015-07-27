@@ -23,7 +23,8 @@ type RTM struct {
 	IncomingEvents   chan SlackEvent
 	outgoingMessages chan OutgoingMessage
 	keepRunning      chan bool
-	isRunning        bool
+	wasIntentional   bool
+	isConnected      bool
 
 	// Client is the main API, embedded
 	Client
@@ -38,17 +39,19 @@ type RTM struct {
 func newRTM(api *Client) *RTM {
 	return &RTM{
 		Client:           *api,
-		pings:            make(map[int]time.Time),
 		IncomingEvents:   make(chan SlackEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
-		keepRunning:      make(chan bool),
-		isRunning:        true,
+		pings:            make(map[int]time.Time),
+		isConnected:      false,
+		wasIntentional:   true,
 	}
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
 func (rtm *RTM) Disconnect() error {
-	if !rtm.isRunning {
+	rtm.mutex.Lock()
+	defer rtm.mutex.Unlock()
+	if !rtm.isConnected {
 		return errors.New("Invalid call to Disconnect - Slack API is already disconnected")
 	}
 	return rtm.killConnection(true)

@@ -13,8 +13,9 @@ import (
 // Max. It returns to Min on every call to Reset().  Used in
 // conjunction with the time package.
 type backoff struct {
+	attempts int
 	//Factor is the multiplying factor for each increment step
-	attempts, Factor float64
+	Factor float64
 	//Jitter eases contention by randomizing backoff steps
 	Jitter bool
 	//Min and Max are the minimum and maximum values of the counter
@@ -36,7 +37,7 @@ func (b *backoff) Duration() time.Duration {
 		b.Factor = 2
 	}
 	//calculate this duration
-	dur := float64(b.Min) * math.Pow(b.Factor, b.attempts)
+	dur := float64(b.Min) * math.Pow(b.Factor, float64(b.attempts))
 	if b.Jitter == true {
 		dur = rand.Float64()*(dur-float64(b.Min)) + float64(b.Min)
 	}

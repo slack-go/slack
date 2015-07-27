@@ -10,6 +10,15 @@ type ConnectedEvent struct {
 	Info            *Info
 }
 
+type ConnectionErrorEvent struct {
+	Attempt  int
+	ErrorObj error
+}
+
+func (c *ConnectionErrorEvent) Error() string {
+	return c.ErrorObj.Error()
+}
+
 type ConnectingEvent struct {
 	Attempt         int // 1 = first attempt, 2 = second attempt
 	ConnectionCount int
@@ -31,4 +40,37 @@ type UnmarshallingErrorEvent struct {
 
 func (u UnmarshallingErrorEvent) Error() string {
 	return u.ErrorObj.Error()
+}
+
+type OutgoingErrorEvent struct {
+	Message  OutgoingMessage
+	ErrorObj error
+}
+
+func (o OutgoingErrorEvent) Error() string {
+	return o.ErrorObj.Error()
+}
+
+type IncomingEventError struct {
+	ErrorObj error
+}
+
+func (i *IncomingEventError) Error() string {
+	return i.ErrorObj.Error()
+}
+
+type AckErrorEvent struct {
+	ErrorObj error
+}
+
+func (a *AckErrorEvent) Error() string {
+	return a.ErrorObj.Error()
+}
+
+type SlackErrorEvent struct {
+	ErrorObj error
+}
+
+func (s SlackErrorEvent) Error() string {
+	return s.ErrorObj.Error()
 }
