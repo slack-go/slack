@@ -1,6 +1,9 @@
 package slack
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 /**
  * Internal events, created by this lib and not mapped to Slack APIs.
@@ -40,6 +43,15 @@ type UnmarshallingErrorEvent struct {
 
 func (u UnmarshallingErrorEvent) Error() string {
 	return u.ErrorObj.Error()
+}
+
+type MessageTooLongEvent struct {
+	Message   OutgoingMessage
+	MaxLength int
+}
+
+func (m *MessageTooLongEvent) Error() string {
+	return fmt.Sprintf("Message too long (max %d characters)", m.MaxLength)
 }
 
 type OutgoingErrorEvent struct {

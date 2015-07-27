@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"reflect"
 	"time"
 
@@ -34,6 +35,7 @@ func (rtm *RTM) ManageConnection() {
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
 		info, conn, err := rtm.connect(connectionCount)
+		log.Println(err)
 		// if err != nil then the connection is sucessful
 		// otherwise we need to send a Disconnected event
 		if err != nil {
@@ -182,6 +184,13 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &OutgoingErrorEvent{
 			Message:  msg,
 			ErrorObj: errors.New("Cannot send message - API is not connected"),
+		}}
+		return
+	}
+	if len(msg.Text) > maxMessageTextLength {
+		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &MessageTooLongEvent{
+			Message:   msg,
+			MaxLength: maxMessageTextLength,
 		}}
 		return
 	}
