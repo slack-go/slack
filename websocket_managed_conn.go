@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -17,19 +16,16 @@ import (
 // and will notify any listeners through an error event on the IncomingEvents
 // channel.
 //
-// This detects failed and closed connections through the RTM's keepRunning
-// channel. Once this channel is closed or has something sent to it, this will
-// open a lock on the RTM's mutex and check if the disconnect was intentional
-// or not. If it was not then it attempts to reconnect.
+// If the connection ends and the disconnect was unintentional then this will
+// attempt to reconnect.
+//
+// This should only be called once per slack API! Otherwise expect undefined
+// behavior.
 //
 // The defined error events are located in websocket_internals.go.
 func (rtm *RTM) ManageConnection() {
 	var connectionCount int
 	for {
-		// open a lock - we want to close this before returning from the
-		// function so we won't defer the mutex's close therefore we MUST
-		// release the lock before returning on an error!
-		rtm.mutex.Lock()
 		connectionCount++
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
@@ -40,7 +36,6 @@ func (rtm *RTM) ManageConnection() {
 			rtm.IncomingEvents <- SlackEvent{"disconnected", &DisconnectedEvent{
 				Intentional: false,
 			}}
-			rtm.mutex.Unlock()
 			return
 		}
 		rtm.info = info
@@ -48,27 +43,21 @@ func (rtm *RTM) ManageConnection() {
 			ConnectionCount: connectionCount,
 			Info:            info,
 		}}
-		// set the connection object and unlock the mutex
+
 		rtm.conn = conn
 		rtm.isConnected = true
-		rtm.keepRunning = make(chan bool)
-		rtm.mutex.Unlock()
 
+		keepRunning := make(chan bool)
 		// we're now connected (or have failed fatally) so we can set up
-		// listeners and monitor for stopping
-		go rtm.sendKeepAlive(30 * time.Second)
-		go rtm.handleIncomingEvents()
-		go rtm.handleOutgoingMessages()
+		// listeners
+		go rtm.handleIncomingEvents(keepRunning)
 
-		// should return only once we are disconnected
-		<-rtm.keepRunning
+		// this should be a blocking call until the connection has ended
+		rtm.handleEvents(keepRunning, 30*time.Second)
 
 		// after being disconnected we need to check if it was intentional
 		// if not then we should try to reconnect
-		rtm.mutex.Lock()
-		intentional := rtm.wasIntentional
-		rtm.mutex.Unlock()
-		if intentional {
+		if rtm.wasIntentional {
 			return
 		}
 		// else continue and run the loop again to connect
@@ -136,11 +125,12 @@ func (rtm *RTM) startRTMAndDial() (*Info, *websocket.Conn, error) {
 // killConnection stops the websocket connection and signals to all goroutines
 // that they should cease listening to the connection for events.
 //
-// This requires that a lock on the RTM's mutex is held before being called.
-func (rtm *RTM) killConnection(intentional bool) error {
+// This should not be called directly! Instead a boolean value (true for
+// intentional, false otherwise) should be sent to the killChannel on the RTM.
+func (rtm *RTM) killConnection(keepRunning chan bool, intentional bool) error {
 	rtm.Debugln("killing connection")
 	if rtm.isConnected {
-		close(rtm.keepRunning)
+		close(keepRunning)
 	}
 	rtm.isConnected = false
 	rtm.wasIntentional = intentional
@@ -149,42 +139,67 @@ func (rtm *RTM) killConnection(intentional bool) error {
 	return err
 }
 
-// handleOutgoingMessages listens on the outgoingMessages channel for any
-// queued messages that have not been sent.
-//
-// This will stop executing once the RTM's keepRunning channel has been closed
-// or has anything sent to it.
-func (rtm *RTM) handleOutgoingMessages() {
+// handleEvents is a blocking function that handles all events. This sends
+// pings when asked to (on rtm.forcePing) and upon every given elapsed
+// interval. This also sends outgoing messages that are received from the RTM's
+// outgoingMessages channel. This also handles incoming raw events from the RTM
+// rawEvents channel.
+func (rtm *RTM) handleEvents(keepRunning chan bool, interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 	for {
 		select {
 		// catch "stop" signal on channel close
-		case <-rtm.keepRunning:
+		case intentional := <-rtm.killChannel:
+			_ = rtm.killConnection(keepRunning, intentional)
 			return
+			// send pings on ticker interval
+		case <-ticker.C:
+			err := rtm.ping()
+			if err != nil {
+				_ = rtm.killConnection(keepRunning, false)
+				return
+			}
+		case <-rtm.forcePing:
+			err := rtm.ping()
+			if err != nil {
+				_ = rtm.killConnection(keepRunning, false)
+				return
+			}
 		// listen for messages that need to be sent
 		case msg := <-rtm.outgoingMessages:
 			rtm.sendOutgoingMessage(msg)
+		// listen for incoming messages that need to be parsed
+		case rawEvent := <-rtm.rawEvents:
+			rtm.handleRawEvent(rawEvent)
 		}
 	}
 }
 
-// sendOutgoingMessage sends the given OutgoingMessage to the slack websocket
-// after acquiring a lock on the RTM's mutex.
+// handleIncomingEvents monitors the RTM's opened websocket for any incoming
+// events. It pushes the raw events onto the RTM channel rawEvents.
+//
+// This will stop executing once the RTM's keepRunning channel has been closed
+// or has anything sent to it.
+func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
+	for {
+		// non-blocking listen to see if channel is closed
+		select {
+		// catch "stop" signal on channel close
+		case <-keepRunning:
+			return
+		default:
+			rtm.receiveIncomingEvent()
+		}
+	}
+}
+
+// sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
 //
 // It does not currently detect if a outgoing message fails due to a disconnect
 // and instead lets a future failed 'PING' detect the failed connection.
 func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
 	rtm.Debugln("Sending message:", msg)
-	if !rtm.isConnected {
-		// check for race condition of connection closed after lock
-		// obtained
-		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &OutgoingErrorEvent{
-			Message:  msg,
-			ErrorObj: errors.New("Cannot send message - API is not connected"),
-		}}
-		return
-	}
 	if len(msg.Text) > maxMessageTextLength {
 		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &MessageTooLongEvent{
 			Message:   msg,
@@ -198,75 +213,29 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 			Message:  msg,
 			ErrorObj: err,
 		}}
-	}
-}
-
-// sendKeepAlive is a blocking call that sends a 'PING' message once for every
-// duration elapsed.
-//
-// This will stop executing once the RTM's keepRunning channel has been closed
-// or has anything sent to it.
-func (rtm *RTM) sendKeepAlive(interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		// catch "stop" signal on channel close
-		case <-rtm.keepRunning:
-			return
-		// send pings on ticker interval
-		case <-ticker.C:
-			go rtm.ping()
-		}
+		// TODO force ping?
 	}
 }
 
 // ping sends a 'PING' message to the RTM's websocket. If the 'PING' message
-// fails to send then this calls killConnection to signal an unintentional
-// websocket disconnect.
+// fails to send then this returns an error signifying that the connection
+// should be considered disconnected.
 //
 // This does not handle incoming 'PONG' responses but does store the time of
 // each successful 'PING' send so latency can be detected upon a 'PONG'
 // response.
-func (rtm *RTM) ping() {
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
+func (rtm *RTM) ping() error {
 	rtm.Debugln("Sending PING")
-	if !rtm.isConnected {
-		// it's possible that the API has disconnected while we were waiting
-		// for a lock on the mutex
-		rtm.Debugln("Cannot send ping - API is not connected")
-		// no need to send an error event since it really isn't an error
-		return
-	}
-	rtm.messageID++
-	rtm.pings[rtm.messageID] = time.Now()
+	id := rtm.idGen.Next()
+	rtm.pings[id] = time.Now()
 
-	msg := &Ping{ID: rtm.messageID, Type: "ping"}
+	msg := &Ping{ID: id, Type: "ping"}
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
 		rtm.Debugf("RTM Error sending 'PING': %s", err.Error())
-		rtm.killConnection(false)
+		return err
 	}
-}
-
-// handleIncomingEvents monitors the RTM's opened websocket for any incoming
-// events.
-//
-// This will stop executing once the RTM's keepRunning channel has been closed
-// or has anything sent to it.
-func (rtm *RTM) handleIncomingEvents() {
-	for {
-		// non-blocking listen to see if channel is closed
-		select {
-		// catch "stop" signal on channel close
-		case <-rtm.keepRunning:
-			return
-		default:
-			rtm.receiveIncomingEvent()
-		}
-	}
+	return nil
 }
 
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
@@ -280,38 +249,20 @@ func (rtm *RTM) receiveIncomingEvent() {
 		// 'PING' message
 
 		// trigger a 'PING' to detect pontential websocket disconnect
-		go rtm.ping()
+		rtm.forcePing <- true
 		return
 	} else if err != nil {
-		// TODO detect if this is a fatal error
 		rtm.IncomingEvents <- SlackEvent{"incoming_error", &IncomingEventError{
 			ErrorObj: err,
 		}}
+		// force a ping here too?
 		return
 	} else if len(event) == 0 {
 		rtm.Debugln("Received empty event")
 		return
 	}
 	rtm.Debugln("Incoming Event:", string(event[:]))
-	rtm.handleRawEvent(event)
-}
-
-// handleEOF should be called after receiving an EOF on the RTM's websocket.
-// It calls the internal killConnection method if the RTM was still considered
-// to be connected. If it is not considered connected then it is because
-// the killConnection method has already been called elsewhere.
-func (rtm *RTM) handleEOF() {
-	rtm.Debugln("Received EOF on websocket")
-	// we need a lock in order to access isConnected and to call killConnection
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
-	// if isConnected is true then we didn't expect the EOF event
-	// so for it to be intentional we need to have it be false
-	if rtm.isConnected {
-		// try to kill the connection - this should fail silently if the
-		// API has already disconnected
-		_ = rtm.killConnection(false)
-	}
+	rtm.rawEvents <- event
 }
 
 // handleRawEvent takes a raw JSON message received from the slack websocket
@@ -360,8 +311,6 @@ func (rtm *RTM) handlePong(event json.RawMessage) {
 		rtm.Debugln(" -> Erroneous 'ping' event:", string(event))
 		return
 	}
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
 	if pingTime, exists := rtm.pings[pong.ReplyTo]; exists {
 		latency := time.Since(pingTime)
 		rtm.IncomingEvents <- SlackEvent{"latency_report", &LatencyReport{Value: latency}}

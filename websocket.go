@@ -1,9 +1,9 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
-	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -20,15 +20,16 @@ const (
 //
 // Create this element with Client's NewRTM().
 type RTM struct {
-	mutex     sync.Mutex
-	messageID int
-	pings     map[int]time.Time
+	idGen IDGenerator
+	pings map[int]time.Time
 
 	// Connection life-cycle
 	conn             *websocket.Conn
 	IncomingEvents   chan SlackEvent
 	outgoingMessages chan OutgoingMessage
-	keepRunning      chan bool
+	killChannel      chan bool
+	forcePing        chan bool
+	rawEvents        chan json.RawMessage
 	wasIntentional   bool
 	isConnected      bool
 
@@ -50,17 +51,20 @@ func newRTM(api *Client) *RTM {
 		pings:            make(map[int]time.Time),
 		isConnected:      false,
 		wasIntentional:   true,
+		killChannel:      make(chan bool),
+		forcePing:        make(chan bool),
+		rawEvents:        make(chan json.RawMessage),
+		idGen:            NewSafeID(1),
 	}
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
 func (rtm *RTM) Disconnect() error {
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
 	if !rtm.isConnected {
 		return errors.New("Invalid call to Disconnect - Slack API is already disconnected")
 	}
-	return rtm.killConnection(true)
+	rtm.killChannel <- true
+	return nil
 }
 
 // Reconnect only makes sense if you've successfully disconnectd with Disconnect().

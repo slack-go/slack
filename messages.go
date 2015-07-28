@@ -106,11 +106,9 @@ type Pong struct {
 // use to send a message. Use this function to properly set the
 // messageID.
 func (rtm *RTM) NewOutgoingMessage(text string, channel string) *OutgoingMessage {
-	rtm.mutex.Lock()
-	defer rtm.mutex.Unlock()
-	rtm.messageID++
+	id := rtm.idGen.Next()
 	return &OutgoingMessage{
-		ID:      rtm.messageID,
+		ID:      id,
 		Type:    "message",
 		Channel: channel,
 		Text:    text,
