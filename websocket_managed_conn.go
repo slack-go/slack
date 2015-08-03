@@ -200,10 +200,10 @@ func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
 // and instead lets a future failed 'PING' detect the failed connection.
 func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 	rtm.Debugln("Sending message:", msg)
-	if len(msg.Text) > maxMessageTextLength {
+	if len(msg.Text) > MaxMessageTextLength {
 		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &MessageTooLongEvent{
 			Message:   msg,
-			MaxLength: maxMessageTextLength,
+			MaxLength: MaxMessageTextLength,
 		}}
 		return
 	}

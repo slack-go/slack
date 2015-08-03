@@ -12,7 +12,7 @@ import (
 const (
 	// maximum message length in number of characters as defined here
 	// https://api.slack.com/rtm#limits
-	maxMessageTextLength = 4000
+	MaxMessageTextLength = 4000
 )
 
 // RTM represents a managed websocket connection. It also supports
