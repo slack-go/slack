@@ -14,8 +14,10 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// MessageEvent represents the Message event
 type MessageEvent Message
 
+// WS contains websocket metadata
 type WS struct {
 	conn      *websocket.Conn
 	messageID int
@@ -32,21 +34,25 @@ type AckMessage struct {
 	WSResponse
 }
 
+// WSResponse is a websocket response
 type WSResponse struct {
 	Ok    bool     `json:"ok"`
 	Error *WSError `json:"error"`
 }
 
+// WSError is a websocket error
 type WSError struct {
 	Code int
 	Msg  string
 }
 
+// SlackEvent is a Slack event
 type SlackEvent struct {
 	Type uint64
 	Data interface{}
 }
 
+// JSONTimeString is a JSON unix timestamp
 type JSONTimeString string
 
 // String converts the unix timestamp into a string
