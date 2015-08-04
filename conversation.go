@@ -1,7 +1,7 @@
 package slack
 
-// BaseConversation is the foundation for IM and BaseGroupConversation
-type BaseConversation struct {
+// Conversation is the foundation for IM and BaseGroupConversation
+type conversation struct {
 	ID                 string   `json:"id"`
 	Created            JSONTime `json:"created"`
 	IsOpen             bool     `json:"is_open"`
@@ -11,9 +11,9 @@ type BaseConversation struct {
 	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
 }
 
-// BaseGroupConversation is the foundation for Group and Channel
-type BaseGroupConversation struct {
-	BaseConversation
+// GroupConversation is the foundation for Group and Channel
+type groupConversation struct {
+	conversation
 	Name       string   `json:"name"`
 	Creator    string   `json:"creator"`
 	IsArchived bool     `json:"is_archived"`
