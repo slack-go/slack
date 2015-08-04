@@ -23,6 +23,7 @@ type Msg struct {
 	Text        string       `json:"text,omitempty"`
 	Timestamp   string       `json:"ts,omitempty"`
 	IsStarred   bool         `json:"is_starred,omitempty"`
+	PinnedTo    []string     `json:"pinned_to, omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
 	Edited      *Edited      `json:"edited,omitempty"`
 
