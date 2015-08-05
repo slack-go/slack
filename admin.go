@@ -25,10 +25,10 @@ func adminRequest(method string, teamName string, values url.Values, debug bool)
 	return adminResponse, nil
 }
 
-// DisableUser disabled a user account
-func (api *Slack) DisableUser(teamName string, user string) error {
+// DisableUser disables a user account, given a user ID
+func (api *Slack) DisableUser(teamName string, uid string) error {
 	values := url.Values{
-		"user":       {user},
+		"user":       {uid},
 		"token":      {api.config.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
@@ -36,7 +36,7 @@ func (api *Slack) DisableUser(teamName string, user string) error {
 
 	_, err := adminRequest("setInactive", teamName, values, api.debug)
 	if err != nil {
-		return fmt.Errorf("Failed to disable user (%s): %s", user, err)
+		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
 	}
 
 	return nil
