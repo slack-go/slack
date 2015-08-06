@@ -129,3 +129,25 @@ func (api *Slack) SendSSOBindingEmail(teamName string, user string) error {
 
 	return nil
 }
+
+// SetUltraRestricted converts a user into a single-channel guest
+func (api *Slack) SetUltraRestricted(
+	teamName string,
+	uid string,
+	channel string,
+) error {
+	values := url.Values{
+		"user":       {uid},
+		"channel":    {channel},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setUltraRestricted", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
+	}
+
+	return nil
+}
