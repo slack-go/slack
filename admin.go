@@ -151,3 +151,23 @@ func (api *Slack) SetUltraRestricted(
 
 	return nil
 }
+
+// SetRestricted converts a user into a restricted account
+func (api *Slack) SetRestricted(
+	teamName string,
+	uid string,
+) error {
+	values := url.Values{
+		"user":       {uid},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setRestricted", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to restrict account: %s", err)
+	}
+
+	return nil
+}
