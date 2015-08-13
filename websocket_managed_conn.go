@@ -30,12 +30,9 @@ func (rtm *RTM) ManageConnection() {
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
 		info, conn, err := rtm.connect(connectionCount)
-		// if err != nil then the connection is sucessful
-		// otherwise we need to send a Disconnected event
+		// if err != nil then the connection is sucessful - otherwise it is
+		// fatal
 		if err != nil {
-			rtm.IncomingEvents <- SlackEvent{"disconnected", &DisconnectedEvent{
-				Intentional: false,
-			}}
 			return
 		}
 		rtm.info = info
@@ -225,14 +222,14 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 // each successful 'PING' send so latency can be detected upon a 'PONG'
 // response.
 func (rtm *RTM) ping() error {
-	rtm.Debugln("Sending PING")
 	id := rtm.idGen.Next()
+	rtm.Debugln("Sending PING ", id)
 	rtm.pings[id] = time.Now()
 
 	msg := &Ping{ID: id, Type: "ping"}
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
-		rtm.Debugf("RTM Error sending 'PING': %s", err.Error())
+		rtm.Debugf("RTM Error sending 'PING %d': %s", id, err.Error())
 		return err
 	}
 	return nil
