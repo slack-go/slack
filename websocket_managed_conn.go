@@ -236,7 +236,7 @@ func (rtm *RTM) ping() {
 	rtm.messageID++
 	rtm.pings[rtm.messageID] = time.Now()
 
-	msg := &Ping{Id: rtm.messageID, Type: "ping"}
+	msg := &Ping{ID: rtm.messageID, Type: "ping"}
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
 		rtm.Debugf("RTM Error sending 'PING': %s", err.Error())
