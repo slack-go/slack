@@ -16,46 +16,12 @@ type channelResponseFull struct {
 	SlackResponse
 }
 
-// ChannelTopic contains information about the channel topic
-type ChannelTopic struct {
-	Value   string   `json:"value"`
-	Creator string   `json:"creator"`
-	LastSet JSONTime `json:"last_set"`
-}
-
-// ChannelPurpose contains information about the channel purpose
-type ChannelPurpose struct {
-	Value   string   `json:"value"`
-	Creator string   `json:"creator"`
-	LastSet JSONTime `json:"last_set"`
-}
-
-type baseChannel struct {
-	ID                 string   `json:"id"`
-	Created            JSONTime `json:"created"`
-	IsOpen             bool     `json:"is_open"`
-	LastRead           string   `json:"last_read,omitempty"`
-	Latest             Message  `json:"latest,omitempty"`
-	UnreadCount        int      `json:"unread_count,omitempty"`
-	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
-}
-
 // Channel contains information about the channel
 type Channel struct {
-	baseChannel
-	Name        string         `json:"name"`
-	IsChannel   bool           `json:"is_channel"`
-	Creator     string         `json:"creator"`
-	IsArchived  bool           `json:"is_archived"`
-	IsGeneral   bool           `json:"is_general"`
-	Members     []string       `json:"members"`
-	Topic       ChannelTopic   `json:"topic"`
-	Purpose     ChannelPurpose `json:"purpose"`
-	IsMember    bool           `json:"is_member"`
-	LastRead    string         `json:"last_read,omitempty"`
-	Latest      *Message       `json:"latest,omitempty"`
-	UnreadCount int            `json:"unread_count,omitempty"`
-	NumMembers  int            `json:"num_members,omitempty"`
+	groupConversation
+	IsChannel bool `json:"is_channel"`
+	IsGeneral bool `json:"is_general"`
+	IsMember  bool `json:"is_member"`
 }
 
 func channelRequest(path string, values url.Values, debug bool) (*channelResponseFull, error) {

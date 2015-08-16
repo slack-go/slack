@@ -22,7 +22,7 @@ type imResponseFull struct {
 
 // IM contains information related to the Direct Message channel
 type IM struct {
-	baseChannel
+	conversation
 	IsIM          bool   `json:"is_im"`
 	User          string `json:"user"`
 	IsUserDeleted bool   `json:"is_user_deleted"`

@@ -15,7 +15,7 @@ func main() {
 	api.SetDebug(true)
 	wsAPI, err := api.StartRTM("", "http://example.com")
 	if err != nil {
-		fmt.Errorf("%s\n", err)
+		_ = fmt.Errorf("%s\n", err)
 	}
 	go wsAPI.HandleIncomingEvents(chReceiver)
 	go wsAPI.Keepalive(20 * time.Second)

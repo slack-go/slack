@@ -6,5 +6,9 @@ type starEvent struct {
 	Item           StarredItem    `json:"item"`
 	EventTimestamp JSONTimeString `json:"event_ts"`
 }
+
+// StarAddedEvent represents the Star added event
 type StarAddedEvent starEvent
+
+// StarRemovedEvent represents the Star removed event
 type StarRemovedEvent starEvent

@@ -8,20 +8,8 @@ import (
 
 // Group contains all the information for a group
 type Group struct {
-	baseChannel
-	Name               string         `json:"name"`
-	IsGroup            bool           `json:"is_group"`
-	Creator            string         `json:"creator"`
-	IsArchived         bool           `json:"is_archived"`
-	IsOpen             bool           `json:"is_open,omitempty"`
-	Members            []string       `json:"members"`
-	Topic              ChannelTopic   `json:"topic"`
-	Purpose            ChannelPurpose `json:"purpose"`
-	LastRead           string         `json:"last_read,omitempty"`
-	Latest             *Message       `json:"latest,omitempty"`
-	UnreadCount        int            `json:"unread_count,omitempty"`
-	NumMembers         int            `json:"num_members,omitempty"`
-	UnreadCountDisplay int            `json:"unread_count_display,omitempty"`
+	groupConversation
+	IsGroup bool `json:"is_group"`
 }
 
 type groupResponseFull struct {
