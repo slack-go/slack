@@ -36,7 +36,7 @@ func main() {
 			case *slack.LatencyReport:
 				fmt.Printf("Current latency: %v\n", ev.Value)
 
-			case *slack.SlackWSError:
+			case *slack.RTMError:
 				fmt.Printf("Error: %s\n", ev.Error())
 
 			default:

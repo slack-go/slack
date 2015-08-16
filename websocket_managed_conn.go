@@ -36,7 +36,7 @@ func (rtm *RTM) ManageConnection() {
 			return
 		}
 		rtm.info = info
-		rtm.IncomingEvents <- SlackEvent{"connected", &ConnectedEvent{
+		rtm.IncomingEvents <- RTMEvent{"connected", &ConnectedEvent{
 			ConnectionCount: connectionCount,
 			Info:            info,
 		}}
@@ -76,7 +76,7 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 
 	for {
 		// send connecting event
-		rtm.IncomingEvents <- SlackEvent{"connecting", &ConnectingEvent{
+		rtm.IncomingEvents <- RTMEvent{"connecting", &ConnectingEvent{
 			Attempt:         boff.attempts + 1,
 			ConnectionCount: connectionCount,
 		}}
@@ -86,13 +86,13 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 			return info, conn, nil
 		}
 		// check for fatal errors - currently only invalid_auth
-		if sErr, ok := err.(*SlackWebError); ok && sErr.Error() == "invalid_auth" {
-			rtm.IncomingEvents <- SlackEvent{"invalid_auth", &InvalidAuthEvent{}}
+		if sErr, ok := err.(*WebError); ok && sErr.Error() == "invalid_auth" {
+			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, sErr
 		}
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
-		rtm.IncomingEvents <- SlackEvent{"connection_error", &ConnectionErrorEvent{
+		rtm.IncomingEvents <- RTMEvent{"connection_error", &ConnectionErrorEvent{
 			Attempt:  boff.attempts,
 			ErrorObj: err,
 		}}
@@ -132,7 +132,7 @@ func (rtm *RTM) killConnection(keepRunning chan bool, intentional bool) error {
 	rtm.isConnected = false
 	rtm.wasIntentional = intentional
 	err := rtm.conn.Close()
-	rtm.IncomingEvents <- SlackEvent{"disconnected", &DisconnectedEvent{intentional}}
+	rtm.IncomingEvents <- RTMEvent{"disconnected", &DisconnectedEvent{intentional}}
 	return err
 }
 
@@ -198,7 +198,7 @@ func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
 func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 	rtm.Debugln("Sending message:", msg)
 	if len(msg.Text) > MaxMessageTextLength {
-		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &MessageTooLongEvent{
+		rtm.IncomingEvents <- RTMEvent{"outgoing_error", &MessageTooLongEvent{
 			Message:   msg,
 			MaxLength: MaxMessageTextLength,
 		}}
@@ -206,7 +206,7 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 	}
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
-		rtm.IncomingEvents <- SlackEvent{"outgoing_error", &OutgoingErrorEvent{
+		rtm.IncomingEvents <- RTMEvent{"outgoing_error", &OutgoingErrorEvent{
 			Message:  msg,
 			ErrorObj: err,
 		}}
@@ -249,7 +249,7 @@ func (rtm *RTM) receiveIncomingEvent() {
 		rtm.forcePing <- true
 		return
 	} else if err != nil {
-		rtm.IncomingEvents <- SlackEvent{"incoming_error", &IncomingEventError{
+		rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{
 			ErrorObj: err,
 		}}
 		// force a ping here too?
@@ -268,14 +268,14 @@ func (rtm *RTM) handleRawEvent(rawEvent json.RawMessage) {
 	event := &Event{}
 	err := json.Unmarshal(rawEvent, event)
 	if err != nil {
-		rtm.IncomingEvents <- SlackEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
+		rtm.IncomingEvents <- RTMEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
 		return
 	}
 	switch event.Type {
 	case "":
 		rtm.handleAck(rawEvent)
 	case "hello":
-		rtm.IncomingEvents <- SlackEvent{"hello", &HelloEvent{}}
+		rtm.IncomingEvents <- RTMEvent{"hello", &HelloEvent{}}
 	case "pong":
 		rtm.handlePong(rawEvent)
 	default:
@@ -292,9 +292,9 @@ func (rtm *RTM) handleAck(event json.RawMessage) {
 		return
 	}
 	if ack.Ok {
-		rtm.IncomingEvents <- SlackEvent{"ack", ack}
+		rtm.IncomingEvents <- RTMEvent{"ack", ack}
 	} else {
-		rtm.IncomingEvents <- SlackEvent{"ack_error", &AckErrorEvent{ack.Error}}
+		rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ack.Error}}
 	}
 }
 
@@ -310,7 +310,7 @@ func (rtm *RTM) handlePong(event json.RawMessage) {
 	}
 	if pingTime, exists := rtm.pings[pong.ReplyTo]; exists {
 		latency := time.Since(pingTime)
-		rtm.IncomingEvents <- SlackEvent{"latency_report", &LatencyReport{Value: latency}}
+		rtm.IncomingEvents <- RTMEvent{"latency_report", &LatencyReport{Value: latency}}
 		delete(rtm.pings, pong.ReplyTo)
 	} else {
 		rtm.Debugln("RTM Error - unmatched 'pong' event:", string(event))
@@ -328,7 +328,7 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 	if !exists {
 		rtm.Debugf("RTM Error, received unmapped event %q: %s\n", typeStr, string(event))
 		err := fmt.Errorf("RTM Error: Received unmapped event %q: %s\n", typeStr, string(event))
-		rtm.IncomingEvents <- SlackEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
+		rtm.IncomingEvents <- RTMEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
 		return
 	}
 	t := reflect.TypeOf(v)
@@ -337,10 +337,10 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 	if err != nil {
 		rtm.Debugf("RTM Error, could not unmarshall event %q: %s\n", typeStr, string(event))
 		err := fmt.Errorf("RTM Error: Could not unmarshall event %q: %s\n", typeStr, string(event))
-		rtm.IncomingEvents <- SlackEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
+		rtm.IncomingEvents <- RTMEvent{"unmarshalling_error", &UnmarshallingErrorEvent{err}}
 		return
 	}
-	rtm.IncomingEvents <- SlackEvent{typeStr, recvEvent}
+	rtm.IncomingEvents <- RTMEvent{typeStr, recvEvent}
 }
 
 // eventMapping holds a mapping of event names to their corresponding struct

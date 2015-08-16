@@ -16,6 +16,17 @@ import (
 	"time"
 )
 
+type WebResponse struct {
+	Ok    bool      `json:"ok"`
+	Error *WebError `json:"error"`
+}
+
+type WebError string
+
+func (s WebError) Error() string {
+	return string(s)
+}
+
 func fileUploadReq(path, fpath string, values url.Values) (*http.Request, error) {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {

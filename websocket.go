@@ -25,7 +25,7 @@ type RTM struct {
 
 	// Connection life-cycle
 	conn             *websocket.Conn
-	IncomingEvents   chan SlackEvent
+	IncomingEvents   chan RTMEvent
 	outgoingMessages chan OutgoingMessage
 	killChannel      chan bool
 	forcePing        chan bool
@@ -46,7 +46,7 @@ type RTM struct {
 func newRTM(api *Client) *RTM {
 	return &RTM{
 		Client:           *api,
-		IncomingEvents:   make(chan SlackEvent, 50),
+		IncomingEvents:   make(chan RTMEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
 		pings:            make(map[int]time.Time),
 		isConnected:      false,

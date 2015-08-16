@@ -10,38 +10,27 @@ type AckMessage struct {
 	ReplyTo   int    `json:"reply_to"`
 	Timestamp string `json:"ts"`
 	Text      string `json:"text"`
-	SlackWSResponse
+	RTMResponse
 }
 
-type SlackWebResponse struct {
-	Ok    bool           `json:"ok"`
-	Error *SlackWebError `json:"error"`
+type RTMResponse struct {
+	Ok    bool      `json:"ok"`
+	Error *RTMError `json:"error"`
 }
 
-type SlackWebError string
-
-func (s SlackWebError) Error() string {
-	return string(s)
-}
-
-type SlackWSResponse struct {
-	Ok    bool          `json:"ok"`
-	Error *SlackWSError `json:"error"`
-}
-
-type SlackWSError struct {
+type RTMError struct {
 	Code int
 	Msg  string
 }
 
-func (s SlackWSError) Error() string {
+func (s RTMError) Error() string {
 	return fmt.Sprintf("Code %d - %s", s.Code, s.Msg)
 }
 
 type MessageEvent Message
 
-// SlackEvent is the main wrapper. You will find all the other messages attached
-type SlackEvent struct {
+// RTMEvent is the main wrapper. You will find all the other messages attached
+type RTMEvent struct {
 	Type string
 	Data interface{}
 }
