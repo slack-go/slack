@@ -5,8 +5,8 @@ This library supports most if not all of the `api.slack.com` REST
 calls, as well as the Real-Time Messaging protocol over websocket, in
 a fully managed way.
 
-This fork breaks many things `github.com/nlopes/slack`, and improves
-the RTM a lot.
+
+Note: If you just updated from master and it broke your implementation, please check [0.0.1](https://github.com/nlopes/slack/releases/tag/v0.0.1)
 
 ## Installing
 

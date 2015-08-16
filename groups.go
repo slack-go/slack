@@ -39,6 +39,7 @@ func groupRequest(path string, values url.Values, debug bool) (*groupResponseFul
 	return response, nil
 }
 
+// ArchiveGroup archives a private group
 func (api *Client) ArchiveGroup(group string) error {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -95,6 +96,7 @@ func (api *Client) CreateChildGroup(group string) (*Group, error) {
 	return &response.Group, nil
 }
 
+// CloseGroup closes a private group
 func (api *Client) CloseGroup(group string) (bool, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -107,6 +109,7 @@ func (api *Client) CloseGroup(group string) (bool, bool, error) {
 	return response.NoOp, response.AlreadyClosed, nil
 }
 
+// GetGroupHistory fetches all the history for a private group
 func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*History, error) {
 	values := url.Values{
 		"token":   {api.config.token},
@@ -135,6 +138,7 @@ func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*His
 	return &response.History, nil
 }
 
+// InviteUserToGroup invites a specific user to a private group
 func (api *Client) InviteUserToGroup(group, user string) (*Group, bool, error) {
 	values := url.Values{
 		"token":   {api.config.token},
