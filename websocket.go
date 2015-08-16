@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	// maximum message length in number of characters as defined here
+	// MaxMessageTextLength is the current maximum message length in number of characters as defined here
 	// https://api.slack.com/rtm#limits
 	MaxMessageTextLength = 4000
 )
