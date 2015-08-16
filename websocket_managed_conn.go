@@ -35,7 +35,7 @@ func (rtm *RTM) ManageConnection() {
 		var err error
 		var info *Info
 
-		connectionCount += 1
+		connectionCount++
 
 		attempts := 1
 		boff.Reset()
@@ -53,7 +53,7 @@ func (rtm *RTM) ManageConnection() {
 			dur := boff.Duration()
 			rtm.Debugf("reconnection %d failed: %s", attempts, err)
 			rtm.Debugln(" -> reconnecting in", dur)
-			attempts += 1
+			attempts++
 			time.Sleep(dur)
 		}
 
