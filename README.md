@@ -1,4 +1,4 @@
-# Slack API in Go
+# Slack API For Go [![Build Status](https://travis-ci.org/nlopes/slack.svg)](https://travis-ci.org/nlopes/slack)
 
 [![GoDoc](https://godoc.org/github.com/nlopes/slack?status.png)](https://godoc.org/github.com/nlopes/slack)
 
