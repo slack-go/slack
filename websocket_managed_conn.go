@@ -285,6 +285,9 @@ var eventMapping = map[string]interface{}{
 	"star_added":   StarAddedEvent{},
 	"star_removed": StarRemovedEvent{},
 
+	"reaction_added":   ReactionAddedEvent{},
+	"reaction_removed": ReactionRemovedEvent{},
+
 	"pref_change": PrefChangeEvent{},
 
 	"team_join":              TeamJoinEvent{},
