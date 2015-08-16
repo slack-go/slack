@@ -13,6 +13,7 @@ func main() {
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
+Loop:
 	for {
 		select {
 		case msg := <-rtm.IncomingEvents:
@@ -39,9 +40,14 @@ func main() {
 			case *slack.RTMError:
 				fmt.Printf("Error: %s\n", ev.Error())
 
+			case *slack.InvalidAuthEvent:
+				fmt.Printf("Invalid credentials")
+				break Loop
+
 			default:
+
 				// Ignore other events..
-				//fmt.Printf("Unexpected: %v\n", msg.Data)
+				// fmt.Printf("Unexpected: %v\n", msg.Data)
 			}
 		}
 	}
