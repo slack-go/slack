@@ -26,7 +26,7 @@ func adminRequest(method string, teamName string, values url.Values, debug bool)
 }
 
 // DisableUser disabled a user account
-func (api *Slack) DisableUser(teamName string, user string) error {
+func (api *Client) DisableUser(teamName string, user string) error {
 	values := url.Values{
 		"user":       {user},
 		"token":      {api.config.token},
@@ -43,7 +43,7 @@ func (api *Slack) DisableUser(teamName string, user string) error {
 }
 
 // InviteGuest invites a user to Slack as a single-channel guest
-func (api *Slack) InviteGuest(
+func (api *Client) InviteGuest(
 	teamName string,
 	channel string,
 	firstName string,
@@ -70,7 +70,7 @@ func (api *Slack) InviteGuest(
 }
 
 // InviteRestricted invites a user to Slack as a restricted account
-func (api *Slack) InviteRestricted(
+func (api *Client) InviteRestricted(
 	teamName string,
 	channel string,
 	firstName string,
@@ -97,7 +97,7 @@ func (api *Slack) InviteRestricted(
 }
 
 // SetRegular enables the specified user
-func (api *Slack) SetRegular(teamName string, user string) error {
+func (api *Client) SetRegular(teamName string, user string) error {
 	values := url.Values{
 		"user":       {user},
 		"token":      {api.config.token},
@@ -114,7 +114,7 @@ func (api *Slack) SetRegular(teamName string, user string) error {
 }
 
 // SendSSOBindingEmail sends an SSO binding email to the specified user
-func (api *Slack) SendSSOBindingEmail(teamName string, user string) error {
+func (api *Client) SendSSOBindingEmail(teamName string, user string) error {
 	values := url.Values{
 		"user":       {user},
 		"token":      {api.config.token},

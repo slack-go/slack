@@ -129,7 +129,7 @@ func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 }
 
 // AddReaction adds a reaction emoji to a message, file or file comment.
-func (api *Slack) AddReaction(name string, item ItemRef) error {
+func (api *Client) AddReaction(name string, item ItemRef) error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -149,7 +149,7 @@ func (api *Slack) AddReaction(name string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := parseResponse("reactions.add", values, response, api.debug); err != nil {
+	if err := post("reactions.add", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -159,7 +159,7 @@ func (api *Slack) AddReaction(name string, item ItemRef) error {
 }
 
 // RemoveReaction removes a reaction emoji from a message, file or file comment.
-func (api *Slack) RemoveReaction(name string, item ItemRef) error {
+func (api *Client) RemoveReaction(name string, item ItemRef) error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -179,7 +179,7 @@ func (api *Slack) RemoveReaction(name string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := parseResponse("reactions.remove", values, response, api.debug); err != nil {
+	if err := post("reactions.remove", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -189,7 +189,7 @@ func (api *Slack) RemoveReaction(name string, item ItemRef) error {
 }
 
 // GetReactions returns details about the reactions on an item.
-func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]ItemReaction, error) {
+func (api *Client) GetReactions(item ItemRef, params GetReactionsParameters) ([]ItemReaction, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -209,7 +209,7 @@ func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]I
 		values.Set("full", strconv.FormatBool(params.Full))
 	}
 	response := &getReactionsResponseFull{}
-	if err := parseResponse("reactions.get", values, response, api.debug); err != nil {
+	if err := post("reactions.get", values, response, api.debug); err != nil {
 		return nil, err
 	}
 	if !response.Ok {
@@ -219,7 +219,7 @@ func (api *Slack) GetReactions(item ItemRef, params GetReactionsParameters) ([]I
 }
 
 // ListReactions returns information about the items a user reacted to.
-func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
+func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
@@ -236,7 +236,7 @@ func (api *Slack) ListReactions(params ListReactionsParameters) ([]ReactedItem, 
 		values.Add("full", strconv.FormatBool(params.Full))
 	}
 	response := &listReactionsResponseFull{}
-	err := parseResponse("reactions.list", values, response, api.debug)
+	err := post("reactions.list", values, response, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}

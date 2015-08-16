@@ -9,7 +9,7 @@ import (
 )
 
 // RTM represents a managed websocket connection. It also supports
-// all the methods of the `Slack` type.
+// all the methods of the `Client` type.
 //
 // Create this element with Client's NewRTM().
 type RTM struct {
@@ -22,7 +22,7 @@ type RTM struct {
 	IncomingEvents   chan SlackEvent
 	outgoingMessages chan OutgoingMessage
 
-	// Slack is the main API, embedded
+	// Client is the main API, embedded
 	Client
 	websocketURL string
 

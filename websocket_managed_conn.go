@@ -115,7 +115,7 @@ func (rtm *RTM) ping(conn *websocket.Conn, errors chan error) {
 	rtm.messageID++
 	rtm.pings[rtm.messageID] = time.Now()
 
-	msg := &Ping{Id: rtm.messageID, Type: "ping"}
+	msg := &Ping{ID: rtm.messageID, Type: "ping"}
 	rtm.Debugln("Sending PING")
 	if err := websocket.JSON.Send(conn, msg); err != nil {
 		errors <- fmt.Errorf("error sending 'ping': %s", err)

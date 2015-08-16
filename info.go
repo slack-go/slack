@@ -157,7 +157,7 @@ type Info struct {
 
 type infoResponseFull struct {
 	Info
-	WSResponse
+	SlackWSResponse
 }
 
 // GetBotByID returns a bot given a bot id

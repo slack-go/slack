@@ -110,9 +110,9 @@ func (rtm *RTM) NewOutgoingMessage(text string, channel string) *OutgoingMessage
 	defer rtm.mutex.Unlock()
 	rtm.messageID++
 	return &OutgoingMessage{
-		Id:        rtm.messageID,
-		Type:      "message",
-		ChannelId: channel,
-		Text:      text,
+		ID:      rtm.messageID,
+		Type:    "message",
+		Channel: channel,
+		Text:    text,
 	}
 }

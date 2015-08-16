@@ -94,7 +94,7 @@ func escapeMessage(message string) string {
 // PostMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Client) PostMessage(channel, text string, params PostMessageParameters) (channel, timestamp string, err error) {
+func (api *Client) PostMessage(channel, text string, params PostMessageParameters) (string, string, error) {
 	if params.EscapeText {
 		text = escapeMessage(text)
 	}
