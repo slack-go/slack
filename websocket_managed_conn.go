@@ -112,7 +112,7 @@ func (rtm *RTM) startRTMAndDial() (*Info, *websocket.Conn, error) {
 		return nil, nil, err
 	}
 
-	conn, err := websocket.Dial(url, "", "http://api.slack.com")
+	conn, err := websocketProxyDial(url, "http://api.slack.com")
 	if err != nil {
 		return nil, nil, err
 	}
