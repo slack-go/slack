@@ -25,10 +25,10 @@ func adminRequest(method string, teamName string, values url.Values, debug bool)
 	return adminResponse, nil
 }
 
-// DisableUser disabled a user account
-func (api *Client) DisableUser(teamName string, user string) error {
+// DisableUser disabled a user account, given a user ID
+func (api *Client) DisableUser(teamName string, uid string) error {
 	values := url.Values{
-		"user":       {user},
+		"user":       {uid},
 		"token":      {api.config.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
@@ -36,7 +36,7 @@ func (api *Client) DisableUser(teamName string, user string) error {
 
 	_, err := adminRequest("setInactive", teamName, values, api.debug)
 	if err != nil {
-		return fmt.Errorf("Failed to disable user (%s): %s", user, err)
+		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
 	}
 
 	return nil
@@ -125,6 +125,41 @@ func (api *Client) SendSSOBindingEmail(teamName string, user string) error {
 	_, err := adminRequest("sendSSOBind", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
+	}
+
+	return nil
+}
+
+// SetUltraRestricted converts a user into a single-channel guest
+func (api *Client) SetUltraRestricted(teamName, uid, channel string) error {
+	values := url.Values{
+		"user":       {uid},
+		"channel":    {channel},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setUltraRestricted", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
+	}
+
+	return nil
+}
+
+// SetRestricted converts a user into a restricted account
+func (api *Client) SetRestricted(teamName, uid string) error {
+	values := url.Values{
+		"user":       {uid},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("setRestricted", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to restrict account: %s", err)
 	}
 
 	return nil
