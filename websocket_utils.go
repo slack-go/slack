@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// JSONTimeString is an auxiliary type to allow us to format the time as we wish
 type JSONTimeString string
 
 // String converts the unix timestamp into a string
@@ -28,7 +29,7 @@ func (t JSONTimeString) String() string {
 
 var portMapping = map[string]string{"ws": "80", "wss": "443"}
 
-func websocketizeUrlPort(orig string) (string, error) {
+func websocketizeURLPort(orig string) (string, error) {
 	urlObj, err := url.ParseRequestURI(orig)
 	if err != nil {
 		return "", err

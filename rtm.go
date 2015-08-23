@@ -24,7 +24,7 @@ func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
 	// but slack returns the address with no port, so we have to fix it
 	api.Debugln("Using URL:", response.Info.URL)
-	websocketURL, err = websocketizeUrlPort(response.Info.URL)
+	websocketURL, err = websocketizeURLPort(response.Info.URL)
 	if err != nil {
 		return nil, "", fmt.Errorf("parsing response URL: %s", err)
 	}

@@ -13,11 +13,13 @@ type AckMessage struct {
 	RTMResponse
 }
 
+// RTMResponse encapsulates response details as returned by the Slack API
 type RTMResponse struct {
 	Ok    bool      `json:"ok"`
 	Error *RTMError `json:"error"`
 }
 
+// RTMError encapsulates error information as returned by the Slack API
 type RTMError struct {
 	Code int
 	Msg  string
@@ -27,6 +29,7 @@ func (s RTMError) Error() string {
 	return fmt.Sprintf("Code %d - %s", s.Code, s.Msg)
 }
 
+// MessageEvent represents a Slack Message (used as the event type for an incoming message)
 type MessageEvent Message
 
 // RTMEvent is the main wrapper. You will find all the other messages attached
@@ -52,6 +55,7 @@ type UserTypingEvent struct {
 	Channel string `json:"channel"`
 }
 
+// PrefChangeEvent represents a user preferences change event
 type PrefChangeEvent struct {
 	Type  string          `json:"type"`
 	Name  string          `json:"name"`
