@@ -118,8 +118,13 @@ type JSONTime int64
 
 // String converts the unix timestamp into a string
 func (t JSONTime) String() string {
-	tm := time.Unix(int64(t), 0)
+	tm := t.Time()
 	return fmt.Sprintf("\"%s\"", tm.Format("Mon Jan _2"))
+}
+
+// Time returns a `time.Time` representation of this value.
+func (t JSONTime) Time() time.Time {
+	return time.Unix(int64(t), 0)
 }
 
 // Team contains details about a team
