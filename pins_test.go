@@ -202,13 +202,8 @@ func TestSlack_ListPins(t *testing.T) {
 	}
 	wantParams := map[string]string{
 		"channel": "ChannelID",
-		"count":   "200",
-		"page":    "2",
 	}
-	params := NewListPinsParameters()
-	params.Count = 200
-	params.Page = 2
-	got, paging, err := api.ListPins("ChannelID", params)
+	got, paging, err := api.ListPins("ChannelID")
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}

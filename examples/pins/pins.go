@@ -97,7 +97,7 @@ func main() {
 	}
 
 	// List all of the users pins.
-	listPins, _, err := api.ListPins(channelID, slack.NewListPinsParameters())
+	listPins, _, err := api.ListPins(channelID)
 	if err != nil {
 		fmt.Printf("Error listing pins: %s\n", err)
 		return
