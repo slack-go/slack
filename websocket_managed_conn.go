@@ -388,6 +388,9 @@ var eventMapping = map[string]interface{}{
 	"file_comment_edited":  FileCommentEditedEvent{},
 	"file_comment_deleted": FileCommentDeletedEvent{},
 
+	"pin_added":   PinAddedEvent{},
+	"pin_removed": PinRemovedEvent{},
+
 	"star_added":   StarAddedEvent{},
 	"star_removed": StarRemovedEvent{},
 
