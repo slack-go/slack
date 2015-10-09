@@ -8,7 +8,7 @@ import (
 
 // Group contains all the information for a group
 type Group struct {
-	GroupConversation
+	groupConversation
 	IsGroup bool `json:"is_group"`
 }
 
