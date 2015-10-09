@@ -21,6 +21,7 @@ func (t JSONTimeString) String() string {
 	return fmt.Sprintf("\"%s\"", tm.Format("Mon Jan _2"))
 }
 
+// Time converts the timestamp string to time.Time
 func (t JSONTimeString) Time() time.Time {
 	if t == "" {
 		return time.Time{}
@@ -30,9 +31,7 @@ func (t JSONTimeString) Time() time.Time {
 		log.Println("ERROR parsing a JSONTimeString!", err)
 		return time.Time{}
 	}
-	timeStr := int64(floatN)
-	tm := time.Unix(int64(timeStr), 0)
-	return tm
+	return time.Unix(int64(floatN), 0)
 }
 
 var portMapping = map[string]string{"ws": "80", "wss": "443"}
