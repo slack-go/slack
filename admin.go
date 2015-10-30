@@ -96,6 +96,30 @@ func (api *Client) InviteRestricted(
 	return nil
 }
 
+// InviteToTeam invites a user to a Slack team
+func (api *Client) InviteToTeam(
+	teamName string,
+	firstName string,
+	lastName string,
+	emailAddress string,
+) error {
+	values := url.Values{
+		"email":      {emailAddress},
+		"first_name": {firstName},
+		"last_name":  {lastName},
+		"token":      {api.config.token},
+		"set_active": {"true"},
+		"_attempts":  {"1"},
+	}
+
+	_, err := adminRequest("invite", teamName, values, api.debug)
+	if err != nil {
+		return fmt.Errorf("Failed to invite to team: %s", err)
+	}
+
+	return nil
+}
+
 // SetRegular enables the specified user
 func (api *Client) SetRegular(teamName string, user string) error {
 	values := url.Values{
