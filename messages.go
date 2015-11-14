@@ -114,3 +114,15 @@ func (rtm *RTM) NewOutgoingMessage(text string, channel string) *OutgoingMessage
 		Text:    text,
 	}
 }
+
+// NewTypingMessage prepares an OutgoingMessage that the user can
+// use to send as a typing indicator. Use this function to properly set the
+// messageID.
+func (rtm *RTM) NewTypingMessage(channel string) *OutgoingMessage {
+	id := rtm.idGen.Next()
+	return &OutgoingMessage{
+		ID:      id,
+		Type:    "typing",
+		Channel: channel,
+	}
+}
