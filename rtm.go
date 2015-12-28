@@ -12,7 +12,7 @@ import (
 // on it.
 func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 	response := &infoResponseFull{}
-	err = post("rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
+	err = post(api.httpClient, "rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
 	if err != nil {
 		return nil, "", fmt.Errorf("post: %s", err)
 	}

@@ -3,6 +3,7 @@ package slack
 import (
 	"errors"
 	"log"
+	"net/http"
 	"net/url"
 )
 
@@ -45,23 +46,28 @@ type authTestResponseFull struct {
 }
 
 type Client struct {
-	config struct {
+	httpClient *http.Client
+	config     struct {
 		token string
 	}
 	info  Info
 	debug bool
 }
 
-func New(token string) *Client {
+func New(token string, client *http.Client) *Client {
 	s := &Client{}
 	s.config.token = token
+	if client == nil {
+		client = http.DefaultClient
+	}
+	s.httpClient = client
 	return s
 }
 
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
-	err := post("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
+	err := post(api.httpClient, "auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
 		return nil, err
 	}

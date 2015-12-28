@@ -51,7 +51,7 @@ func (api *Client) AddStar(channel string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("stars.add", values, response, api.debug); err != nil {
+	if err := post(api.httpClient, "stars.add", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -76,7 +76,7 @@ func (api *Client) RemoveStar(channel string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("stars.remove", values, response, api.debug); err != nil {
+	if err := post(api.httpClient, "stars.remove", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -100,7 +100,7 @@ func (api *Client) ListStars(params StarsParameters) ([]Item, *Paging, error) {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
 	response := &listResponseFull{}
-	err := post("stars.list", values, response, api.debug)
+	err := post(api.httpClient, "stars.list", values, response, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}

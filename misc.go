@@ -88,9 +88,8 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 	return nil
 }
 
-func postWithMultipartResponse(path string, filepath string, values url.Values, intf interface{}, debug bool) error {
+func postWithMultipartResponse(client *http.Client, path string, filepath string, values url.Values, intf interface{}, debug bool) error {
 	req, err := fileUploadReq(SLACK_API+path, filepath, values)
-	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -99,8 +98,8 @@ func postWithMultipartResponse(path string, filepath string, values url.Values, 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
-	resp, err := http.PostForm(endpoint, values)
+func postForm(client *http.Client, endpoint string, values url.Values, intf interface{}, debug bool) error {
+	resp, err := client.PostForm(endpoint, values)
 	if err != nil {
 		return err
 	}
@@ -109,11 +108,11 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func post(path string, values url.Values, intf interface{}, debug bool) error {
-	return postForm(SLACK_API+path, values, intf, debug)
+func post(client *http.Client, path string, values url.Values, intf interface{}, debug bool) error {
+	return postForm(client, SLACK_API+path, values, intf, debug)
 }
 
-func parseAdminResponse(method string, teamName string, values url.Values, intf interface{}, debug bool) error {
+func parseAdminResponse(client *http.Client, method string, teamName string, values url.Values, intf interface{}, debug bool) error {
 	endpoint := fmt.Sprintf(SLACK_WEB_API_FORMAT, teamName, method, time.Now().Unix())
-	return postForm(endpoint, values, intf, debug)
+	return postForm(client, endpoint, values, intf, debug)
 }

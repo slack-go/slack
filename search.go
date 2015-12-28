@@ -101,7 +101,7 @@ func (api *Client) _search(path, query string, params SearchParameters, files, m
 		values.Add("page", strconv.Itoa(params.Page))
 	}
 	response = &searchResponseFull{}
-	err := post(path, values, response, api.debug)
+	err := post(api.httpClient, path, values, response, api.debug)
 	if err != nil {
 		return nil, err
 	}

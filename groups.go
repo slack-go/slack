@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -27,9 +28,9 @@ type groupResponseFull struct {
 	SlackResponse
 }
 
-func groupRequest(path string, values url.Values, debug bool) (*groupResponseFull, error) {
+func groupRequest(client *http.Client, path string, values url.Values, debug bool) (*groupResponseFull, error) {
 	response := &groupResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (api *Client) ArchiveGroup(group string) error {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	_, err := groupRequest("groups.archive", values, api.debug)
+	_, err := groupRequest(api.httpClient, "groups.archive", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func (api *Client) UnarchiveGroup(group string) error {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	_, err := groupRequest("groups.unarchive", values, api.debug)
+	_, err := groupRequest(api.httpClient, "groups.unarchive", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func (api *Client) CreateGroup(group string) (*Group, error) {
 		"token": {api.config.token},
 		"name":  {group},
 	}
-	response, err := groupRequest("groups.create", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.create", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func (api *Client) CreateChildGroup(group string) (*Group, error) {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	response, err := groupRequest("groups.createChild", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.createChild", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func (api *Client) CloseGroup(group string) (bool, bool, error) {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	response, err := imRequest("groups.close", values, api.debug)
+	response, err := imRequest(api.httpClient, "groups.close", values, api.debug)
 	if err != nil {
 		return false, false, err
 	}
@@ -131,7 +132,7 @@ func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*His
 			values.Add("inclusive", "0")
 		}
 	}
-	response, err := groupRequest("groups.history", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.history", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func (api *Client) InviteUserToGroup(group, user string) (*Group, bool, error) {
 		"channel": {group},
 		"user":    {user},
 	}
-	response, err := groupRequest("groups.invite", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.invite", values, api.debug)
 	if err != nil {
 		return nil, false, err
 	}
@@ -158,7 +159,7 @@ func (api *Client) LeaveGroup(group string) error {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	_, err := groupRequest("groups.leave", values, api.debug)
+	_, err := groupRequest(api.httpClient, "groups.leave", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -172,7 +173,7 @@ func (api *Client) KickUserFromGroup(group, user string) error {
 		"channel": {group},
 		"user":    {user},
 	}
-	_, err := groupRequest("groups.kick", values, api.debug)
+	_, err := groupRequest(api.httpClient, "groups.kick", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -187,7 +188,7 @@ func (api *Client) GetGroups(excludeArchived bool) ([]Group, error) {
 	if excludeArchived {
 		values.Add("exclude_archived", "1")
 	}
-	response, err := groupRequest("groups.list", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.list", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +201,7 @@ func (api *Client) GetGroupInfo(group string) (*Group, error) {
 		"token":   {api.config.token},
 		"channel": {group},
 	}
-	response, err := groupRequest("groups.info", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +219,7 @@ func (api *Client) SetGroupReadMark(group, ts string) error {
 		"channel": {group},
 		"ts":      {ts},
 	}
-	_, err := groupRequest("groups.mark", values, api.debug)
+	_, err := groupRequest(api.httpClient, "groups.mark", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -231,7 +232,7 @@ func (api *Client) OpenGroup(group string) (bool, bool, error) {
 		"token": {api.config.token},
 		"user":  {group},
 	}
-	response, err := groupRequest("groups.open", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.open", values, api.debug)
 	if err != nil {
 		return false, false, err
 	}
@@ -249,7 +250,7 @@ func (api *Client) RenameGroup(group, name string) (*Channel, error) {
 	}
 	// XXX: the created entry in this call returns a string instead of a number
 	// so I may have to do some workaround to solve it.
-	response, err := groupRequest("groups.rename", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.rename", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +265,7 @@ func (api *Client) SetGroupPurpose(group, purpose string) (string, error) {
 		"channel": {group},
 		"purpose": {purpose},
 	}
-	response, err := groupRequest("groups.setPurpose", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.setPurpose", values, api.debug)
 	if err != nil {
 		return "", err
 	}
@@ -278,7 +279,7 @@ func (api *Client) SetGroupTopic(group, topic string) (string, error) {
 		"channel": {group},
 		"topic":   {topic},
 	}
-	response, err := groupRequest("groups.setTopic", values, api.debug)
+	response, err := groupRequest(api.httpClient, "groups.setTopic", values, api.debug)
 	if err != nil {
 		return "", err
 	}

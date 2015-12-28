@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 )
 
@@ -12,7 +13,7 @@ type oAuthResponseFull struct {
 }
 
 // GetOAuthToken retrieves an AccessToken
-func GetOAuthToken(clientID, clientSecret, code, redirectURI string, debug bool) (accessToken string, scope string, err error) {
+func GetOAuthToken(client *http.Client, clientID, clientSecret, code, redirectURI string, debug bool) (accessToken string, scope string, err error) {
 	values := url.Values{
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
@@ -20,7 +21,7 @@ func GetOAuthToken(clientID, clientSecret, code, redirectURI string, debug bool)
 		"redirect_uri":  {redirectURI},
 	}
 	response := &oAuthResponseFull{}
-	err = post("oauth.access", values, response, debug)
+	err = post(client, "oauth.access", values, response, debug)
 	if err != nil {
 		return "", "", err
 	}
