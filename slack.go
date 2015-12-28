@@ -6,6 +6,20 @@ import (
 	"net/url"
 )
 
+// Well-known slack error strings.
+const (
+	TokenRevokedError    = "token_revoked"     // oauth token revoked by user
+	ChannelNotFoundError = "channel_not_found" // Value passed for channel was invalid.
+	NotInChannelError    = "not_in_channel"    // Cannot post user messages to a channel they are not in.
+	IsArchivedError      = "is_archived"       // Channel has been archived.
+	MsgTooLongError      = "msg_too_long"      // Message text is too long
+	NoTextError          = "no_text"           // No message text provided
+	RateLimitedError     = "rate_limited"      // Application has posted too many messages, read the Rate Limit documentation for more information
+	NotAuthedError       = "not_authed"        // No authentication token provided.
+	InvalidAuthError     = "invalid_auth"      // Invalid authentication token.
+	AccountInactiveError = "account_inactive"  // Authentication token is for a deleted user or team.
+)
+
 /*
   Added as a var so that we can change this for testing purposes
 */
