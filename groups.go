@@ -228,8 +228,8 @@ func (api *Client) SetGroupReadMark(group, ts string) error {
 // OpenGroup opens a private group
 func (api *Client) OpenGroup(group string) (bool, bool, error) {
 	values := url.Values{
-		"token": {api.config.token},
-		"user":  {group},
+		"token":   {api.config.token},
+		"channel": {group},
 	}
 	response, err := groupRequest("groups.open", values, api.debug)
 	if err != nil {
