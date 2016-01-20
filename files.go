@@ -23,12 +23,13 @@ type File struct {
 	Created   JSONTime `json:"created"`
 	Timestamp JSONTime `json:"timestamp"`
 
-	Name       string `json:"name"`
-	Title      string `json:"title"`
-	Mimetype   string `json:"mimetype"`
-	Filetype   string `json:"filetype"`
-	PrettyType string `json:"pretty_type"`
-	User       string `json:"user"`
+	Name              string `json:"name"`
+	Title             string `json:"title"`
+	Mimetype          string `json:"mimetype"`
+	ImageExifRotation int    `json:"image_exif_rotation"`
+	Filetype          string `json:"filetype"`
+	PrettyType        string `json:"pretty_type"`
+	User              string `json:"user"`
 
 	Mode         string `json:"mode"`
 	Editable     bool   `json:"editable"`
@@ -37,19 +38,36 @@ type File struct {
 
 	Size int `json:"size"`
 
-	URL                string `json:"url"`
-	URLDownload        string `json:"url_download"`
+	URL                string `json:"url"`          // Deprecated - never set
+	URLDownload        string `json:"url_download"` // Deprecated - never set
 	URLPrivate         string `json:"url_private"`
 	URLPrivateDownload string `json:"url_private_download"`
 
+	OriginalH   int    `json:"original_h"`
+	OriginalW   int    `json:"original_w"`
 	Thumb64     string `json:"thumb_64"`
 	Thumb80     string `json:"thumb_80"`
+	Thumb160    string `json:"thumb_160"`
 	Thumb360    string `json:"thumb_360"`
 	Thumb360Gif string `json:"thumb_360_gif"`
 	Thumb360W   int    `json:"thumb_360_w"`
 	Thumb360H   int    `json:"thumb_360_h"`
+	Thumb480    string `json:"thumb_480"`
+	Thumb480W   int    `json:"thumb_480_w"`
+	Thumb480H   int    `json:"thumb_480_h"`
+	Thumb720    string `json:"thumb_720"`
+	Thumb720W   int    `json:"thumb_720_w"`
+	Thumb720H   int    `json:"thumb_720_h"`
+	Thumb960    string `json:"thumb_960"`
+	Thumb960W   int    `json:"thumb_960_w"`
+	Thumb960H   int    `json:"thumb_960_h"`
+	Thumb1024   string `json:"thumb_1024"`
+	Thumb1024W  int    `json:"thumb_1024_w"`
+	Thumb1024H  int    `json:"thumb_1024_h"`
 
-	Permalink        string `json:"permalink"`
+	Permalink       string `json:"permalink"`
+	PermalinkPublic string `json:"permalink_public"`
+
 	EditLink         string `json:"edit_link"`
 	Preview          string `json:"preview"`
 	PreviewHighlight string `json:"preview_highlight"`
@@ -60,7 +78,9 @@ type File struct {
 	PublicURLShared bool     `json:"public_url_shared"`
 	Channels        []string `json:"channels"`
 	Groups          []string `json:"groups"`
+	IMs             []string `json:"ims"`
 	InitialComment  Comment  `json:"initial_comment"`
+	CommentsCount   int      `json:"comments_count"`
 	NumStars        int      `json:"num_stars"`
 	IsStarred       bool     `json:"is_starred"`
 }
