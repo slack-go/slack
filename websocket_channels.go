@@ -4,7 +4,7 @@ package slack
 type ChannelCreatedEvent struct {
 	Type           string             `json:"type"`
 	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp JSONTimeString     `json:"event_ts"`
+	EventTimestamp string             `json:"event_ts"`
 }
 
 // ChannelCreatedInfo represents the information associated with the Channel created event
@@ -28,10 +28,10 @@ type ChannelInfoEvent struct {
 	// channel_deleted
 	// channel_archive
 	// channel_unarchive
-	Type      string          `json:"type"`
-	Channel   string          `json:"channel"`
-	User      string          `json:"user,omitempty"`
-	Timestamp *JSONTimeString `json:"ts,omitempty"`
+	Type      string `json:"type"`
+	Channel   string `json:"channel"`
+	User      string `json:"user,omitempty"`
+	Timestamp string `json:"ts,omitempty"`
 }
 
 // ChannelRenameEvent represents the Channel rename event
@@ -43,17 +43,17 @@ type ChannelRenameEvent struct {
 
 // ChannelRenameInfo represents the information associated with a Channel rename event
 type ChannelRenameInfo struct {
-	ID      string          `json:"id"`
-	Name    string          `json:"name"`
-	Created *JSONTimeString `json:"created"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Created string `json:"created"`
 }
 
 // ChannelHistoryChangedEvent represents the Channel history changed event
 type ChannelHistoryChangedEvent struct {
-	Type           string         `json:"type"`
-	Latest         JSONTimeString `json:"latest"`
-	Timestamp      JSONTimeString `json:"ts"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
+	Type           string `json:"type"`
+	Latest         string `json:"latest"`
+	Timestamp      string `json:"ts"`
+	EventTimestamp string `json:"event_ts"`
 }
 
 // ChannelMarkedEvent represents the Channel marked event

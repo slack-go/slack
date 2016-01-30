@@ -76,21 +76,21 @@ type UserChangeEvent struct {
 
 // EmojiChangedEvent represents the emoji changed event
 type EmojiChangedEvent struct {
-	Type           string         `json:"type"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
+	Type           string `json:"type"`
+	EventTimestamp string `json:"event_ts"`
 }
 
 // CommandsChangedEvent represents the commands changed event
 type CommandsChangedEvent struct {
-	Type           string         `json:"type"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
+	Type           string `json:"type"`
+	EventTimestamp string `json:"event_ts"`
 }
 
 // EmailDomainChangedEvent represents the email domain changed event
 type EmailDomainChangedEvent struct {
-	Type           string         `json:"type"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
-	EmailDomain    string         `json:"email_domain"`
+	Type           string `json:"type"`
+	EventTimestamp string `json:"event_ts"`
+	EmailDomain    string `json:"email_domain"`
 }
 
 // BotAddedEvent represents the bot added event
