@@ -1,9 +1,18 @@
 package slack
 
+// reactionItem is a lighter-weight item than is returned by the reactions list.
+type reactionItem struct {
+	Type        string `json:"type"`
+	Channel     string `json:"channel,omitempty"`
+	File        string `json:"file,omitempty"`
+	FileComment string `json:"file_comment,omitempty"`
+	Timestamp   string `json:"ts,omitempty"`
+}
+
 type reactionEvent struct {
 	Type           string         `json:"type"`
 	User           string         `json:"user"`
-	Item           ReactedItem    `json:"item"`
+	Item           reactionItem   `json:"item"`
 	Reaction       string         `json:"reaction"`
 	EventTimestamp JSONTimeString `json:"event_ts"`
 }
