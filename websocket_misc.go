@@ -109,3 +109,9 @@ type BotChangedEvent struct {
 type AccountsChangedEvent struct {
 	Type string `json:"type"`
 }
+
+// ReconnectUrlEvent represents the receiving reconnect url event
+type ReconnectUrlEvent struct {
+	Type string `json:"type"`
+	URL  string `json:"url"`
+}

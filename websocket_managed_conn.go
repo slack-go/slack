@@ -419,4 +419,6 @@ var eventMapping = map[string]interface{}{
 	"bot_changed": BotChangedEvent{},
 
 	"accounts_changed": AccountsChangedEvent{},
+
+	"reconnect_url": ReconnectUrlEvent{},
 }
