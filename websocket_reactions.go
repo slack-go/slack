@@ -12,6 +12,7 @@ type reactionItem struct {
 type reactionEvent struct {
 	Type           string       `json:"type"`
 	User           string       `json:"user"`
+	ItemUser       string       `json:"item_user"`
 	Item           reactionItem `json:"item"`
 	Reaction       string       `json:"reaction"`
 	EventTimestamp string       `json:"event_ts"`
