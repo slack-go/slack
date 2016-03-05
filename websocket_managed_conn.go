@@ -361,6 +361,9 @@ var eventMapping = map[string]interface{}{
 	"channel_unarchive":       ChannelUnarchiveEvent{},
 	"channel_history_changed": ChannelHistoryChangedEvent{},
 
+	"dnd_updated":      DNDUpdatedEvent{},
+	"dnd_updated_user": DNDUpdatedEvent{},
+
 	"im_created":         IMCreatedEvent{},
 	"im_open":            IMOpenEvent{},
 	"im_close":           IMCloseEvent{},
