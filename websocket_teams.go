@@ -8,9 +8,9 @@ type TeamJoinEvent struct {
 
 // TeamRenameEvent represents the Team rename event
 type TeamRenameEvent struct {
-	Type           string          `json:"type"`
-	Name           string          `json:"name,omitempty"`
-	EventTimestamp *JSONTimeString `json:"event_ts,omitempty"`
+	Type           string `json:"type"`
+	Name           string `json:"name,omitempty"`
+	EventTimestamp string `json:"event_ts,omitempty"`
 }
 
 // TeamPrefChangeEvent represents the Team preference change event

@@ -10,11 +10,11 @@ type reactionItem struct {
 }
 
 type reactionEvent struct {
-	Type           string         `json:"type"`
-	User           string         `json:"user"`
-	Item           reactionItem   `json:"item"`
-	Reaction       string         `json:"reaction"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
+	Type           string       `json:"type"`
+	User           string       `json:"user"`
+	Item           reactionItem `json:"item"`
+	Reaction       string       `json:"reaction"`
+	EventTimestamp string       `json:"event_ts"`
 }
 
 // ReactionAddedEvent represents the Reaction added event

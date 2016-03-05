@@ -2,9 +2,9 @@ package slack
 
 // FileActionEvent represents the File action event
 type fileActionEvent struct {
-	Type           string         `json:"type"`
-	EventTimestamp JSONTimeString `json:"event_ts"`
-	File           File           `json:"file"`
+	Type           string `json:"type"`
+	EventTimestamp string `json:"event_ts"`
+	File           File   `json:"file"`
 	// FileID is used for FileDeletedEvent
 	FileID string `json:"file_id,omitempty"`
 }
