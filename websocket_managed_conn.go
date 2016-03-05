@@ -391,16 +391,22 @@ var eventMapping = map[string]interface{}{
 	"file_comment_edited":  FileCommentEditedEvent{},
 	"file_comment_deleted": FileCommentDeletedEvent{},
 
+	"mpim_open":            MPIMOpenEvent{},
+	"mpim_close":           MPIMCloseEvent{},
+	"mpim_joined":          MPIMJoinedEvent{},
+	"mpim_marked":          MPIMMarkedEvent{},
+	"mpim_history_changed": MPIMHistoryChangedEvent{},
+
 	"pin_added":   PinAddedEvent{},
 	"pin_removed": PinRemovedEvent{},
 
-	"star_added":   StarAddedEvent{},
-	"star_removed": StarRemovedEvent{},
+	"pref_change": PrefChangeEvent{},
 
 	"reaction_added":   ReactionAddedEvent{},
 	"reaction_removed": ReactionRemovedEvent{},
 
-	"pref_change": PrefChangeEvent{},
+	"star_added":   StarAddedEvent{},
+	"star_removed": StarRemovedEvent{},
 
 	"team_join":              TeamJoinEvent{},
 	"team_rename":            TeamRenameEvent{},
