@@ -131,6 +131,13 @@ func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*His
 			values.Add("inclusive", "0")
 		}
 	}
+	if params.Unreads != DEFAULT_HISTORY_UNREADS {
+		if params.Unreads {
+			values.Add("unreads", "1")
+		} else {
+			values.Add("unreads", "0")
+		}
+	}
 	response, err := groupRequest("groups.history", values, api.debug)
 	if err != nil {
 		return nil, err
