@@ -240,3 +240,29 @@ func (api *Client) DeleteFile(fileID string) error {
 	return nil
 
 }
+
+// RevokeFilePublicURL disables public/external sharing for a file
+func (api *Client) RevokeFilePublicURL(fileID string) (*File, error) {
+	values := url.Values{
+		"token": {api.config.token},
+		"file":  {fileID},
+	}
+	response, err := fileRequest("files.revokePublicURL", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	return &response.File, nil
+}
+
+// ShareFilePublicURL enabled public/external sharing for a file
+func (api *Client) ShareFilePublicURL(fileID string) (*File, []Comment, *Paging, error) {
+	values := url.Values{
+		"token": {api.config.token},
+		"file":  {fileID},
+	}
+	response, err := fileRequest("files.sharedPublicURL", values, api.debug)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return &response.File, response.Comments, &response.Paging, nil
+}
