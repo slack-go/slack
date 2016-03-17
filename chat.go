@@ -125,6 +125,11 @@ func (api *Client) PostMessage(channel, text string, params PostMessageParameter
 	if params.UnfurlLinks != DEFAULT_MESSAGE_UNFURL_LINKS {
 		values.Set("unfurl_links", "true")
 	}
+	// I want to send a message with explicit `as_user` `true` and `unfurl_links` `false` in request.
+	// Because setting `as_user` to `true` will change the default value for `unfurl_links` to `true` on Slack API side.
+	if params.AsUser != DEFAULT_MESSAGE_ASUSER && params.UnfurlLinks == DEFAULT_MESSAGE_UNFURL_LINKS {
+		values.Set("unfurl_links", "false")
+	}
 	if params.UnfurlMedia != DEFAULT_MESSAGE_UNFURL_MEDIA {
 		values.Set("unfurl_media", "false")
 	}
