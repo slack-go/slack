@@ -197,7 +197,13 @@ func TestSlack_ListStars(t *testing.T) {
         "pages": 1
     }}`
 	want := []Item{
-		NewMessageItem("C1", &Message{Msg: Msg{Text: "hello"}}),
+		NewMessageItem("C1", &Message{Msg: Msg{
+			Text: "hello",
+			Reactions: []ItemReaction{
+				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+			},
+		}}),
 		NewFileItem(&File{Name: "toy"}),
 		NewFileCommentItem(&File{Name: "toy"}, &Comment{Comment: "cool toy"}),
 	}
