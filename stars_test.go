@@ -40,7 +40,7 @@ func (sh *starsHandler) handler(w http.ResponseWriter, r *http.Request) {
 func TestSlack_AddStar(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	tests := []struct {
 		channel    string
 		ref        ItemRef
@@ -88,7 +88,7 @@ func TestSlack_AddStar(t *testing.T) {
 func TestSlack_RemoveStar(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	tests := []struct {
 		channel    string
 		ref        ItemRef
@@ -136,7 +136,7 @@ func TestSlack_RemoveStar(t *testing.T) {
 func TestSlack_ListStars(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	rh := newStarsHandler()
 	http.HandleFunc("/stars.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,

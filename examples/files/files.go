@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	api := slack.New("YOUR_TOKEN_HERE", http.DefaultClient)
 	params := slack.FileUploadParameters{
 		Title: "Batman Example",
 		//Filetype: "txt",

@@ -3,14 +3,14 @@ package slack
 // TeamJoinEvent represents the Team join event
 type TeamJoinEvent struct {
 	Type string `json:"type"`
-	User *User  `json:"user,omitempty"`
+	User User   `json:"user"`
 }
 
 // TeamRenameEvent represents the Team rename event
 type TeamRenameEvent struct {
-	Type           string          `json:"type"`
-	Name           string          `json:"name,omitempty"`
-	EventTimestamp *JSONTimeString `json:"event_ts,omitempty"`
+	Type           string `json:"type"`
+	Name           string `json:"name,omitempty"`
+	EventTimestamp string `json:"event_ts,omitempty"`
 }
 
 // TeamPrefChangeEvent represents the Team preference change event

@@ -20,7 +20,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
-	api := slack.New(apiToken)
+	api := slack.New(apiToken, http.DefaultClient)
 	if debug {
 		api.SetDebug(true)
 	}

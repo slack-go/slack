@@ -54,6 +54,7 @@ type Client struct {
 	debug bool
 }
 
+// Creates a new API client. The 'client' parameter should be http.DefaultClient in most cases.
 func New(token string, client *http.Client) *Client {
 	s := &Client{}
 	s.config.token = token

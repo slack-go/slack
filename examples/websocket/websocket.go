@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	api := slack.New("YOUR TOKEN HERE")
+	api := slack.New("YOUR TOKEN HERE", http.DefaultClient)
 	api.SetDebug(true)
 
 	rtm := api.NewRTM()

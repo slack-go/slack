@@ -42,7 +42,7 @@ func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
 func TestSlack_AddReaction(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	tests := []struct {
 		name       string
 		ref        ItemRef
@@ -91,7 +91,7 @@ func TestSlack_AddReaction(t *testing.T) {
 func TestSlack_RemoveReaction(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	tests := []struct {
 		name       string
 		ref        ItemRef
@@ -140,7 +140,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 func TestSlack_GetReactions(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	tests := []struct {
 		ref           ItemRef
 		params        GetReactionsParameters
@@ -255,7 +255,7 @@ func TestSlack_GetReactions(t *testing.T) {
 func TestSlack_ListReactions(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	rh := newReactionsHandler()
 	http.HandleFunc("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,
