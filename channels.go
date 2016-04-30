@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -24,9 +25,9 @@ type Channel struct {
 	IsMember  bool `json:"is_member"`
 }
 
-func channelRequest(path string, values url.Values, debug bool) (*channelResponseFull, error) {
+func channelRequest(client *http.Client, path string, values url.Values, debug bool) (*channelResponseFull, error) {
 	response := &channelResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func (api *Client) ArchiveChannel(channel string) error {
 		"token":   {api.config.token},
 		"channel": {channel},
 	}
-	_, err := channelRequest("channels.archive", values, api.debug)
+	_, err := channelRequest(api.httpClient, "channels.archive", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (api *Client) UnarchiveChannel(channel string) error {
 		"token":   {api.config.token},
 		"channel": {channel},
 	}
-	_, err := channelRequest("channels.unarchive", values, api.debug)
+	_, err := channelRequest(api.httpClient, "channels.unarchive", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (api *Client) CreateChannel(channel string) (*Channel, error) {
 		"token": {api.config.token},
 		"name":  {channel},
 	}
-	response, err := channelRequest("channels.create", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.create", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (api *Client) GetChannelHistory(channel string, params HistoryParameters) (
 			values.Add("unreads", "0")
 		}
 	}
-	response, err := channelRequest("channels.history", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.history", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +118,7 @@ func (api *Client) GetChannelInfo(channel string) (*Channel, error) {
 		"token":   {api.config.token},
 		"channel": {channel},
 	}
-	response, err := channelRequest("channels.info", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func (api *Client) InviteUserToChannel(channel, user string) (*Channel, error) {
 		"channel": {channel},
 		"user":    {user},
 	}
-	response, err := channelRequest("channels.invite", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.invite", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +145,7 @@ func (api *Client) JoinChannel(channel string) (*Channel, error) {
 		"token": {api.config.token},
 		"name":  {channel},
 	}
-	response, err := channelRequest("channels.join", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.join", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +158,7 @@ func (api *Client) LeaveChannel(channel string) (bool, error) {
 		"token":   {api.config.token},
 		"channel": {channel},
 	}
-	response, err := channelRequest("channels.leave", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.leave", values, api.debug)
 	if err != nil {
 		return false, err
 	}
@@ -174,7 +175,7 @@ func (api *Client) KickUserFromChannel(channel, user string) error {
 		"channel": {channel},
 		"user":    {user},
 	}
-	_, err := channelRequest("channels.kick", values, api.debug)
+	_, err := channelRequest(api.httpClient, "channels.kick", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -189,7 +190,7 @@ func (api *Client) GetChannels(excludeArchived bool) ([]Channel, error) {
 	if excludeArchived {
 		values.Add("exclude_archived", "1")
 	}
-	response, err := channelRequest("channels.list", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.list", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +208,7 @@ func (api *Client) SetChannelReadMark(channel, ts string) error {
 		"channel": {channel},
 		"ts":      {ts},
 	}
-	_, err := channelRequest("channels.mark", values, api.debug)
+	_, err := channelRequest(api.httpClient, "channels.mark", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -223,7 +224,7 @@ func (api *Client) RenameChannel(channel, name string) (*Channel, error) {
 	}
 	// XXX: the created entry in this call returns a string instead of a number
 	// so I may have to do some workaround to solve it.
-	response, err := channelRequest("channels.rename", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.rename", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +240,7 @@ func (api *Client) SetChannelPurpose(channel, purpose string) (string, error) {
 		"channel": {channel},
 		"purpose": {purpose},
 	}
-	response, err := channelRequest("channels.setPurpose", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.setPurpose", values, api.debug)
 	if err != nil {
 		return "", err
 	}
@@ -253,7 +254,7 @@ func (api *Client) SetChannelTopic(channel, topic string) (string, error) {
 		"channel": {channel},
 		"topic":   {topic},
 	}
-	response, err := channelRequest("channels.setTopic", values, api.debug)
+	response, err := channelRequest(api.httpClient, "channels.setTopic", values, api.debug)
 	if err != nil {
 		return "", err
 	}

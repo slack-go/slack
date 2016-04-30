@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -35,9 +36,9 @@ type dndTeamInfoResponse struct {
 	SlackResponse
 }
 
-func dndRequest(path string, values url.Values, debug bool) (*dndResponseFull, error) {
+func dndRequest(client *http.Client, path string, values url.Values, debug bool) (*dndResponseFull, error) {
 	response := &dndResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func (api *Client) EndDND() error {
 	}
 
 	response := &SlackResponse{}
-	if err := post("dnd.endDnd", values, response, api.debug); err != nil {
+	if err := post(api.httpClient, "dnd.endDnd", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -69,7 +70,7 @@ func (api *Client) EndSnooze() (*DNDStatus, error) {
 		"token": {api.config.token},
 	}
 
-	response, err := dndRequest("dnd.endSnooze", values, api.debug)
+	response, err := dndRequest(api.httpClient, "dnd.endSnooze", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (api *Client) GetDNDInfo(user *string) (*DNDStatus, error) {
 	if user != nil {
 		values.Set("user", *user)
 	}
-	response, err := dndRequest("dnd.info", values, api.debug)
+	response, err := dndRequest(api.httpClient, "dnd.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (api *Client) GetDNDTeamInfo(users []string) (map[string]DNDStatus, error) 
 		"users": {strings.Join(users, ",")},
 	}
 	response := &dndTeamInfoResponse{}
-	if err := post("dnd.teamInfo", values, response, api.debug); err != nil {
+	if err := post(api.httpClient, "dnd.teamInfo", values, response, api.debug); err != nil {
 		return nil, err
 	}
 	if !response.Ok {
@@ -115,7 +116,7 @@ func (api *Client) SetSnooze(minutes int) (*DNDStatus, error) {
 		"token":       {api.config.token},
 		"num_minutes": {strconv.Itoa(minutes)},
 	}
-	response, err := dndRequest("dnd.setSnooze", values, api.debug)
+	response, err := dndRequest(api.httpClient, "dnd.setSnooze", values, api.debug)
 	if err != nil {
 		return nil, err
 	}

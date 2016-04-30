@@ -3,7 +3,22 @@ package slack
 import (
 	"errors"
 	"log"
+	"net/http"
 	"net/url"
+)
+
+// Well-known slack error strings.
+const (
+	TokenRevokedError    = "token_revoked"     // oauth token revoked by user
+	ChannelNotFoundError = "channel_not_found" // Value passed for channel was invalid.
+	NotInChannelError    = "not_in_channel"    // Cannot post user messages to a channel they are not in.
+	IsArchivedError      = "is_archived"       // Channel has been archived.
+	MsgTooLongError      = "msg_too_long"      // Message text is too long
+	NoTextError          = "no_text"           // No message text provided
+	RateLimitedError     = "rate_limited"      // Application has posted too many messages, read the Rate Limit documentation for more information
+	NotAuthedError       = "not_authed"        // No authentication token provided.
+	InvalidAuthError     = "invalid_auth"      // Invalid authentication token.
+	AccountInactiveError = "account_inactive"  // Authentication token is for a deleted user or team.
 )
 
 /*
@@ -31,23 +46,29 @@ type authTestResponseFull struct {
 }
 
 type Client struct {
-	config struct {
+	httpClient *http.Client
+	config     struct {
 		token string
 	}
 	info  Info
 	debug bool
 }
 
-func New(token string) *Client {
+// Creates a new API client. The 'client' parameter should be http.DefaultClient in most cases.
+func New(token string, client *http.Client) *Client {
 	s := &Client{}
 	s.config.token = token
+	if client == nil {
+		client = http.DefaultClient
+	}
+	s.httpClient = client
 	return s
 }
 
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
-	err := post("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
+	err := post(api.httpClient, "auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
 		return nil, err
 	}

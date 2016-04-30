@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	api := slack.New("YOUR_TOKEN_HERE", http.DefaultClient)
 	// If you set debugging, it will log all requests to the console
 	// Useful when encountering issues
 	// api.SetDebug(true)

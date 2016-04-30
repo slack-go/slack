@@ -31,7 +31,7 @@ func TestGetTeamInfo(t *testing.T) {
 
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 
 	teamInfo, err := api.GetTeamInfo()
 	if err != nil {

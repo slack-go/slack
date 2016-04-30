@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -60,9 +61,9 @@ func NewPostMessageParameters() PostMessageParameters {
 	}
 }
 
-func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull, error) {
+func chatRequest(client *http.Client, path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, stri
 		"channel": {channel},
 		"ts":      {messageTimestamp},
 	}
-	response, err := chatRequest("chat.delete", values, api.debug)
+	response, err := chatRequest(api.httpClient, "chat.delete", values, api.debug)
 	if err != nil {
 		return "", "", err
 	}
@@ -143,7 +144,7 @@ func (api *Client) PostMessage(channel, text string, params PostMessageParameter
 		values.Set("mrkdwn", "false")
 	}
 
-	response, err := chatRequest("chat.postMessage", values, api.debug)
+	response, err := chatRequest(api.httpClient, "chat.postMessage", values, api.debug)
 	if err != nil {
 		return "", "", err
 	}
@@ -158,7 +159,7 @@ func (api *Client) UpdateMessage(channel, timestamp, text string) (string, strin
 		"text":    {escapeMessage(text)},
 		"ts":      {timestamp},
 	}
-	response, err := chatRequest("chat.update", values, api.debug)
+	response, err := chatRequest(api.httpClient, "chat.update", values, api.debug)
 	if err != nil {
 		return "", "", "", err
 	}

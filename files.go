@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -130,9 +131,9 @@ func NewGetFilesParameters() GetFilesParameters {
 	}
 }
 
-func fileRequest(path string, values url.Values, debug bool) (*fileResponseFull, error) {
+func fileRequest(client *http.Client, path string, values url.Values, debug bool) (*fileResponseFull, error) {
 	response := &fileResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +151,7 @@ func (api *Client) GetFileInfo(fileID string, count, page int) (*File, []Comment
 		"count": {strconv.Itoa(count)},
 		"page":  {strconv.Itoa(page)},
 	}
-	response, err := fileRequest("files.info", values, api.debug)
+	response, err := fileRequest(api.httpClient, "files.info", values, api.debug)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -184,7 +185,7 @@ func (api *Client) GetFiles(params GetFilesParameters) ([]File, *Paging, error) 
 	if params.Page != DEFAULT_FILES_PAGE {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
-	response, err := fileRequest("files.list", values, api.debug)
+	response, err := fileRequest(api.httpClient, "files.list", values, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -220,9 +221,9 @@ func (api *Client) UploadFile(params FileUploadParameters) (file *File, err erro
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
-		err = post("files.upload", values, response, api.debug)
+		err = post(api.httpClient, "files.upload", values, response, api.debug)
 	} else if params.File != "" {
-		err = postWithMultipartResponse("files.upload", params.File, values, response, api.debug)
+		err = postWithMultipartResponse(api.httpClient, "files.upload", params.File, values, response, api.debug)
 	}
 	if err != nil {
 		return nil, err
@@ -239,7 +240,7 @@ func (api *Client) DeleteFile(fileID string) error {
 		"token": {api.config.token},
 		"file":  {fileID},
 	}
-	_, err := fileRequest("files.delete", values, api.debug)
+	_, err := fileRequest(api.httpClient, "files.delete", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -253,7 +254,7 @@ func (api *Client) RevokeFilePublicURL(fileID string) (*File, error) {
 		"token": {api.config.token},
 		"file":  {fileID},
 	}
-	response, err := fileRequest("files.revokePublicURL", values, api.debug)
+	response, err := fileRequest(api.httpClient, "files.revokePublicURL", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -266,7 +267,7 @@ func (api *Client) ShareFilePublicURL(fileID string) (*File, []Comment, *Paging,
 		"token": {api.config.token},
 		"file":  {fileID},
 	}
-	response, err := fileRequest("files.sharedPublicURL", values, api.debug)
+	response, err := fileRequest(api.httpClient, "files.sharedPublicURL", values, api.debug)
 	if err != nil {
 		return nil, nil, nil, err
 	}

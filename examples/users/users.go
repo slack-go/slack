@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	api := slack.New("YOUR_TOKEN_HERE", http.DefaultClient)
 	user, err := api.GetUserInfo("U023BECGF")
 	if err != nil {
 		fmt.Printf("%s\n", err)

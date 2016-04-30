@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 )
 
@@ -18,9 +19,9 @@ type TeamInfo struct {
 	Icon        map[string]interface{} `json:"icon"`
 }
 
-func teamRequest(path string, values url.Values, debug bool) (*TeamResponse, error) {
+func teamRequest(client *http.Client, path string, values url.Values, debug bool) (*TeamResponse, error) {
 	response := &TeamResponse{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func (api *Client) GetTeamInfo() (*TeamInfo, error) {
 		"token": {api.config.token},
 	}
 
-	response, err := teamRequest("team.info", values, api.debug)
+	response, err := teamRequest(api.httpClient, "team.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -28,9 +29,9 @@ type IM struct {
 	IsUserDeleted bool   `json:"is_user_deleted"`
 }
 
-func imRequest(path string, values url.Values, debug bool) (*imResponseFull, error) {
+func imRequest(client *http.Client, path string, values url.Values, debug bool) (*imResponseFull, error) {
 	response := &imResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func (api *Client) CloseIMChannel(channel string) (bool, bool, error) {
 		"token":   {api.config.token},
 		"channel": {channel},
 	}
-	response, err := imRequest("im.close", values, api.debug)
+	response, err := imRequest(api.httpClient, "im.close", values, api.debug)
 	if err != nil {
 		return false, false, err
 	}
@@ -60,7 +61,7 @@ func (api *Client) OpenIMChannel(user string) (bool, bool, string, error) {
 		"token": {api.config.token},
 		"user":  {user},
 	}
-	response, err := imRequest("im.open", values, api.debug)
+	response, err := imRequest(api.httpClient, "im.open", values, api.debug)
 	if err != nil {
 		return false, false, "", err
 	}
@@ -74,7 +75,7 @@ func (api *Client) MarkIMChannel(channel, ts string) (err error) {
 		"channel": {channel},
 		"ts":      {ts},
 	}
-	_, err = imRequest("im.mark", values, api.debug)
+	_, err = imRequest(api.httpClient, "im.mark", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func (api *Client) GetIMHistory(channel string, params HistoryParameters) (*Hist
 			values.Add("unreads", "0")
 		}
 	}
-	response, err := imRequest("im.history", values, api.debug)
+	response, err := imRequest(api.httpClient, "im.history", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +123,7 @@ func (api *Client) GetIMChannels() ([]IM, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	response, err := imRequest("im.list", values, api.debug)
+	response, err := imRequest(api.httpClient, "im.list", values, api.debug)
 	if err != nil {
 		return nil, err
 	}

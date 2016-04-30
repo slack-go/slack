@@ -21,7 +21,7 @@ func TestGetEmoji(t *testing.T) {
 
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", http.DefaultClient)
 	emojisResponse := map[string]string{
 		"bowtie":   "https://my.slack.com/emoji/bowtie/46ec6f2bb0.png",
 		"squirrel": "https://my.slack.com/emoji/squirrel/f35f40c0e0.png",
