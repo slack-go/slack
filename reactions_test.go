@@ -317,7 +317,13 @@ func TestSlack_ListReactions(t *testing.T) {
     }}`
 	want := []ReactedItem{
 		ReactedItem{
-			Item: NewMessageItem("C1", &Message{Msg: Msg{Text: "hello"}}),
+			Item: NewMessageItem("C1", &Message{Msg: Msg{
+				Text: "hello",
+				Reactions: []ItemReaction{
+					ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+					ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				},
+			}}),
 			Reactions: []ItemReaction{
 				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
 				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
