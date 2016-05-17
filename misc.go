@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+var HTTPClient = &http.Client{}
+
 type WebResponse struct {
 	Ok    bool      `json:"ok"`
 	Error *WebError `json:"error"`
@@ -90,8 +92,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 
 func postWithMultipartResponse(path string, filepath string, values url.Values, intf interface{}, debug bool) error {
 	req, err := fileUploadReq(SLACK_API+path, filepath, values)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -100,7 +101,7 @@ func postWithMultipartResponse(path string, filepath string, values url.Values, 
 }
 
 func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
-	resp, err := http.PostForm(endpoint, values)
+	resp, err := HTTPClient.PostForm(endpoint, values)
 	if err != nil {
 		return err
 	}
