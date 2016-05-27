@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -77,7 +76,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 
 	// FIXME: will be api.Debugf
 	if debug {
-		log.Printf("parseResponseBody: %s\n", string(response))
+		logger.Printf("parseResponseBody: %s\n", string(response))
 	}
 
 	err = json.Unmarshal(response, &intf)

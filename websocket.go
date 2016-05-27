@@ -3,7 +3,6 @@ package slack
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -69,7 +68,7 @@ func (rtm *RTM) Disconnect() error {
 
 // Reconnect only makes sense if you've successfully disconnectd with Disconnect().
 func (rtm *RTM) Reconnect() error {
-	log.Println("RTM::Reconnect not implemented!")
+	logger.Println("RTM::Reconnect not implemented!")
 	return nil
 }
 
