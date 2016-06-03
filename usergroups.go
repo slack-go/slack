@@ -81,3 +81,17 @@ func (api *Client) UpdateUserGroup(userGroup UserGroup) (UserGroup, error){
 	}
 	return response.UserGroup, nil
 }
+
+func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error){
+  values := url.Values{
+		"token": {api.config.token},
+    "usergroup": {userGroup.ID},
+    "users": {members}
+	}
+
+	response, err := userGroupRequest("usergroups.users.update", values, api.debug)
+	if err != nil {
+		return UserGroup{}, err
+	}
+	return response.UserGroup, nil
+}
