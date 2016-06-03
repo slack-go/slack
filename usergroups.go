@@ -84,7 +84,7 @@ func (api *Client) UpdateUserGroup(userGroup UserGroup) (UserGroup, error) {
 func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error) {
 	values := url.Values{
 		"token":     {api.config.token},
-		"usergroup": {userGroup.ID},
+		"usergroup": {userGroup},
 		"users":     {members},
 	}
 
