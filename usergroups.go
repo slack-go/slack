@@ -29,6 +29,7 @@ type UserGroup struct {
 type userGroupResponseFull struct {
 	UserGroups []UserGroup `json:"usergroups"`
 	UserGroup  UserGroup   `json:"usergroup"`
+	Users      []string    `json:"users"`
 	SlackResponse
 }
 
@@ -79,6 +80,18 @@ func (api *Client) UpdateUserGroup(userGroup UserGroup) (UserGroup, error) {
 		return UserGroup{}, err
 	}
 	return response.UserGroup, nil
+}
+
+func (api *Client) GetUserGroupMembers(userGroup string) ([]string, error) {
+	values := url.Values{
+		"token":     {api.config.token},
+		"usergroup": {userGroup},
+	}
+	response, err := userGroupRequest("usergroups.users.list", values, api.debug)
+	if err != nil {
+		return []string{}, err
+	}
+	return response.Users, nil
 }
 
 func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error) {
