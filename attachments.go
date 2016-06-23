@@ -20,6 +20,21 @@ type AttachmentAction struct {
 	Confirm []ConfirmationField `json:"confirm,omitempty"` // Optional.
 }
 
+// AttachmentActionCallback is sent from Slack when a user clicks a button in an interactive message (aka AttachmentAction)
+type AttachmentActionCallback struct {
+	Actions    []AttachmentAction `json:"actions"`
+	CallbackID string             `json:"callback_id"`
+	Team       Team               `json:"team"`
+	Channel    Channel            `json:"channel"`
+	User       User               `json:"user"`
+
+	ActionTs     string `json:"action_ts"`
+	MessageTs    string `json:"message_ts"`
+	AttachmentID string `json:"attachment_id"`
+	Token        string `json:"token"`
+	ResponseURL  string `json:"response_url"`
+}
+
 // ConfirmationField are used to ask users to confirm actions
 type ConfirmationField struct {
 	Title       string `json:"title,omitempty"`        // Optional.
