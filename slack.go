@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"os"
 )
 
 var logger *log.Logger // A logger that can be set by consumers
@@ -69,6 +70,9 @@ func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 // If you ever use this in production, don't call SetDebug(true)
 func (api *Client) SetDebug(debug bool) {
 	api.debug = debug
+	if debug && logger == nil {
+		logger = log.New(os.Stdout, "nlopes/slack", log.LstdFlags | log.Lshortfile)
+	}
 }
 
 func (api *Client) Debugf(format string, v ...interface{}) {
