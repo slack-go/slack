@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"net/http"
 	"net/url"
 )
 
@@ -62,9 +63,9 @@ type userResponseFull struct {
 	SlackResponse
 }
 
-func userRequest(path string, values url.Values, debug bool) (*userResponseFull, error) {
+func userRequest(httpcl *http.Client, path string, values url.Values, debug bool) (*userResponseFull, error) {
 	response := &userResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(httpcl, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func (api *Client) GetUserPresence(user string) (*UserPresence, error) {
 		"token": {api.config.token},
 		"user":  {user},
 	}
-	response, err := userRequest("users.getPresence", values, api.debug)
+	response, err := userRequest(api.HTTPClient, "users.getPresence", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (api *Client) GetUserInfo(user string) (*User, error) {
 		"token": {api.config.token},
 		"user":  {user},
 	}
-	response, err := userRequest("users.info", values, api.debug)
+	response, err := userRequest(api.HTTPClient, "users.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (api *Client) GetUsers() ([]User, error) {
 		"token":    {api.config.token},
 		"presence": {"1"},
 	}
-	response, err := userRequest("users.list", values, api.debug)
+	response, err := userRequest(api.HTTPClient, "users.list", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +119,7 @@ func (api *Client) SetUserAsActive() error {
 	values := url.Values{
 		"token": {api.config.token},
 	}
-	_, err := userRequest("users.setActive", values, api.debug)
+	_, err := userRequest(api.HTTPClient, "users.setActive", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -131,7 +132,7 @@ func (api *Client) SetUserPresence(presence string) error {
 		"token":    {api.config.token},
 		"presence": {presence},
 	}
-	_, err := userRequest("users.setPresence", values, api.debug)
+	_, err := userRequest(api.HTTPClient, "users.setPresence", values, api.debug)
 	if err != nil {
 		return err
 	}
