@@ -8,6 +8,25 @@ type AttachmentField struct {
 	Short bool   `json:"short"`
 }
 
+// AttachmentActionConfirm
+type AttachmentActionConfirm struct {
+	Title       string `json:"title"`
+	Text        string `json:"text"`
+	OkText      string `json:"ok_text"`
+	DismissText string `json:"dismiss_text"`
+}
+
+// AttachmentAction is used for creating a button in an outgoing slack message
+type AttachmentAction struct {
+	Name       string `json:"name"`
+	Text       string `json:"text"`
+	Type       string `json:"type"`
+	Value      string `json:"value,omitempty"`
+	Style      string `json:"style,omitempty"`
+
+	Confirm AttachmentActionConfirm `json:"confirm,omitempty"`
+}
+
 // Attachment contains all the information for an attachment
 type Attachment struct {
 	Color    string `json:"color,omitempty"`
@@ -28,4 +47,7 @@ type Attachment struct {
 
 	Fields     []AttachmentField `json:"fields,omitempty"`
 	MarkdownIn []string          `json:"mrkdwn_in,omitempty"`
+
+	Actions []AttachmentAction `json:"actions,omitempty"`
+	CallbackID string `json:"callback_id,omitempty"`
 }
