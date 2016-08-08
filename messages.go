@@ -27,17 +27,15 @@ func (m *Message) UnmarshalJSON(bytes []byte) error {
 
 	t, err := strconv.Unquote(string(bytes))
 	if err != nil {
-		return err
+		t = string(bytes)
 	}
 
 	if err := json.Unmarshal([]byte(t), &msg); err != nil {
 		return err
 	}
 
-	m = &Message{
-		Msg:        msg.Msg,
-		SubMessage: msg.SubMessage,
-	}
+	m.Msg = msg.Msg
+	m.SubMessage = msg.SubMessage
 
 	return nil
 }
