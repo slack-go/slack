@@ -1,5 +1,10 @@
 package slack
 
+import (
+	"encoding/json"
+	"strconv"
+)
+
 // OutgoingMessage is used for the realtime API, and seems incomplete.
 type OutgoingMessage struct {
 	ID      int    `json:"id"`
@@ -12,6 +17,29 @@ type OutgoingMessage struct {
 type Message struct {
 	Msg
 	SubMessage *Msg `json:"message,omitempty"`
+}
+
+func (m *Message) UnmarshalJSON(bytes []byte) error {
+	var msg struct {
+		Msg
+		SubMessage *Msg `json:"message,omitempty"`
+	}
+
+	t, err := strconv.Unquote(string(bytes))
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal([]byte(t), &msg); err != nil {
+		return err
+	}
+
+	m = &Message{
+		Msg:        msg.Msg,
+		SubMessage: msg.SubMessage,
+	}
+
+	return nil
 }
 
 // Msg contains information about a slack message
