@@ -60,6 +60,24 @@ func NewPostMessageParameters() PostMessageParameters {
 	}
 }
 
+// UpdateMessageParameters contains all the parameters necessary (including the optional ones) for an UpdateMessage() request
+type UpdateMessageParameters struct {
+	AsUser      bool
+	Parse       string
+	LinkNames   int
+	Attachments []Attachment
+}
+
+// NewUpdateMessageParameters provides an instance of PostMessageParameters with all the sane default values set
+func NewUpdateMessageParameters() UpdateMessageParameters {
+	return UpdateMessageParameters{
+		AsUser:      DEFAULT_MESSAGE_ASUSER,
+		Parse:       DEFAULT_MESSAGE_PARSE,
+		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
+		Attachments: nil,
+	}
+}
+
 func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
 	err := post(path, values, response, debug)
@@ -151,16 +169,35 @@ func (api *Client) PostMessage(channel, text string, params PostMessageParameter
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
+func (api *Client) UpdateMessage(channel, timestamp, text string, params UpdateMessageParameters) (string, string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
 		"text":    {escapeMessage(text)},
 		"ts":      {timestamp},
 	}
+
+	if params.AsUser != DEFAULT_MESSAGE_ASUSER {
+		values.Set("as_user", "true")
+	}
+	if params.Parse != DEFAULT_MESSAGE_PARSE {
+		values.Set("parse", string(params.Parse))
+	}
+	if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+		values.Set("link_names", "1")
+	}
+	if params.Attachments != nil {
+		attachments, err := json.Marshal(params.Attachments)
+		if err != nil {
+			return "", "", "", err
+		}
+		values.Set("attachments", string(attachments))
+	}
+
 	response, err := chatRequest("chat.update", values, api.debug)
 	if err != nil {
 		return "", "", "", err
 	}
+
 	return response.Channel, response.Timestamp, response.Text, nil
 }
