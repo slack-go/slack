@@ -227,6 +227,12 @@ func (rtm *RTM) ping() error {
 	rtm.pings[id] = time.Now()
 
 	msg := &Ping{ID: id, Type: "ping"}
+
+	if err := rtm.conn.SetWriteDeadline(time.Now().Add(1 * time.Second)); err != nil {
+		rtm.Debugf("RTM Error setting deadline 'PING %d': %s", id, err.Error())
+		return err
+	}
+
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
 		rtm.Debugf("RTM Error sending 'PING %d': %s", id, err.Error())
