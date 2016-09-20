@@ -21,6 +21,8 @@ type UserProfile struct {
 	Image192           string `json:"image_192"`
 	ImageOriginal      string `json:"image_original"`
 	Title              string `json:"title"`
+	BotID              string `json:"bot_id,omitempty"`
+	ApiAppID           string `json:"api_app_id,omitempty"`
 }
 
 // User contains all the information of a user
