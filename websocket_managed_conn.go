@@ -90,6 +90,10 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, sErr
 		}
+		// set a write deadline on the connection
+		if dErr := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); dErr != nil {
+			return nil, nil, dErr
+		}
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
 		rtm.IncomingEvents <- RTMEvent{"connection_error", &ConnectionErrorEvent{
@@ -227,11 +231,6 @@ func (rtm *RTM) ping() error {
 	rtm.pings[id] = time.Now()
 
 	msg := &Ping{ID: id, Type: "ping"}
-
-	if err := rtm.conn.SetWriteDeadline(time.Now().Add(1 * time.Second)); err != nil {
-		rtm.Debugf("RTM Error setting deadline 'PING %d': %s", id, err.Error())
-		return err
-	}
 
 	err := websocket.JSON.Send(rtm.conn, msg)
 	if err != nil {
