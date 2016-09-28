@@ -83,6 +83,10 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 		// attempt to start the connection
 		info, conn, err := rtm.startRTMAndDial()
 		if err == nil {
+			// set a write deadline on the connection
+			if dErr := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); dErr != nil {
+				return nil, nil, dErr
+			}
 			return info, conn, nil
 		}
 		// check for fatal errors - currently only invalid_auth
@@ -90,10 +94,7 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, sErr
 		}
-		// set a write deadline on the connection
-		if dErr := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); dErr != nil {
-			return nil, nil, dErr
-		}
+
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
 		rtm.IncomingEvents <- RTMEvent{"connection_error", &ConnectionErrorEvent{
