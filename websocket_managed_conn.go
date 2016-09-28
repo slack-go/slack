@@ -205,7 +205,7 @@ func (rtm *RTM) sendWithDeadline(msg interface{}) error {
 }
 
 func (rtm *RTM) receiveWithDeadline(event interface{}) error {
-	// set a write deadline on the connection
+	// set a read deadline on the connection
 	if err := rtm.conn.SetReadDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (rtm *RTM) receiveWithDeadline(event interface{}) error {
 		return err
 	}
 	// remove read deadline
-	return rtm.conn.SetWriteDeadline(time.Time{})
+	return rtm.conn.SetReadDeadline(time.Time{})
 }
 
 // sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
