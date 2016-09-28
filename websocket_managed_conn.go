@@ -83,10 +83,6 @@ func (rtm *RTM) connect(connectionCount int) (*Info, *websocket.Conn, error) {
 		// attempt to start the connection
 		info, conn, err := rtm.startRTMAndDial()
 		if err == nil {
-			// set a write deadline on the connection
-			if dErr := conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); dErr != nil {
-				return nil, nil, dErr
-			}
 			return info, conn, nil
 		}
 		// check for fatal errors - currently only invalid_auth
@@ -196,6 +192,30 @@ func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
 	}
 }
 
+func (rtm *RTM) sendWithDeadline(msg interface{}) error {
+	// set a write deadline on the connection
+	if err := rtm.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
+		return err
+	}
+	if err := websocket.JSON.Send(rtm.conn, msg); err != nil {
+		return err
+	}
+	// remove write deadline
+	return rtm.conn.SetWriteDeadline(time.Time{})
+}
+
+func (rtm *RTM) receiveWithDeadline(event interface{}) error {
+	// set a write deadline on the connection
+	if err := rtm.conn.SetReadDeadline(time.Now().Add(10 * time.Second)); err != nil {
+		return err
+	}
+	if err := websocket.JSON.Receive(rtm.conn, event); err != nil {
+		return err
+	}
+	// remove read deadline
+	return rtm.conn.SetWriteDeadline(time.Time{})
+}
+
 // sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
 //
 // It does not currently detect if a outgoing message fails due to a disconnect
@@ -209,8 +229,8 @@ func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 		}}
 		return
 	}
-	err := websocket.JSON.Send(rtm.conn, msg)
-	if err != nil {
+
+	if err := rtm.sendWithDeadline(msg); err != nil {
 		rtm.IncomingEvents <- RTMEvent{"outgoing_error", &OutgoingErrorEvent{
 			Message:  msg,
 			ErrorObj: err,
@@ -233,8 +253,7 @@ func (rtm *RTM) ping() error {
 
 	msg := &Ping{ID: id, Type: "ping"}
 
-	err := websocket.JSON.Send(rtm.conn, msg)
-	if err != nil {
+	if err := rtm.sendWithDeadline(msg); err != nil {
 		rtm.Debugf("RTM Error sending 'PING %d': %s", id, err.Error())
 		return err
 	}
@@ -245,7 +264,7 @@ func (rtm *RTM) ping() error {
 // This will block until a frame is available from the websocket.
 func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
-	err := websocket.JSON.Receive(rtm.conn, &event)
+	err := rtm.receiveWithDeadline(&event)
 	if err == io.EOF {
 		// EOF's don't seem to signify a failed connection so instead we ignore
 		// them here and detect a failed connection upon attempting to send a
