@@ -204,18 +204,6 @@ func (rtm *RTM) sendWithDeadline(msg interface{}) error {
 	return rtm.conn.SetWriteDeadline(time.Time{})
 }
 
-func (rtm *RTM) receiveWithDeadline(event interface{}) error {
-	// set a read deadline on the connection
-	if err := rtm.conn.SetReadDeadline(time.Now().Add(10 * time.Second)); err != nil {
-		return err
-	}
-	if err := websocket.JSON.Receive(rtm.conn, event); err != nil {
-		return err
-	}
-	// remove read deadline
-	return rtm.conn.SetReadDeadline(time.Time{})
-}
-
 // sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
 //
 // It does not currently detect if a outgoing message fails due to a disconnect
@@ -264,7 +252,7 @@ func (rtm *RTM) ping() error {
 // This will block until a frame is available from the websocket.
 func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
-	err := rtm.receiveWithDeadline(&event)
+	err := websocket.JSON.Receive(rtm.conn, &event)
 	if err == io.EOF {
 		// EOF's don't seem to signify a failed connection so instead we ignore
 		// them here and detect a failed connection upon attempting to send a
