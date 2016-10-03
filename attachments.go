@@ -1,5 +1,7 @@
 package slack
 
+import "encoding/json"
+
 // AttachmentField contains information for an attachment field
 // An Attachment can contain multiple of these
 type AttachmentField struct {
@@ -72,5 +74,5 @@ type Attachment struct {
 	Footer     string `json:"footer,omitempty"`
 	FooterIcon string `json:"footer_icon,omitempty"`
 
-	Ts string `json:"ts,omitempty"`
+	Ts json.Number `json:"ts,omitempty"`
 }
