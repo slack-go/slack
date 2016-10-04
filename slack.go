@@ -3,6 +3,7 @@ package slack
 import (
 	"errors"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 )
@@ -36,8 +37,9 @@ type Client struct {
 	config struct {
 		token string
 	}
-	info  Info
-	debug bool
+	info       Info
+	debug      bool
+	HTTPClient *http.Client
 }
 
 // SetLogger let's library users supply a logger, so that api debugging
@@ -47,7 +49,9 @@ func SetLogger(l *log.Logger) {
 }
 
 func New(token string) *Client {
-	s := &Client{}
+	s := &Client{
+		HTTPClient: http.DefaultClient,
+	}
 	s.config.token = token
 	return s
 }
@@ -55,7 +59,7 @@ func New(token string) *Client {
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 	responseFull := &authTestResponseFull{}
-	err := post("auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
+	err := post(api.HTTPClient, "auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
 		return nil, err
 	}

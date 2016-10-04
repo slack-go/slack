@@ -15,8 +15,6 @@ import (
 	"time"
 )
 
-var HTTPClient = &http.Client{}
-
 type WebResponse struct {
 	Ok    bool      `json:"ok"`
 	Error *WebError `json:"error"`
@@ -89,9 +87,9 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 	return nil
 }
 
-func postWithMultipartResponse(path string, filepath string, values url.Values, intf interface{}, debug bool) error {
+func postWithMultipartResponse(httpcl *http.Client, path string, filepath string, values url.Values, intf interface{}, debug bool) error {
 	req, err := fileUploadReq(SLACK_API+path, filepath, values)
-	resp, err := HTTPClient.Do(req)
+	resp, err := httpcl.Do(req)
 	if err != nil {
 		return err
 	}
@@ -99,8 +97,8 @@ func postWithMultipartResponse(path string, filepath string, values url.Values, 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
-	resp, err := HTTPClient.PostForm(endpoint, values)
+func postForm(httpcl *http.Client, endpoint string, values url.Values, intf interface{}, debug bool) error {
+	resp, err := httpcl.PostForm(endpoint, values)
 	if err != nil {
 		return err
 	}
@@ -109,11 +107,11 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func post(path string, values url.Values, intf interface{}, debug bool) error {
-	return postForm(SLACK_API+path, values, intf, debug)
+func post(httpcl *http.Client, path string, values url.Values, intf interface{}, debug bool) error {
+	return postForm(httpcl, SLACK_API+path, values, intf, debug)
 }
 
-func parseAdminResponse(method string, teamName string, values url.Values, intf interface{}, debug bool) error {
+func parseAdminResponse(httpcl *http.Client, method string, teamName string, values url.Values, intf interface{}, debug bool) error {
 	endpoint := fmt.Sprintf(SLACK_WEB_API_FORMAT, teamName, method, time.Now().Unix())
-	return postForm(endpoint, values, intf, debug)
+	return postForm(httpcl, endpoint, values, intf, debug)
 }

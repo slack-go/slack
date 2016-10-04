@@ -16,7 +16,7 @@ func (api *Client) GetEmoji() (map[string]string, error) {
 		"token": {api.config.token},
 	}
 	response := &emojiResponseFull{}
-	err := post("emoji.list", values, response, api.debug)
+	err := post(api.HTTPClient, "emoji.list", values, response, api.debug)
 	if err != nil {
 		return nil, err
 	}

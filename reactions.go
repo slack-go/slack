@@ -148,7 +148,7 @@ func (api *Client) AddReaction(name string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("reactions.add", values, response, api.debug); err != nil {
+	if err := post(api.HTTPClient, "reactions.add", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -178,7 +178,7 @@ func (api *Client) RemoveReaction(name string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("reactions.remove", values, response, api.debug); err != nil {
+	if err := post(api.HTTPClient, "reactions.remove", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -208,7 +208,7 @@ func (api *Client) GetReactions(item ItemRef, params GetReactionsParameters) ([]
 		values.Set("full", strconv.FormatBool(params.Full))
 	}
 	response := &getReactionsResponseFull{}
-	if err := post("reactions.get", values, response, api.debug); err != nil {
+	if err := post(api.HTTPClient, "reactions.get", values, response, api.debug); err != nil {
 		return nil, err
 	}
 	if !response.Ok {
@@ -235,7 +235,7 @@ func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem,
 		values.Add("full", strconv.FormatBool(params.Full))
 	}
 	response := &listReactionsResponseFull{}
-	err := post("reactions.list", values, response, api.debug)
+	err := post(api.HTTPClient, "reactions.list", values, response, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}

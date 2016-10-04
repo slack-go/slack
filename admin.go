@@ -3,6 +3,7 @@ package slack
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 )
 
@@ -11,9 +12,9 @@ type adminResponse struct {
 	Error string `json:"error"`
 }
 
-func adminRequest(method string, teamName string, values url.Values, debug bool) (*adminResponse, error) {
+func adminRequest(httpcl *http.Client, method string, teamName string, values url.Values, debug bool) (*adminResponse, error) {
 	adminResponse := &adminResponse{}
-	err := parseAdminResponse(method, teamName, values, adminResponse, debug)
+	err := parseAdminResponse(httpcl, method, teamName, values, adminResponse, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +35,7 @@ func (api *Client) DisableUser(teamName string, uid string) error {
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("setInactive", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "setInactive", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
 	}
@@ -61,7 +62,7 @@ func (api *Client) InviteGuest(
 		"_attempts":        {"1"},
 	}
 
-	_, err := adminRequest("invite", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "invite", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to invite single-channel guest: %s", err)
 	}
@@ -88,7 +89,7 @@ func (api *Client) InviteRestricted(
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("invite", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "invite", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to restricted account: %s", err)
 	}
@@ -112,7 +113,7 @@ func (api *Client) InviteToTeam(
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("invite", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "invite", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to invite to team: %s", err)
 	}
@@ -129,7 +130,7 @@ func (api *Client) SetRegular(teamName string, user string) error {
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("setRegular", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "setRegular", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to change the user (%s) to a regular user: %s", user, err)
 	}
@@ -146,7 +147,7 @@ func (api *Client) SendSSOBindingEmail(teamName string, user string) error {
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("sendSSOBind", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "sendSSOBind", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
 	}
@@ -164,7 +165,7 @@ func (api *Client) SetUltraRestricted(teamName, uid, channel string) error {
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("setUltraRestricted", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "setUltraRestricted", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
 	}
@@ -181,7 +182,7 @@ func (api *Client) SetRestricted(teamName, uid string) error {
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest("setRestricted", teamName, values, api.debug)
+	_, err := adminRequest(api.HTTPClient, "setRestricted", teamName, values, api.debug)
 	if err != nil {
 		return fmt.Errorf("Failed to restrict account: %s", err)
 	}

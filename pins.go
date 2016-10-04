@@ -27,7 +27,7 @@ func (api *Client) AddPin(channel string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("pins.add", values, response, api.debug); err != nil {
+	if err := post(api.HTTPClient, "pins.add", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -52,7 +52,7 @@ func (api *Client) RemovePin(channel string, item ItemRef) error {
 		values.Set("file_comment", string(item.Comment))
 	}
 	response := &SlackResponse{}
-	if err := post("pins.remove", values, response, api.debug); err != nil {
+	if err := post(api.HTTPClient, "pins.remove", values, response, api.debug); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -68,7 +68,7 @@ func (api *Client) ListPins(channel string) ([]Item, *Paging, error) {
 		"token":   {api.config.token},
 	}
 	response := &listPinsResponseFull{}
-	err := post("pins.list", values, response, api.debug)
+	err := post(api.HTTPClient, "pins.list", values, response, api.debug)
 	if err != nil {
 		return nil, nil, err
 	}
