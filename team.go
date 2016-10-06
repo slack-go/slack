@@ -50,7 +50,7 @@ type AccessLogParameters struct {
 	Page          int
 }
 
-// NewHistoryParameters provides an instance of HistoryParameters with all the sane default values set
+// NewAccessLogParameters provides an instance of AccessLogParameters with all the sane default values set
 func NewAccessLogParameters() AccessLogParameters {
 	return AccessLogParameters{
 		Count: DEFAULT_LOGINS_COUNT,
