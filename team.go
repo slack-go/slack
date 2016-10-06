@@ -44,11 +44,20 @@ type Login struct {
 	Region    string `json:"region"`
 }
 
-// GetAccessLogsParameters contains all the parameters necessary (including the optional ones) for a GetAccessLogs() request
-type GetAccessLogsParameters struct {
+// AccessLogParameters contains all the parameters necessary (including the optional ones) for a GetAccessLogs() request
+type AccessLogParameters struct {
 	Count         int
 	Page          int
 }
+
+// NewHistoryParameters provides an instance of HistoryParameters with all the sane default values set
+func NewAccessLogParameters() AccessLogParameters {
+	return AccessLogParameters{
+		Count: DEFAULT_LOGINS_COUNT,
+		Page:  DEFAULT_LOGINS_PAGE,
+	}
+}
+
 
 func teamRequest(path string, values url.Values, debug bool) (*TeamResponse, error) {
 	response := &TeamResponse{}
@@ -65,7 +74,7 @@ func teamRequest(path string, values url.Values, debug bool) (*TeamResponse, err
 }
 
 func accessLogsRequest(path string, values url.Values, debug bool) (*LoginResponse, error) {
-	response := &LoginResponseFull{}
+	response := &LoginResponse{}
 	err := post(path, values, response, debug)
 	if err != nil {
 		return nil, err
@@ -91,7 +100,7 @@ func (api *Client) GetTeamInfo() (*TeamInfo, error) {
 }
 
 // GetAccessLogs retrieves a page of logins according to the parameters given
-func (api *Client) GetAccessLogs(params GetAccessLogsParameters) ([]Login, *Paging, error) {
+func (api *Client) GetAccessLogs(params AccessLogParameters) ([]Login, *Paging, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
