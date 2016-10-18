@@ -1,13 +1,8 @@
 package slack
 
 import (
-	"errors"
 	"net/http"
 	"testing"
-)
-
-var (
-	ErrIncorrectResponse = errors.New("Response is incorrect")
 )
 
 func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
