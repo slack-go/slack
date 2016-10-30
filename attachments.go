@@ -14,12 +14,12 @@ type AttachmentField struct {
 // using message buttons and otherwise not useful. A maximum of 5 actions may be
 // provided per attachment.
 type AttachmentAction struct {
-	Name    string              `json:"name"`              // Required.
-	Text    string              `json:"text"`              // Required.
-	Style   string              `json:"style,omitempty"`   // Optional. Allowed values: "default", "primary", "danger"
-	Type    string              `json:"type"`              // Required. Must be set to "button"
-	Value   string              `json:"value,omitempty"`   // Optional.
-	Confirm []ConfirmationField `json:"confirm,omitempty"` // Optional.
+	Name    string             `json:"name"`              // Required.
+	Text    string             `json:"text"`              // Required.
+	Style   string             `json:"style,omitempty"`   // Optional. Allowed values: "default", "primary", "danger"
+	Type    string             `json:"type"`              // Required. Must be set to "button"
+	Value   string             `json:"value,omitempty"`   // Optional.
+	Confirm *ConfirmationField `json:"confirm,omitempty"` // Optional.
 }
 
 // AttachmentActionCallback is sent from Slack when a user clicks a button in an interactive message (aka AttachmentAction)
