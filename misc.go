@@ -114,6 +114,12 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	}
 	defer resp.Body.Close()
 
+	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
+	if resp.StatusCode != 200 {
+		logResponse(resp, debug)
+		return fmt.Errorf("Slack server error: %s.", resp.Status)
+	}
+
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
@@ -133,7 +139,7 @@ func logResponse(resp *http.Response, debug bool) error {
 			return err
 		}
 
-		logger.Print(text)
+		logger.Print(string(text))
 	}
 
 	return nil
