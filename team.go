@@ -51,7 +51,7 @@ type BillableInfoResponse struct {
 }
 
 type BillingActive struct {
-	BillingActive map[string]bool `json:"billing_active"`
+	BillingActive bool `json:"billing_active"`
 }
 
 // AccessLogParameters contains all the parameters necessary (including the optional ones) for a GetAccessLogs() request
