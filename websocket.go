@@ -91,3 +91,9 @@ func (rtm *RTM) SendMessage(msg *OutgoingMessage) {
 
 	rtm.outgoingMessages <- *msg
 }
+
+// Events returns the internal event channel (can also be accessed directly
+// with `rtm.IncomingEvents``). Mainly for testing purposes.
+func (rtm *RTM) Events() chan RTMEvent {
+	return rtm.IncomingEvents
+}
