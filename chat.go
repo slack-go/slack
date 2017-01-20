@@ -37,7 +37,7 @@ type PostMessageParameters struct {
 	Attachments []Attachment `json:"attachments"`
 	UnfurlLinks bool         `json:"unfurl_links"`
 	UnfurlMedia bool         `json:"unfurl_media"`
-	IconURL     string       `json:"icon_media"`
+	IconURL     string       `json:"icon_url"`
 	IconEmoji   string       `json:"icon_emoji"`
 	Markdown    bool         `json:"mrkdwn,omitempty"`
 	EscapeText  bool         `json:"escape_text"`
