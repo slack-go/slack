@@ -29,18 +29,18 @@ type chatResponseFull struct {
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
 type PostMessageParameters struct {
-	Text        string
-	Username    string
-	AsUser      bool
-	Parse       string
-	LinkNames   int
-	Attachments []Attachment
-	UnfurlLinks bool
-	UnfurlMedia bool
-	IconURL     string
-	IconEmoji   string
-	Markdown    bool `json:"mrkdwn,omitempty"`
-	EscapeText  bool
+	Text        string       `json:"text"`
+	Username    string       `json:"username"`
+	AsUser      bool         `json:"as_user"`
+	Parse       string       `json:"parse"`
+	LinkNames   int          `json:"link_names"`
+	Attachments []Attachment `json:"attachments"`
+	UnfurlLinks bool         `json:"unfurl_links"`
+	UnfurlMedia bool         `json:"unfurl_media"`
+	IconURL     string       `json:"icon_url"`
+	IconEmoji   string       `json:"icon_emoji"`
+	Markdown    bool         `json:"mrkdwn,omitempty"`
+	EscapeText  bool         `json:"-"`
 }
 
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
@@ -57,6 +57,24 @@ func NewPostMessageParameters() PostMessageParameters {
 		IconEmoji:   DEFAULT_MESSAGE_ICON_EMOJI,
 		Markdown:    DEFAULT_MESSAGE_MARKDOWN,
 		EscapeText:  DEFAULT_MESSAGE_ESCAPE_TEXT,
+	}
+}
+
+// UpdateMessageParameters contains all the parameters necessary (including the optional ones) for an UpdateMessage() request
+type UpdateMessageParameters struct {
+	AsUser      bool
+	Parse       string
+	LinkNames   int
+	Attachments []Attachment
+}
+
+// NewUpdateMessageParameters provides an instance of PostMessageParameters with all the sane default values set
+func NewUpdateMessageParameters() UpdateMessageParameters {
+	return UpdateMessageParameters{
+		AsUser:      DEFAULT_MESSAGE_ASUSER,
+		Parse:       DEFAULT_MESSAGE_PARSE,
+		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
+		Attachments: nil,
 	}
 }
 
@@ -151,16 +169,35 @@ func (api *Client) PostMessage(channel, text string, params PostMessageParameter
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
+func (api *Client) UpdateMessage(channel, timestamp, text string, params UpdateMessageParameters) (string, string, string, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channel},
 		"text":    {escapeMessage(text)},
 		"ts":      {timestamp},
 	}
+
+	if params.AsUser != DEFAULT_MESSAGE_ASUSER {
+		values.Set("as_user", "true")
+	}
+	if params.Parse != DEFAULT_MESSAGE_PARSE {
+		values.Set("parse", string(params.Parse))
+	}
+	if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+		values.Set("link_names", "1")
+	}
+	if params.Attachments != nil {
+		attachments, err := json.Marshal(params.Attachments)
+		if err != nil {
+			return "", "", "", err
+		}
+		values.Set("attachments", string(attachments))
+	}
+
 	response, err := chatRequest("chat.update", values, api.debug)
 	if err != nil {
 		return "", "", "", err
 	}
+
 	return response.Channel, response.Timestamp, response.Text, nil
 }
