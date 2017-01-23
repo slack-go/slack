@@ -83,7 +83,7 @@ func teamRequest(path string, values url.Values, debug bool) (*TeamResponse, err
 	return response, nil
 }
 
-func billableInfoRequest(path string, values url.Values, debug bool) (*BillableInfoResponse, error) {
+func billableInfoRequest(path string, values url.Values, debug bool) (map[string]BillingActive, error) {
 	response := &BillableInfoResponse{}
 	err := post(path, values, response, debug)
 	if err != nil {
@@ -94,7 +94,7 @@ func billableInfoRequest(path string, values url.Values, debug bool) (*BillableI
 		return nil, errors.New(response.Error)
 	}
 
-	return response, nil
+	return response.BillableInfo, nil
 }
 
 func accessLogsRequest(path string, values url.Values, debug bool) (*LoginResponse, error) {
@@ -147,10 +147,14 @@ func (api *Client) GetBillableInfo(user string) (map[string]BillingActive, error
 		"user": {user},
 	}
 
-	response, err := billableInfoRequest("team.billableInfo", values, api.debug)
-	if err != nil {
-		return nil, err
-	}
-	return response.BillableInfo, nil
+	return billableInfoRequest("team.billableInfo", values, api.debug)
+}
 
+// GetBillableInfoForTeam returns the billing_active status of all users on the team.
+func (api *Client) GetBillableInfoForTeam() (map[string]BillingActive, error) {
+	values := url.Values{
+		"token": {api.config.token},
+	}
+
+	return billableInfoRequest("team.billableInfo", values, api.debug)
 }
