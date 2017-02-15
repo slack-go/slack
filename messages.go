@@ -74,6 +74,9 @@ type Msg struct {
 
 	// reactions
 	Reactions []ItemReaction `json:"reactions,omitempty"`
+
+	// Thread timestamp
+	ThreadTimestamp string `json:"thread_ts"`
 }
 
 // Icon is used for bot messages
