@@ -10,8 +10,10 @@ type AttachmentField struct {
 
 // Attachment contains all the information for an attachment
 type Attachment struct {
-	Color    string `json:"color,omitempty"`
-	Fallback string `json:"fallback"`
+	Color      string `json:"color,omitempty"`
+	Fallback   string `json:"fallback"`
+	Footer     string `json:"footer"`
+	FooterIcon string `json:"footer_icon"`
 
 	AuthorName    string `json:"author_name,omitempty"`
 	AuthorSubname string `json:"author_subname,omitempty"`
