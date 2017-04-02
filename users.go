@@ -5,6 +5,12 @@ import (
 	"net/url"
 )
 
+const (
+	DEFAULT_USER_PHOTO_CROP_X = -1
+	DEFAULT_USER_PHOTO_CROP_Y = -1
+	DEFAULT_USER_PHOTO_CROP_W = -1
+)
+
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
 	FirstName          string `json:"first_name"`
@@ -95,6 +101,20 @@ type userResponseFull struct {
 	User         `json:"user,omitempty"` // GetUserInfo
 	UserPresence                         // GetUserPresence
 	SlackResponse
+}
+
+type UserSetPhotoParams struct {
+	CropX int
+	CropY int
+	CropW int
+}
+
+func NewUserSetPhotoParams() UserSetPhotoParams {
+	return UserSetPhotoParams{
+		CropX: DEFAULT_USER_PHOTO_CROP_X,
+		CropY: DEFAULT_USER_PHOTO_CROP_Y,
+		CropW: DEFAULT_USER_PHOTO_CROP_W,
+	}
 }
 
 func userRequest(path string, values url.Values, debug bool) (*userResponseFull, error) {
@@ -188,4 +208,45 @@ func (api *Client) GetUserIdentity() (*UserIdentityResponse, error) {
 		return nil, errors.New(response.Error)
 	}
 	return response, nil
+}
+
+// SetUserPhoto changes the currently authenticated user's profile image
+func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
+	response := &SlackResponse{}
+	values := url.Values{
+		"token": {api.config.token},
+	}
+	if params.CropX != DEFAULT_USER_PHOTO_CROP_X {
+		values.Add("crop_x", string(params.CropX))
+	}
+	if params.CropY != DEFAULT_USER_PHOTO_CROP_Y {
+		values.Add("crop_y", string(params.CropY))
+	}
+	if params.CropW != DEFAULT_USER_PHOTO_CROP_W {
+		values.Add("crop_w", string(params.CropW))
+	}
+	err := postWithMultipartResponse("users.setPhoto", image, "image", values, response, api.debug)
+	if err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
+}
+
+// DeleteUserPhoto deletes the current authenticated user's profile image
+func (api *Client) DeleteUserPhoto() error {
+	response := &SlackResponse{}
+	values := url.Values{
+		"token": {api.config.token},
+	}
+	err := post("users.deletePhoto", values, response, api.debug)
+	if err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
 }
