@@ -22,7 +22,7 @@ type Msg struct {
 	User            string       `json:"user,omitempty"`
 	Text            string       `json:"text,omitempty"`
 	Timestamp       string       `json:"ts,omitempty"`
-	ThreadTimeStamp string       `json:"thread_ts,omitempty"`
+	ThreadTimestamp string       `json:"thread_ts,omitempty"`
 	IsStarred       bool         `json:"is_starred,omitempty"`
 	PinnedTo        []string     `json:"pinned_to, omitempty"`
 	Attachments     []Attachment `json:"attachments,omitempty"`
