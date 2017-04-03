@@ -17,15 +17,16 @@ type Message struct {
 // Msg contains information about a slack message
 type Msg struct {
 	// Basic Message
-	Type        string       `json:"type,omitempty"`
-	Channel     string       `json:"channel,omitempty"`
-	User        string       `json:"user,omitempty"`
-	Text        string       `json:"text,omitempty"`
-	Timestamp   string       `json:"ts,omitempty"`
-	IsStarred   bool         `json:"is_starred,omitempty"`
-	PinnedTo    []string     `json:"pinned_to, omitempty"`
-	Attachments []Attachment `json:"attachments,omitempty"`
-	Edited      *Edited      `json:"edited,omitempty"`
+	Type            string       `json:"type,omitempty"`
+	Channel         string       `json:"channel,omitempty"`
+	User            string       `json:"user,omitempty"`
+	Text            string       `json:"text,omitempty"`
+	Timestamp       string       `json:"ts,omitempty"`
+	ThreadTimestamp string       `json:"thread_ts,omitempty"`
+	IsStarred       bool         `json:"is_starred,omitempty"`
+	PinnedTo        []string     `json:"pinned_to, omitempty"`
+	Attachments     []Attachment `json:"attachments,omitempty"`
+	Edited          *Edited      `json:"edited,omitempty"`
 
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
