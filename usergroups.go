@@ -27,7 +27,7 @@ type UserGroup struct {
 		Groups   []string `json:"groups"`
 	} `json:"prefs"`
 	Users     []string
-	UserCount int `json:"user_count,string"`
+	UserCount int `json:"user_count"`
 }
 
 type userGroupResponseFull struct {

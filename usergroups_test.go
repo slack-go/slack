@@ -39,7 +39,7 @@ func newUserGroupsHandler() *userGroupsHandler {
 
             ]
         },
-        "user_count": "0"
+        "user_count": 0
     }
 }`,
 	}
@@ -124,7 +124,7 @@ func getUserGroups(rw http.ResponseWriter, r *http.Request) {
 
                 ]
             },
-            "user_count": "2"
+            "user_count": 2
         }
     ]
 }`)
