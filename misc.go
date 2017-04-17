@@ -114,6 +114,11 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		logResponse(resp, debug)
+		return fmt.Errorf("Slack server error: %s.", resp.Status)
+	}
+
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
