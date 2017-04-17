@@ -221,7 +221,7 @@ func (api *Client) UploadFile(params FileUploadParameters) (file *File, err erro
 		values.Add("content", params.Content)
 		err = post("files.upload", values, response, api.debug)
 	} else if params.File != "" {
-		err = postWithMultipartResponse("files.upload", params.File, values, response, api.debug)
+		err = postWithMultipartResponse("files.upload", params.File, "file", values, response, api.debug)
 	}
 	if err != nil {
 		return nil, err
