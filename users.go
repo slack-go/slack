@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 )
@@ -29,6 +30,8 @@ type UserProfile struct {
 	Title              string `json:"title"`
 	BotID              string `json:"bot_id,omitempty"`
 	ApiAppID           string `json:"api_app_id,omitempty"`
+	StatusText         string `json:"status_text,omitempty"`
+	StatusEmoji        string `json:"status_emoji,omitempty"`
 }
 
 // User contains all the information of a user
@@ -249,4 +252,58 @@ func (api *Client) DeleteUserPhoto() error {
 		return errors.New(response.Error)
 	}
 	return nil
+}
+
+// SetUserCustomStatus will set a custom status and emoji for the currently
+// authenticated user. If statusEmoji is "" and statusText is not, the Slack API
+// will automatically set it to ":speech_balloon:". Otherwise, if both are ""
+// the Slack API will unset the custom status/emoji.
+func (api *Client) SetUserCustomStatus(statusText, statusEmoji string) error {
+	// XXX(theckman): this anonymous struct is for making requests to the Slack
+	// API for setting and unsetting a User's Custom Status/Emoji. To change
+	// these values we must provide a JSON document as the profile POST field.
+	//
+	// We use an anonymous struct over UserProfile because to unset the values
+	// on the User's profile we cannot use the `json:"omitempty"` tag. This is
+	// because an empty string ("") is what's used to unset the values. Check
+	// out the API docs for more details:
+	//
+	// - https://api.slack.com/docs/presence-and-status#custom_status
+	profile, err := json.Marshal(
+		&struct {
+			StatusText  string `json:"status_text"`
+			StatusEmoji string `json:"status_emoji"`
+		}{
+			StatusText:  statusText,
+			StatusEmoji: statusEmoji,
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{
+		"token":   {api.config.token},
+		"profile": {string(profile)},
+	}
+
+	response := &userResponseFull{}
+
+	if err = post("users.profile.set", values, response, api.debug); err != nil {
+		return err
+	}
+
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+
+	return nil
+}
+
+// UnsetUserCustomStatus removes the custom status message for the currently
+// authenticated user. This is a convenience method that wraps
+// (*Client).SetUserCustomStatus().
+func (api *Client) UnsetUserCustomStatus() error {
+	return api.SetUserCustomStatus("", "")
 }
