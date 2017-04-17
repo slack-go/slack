@@ -2,10 +2,11 @@ package slack
 
 // OutgoingMessage is used for the realtime API, and seems incomplete.
 type OutgoingMessage struct {
-	ID      int    `json:"id"`
-	Channel string `json:"channel,omitempty"`
-	Text    string `json:"text,omitempty"`
-	Type    string `json:"type,omitempty"`
+	ID              int    `json:"id"`
+	Channel         string `json:"channel,omitempty"`
+	Text            string `json:"text,omitempty"`
+	Type            string `json:"type,omitempty"`
+	ThreadTimestamp string `json:"thread_ts,omitempty"`
 }
 
 // Message is an auxiliary type to allow us to have a message containing sub messages
