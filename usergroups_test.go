@@ -118,10 +118,13 @@ func getUserGroups(rw http.ResponseWriter, r *http.Request) {
             "deleted_by": null,
             "prefs": {
                 "channels": [
-
+                  "channel1",
+                  "channel2"
                 ],
                 "groups": [
-
+                  "group1",
+                  "group2",
+                  "group3"
                 ]
             },
             "user_count": 2
@@ -164,10 +167,10 @@ func TestGetUserGroups(t *testing.T) {
 		CreatedBy:   "USLACKBOT",
 		UpdatedBy:   "U060RNRCZ",
 		DeletedBy:   "",
-		Prefs: struct {
-			Channels []string "json:\"channels\""
-			Groups   []string "json:\"groups\""
-		}{Channels: []string{}, Groups: []string{}},
+		Prefs: UserGroupPrefs{
+			Channels: []string{"channel1", "channel2"},
+			Groups:   []string{"group1", "group2", "group3"},
+		},
 		UserCount: 2,
 	}
 

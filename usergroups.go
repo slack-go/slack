@@ -8,26 +8,29 @@ import (
 
 // UserGroup contains all the information of a user group
 type UserGroup struct {
-	ID          string   `json:"id"`
-	TeamID      string   `json:"team_id"`
-	IsUserGroup bool     `json:"is_usergroup"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Handle      string   `json:"handle"`
-	IsExternal  bool     `json:"is_external"`
-	DateCreate  JSONTime `json:"date_create"`
-	DateUpdate  JSONTime `json:"date_update"`
-	DateDelete  JSONTime `json:"date_delete"`
-	AutoType    string   `json:"auto_type"`
-	CreatedBy   string   `json:"created_by"`
-	UpdatedBy   string   `json:"updated_by"`
-	DeletedBy   string   `json:"deleted_by"`
-	Prefs       struct {
-		Channels []string `json:"channels"`
-		Groups   []string `json:"groups"`
-	} `json:"prefs"`
-	Users     []string
-	UserCount int `json:"user_count"`
+	ID          string         `json:"id"`
+	TeamID      string         `json:"team_id"`
+	IsUserGroup bool           `json:"is_usergroup"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Handle      string         `json:"handle"`
+	IsExternal  bool           `json:"is_external"`
+	DateCreate  JSONTime       `json:"date_create"`
+	DateUpdate  JSONTime       `json:"date_update"`
+	DateDelete  JSONTime       `json:"date_delete"`
+	AutoType    string         `json:"auto_type"`
+	CreatedBy   string         `json:"created_by"`
+	UpdatedBy   string         `json:"updated_by"`
+	DeletedBy   string         `json:"deleted_by"`
+	Prefs       UserGroupPrefs `json:"prefs"`
+	Users       []string
+	UserCount   int `json:"user_count"`
+}
+
+// UserGroupPrefs contains default channels and groups (private channels)
+type UserGroupPrefs struct {
+	Channels []string `json:"channels"`
+	Groups   []string `json:"groups"`
 }
 
 type userGroupResponseFull struct {
