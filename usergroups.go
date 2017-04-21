@@ -23,8 +23,7 @@ type UserGroup struct {
 	UpdatedBy   string         `json:"updated_by"`
 	DeletedBy   string         `json:"deleted_by"`
 	Prefs       UserGroupPrefs `json:"prefs"`
-	Users       []string
-	UserCount   int `json:"user_count"`
+	UserCount   int            `json:"user_count"`
 }
 
 // UserGroupPrefs contains default channels and groups (private channels)
