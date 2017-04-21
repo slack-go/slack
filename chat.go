@@ -249,7 +249,7 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 
 		// never generates an error.
-		_ = MsgOptionAsUser(params.AsUser)
+		MsgOptionAsUser(params.AsUser)(config)
 
 		if params.Parse != DEFAULT_MESSAGE_PARSE {
 			config.values.Set("parse", string(params.Parse))
