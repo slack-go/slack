@@ -108,6 +108,7 @@ func postWithMultipartResponse(path, filepath, fieldname string, values url.Valu
 }
 
 func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
+	const retryAfterHeader = "Retry-After"
 	resp, err := HTTPClient.PostForm(endpoint, values)
 	if err != nil {
 		return err
@@ -115,12 +116,16 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	defer resp.Body.Close()
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
-	if resp.StatusCode != 200 {
+	switch {
+	case resp.StatusCode == http.StatusTooManyRequests: // Rate limited, need the Retry-After header
 		logResponse(resp, debug)
-		return fmt.Errorf("Slack server error: %s.", resp.Status)
+		return fmt.Errorf("rate limited, retry after: %s", resp.Header.Get(retryAfterHeader))
+	case resp.StatusCode != http.StatusOK:
+		logResponse(resp, debug)
+		return fmt.Errorf("Slack server error: %s. Status code: %v", resp.Status, resp.StatusCode)
+	default:
+		return parseResponseBody(resp.Body, &intf, debug)
 	}
-
-	return parseResponseBody(resp.Body, &intf, debug)
 }
 
 func post(path string, values url.Values, intf interface{}, debug bool) error {
