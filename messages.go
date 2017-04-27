@@ -58,6 +58,11 @@ type Msg struct {
 	// channel_archive, group_archive
 	Members []string `json:"members,omitempty"`
 
+	// channels.replies, groups.replies, im.replies, mpim.replies
+	ReplyCount   int     `json:"reply_count,omitempty"`
+	Replies      []Reply `json:"replies,omitempty"`
+	ParentUserId string  `json:"parent_user_id,omitempty"`
+
 	// file_share, file_comment, file_mention
 	File *File `json:"file,omitempty"`
 
@@ -86,6 +91,12 @@ type Icon struct {
 
 // Edited indicates that a message has been edited.
 type Edited struct {
+	User      string `json:"user,omitempty"`
+	Timestamp string `json:"ts,omitempty"`
+}
+
+// Reply contains information about a reply for a thread
+type Reply struct {
 	User      string `json:"user,omitempty"`
 	Timestamp string `json:"ts,omitempty"`
 }

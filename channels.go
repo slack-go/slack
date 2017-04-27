@@ -259,3 +259,17 @@ func (api *Client) SetChannelTopic(channel, topic string) (string, error) {
 	}
 	return response.Topic, nil
 }
+
+// GetChannelReplies gets an entire thread (a message plus all the messages in reply to it).
+func (api *Client) GetChannelReplies(channel, thread_ts string) ([]Message, error) {
+	values := url.Values{
+		"token":     {api.config.token},
+		"channel":   {channel},
+		"thread_ts": {thread_ts},
+	}
+	response, err := channelRequest("channels.replies", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	return response.History.Messages, nil
+}
