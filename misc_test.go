@@ -42,6 +42,7 @@ func TestParseResponse(t *testing.T) {
 	values := url.Values{
 		"token": {validToken},
 	}
+
 	responsePartial := &SlackResponse{}
 	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
 	if err != nil {
@@ -54,6 +55,7 @@ func TestParseResponseNoToken(t *testing.T) {
 	once.Do(startServer)
 	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{}
+
 	responsePartial := &SlackResponse{}
 	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
 	if err != nil {

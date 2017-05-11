@@ -420,13 +420,13 @@ func (api *Client) GetUserIdentity() (*UserIdentityResponse, error) {
 }
 
 // GetUserIdentityContext will retrieve user info available per identity scopes with a custom context
-func (api *Client) GetUserIdentityContext(ctx context.Context) (*UserIdentityResponse, error) {
+func (api *Client) GetUserIdentityContext(ctx context.Context) (response *UserIdentityResponse, err error) {
 	values := url.Values{
 		"token": {api.token},
 	}
-	response := &UserIdentityResponse{}
+	response = &UserIdentityResponse{}
 
-	err := api.postMethod(ctx, "users.identity", values, response)
+	err = api.postMethod(ctx, "users.identity", values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -444,7 +444,7 @@ func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
 }
 
 // SetUserPhotoContext changes the currently authenticated user's profile image using a custom context
-func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params UserSetPhotoParams) error {
+func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params UserSetPhotoParams) (err error) {
 	response := &SlackResponse{}
 	values := url.Values{
 		"token": {api.token},
@@ -459,7 +459,7 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		values.Add("crop_w", strconv.Itoa(params.CropW))
 	}
 
-	err := postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", values, response, api)
+	err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", values, response, api)
 	if err != nil {
 		return err
 	}
@@ -473,13 +473,13 @@ func (api *Client) DeleteUserPhoto() error {
 }
 
 // DeleteUserPhotoContext deletes the current authenticated user's profile image with a custom context
-func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
+func (api *Client) DeleteUserPhotoContext(ctx context.Context) (err error) {
 	response := &SlackResponse{}
 	values := url.Values{
 		"token": {api.token},
 	}
 
-	err := api.postMethod(ctx, "users.deletePhoto", values, response)
+	err = api.postMethod(ctx, "users.deletePhoto", values, response)
 	if err != nil {
 		return err
 	}
