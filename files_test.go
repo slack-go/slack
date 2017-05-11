@@ -177,7 +177,8 @@ func TestUploadFile(t *testing.T) {
 
 	reader := bytes.NewBufferString("test reader")
 	params = FileUploadParameters{
-		Filename: "test.txt", Reader: reader,
+		Filename: "test.txt",
+		Reader:   reader,
 		Channels: []string{"CXXXXXXXX"}}
 	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)

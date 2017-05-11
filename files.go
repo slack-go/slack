@@ -321,6 +321,7 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 		}
 		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", values, params.Reader, response, api)
 	}
+
 	if err != nil {
 		return nil, err
 	}
