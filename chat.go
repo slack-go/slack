@@ -143,7 +143,7 @@ func (api *Client) UpdateMessage(channel, timestamp, text string) (string, strin
 	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
 }
 
-// UpdateMessage updates a message in a channel
+// UpdateMessageContext updates a message in a channel
 func (api *Client) UpdateMessageContext(ctx context.Context, channel, timestamp, text string) (string, string, string, error) {
 	return api.SendMessageContext(ctx, channel, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
 }
@@ -155,12 +155,12 @@ func (api *Client) SendMessage(channel string, options ...MsgOption) (string, st
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
 func (api *Client) SendMessageContext(ctx context.Context, channel string, options ...MsgOption) (string, string, string, error) {
-	channel, values, err := ApplyMsgOptions(api.config.token, channel, options...)
+	channel, values, err := ApplyMsgOptions(api.token, channel, options...)
 	if err != nil {
 		return "", "", "", err
 	}
 
-	response, err := chatRequest(ctx, channel, values, api.debug)
+	response, err := chatRequest(ctx, api.httpclient, channel, values, api.debug)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -192,9 +192,9 @@ func escapeMessage(message string) string {
 	return replacer.Replace(message)
 }
 
-func chatRequest(ctx context.Context, path string, values url.Values, debug bool) (*chatResponseFull, error) {
+func chatRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
-	err := post(ctx, path, values, response, debug)
+	err := post(ctx, client, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -298,6 +298,14 @@ func MsgOptionAttachments(attachments ...Attachment) MsgOption {
 func MsgOptionEnableLinkUnfurl() MsgOption {
 	return func(config *sendConfig) error {
 		config.values.Set("unfurl_links", "true")
+		return nil
+	}
+}
+
+// MsgOptionDisableLinkUnfurl disables link unfurling
+func MsgOptionDisableLinkUnfurl() MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("unfurl_links", "false")
 		return nil
 	}
 }
