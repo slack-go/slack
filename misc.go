@@ -92,6 +92,9 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 
 func postWithMultipartResponse(path, filepath, fieldname string, values url.Values, intf interface{}, debug bool) error {
 	req, err := fileUploadReq(SLACK_API+path, filepath, fieldname, values)
+	if err != nil {
+		return err
+	}
 	resp, err := HTTPClient.Do(req)
 	if err != nil {
 		return err
