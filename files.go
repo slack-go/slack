@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"io"
 	"net/url"
 	"strconv"
 	"strings"
@@ -90,6 +91,7 @@ type File struct {
 type FileUploadParameters struct {
 	File           string
 	Content        string
+	Reader         io.Reader
 	Filetype       string
 	Filename       string
 	Title          string
@@ -221,7 +223,9 @@ func (api *Client) UploadFile(params FileUploadParameters) (file *File, err erro
 		values.Add("content", params.Content)
 		err = post("files.upload", values, response, api.debug)
 	} else if params.File != "" {
-		err = postWithMultipartResponse("files.upload", params.File, "file", values, response, api.debug)
+		err = postLocalWithMultipartResponse("files.upload", params.File, "file", values, response, api.debug)
+	} else if params.Reader != nil {
+		err = postWithMultipartResponse("files.upload", params.Filename, "file", values, params.Reader, response, api.debug)
 	}
 	if err != nil {
 		return nil, err
