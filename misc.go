@@ -2,6 +2,7 @@ package slack
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -41,7 +42,7 @@ func (s WebError) Error() string {
 	return string(s)
 }
 
-func fileUploadReq(path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
+func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
 	body := &bytes.Buffer{}
 	wr := multipart.NewWriter(body)
 
@@ -58,6 +59,7 @@ func fileUploadReq(path, fieldname, filename string, values url.Values, r io.Rea
 	// Close the multipart writer or the footer won't be written
 	wr.Close()
 	req, err := http.NewRequest("POST", path, body)
+	req = req.WithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +87,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 	return nil
 }
 
-func postLocalWithMultipartResponse(path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
+func postLocalWithMultipartResponse(ctx context.Context, path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {
 		return err
@@ -95,14 +97,15 @@ func postLocalWithMultipartResponse(path, fpath, fieldname string, values url.Va
 		return err
 	}
 	defer file.Close()
-	return postWithMultipartResponse(path, filepath.Base(fpath), fieldname, values, file, intf, debug)
+	return postWithMultipartResponse(ctx, path, filepath.Base(fpath), fieldname, values, file, intf, debug)
 }
 
-func postWithMultipartResponse(path, name, fieldname string, values url.Values, r io.Reader, intf interface{}, debug bool) error {
-	req, err := fileUploadReq(SLACK_API+path, fieldname, name, values, r)
+func postWithMultipartResponse(ctx context.Context, path, name, fieldname string, values url.Values, r io.Reader, intf interface{}, debug bool) error {
+	req, err := fileUploadReq(ctx, SLACK_API+path, fieldname, name, values, r)
 	if err != nil {
 		return err
 	}
+	req = req.WithContext(ctx)
 	resp, err := getHTTPClient().Do(req)
 	if err != nil {
 		return err
@@ -118,7 +121,7 @@ func postWithMultipartResponse(path, name, fieldname string, values url.Values, 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
+func postForm(ctx context.Context, endpoint string, values url.Values, intf interface{}, debug bool) error {
 	reqBody := strings.NewReader(values.Encode())
 	req, err := http.NewRequest("POST", endpoint, reqBody)
 	if err != nil {
@@ -126,6 +129,7 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
+	req = req.WithContext(ctx)
 	resp, err := getHTTPClient().Do(req)
 	if err != nil {
 		return err
@@ -141,13 +145,13 @@ func postForm(endpoint string, values url.Values, intf interface{}, debug bool) 
 	return parseResponseBody(resp.Body, &intf, debug)
 }
 
-func post(path string, values url.Values, intf interface{}, debug bool) error {
-	return postForm(SLACK_API+path, values, intf, debug)
+func post(ctx context.Context, path string, values url.Values, intf interface{}, debug bool) error {
+	return postForm(ctx, SLACK_API+path, values, intf, debug)
 }
 
-func parseAdminResponse(method string, teamName string, values url.Values, intf interface{}, debug bool) error {
+func parseAdminResponse(ctx context.Context, method string, teamName string, values url.Values, intf interface{}, debug bool) error {
 	endpoint := fmt.Sprintf(SLACK_WEB_API_FORMAT, teamName, method, time.Now().Unix())
-	return postForm(endpoint, values, intf, debug)
+	return postForm(ctx, endpoint, values, intf, debug)
 }
 
 func logResponse(resp *http.Response, debug bool) error {
