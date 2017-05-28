@@ -87,7 +87,10 @@ type File struct {
 	IsStarred       bool     `json:"is_starred"`
 }
 
-// FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request
+// FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
+//
+// There are three ways to upload a file. You can either set Content if file is small, set Reader if file is large,
+// or provide a local file path in File to upload it from your filesystem.
 type FileUploadParameters struct {
 	File           string
 	Content        string
