@@ -3,7 +3,6 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -42,39 +41,22 @@ func (s WebError) Error() string {
 	return string(s)
 }
 
-func fileUploadReq(path, fpath, fieldname string, values url.Values) (*http.Request, error) {
-	fullpath, err := filepath.Abs(fpath)
-	if err != nil {
-		return nil, err
-	}
-	file, err := os.Open(fullpath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+func fileUploadReq(path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
 	body := &bytes.Buffer{}
 	wr := multipart.NewWriter(body)
 
-	ioWriter, err := wr.CreateFormFile(fieldname, filepath.Base(fullpath))
+	ioWriter, err := wr.CreateFormFile(fieldname, filename)
 	if err != nil {
 		wr.Close()
 		return nil, err
 	}
-	bytes, err := io.Copy(ioWriter, file)
+	_, err = io.Copy(ioWriter, r)
 	if err != nil {
 		wr.Close()
 		return nil, err
 	}
 	// Close the multipart writer or the footer won't be written
 	wr.Close()
-	stat, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	if bytes != stat.Size() {
-		return nil, errors.New("could not read the whole file")
-	}
 	req, err := http.NewRequest("POST", path, body)
 	if err != nil {
 		return nil, err
@@ -103,8 +85,21 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 	return nil
 }
 
-func postWithMultipartResponse(path, filepath, fieldname string, values url.Values, intf interface{}, debug bool) error {
-	req, err := fileUploadReq(SLACK_API+path, filepath, fieldname, values)
+func postLocalWithMultipartResponse(path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
+	fullpath, err := filepath.Abs(fpath)
+	if err != nil {
+		return err
+	}
+	file, err := os.Open(fullpath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return postWithMultipartResponse(path, filepath.Base(fpath), fieldname, values, file, intf, debug)
+}
+
+func postWithMultipartResponse(path, name, fieldname string, values url.Values, r io.Reader, intf interface{}, debug bool) error {
+	req, err := fileUploadReq(SLACK_API+path, fieldname, name, values, r)
 	if err != nil {
 		return err
 	}

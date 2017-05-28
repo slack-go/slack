@@ -228,7 +228,7 @@ func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
 	if params.CropW != DEFAULT_USER_PHOTO_CROP_W {
 		values.Add("crop_w", string(params.CropW))
 	}
-	err := postWithMultipartResponse("users.setPhoto", image, "image", values, response, api.debug)
+	err := postLocalWithMultipartResponse("users.setPhoto", image, "image", values, response, api.debug)
 	if err != nil {
 		return err
 	}
