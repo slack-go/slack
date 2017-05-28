@@ -13,9 +13,22 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
+// HTTPRequester defines the minimal interface needed for an http.Client to be implemented.
+//
+// Use it in conjunction with the SetHTTPClient function to allow for other capabilities
+// like a tracing http.Client
+type HTTPRequester interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
+var customHTTPClient HTTPRequester
+
+// HTTPClient sets a custom http.Client
+// deprecated: in favor of SetHTTPClient()
 var HTTPClient = &http.Client{}
 
 type WebResponse struct {
@@ -95,7 +108,7 @@ func postWithMultipartResponse(path, filepath, fieldname string, values url.Valu
 	if err != nil {
 		return err
 	}
-	resp, err := HTTPClient.Do(req)
+	resp, err := getHTTPClient().Do(req)
 	if err != nil {
 		return err
 	}
@@ -111,7 +124,14 @@ func postWithMultipartResponse(path, filepath, fieldname string, values url.Valu
 }
 
 func postForm(endpoint string, values url.Values, intf interface{}, debug bool) error {
-	resp, err := HTTPClient.PostForm(endpoint, values)
+	reqBody := strings.NewReader(values.Encode())
+	req, err := http.NewRequest("POST", endpoint, reqBody)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := getHTTPClient().Do(req)
 	if err != nil {
 		return err
 	}
@@ -146,4 +166,19 @@ func logResponse(resp *http.Response, debug bool) error {
 	}
 
 	return nil
+}
+
+func getHTTPClient() HTTPRequester {
+	if customHTTPClient != nil {
+		return customHTTPClient
+	}
+
+	return HTTPClient
+}
+
+// SetHTTPClient allows you to specify a custom http.Client
+// Use this instead of the package level HTTPClient variable if you want to use a custom client like the
+// Stackdriver Trace HTTPClient https://godoc.org/cloud.google.com/go/trace#HTTPClient
+func SetHTTPClient(client HTTPRequester) {
+	customHTTPClient = client
 }
