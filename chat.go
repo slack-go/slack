@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/url"
@@ -64,7 +65,13 @@ func NewPostMessageParameters() PostMessageParameters {
 
 // DeleteMessage deletes a message in a channel
 func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessage(channel, MsgOptionDelete(messageTimestamp))
+	respChannel, respTimestamp, _, err := api.SendMessageContext(context.Background(), channel, MsgOptionDelete(messageTimestamp))
+	return respChannel, respTimestamp, err
+}
+
+// DeleteMessageContext deletes a message in a channel with a custom context
+func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTimestamp string) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.SendMessageContext(ctx, channel, MsgOptionDelete(messageTimestamp))
 	return respChannel, respTimestamp, err
 }
 
@@ -72,7 +79,21 @@ func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, stri
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
 func (api *Client) PostMessage(channel, text string, params PostMessageParameters) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessage(
+	respChannel, respTimestamp, _, err := api.SendMessageContext(
+		context.Background(),
+		channel,
+		MsgOptionText(text, params.EscapeText),
+		MsgOptionAttachments(params.Attachments...),
+		MsgOptionPostMessageParameters(params),
+	)
+	return respChannel, respTimestamp, err
+}
+
+// PostMessageContext sends a message to a channel with a custom context
+// For more details, see PostMessage documentation
+func (api *Client) PostMessageContext(ctx context.Context, channel, text string, params PostMessageParameters) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.SendMessageContext(
+		ctx,
 		channel,
 		MsgOptionText(text, params.EscapeText),
 		MsgOptionAttachments(params.Attachments...),
@@ -83,17 +104,27 @@ func (api *Client) PostMessage(channel, text string, params PostMessageParameter
 
 // UpdateMessage updates a message in a channel
 func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
-	return api.SendMessage(channel, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
+	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
+}
+
+// UpdateMessage updates a message in a channel
+func (api *Client) UpdateMessageContext(ctx context.Context, channel, timestamp, text string) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channel, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
 }
 
 // SendMessage more flexible method for configuring messages.
 func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(context.Background(), channel, options...)
+}
+
+// SendMessageContext more flexible method for configuring messages with a custom context.
+func (api *Client) SendMessageContext(ctx context.Context, channel string, options ...MsgOption) (string, string, string, error) {
 	channel, values, err := ApplyMsgOptions(api.config.token, channel, options...)
 	if err != nil {
 		return "", "", "", err
 	}
 
-	response, err := chatRequest(channel, values, api.debug)
+	response, err := chatRequest(ctx, channel, values, api.debug)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -125,9 +156,9 @@ func escapeMessage(message string) string {
 	return replacer.Replace(message)
 }
 
-func chatRequest(path string, values url.Values, debug bool) (*chatResponseFull, error) {
+func chatRequest(ctx context.Context, path string, values url.Values, debug bool) (*chatResponseFull, error) {
 	response := &chatResponseFull{}
-	err := post(path, values, response, debug)
+	err := post(ctx, path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
