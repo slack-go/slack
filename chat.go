@@ -46,6 +46,16 @@ type PostMessageParameters struct {
 	EscapeText      bool         `json:"escape_text"`
 }
 
+// UpdateMessageParameters contains all the parameters necessary (including the optional ones) for a UpdateMessage() request
+type UpdateMessageParameters struct {
+	Timestamp   string       `json:"ts"`
+	Text        string       `json:"text"`
+	Attachments []Attachment `json:"attachments"`
+	Parse       string       `json:"parse"`
+	LinkNames   int          `json:"link_names"`
+	AsUser      bool         `json:"as_user"`
+}
+
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
@@ -317,4 +327,35 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 
 		return nil
 	}
+}
+
+// UpdateMessageWithAttachments updates a message in a channel with attachments
+func (api *Client) UpdateMessageWithAttachments(channel string, params UpdateMessageParameters) (string, string, string, error) {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {channel},
+		"text":    {escapeMessage(params.Text)},
+		"ts":      {params.Timestamp},
+	}
+	if params.AsUser != DEFAULT_MESSAGE_ASUSER {
+		values.Set("as_user", "true")
+	}
+	if params.Parse != DEFAULT_MESSAGE_PARSE {
+		values.Set("parse", string(params.Parse))
+	}
+	if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+		values.Set("link_names", "1")
+	}
+	if params.Attachments != nil {
+		attachments, err := json.Marshal(params.Attachments)
+		if err != nil {
+			return "", "", "", err
+		}
+		values.Set("attachments", string(attachments))
+	}
+	response, err := chatRequest("chat.update", values, api.debug)
+	if err != nil {
+		return "", "", "", err
+	}
+	return response.Channel, response.Timestamp, response.Text, nil
 }
