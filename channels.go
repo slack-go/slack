@@ -228,17 +228,20 @@ func (api *Client) KickUserFromChannelContext(ctx context.Context, channel, user
 }
 
 // GetChannels retrieves all the channels
-func (api *Client) GetChannels(excludeArchived bool) ([]Channel, error) {
-	return api.GetChannelsContext(context.Background(), excludeArchived)
+func (api *Client) GetChannels(excludeArchived bool, excludeMembers bool) ([]Channel, error) {
+	return api.GetChannelsContext(context.Background(), excludeArchived, excludeMembers)
 }
 
 // GetChannelsContext retrieves all the channels with a custom context
-func (api *Client) GetChannelsContext(ctx context.Context, excludeArchived bool) ([]Channel, error) {
+func (api *Client) GetChannelsContext(ctx context.Context, excludeArchived bool, excludeMembers bool) ([]Channel, error) {
 	values := url.Values{
 		"token": {api.config.token},
 	}
 	if excludeArchived {
 		values.Add("exclude_archived", "1")
+	}
+	if excludeMembers {
+		values.Add("exclude_members", "1")
 	}
 	response, err := channelRequest(ctx, "channels.list", values, api.debug)
 	if err != nil {
