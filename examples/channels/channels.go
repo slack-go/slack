@@ -8,7 +8,7 @@ import (
 
 func main() {
 	api := slack.New("YOUR_TOKEN_HERE")
-	channels, err := api.GetChannels(false)
+	channels, err := api.GetChannels(false, false)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

@@ -51,7 +51,7 @@ func main() {
 		// If the channel exists, that means we just need to unarchive it
 		if err.Error() == "name_taken" {
 			err = nil
-			channels, err := api.GetChannels(false)
+			channels, err := api.GetChannels(false, false)
 			if err != nil {
 				fmt.Println("Could not retrieve channels")
 				return
