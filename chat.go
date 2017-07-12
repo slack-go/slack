@@ -11,6 +11,7 @@ import (
 const (
 	DEFAULT_MESSAGE_USERNAME         = ""
 	DEFAULT_MESSAGE_THREAD_TIMESTAMP = ""
+	DEFAULT_MESSAGE_REPLY_BROADCAST  = false
 	DEFAULT_MESSAGE_ASUSER           = false
 	DEFAULT_MESSAGE_PARSE            = ""
 	DEFAULT_MESSAGE_LINK_NAMES       = 0
@@ -36,6 +37,7 @@ type PostMessageParameters struct {
 	AsUser          bool         `json:"as_user"`
 	Parse           string       `json:"parse"`
 	ThreadTimestamp string       `json:"thread_ts"`
+	ReplyBroadcast  bool         `json:"reply_broadcast"`
 	LinkNames       int          `json:"link_names"`
 	Attachments     []Attachment `json:"attachments"`
 	UnfurlLinks     bool         `json:"unfurl_links"`
@@ -364,6 +366,9 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 
 		if params.ThreadTimestamp != DEFAULT_MESSAGE_THREAD_TIMESTAMP {
 			config.values.Set("thread_ts", params.ThreadTimestamp)
+		}
+		if params.ReplyBroadcast != DEFAULT_MESSAGE_REPLY_BROADCAST {
+			config.values.Set("reply_broadcast", "true")
 		}
 
 		return nil
