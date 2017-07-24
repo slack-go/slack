@@ -36,6 +36,7 @@ type PostMessageParameters struct {
 	AsUser          bool         `json:"as_user"`
 	Parse           string       `json:"parse"`
 	ThreadTimestamp string       `json:"thread_ts"`
+	ReplyBroadcast  bool         `json:"reply_broadcast"`
 	LinkNames       int          `json:"link_names"`
 	Attachments     []Attachment `json:"attachments"`
 	UnfurlLinks     bool         `json:"unfurl_links"`
