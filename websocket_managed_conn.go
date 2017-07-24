@@ -303,7 +303,7 @@ func (rtm *RTM) handleRawEvent(rawEvent json.RawMessage) {
 	case "pong":
 		rtm.handlePong(rawEvent)
 	case "desktop_notification":
-		rtm.Debugln("Recieved desktop notification, ignoring")
+		rtm.Debugln("Received desktop notification, ignoring")
 	default:
 		rtm.handleEvent(event.Type, rawEvent)
 	}
