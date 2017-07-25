@@ -17,7 +17,7 @@ Please check [0.1.0](https://github.com/nlopes/slack/releases/tag/v0.1.0)
 
 ### CHANGELOG.md
 
-As of this version a [CHANGELOG.md](https://github.com/nlopes/slack/blob/master/README.md) is available. Please visit it for updates. 
+As of this version a [CHANGELOG.md](https://github.com/nlopes/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
 
 ## Installing
 
