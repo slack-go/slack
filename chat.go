@@ -102,6 +102,22 @@ func (api *Client) PostMessageContext(ctx context.Context, channel, text string,
 	return respChannel, respTimestamp, err
 }
 
+// PostMessageTo sends a message to a channel and specific user.
+// id Means User.ID.
+// Message is escaped by default according to https://api.slack.com/docs/formatting
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
+func (api *Client) PostMessageTo(channel, text string, id string, params PostMessageParameters) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.SendMessageContext(
+		context.Background(),
+		channel,
+		// as you want to mentioning user, you should type <@userid> text
+		MsgOptionText("<@"+id+"> "+text, params.EscapeText),
+		MsgOptionAttachments(params.Attachments...),
+		MsgOptionPostMessageParameters(params),
+	)
+	return respChannel, respTimestamp, err
+}
+
 // UpdateMessage updates a message in a channel
 func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
 	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
