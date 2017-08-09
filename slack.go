@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-var logger *log.Logger // A logger that can be set by consumers
+var logger stdLogger // A logger that can be set by consumers
 /*
   Added as a var so that we can change this for testing purposes
 */
@@ -42,12 +42,29 @@ type Client struct {
 	debug bool
 }
 
+// stdLogger is a logger interface compatible with both stdlib and some
+// 3rd party loggers such as logrus.
+type stdLogger interface {
+	Print(...interface{})
+	Printf(string, ...interface{})
+	Println(...interface{})
+
+	Fatal(...interface{})
+	Fatalf(string, ...interface{})
+	Fatalln(...interface{})
+
+	Panic(...interface{})
+	Panicf(string, ...interface{})
+	Panicln(...interface{})
+}
+
 // SetLogger let's library users supply a logger, so that api debugging
 // can be logged along with the application's debugging info.
-func SetLogger(l *log.Logger) {
+func SetLogger(l stdLogger) {
 	logger = l
 }
 
+// New creates new Client.
 func New(token string) *Client {
 	s := &Client{}
 	s.config.token = token
