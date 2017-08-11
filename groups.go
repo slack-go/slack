@@ -11,6 +11,7 @@ import (
 type Group struct {
 	groupConversation
 	IsGroup bool `json:"is_group"`
+	IsMpIM  bool `json:"is_mpim"`
 }
 
 type groupResponseFull struct {
