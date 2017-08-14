@@ -86,6 +86,8 @@ type File struct {
 	CommentsCount   int      `json:"comments_count"`
 	NumStars        int      `json:"num_stars"`
 	IsStarred       bool     `json:"is_starred"`
+
+	Reactions []ItemReaction `json:"reactions,omitempty"`
 }
 
 // FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
