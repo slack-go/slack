@@ -107,9 +107,26 @@ func (api *Client) UpdateMessage(channel, timestamp, text string) (string, strin
 	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
 }
 
-// UpdateMessage updates a message in a channel
+// UpdateMessageContext : more flexible method for updating a message in a channel
 func (api *Client) UpdateMessageContext(ctx context.Context, channel, timestamp, text string) (string, string, string, error) {
 	return api.SendMessageContext(ctx, channel, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
+}
+
+// UpdateMessageWithParams : more flexible method for updating messages with params in a channel
+func (api *Client) UpdateMessageWithParams(channel, timestamp, text string, params PostMessageParameters) (string, string, string, error) {
+	return api.UpdateMessageWithParamsContext(context.Background(), channel, timestamp, text, params)
+}
+
+// UpdateMessageWithParamsContext : updates a message in a channel
+func (api *Client) UpdateMessageWithParamsContext(ctx context.Context, channel, timestamp, text string, params PostMessageParameters) (string, string, string, error) {
+	return api.SendMessageContext(
+		ctx,
+		channel,
+		MsgOptionUpdate(timestamp),
+		MsgOptionText(text, params.EscapeText),
+		MsgOptionAttachments(params.Attachments...),
+		MsgOptionPostMessageParameters(params),
+	)
 }
 
 // SendMessage more flexible method for configuring messages.
