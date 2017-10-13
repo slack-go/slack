@@ -55,6 +55,7 @@ type AttachmentActionCallback struct {
 	AttachmentID string `json:"attachment_id"`
 	Token        string `json:"token"`
 	ResponseURL  string `json:"response_url"`
+	TriggerID    string `json:"trigger_id"`
 }
 
 // ConfirmationField are used to ask users to confirm actions
