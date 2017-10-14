@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
 	"time"
 )
@@ -208,7 +207,7 @@ pagination:
 			break retry
 		}
 		users = append(users, response.Members...)
-		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok {
+		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok && next_token != "" {
 			values["cursor"] = []string{next_token}
 		} else {
 			break pagination
