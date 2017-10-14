@@ -186,7 +186,7 @@ func (api *Client) GetUsersContext(ctx context.Context) (users []User, err error
 		// quickly, so we'll have to be bad little citizens and
 		// use the max. :-/
 		"limit":    {"1000"},
-		"presence": {"false"},
+		"presence": {"true"},
 		"token":    {api.config.token},
 	}
 
