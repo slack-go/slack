@@ -102,10 +102,10 @@ type TeamIdentity struct {
 }
 
 type userResponseFull struct {
-	Members          []User             `json:"members,omitempty"` // ListUsers
-	User             `json:"user,omitempty"`                       // GetUserInfo
-	UserPresence                                                   // GetUserPresence
-	ResponseMetadata map[string]string  `json:"response_metadata,omitempty"`
+	Members          []User                  `json:"members,omitempty"` // ListUsers
+	User             `json:"user,omitempty"` // GetUserInfo
+	UserPresence                             // GetUserPresence
+	ResponseMetadata map[string]string       `json:"response_metadata,omitempty"`
 	SlackResponse
 }
 
@@ -171,38 +171,53 @@ func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, 
 	return &response.User, nil
 }
 
-// GetUsers returns the list of users (with their detailed information)
+// GetUsers returns the list of users (with their detailed information). This
+// call can take a long time for large teams, due to rate limits on `users.list`.
 func (api *Client) GetUsers() ([]User, error) {
 	return api.GetUsersContext(context.Background())
 }
 
-// GetUsersContext returns the list of users (with their detailed information) with a custom context
+// GetUsersContext returns the list of users (with their detailed information)
+// with a custom context. This call can take a long time for large teams, due to
+// rate limits on `users.list`.
 func (api *Client) GetUsersContext(ctx context.Context) (users []User, err error) {
 	values := url.Values{
 		// API docs say to use 200, but rate limiting kicks in too
 		// quickly, so we'll have to be bad little citizens and
 		// use the max. :-/
-		"limit":    {"999"},
-		"presence": {"1"},
+		"limit":    {"1000"},
+		"presence": {"true"},
 		"token":    {api.config.token},
 	}
 
+pagination:
 	for {
-		response, err := userRequest(ctx, "users.list", values, api.debug)
-		if err != nil {
-			break
+		var response *userResponseFull
+	retry:
+		for {
+			var err error
+			response, err = userRequest(ctx, "users.list", values, api.debug)
+			if err != nil {
+				if e, ok := err.(WebError); ok && e.Status == 429 {
+					if api.debug {
+						logger.Printf("GetUsersContext: users.list rate limited, sleeping for %d seconds", e.RetryAfter)
+					}
+					time.Sleep(time.Duration(e.RetryAfter) * time.Second)
+					continue retry
+				}
+				return nil, err
+			}
+			break retry
 		}
 		users = append(users, response.Members...)
-		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok {
+		if api.debug {
+			logger.Printf("GetUsersContext: got %d users; now %d total", len(response.Members), len(users))
+		}
+		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok && next_token != "" {
 			values["cursor"] = []string{next_token}
 		} else {
-			break
+			break pagination
 		}
-		// Slack API might rate-limit us. Even trying to sleep several
-		// seconds here seems to trigger rate-limiting; API docs say
-		// to "send no more than one message per second", so let's
-		// sleep for 2.
-		time.Sleep(2 * time.Second)
 	}
 	return
 }

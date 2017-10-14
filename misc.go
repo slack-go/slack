@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -36,10 +37,14 @@ type WebResponse struct {
 	Error *WebError `json:"error"`
 }
 
-type WebError string
+type WebError struct {
+	Status       int
+	RetryAfter   int
+	ErrorMessage string
+}
 
 func (s WebError) Error() string {
-	return string(s)
+	return string(s.ErrorMessage)
 }
 
 func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
@@ -138,8 +143,16 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != 200 {
+		retryAfter := 0
+		if resp.StatusCode == 429 {
+			retryAfter, _ = strconv.Atoi(resp.Header.Get("retry-after"))
+		}
 		logResponse(resp, debug)
-		return fmt.Errorf("Slack server error: %s.", resp.Status)
+		return WebError{
+			Status:       resp.StatusCode,
+			RetryAfter:   retryAfter,
+			ErrorMessage: fmt.Sprintf("Slack server error: %s.", resp.Status),
+		}
 	}
 
 	return parseResponseBody(resp.Body, &intf, debug)
