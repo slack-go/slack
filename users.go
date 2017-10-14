@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
+	"time"
 )
 
 const (
@@ -101,9 +102,10 @@ type TeamIdentity struct {
 }
 
 type userResponseFull struct {
-	Members      []User                  `json:"members,omitempty"` // ListUsers
-	User         `json:"user,omitempty"` // GetUserInfo
-	UserPresence                         // GetUserPresence
+	Members          []User             `json:"members,omitempty"` // ListUsers
+	User             `json:"user,omitempty"`                       // GetUserInfo
+	UserPresence                                                   // GetUserPresence
+	ResponseMetadata map[string]string  `json:"response_metadata,omitempty"`
 	SlackResponse
 }
 
@@ -175,16 +177,34 @@ func (api *Client) GetUsers() ([]User, error) {
 }
 
 // GetUsersContext returns the list of users (with their detailed information) with a custom context
-func (api *Client) GetUsersContext(ctx context.Context) ([]User, error) {
+func (api *Client) GetUsersContext(ctx context.Context) (users []User, err error) {
 	values := url.Values{
-		"token":    {api.config.token},
+		// API docs say to use 200, but rate limiting kicks in too
+		// quickly, so we'll have to be bad little citizens and
+		// use the max. :-/
+		"limit":    {"999"},
 		"presence": {"1"},
+		"token":    {api.config.token},
 	}
-	response, err := userRequest(ctx, "users.list", values, api.debug)
-	if err != nil {
-		return nil, err
+
+	for {
+		response, err := userRequest(ctx, "users.list", values, api.debug)
+		if err != nil {
+			break
+		}
+		users = append(users, response.Members...)
+		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok {
+			values["cursor"] = []string{next_token}
+		} else {
+			break
+		}
+		// Slack API might rate-limit us. Even trying to sleep several
+		// seconds here seems to trigger rate-limiting; API docs say
+		// to "send no more than one message per second", so let's
+		// sleep for 2.
+		time.Sleep(2 * time.Second)
 	}
-	return response.Members, nil
+	return
 }
 
 // SetUserAsActive marks the currently authenticated user as active
