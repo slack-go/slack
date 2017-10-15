@@ -526,6 +526,65 @@ func TestChannelUnarchiveMessage(t *testing.T) {
 	assert.Equal(t, "U1234", message.User)
 }
 
+var channelRepliesParentMessage = `{
+    "type": "message",
+    "user": "U1234",
+    "text": "test",
+    "thread_ts": "1493305433.915644",
+    "reply_count": 2,
+    "replies": [
+        {
+            "user": "U5678",
+            "ts": "1493305444.920992"
+        },
+        {
+            "user": "U9012",
+            "ts": "1493305894.133936"
+        }
+    ],
+    "subscribed": true,
+    "last_read": "1493305894.133936",
+    "unread_count": 0,
+    "ts": "1493305433.915644"
+}`
+
+func TestChannelRepliesParentMessage(t *testing.T) {
+	message, err := unmarshalMessage(channelRepliesParentMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, message)
+	assert.Equal(t, "message", message.Type)
+	assert.Equal(t, "U1234", message.User)
+	assert.Equal(t, "test", message.Text)
+	assert.Equal(t, "1493305433.915644", message.ThreadTimestamp)
+	assert.Equal(t, 2, message.ReplyCount)
+	assert.Equal(t, "U5678", message.Replies[0].User)
+	assert.Equal(t, "1493305444.920992", message.Replies[0].Timestamp)
+	assert.Equal(t, "U9012", message.Replies[1].User)
+	assert.Equal(t, "1493305894.133936", message.Replies[1].Timestamp)
+	assert.Equal(t, "1493305433.915644", message.Timestamp)
+}
+
+var channelRepliesChildMessage = `{
+    "type": "message",
+    "user": "U5678",
+    "text": "foo",
+    "thread_ts": "1493305433.915644",
+    "parent_user_id": "U1234",
+    "ts": "1493305444.920992"
+}`
+
+func TestChannelRepliesChildMessage(t *testing.T) {
+	message, err := unmarshalMessage(channelRepliesChildMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, message)
+	assert.Equal(t, "message", message.Type)
+	assert.Equal(t, "U5678", message.User)
+	assert.Equal(t, "foo", message.Text)
+	assert.Equal(t, "1493305433.915644", message.ThreadTimestamp)
+	assert.Equal(t, "U1234", message.ParentUserId)
+	assert.Equal(t, "1493305444.920992", message.Timestamp)
+}
+
 var groupJoinMessage = `{
     "type": "message",
     "subtype": "group_join",
