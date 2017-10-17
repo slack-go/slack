@@ -208,9 +208,7 @@ pagination:
 			break retry
 		}
 		users = append(users, response.Members...)
-		if api.debug {
-			logger.Printf("GetUsersContext: got %d users; now %d total", len(response.Members), len(users))
-		}
+		api.Debugf("GetUsersContext: got %d users; now %d total", len(response.Members), len(users))
 		if next_cursor, ok := response.ResponseMetadata["next_cursor"]; ok && next_cursor != "" {
 			values["cursor"] = []string{next_cursor}
 		} else {
