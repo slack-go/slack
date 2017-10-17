@@ -145,7 +145,13 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	if resp.StatusCode != 200 {
 		retryAfter := 0
 		if resp.StatusCode == 429 {
-			retryAfter, _ = strconv.Atoi(resp.Header.Get("retry-after"))
+			retryAfter, err = strconv.Atoi(resp.Header.Get("retry-after"))
+			if err != nil {
+				if debug {
+					logger.Printf("Got a 429 without a retry-after: %s", err)
+				}
+				retryAfter = 10
+			}
 		}
 		logResponse(resp, debug)
 		return WebError{

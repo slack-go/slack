@@ -199,9 +199,7 @@ pagination:
 			response, err = userRequest(ctx, "users.list", values, api.debug)
 			if err != nil {
 				if e, ok := err.(WebError); ok && e.Status == 429 {
-					if api.debug {
-						logger.Printf("GetUsersContext: users.list rate limited, sleeping for %d seconds", e.RetryAfter)
-					}
+					api.Debugf("GetUsersContext: users.list rate limited, sleeping for %d seconds\n", e.RetryAfter)
 					time.Sleep(time.Duration(e.RetryAfter) * time.Second)
 					continue retry
 				}
@@ -213,8 +211,8 @@ pagination:
 		if api.debug {
 			logger.Printf("GetUsersContext: got %d users; now %d total", len(response.Members), len(users))
 		}
-		if next_token, ok := response.ResponseMetadata["next_cursor"]; ok && next_token != "" {
-			values["cursor"] = []string{next_token}
+		if next_cursor, ok := response.ResponseMetadata["next_cursor"]; ok && next_cursor != "" {
+			values["cursor"] = []string{next_cursor}
 		} else {
 			break pagination
 		}
