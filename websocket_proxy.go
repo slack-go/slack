@@ -89,4 +89,3 @@ func websocketProxyDial(urlString, origin string) (ws *websocket.Conn, err error
 
 	return websocket.NewClient(config, client)
 }
-
