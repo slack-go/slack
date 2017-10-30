@@ -102,6 +102,37 @@ func (api *Client) PostMessageContext(ctx context.Context, channel, text string,
 	return respChannel, respTimestamp, err
 }
 
+// PostEphemeral sends an ephemeral message to a user in a channel.
+// Message is escaped by default according to https://api.slack.com/docs/formatting
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
+func (api *Client) PostEphemeral(channel, userID string, options ...MsgOption) (string, error) {
+	options = append(options, MsgOptionPostEphemeral())
+	return api.PostEphemeralContext(
+		context.Background(),
+		channel,
+		userID,
+		options...,
+	)
+}
+
+// PostEphemeralContext sends an ephemeal message to a user in a channel with a custom context
+// For more details, see PostEphemeral documentation
+func (api *Client) PostEphemeralContext(ctx context.Context, channel, userID string, options ...MsgOption) (string, error) {
+	path, values, err := ApplyMsgOptions(api.config.token, channel, options...)
+	if err != nil {
+		return "", err
+	}
+
+	values.Add("user", userID)
+
+	response, err := chatRequest(ctx, path, values, api.debug)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Timestamp, nil
+}
+
 // UpdateMessage updates a message in a channel
 func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
 	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
@@ -171,9 +202,10 @@ func chatRequest(ctx context.Context, path string, values url.Values, debug bool
 type sendMode string
 
 const (
-	chatUpdate      sendMode = "chat.update"
-	chatPostMessage sendMode = "chat.postMessage"
-	chatDelete      sendMode = "chat.delete"
+	chatUpdate        sendMode = "chat.update"
+	chatPostMessage   sendMode = "chat.postMessage"
+	chatDelete        sendMode = "chat.delete"
+	chatPostEphemeral sendMode = "chat.postEphemeral"
 )
 
 type sendConfig struct {
@@ -188,6 +220,15 @@ type MsgOption func(*sendConfig) error
 func MsgOptionPost() MsgOption {
 	return func(config *sendConfig) error {
 		config.mode = chatPostMessage
+		config.values.Del("ts")
+		return nil
+	}
+}
+
+// MsgOptionPostEphemeral posts an ephemeral message
+func MsgOptionPostEphemeral() MsgOption {
+	return func(config *sendConfig) error {
+		config.mode = chatPostEphemeral
 		config.values.Del("ts")
 		return nil
 	}
