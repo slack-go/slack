@@ -43,13 +43,21 @@ func websocketHTTPConnect(proxy, urlString string) (net.Conn, error) {
 }
 
 func websocketProxyDial(urlString, origin string) (ws *websocket.Conn, err error) {
-	if os.Getenv("HTTP_PROXY") == "" {
-		return websocket.Dial(urlString, "", origin)
-	}
+	var purl *url.URL
 
-	purl, err := url.Parse(os.Getenv("HTTP_PROXY"))
-	if err != nil {
-		return nil, err
+	switch {
+	case os.Getenv("HTTP_PROXY") != "":
+		purl, err = url.Parse(os.Getenv("HTTP_PROXY"))
+		if err != nil {
+			return nil, err
+		}
+	case os.Getenv("http_proxy") != "":
+		purl, err = url.Parse(os.Getenv("http_proxy"))
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return websocket.Dial(urlString, "", origin)
 	}
 
 	config, err := websocket.NewConfig(urlString, origin)
@@ -81,3 +89,4 @@ func websocketProxyDial(urlString, origin string) (ws *websocket.Conn, err error
 
 	return websocket.NewClient(config, client)
 }
+
