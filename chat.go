@@ -102,6 +102,11 @@ func (api *Client) PostMessageContext(ctx context.Context, channel, text string,
 	return respChannel, respTimestamp, err
 }
 
+// UpdateMessageWithParams updates a message in a channel with params
+func (api *Client) UpdateMessageWithParams(channel, timestamp, text string, params PostMessageParameters) (string, string, string, error) {
+	return api.SendMessageContext(context.Background(), channel, MsgOptionUpdate(timestamp), MsgOptionText(text, params.EscapeText), MsgOptionAttachments(params.Attachments...), MsgOptionPostMessageParameters(params))
+}
+
 // UpdateMessage updates a message in a channel
 func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
 	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
