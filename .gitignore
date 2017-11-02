@@ -1,2 +1,4 @@
 *.test
 *~
+*.xml
+.idea/slack.iml
