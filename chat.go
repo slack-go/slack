@@ -46,6 +46,17 @@ type PostMessageParameters struct {
 	EscapeText      bool         `json:"escape_text"`
 }
 
+// PostEphemeralParameters contains all necessary params for sending chat.postEphemeral
+type PostEphemeralParameters struct {
+	Channel     string       `json:"channel"`
+	Text        string       `json:"text"`
+	User        string       `json:"user"`
+	AsUser      bool         `json:"as_user"`
+	Attachments []Attachment `json:"attachments"`
+	LinkNames   int          `json:"link_names"`
+	Parse       string       `json:"parse"`
+}
+
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
@@ -60,6 +71,17 @@ func NewPostMessageParameters() PostMessageParameters {
 		IconEmoji:   DEFAULT_MESSAGE_ICON_EMOJI,
 		Markdown:    DEFAULT_MESSAGE_MARKDOWN,
 		EscapeText:  DEFAULT_MESSAGE_ESCAPE_TEXT,
+	}
+}
+
+// NewPostEphemeralParameters provides an instance of PostEphemeralParameters with all the sane default values set
+func NewPostEphemeralParameters() PostEphemeralParameters {
+	return PostEphemeralParameters{
+		User:        DEFAULT_MESSAGE_USERNAME,
+		AsUser:      DEFAULT_MESSAGE_ASUSER,
+		Attachments: nil,
+		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
+		Parse:       DEFAULT_MESSAGE_PARSE,
 	}
 }
 
@@ -100,6 +122,37 @@ func (api *Client) PostMessageContext(ctx context.Context, channel, text string,
 		MsgOptionPostMessageParameters(params),
 	)
 	return respChannel, respTimestamp, err
+}
+
+// PostEphemeral sends an ephemeral message to a user in a channel.
+// Message is escaped by default according to https://api.slack.com/docs/formatting
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
+func (api *Client) PostEphemeral(channel, userID string, options ...MsgOption) (string, error) {
+	options = append(options, MsgOptionPostEphemeral())
+	return api.PostEphemeralContext(
+		context.Background(),
+		channel,
+		userID,
+		options...,
+	)
+}
+
+// PostEphemeralContext sends an ephemeal message to a user in a channel with a custom context
+// For more details, see PostEphemeral documentation
+func (api *Client) PostEphemeralContext(ctx context.Context, channel, userID string, options ...MsgOption) (string, error) {
+	path, values, err := ApplyMsgOptions(api.config.token, channel, options...)
+	if err != nil {
+		return "", err
+	}
+
+	values.Add("user", userID)
+
+	response, err := chatRequest(ctx, path, values, api.debug)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Timestamp, nil
 }
 
 // UpdateMessage updates a message in a channel
@@ -171,9 +224,10 @@ func chatRequest(ctx context.Context, path string, values url.Values, debug bool
 type sendMode string
 
 const (
-	chatUpdate      sendMode = "chat.update"
-	chatPostMessage sendMode = "chat.postMessage"
-	chatDelete      sendMode = "chat.delete"
+	chatUpdate        sendMode = "chat.update"
+	chatPostMessage   sendMode = "chat.postMessage"
+	chatDelete        sendMode = "chat.delete"
+	chatPostEphemeral sendMode = "chat.postEphemeral"
 )
 
 type sendConfig struct {
@@ -188,6 +242,15 @@ type MsgOption func(*sendConfig) error
 func MsgOptionPost() MsgOption {
 	return func(config *sendConfig) error {
 		config.mode = chatPostMessage
+		config.values.Del("ts")
+		return nil
+	}
+}
+
+// MsgOptionPostEphemeral posts an ephemeral message
+func MsgOptionPostEphemeral() MsgOption {
+	return func(config *sendConfig) error {
+		config.mode = chatPostEphemeral
 		config.values.Del("ts")
 		return nil
 	}
@@ -268,6 +331,25 @@ func MsgOptionDisableMediaUnfurl() MsgOption {
 func MsgOptionDisableMarkdown() MsgOption {
 	return func(config *sendConfig) error {
 		config.values.Set("mrkdwn", "false")
+		return nil
+	}
+}
+
+func MsgOptionPostEphemeralParameters(params PostEphemeralParameters) MsgOption {
+	return func(config *sendConfig) error {
+		if params.User != DEFAULT_MESSAGE_USERNAME {
+			config.values.Set("user", params.User)
+		}
+
+		MsgOptionAsUser(params.AsUser)(config)
+
+		if params.Parse != DEFAULT_MESSAGE_PARSE {
+			config.values.Set("parse", params.Parse)
+		}
+		if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+			config.values.Set("link_names", "1")
+		}
+
 		return nil
 	}
 }
