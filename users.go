@@ -15,6 +15,7 @@ const (
 
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
+	AvatarHash            string `json:"avatar_hash"`
 	FirstName             string `json:"first_name"`
 	LastName              string `json:"last_name"`
 	DisplayName           string `json:"display_name"`
