@@ -246,7 +246,7 @@ func (api *Client) GetUserIdentityContext(ctx context.Context) (*UserIdentityRes
 
 // SetUserPhoto changes the currently authenticated user's profile image
 func (api *Client) SetUserPhoto(ctx context.Context, image string, params UserSetPhotoParams) error {
-	return api.SetUserPhoto(context.Background(), image, params)
+	return api.SetUserPhotoContext(context.Background(), image, params)
 }
 
 // SetUserPhotoContext changes the currently authenticated user's profile image using a custom context
