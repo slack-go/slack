@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/nlopes/slack"
+	"github.com/essentialkaos/slack"
 )
 
 func main() {
@@ -30,40 +30,44 @@ func main() {
 		postToChannelID string
 	)
 
-	// Find the user to post as.
+	// Find the user to post as
 	authTest, err := api.AuthTest()
+
 	if err != nil {
 		fmt.Printf("Error getting channels: %s\n", err)
 		return
 	}
 
-	// Post as the authenticated user.
+	// Post as the authenticated user
 	postAsUserName = authTest.User
 	postAsUserID = authTest.UserID
 
-	// Posting to DM with self causes a conversation with slackbot.
+	// Posting to DM with self causes a conversation with slackbot
 	postToUserName = authTest.User
 	postToUserID = authTest.UserID
 
-	// Find the channel.
+	// Find the channel
 	_, _, chanID, err := api.OpenIMChannel(postToUserID)
+
 	if err != nil {
 		fmt.Printf("Error opening IM: %s\n", err)
 		return
 	}
+
 	postToChannelID = chanID
 
 	fmt.Printf("Posting as %s (%s) in DM with %s (%s), channel %s\n", postAsUserName, postAsUserID, postToUserName, postToUserID, postToChannelID)
 
-	// Post a message.
+	// Post a message
 	postParams := slack.PostMessageParameters{}
 	channelID, timestamp, err := api.PostMessage(postToChannelID, "Is this any good?", postParams)
+
 	if err != nil {
 		fmt.Printf("Error posting message: %s\n", err)
 		return
 	}
 
-	// Grab a reference to the message.
+	// Grab a reference to the message
 	msgRef := slack.NewRefToMessage(channelID, timestamp)
 
 	// React with :+1:
@@ -78,26 +82,32 @@ func main() {
 		return
 	}
 
-	// Get all reactions on the message.
+	// Get all reactions on the message
 	msgReactions, err := api.GetReactions(msgRef, slack.NewGetReactionsParameters())
+
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return
 	}
+
 	fmt.Printf("\n")
 	fmt.Printf("%d reactions to message...\n", len(msgReactions))
+
 	for _, r := range msgReactions {
 		fmt.Printf("  %d users say %s\n", r.Count, r.Name)
 	}
 
-	// List all of the users reactions.
+	// List all of the users reactions
 	listReactions, _, err := api.ListReactions(slack.NewListReactionsParameters())
+
 	if err != nil {
 		fmt.Printf("Error listing reactions: %s\n", err)
 		return
 	}
+
 	fmt.Printf("\n")
 	fmt.Printf("All reactions by %s...\n", authTest.User)
+
 	for _, item := range listReactions {
 		fmt.Printf("%d on a %s...\n", len(item.Reactions), item.Type)
 		for _, r := range item.Reactions {
@@ -105,21 +115,25 @@ func main() {
 		}
 	}
 
-	// Remove the :cry: reaction.
+	// Remove the :cry: reaction
 	err = api.RemoveReaction("cry", msgRef)
+
 	if err != nil {
 		fmt.Printf("Error remove reaction: %s\n", err)
 		return
 	}
 
-	// Get all reactions on the message.
+	// Get all reactions on the message
 	msgReactions, err = api.GetReactions(msgRef, slack.NewGetReactionsParameters())
+
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return
 	}
+
 	fmt.Printf("\n")
 	fmt.Printf("%d reactions to message after removing cry...\n", len(msgReactions))
+
 	for _, r := range msgReactions {
 		fmt.Printf("  %d users say %s\n", r.Count, r.Name)
 	}

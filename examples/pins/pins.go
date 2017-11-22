@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/nlopes/slack"
+	"github.com/essentialkaos/slack"
 )
 
 /*
@@ -21,6 +21,7 @@ func main() {
 	flag.Parse()
 
 	api := slack.New(apiToken)
+
 	if debug {
 		api.SetDebug(true)
 	}
@@ -33,6 +34,7 @@ func main() {
 
 	// Find the user to post as.
 	authTest, err := api.AuthTest()
+
 	if err != nil {
 		fmt.Printf("Error getting channels: %s\n", err)
 		return
@@ -52,10 +54,12 @@ func main() {
 		if err.Error() == "name_taken" {
 			err = nil
 			channels, err := api.GetChannels(false)
+
 			if err != nil {
 				fmt.Println("Could not retrieve channels")
 				return
 			}
+
 			for _, archivedChannel := range channels {
 				if archivedChannel.Name == channelName {
 					if archivedChannel.IsArchived {
@@ -65,16 +69,19 @@ func main() {
 							return
 						}
 					}
+
 					channel = &archivedChannel
 					break
 				}
 			}
 		}
+
 		if err != nil {
 			fmt.Printf("Error setting test channel for pinning: %s\n", err)
 			return
 		}
 	}
+
 	postToChannelID = channel.ID
 
 	fmt.Printf("Posting as %s (%s) in channel %s\n", postAsUserName, postAsUserID, postToChannelID)
@@ -82,6 +89,7 @@ func main() {
 	// Post a message.
 	postParams := slack.PostMessageParameters{}
 	channelID, timestamp, err := api.PostMessage(postToChannelID, "Is this any good?", postParams)
+
 	if err != nil {
 		fmt.Printf("Error posting message: %s\n", err)
 		return
@@ -98,18 +106,22 @@ func main() {
 
 	// List all of the users pins.
 	listPins, _, err := api.ListPins(channelID)
+
 	if err != nil {
 		fmt.Printf("Error listing pins: %s\n", err)
 		return
 	}
+
 	fmt.Printf("\n")
 	fmt.Printf("All pins by %s...\n", authTest.User)
+
 	for _, item := range listPins {
 		fmt.Printf(" > Item type: %s\n", item.Type)
 	}
 
 	// Remove the pin.
 	err = api.RemovePin(channelID, msgRef)
+
 	if err != nil {
 		fmt.Printf("Error remove pin: %s\n", err)
 		return

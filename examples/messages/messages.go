@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/nlopes/slack"
+	"github.com/essentialkaos/slack"
 )
 
 func main() {
@@ -22,11 +22,14 @@ func main() {
 			},
 		*/
 	}
+
 	params.Attachments = []slack.Attachment{attachment}
 	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", params)
+
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
+
 	fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
 }

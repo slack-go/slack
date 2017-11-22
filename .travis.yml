@@ -1,21 +1,24 @@
+sudo: false
+
 language: go
 
 go:
-    - 1.7
-    - 1.8
-    - 1.x
-    - tip
+  - 1.7.x
+  - 1.8.x
+  - 1.9.x
+  - tip
+
+git:
+  depth: 10
 
 before_install:
   - export PATH=$HOME/gopath/bin:$PATH
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
+
 script:
   - go test -race ./...
   - go test -cover ./...
-
-matrix:
-    allow_failures:
-        - go: tip
-
-git:
-  depth: 10

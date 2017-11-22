@@ -5,12 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/nlopes/slack"
+	"github.com/essentialkaos/slack"
 )
 
 func main() {
 	api := slack.New("YOUR TOKEN HERE")
 	logger := log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)
+
 	slack.SetLogger(logger)
 	api.SetDebug(true)
 
@@ -19,6 +20,7 @@ func main() {
 
 	for msg := range rtm.IncomingEvents {
 		fmt.Print("Event Received: ")
+
 		switch ev := msg.Data.(type) {
 		case *slack.HelloEvent:
 			// Ignore hello
@@ -46,7 +48,6 @@ func main() {
 			return
 
 		default:
-
 			// Ignore other events..
 			// fmt.Printf("Unexpected: %v\n", msg.Data)
 		}
