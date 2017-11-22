@@ -11,6 +11,11 @@ go:
 git:
   depth: 10
 
+branches:
+  only:
+  - master
+  - develop
+
 matrix:
   fast_finish: true
   allow_failures:
