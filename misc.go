@@ -79,12 +79,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 		logger.Printf("parseResponseBody: %s\n", string(response))
 	}
 
-	err = json.Unmarshal(response, &intf)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(response, &intf)
 }
 
 func postLocalWithMultipartResponse(ctx context.Context, path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {

@@ -5,8 +5,7 @@ type fileActionEvent struct {
 	Type           string `json:"type"`
 	EventTimestamp string `json:"event_ts"`
 	File           File   `json:"file"`
-	// FileID is used for FileDeletedEvent
-	FileID string `json:"file_id,omitempty"`
+	FileID         string `json:"file_id,omitempty"` // FileID is used for FileDeletedEvent
 }
 
 // FileCreatedEvent represents the File created event

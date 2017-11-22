@@ -201,10 +201,8 @@ func (api *Client) SetUserAsActiveContext(ctx context.Context) error {
 		"token": {api.config.token},
 	}
 	_, err := userRequest(ctx, "users.setActive", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // SetUserPresence changes the currently authenticated user presence
@@ -219,11 +217,8 @@ func (api *Client) SetUserPresenceContext(ctx context.Context, presence string) 
 		"presence": {presence},
 	}
 	_, err := userRequest(ctx, "users.setPresence", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
 
+	return err
 }
 
 // GetUserIdentity will retrieve user info available per identity scopes

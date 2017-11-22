@@ -49,10 +49,8 @@ func (api *Client) ArchiveChannelContext(ctx context.Context, channelID string) 
 		"channel": {channelID},
 	}
 	_, err := channelRequest(ctx, "channels.archive", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // UnarchiveChannel unarchives the given channel
@@ -67,10 +65,8 @@ func (api *Client) UnarchiveChannelContext(ctx context.Context, channelID string
 		"channel": {channelID},
 	}
 	_, err := channelRequest(ctx, "channels.unarchive", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // CreateChannel creates a channel with the given name and returns a *Channel
@@ -221,10 +217,8 @@ func (api *Client) KickUserFromChannelContext(ctx context.Context, channelID, us
 		"user":    {userID},
 	}
 	_, err := channelRequest(ctx, "channels.kick", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // GetChannels retrieves all the channels
@@ -265,10 +259,8 @@ func (api *Client) SetChannelReadMarkContext(ctx context.Context, channelID, ts 
 		"ts":      {ts},
 	}
 	_, err := channelRequest(ctx, "channels.mark", values, api.debug)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return err
 }
 
 // RenameChannel renames a given channel
