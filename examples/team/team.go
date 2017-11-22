@@ -22,6 +22,11 @@ func main() {
 	//Example for team
 	billingActiveForTeam, err := api.GetBillableInfoForTeam()
 
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+
 	for id, value := range billingActiveForTeam {
 		fmt.Printf("ID: %v, BillingActive: %v\n", id, value)
 	}
