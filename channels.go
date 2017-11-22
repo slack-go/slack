@@ -57,14 +57,14 @@ func (api *Client) ArchiveChannelContext(ctx context.Context, channelID string) 
 
 // UnarchiveChannel unarchives the given channel
 func (api *Client) UnarchiveChannel(channelID string) error {
-	return api.UnarchiveChannelContext(context.Background(), channel)
+	return api.UnarchiveChannelContext(context.Background(), channelID)
 }
 
 // UnarchiveChannelContext unarchives the given channel with a custom context
 func (api *Client) UnarchiveChannelContext(ctx context.Context, channelID string) error {
 	values := url.Values{
 		"token":   {api.config.token},
-		"channel": {channel},
+		"channel": {channelID},
 	}
 	_, err := channelRequest(ctx, "channels.unarchive", values, api.debug)
 	if err != nil {
