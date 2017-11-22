@@ -72,6 +72,12 @@ func main() {
 
 See [example](examples/websocket/websocket.go).
 
+### Build Status
+
+| Branch | Status |
+|------------|--------|
+| `master` (_Stable_) | [![Build Status](https://travis-ci.org/essentialkaos/slack.svg?branch=master)](https://travis-ci.org/essentialkaos/slack) |
+| `develop` (_Unstable_) | [![Build Status](https://travis-ci.org/essentialkaos/slack.svg?branch=develop)](https://travis-ci.org/essentialkaos/slack) |
 
 ### License
 
