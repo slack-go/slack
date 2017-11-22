@@ -1,87 +1,84 @@
-Slack API in Go [![GoDoc](https://godoc.org/github.com/nlopes/slack?status.svg)](https://godoc.org/github.com/nlopes/slack) [![Build Status](https://travis-ci.org/nlopes/slack.svg)](https://travis-ci.org/nlopes/slack)
+Slack API in Go [![GoDoc](https://godoc.org/github.com/essentialkaos/slack?status.svg)](https://godoc.org/github.com/essentialkaos/slack) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/slack)](https://goreportcard.com/report/github.com/essentialkaos/slack) [![Build Status](https://travis-ci.org/essentialkaos/slack.svg)](https://travis-ci.org/essentialkaos/slack)
 ===============
 
-This library supports most if not all of the `api.slack.com` REST
-calls, as well as the Real-Time Messaging protocol over websocket, in
-a fully managed way.
+This library supports most if not all of the `api.slack.com` REST calls, as well as the Real-Time Messaging protocol over websocket, in a fully managed way.
 
-## Change log
+### Installing
 
-### v0.1.0 - May 28, 2017
+Make sure you have a working Go 1.7+ workspace ([instructions](https://golang.org/doc/install)), then:
 
-This is released before adding context support.
-As the used context package is the one from Go 1.7 this will be the last
-compatible with Go < 1.7.
+```
+go get github.com/essentialkaos/slack
+```
 
-Please check [0.1.0](https://github.com/nlopes/slack/releases/tag/v0.1.0)
+For update to latest stable release, do:
 
-### CHANGELOG.md
+```
+go get -u github.com/essentialkaos/slack
+```
 
-As of this version a [CHANGELOG.md](https://github.com/nlopes/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
+### Examples
 
-## Installing
-
-### *go get*
-
-    $ go get -u github.com/nlopes/slack
-
-## Example
-
-### Getting all groups
+#### Getting all groups
 
 ```golang
 import (
-	"fmt"
+  "fmt"
 
-	"github.com/nlopes/slack"
+  "github.com/essentialkaos/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
-	// If you set debugging, it will log all requests to the console
-	// Useful when encountering issues
-	// api.SetDebug(true)
-	groups, err := api.GetGroups(false)
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-	for _, group := range groups {
-		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
-	}
+  api := slack.New("YOUR_TOKEN_HERE")
+  // If you set debugging, it will log all requests to the console
+  // Useful when encountering issues
+  // api.SetDebug(true)
+  groups, err := api.GetGroups(false)
+
+  if err != nil {
+    fmt.Printf("%s\n", err)
+    return
+  }
+
+  for _, group := range groups {
+    fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
+  }
 }
 ```
 
-### Getting User Information
+#### Getting user information
 
 ```golang
 import (
-    "fmt"
+  "fmt"
 
-    "github.com/nlopes/slack"
+  "github.com/essentialkaos/slack"
 )
 
 func main() {
-    api := slack.New("YOUR_TOKEN_HERE")
-    user, err := api.GetUserInfo("U023BECGF")
-    if err != nil {
-	    fmt.Printf("%s\n", err)
-	    return
-    }
-    fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
+  api := slack.New("YOUR_TOKEN_HERE")
+  user, err := api.GetUserInfo("U023BECGF")
+
+  if err != nil {
+    fmt.Printf("%s\n", err)
+    return
+  }
+
+  fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
 }
 ```
 
-## Minimal RTM usage:
+#### Minimal RTM usage:
 
-See https://github.com/nlopes/slack/blob/master/examples/websocket/websocket.go
+See [example](examples/websocket/websocket.go).
 
+### Build Status
 
-## Contributing
+| Branch | Status |
+|------------|--------|
+| `master` (_Stable_) | [![Build Status](https://travis-ci.org/essentialkaos/slack.svg?branch=master)](https://travis-ci.org/essentialkaos/slack) |
+| `develop` (_Unstable_) | [![Build Status](https://travis-ci.org/essentialkaos/slack.svg?branch=develop)](https://travis-ci.org/essentialkaos/slack) |
 
-You are more than welcome to contribute to this project.  Fork and
-make a Pull Request, or create an Issue if you see any problem.
-
-## License
+### License
 
 BSD 2 Clause license

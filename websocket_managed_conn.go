@@ -30,7 +30,7 @@ func (rtm *RTM) ManageConnection() {
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
 		info, conn, err := rtm.connect(connectionCount, rtm.useRTMStart)
-		// if err != nil then the connection is sucessful - otherwise it is
+		// if err != nil then the connection is successful - otherwise it is
 		// fatal
 		if err != nil {
 			return
@@ -124,7 +124,7 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (*Info, *websocket.Conn, error
 		return nil, nil, err
 	}
 
-	conn, err := websocketProxyDial(url, "http://api.slack.com")
+	conn, err := websocketProxyDial(url, "https://api.slack.com")
 	if err != nil {
 		return nil, nil, err
 	}

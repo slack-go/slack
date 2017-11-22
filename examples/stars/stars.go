@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/nlopes/slack"
+	"github.com/essentialkaos/slack"
 )
 
 func main() {
@@ -18,17 +18,20 @@ func main() {
 	flag.Parse()
 
 	api := slack.New(apiToken)
+
 	if debug {
 		api.SetDebug(true)
 	}
 
-	// Get all stars for the usr.
+	// Get all stars for the usr
 	params := slack.NewStarsParameters()
 	starredItems, _, err := api.GetStarred(params)
+
 	if err != nil {
 		fmt.Printf("Error getting stars: %s\n", err)
 		return
 	}
+
 	for _, s := range starredItems {
 		var desc string
 		switch s.Type {
@@ -41,6 +44,7 @@ func main() {
 		case slack.TYPE_CHANNEL, slack.TYPE_IM, slack.TYPE_GROUP:
 			desc = s.Channel
 		}
+
 		fmt.Printf("Starred %s: %s\n", s.Type, desc)
 	}
 }

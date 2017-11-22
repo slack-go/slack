@@ -104,12 +104,12 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
         }`))
 	})
 	usersDNDInfo := map[string]DNDStatus{
-		"U023BECGF": DNDStatus{
+		"U023BECGF": {
 			Enabled:            true,
 			NextStartTimestamp: 1450387800,
 			NextEndTimestamp:   1450423800,
 		},
-		"U058CJVAA": DNDStatus{
+		"U058CJVAA": {
 			Enabled:            false,
 			NextStartTimestamp: 1,
 			NextEndTimestamp:   1,

@@ -1,21 +1,30 @@
+sudo: false
+
 language: go
 
 go:
-    - 1.7
-    - 1.8
-    - 1.x
-    - tip
-
-before_install:
-  - export PATH=$HOME/gopath/bin:$PATH
-
-script:
-  - go test -race ./...
-  - go test -cover ./...
-
-matrix:
-    allow_failures:
-        - go: tip
+  - 1.7.x
+  - 1.8.x
+  - 1.9.x
+  - tip
 
 git:
   depth: 10
+
+branches:
+  only:
+  - master
+  - develop
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
+
+before_install:
+  - export PATH=$HOME/gopath/bin:$PATH
+  - make deps deps-test
+
+script:
+  - go test -race .
+  - go test -cover .
