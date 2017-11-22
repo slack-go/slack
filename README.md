@@ -1,4 +1,4 @@
-Slack API in Go [![GoDoc](https://godoc.org/github.com/essentialkaos/slack?status.svg)](https://godoc.org/github.com/essentialkaos/slack) [![Build Status](https://travis-ci.org/essentialkaos/slack.svg)](https://travis-ci.org/essentialkaos/slack)
+Slack API in Go [![GoDoc](https://godoc.org/github.com/essentialkaos/slack?status.svg)](https://godoc.org/github.com/essentialkaos/slack) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/slack)](https://goreportcard.com/report/github.com/essentialkaos/slack) [![Build Status](https://travis-ci.org/essentialkaos/slack.svg)](https://travis-ci.org/essentialkaos/slack)
 ===============
 
 This library supports most if not all of the `api.slack.com` REST calls, as well as the Real-Time Messaging protocol over websocket, in a fully managed way.
