@@ -13,6 +13,7 @@ git:
 
 before_install:
   - export PATH=$HOME/gopath/bin:$PATH
+  - make deps deps-test
 
 matrix:
   fast_finish: true
