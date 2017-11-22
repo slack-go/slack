@@ -28,8 +28,8 @@ func main() {
 		case *slack.ConnectedEvent:
 			fmt.Println("Infos:", ev.Info)
 			fmt.Println("Connection counter:", ev.ConnectionCount)
-			// Replace #general with your Channel ID
-			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "#general"))
+
+			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C2147483705"))
 
 		case *slack.MessageEvent:
 			fmt.Printf("Message: %v\n", ev)
