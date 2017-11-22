@@ -11,15 +11,15 @@ go:
 git:
   depth: 10
 
-before_install:
-  - export PATH=$HOME/gopath/bin:$PATH
-  - make deps deps-test
-
 matrix:
   fast_finish: true
   allow_failures:
     - go: tip
 
+before_install:
+  - export PATH=$HOME/gopath/bin:$PATH
+  - make deps deps-test
+
 script:
-  - go test -race ./...
-  - go test -cover ./...
+  - go test -race .
+  - go test -cover .
