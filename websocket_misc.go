@@ -80,7 +80,7 @@ type EmojiChangedEvent struct {
 	SubType        string   `json:"subtype"`
 	Name           string   `json:"name"`
 	Names          []string `json:"names"`
-	Value          string   `json:"value"` 
+	Value          string   `json:"value"`
 	EventTimestamp string   `json:"event_ts"`
 }
 
