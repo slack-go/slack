@@ -24,13 +24,13 @@ func (api *Client) AddPinContext(ctx context.Context, channel string, item ItemR
 		"token":   {api.config.token},
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 	response := &SlackResponse{}
 	if err := post(ctx, "pins.add", values, response, api.debug); err != nil {
@@ -54,13 +54,13 @@ func (api *Client) RemovePinContext(ctx context.Context, channel string, item It
 		"token":   {api.config.token},
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 	response := &SlackResponse{}
 	if err := post(ctx, "pins.remove", values, response, api.debug); err != nil {
