@@ -122,14 +122,25 @@ func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string)
 }
 
 // GetUserGroups returns a list of user groups for the team
-func (api *Client) GetUserGroups() ([]UserGroup, error) {
-	return api.GetUserGroupsContext(context.Background())
+func (api *Client) GetUserGroups(includeCount bool, includeDisabled bool, includeUsers bool) ([]UserGroup, error) {
+	return api.GetUserGroupsContext(context.Background(), includeCount, includeDisabled, includeUsers)
 }
 
 // GetUserGroupsContext returns a list of user groups for the team with a custom context
-func (api *Client) GetUserGroupsContext(ctx context.Context) ([]UserGroup, error) {
+func (api *Client) GetUserGroupsContext(ctx context.Context, includeCount bool, includeDisabled bool, includeUsers bool) ([]UserGroup, error) {
 	values := url.Values{
 		"token": {api.config.token},
+	}
+	if includeCount {
+		values.Add("include_count", "true")
+	}
+
+	if includeDisabled {
+		values.Add("include_disabled", "true")
+	}
+
+	if includeUsers {
+		values.Add("include_users", "true")
 	}
 
 	response, err := userGroupRequest(ctx, "usergroups.list", values, api.debug)
