@@ -25,6 +25,7 @@ type AttachmentAction struct {
 	SelectedOptions []AttachmentActionOption      `json:"selected_options,omitempty"` // Optional. The first element of this array will be set as the pre-selected option for this menu.
 	OptionGroups    []AttachmentActionOptionGroup `json:"option_groups,omitempty"`    // Optional.
 	Confirm         *ConfirmationField            `json:"confirm,omitempty"`          // Optional.
+	URL             string                        `json:"url,omitempty"`              // Optional.
 }
 
 // AttachmentActionOption the individual option to appear in action menu.
