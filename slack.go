@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"fmt"
 )
 
 var logger *log.Logger // A logger that can be set by consumers
@@ -83,12 +84,12 @@ func (api *Client) SetDebug(debug bool) {
 
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
-		logger.Printf(format, v...)
+		logger.Output(2,fmt.Sprintf(format, v...))
 	}
 }
 
 func (api *Client) Debugln(v ...interface{}) {
 	if api.debug {
-		logger.Println(v...)
+		logger.Output(2, fmt.Sprintln(v...))
 	}
 }
