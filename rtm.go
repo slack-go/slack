@@ -27,10 +27,6 @@ func (api *Client) StartRTMContext(ctx context.Context) (info *Info, websocketUR
 	if !response.Ok {
 		return nil, "", response.Error
 	}
-
-	// websocket.Dial does not accept url without the port (yet)
-	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
-	// but slack returns the address with no port, so we have to fix it
 	api.Debugln("Using URL:", response.Info.URL)
 	return &response.Info, response.Info.URL, nil
 }
@@ -54,10 +50,6 @@ func (api *Client) ConnectRTMContext(ctx context.Context) (info *Info, websocket
 	if !response.Ok {
 		return nil, "", response.Error
 	}
-
-	// websocket.Dial does not accept url without the port (yet)
-	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
-	// but slack returns the address with no port, so we have to fix it
 	api.Debugln("Using URL:", response.Info.URL)
 	return &response.Info, response.Info.URL, nil
 }
