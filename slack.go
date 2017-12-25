@@ -80,14 +80,19 @@ func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 
 // AuthTestContext tests if the user is able to do authenticated requests or not with a custom context
 func (api *Client) AuthTestContext(ctx context.Context) (response *AuthTestResponse, error error) {
+	api.Debugf("Challenging auth...")
 	responseFull := &authTestResponseFull{}
 	err := post(ctx, "auth.test", url.Values{"token": {api.config.token}}, responseFull, api.debug)
 	if err != nil {
+		api.Debugf("failed to test for auth: %s", err)
 		return nil, err
 	}
 	if !responseFull.Ok {
+		api.Debugf("auth response was not Ok: %s", responseFull.Error)
 		return nil, errors.New(responseFull.Error)
 	}
+
+	api.Debugf("Auth challenge was successful with response %+v", responseFull.AuthTestResponse)
 	return &responseFull.AuthTestResponse, nil
 }
 

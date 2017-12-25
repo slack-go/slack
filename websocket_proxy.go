@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -42,16 +43,21 @@ func websocketHTTPConnect(proxy, urlString string) (net.Conn, error) {
 }
 
 func websocketProxyDial(urlString, origin string) (ws *websocket.Conn, err error) {
-	if os.Getenv("HTTP_PROXY") == "" {
-		return websocket.Dial(urlString, "", origin)
-	}
-
-	purl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+	config, err := websocket.NewConfig(urlString, origin)
 	if err != nil {
 		return nil, err
 	}
+	config.Dialer = &net.Dialer{
+		Timeout:   10 * time.Second,
+		KeepAlive: 30 * time.Second,
+		DualStack: true,
+	}
 
-	config, err := websocket.NewConfig(urlString, origin)
+	if os.Getenv("HTTP_PROXY") == "" {
+		return websocket.DialConfig(config)
+	}
+
+	purl, err := url.Parse(os.Getenv("HTTP_PROXY"))
 	if err != nil {
 		return nil, err
 	}
