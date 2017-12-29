@@ -44,12 +44,17 @@ type PostMessageParameters struct {
 	IconEmoji       string       `json:"icon_emoji"`
 	Markdown        bool         `json:"mrkdwn,omitempty"`
 	EscapeText      bool         `json:"escape_text"`
+
+	// chat.postEphemeral support
+	Channel string `json:"channel"`
+	User    string `json:"user"`
 }
 
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
 		Username:    DEFAULT_MESSAGE_USERNAME,
+		User:        DEFAULT_MESSAGE_USERNAME,
 		AsUser:      DEFAULT_MESSAGE_ASUSER,
 		Parse:       DEFAULT_MESSAGE_PARSE,
 		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
@@ -100,6 +105,37 @@ func (api *Client) PostMessageContext(ctx context.Context, channel, text string,
 		MsgOptionPostMessageParameters(params),
 	)
 	return respChannel, respTimestamp, err
+}
+
+// PostEphemeral sends an ephemeral message to a user in a channel.
+// Message is escaped by default according to https://api.slack.com/docs/formatting
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
+func (api *Client) PostEphemeral(channel, userID string, options ...MsgOption) (string, error) {
+	options = append(options, MsgOptionPostEphemeral())
+	return api.PostEphemeralContext(
+		context.Background(),
+		channel,
+		userID,
+		options...,
+	)
+}
+
+// PostEphemeralContext sends an ephemeal message to a user in a channel with a custom context
+// For more details, see PostEphemeral documentation
+func (api *Client) PostEphemeralContext(ctx context.Context, channel, userID string, options ...MsgOption) (string, error) {
+	path, values, err := ApplyMsgOptions(api.config.token, channel, options...)
+	if err != nil {
+		return "", err
+	}
+
+	values.Add("user", userID)
+
+	response, err := chatRequest(ctx, path, values, api.debug)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Timestamp, nil
 }
 
 // UpdateMessage updates a message in a channel
@@ -171,9 +207,10 @@ func chatRequest(ctx context.Context, path string, values url.Values, debug bool
 type sendMode string
 
 const (
-	chatUpdate      sendMode = "chat.update"
-	chatPostMessage sendMode = "chat.postMessage"
-	chatDelete      sendMode = "chat.delete"
+	chatUpdate        sendMode = "chat.update"
+	chatPostMessage   sendMode = "chat.postMessage"
+	chatDelete        sendMode = "chat.delete"
+	chatPostEphemeral sendMode = "chat.postEphemeral"
 )
 
 type sendConfig struct {
@@ -188,6 +225,15 @@ type MsgOption func(*sendConfig) error
 func MsgOptionPost() MsgOption {
 	return func(config *sendConfig) error {
 		config.mode = chatPostMessage
+		config.values.Del("ts")
+		return nil
+	}
+}
+
+// MsgOptionPostEphemeral posts an ephemeral message
+func MsgOptionPostEphemeral() MsgOption {
+	return func(config *sendConfig) error {
+		config.mode = chatPostEphemeral
 		config.values.Del("ts")
 		return nil
 	}
@@ -277,6 +323,11 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 	return func(config *sendConfig) error {
 		if params.Username != DEFAULT_MESSAGE_USERNAME {
 			config.values.Set("username", string(params.Username))
+		}
+
+		// chat.postEphemeral support
+		if params.User != DEFAULT_MESSAGE_USERNAME {
+			config.values.Set("user", params.User)
 		}
 
 		// never generates an error.
