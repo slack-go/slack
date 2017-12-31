@@ -131,13 +131,19 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	}
 	defer resp.Body.Close()
 
-	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
-	if resp.StatusCode != 200 {
-		logResponse(resp, debug)
-		return fmt.Errorf("Slack server error: %s.", resp.Status)
-	}
+	const retryAfterHeader = "Retry-After"
 
-	return parseResponseBody(resp.Body, &intf, debug)
+	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
+	switch {
+	case resp.StatusCode == http.StatusTooManyRequests: // Rate limited, need the Retry-After header
+		logResponse(resp, debug)
+		return fmt.Errorf("rate limited, retry after: %s", resp.Header.Get(retryAfterHeader))
+	case resp.StatusCode != http.StatusOK:
+		logResponse(resp, debug)
+		return fmt.Errorf("Slack server error: %s. Status code: %v", resp.Status, resp.StatusCode)
+	default:
+		return parseResponseBody(resp.Body, &intf, debug)
+	}
 }
 
 func post(ctx context.Context, path string, values url.Values, intf interface{}, debug bool) error {
