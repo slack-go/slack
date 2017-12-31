@@ -3,10 +3,10 @@ package slack
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
-	"fmt"
 )
 
 var logger stdLogger // A logger that can be set by consumers
@@ -56,6 +56,8 @@ type stdLogger interface {
 	Panic(...interface{})
 	Panicf(string, ...interface{})
 	Panicln(...interface{})
+
+	Output(int, string) error
 }
 
 // SetLogger let's library users supply a logger, so that api debugging
@@ -101,7 +103,7 @@ func (api *Client) SetDebug(debug bool) {
 
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
-		logger.Output(2,fmt.Sprintf(format, v...))
+		logger.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
