@@ -121,7 +121,7 @@ func postWithMultipartResponse(ctx context.Context, path, name, fieldname string
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 429 {
+	if resp.StatusCode == http.StatusTooManyRequests {
 		retry, err := strconv.ParseUint(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
 			retry = 1
@@ -153,7 +153,7 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == 429 {
+	if resp.StatusCode == http.StatusTooManyRequests {
 		retry, err := strconv.ParseUint(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
 			retry = 1
