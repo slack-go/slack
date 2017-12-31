@@ -28,9 +28,6 @@ type HTTPRequester interface {
 
 var customHTTPClient HTTPRequester
 
-// Default duration for rate limiting if Retry-After header does not exist/parse
-const defaultRetrySeconds int64 = 60
-
 // HTTPClient sets a custom http.Client
 // deprecated: in favor of SetHTTPClient()
 var HTTPClient = &http.Client{}
@@ -127,7 +124,7 @@ func postWithMultipartResponse(ctx context.Context, path, name, fieldname string
 	if resp.StatusCode == http.StatusTooManyRequests {
 		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
-			retry = defaultRetrySeconds
+			return err
 		}
 		return &RateLimitedError{time.Duration(retry) * time.Second}
 	}
@@ -159,7 +156,7 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	if resp.StatusCode == http.StatusTooManyRequests {
 		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
-			retry = defaultRetrySeconds
+			return err
 		}
 		return &RateLimitedError{time.Duration(retry) * time.Second}
 	}
