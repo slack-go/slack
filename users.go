@@ -121,9 +121,9 @@ func NewUserSetPhotoParams() UserSetPhotoParams {
 	}
 }
 
-func userRequest(ctx context.Context, path string, values url.Values, debug bool) (*userResponseFull, error) {
+func userRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*userResponseFull, error) {
 	response := &userResponseFull{}
-	err := post(ctx, path, values, response, debug)
+	err := postForm(ctx, client, SLACK_API+path, values, response, debug)
 	if err != nil {
 		return nil, err
 	}
@@ -141,10 +141,11 @@ func (api *Client) GetUserPresence(user string) (*UserPresence, error) {
 // GetUserPresenceContext will retrieve the current presence status of given user with a custom context.
 func (api *Client) GetUserPresenceContext(ctx context.Context, user string) (*UserPresence, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 		"user":  {user},
 	}
-	response, err := userRequest(ctx, "users.getPresence", values, api.debug)
+
+	response, err := userRequest(ctx, api.httpclient, "users.getPresence", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -159,10 +160,11 @@ func (api *Client) GetUserInfo(user string) (*User, error) {
 // GetUserInfoContext will retrieve the complete user information with a custom context
 func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 		"user":  {user},
 	}
-	response, err := userRequest(ctx, "users.info", values, api.debug)
+
+	response, err := userRequest(ctx, api.httpclient, "users.info", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -177,10 +179,11 @@ func (api *Client) GetUsers() ([]User, error) {
 // GetUsersContext returns the list of users (with their detailed information) with a custom context
 func (api *Client) GetUsersContext(ctx context.Context) ([]User, error) {
 	values := url.Values{
-		"token":    {api.config.token},
+		"token":    {api.token},
 		"presence": {"1"},
 	}
-	response, err := userRequest(ctx, "users.list", values, api.debug)
+
+	response, err := userRequest(ctx, api.httpclient, "users.list", values, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -193,12 +196,16 @@ func (api *Client) SetUserAsActive() error {
 }
 
 // SetUserAsActiveContext marks the currently authenticated user as active with a custom context
-func (api *Client) SetUserAsActiveContext(ctx context.Context) error {
+func (api *Client) SetUserAsActiveContext(ctx context.Context) (err error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
-	_, err := userRequest(ctx, "users.setActive", values, api.debug)
-	return err
+
+	if _, err := userRequest(ctx, api.httpclient, "users.setActive", values, api.debug); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SetUserPresence changes the currently authenticated user presence
@@ -209,10 +216,11 @@ func (api *Client) SetUserPresence(presence string) error {
 // SetUserPresenceContext changes the currently authenticated user presence with a custom context
 func (api *Client) SetUserPresenceContext(ctx context.Context, presence string) error {
 	values := url.Values{
-		"token":    {api.config.token},
+		"token":    {api.token},
 		"presence": {presence},
 	}
-	_, err := userRequest(ctx, "users.setPresence", values, api.debug)
+
+	_, err := userRequest(ctx, api.httpclient, "users.setPresence", values, api.debug)
 	if err != nil {
 		return err
 	}
@@ -228,10 +236,11 @@ func (api *Client) GetUserIdentity() (*UserIdentityResponse, error) {
 // GetUserIdentityContext will retrieve user info available per identity scopes with a custom context
 func (api *Client) GetUserIdentityContext(ctx context.Context) (*UserIdentityResponse, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 	response := &UserIdentityResponse{}
-	err := post(ctx, "users.identity", values, response, api.debug)
+
+	err := postForm(ctx, api.httpclient, SLACK_API+"users.identity", values, response, api.debug)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +259,7 @@ func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
 func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params UserSetPhotoParams) error {
 	response := &SlackResponse{}
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 	if params.CropX != DEFAULT_USER_PHOTO_CROP_X {
 		values.Add("crop_x", string(params.CropX))
@@ -261,7 +270,8 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 	if params.CropW != DEFAULT_USER_PHOTO_CROP_W {
 		values.Add("crop_w", string(params.CropW))
 	}
-	err := postLocalWithMultipartResponse(ctx, "users.setPhoto", image, "image", values, response, api.debug)
+
+	err := postLocalWithMultipartResponse(ctx, api.httpclient, SLACK_API+"users.setPhoto", image, "image", values, response, api.debug)
 	if err != nil {
 		return err
 	}
@@ -280,9 +290,10 @@ func (api *Client) DeleteUserPhoto() error {
 func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
 	response := &SlackResponse{}
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
-	err := post(ctx, "users.deletePhoto", values, response, api.debug)
+
+	err := postForm(ctx, api.httpclient, SLACK_API+"users.deletePhoto", values, response, api.debug)
 	if err != nil {
 		return err
 	}
@@ -329,13 +340,12 @@ func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, s
 	}
 
 	values := url.Values{
-		"token":   {api.config.token},
+		"token":   {api.token},
 		"profile": {string(profile)},
 	}
 
 	response := &userResponseFull{}
-
-	if err = post(ctx, "users.profile.set", values, response, api.debug); err != nil {
+	if err = postForm(ctx, api.httpclient, SLACK_API+"users.profile.set", values, response, api.debug); err != nil {
 		return err
 	}
 
