@@ -72,6 +72,7 @@ func (api *Client) NewRTMWithOptions(options *RTMOptions) *RTM {
 		isConnected:      false,
 		wasIntentional:   true,
 		killChannel:      make(chan bool),
+		disconnected:     make(chan struct{}),
 		forcePing:        make(chan bool),
 		rawEvents:        make(chan json.RawMessage),
 		idGen:            NewSafeID(1),
