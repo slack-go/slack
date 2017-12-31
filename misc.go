@@ -28,6 +28,9 @@ type HTTPRequester interface {
 
 var customHTTPClient HTTPRequester
 
+// Default duration for rate limiting if Retry-After header does not exist/parse
+const defaultRetrySeconds int64 = 60
+
 // HTTPClient sets a custom http.Client
 // deprecated: in favor of SetHTTPClient()
 var HTTPClient = &http.Client{}
@@ -44,11 +47,11 @@ func (s WebError) Error() string {
 }
 
 type RateLimitedError struct {
-	RetryAfter uint64
+	RetryAfter time.Duration
 }
 
 func (e *RateLimitedError) Error() string {
-	return fmt.Sprintf("Slack rate limit exceeded, retry after %d seconds", e.RetryAfter)
+	return fmt.Sprintf("Slack rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
 func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
@@ -122,11 +125,11 @@ func postWithMultipartResponse(ctx context.Context, path, name, fieldname string
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		retry, err := strconv.ParseUint(resp.Header.Get("Retry-After"), 10, 64)
+		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
-			retry = 1
+			retry = defaultRetrySeconds
 		}
-		return &RateLimitedError{retry}
+		return &RateLimitedError{time.Duration(retry) * time.Second}
 	}
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
@@ -154,11 +157,11 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		retry, err := strconv.ParseUint(resp.Header.Get("Retry-After"), 10, 64)
+		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
-			retry = 1
+			retry = defaultRetrySeconds
 		}
-		return &RateLimitedError{retry}
+		return &RateLimitedError{time.Duration(retry) * time.Second}
 	}
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
