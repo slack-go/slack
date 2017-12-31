@@ -130,7 +130,7 @@ func postWithMultipartResponse(ctx context.Context, path, name, fieldname string
 	}
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		logResponse(resp, debug)
 		return fmt.Errorf("Slack server error: %s.", resp.Status)
 	}
@@ -162,7 +162,7 @@ func postForm(ctx context.Context, endpoint string, values url.Values, intf inte
 	}
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		logResponse(resp, debug)
 		return fmt.Errorf("Slack server error: %s.", resp.Status)
 	}
