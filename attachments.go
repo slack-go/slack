@@ -49,6 +49,9 @@ type AttachmentActionCallback struct {
 	Channel    Channel            `json:"channel"`
 	User       User               `json:"user"`
 
+	Name  string `json:"name"`
+	Value string `json:"value"`
+
 	OriginalMessage Message `json:"original_message"`
 
 	ActionTs     string `json:"action_ts"`
