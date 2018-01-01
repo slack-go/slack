@@ -141,6 +141,7 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (*Info, *websocket.Conn, error
 	}
 
 	rtm.Debugf("Dialing to websocket on url %s", url)
+	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	conn, err := websocketProxyDial(url, "https://api.slack.com")
 	if err != nil {
 		rtm.Debugf("Failed to dial to the websocket: %s", err)

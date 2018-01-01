@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	WEBSOCKET_TIMEOUT_SECONDS = 10 * time.Second
+	websocketDefaultTimeout = 10 * time.Second
 )
 
 // StartRTM calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), WEBSOCKET_TIMEOUT_SECONDS)
+	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
 	defer cancel()
 
 	return api.StartRTMContext(ctx)
@@ -42,7 +42,7 @@ func (api *Client) StartRTMContext(ctx context.Context) (info *Info, websocketUR
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) ConnectRTM() (info *Info, websocketURL string, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), WEBSOCKET_TIMEOUT_SECONDS)
+	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
 	defer cancel()
 
 	return api.ConnectRTMContext(ctx)
