@@ -9,10 +9,7 @@ import (
 	"os"
 )
 
-var logger stdLogger // A logger that can be set by consumers
-/*
-  Added as a var so that we can change this for testing purposes
-*/
+// Added as a var so that we can change this for testing purposes
 var SLACK_API string = "https://slack.com/api/"
 var SLACK_WEB_API_FORMAT string = "https://%s.slack.com/api/users.admin.%s?t=%s"
 
@@ -40,30 +37,6 @@ type Client struct {
 	}
 	info  Info
 	debug bool
-}
-
-// stdLogger is a logger interface compatible with both stdlib and some
-// 3rd party loggers such as logrus.
-type stdLogger interface {
-	Print(...interface{})
-	Printf(string, ...interface{})
-	Println(...interface{})
-
-	Fatal(...interface{})
-	Fatalf(string, ...interface{})
-	Fatalln(...interface{})
-
-	Panic(...interface{})
-	Panicf(string, ...interface{})
-	Panicln(...interface{})
-
-	Output(int, string) error
-}
-
-// SetLogger let's library users supply a logger, so that api debugging
-// can be logged along with the application's debugging info.
-func SetLogger(l stdLogger) {
-	logger = l
 }
 
 // New creates new Client.
@@ -97,16 +70,18 @@ func (api *Client) AuthTestContext(ctx context.Context) (response *AuthTestRespo
 func (api *Client) SetDebug(debug bool) {
 	api.debug = debug
 	if debug && logger == nil {
-		logger = log.New(os.Stdout, "nlopes/slack", log.LstdFlags|log.Lshortfile)
+		SetLogger(log.New(os.Stdout, "nlopes/slack", log.LstdFlags|log.Lshortfile))
 	}
 }
 
+// Debugf print a formatted debug line.
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
 		logger.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
+// Debugln print a debug line.
 func (api *Client) Debugln(v ...interface{}) {
 	if api.debug {
 		logger.Output(2, fmt.Sprintln(v...))
