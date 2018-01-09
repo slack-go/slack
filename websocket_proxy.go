@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"strings"
 
 	"golang.org/x/net/websocket"
@@ -42,13 +41,17 @@ func websocketHTTPConnect(proxy, urlString string) (net.Conn, error) {
 }
 
 func websocketProxyDial(urlString, origin string) (ws *websocket.Conn, err error) {
-	if os.Getenv("HTTP_PROXY") == "" {
-		return websocket.Dial(urlString, "", origin)
-	}
-
-	purl, err := url.Parse(os.Getenv("HTTP_PROXY"))
+	dummyReq, err := http.NewRequest("", urlString, nil)
 	if err != nil {
 		return nil, err
+	}
+	purl, err := http.ProxyFromEnvironment(dummyReq)
+	if err != nil {
+		return nil, err
+	}
+
+	if purl == nil {
+		return websocket.Dial(urlString, "", origin)
 	}
 
 	config, err := websocket.NewConfig(urlString, origin)
