@@ -56,10 +56,12 @@ type User struct {
 	IsPrimaryOwner    bool        `json:"is_primary_owner"`
 	IsRestricted      bool        `json:"is_restricted"`
 	IsUltraRestricted bool        `json:"is_ultra_restricted"`
+	IsStranger        bool        `json:"is_stranger"`
 	IsAppUser         bool        `json:"is_app_user"`
 	Has2FA            bool        `json:"has_2fa"`
 	HasFiles          bool        `json:"has_files"`
 	Presence          string      `json:"presence"`
+	Locale            string      `json:"locale"`
 }
 
 // UserPresence contains details about a user online status
