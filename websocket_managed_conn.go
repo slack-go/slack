@@ -142,10 +142,13 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (*Info, *websocket.Conn, error
 	}
 
 	rtm.Debugf("Dialing to websocket on url %s", url)
-	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	upgradeHeader := http.Header{}
 	upgradeHeader.Add("Origin", "https://api.slack.com")
-	conn, _, err := websocket.DefaultDialer.Dial(url, upgradeHeader)
+	dialer := &websocket.Dialer{
+		Proxy:   http.ProxyFromEnvironment,
+		NetDial: rtm.dialer.Dial,
+	}
+	conn, _, err := dialer.Dial(url, upgradeHeader)
 	if err != nil {
 		rtm.Debugf("Failed to dial to the websocket: %s", err)
 		return nil, nil, err
