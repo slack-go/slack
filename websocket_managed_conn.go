@@ -33,6 +33,7 @@ func (rtm *RTM) ManageConnection() {
 		// if err != nil then the connection is sucessful - otherwise it is
 		// fatal
 		if err != nil {
+			rtm.Debugf("Failed to connect with RTM on try %d: %s", connectionCount, err)
 			return
 		}
 		rtm.info = info
@@ -43,6 +44,8 @@ func (rtm *RTM) ManageConnection() {
 
 		rtm.conn = conn
 		rtm.isConnected = true
+
+		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
 		keepRunning := make(chan bool)
 		// we're now connected (or have failed fatally) so we can set up
@@ -89,6 +92,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		}
 		// check for fatal errors - currently only invalid_auth
 		if sErr, ok := err.(*WebError); ok && (sErr.Error() == "invalid_auth" || sErr.Error() == "account_inactive") {
+			rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, sErr
 		}
@@ -125,17 +129,22 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (*Info, *websocket.Conn, error
 	var err error
 
 	if useRTMStart {
+		rtm.Debugf("Starting RTM")
 		info, url, err = rtm.StartRTM()
 	} else {
+		rtm.Debugf("Connecting to RTM")
 		info, url, err = rtm.ConnectRTM()
 	}
 	if err != nil {
+		rtm.Debugf("Failed to start or connect to RTM: %s", err)
 		return nil, nil, err
 	}
 
+	rtm.Debugf("Dialing to websocket on url %s", url)
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	conn, err := websocketProxyDial(url, "https://api.slack.com")
 	if err != nil {
+		rtm.Debugf("Failed to dial to the websocket: %s", err)
 		return nil, nil, err
 	}
 	return info, conn, err
