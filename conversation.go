@@ -83,3 +83,25 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 	}
 	return response.Members, response.ResponseMetaData.NextCursor, nil
 }
+
+// ArchiveConversation archives a conversation
+func (api *Client) ArchiveConversation(channelID string) error {
+	return api.ArchiveConversationContext(context.Background(), channelID)
+}
+
+// ArchiveConversationContext archives a conversation with a custom context
+func (api *Client) ArchiveConversationContext(ctx context.Context, channelID string) error {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {channelID},
+	}
+	response := SlackResponse{}
+	err := post(ctx, "conversations.archive", values, &response, api.debug)
+	if err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
+}

@@ -239,3 +239,23 @@ func TestGetUsersInConversation(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
+
+func archiveConversation(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(SlackResponse{
+		Ok: true,
+	})
+	rw.Write(response)
+}
+
+func TestArchiveConversation(t *testing.T) {
+	http.HandleFunc("/conversations.archive", archiveConversation)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	err := api.ArchiveConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
