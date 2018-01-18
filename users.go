@@ -194,6 +194,24 @@ func (api *Client) GetUsersContext(ctx context.Context) ([]User, error) {
 	return response.Members, nil
 }
 
+// GetUserByEmail will retrieve the complete user information by email
+func (api *Client) GetUserByEmail(email string) (*User, error) {
+	return api.GetUserByEmailContext(context.Background(), email)
+}
+
+// GetUserByEmailContext will retrieve the complete user information by email with a custom context
+func (api *Client) GetUserByEmailContext(ctx context.Context, email string) (*User, error) {
+	values := url.Values{
+		"token": {api.config.token},
+		"email": {email},
+	}
+	response, err := userRequest(ctx, "users.lookupByEmail", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	return &response.User, nil
+}
+
 // SetUserAsActive marks the currently authenticated user as active
 func (api *Client) SetUserAsActive() error {
 	return api.SetUserAsActiveContext(context.Background())
