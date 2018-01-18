@@ -129,12 +129,12 @@ func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID s
 }
 
 // SetTopicOfConversation sets the topic for a conversation
-func (api *Client) SetTopicOfConversation(channelID, topic string) (string, error) {
+func (api *Client) SetTopicOfConversation(channelID, topic string) (*Channel, error) {
 	return api.SetTopicOfConversationContext(context.Background(), channelID, topic)
 }
 
 // SetTopicOfConversationContext sets the topic for a conversation with a custom context
-func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID, topic string) (string, error) {
+func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID, topic string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.config.token},
 		"channel": {channelID},
@@ -142,14 +142,14 @@ func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID,
 	}
 	response := struct {
 		SlackResponse
-		Topic string `json:"topic"`
+		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, "conversations.setTopic", values, &response, api.debug)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if !response.Ok {
-		return "", errors.New(response.Error)
+		return nil, errors.New(response.Error)
 	}
-	return response.Topic, nil
+	return response.Channel, nil
 }

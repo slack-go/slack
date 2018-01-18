@@ -264,14 +264,23 @@ func TestUnArchiveConversation(t *testing.T) {
 	}
 }
 
+func getTestChannel() *Channel {
+	return &Channel{
+		groupConversation: groupConversation{
+			Topic: Topic{
+				Value: "response topic",
+			}},
+	}
+}
+
 func setTopicOfConversation(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
-		Topic string `json:"topic"`
+		Channel *Channel `json:"channel"`
 	}{
 		SlackResponse: SlackResponse{Ok: true},
-		Topic:         "response topic",
+		Channel:       getTestChannel(),
 	})
 	rw.Write(response)
 }
@@ -281,13 +290,13 @@ func TestSetTopicOfConversation(t *testing.T) {
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	topic, err := api.SetTopicOfConversation("CXXXXXXXX", "test topic")
+	inputChannel := getTestChannel()
+	channel, err := api.SetTopicOfConversation("CXXXXXXXX", inputChannel.Topic.Value)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	expectedTopic := "response topic"
-	if topic != expectedTopic {
-		t.Fatalf(`response.Topic = '%s', want '%s'`, topic, expectedTopic)
+	if channel.Topic.Value != inputChannel.Topic.Value {
+		t.Fatalf(`topic = '%s', want '%s'`, channel.Topic.Value, inputChannel.Topic.Value)
 	}
 }
