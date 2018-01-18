@@ -319,3 +319,19 @@ func TestSetPurposeOfConversation(t *testing.T) {
 		t.Fatalf(`purpose = '%s', want '%s'`, channel.Purpose.Value, inputChannel.Purpose.Value)
 	}
 }
+
+func TestRenameConversation(t *testing.T) {
+	http.HandleFunc("/conversations.rename", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	inputChannel := getTestChannel()
+	channel, err := api.RenameConversation("CXXXXXXXX", inputChannel.Name)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel.Name != inputChannel.Name {
+		t.Fatalf(`channelName = '%s', want '%s'`, channel.Name, inputChannel.Name)
+	}
+}

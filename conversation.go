@@ -179,3 +179,29 @@ func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelI
 	}
 	return response.Channel, nil
 }
+
+// RenameConversation renames a conversation
+func (api *Client) RenameConversation(channelID, channelName string) (*Channel, error) {
+	return api.RenameConversationContext(context.Background(), channelID, channelName)
+}
+
+// RenameConversationContext renames a conversation with a custom context
+func (api *Client) RenameConversationContext(ctx context.Context, channelID, channelName string) (*Channel, error) {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {channelID},
+		"name":    {channelName},
+	}
+	response := struct {
+		SlackResponse
+		Channel *Channel `json:"channel"`
+	}{}
+	err := post(ctx, "conversations.rename", values, &response, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return response.Channel, nil
+}
