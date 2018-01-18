@@ -105,3 +105,25 @@ func (api *Client) ArchiveConversationContext(ctx context.Context, channelID str
 	}
 	return nil
 }
+
+// UnArchiveConversation reverses conversation archival
+func (api *Client) UnArchiveConversation(channelID string) error {
+	return api.UnArchiveConversationContext(context.Background(), channelID)
+}
+
+// UnArchiveConversationContext reverses conversation archival with a custom context
+func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID string) error {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {channelID},
+	}
+	response := SlackResponse{}
+	err := post(ctx, "conversations.unarchive", values, &response, api.debug)
+	if err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
+}
