@@ -208,11 +208,11 @@ func getTestMembers() []string {
 func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		Ok               bool             `json:"ok"`
+		SlackResponse
 		Members          []string         `json:"members"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
 	}{
-		Ok:               true,
+		SlackResponse:    SlackResponse{Ok: true},
 		Members:          getTestMembers(),
 		ResponseMetaData: responseMetaData{NextCursor: ""},
 	})
