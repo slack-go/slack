@@ -201,3 +201,11 @@ func getHTTPClient() HTTPRequester {
 func SetHTTPClient(client HTTPRequester) {
 	customHTTPClient = client
 }
+
+func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(SlackResponse{
+		Ok: true,
+	})
+	rw.Write(response)
+}

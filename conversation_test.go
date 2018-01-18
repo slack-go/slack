@@ -240,24 +240,8 @@ func TestGetUsersInConversation(t *testing.T) {
 	}
 }
 
-func archiveConversation(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(SlackResponse{
-		Ok: true,
-	})
-	rw.Write(response)
-}
-
-func unArchiveConversation(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(SlackResponse{
-		Ok: true,
-	})
-	rw.Write(response)
-}
-
 func TestArchiveConversation(t *testing.T) {
-	http.HandleFunc("/conversations.archive", archiveConversation)
+	http.HandleFunc("/conversations.archive", okJsonHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
@@ -269,7 +253,7 @@ func TestArchiveConversation(t *testing.T) {
 }
 
 func TestUnArchiveConversation(t *testing.T) {
-	http.HandleFunc("/conversations.unarchive", unArchiveConversation)
+	http.HandleFunc("/conversations.unarchive", okJsonHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
