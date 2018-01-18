@@ -153,3 +153,29 @@ func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID,
 	}
 	return response.Channel, nil
 }
+
+// SetPurposeOfConversation sets the purpose for a conversation
+func (api *Client) SetPurposeOfConversation(channelID, purpose string) (*Channel, error) {
+	return api.SetPurposeOfConversationContext(context.Background(), channelID, purpose)
+}
+
+// SetPurposeOfConversationContext sets the purpose for a conversation with a custom context
+func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelID, purpose string) (*Channel, error) {
+	values := url.Values{
+		"token":   {api.config.token},
+		"channel": {channelID},
+		"purpose": {purpose},
+	}
+	response := struct {
+		SlackResponse
+		Channel *Channel `json:"channel"`
+	}{}
+	err := post(ctx, "conversations.setPurpose", values, &response, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return response.Channel, nil
+}

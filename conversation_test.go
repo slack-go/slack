@@ -269,11 +269,14 @@ func getTestChannel() *Channel {
 		groupConversation: groupConversation{
 			Topic: Topic{
 				Value: "response topic",
-			}},
-	}
+			},
+			Purpose: Purpose{
+				Value: "response purpose",
+			},
+		}}
 }
 
-func setTopicOfConversation(rw http.ResponseWriter, r *http.Request) {
+func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
@@ -286,7 +289,7 @@ func setTopicOfConversation(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestSetTopicOfConversation(t *testing.T) {
-	http.HandleFunc("/conversations.setTopic", setTopicOfConversation)
+	http.HandleFunc("/conversations.setTopic", okChannelJsonHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
@@ -298,5 +301,21 @@ func TestSetTopicOfConversation(t *testing.T) {
 	}
 	if channel.Topic.Value != inputChannel.Topic.Value {
 		t.Fatalf(`topic = '%s', want '%s'`, channel.Topic.Value, inputChannel.Topic.Value)
+	}
+}
+
+func TestSetPurposeOfConversation(t *testing.T) {
+	http.HandleFunc("/conversations.setPurpose", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	inputChannel := getTestChannel()
+	channel, err := api.SetPurposeOfConversation("CXXXXXXXX", inputChannel.Purpose.Value)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel.Purpose.Value != inputChannel.Purpose.Value {
+		t.Fatalf(`purpose = '%s', want '%s'`, channel.Purpose.Value, inputChannel.Purpose.Value)
 	}
 }
