@@ -1,9 +1,10 @@
-package slack
+package slack_test
 
 import (
 	"testing"
 
 	slacktest "github.com/lusis/slack-test"
+	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,8 +19,8 @@ func TestRTMSingleConnect(t *testing.T) {
 	go testServer.Start()
 
 	// Setup and start the RTM.
-	SLACK_API = testServer.GetAPIURL()
-	api := New(testToken)
+	slack.SLACK_API = testServer.GetAPIURL()
+	api := slack.New(testToken)
 	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
@@ -31,19 +32,19 @@ func TestRTMSingleConnect(t *testing.T) {
 	go func() {
 		for msg := range rtm.IncomingEvents {
 			switch ev := msg.Data.(type) {
-			case *ConnectingEvent:
+			case *slack.ConnectingEvent:
 				if connectingReceived {
 					t.Error("Received multiple connecting events.")
 					t.Fail()
 				}
 				connectingReceived = true
-			case *ConnectedEvent:
+			case *slack.ConnectedEvent:
 				if connectedReceived {
 					t.Error("Received multiple connected events.")
 					t.Fail()
 				}
 				connectedReceived = true
-			case *MessageEvent:
+			case *slack.MessageEvent:
 				if ev.Text == testMessage {
 					testMessageReceived = true
 					rtm.Disconnect()
