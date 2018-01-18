@@ -2,6 +2,8 @@ package slack
 
 import (
 	"encoding/json"
+	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -197,4 +199,43 @@ func TestCreateSimpleIM(t *testing.T) {
 	im.UnreadCount = 0
 	im.UnreadCountDisplay = 0
 	assertSimpleIM(t, im)
+}
+
+func getTestMembers() []string {
+	return []string{"test"}
+}
+
+func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Ok               bool             `json:"ok"`
+		Members          []string         `json:"members"`
+		ResponseMetaData responseMetaData `json:"response_metadata"`
+	}{
+		Ok:               true,
+		Members:          getTestMembers(),
+		ResponseMetaData: responseMetaData{NextCursor: ""},
+	})
+	rw.Write(response)
+}
+
+func TestGetUsersInConversation(t *testing.T) {
+	http.HandleFunc("/conversations.members", getUsersInConversation)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetUsersInConversationParameters{
+		ChannelID: "CXXXXXXXX",
+	}
+
+	expectedMembers := getTestMembers()
+
+	members, _, err := api.GetUsersInConversation(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(expectedMembers, members) {
+		t.Fatal(ErrIncorrectResponse)
+	}
 }
