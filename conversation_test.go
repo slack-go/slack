@@ -263,3 +263,31 @@ func TestUnArchiveConversation(t *testing.T) {
 		return
 	}
 }
+
+func setTopicOfConversation(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		Topic string `json:"topic"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Topic:         "response topic",
+	})
+	rw.Write(response)
+}
+
+func TestSetTopicOfConversation(t *testing.T) {
+	http.HandleFunc("/conversations.setTopic", setTopicOfConversation)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	topic, err := api.SetTopicOfConversation("CXXXXXXXX", "test topic")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	expectedTopic := "response topic"
+	if topic != expectedTopic {
+		t.Fatalf(`response.Topic = '%s', want '%s'`, topic, expectedTopic)
+	}
+}
