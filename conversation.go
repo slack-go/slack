@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -281,4 +282,27 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 		return false, false, errors.New(response.Error)
 	}
 	return response.NoOp, response.AlreadyClosed, nil
+}
+
+// CreateConversation initiates a public or private channel-based conversation
+func (api *Client) CreateConversation(channelName string, isPrivate bool) (*Channel, error) {
+	return api.CreateConversationContext(context.Background(), channelName, isPrivate)
+}
+
+// CreateConversationContext initiates a public or private channel-based conversation with a custom context
+func (api *Client) CreateConversationContext(ctx context.Context, channelName string, isPrivate bool) (*Channel, error) {
+	values := url.Values{
+		"token":      {api.token},
+		"name":       {channelName},
+		"is_private": {strconv.FormatBool(isPrivate)},
+	}
+	response, err := channelRequest(
+		ctx, api.httpclient, "conversations.create", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return &response.Channel, nil
 }

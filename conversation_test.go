@@ -387,3 +387,19 @@ func TestCloseConversation(t *testing.T) {
 		return
 	}
 }
+
+func TestCreateConversation(t *testing.T) {
+	http.HandleFunc("/conversations.create", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	channel, err := api.CreateConversation("CXXXXXXXX", false)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}
