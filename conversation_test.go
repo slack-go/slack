@@ -352,3 +352,15 @@ func TestInviteUsersToConversation(t *testing.T) {
 		return
 	}
 }
+
+func TestKickUserFromConversation(t *testing.T) {
+	http.HandleFunc("/conversations.kick", okJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	err := api.KickUserFromConversation("CXXXXXXXX", "UXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}

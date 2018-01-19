@@ -232,3 +232,26 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 	}
 	return response.Channel, nil
 }
+
+// KickUserFromConversation removes a user from a conversation
+func (api *Client) KickUserFromConversation(channelID string, user string) error {
+	return api.KickUserFromConversationContext(context.Background(), channelID, user)
+}
+
+// KickUserFromConversationContext removes a user from a conversation with a custom context
+func (api *Client) KickUserFromConversationContext(ctx context.Context, channelID string, user string) error {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {channelID},
+		"user":    {user},
+	}
+	response := SlackResponse{}
+	err := post(ctx, api.httpclient, "conversations.kick", values, &response, api.debug)
+	if err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
+}
