@@ -364,3 +364,26 @@ func TestKickUserFromConversation(t *testing.T) {
 		return
 	}
 }
+
+func closeConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NoOp          bool `json:"no_op"`
+		AlreadyClosed bool `json:"already_closed"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestCloseConversation(t *testing.T) {
+	http.HandleFunc("/conversations.close", closeConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, _, err := api.CloseConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}

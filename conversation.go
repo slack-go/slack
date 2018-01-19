@@ -255,3 +255,30 @@ func (api *Client) KickUserFromConversationContext(ctx context.Context, channelI
 	}
 	return nil
 }
+
+// CloseConversation closes a direct message or multi-person direct message
+func (api *Client) CloseConversation(channelID string) (bool, bool, error) {
+	return api.CloseConversationContext(context.Background(), channelID)
+}
+
+// CloseConversationContext closes a direct message or multi-person direct message with a custom context
+func (api *Client) CloseConversationContext(ctx context.Context, channelID string) (bool, bool, error) {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {channelID},
+	}
+	response := struct {
+		SlackResponse
+		NoOp          bool `json:"no_op"`
+		AlreadyClosed bool `json:"already_closed"`
+	}{}
+
+	err := post(ctx, api.httpclient, "conversations.close", values, &response, api.debug)
+	if err != nil {
+		return false, false, err
+	}
+	if !response.Ok {
+		return false, false, errors.New(response.Error)
+	}
+	return response.NoOp, response.AlreadyClosed, nil
+}
