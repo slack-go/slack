@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strings"
 )
 
 // Conversation is the foundation for IM and BaseGroupConversation
@@ -197,6 +198,32 @@ func (api *Client) RenameConversationContext(ctx context.Context, channelID, cha
 		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, api.httpclient, "conversations.rename", values, &response, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return response.Channel, nil
+}
+
+// InviteUsersToConversation invites users to a channel
+func (api *Client) InviteUsersToConversation(channelID string, users []string) (*Channel, error) {
+	return api.InviteUsersToConversationContext(context.Background(), channelID, users)
+}
+
+// InviteUsersToConversationContext invites users to a channel with a custom context
+func (api *Client) InviteUsersToConversationContext(ctx context.Context, channelID string, users []string) (*Channel, error) {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {channelID},
+		"users":   {strings.Join(users, ",")},
+	}
+	response := struct {
+		SlackResponse
+		Channel *Channel `json:"channel"`
+	}{}
+	err := post(ctx, api.httpclient, "conversations.invite", values, &response, api.debug)
 	if err != nil {
 		return nil, err
 	}

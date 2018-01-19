@@ -335,3 +335,20 @@ func TestRenameConversation(t *testing.T) {
 		t.Fatalf(`channelName = '%s', want '%s'`, channel.Name, inputChannel.Name)
 	}
 }
+
+func TestInviteUsersToConversation(t *testing.T) {
+	http.HandleFunc("/conversations.invite", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	users := []string{"UXXXXXXX1", "UXXXXXXX2"}
+	channel, err := api.InviteUsersToConversation("CXXXXXXXX", users)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}
