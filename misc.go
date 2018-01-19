@@ -172,3 +172,11 @@ func logResponse(resp *http.Response, debug bool) error {
 
 	return nil
 }
+
+func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(SlackResponse{
+		Ok: true,
+	})
+	rw.Write(response)
+}
