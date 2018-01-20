@@ -441,3 +441,34 @@ func TestLeaveConversation(t *testing.T) {
 		return
 	}
 }
+
+func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		HasMore          bool `json:"has_more"`
+		ResponseMetaData struct {
+			NextCursor string `json:"next_cursor"`
+		} `json:"response_metadata"`
+		Messages []Message `json:"messages"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Messages:      []Message{}})
+	rw.Write(response)
+}
+
+func TestGetConversationReplies(t *testing.T) {
+	http.HandleFunc("/conversations.replies", getConversationRepliesHander)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationRepliesParameters{
+		ChannelID: "CXXXXXXXX",
+		Timestamp: "1234567890.123456",
+	}
+	_, _, _, err := api.GetConversationReplies(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}

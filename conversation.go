@@ -349,3 +349,61 @@ func (api *Client) LeaveConversationContext(ctx context.Context, channelID strin
 
 	return response.NotInChannel, nil
 }
+
+type GetConversationRepliesParameters struct {
+	ChannelID string
+	Timestamp string
+	Cursor    string
+	Inclusive bool
+	Latest    string
+	Limit     int
+	Oldest    string
+}
+
+// GetConversationReplies retrieves a thread of messages posted to a conversation
+func (api *Client) GetConversationReplies(params *GetConversationRepliesParameters) ([]Message, bool, string, error) {
+	return api.GetConversationRepliesContext(context.Background(), params)
+}
+
+// GetConversationRepliesContext retrieves a thread of messages posted to a conversation with a custom context
+func (api *Client) GetConversationRepliesContext(ctx context.Context, params *GetConversationRepliesParameters) ([]Message, bool, string, error) {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {params.ChannelID},
+		"ts":      {params.Timestamp},
+	}
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+	if params.Latest != "" {
+		values.Add("latest", params.Latest)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", string(params.Limit))
+	}
+	if params.Oldest != "" {
+		values.Add("oldest", params.Oldest)
+	}
+	if params.Inclusive {
+		values.Add("inclusive", "1")
+	} else {
+		values.Add("inclusive", "0")
+	}
+	response := struct {
+		SlackResponse
+		HasMore          bool `json:"has_more"`
+		ResponseMetaData struct {
+			NextCursor string `json:"next_cursor"`
+		} `json:"response_metadata"`
+		Messages []Message `json:"messages"`
+	}{}
+
+	err := post(ctx, api.httpclient, "conversations.replies", values, &response, api.debug)
+	if err != nil {
+		return nil, false, "", err
+	}
+	if !response.Ok {
+		return nil, false, "", errors.New(response.Error)
+	}
+	return response.Messages, response.HasMore, response.ResponseMetaData.NextCursor, nil
+}
