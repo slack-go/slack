@@ -403,3 +403,19 @@ func TestCreateConversation(t *testing.T) {
 		return
 	}
 }
+
+func TestGetConversationInfo(t *testing.T) {
+	http.HandleFunc("/conversations.info", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	channel, err := api.GetConversationInfo("CXXXXXXXX", false)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}

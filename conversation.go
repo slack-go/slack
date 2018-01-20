@@ -306,3 +306,26 @@ func (api *Client) CreateConversationContext(ctx context.Context, channelName st
 	}
 	return &response.Channel, nil
 }
+
+// GetConversationInfo retrieves information about a conversation
+func (api *Client) GetConversationInfo(channelID string, includeLocale bool) (*Channel, error) {
+	return api.GetConversationInfoContext(context.Background(), channelID, includeLocale)
+}
+
+// GetConversationInfoContext retrieves information about a conversation with a custom context
+func (api *Client) GetConversationInfoContext(ctx context.Context, channelID string, includeLocale bool) (*Channel, error) {
+	values := url.Values{
+		"token":          {api.token},
+		"channel":        {channelID},
+		"include_locale": {strconv.FormatBool(includeLocale)},
+	}
+	response, err := channelRequest(
+		ctx, api.httpclient, "conversations.info", values, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return &response.Channel, nil
+}

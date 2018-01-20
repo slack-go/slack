@@ -20,9 +20,10 @@ type channelResponseFull struct {
 // Channel contains information about the channel
 type Channel struct {
 	groupConversation
-	IsChannel bool `json:"is_channel"`
-	IsGeneral bool `json:"is_general"`
-	IsMember  bool `json:"is_member"`
+	IsChannel bool   `json:"is_channel"`
+	IsGeneral bool   `json:"is_general"`
+	IsMember  bool   `json:"is_member"`
+	Locale    string `json:"locale"`
 }
 
 func channelRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*channelResponseFull, error) {
