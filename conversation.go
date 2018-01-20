@@ -329,3 +329,23 @@ func (api *Client) GetConversationInfoContext(ctx context.Context, channelID str
 	}
 	return &response.Channel, nil
 }
+
+// LeaveConversation leaves a conversation
+func (api *Client) LeaveConversation(channelID string) (bool, error) {
+	return api.LeaveConversationContext(context.Background(), channelID)
+}
+
+// LeaveConversationContext leaves a conversation with a custom context
+func (api *Client) LeaveConversationContext(ctx context.Context, channelID string) (bool, error) {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {channelID},
+	}
+
+	response, err := channelRequest(ctx, api.httpclient, "conversations.leave", values, api.debug)
+	if err != nil {
+		return false, err
+	}
+
+	return response.NotInChannel, nil
+}

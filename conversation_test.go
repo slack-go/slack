@@ -419,3 +419,25 @@ func TestGetConversationInfo(t *testing.T) {
 		return
 	}
 }
+
+func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NotInChannel bool `json:"not_in_channel"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestLeaveConversation(t *testing.T) {
+	http.HandleFunc("/conversations.leave", leaveConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, err := api.LeaveConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
