@@ -1,0 +1,102 @@
+package slack
+
+import (
+	"net/http"
+	"reflect"
+	"testing"
+)
+
+type remindersHandler struct {
+	gotParams map[string]string
+	response  string
+}
+
+func newRemindersHandler() *remindersHandler {
+	return &remindersHandler{
+		gotParams: make(map[string]string),
+	}
+}
+
+func (rh *remindersHandler) accumulateFormValue(k string, r *http.Request) {
+	if v := r.FormValue(k); v != "" {
+		rh.gotParams[k] = v
+	}
+}
+
+func (rh *remindersHandler) handler(w http.ResponseWriter, r *http.Request) {
+	rh.accumulateFormValue("channel", r)
+	rh.accumulateFormValue("user", r)
+	rh.accumulateFormValue("text", r)
+	rh.accumulateFormValue("time", r)
+	w.Header().Set("Content-Type", "application/json")
+	if rh.gotParams["text"] == "trigger-error" {
+		w.Write([]byte(`{ "ok": false, "error": "oh no" }`))
+	} else {
+		w.Write([]byte(`{ "ok": true }`))
+	}
+}
+
+func TestSlack_AddReminder(t *testing.T) {
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	tests := []struct {
+		chanID     string
+		userID     string
+		text       string
+		time       string
+		wantParams map[string]string
+		expectErr  bool
+	}{
+		{
+			"someChannelID",
+			"",
+			"hello world",
+			"tomorrow at 9am",
+			map[string]string{
+				"text":    "hello world",
+				"time":    "tomorrow at 9am",
+				"channel": "someChannelID",
+			},
+			false,
+		},
+		{
+			"someChannelID",
+			"",
+			"trigger-error",
+			"tomorrow at 9am",
+			map[string]string{
+				"text":    "trigger-error",
+				"time":    "tomorrow at 9am",
+				"channel": "someChannelID",
+			},
+			true,
+		},
+		{
+			"",
+			"someUserID",
+			"hello world",
+			"tomorrow at 10am",
+			map[string]string{
+				"text": "hello world",
+				"time": "tomorrow at 10am",
+				"user": "someUserID",
+			},
+			false,
+		},
+	}
+	var rh *remindersHandler
+	http.HandleFunc("/reminders.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	for i, test := range tests {
+		rh = newRemindersHandler()
+		err := api.AddReminder(test.chanID, test.userID, test.text, test.time)
+		if test.expectErr == false && err != nil {
+			t.Fatalf("%d: Unexpected error: %s", i, err)
+		} else if test.expectErr == true && err == nil {
+			t.Fatalf("%d: Expected error but got none!", i)
+		}
+		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
+		}
+	}
+}
