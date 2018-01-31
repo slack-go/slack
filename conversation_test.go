@@ -524,3 +524,29 @@ func TestOpenConversation(t *testing.T) {
 		return
 	}
 }
+
+func joinConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Channel          *Channel `json:"channel"`
+		Warning          string   `json:"warning"`
+		ResponseMetaData *struct {
+			Warnings []string `json:"warnings"`
+		} `json:"response_metadata"`
+		SlackResponse
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestJoinConversation(t *testing.T) {
+	http.HandleFunc("/conversations.join", joinConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, _, _, err := api.JoinConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}

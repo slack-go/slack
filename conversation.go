@@ -502,3 +502,33 @@ func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConv
 	}
 	return response.Channel, response.NoOp, response.AlreadyOpen, nil
 }
+
+// JoinConversation joins an existing conversation
+func (api *Client) JoinConversation(channelID string) (*Channel, string, []string, error) {
+	return api.JoinConversationContext(context.Background(), channelID)
+}
+
+// JoinConversationContext joins an existing conversation with a custom context
+func (api *Client) JoinConversationContext(ctx context.Context, channelID string) (*Channel, string, []string, error) {
+	values := url.Values{"token": {api.token}, "channel": {channelID}}
+	response := struct {
+		Channel          *Channel `json:"channel"`
+		Warning          string   `json:"warning"`
+		ResponseMetaData *struct {
+			Warnings []string `json:"warnings"`
+		} `json:"response_metadata"`
+		SlackResponse
+	}{}
+	err := post(ctx, api.httpclient, "conversations.join", values, &response, api.debug)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	if !response.Ok {
+		return nil, "", nil, errors.New(response.Error)
+	}
+	var warnings []string
+	if response.ResponseMetaData != nil {
+		warnings = response.ResponseMetaData.Warnings
+	}
+	return response.Channel, response.Warning, warnings, nil
+}
