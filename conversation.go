@@ -463,3 +463,42 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 	}
 	return response.Channels, response.ResponseMetaData.NextCursor, nil
 }
+
+type OpenConversationParameters struct {
+	ChannelID string
+	ReturnIM  bool
+	Users     []string
+}
+
+// OpenConversation opens or resumes a direct message or multi-person direct message
+func (api *Client) OpenConversation(params *OpenConversationParameters) (*Channel, bool, bool, error) {
+	return api.OpenConversationContext(context.Background(), params)
+}
+
+// OpenConversationContext opens or resumes a direct message or multi-person direct message with a custom context
+func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConversationParameters) (*Channel, bool, bool, error) {
+	values := url.Values{
+		"token":     {api.token},
+		"return_im": {strconv.FormatBool(params.ReturnIM)},
+	}
+	if params.ChannelID != "" {
+		values.Add("channel", params.ChannelID)
+	}
+	if params.Users != nil {
+		values.Add("users", strings.Join(params.Users, ","))
+	}
+	response := struct {
+		Channel     *Channel `json:"channel"`
+		NoOp        bool     `json:"no_op"`
+		AlreadyOpen bool     `json:"already_open"`
+		SlackResponse
+	}{}
+	err := post(ctx, api.httpclient, "conversations.open", values, &response, api.debug)
+	if err != nil {
+		return nil, false, false, err
+	}
+	if !response.Ok {
+		return nil, false, false, errors.New(response.Error)
+	}
+	return response.Channel, response.NoOp, response.AlreadyOpen, nil
+}

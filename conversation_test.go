@@ -499,3 +499,28 @@ func TestGetConversations(t *testing.T) {
 		return
 	}
 }
+
+func openConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NoOp        bool     `json:"no_op"`
+		AlreadyOpen bool     `json:"already_open"`
+		Channel     *Channel `json:"channel"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestOpenConversation(t *testing.T) {
+	http.HandleFunc("/conversations.open", openConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := OpenConversationParameters{ChannelID: "CXXXXXXXX"}
+	_, _, _, err := api.OpenConversation(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
