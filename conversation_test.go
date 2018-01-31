@@ -472,3 +472,30 @@ func TestGetConversationReplies(t *testing.T) {
 		return
 	}
 }
+
+func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		ResponseMetaData struct {
+			NextCursor string `json:"next_cursor"`
+		} `json:"response_metadata"`
+		Channels []Channel `json:"channels"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Channels:      []Channel{}})
+	rw.Write(response)
+}
+
+func TestGetConversations(t *testing.T) {
+	http.HandleFunc("/conversations.list", getConversationsHander)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationsParameters{}
+	_, _, err := api.GetConversations(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}

@@ -17,6 +17,20 @@ type conversation struct {
 	Latest             *Message `json:"latest,omitempty"`
 	UnreadCount        int      `json:"unread_count,omitempty"`
 	UnreadCountDisplay int      `json:"unread_count_display,omitempty"`
+	IsGroup            bool     `json:"is_group"`
+	IsShared           bool     `json:"is_shared"`
+	IsIM               bool     `json:"is_im"`
+	IsExtShared        bool     `json:"is_ext_shared"`
+	IsOrgShared        bool     `json:"is_org_shared"`
+	IsPendingExtShared bool     `json:"is_pending_ext_shared"`
+	IsPrivate          bool     `json:"is_private"`
+	IsMpIM             bool     `json:"is_mpim"`
+	Unlinked           int      `json:"unlinked"`
+	NameNormalized     string   `json:"name_normalized"`
+	NumMembers         int      `json:"num_members"`
+	Priority           int      `json:"priority"`
+	// TODO support pending_shared
+	// TODO support previous_names
 }
 
 // GroupConversation is the foundation for Group and Channel
@@ -406,4 +420,46 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		return nil, false, "", errors.New(response.Error)
 	}
 	return response.Messages, response.HasMore, response.ResponseMetaData.NextCursor, nil
+}
+
+type GetConversationsParameters struct {
+	Cursor          string
+	ExcludeArchived string
+	Limit           int
+	Types           []string
+}
+
+// GetConversations returns the list of channels in a Slack team
+func (api *Client) GetConversations(params *GetConversationsParameters) ([]Channel, string, error) {
+	return api.GetConversationsContext(context.Background(), params)
+}
+
+// GetConversationsContext returns the list of channels in a Slack team with a custom context
+func (api *Client) GetConversationsContext(ctx context.Context, params *GetConversationsParameters) ([]Channel, string, error) {
+	values := url.Values{
+		"token":            {api.token},
+		"exclude_archived": {params.ExcludeArchived},
+	}
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", string(params.Limit))
+	}
+	if params.Types != nil {
+		values.Add("types", strings.Join(params.Types, ","))
+	}
+	response := struct {
+		Channels         []Channel        `json:"channels"`
+		ResponseMetaData responseMetaData `json:"response_metadata"`
+		SlackResponse
+	}{}
+	err := post(ctx, api.httpclient, "conversations.list", values, &response, api.debug)
+	if err != nil {
+		return nil, "", err
+	}
+	if !response.Ok {
+		return nil, "", errors.New(response.Error)
+	}
+	return response.Channels, response.ResponseMetaData.NextCursor, nil
 }
