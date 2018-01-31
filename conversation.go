@@ -59,7 +59,7 @@ func (api *Client) GetUsersInConversation(params *GetUsersInConversationParamete
 	return api.GetUsersInConversationContext(context.Background(), params)
 }
 
-// GetUsersInConversation returns the list of users in a conversation with a custom context
+// GetUsersInConversationContext returns the list of users in a conversation with a custom context
 func (api *Client) GetUsersInConversationContext(ctx context.Context, params *GetUsersInConversationParameters) ([]string, string, error) {
 	values := url.Values{
 		"token":   {api.token},
