@@ -532,3 +532,61 @@ func (api *Client) JoinConversationContext(ctx context.Context, channelID string
 	}
 	return response.Channel, response.Warning, warnings, nil
 }
+
+type GetConversationHistoryParameters struct {
+	ChannelID string
+	Cursor    string
+	Inclusive bool
+	Latest    string
+	Limit     int
+	Oldest    string
+}
+
+type GetConversationHistoryResponse struct {
+	SlackResponse
+	HasMore          bool   `json:"has_more"`
+	PinCount         int    `json:"pin_count"`
+	Latest           string `json:"latest"`
+	ResponseMetaData struct {
+		NextCursor string `json:"next_cursor"`
+	} `json:"response_metadata"`
+	Messages []Message `json:"messages"`
+}
+
+// GetConversationHistory joins an existing conversation
+func (api *Client) GetConversationHistory(params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
+	return api.GetConversationHistoryContext(context.Background(), params)
+}
+
+// GetConversationHistoryContext joins an existing conversation with a custom context
+func (api *Client) GetConversationHistoryContext(ctx context.Context, params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
+	values := url.Values{"token": {api.token}, "channel": {params.ChannelID}}
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+	if params.Inclusive {
+		values.Add("inclusive", "1")
+	} else {
+		values.Add("inclusive", "0")
+	}
+	if params.Latest != "" {
+		values.Add("latest", params.Latest)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", string(params.Limit))
+	}
+	if params.Oldest != "" {
+		values.Add("oldest", params.Oldest)
+	}
+
+	response := GetConversationHistoryResponse{}
+
+	err := post(ctx, api.httpclient, "conversations.history", values, &response, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !response.Ok {
+		return nil, errors.New(response.Error)
+	}
+	return &response, nil
+}

@@ -550,3 +550,23 @@ func TestJoinConversation(t *testing.T) {
 		return
 	}
 }
+
+func getConversationHistoryHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(GetConversationHistoryResponse{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestGetConversationHistory(t *testing.T) {
+	http.HandleFunc("/conversations.history", getConversationHistoryHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationHistoryParameters{ChannelID: "CXXXXXXXX"}
+	_, err := api.GetConversationHistory(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
