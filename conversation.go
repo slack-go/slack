@@ -28,7 +28,7 @@ type conversation struct {
 	Unlinked           int      `json:"unlinked"`
 	NameNormalized     string   `json:"name_normalized"`
 	NumMembers         int      `json:"num_members"`
-	Priority           int      `json:"priority"`
+	Priority           float64  `json:"priority"`
 	// TODO support pending_shared
 	// TODO support previous_names
 }
