@@ -9,28 +9,13 @@ import (
 	"testing"
 )
 
-type slashHandler struct {
-	gotParams *Slash
-}
-
-func newSlashHandler() *slashHandler {
-	return &slashHandler{
-		gotParams: &Slash{},
-	}
-}
-func (sh *slashHandler) handler(s *Slash) (*PostMessageParameters, error) {
-	sh.gotParams = s
-	response := &PostMessageParameters{Text: "success"}
-	return response, nil
-}
-
 func TestSlash_ServeHTTP(t *testing.T) {
 	once.Do(startServer)
 	serverURL := fmt.Sprintf("http://%s/slash", serverAddr)
 
 	tests := []struct {
 		body           url.Values
-		wantParams     *Slash
+		wantParams     SlashCommand
 		wantStatusCode int
 	}{
 		{
@@ -47,7 +32,7 @@ func TestSlash_ServeHTTP(t *testing.T) {
 				"channel_name": []string{"channel"},
 				"trigger_id":   []string{"0000000000.1111111111.222222222222aaaaaaaaaaaaaa"},
 			},
-			wantParams: &Slash{
+			wantParams: SlashCommand{
 				Command:     "/command",
 				TeamDomain:  "team",
 				ChannelID:   "C1234ABCD",
@@ -66,15 +51,26 @@ func TestSlash_ServeHTTP(t *testing.T) {
 			body: url.Values{
 				"token": []string{"invalid"},
 			},
-			wantParams:     &Slash{},
+			wantParams: SlashCommand{
+				Token: "invalid",
+			},
 			wantStatusCode: http.StatusUnauthorized,
 		},
 	}
 
+	var slashCommand SlashCommand
 	client := &http.Client{}
-	h := newSlashHandler()
-	verificationToken := "valid"
-	http.HandleFunc("/slash", SlashHandler(verificationToken, h.handler))
+	http.HandleFunc("/slash", func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		slashCommand, err = SlashCommandParse(r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		acceptableTokens := []string{"valid", "valid2"}
+		if !slashCommand.ValidateToken(acceptableTokens...) {
+			w.WriteHeader(http.StatusUnauthorized)
+		}
+	})
 
 	for i, test := range tests {
 		req, err := http.NewRequest(http.MethodPost, serverURL, strings.NewReader(test.body.Encode()))
@@ -91,10 +87,9 @@ func TestSlash_ServeHTTP(t *testing.T) {
 		if resp.StatusCode != test.wantStatusCode {
 			t.Errorf("%d: Got status code %d, want %d", i, resp.StatusCode, test.wantStatusCode)
 		}
-		if !reflect.DeepEqual(h.gotParams, test.wantParams) {
-			t.Errorf("%d: Got params %#v, want %#v", i, h.gotParams, test.wantParams)
+		if !reflect.DeepEqual(slashCommand, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, slashCommand, test.wantParams)
 		}
 		resp.Body.Close()
-		h = newSlashHandler()
 	}
 }
