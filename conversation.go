@@ -223,12 +223,12 @@ func (api *Client) RenameConversationContext(ctx context.Context, channelID, cha
 }
 
 // InviteUsersToConversation invites users to a channel
-func (api *Client) InviteUsersToConversation(channelID string, users []string) (*Channel, error) {
-	return api.InviteUsersToConversationContext(context.Background(), channelID, users)
+func (api *Client) InviteUsersToConversation(channelID string, users ...string) (*Channel, error) {
+	return api.InviteUsersToConversationContext(context.Background(), channelID, users...)
 }
 
 // InviteUsersToConversationContext invites users to a channel with a custom context
-func (api *Client) InviteUsersToConversationContext(ctx context.Context, channelID string, users []string) (*Channel, error) {
+func (api *Client) InviteUsersToConversationContext(ctx context.Context, channelID string, users ...string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.token},
 		"channel": {channelID},
@@ -272,12 +272,12 @@ func (api *Client) KickUserFromConversationContext(ctx context.Context, channelI
 }
 
 // CloseConversation closes a direct message or multi-person direct message
-func (api *Client) CloseConversation(channelID string) (bool, bool, error) {
+func (api *Client) CloseConversation(channelID string) (noOp bool, alreadyClosed bool, err error) {
 	return api.CloseConversationContext(context.Background(), channelID)
 }
 
 // CloseConversationContext closes a direct message or multi-person direct message with a custom context
-func (api *Client) CloseConversationContext(ctx context.Context, channelID string) (bool, bool, error) {
+func (api *Client) CloseConversationContext(ctx context.Context, channelID string) (noOp bool, alreadyClosed bool, err error) {
 	values := url.Values{
 		"token":   {api.token},
 		"channel": {channelID},
@@ -288,7 +288,7 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 		AlreadyClosed bool `json:"already_closed"`
 	}{}
 
-	err := post(ctx, api.httpclient, "conversations.close", values, &response, api.debug)
+	err = post(ctx, api.httpclient, "conversations.close", values, &response, api.debug)
 	if err != nil {
 		return false, false, err
 	}
@@ -375,12 +375,12 @@ type GetConversationRepliesParameters struct {
 }
 
 // GetConversationReplies retrieves a thread of messages posted to a conversation
-func (api *Client) GetConversationReplies(params *GetConversationRepliesParameters) ([]Message, bool, string, error) {
+func (api *Client) GetConversationReplies(params *GetConversationRepliesParameters) (msgs []Message, hasMore bool, nextCursor string, err error) {
 	return api.GetConversationRepliesContext(context.Background(), params)
 }
 
 // GetConversationRepliesContext retrieves a thread of messages posted to a conversation with a custom context
-func (api *Client) GetConversationRepliesContext(ctx context.Context, params *GetConversationRepliesParameters) ([]Message, bool, string, error) {
+func (api *Client) GetConversationRepliesContext(ctx context.Context, params *GetConversationRepliesParameters) (msgs []Message, hasMore bool, nextCursor string, err error) {
 	values := url.Values{
 		"token":   {api.token},
 		"channel": {params.ChannelID},
@@ -412,7 +412,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		Messages []Message `json:"messages"`
 	}{}
 
-	err := post(ctx, api.httpclient, "conversations.replies", values, &response, api.debug)
+	err = post(ctx, api.httpclient, "conversations.replies", values, &response, api.debug)
 	if err != nil {
 		return nil, false, "", err
 	}
@@ -430,12 +430,12 @@ type GetConversationsParameters struct {
 }
 
 // GetConversations returns the list of channels in a Slack team
-func (api *Client) GetConversations(params *GetConversationsParameters) ([]Channel, string, error) {
+func (api *Client) GetConversations(params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
 	return api.GetConversationsContext(context.Background(), params)
 }
 
 // GetConversationsContext returns the list of channels in a Slack team with a custom context
-func (api *Client) GetConversationsContext(ctx context.Context, params *GetConversationsParameters) ([]Channel, string, error) {
+func (api *Client) GetConversationsContext(ctx context.Context, params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
 	values := url.Values{
 		"token":            {api.token},
 		"exclude_archived": {params.ExcludeArchived},
@@ -454,7 +454,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 		ResponseMetaData responseMetaData `json:"response_metadata"`
 		SlackResponse
 	}{}
-	err := post(ctx, api.httpclient, "conversations.list", values, &response, api.debug)
+	err = post(ctx, api.httpclient, "conversations.list", values, &response, api.debug)
 	if err != nil {
 		return nil, "", err
 	}

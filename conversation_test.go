@@ -342,7 +342,7 @@ func TestInviteUsersToConversation(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	users := []string{"UXXXXXXX1", "UXXXXXXX2"}
-	channel, err := api.InviteUsersToConversation("CXXXXXXXX", users)
+	channel, err := api.InviteUsersToConversation("CXXXXXXXX", users...)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
