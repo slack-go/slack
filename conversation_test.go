@@ -335,3 +335,238 @@ func TestRenameConversation(t *testing.T) {
 		t.Fatalf(`channelName = '%s', want '%s'`, channel.Name, inputChannel.Name)
 	}
 }
+
+func TestInviteUsersToConversation(t *testing.T) {
+	http.HandleFunc("/conversations.invite", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	users := []string{"UXXXXXXX1", "UXXXXXXX2"}
+	channel, err := api.InviteUsersToConversation("CXXXXXXXX", users...)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}
+
+func TestKickUserFromConversation(t *testing.T) {
+	http.HandleFunc("/conversations.kick", okJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	err := api.KickUserFromConversation("CXXXXXXXX", "UXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func closeConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NoOp          bool `json:"no_op"`
+		AlreadyClosed bool `json:"already_closed"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestCloseConversation(t *testing.T) {
+	http.HandleFunc("/conversations.close", closeConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, _, err := api.CloseConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestCreateConversation(t *testing.T) {
+	http.HandleFunc("/conversations.create", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	channel, err := api.CreateConversation("CXXXXXXXX", false)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}
+
+func TestGetConversationInfo(t *testing.T) {
+	http.HandleFunc("/conversations.info", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	channel, err := api.GetConversationInfo("CXXXXXXXX", false)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel == nil {
+		t.Error("channel should not be nil")
+		return
+	}
+}
+
+func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NotInChannel bool `json:"not_in_channel"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestLeaveConversation(t *testing.T) {
+	http.HandleFunc("/conversations.leave", leaveConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, err := api.LeaveConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		HasMore          bool `json:"has_more"`
+		ResponseMetaData struct {
+			NextCursor string `json:"next_cursor"`
+		} `json:"response_metadata"`
+		Messages []Message `json:"messages"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Messages:      []Message{}})
+	rw.Write(response)
+}
+
+func TestGetConversationReplies(t *testing.T) {
+	http.HandleFunc("/conversations.replies", getConversationRepliesHander)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationRepliesParameters{
+		ChannelID: "CXXXXXXXX",
+		Timestamp: "1234567890.123456",
+	}
+	_, _, _, err := api.GetConversationReplies(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		ResponseMetaData struct {
+			NextCursor string `json:"next_cursor"`
+		} `json:"response_metadata"`
+		Channels []Channel `json:"channels"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Channels:      []Channel{}})
+	rw.Write(response)
+}
+
+func TestGetConversations(t *testing.T) {
+	http.HandleFunc("/conversations.list", getConversationsHander)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationsParameters{}
+	_, _, err := api.GetConversations(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func openConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		NoOp        bool     `json:"no_op"`
+		AlreadyOpen bool     `json:"already_open"`
+		Channel     *Channel `json:"channel"`
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestOpenConversation(t *testing.T) {
+	http.HandleFunc("/conversations.open", openConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := OpenConversationParameters{ChannelID: "CXXXXXXXX"}
+	_, _, _, err := api.OpenConversation(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func joinConversationHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Channel          *Channel `json:"channel"`
+		Warning          string   `json:"warning"`
+		ResponseMetaData *struct {
+			Warnings []string `json:"warnings"`
+		} `json:"response_metadata"`
+		SlackResponse
+	}{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestJoinConversation(t *testing.T) {
+	http.HandleFunc("/conversations.join", joinConversationHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	_, _, _, err := api.JoinConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func getConversationHistoryHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(GetConversationHistoryResponse{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestGetConversationHistory(t *testing.T) {
+	http.HandleFunc("/conversations.history", getConversationHistoryHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetConversationHistoryParameters{ChannelID: "CXXXXXXXX"}
+	_, err := api.GetConversationHistory(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
