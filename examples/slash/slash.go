@@ -31,7 +31,7 @@ func main() {
 
 		switch s.Command {
 		case "/echo":
-			params := &slack.PostMessageParameters{Text: s.Text}
+			params := &slack.Msg{Text: s.Text}
 			b, err := json.Marshal(params)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
