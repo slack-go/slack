@@ -2,6 +2,8 @@ package slack
 
 import (
 	"encoding/json"
+	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -197,4 +199,139 @@ func TestCreateSimpleIM(t *testing.T) {
 	im.UnreadCount = 0
 	im.UnreadCountDisplay = 0
 	assertSimpleIM(t, im)
+}
+
+func getTestMembers() []string {
+	return []string{"test"}
+}
+
+func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		Members          []string         `json:"members"`
+		ResponseMetaData responseMetaData `json:"response_metadata"`
+	}{
+		SlackResponse:    SlackResponse{Ok: true},
+		Members:          getTestMembers(),
+		ResponseMetaData: responseMetaData{NextCursor: ""},
+	})
+	rw.Write(response)
+}
+
+func TestGetUsersInConversation(t *testing.T) {
+	http.HandleFunc("/conversations.members", getUsersInConversation)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := GetUsersInConversationParameters{
+		ChannelID: "CXXXXXXXX",
+	}
+
+	expectedMembers := getTestMembers()
+
+	members, _, err := api.GetUsersInConversation(&params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(expectedMembers, members) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestArchiveConversation(t *testing.T) {
+	http.HandleFunc("/conversations.archive", okJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	err := api.ArchiveConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestUnArchiveConversation(t *testing.T) {
+	http.HandleFunc("/conversations.unarchive", okJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	err := api.UnArchiveConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func getTestChannel() *Channel {
+	return &Channel{
+		groupConversation: groupConversation{
+			Topic: Topic{
+				Value: "response topic",
+			},
+			Purpose: Purpose{
+				Value: "response purpose",
+			},
+		}}
+}
+
+func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		Channel *Channel `json:"channel"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		Channel:       getTestChannel(),
+	})
+	rw.Write(response)
+}
+
+func TestSetTopicOfConversation(t *testing.T) {
+	http.HandleFunc("/conversations.setTopic", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	inputChannel := getTestChannel()
+	channel, err := api.SetTopicOfConversation("CXXXXXXXX", inputChannel.Topic.Value)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel.Topic.Value != inputChannel.Topic.Value {
+		t.Fatalf(`topic = '%s', want '%s'`, channel.Topic.Value, inputChannel.Topic.Value)
+	}
+}
+
+func TestSetPurposeOfConversation(t *testing.T) {
+	http.HandleFunc("/conversations.setPurpose", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	inputChannel := getTestChannel()
+	channel, err := api.SetPurposeOfConversation("CXXXXXXXX", inputChannel.Purpose.Value)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel.Purpose.Value != inputChannel.Purpose.Value {
+		t.Fatalf(`purpose = '%s', want '%s'`, channel.Purpose.Value, inputChannel.Purpose.Value)
+	}
+}
+
+func TestRenameConversation(t *testing.T) {
+	http.HandleFunc("/conversations.rename", okChannelJsonHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	inputChannel := getTestChannel()
+	channel, err := api.RenameConversation("CXXXXXXXX", inputChannel.Name)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if channel.Name != inputChannel.Name {
+		t.Fatalf(`channelName = '%s', want '%s'`, channel.Name, inputChannel.Name)
+	}
 }

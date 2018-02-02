@@ -4,8 +4,47 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"testing"
 )
+
+func getTestUserProfile() UserProfile {
+	return UserProfile{
+		StatusText:            "testStatus",
+		StatusEmoji:           ":construction:",
+		RealName:              "Test Real Name",
+		RealNameNormalized:    "Test Real Name Normalized",
+		DisplayName:           "Test Display Name",
+		DisplayNameNormalized: "Test Display Name Normalized",
+		Email:    "test@test.com",
+		Image24:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
+		Image32:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
+		Image48:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
+		Image72:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
+		Image192: "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+	}
+}
+
+func getTestUser() User {
+	return User{
+		ID:                "UXXXXXXXX",
+		Name:              "Test User",
+		Deleted:           false,
+		Color:             "9f69e7",
+		RealName:          "testuser",
+		TZ:                "America/Los_Angeles",
+		TZLabel:           "Pacific Daylight Time",
+		TZOffset:          -25200,
+		Profile:           getTestUserProfile(),
+		IsBot:             false,
+		IsAdmin:           false,
+		IsOwner:           false,
+		IsPrimaryOwner:    false,
+		IsRestricted:      false,
+		IsUltraRestricted: false,
+		Has2FA:            false,
+	}
+}
 
 func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
@@ -36,6 +75,18 @@ func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
     "image_original": "https:\/\/s3-us-west-2.amazonaws.com\/slack-files2\/avatars\/2016-10-18\/92962080834_ef14c1469fc0741caea1_original.jpg"
   }
 }`)
+	rw.Write(response)
+}
+
+func getUserByEmail(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Ok   bool
+		User User
+	}{
+		Ok:   true,
+		User: getTestUser(),
+	})
 	rw.Write(response)
 }
 
@@ -126,6 +177,24 @@ func TestGetUserIdentity(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if identity.Team.Image34 == "" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUserByEmail(t *testing.T) {
+	http.HandleFunc("/users.lookupByEmail", getUserByEmail)
+	expectedUser := getTestUser()
+
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	user, err := api.GetUserByEmail("test@test.com")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(expectedUser, *user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
