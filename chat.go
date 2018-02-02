@@ -55,7 +55,7 @@ type PostMessageParameters struct {
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
 		Username:        DEFAULT_MESSAGE_USERNAME,
-    User:            DEFAULT_MESSAGE_USERNAME,
+		User:            DEFAULT_MESSAGE_USERNAME,
 		AsUser:          DEFAULT_MESSAGE_ASUSER,
 		Parse:           DEFAULT_MESSAGE_PARSE,
 		ThreadTimestamp: DEFAULT_MESSAGE_THREAD_TIMESTAMP,
