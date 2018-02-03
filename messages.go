@@ -85,6 +85,10 @@ type Msg struct {
 
 	// reactions
 	Reactions []ItemReaction `json:"reactions,omitempty"`
+
+	// slash commands and interactive messages
+	ResponseType    string `json:"response_type,omitempty"`
+	ReplaceOriginal bool   `json:"replace_original,omitempty"`
 }
 
 // Icon is used for bot messages
