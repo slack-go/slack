@@ -263,14 +263,21 @@ func (api *Client) DeleteFileComment(commentID, fileID string) error {
 }
 
 // DeleteFileCommentContext deletes a file's comment with a custom context
-func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, commentID string) error {
+func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, commentID string) (err error) {
+	if fileID == "" || commentID == "" {
+		return errors.New("received empty parameters")
+	}
+
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 		"file":  {fileID},
 		"id":    {commentID},
 	}
-	_, err := fileRequest(ctx, "files.comments.delete", values, api.debug)
-	return err
+	if _, err = fileRequest(ctx, api.httpclient, "files.comments.delete", values, api.debug); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // DeleteFile deletes a file
