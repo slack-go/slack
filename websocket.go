@@ -44,6 +44,10 @@ type RTM struct {
 	// rtm.start to connect to Slack, otherwise it will use
 	// rtm.connect
 	useRTMStart bool
+
+	// dialer is a gorilla/websocket Dialer. If nil, use the default
+	// Dialer.
+	dialer *websocket.Dialer
 }
 
 // RTMOptions allows configuration of various options available for RTM messaging
