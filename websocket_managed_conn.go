@@ -3,7 +3,6 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"time"
@@ -286,13 +285,8 @@ func (rtm *RTM) ping() error {
 func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
-	if err == io.EOF {
-		// EOF's don't seem to signify a failed connection so instead we ignore
-		// them here and detect a failed connection upon attempting to send a
-		// 'PING' message
-
-		// trigger a 'PING' to detect pontential websocket disconnect
-		rtm.forcePing <- true
+	if websocket.IsCloseError(err, websocket.CloseAbnormalClosure) {
+		rtm.killChannel <- false
 		return
 	} else if err != nil {
 		rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{
