@@ -70,6 +70,25 @@ func NewPostMessageParameters() PostMessageParameters {
 	}
 }
 
+// UpdateMessageParameters contains all the parameters necessary (including the optional ones) for a UpdateMessage() request
+type UpdateMessageParameters struct {
+	Text        string       `json:"text"`
+	Attachments []Attachment `json:"attachments"`
+	AsUser      bool         `json:"as_user"`
+	LinkNames   int          `json:"link_names"`
+	Parse       string       `json:"parse"`
+}
+
+// NewUpdateMessageParameters provides an instance of UpdateMessageParameters with all the sane default values set
+func NewUpdateMessageParameters() UpdateMessageParameters {
+	return UpdateMessageParameters{
+		AsUser:      DEFAULT_MESSAGE_ASUSER,
+		Parse:       DEFAULT_MESSAGE_PARSE,
+		LinkNames:   DEFAULT_MESSAGE_LINK_NAMES,
+		Attachments: nil,
+	}
+}
+
 // DeleteMessage deletes a message in a channel
 func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(context.Background(), channel, MsgOptionDelete(messageTimestamp))
@@ -141,13 +160,20 @@ func (api *Client) PostEphemeralContext(ctx context.Context, channel, userID str
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channel, timestamp, text string) (string, string, string, error) {
-	return api.UpdateMessageContext(context.Background(), channel, timestamp, text)
+func (api *Client) UpdateMessage(channel, timestamp string, params UpdateMessageParameters) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.UpdateMessageContext(
+		context.Background(),
+		channel,
+		timestamp,
+		MsgOptionUpdateMessageParameters(params),
+	)
+	return respChannel, respTimestamp, err
 }
 
 // UpdateMessageContext updates a message in a channel
-func (api *Client) UpdateMessageContext(ctx context.Context, channel, timestamp, text string) (string, string, string, error) {
-	return api.SendMessageContext(ctx, channel, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
+func (api *Client) UpdateMessageContext(ctx context.Context, channel, timestamp string, options ...MsgOption) (string, string, string, error) {
+	options = append(options, MsgOptionUpdate(timestamp))
+	return api.SendMessageContext(ctx, channel, options...)
 }
 
 // SendMessage more flexible method for configuring messages.
@@ -377,6 +403,27 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 		if params.ReplyBroadcast != DEFAULT_MESSAGE_REPLY_BROADCAST {
 			config.values.Set("reply_broadcast", "true")
+		}
+
+		return nil
+	}
+}
+
+// MsgOptionPostMessageParameters maintain backwards compatibility.
+func MsgOptionUpdateMessageParameters(params UpdateMessageParameters) MsgOption {
+	return func(config *sendConfig) error {
+
+		MsgOptionAsUser(params.AsUser)(config)
+
+		MsgOptionText(params.Text, true)(config)
+
+		MsgOptionAttachments(params.Attachments...)(config)
+
+		if params.Parse != DEFAULT_MESSAGE_PARSE {
+			config.values.Set("parse", string(params.Parse))
+		}
+		if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+			config.values.Set("link_names", "1")
 		}
 
 		return nil
