@@ -94,7 +94,7 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 		err := api.DeleteFileComment(test.body["id"][0], test.body["file"][0])
 
 		if test.expectError == false && err != nil {
-			log.Fatalf("Unexpected error: %s in test", err, test.title)
+			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
 		} else if test.expectError == true && err == nil {
 			log.Fatalf("Expected error but got none")
 		}
