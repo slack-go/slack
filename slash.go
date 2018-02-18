@@ -9,8 +9,8 @@ type SlashCommand struct {
 	Token          string `json:"token"`
 	TeamID         string `json:"team_id"`
 	TeamDomain     string `json:"team_domain"`
-	EnterpriseID   string `json:"enterprise_id"`
-	EnterpriseName string `json:"enterprise_name"`
+	EnterpriseID   string `json:"enterprise_id,omitempty"`
+	EnterpriseName string `json:"enterprise_name,omitempty"`
 	ChannelID      string `json:"channel_id"`
 	ChannelName    string `json:"channel_name"`
 	UserID         string `json:"user_id"`
