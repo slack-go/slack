@@ -393,7 +393,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		values.Add("latest", params.Latest)
 	}
 	if params.Limit != 0 {
-		values.Add("limit", string(params.Limit))
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Oldest != "" {
 		values.Add("oldest", params.Oldest)
