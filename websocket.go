@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"net"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -36,7 +37,7 @@ type RTM struct {
 	// Client is the main API, embedded
 	Client
 	websocketURL string
-
+	dialer       *net.Dialer
 	// UserDetails upon connection
 	info *Info
 
