@@ -1,6 +1,8 @@
 package slack
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/url"
@@ -94,7 +96,7 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 		err := api.DeleteFileComment(test.body["id"][0], test.body["file"][0])
 
 		if test.expectError == false && err != nil {
-			log.Fatalf("Unexpected error: %s in test", err, test.title)
+			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
 		} else if test.expectError == true && err == nil {
 			log.Fatalf("Expected error but got none")
 		}
@@ -102,5 +104,41 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 		if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
 			log.Fatalf("%s: Got params [%#v]\nBut received [%#v]\n", test.title, fch.gotParams, test.wantParams)
 		}
+	}
+}
+
+func authTestHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(authTestResponseFull{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func uploadFileHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(fileResponseFull{
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestUploadFile(t *testing.T) {
+	http.HandleFunc("/auth.test", authTestHandler)
+	http.HandleFunc("/files.upload", uploadFileHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	params := FileUploadParameters{
+		Filename: "test.txt", Content: "test content",
+		Channels: []string{"CXXXXXXXX"}}
+	if _, err := api.UploadFile(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+
+	reader := bytes.NewBufferString("test reader")
+	params = FileUploadParameters{
+		Filename: "test.txt", Reader: reader,
+		Channels: []string{"CXXXXXXXX"}}
+	if _, err := api.UploadFile(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
 	}
 }
