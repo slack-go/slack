@@ -83,7 +83,7 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 		values.Add("cursor", params.Cursor)
 	}
 	if params.Limit != 0 {
-		values.Add("limit", string(params.Limit))
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	response := struct {
 		Members          []string         `json:"members"`
@@ -444,7 +444,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 		values.Add("cursor", params.Cursor)
 	}
 	if params.Limit != 0 {
-		values.Add("limit", string(params.Limit))
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Types != nil {
 		values.Add("types", strings.Join(params.Types, ","))
@@ -573,7 +573,7 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 		values.Add("latest", params.Latest)
 	}
 	if params.Limit != 0 {
-		values.Add("limit", string(params.Limit))
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Oldest != "" {
 		values.Add("oldest", params.Oldest)
