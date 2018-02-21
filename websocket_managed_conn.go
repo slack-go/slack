@@ -286,26 +286,27 @@ func (rtm *RTM) ping() error {
 func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
-	if err == io.EOF {
+	switch {
+	case err == io.EOF:
 		// EOF's don't seem to signify a failed connection so instead we ignore
 		// them here and detect a failed connection upon attempting to send a
 		// 'PING' message
 
-		// trigger a 'PING' to detect pontential websocket disconnect
+		// trigger a 'PING' to detect potential websocket disconnect
 		rtm.forcePing <- true
-		return
-	} else if err != nil {
+	case websocket.IsCloseError(err, websocket.CloseAbnormalClosure):
+		rtm.killChannel <- false
+	case err != nil:
 		rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{
 			ErrorObj: err,
 		}}
 		// force a ping here too?
-		return
-	} else if len(event) == 0 {
+	case len(event) == 0:
 		rtm.Debugln("Received empty event")
-		return
+	default:
+		rtm.Debugln("Incoming Event:", string(event[:]))
+		rtm.rawEvents <- event
 	}
-	rtm.Debugln("Incoming Event:", string(event[:]))
-	rtm.rawEvents <- event
 }
 
 // handleRawEvent takes a raw JSON message received from the slack websocket
