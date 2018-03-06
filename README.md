@@ -9,17 +9,15 @@ a fully managed way.
 
 ## Change log
 
-### v0.1.0 - May 28, 2017
+### v0.2.0 - Feb 10, 2018
 
-This is released before adding context support.
-As the used context package is the one from Go 1.7 this will be the last
-compatible with Go < 1.7.
+Release adds a bunch of functionality and improvements, mainly to give people a recent version to vendor against.
 
-Please check [0.1.0](https://github.com/nlopes/slack/releases/tag/v0.1.0)
+Please check [0.2.0](https://github.com/nlopes/slack/releases/tag/v0.2.0)
 
 ### CHANGELOG.md
 
-As of this version a [CHANGELOG.md](https://github.com/nlopes/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
+ [CHANGELOG.md](https://github.com/nlopes/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
 
 ## Installing
 
