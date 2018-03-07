@@ -37,17 +37,18 @@ type CtxMessage struct {
 }
 
 type SearchMessage struct {
-	Type      string     `json:"type"`
-	Channel   CtxChannel `json:"channel"`
-	User      string     `json:"user"`
-	Username  string     `json:"username"`
-	Timestamp string     `json:"ts"`
-	Text      string     `json:"text"`
-	Permalink string     `json:"permalink"`
-	Previous  CtxMessage `json:"previous"`
-	Previous2 CtxMessage `json:"previous_2"`
-	Next      CtxMessage `json:"next"`
-	Next2     CtxMessage `json:"next_2"`
+	Type        string       `json:"type"`
+	Channel     CtxChannel   `json:"channel"`
+	User        string       `json:"user"`
+	Username    string       `json:"username"`
+	Timestamp   string       `json:"ts"`
+	Text        string       `json:"text"`
+	Permalink   string       `json:"permalink"`
+	Attachments []Attachment `json:"attachments"`
+	Previous    CtxMessage   `json:"previous"`
+	Previous2   CtxMessage   `json:"previous_2"`
+	Next        CtxMessage   `json:"next"`
+	Next2       CtxMessage   `json:"next_2"`
 }
 
 type SearchMessages struct {
