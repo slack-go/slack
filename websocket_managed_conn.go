@@ -291,12 +291,16 @@ func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 	switch {
-	// ReadJSON calls NextReader which states:
-	// Applications must break out of the application's read loop when this method
-	// returns a non-nil error value. Errors returned from this method are
-	// permanent. Once this method returns a non-nil error, all subsequent calls to
-	// this method return the same error.
+	case err == io.ErrUnexpectedEOF:
+		// EOF's don't seem to signify a failed connection so instead we ignore
+		// them here and detect a failed connection upon attempting to send a
+		// 'PING' message
+
+		// trigger a 'PING' to detect potential websocket disconnect
+		rtm.forcePing <- true
 	case err != nil:
+		// All other errors from ReadJSON come from NextReader, and should
+		// kill the read loop and force a reconnect.
 		rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{
 			ErrorObj: err,
 		}}
