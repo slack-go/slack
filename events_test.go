@@ -14,7 +14,7 @@ func TestParseEvent(t *testing.T) {
 				"team_id": "TXXXXXXXX",
 				"api_app_id": "AXXXXXXXXX",
 				"event": {
-								"type": "name_of_event",
+								"type": "app_mention",
 								"event_ts": "1234567890.123456",
 								"user": "UXXXXXXX1"
 				},
@@ -27,12 +27,13 @@ func TestParseEvent(t *testing.T) {
 	c := slack.New("token")
 	e, err := c.ParseEvent(body)
 	if err != nil {
+		fmt.Println(err)
 		t.Fail()
 	}
 	if e.Type != "event_callback" {
 		t.Fail()
 	}
-	if e.Event.Type != "name_of_event" {
+	if e.Event.Type != "app_mention" {
 		t.Fail()
 	}
 	fmt.Println(e)
