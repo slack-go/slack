@@ -30,7 +30,7 @@ func TestParseEvent(t *testing.T) {
 		fmt.Println(err)
 		t.Fail()
 	}
-	if e.Type != "event_callback" {
+	if e.Type != slack.CallbackEventType {
 		t.Fail()
 	}
 	if e.Event.Type != "app_mention" {
