@@ -2,23 +2,39 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"reflect"
 )
 
 // EventsAPIEventType is the type of EventsAPI event recieved.
 type EventsAPIEventType string
 
 const (
-	// CallbackEventType is the "outer" event of an EventsAPI event.
-	CallbackEventType EventsAPIEventType = "event_callback"
+	// CallbackEvent is the "outer" event of an EventsAPI event.
+	CallbackEvent EventsAPIEventType = "event_callback"
 	// URLVerification is an event used when configuring your EventsAPI app
 	URLVerification EventsAPIEventType = "url_verification"
 )
 
-// EventsAPIEvent is an EventsAPI catch-all
+// EventsAPIEventMap maps Event API events to their corresponding struct
+// implementations. The structs should be instances of the unmarshalling
+// target for the matching event type.
+var EventsAPIEventMap = map[EventsAPIEventType]interface{}{
+	CallbackEvent:   EventsAPICallbackEvent{},
+	URLVerification: EventsAPIURLVerificationEvent{},
+}
+
+// EventsAPIEvent is the base EventsAPIEvent
 type EventsAPIEvent struct {
-	Type EventsAPIEventType `json:"type"`
+	Type       EventsAPIEventType `json:"type"`
+	Data       interface{}
+	InnerEvent EventsAPIInnerEvent
+}
+
+// EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.
+type EventsAPIInnerEvent struct {
+	Type string `json:"type"`
+	Data interface{}
 }
 
 // EventsAPIURLVerificationEvent recieved when configuring a EventsAPI driven app
@@ -28,13 +44,13 @@ type EventsAPIURLVerificationEvent struct {
 	Type      EventsAPIEventType `json:"type"`
 }
 
-// EventsAPICallbackEvent is the
+// EventsAPICallbackEvent is the main EventsAPI event.
 type EventsAPICallbackEvent struct {
 	Type        EventsAPIEventType `json:"type"`
 	Token       string             `json:"token"`
 	TeamID      string             `json:"team_id"`
 	APIAppID    string             `json:"api_app_id"`
-	Event       Event              `json:"event"`
+	InnerEvent  *json.RawMessage   `json:"event"`
 	AuthedUsers []string           `json:"authed_users"`
 	EventID     string             `json:"event_id"`
 	EventTime   int                `json:"event_time"`
@@ -50,31 +66,76 @@ type AppMentionEvent struct {
 	EventTimeStamp string `json:"event_ts"`
 }
 
-// ParseEvent parses an EventsAPI event string.
-func (api *Client) ParseEvent(event string) (EventsAPICallbackEvent, error) {
-	var e EventsAPIEvent
-	var cE EventsAPICallbackEvent
-
-	err := json.Unmarshal([]byte(event), &e)
-	// Currenlty only supporting callback events
-	if e.Type != CallbackEventType || err != nil {
-		if err == nil {
-			err = errors.New("not implemented")
-		}
-		return EventsAPICallbackEvent{}, err
-	}
-	err = json.Unmarshal([]byte(event), &cE)
+// ParseOuterEvent parses the outter event of a EventsAPI event.
+func ParseOuterEvent(rawEvent json.RawMessage) EventsAPIEvent {
+	e := &Event{}
+	err := json.Unmarshal(rawEvent, e)
 	if err != nil {
-		api.Debugf("ParseEvent Error, could not unmarshall event: %s\n", event)
-		err := fmt.Errorf("ParseEvent Error, could not unmarshall event: %s", event)
-		return EventsAPICallbackEvent{}, err
+		return EventsAPIEvent{
+			"unmarshalling_error",
+			&UnmarshallingErrorEvent{},
+			EventsAPIInnerEvent{},
+		}
 	}
-	typeStr := cE.Event.Type
-	_, exists := EventMapping[cE.Event.Type]
-	if !exists {
-		api.Debugf("ParseEvent Error, received unmapped event %q: %s\n", typeStr, cE.Event)
-		err := fmt.Errorf("ParseEvent Error: Received unmapped event %q: %s", typeStr, cE.Event)
-		return EventsAPICallbackEvent{}, err
+	if e.Type == string(CallbackEvent) {
+		cbEvent := &EventsAPICallbackEvent{}
+		err = json.Unmarshal(rawEvent, cbEvent)
+		if err != nil {
+			fmt.Println(err)
+		}
+		iE := &Event{}
+		innerE := cbEvent.InnerEvent
+		err = json.Unmarshal(*innerE, iE)
+		fmt.Println(iE.Type)
+		v, exists := EventMapping[iE.Type]
+		if !exists {
+			fmt.Println("lol")
+		}
+		t := reflect.TypeOf(v)
+		recvEvent := reflect.New(t).Interface()
+		err = json.Unmarshal(*innerE, recvEvent)
+		if err != nil {
+			return EventsAPIEvent{
+				"unmarshalling_error",
+				&UnmarshallingErrorEvent{err},
+				EventsAPIInnerEvent{},
+			}
+		}
+		return EventsAPIEvent{
+			EventsAPIEventType(e.Type),
+			cbEvent,
+			EventsAPIInnerEvent{iE.Type, recvEvent},
+		}
 	}
-	return cE, nil
+	// must be a urlverification event
+	urlVerificationEvent := &EventsAPIURLVerificationEvent{}
+	err = json.Unmarshal(rawEvent, urlVerificationEvent)
+	// handle error
+	return EventsAPIEvent{
+		EventsAPIEventType(e.Type),
+		urlVerificationEvent,
+		EventsAPIInnerEvent{},
+	}
 }
+
+// func ParseInnerEvent(e EventsAPIInnerEvent) {
+// 	v, exists := EventMapping[e.Type]
+// 	if !exists {
+// 		fmt.Println("does not exist")
+// 	}
+// 	t := reflect.TypeOf(v)
+// 	reflect.NewAt(t, &e)
+// }
+
+// ParseEvent parses an EventsAPI event string and returns the inner event
+// func (api *Client) ParseInnerEvent(event json.RawMessage) (EventsAPIInnerEvent, error) {
+// 	var e EventsAPIEvent
+// 	err := json.Unmarshal(event, &e)
+// 	if err != nil {
+// 		fmt.Println("unmarshalling err")
+// 	}
+// 	v, exists := EventMapping[e.Type]
+// 	if !exists {
+// 		fmt.Println()
+// 	}
+// }
