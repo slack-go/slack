@@ -140,7 +140,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 }
 
 // ParseEventsAPIEvent parses the outter event of a EventsAPI event.
-func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) EventsAPIEvent {
+func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) (EventsAPIEvent, error) {
 	e := parseOuterEvent(rawEvent)
 	if e.Type == CallbackEvent {
 		cbEvent := e.Data.(*EventsAPICallbackEvent)
@@ -152,9 +152,9 @@ func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) EventsAPIEvent 
 				"unmarshalling_error",
 				&UnmarshallingErrorEvent{err},
 				EventsAPIInnerEvent{},
-			}
+			}, err
 		}
-		return innerEvent
+		return innerEvent, nil
 	}
 	urlVerificationEvent := &EventsAPIURLVerificationEvent{}
 	err := json.Unmarshal(rawEvent, urlVerificationEvent)
@@ -163,11 +163,11 @@ func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) EventsAPIEvent 
 			"unmarshalling_error",
 			&UnmarshallingErrorEvent{err},
 			EventsAPIInnerEvent{},
-		}
+		}, err
 	}
 	return EventsAPIEvent{
 		e.Type,
 		urlVerificationEvent,
 		EventsAPIInnerEvent{},
-	}
+	}, nil
 }
