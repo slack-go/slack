@@ -11,6 +11,8 @@ const (
 	CallbackEvent = "event_callback"
 	// URLVerification is an event used when configuring your EventsAPI app
 	URLVerification = "url_verification"
+	// DoesNotExist is an inner event that was not found in the EventMapping
+	DoesNotExist = "DNE"
 )
 
 // EventsAPIEventMap maps Event API events to their corresponding struct
@@ -69,7 +71,7 @@ func parseOuterEvent(rawE json.RawMessage) EventsAPIEvent {
 	if err != nil {
 		return EventsAPIEvent{
 			"unmarshalling_error",
-			&UnmarshallingErrorEvent{},
+			&UnmarshallingErrorEvent{err},
 			EventsAPIInnerEvent{},
 		}
 	}
@@ -77,7 +79,11 @@ func parseOuterEvent(rawE json.RawMessage) EventsAPIEvent {
 		cbEvent := &EventsAPICallbackEvent{}
 		err = json.Unmarshal(rawE, cbEvent)
 		if err != nil {
-			fmt.Println(err)
+			return EventsAPIEvent{
+				"unmarshalling_error",
+				&UnmarshallingErrorEvent{err},
+				EventsAPIInnerEvent{},
+			}
 		}
 		return EventsAPIEvent{
 			e.Type,
@@ -102,11 +108,19 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 	rawInnerJSON := e.InnerEvent
 	err := json.Unmarshal(*rawInnerJSON, iE)
 	if err != nil {
-		fmt.Println("FAIL!")
+		return EventsAPIEvent{
+			"unmarshalling_error",
+			&UnmarshallingErrorEvent{err},
+			EventsAPIInnerEvent{},
+		}
 	}
 	v, exists := EventMapping[iE.Type]
 	if !exists {
-		fmt.Println("lol!")
+		return EventsAPIEvent{
+			DoesNotExist,
+			nil,
+			EventsAPIInnerEvent{},
+		}
 	}
 	t := reflect.TypeOf(v)
 	recvEvent := reflect.New(t).Interface()
@@ -126,16 +140,30 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 }
 
 // ParseEventsAPIEvent parses the outter event of a EventsAPI event.
-func ParseEventsAPIEvent(rawEvent json.RawMessage) EventsAPIEvent {
+func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) EventsAPIEvent {
 	e := parseOuterEvent(rawEvent)
 	if e.Type == CallbackEvent {
 		cbEvent := e.Data.(*EventsAPICallbackEvent)
-		return parseInnerEvent(cbEvent)
+		innerEvent := parseInnerEvent(cbEvent)
+		if innerEvent.Type == DoesNotExist {
+			api.Debugf("EventsAPI Error, received unmapped inner event: %s", innerEvent.Type)
+			err := fmt.Errorf("EventsAPI Error: Received unmapped event: %s", innerEvent.Type)
+			return EventsAPIEvent{
+				"unmarshalling_error",
+				&UnmarshallingErrorEvent{err},
+				EventsAPIInnerEvent{},
+			}
+		}
+		return innerEvent
 	}
 	urlVerificationEvent := &EventsAPIURLVerificationEvent{}
 	err := json.Unmarshal(rawEvent, urlVerificationEvent)
 	if err != nil {
-		fmt.Println("ho")
+		return EventsAPIEvent{
+			"unmarshalling_error",
+			&UnmarshallingErrorEvent{err},
+			EventsAPIInnerEvent{},
+		}
 	}
 	return EventsAPIEvent{
 		e.Type,

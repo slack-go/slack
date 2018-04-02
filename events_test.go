@@ -8,6 +8,8 @@ import (
 	"github.com/ACollectionOfAtoms/slack"
 )
 
+var c = slack.New("my-token")
+
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
 			{
@@ -25,7 +27,7 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg := slack.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg := c.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
 	switch ev := msg.Data.(type) {
 	case *slack.EventsAPICallbackEvent:
 		{
@@ -53,7 +55,7 @@ func TestParseURLVerificationEvent(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	msg := slack.ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent))
+	msg := c.ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent))
 	switch ev := msg.Data.(type) {
 	case *slack.EventsAPIURLVerificationEvent:
 		{
@@ -83,7 +85,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg := slack.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg := c.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
 	switch outterEvent := msg.Data.(type) {
 	case *slack.EventsAPICallbackEvent:
 		{
