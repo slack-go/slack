@@ -139,7 +139,9 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 	}
 }
 
-// ParseEventsAPIEvent parses the outter event of a EventsAPI event.
+// ParseEventsAPIEvent parses the outter and inner events (if applicable) of an events
+// api event returning a EventsAPIEvent type. If the event is a url_verification event,
+// the inner event is empty.
 func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) (EventsAPIEvent, error) {
 	e := parseOuterEvent(rawEvent)
 	if e.Type == CallbackEvent {
