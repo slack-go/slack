@@ -37,6 +37,45 @@ func (e *RateLimitedError) Error() string {
 	return fmt.Sprintf("Slack rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
+func getFile(ctx context.Context, client HTTPRequester, url, token string, writer io.Writer) error {
+	body := &bytes.Buffer{}
+
+	req, err := http.NewRequest("GET", url, body)
+	req = req.WithContext(ctx)
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusTooManyRequests {
+		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
+		if err != nil {
+			return err
+		}
+		return &RateLimitedError{time.Duration(retry) * time.Second}
+	}
+
+	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("slack server error: %s", resp.Status)
+	}
+
+	_, err = io.Copy(writer, resp.Body)
+
+	return err
+
+}
+
 func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
 	body := &bytes.Buffer{}
 	wr := multipart.NewWriter(body)

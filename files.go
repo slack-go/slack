@@ -153,6 +153,12 @@ func (api *Client) GetFileInfo(fileID string, count, page int) (*File, []Comment
 	return api.GetFileInfoContext(context.Background(), fileID, count, page)
 }
 
+//GetFile downloads a file
+func (api *Client) GetFile(file *File, writer io.Writer) error {
+	err := getFile(context.Background(), api.httpclient, file.URLPrivateDownload, api.token, writer)
+	return err
+}
+
 // GetFileInfoContext retrieves a file and related comments with a custom context
 func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count, page int) (*File, []Comment, *Paging, error) {
 	values := url.Values{
