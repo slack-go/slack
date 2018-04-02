@@ -25,7 +25,7 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg := slack.ParseOuterEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg := slack.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
 	switch ev := msg.Data.(type) {
 	case *slack.EventsAPICallbackEvent:
 		{
@@ -53,7 +53,7 @@ func TestParseURLVerificationEvent(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	msg := slack.ParseOuterEvent(json.RawMessage(urlVerificationEvent))
+	msg := slack.ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent))
 	switch ev := msg.Data.(type) {
 	case *slack.EventsAPIURLVerificationEvent:
 		{
@@ -83,7 +83,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg := slack.ParseOuterEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg := slack.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
 	switch outterEvent := msg.Data.(type) {
 	case *slack.EventsAPICallbackEvent:
 		{
