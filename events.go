@@ -11,8 +11,6 @@ const (
 	CallbackEvent = "event_callback"
 	// URLVerification is an event used when configuring your EventsAPI app
 	URLVerification = "url_verification"
-	// DoesNotExist is an inner event that was not found in the EventMapping
-	DoesNotExist = "DNE"
 )
 
 // EventsAPIEventMap maps Event API events to their corresponding struct
@@ -57,12 +55,12 @@ type EventsAPICallbackEvent struct {
 
 // AppMentionEvent is an EventsAPI subscribable event.
 type AppMentionEvent struct {
-	Type           string `json:"type"`
-	User           string `json:"user"`
-	Text           string `json:"text"`
-	TimeStamp      string `json:"ts"`
-	Channel        string `json:"channel"`
-	EventTimeStamp string `json:"event_ts"`
+	Type           string      `json:"type"`
+	User           string      `json:"user"`
+	Text           string      `json:"text"`
+	TimeStamp      string      `json:"ts"`
+	Channel        string      `json:"channel"`
+	EventTimeStamp json.Number `json:"event_ts"`
 }
 
 func parseOuterEvent(rawE json.RawMessage) EventsAPIEvent {
@@ -103,7 +101,7 @@ func parseOuterEvent(rawE json.RawMessage) EventsAPIEvent {
 	}
 }
 
-func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
+func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 	iE := &Event{}
 	rawInnerJSON := e.InnerEvent
 	err := json.Unmarshal(*rawInnerJSON, iE)
@@ -112,15 +110,15 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 			"unmarshalling_error",
 			&UnmarshallingErrorEvent{err},
 			EventsAPIInnerEvent{},
-		}
+		}, err
 	}
 	v, exists := EventMapping[iE.Type]
 	if !exists {
 		return EventsAPIEvent{
-			DoesNotExist,
+			iE.Type,
 			nil,
 			EventsAPIInnerEvent{},
-		}
+		}, fmt.Errorf("Inner Event does not exist! %s", iE.Type)
 	}
 	t := reflect.TypeOf(v)
 	recvEvent := reflect.New(t).Interface()
@@ -130,13 +128,13 @@ func parseInnerEvent(e *EventsAPICallbackEvent) EventsAPIEvent {
 			"unmarshalling_error",
 			&UnmarshallingErrorEvent{err},
 			EventsAPIInnerEvent{},
-		}
+		}, err
 	}
 	return EventsAPIEvent{
 		e.Type,
 		e,
 		EventsAPIInnerEvent{iE.Type, recvEvent},
-	}
+	}, nil
 }
 
 // ParseEventsAPIEvent parses the outter and inner events (if applicable) of an events
@@ -146,10 +144,10 @@ func (api *Client) ParseEventsAPIEvent(rawEvent json.RawMessage) (EventsAPIEvent
 	e := parseOuterEvent(rawEvent)
 	if e.Type == CallbackEvent {
 		cbEvent := e.Data.(*EventsAPICallbackEvent)
-		innerEvent := parseInnerEvent(cbEvent)
-		if innerEvent.Type == DoesNotExist {
-			api.Debugf("EventsAPI Error, received unmapped inner event: %s", innerEvent.Type)
-			err := fmt.Errorf("EventsAPI Error: Received unmapped event: %s", innerEvent.Type)
+		innerEvent, err := parseInnerEvent(cbEvent)
+		if err != nil {
+			api.Debugf("EventsAPI Error parsing inner event: %s", innerEvent.Type)
+			err := fmt.Errorf("EventsAPI Error parsing inner event: %s, %s", innerEvent.Type, err)
 			return EventsAPIEvent{
 				"unmarshalling_error",
 				&UnmarshallingErrorEvent{err},
