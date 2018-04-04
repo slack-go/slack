@@ -92,7 +92,11 @@ func parseOuterEvent(rawE json.RawMessage) EventsAPIEvent {
 	urlVE := &EventsAPIURLVerificationEvent{}
 	err = json.Unmarshal(rawE, urlVE)
 	if err != nil {
-		fmt.Println("lol")
+		return EventsAPIEvent{
+			"unmarshalling_error",
+			&UnmarshallingErrorEvent{err},
+			EventsAPIInnerEvent{},
+		}
 	}
 	return EventsAPIEvent{
 		e.Type,
