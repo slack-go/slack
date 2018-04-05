@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ACollectionOfAtoms/slack"
+	"github.com/nlopes/slack"
 )
 
 var c = slack.New("my-token")

@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ACollectionOfAtoms/slack"
+	"github.com/nlopes/slack"
 )
 
+// You more than likely want your "Bot User OAuth Access Token" which starts with "xoxb-"
 var api = slack.New("TOKEN")
 
 func main() {
