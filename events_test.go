@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-
-	"github.com/nlopes/slack"
 )
 
-var c = slack.New("my-token")
+var c = New("my-token")
 
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
@@ -32,11 +30,11 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 		t.Fail()
 	}
 	switch ev := msg.Data.(type) {
-	case *slack.EventsAPICallbackEvent:
+	case *EventsAPICallbackEvent:
 		{
 			fmt.Println(ev)
 		}
-	case *slack.UnmarshallingErrorEvent:
+	case *UnmarshallingErrorEvent:
 		{
 			fmt.Println("Unmarshalling Error!")
 			fmt.Println(ev)
@@ -63,7 +61,7 @@ func TestParseURLVerificationEvent(t *testing.T) {
 		t.Fail()
 	}
 	switch ev := msg.Data.(type) {
-	case *slack.EventsAPIURLVerificationEvent:
+	case *EventsAPIURLVerificationEvent:
 		{
 		}
 	default:
@@ -96,10 +94,10 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 		t.Fail()
 	}
 	switch outterEvent := msg.Data.(type) {
-	case *slack.EventsAPICallbackEvent:
+	case *EventsAPICallbackEvent:
 		{
 			switch innerEvent := msg.InnerEvent.Data.(type) {
-			case *slack.AppMentionEvent:
+			case *AppMentionEvent:
 				{
 				}
 			default:
