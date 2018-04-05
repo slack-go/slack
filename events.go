@@ -41,6 +41,11 @@ type EventsAPIURLVerificationEvent struct {
 	Type      string `json:"type"`
 }
 
+// ChallengeResponse is a response to a EventsAPIEvent URLVerification challenge
+type ChallengeResponse struct {
+	Challenge string
+}
+
 // EventsAPICallbackEvent is the main EventsAPI event.
 type EventsAPICallbackEvent struct {
 	Type        string           `json:"type"`
