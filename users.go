@@ -296,7 +296,7 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		values.Add("crop_w", string(params.CropW))
 	}
 
-	err := postLocalWithMultipartResponse(ctx, api.httpclient, SLACK_API+"users.setPhoto", image, "image", values, response, api.debug)
+	err := postLocalWithMultipartResponse(ctx, api.httpclient, "users.setPhoto", image, "image", values, response, api.debug)
 	if err != nil {
 		return err
 	}
