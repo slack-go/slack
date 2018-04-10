@@ -4,13 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/url"
+	"strconv"
 )
 
 const (
 	DEFAULT_USER_PHOTO_CROP_X = -1
 	DEFAULT_USER_PHOTO_CROP_Y = -1
 	DEFAULT_USER_PHOTO_CROP_W = -1
+	errPaginationComplete     = errorString("pagination complete")
 )
 
 // UserProfile contains all the information details of a given user
@@ -112,6 +115,7 @@ type userResponseFull struct {
 	User         `json:"user,omitempty"` // GetUserInfo
 	UserPresence                         // GetUserPresence
 	SlackResponse
+	Metadata ResponseMetadata
 }
 
 type UserSetPhotoParams struct {
@@ -178,23 +182,110 @@ func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, 
 	return &response.User, nil
 }
 
+// GetUsersOption options for the GetUsers method call.
+type GetUsersOption func(*UserPagination)
+
+// GetUsersOptionLimit limit the number of users returned
+func GetUsersOptionLimit(n int) GetUsersOption {
+	return func(p *UserPagination) {
+		p.limit = n
+	}
+}
+
+// GetUsersOptionPresence include user presence
+func GetUsersOptionPresence(n bool) GetUsersOption {
+	return func(p *UserPagination) {
+		p.presence = n
+	}
+}
+
+func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination) {
+	up = UserPagination{
+		c:     c,
+		limit: 200, // per slack api documentation.
+	}
+
+	for _, opt := range options {
+		opt(&up)
+	}
+
+	return up
+}
+
+// UserPagination allows for paginating over the users
+type UserPagination struct {
+	Users        []User
+	limit        int
+	presence     bool
+	previousResp *ResponseMetadata
+	c            *Client
+}
+
+// Done checks if the pagination has completed
+func (UserPagination) Done(err error) bool {
+	return err == errPaginationComplete
+}
+
+// Failure checks if pagination failed.
+func (t UserPagination) Failure(err error) error {
+	if t.Done(err) {
+		return nil
+	}
+
+	return err
+}
+
+func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) {
+	var (
+		resp *userResponseFull
+	)
+
+	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
+		return t, errPaginationComplete
+	}
+
+	t.previousResp = t.previousResp.initialize()
+
+	values := url.Values{
+		"limit":    {strconv.Itoa(t.limit)},
+		"presence": {strconv.FormatBool(t.presence)},
+		"token":    {t.c.token},
+		"cursor":   {t.previousResp.Cursor},
+	}
+
+	if resp, err = userRequest(ctx, t.c.httpclient, "users.list", values, t.c.debug); err != nil {
+		log.Println("error during user request", err)
+		return t, err
+	}
+
+	t.c.Debugf("GetUsersContext: got %d users; metadata %v", len(resp.Members), resp.Metadata)
+	t.Users = resp.Members
+	t.previousResp = &resp.Metadata
+
+	return t, nil
+}
+
+// GetUsersPaginated fetches users in a paginated fashion, see GetUsersContext for usage.
+func (api *Client) GetUsersPaginated(options ...GetUsersOption) UserPagination {
+	return newUserPagination(api, options...)
+}
+
 // GetUsers returns the list of users (with their detailed information)
 func (api *Client) GetUsers() ([]User, error) {
 	return api.GetUsersContext(context.Background())
 }
 
 // GetUsersContext returns the list of users (with their detailed information) with a custom context
-func (api *Client) GetUsersContext(ctx context.Context) ([]User, error) {
-	values := url.Values{
-		"token":    {api.token},
-		"presence": {"1"},
+func (api *Client) GetUsersContext(ctx context.Context) (results []User, err error) {
+	var (
+		p UserPagination
+	)
+
+	for p = api.GetUsersPaginated(); !p.Done(err); p, err = p.Next(ctx) {
+		results = append(results, p.Users...)
 	}
 
-	response, err := userRequest(ctx, api.httpclient, "users.list", values, api.debug)
-	if err != nil {
-		return nil, err
-	}
-	return response.Members, nil
+	return results, p.Failure(err)
 }
 
 // GetUserByEmail will retrieve the complete user information by email

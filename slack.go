@@ -40,6 +40,19 @@ type SlackResponse struct {
 	Error string `json:"error"`
 }
 
+// ResponseMetadata holds pagination metadata
+type ResponseMetadata struct {
+	Cursor string `json:"next_cursor"`
+}
+
+func (t *ResponseMetadata) initialize() *ResponseMetadata {
+	if t != nil {
+		return t
+	}
+
+	return &ResponseMetadata{}
+}
+
 type AuthTestResponse struct {
 	URL    string `json:"url"`
 	Team   string `json:"team"`

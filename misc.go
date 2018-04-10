@@ -180,3 +180,9 @@ func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	})
 	rw.Write(response)
 }
+
+type errorString string
+
+func (t errorString) Error() string {
+	return string(t)
+}
