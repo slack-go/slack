@@ -1,10 +1,18 @@
 package slack
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/png"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -16,12 +24,12 @@ func getTestUserProfile() UserProfile {
 		RealNameNormalized:    "Test Real Name Normalized",
 		DisplayName:           "Test Display Name",
 		DisplayNameNormalized: "Test Display Name Normalized",
-		Email:    "test@test.com",
-		Image24:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
-		Image32:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
-		Image48:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
-		Image72:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
-		Image192: "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Email:                 "test@test.com",
+		Image24:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
+		Image32:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
+		Image48:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
+		Image72:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
+		Image192:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
 	}
 }
 
@@ -245,4 +253,108 @@ func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 	if up.StatusEmoji != "" {
 		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, "")
 	}
+}
+
+func TestSetUserPhoto(t *testing.T) {
+	file, fileContent, teardown := createUserPhoto(t)
+	defer teardown()
+
+	params := UserSetPhotoParams{CropX: 0, CropY: 0, CropW: 32}
+
+	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
+
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New(validToken)
+
+	err := api.SetUserPhoto(file.Name(), params)
+	if err != nil {
+		t.Fatalf("unexpected error: %+v\n", err)
+	}
+}
+
+func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.HandlerFunc {
+	const maxMemory = 1 << 20 // 1 MB
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseMultipartForm(maxMemory); err != nil {
+			httpTestErrReply(w, false, fmt.Sprintf("failed to parse multipart/form: %+v", err))
+			return
+		}
+
+		// Test for expected token
+		if v := r.Form.Get("token"); v != validToken {
+			httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value token=%v", validToken))
+			return
+		}
+
+		// Test for expected crop params
+		if wantParams.CropX != DEFAULT_USER_PHOTO_CROP_X {
+			if cx, err := strconv.Atoi(r.Form.Get("crop_x")); err != nil || cx != wantParams.CropX {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_x=%d", wantParams.CropX))
+				return
+			}
+		}
+		if wantParams.CropY != DEFAULT_USER_PHOTO_CROP_Y {
+			if cy, err := strconv.Atoi(r.Form.Get("crop_y")); err != nil || cy != wantParams.CropY {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_y=%d", wantParams.CropY))
+				return
+			}
+		}
+		if wantParams.CropW != DEFAULT_USER_PHOTO_CROP_W {
+			if cw, err := strconv.Atoi(r.Form.Get("crop_w")); err != nil || cw != wantParams.CropW {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_w=%d", wantParams.CropW))
+				return
+			}
+		}
+
+		// Test for expected image
+		f, ok := r.MultipartForm.File["image"]
+		if !ok || len(f) == 0 {
+			httpTestErrReply(w, true, `expected multipart form file "image"`)
+			return
+		}
+		file, err := f[0].Open()
+		if err != nil {
+			httpTestErrReply(w, true, fmt.Sprintf("failed to open uploaded file: %+v", err))
+			return
+		}
+		gotBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			httpTestErrReply(w, true, fmt.Sprintf("failed to read uploaded file: %+v", err))
+			return
+		}
+		if !bytes.Equal(wantBytes, gotBytes) {
+			httpTestErrReply(w, true, "uploaded bytes did not match expected bytes")
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"ok":true}`)
+	}
+}
+
+// createUserPhoto generates a temp photo for testing. It returns the file handle, the file
+// contents, and a function that can be called to remove the file.
+func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
+	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
+	draw.Draw(photo, photo.Bounds(), image.Black, image.ZP, draw.Src)
+
+	f, err := ioutil.TempFile(os.TempDir(), "profile.png")
+	if err != nil {
+		t.Fatalf("failed to create test photo: %+v\n", err)
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(io.MultiWriter(&buf, f), photo); err != nil {
+		t.Fatalf("failed to write test photo: %+v\n", err)
+	}
+
+	teardown := func() {
+		if err := os.Remove(f.Name()); err != nil {
+			t.Fatalf("failed to remove test photo: %+v\n", err)
+		}
+	}
+
+	return f, buf.Bytes(), teardown
 }
