@@ -358,3 +358,27 @@ func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
 
 	return f, buf.Bytes(), teardown
 }
+
+func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	profile := getTestUserProfile()
+	resp, _ := json.Marshal(&getUserProfileResponse{
+		SlackResponse: SlackResponse{Ok: true},
+		Profile:       &profile})
+	rw.Write(resp)
+}
+
+func TestGetUserProfile(t *testing.T) {
+	http.HandleFunc("/users.profile.get", getUserProfileHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	exp := getTestUserProfile()
+	if profile.DisplayName != exp.DisplayName {
+		t.Fatalf(`profile.DisplayName = "%s", wanted "%s"`, profile.DisplayName, exp.DisplayName)
+	}
+}

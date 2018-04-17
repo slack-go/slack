@@ -393,3 +393,30 @@ func (api *Client) UnsetUserCustomStatus() error {
 func (api *Client) UnsetUserCustomStatusContext(ctx context.Context) error {
 	return api.SetUserCustomStatusContext(ctx, "", "")
 }
+
+// GetUserProfile retrieves a user's profile information.
+func (api *Client) GetUserProfile(userID string, includeLabels bool) (*UserProfile, error) {
+	return api.GetUserProfileContext(context.Background(), userID, includeLabels)
+}
+
+type getUserProfileResponse struct {
+	SlackResponse
+	Profile *UserProfile `json:"profile"`
+}
+
+// GetUserProfileContext retrieves a user's profile information with a context.
+func (api *Client) GetUserProfileContext(ctx context.Context, userID string, includeLabels bool) (*UserProfile, error) {
+	values := url.Values{
+		"token": {api.token}, "user": {userID},
+		"include_labels": {strconv.FormatBool(includeLabels)}}
+	resp := &getUserProfileResponse{}
+
+	err := post(ctx, api.httpclient, "users.profile.get", values, &resp, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !resp.Ok {
+		return nil, errors.New(resp.Error)
+	}
+	return resp.Profile, nil
+}
