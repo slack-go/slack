@@ -414,9 +414,10 @@ type getUserProfileResponse struct {
 
 // GetUserProfileContext retrieves a user's profile information with a context.
 func (api *Client) GetUserProfileContext(ctx context.Context, userID string, includeLabels bool) (*UserProfile, error) {
-	values := url.Values{
-		"token": {api.token}, "user": {userID},
-		"include_labels": {strconv.FormatBool(includeLabels)}}
+	values := url.Values{"token": {api.token}, "user": {userID}}
+	if includeLabels {
+		values.Add("include_labels", "true")
+	}
 	resp := &getUserProfileResponse{}
 
 	err := post(ctx, api.httpclient, "users.profile.get", values, &resp, api.debug)
