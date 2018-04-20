@@ -18,27 +18,35 @@ const (
 
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
-	FirstName             string `json:"first_name"`
-	LastName              string `json:"last_name"`
-	RealName              string `json:"real_name"`
-	RealNameNormalized    string `json:"real_name_normalized"`
-	DisplayName           string `json:"display_name"`
-	DisplayNameNormalized string `json:"display_name_normalized"`
-	Email                 string `json:"email"`
-	Skype                 string `json:"skype"`
-	Phone                 string `json:"phone"`
-	Image24               string `json:"image_24"`
-	Image32               string `json:"image_32"`
-	Image48               string `json:"image_48"`
-	Image72               string `json:"image_72"`
-	Image192              string `json:"image_192"`
-	ImageOriginal         string `json:"image_original"`
-	Title                 string `json:"title"`
-	BotID                 string `json:"bot_id,omitempty"`
-	ApiAppID              string `json:"api_app_id,omitempty"`
-	StatusText            string `json:"status_text,omitempty"`
-	StatusEmoji           string `json:"status_emoji,omitempty"`
-	Team                  string `json:"team"`
+	FirstName             string                            `json:"first_name"`
+	LastName              string                            `json:"last_name"`
+	RealName              string                            `json:"real_name"`
+	RealNameNormalized    string                            `json:"real_name_normalized"`
+	DisplayName           string                            `json:"display_name"`
+	DisplayNameNormalized string                            `json:"display_name_normalized"`
+	Email                 string                            `json:"email"`
+	Skype                 string                            `json:"skype"`
+	Phone                 string                            `json:"phone"`
+	Image24               string                            `json:"image_24"`
+	Image32               string                            `json:"image_32"`
+	Image48               string                            `json:"image_48"`
+	Image72               string                            `json:"image_72"`
+	Image192              string                            `json:"image_192"`
+	ImageOriginal         string                            `json:"image_original"`
+	Title                 string                            `json:"title"`
+	BotID                 string                            `json:"bot_id,omitempty"`
+	ApiAppID              string                            `json:"api_app_id,omitempty"`
+	StatusText            string                            `json:"status_text,omitempty"`
+	StatusEmoji           string                            `json:"status_emoji,omitempty"`
+	Team                  string                            `json:"team"`
+	Fields                map[string]UserProfileCustomField `json:"fields"`
+}
+
+// UserProfileCustomField represents a custom user profile field
+type UserProfileCustomField struct {
+	Value string `json:"value"`
+	Alt   string `json:"alt"`
+	Label string `json:"label"`
 }
 
 // User contains all the information of a user
@@ -378,16 +386,16 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		"token": {api.token},
 	}
 	if params.CropX != DEFAULT_USER_PHOTO_CROP_X {
-		values.Add("crop_x", string(params.CropX))
+		values.Add("crop_x", strconv.Itoa(params.CropX))
 	}
 	if params.CropY != DEFAULT_USER_PHOTO_CROP_Y {
-		values.Add("crop_y", string(params.CropY))
+		values.Add("crop_y", strconv.Itoa(params.CropX))
 	}
 	if params.CropW != DEFAULT_USER_PHOTO_CROP_W {
-		values.Add("crop_w", string(params.CropW))
+		values.Add("crop_w", strconv.Itoa(params.CropW))
 	}
 
-	err := postLocalWithMultipartResponse(ctx, api.httpclient, SLACK_API+"users.setPhoto", image, "image", values, response, api.debug)
+	err := postLocalWithMultipartResponse(ctx, api.httpclient, "users.setPhoto", image, "image", values, response, api.debug)
 	if err != nil {
 		return err
 	}
@@ -482,4 +490,32 @@ func (api *Client) UnsetUserCustomStatus() error {
 // with a custom context. This is a convenience method that wraps (*Client).SetUserCustomStatus().
 func (api *Client) UnsetUserCustomStatusContext(ctx context.Context) error {
 	return api.SetUserCustomStatusContext(ctx, "", "")
+}
+
+// GetUserProfile retrieves a user's profile information.
+func (api *Client) GetUserProfile(userID string, includeLabels bool) (*UserProfile, error) {
+	return api.GetUserProfileContext(context.Background(), userID, includeLabels)
+}
+
+type getUserProfileResponse struct {
+	SlackResponse
+	Profile *UserProfile `json:"profile"`
+}
+
+// GetUserProfileContext retrieves a user's profile information with a context.
+func (api *Client) GetUserProfileContext(ctx context.Context, userID string, includeLabels bool) (*UserProfile, error) {
+	values := url.Values{"token": {api.token}, "user": {userID}}
+	if includeLabels {
+		values.Add("include_labels", "true")
+	}
+	resp := &getUserProfileResponse{}
+
+	err := post(ctx, api.httpclient, "users.profile.get", values, &resp, api.debug)
+	if err != nil {
+		return nil, err
+	}
+	if !resp.Ok {
+		return nil, errors.New(resp.Error)
+	}
+	return resp.Profile, nil
 }
