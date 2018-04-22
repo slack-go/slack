@@ -13,6 +13,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"sync/atomic"
 	"testing"
 )
 
@@ -255,6 +256,55 @@ func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 	}
 }
 
+func TestGetUsers(t *testing.T) {
+	http.HandleFunc("/users.list", getUserPage(4))
+	expectedUser := getTestUser()
+
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	users, err := api.GetUsers()
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual([]User{expectedUser, expectedUser, expectedUser, expectedUser}, users) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+// returns n pages users.
+func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
+	var n int64
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var cpage int64
+		sresp := SlackResponse{
+			Ok: true,
+		}
+		members := []User{
+			getTestUser(),
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+			response, _ := json.Marshal(userResponseFull{
+				SlackResponse: sresp,
+				Members:       members,
+			})
+			rw.Write(response)
+			return
+		}
+		response, _ := json.Marshal(userResponseFull{
+			SlackResponse: sresp,
+			Members:       members,
+			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
+		})
+		rw.Write(response)
+		return
+	}
+}
+
 func TestSetUserPhoto(t *testing.T) {
 	file, fileContent, teardown := createUserPhoto(t)
 	defer teardown()
@@ -357,4 +407,28 @@ func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
 	}
 
 	return f, buf.Bytes(), teardown
+}
+
+func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	profile := getTestUserProfile()
+	resp, _ := json.Marshal(&getUserProfileResponse{
+		SlackResponse: SlackResponse{Ok: true},
+		Profile:       &profile})
+	rw.Write(resp)
+}
+
+func TestGetUserProfile(t *testing.T) {
+	http.HandleFunc("/users.profile.get", getUserProfileHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	exp := getTestUserProfile()
+	if profile.DisplayName != exp.DisplayName {
+		t.Fatalf(`profile.DisplayName = "%s", wanted "%s"`, profile.DisplayName, exp.DisplayName)
+	}
 }
