@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -48,6 +49,9 @@ type RTM struct {
 	// dialer is a gorilla/websocket Dialer. If nil, use the default
 	// Dialer.
 	dialer *websocket.Dialer
+
+	// mu is mutex used to prevent RTM connection race conditions
+	mu *sync.Mutex
 }
 
 // RTMOptions allows configuration of various options available for RTM messaging
@@ -64,6 +68,9 @@ type RTMOptions struct {
 
 // Disconnect and wait, blocking until a successful disconnection.
 func (rtm *RTM) Disconnect() error {
+	// avoid RTM disconnect race conditions
+	rtm.mu.Lock()
+	defer rtm.mu.Unlock()
 	// this channel is always closed on disconnect. lets the ManagedConnection() function
 	// properly clean up.
 	close(rtm.disconnected)
