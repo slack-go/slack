@@ -27,6 +27,7 @@ import (
 func (rtm *RTM) ManageConnection() {
 	var connectionCount int
 	for {
+		rtm.mu.Lock()
 		connectionCount++
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
@@ -45,6 +46,7 @@ func (rtm *RTM) ManageConnection() {
 
 		rtm.conn = conn
 		rtm.isConnected = true
+		rtm.mu.Unlock()
 
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
@@ -488,5 +490,5 @@ var eventMapping = map[string]interface{}{
 	"reconnect_url": ReconnectUrlEvent{},
 
 	"member_joined_channel": MemberJoinedChannelEvent{},
-	"member_left_channel": MemberLeftChannelEvent{},
+	"member_left_channel":   MemberLeftChannelEvent{},
 }
