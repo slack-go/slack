@@ -76,6 +76,11 @@ func main() {
 
 See https://github.com/nlopes/slack/blob/master/examples/websocket/websocket.go
 
+## Events API
+
+While there aren't any helpers (yet) for processing events from the Events API. This library does 
+provide HTTP middleware for you to register an endpoint to receive events from Slack. Check the docs 
+for usage examples.
 
 ## Contributing
 
