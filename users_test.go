@@ -17,6 +17,21 @@ import (
 	"testing"
 )
 
+func getTestUserProfileCustomField() UserProfileCustomField {
+	return UserProfileCustomField{
+		Value: "test value",
+		Alt:   "",
+		Label: "",
+	}
+}
+
+func getTestUserProfileCustomFields() UserProfileCustomFields {
+	return UserProfileCustomFields{
+		fields: map[string]UserProfileCustomField{
+			"Xxxxxx": getTestUserProfileCustomField(),
+		}}
+}
+
 func getTestUserProfile() UserProfile {
 	return UserProfile{
 		StatusText:            "testStatus",
@@ -31,6 +46,7 @@ func getTestUserProfile() UserProfile {
 		Image48:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
 		Image72:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
 		Image192:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Fields:                getTestUserProfileCustomFields(),
 	}
 }
 
@@ -90,8 +106,8 @@ func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
 func getUserByEmail(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		Ok   bool
-		User User
+		Ok   bool `json:"ok"`
+		User User `json:"user"`
 	}{
 		Ok:   true,
 		User: getTestUser(),
@@ -430,5 +446,84 @@ func TestGetUserProfile(t *testing.T) {
 	exp := getTestUserProfile()
 	if profile.DisplayName != exp.DisplayName {
 		t.Fatalf(`profile.DisplayName = "%s", wanted "%s"`, profile.DisplayName, exp.DisplayName)
+	}
+}
+
+func TestSetFieldsMap(t *testing.T) {
+	p := &UserProfile{}
+	exp := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	p.SetFieldsMap(exp)
+	act := p.FieldsMap()
+	if !reflect.DeepEqual(act, exp) {
+		t.Fatalf(`p.FieldsMap() = %v, wanted %v`, act, exp)
+	}
+}
+
+func TestUserProfileCustomFieldsUnmarshalJSON(t *testing.T) {
+	fields := &UserProfileCustomFields{}
+	if err := json.Unmarshal([]byte(`[]`), fields); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal([]byte(`{
+	  "Xxxxxx": {
+	    "value": "test value",
+	    "alt": ""
+	  }
+	}`), fields); err != nil {
+		t.Fatal(err)
+	}
+	act := fields.ToMap()["Xxxxxx"].Value
+	exp := "test value"
+	if act != exp {
+		t.Fatalf(`fields.ToMap()["Xxxxxx"]["value"] = "%s", wanted "%s"`, act, exp)
+	}
+}
+
+func TestUserProfileCustomFieldsMarshalJSON(t *testing.T) {
+	fields := UserProfileCustomFields{}
+	b, err := json.Marshal(fields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(b) != "[]" {
+		t.Fatalf(`string(b) = "%s", wanted "[]"`, string(b))
+	}
+	fields = getTestUserProfileCustomFields()
+	if _, err := json.Marshal(fields); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUserProfileCustomFieldsToMap(t *testing.T) {
+	m := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	fields := UserProfileCustomFields{fields: m}
+	act := fields.ToMap()
+	if !reflect.DeepEqual(act, m) {
+		t.Fatalf(`fields.ToMap() = %v, wanted %v`, act, m)
+	}
+}
+
+func TestUserProfileCustomFieldsLen(t *testing.T) {
+	fields := UserProfileCustomFields{
+		fields: map[string]UserProfileCustomField{
+			"Xxxxxx": getTestUserProfileCustomField(),
+		}}
+	if fields.Len() != 1 {
+		t.Fatalf(`fields.Len() = %d, wanted 1`, fields.Len())
+	}
+}
+
+func TestUserProfileCustomFieldsSetMap(t *testing.T) {
+	fields := UserProfileCustomFields{}
+	m := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	fields.SetMap(m)
+	if !reflect.DeepEqual(fields.fields, m) {
+		t.Fatalf(`fields.fields = %v, wanted %v`, fields.fields, m)
 	}
 }

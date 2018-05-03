@@ -18,27 +18,85 @@ const (
 
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
-	FirstName             string `json:"first_name"`
-	LastName              string `json:"last_name"`
-	RealName              string `json:"real_name"`
-	RealNameNormalized    string `json:"real_name_normalized"`
-	DisplayName           string `json:"display_name"`
-	DisplayNameNormalized string `json:"display_name_normalized"`
-	Email                 string `json:"email"`
-	Skype                 string `json:"skype"`
-	Phone                 string `json:"phone"`
-	Image24               string `json:"image_24"`
-	Image32               string `json:"image_32"`
-	Image48               string `json:"image_48"`
-	Image72               string `json:"image_72"`
-	Image192              string `json:"image_192"`
-	ImageOriginal         string `json:"image_original"`
-	Title                 string `json:"title"`
-	BotID                 string `json:"bot_id,omitempty"`
-	ApiAppID              string `json:"api_app_id,omitempty"`
-	StatusText            string `json:"status_text,omitempty"`
-	StatusEmoji           string `json:"status_emoji,omitempty"`
-	Team                  string `json:"team"`
+	FirstName             string                  `json:"first_name"`
+	LastName              string                  `json:"last_name"`
+	RealName              string                  `json:"real_name"`
+	RealNameNormalized    string                  `json:"real_name_normalized"`
+	DisplayName           string                  `json:"display_name"`
+	DisplayNameNormalized string                  `json:"display_name_normalized"`
+	Email                 string                  `json:"email"`
+	Skype                 string                  `json:"skype"`
+	Phone                 string                  `json:"phone"`
+	Image24               string                  `json:"image_24"`
+	Image32               string                  `json:"image_32"`
+	Image48               string                  `json:"image_48"`
+	Image72               string                  `json:"image_72"`
+	Image192              string                  `json:"image_192"`
+	ImageOriginal         string                  `json:"image_original"`
+	Title                 string                  `json:"title"`
+	BotID                 string                  `json:"bot_id,omitempty"`
+	ApiAppID              string                  `json:"api_app_id,omitempty"`
+	StatusText            string                  `json:"status_text,omitempty"`
+	StatusEmoji           string                  `json:"status_emoji,omitempty"`
+	Team                  string                  `json:"team"`
+	Fields                UserProfileCustomFields `json:"fields"`
+}
+
+// UserProfileCustomFields represents user profile's custom fields.
+// Slack API's response data type is inconsistent so we use the struct.
+// For detail, please see below.
+// https://github.com/nlopes/slack/pull/298#discussion_r185159233
+type UserProfileCustomFields struct {
+	fields map[string]UserProfileCustomField
+}
+
+// UnmarshalJSON is the implementation of the json.Unmarshaler interface.
+func (fields *UserProfileCustomFields) UnmarshalJSON(b []byte) error {
+	// https://github.com/nlopes/slack/pull/298#discussion_r185159233
+	if string(b) == "[]" {
+		return nil
+	}
+	return json.Unmarshal(b, &fields.fields)
+}
+
+// MarshalJSON is the implementation of the json.Marshaler interface.
+func (fields UserProfileCustomFields) MarshalJSON() ([]byte, error) {
+	if len(fields.fields) == 0 {
+		return []byte("[]"), nil
+	}
+	return json.Marshal(fields.fields)
+}
+
+// ToMap returns a map of custom fields.
+func (fields *UserProfileCustomFields) ToMap() map[string]UserProfileCustomField {
+	return fields.fields
+}
+
+// Len returns the number of custom fields.
+func (fields *UserProfileCustomFields) Len() int {
+	return len(fields.fields)
+}
+
+// SetMap sets a map of custom fields.
+func (fields *UserProfileCustomFields) SetMap(m map[string]UserProfileCustomField) {
+	fields.fields = m
+}
+
+// FieldsMap returns a map of custom fields.
+func (profile *UserProfile) FieldsMap() map[string]UserProfileCustomField {
+	return profile.Fields.ToMap()
+}
+
+// SetFieldsMap sets a map of custom fields.
+func (profile *UserProfile) SetFieldsMap(m map[string]UserProfileCustomField) {
+	profile.Fields.SetMap(m)
+}
+
+// UserProfileCustomField represents a custom user profile field
+type UserProfileCustomField struct {
+	Value string `json:"value"`
+	Alt   string `json:"alt"`
+	Label string `json:"label"`
 }
 
 // User contains all the information of a user
