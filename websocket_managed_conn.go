@@ -32,7 +32,7 @@ func (rtm *RTM) ManageConnection() {
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
 		info, conn, err := rtm.connect(connectionCount, rtm.useRTMStart)
-		// if err != nil then the connection is sucessful - otherwise it is
+		// if err != nil then the connection is successful - otherwise it is
 		// fatal
 		if err != nil {
 			rtm.Debugf("Failed to connect with RTM on try %d: %s", connectionCount, err)
