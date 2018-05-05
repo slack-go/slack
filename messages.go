@@ -26,7 +26,7 @@ type Msg struct {
 	Timestamp       string       `json:"ts,omitempty"`
 	ThreadTimestamp string       `json:"thread_ts,omitempty"`
 	IsStarred       bool         `json:"is_starred,omitempty"`
-	PinnedTo        []string     `json:"pinned_to, omitempty"`
+	PinnedTo        []string     `json:"pinned_to,omitempty"`
 	Attachments     []Attachment `json:"attachments,omitempty"`
 	Edited          *Edited      `json:"edited,omitempty"`
 	LastRead        string       `json:"last_read,omitempty"`
