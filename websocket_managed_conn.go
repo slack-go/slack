@@ -109,7 +109,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 
 		// check if Disconnect() has been invoked.
 		select {
-		case _ = <-rtm.disconnected:
+		case <-rtm.disconnected:
 			rtm.IncomingEvents <- RTMEvent{"disconnected", &DisconnectedEvent{Intentional: true}}
 			return nil, nil, fmt.Errorf("disconnect received while trying to connect")
 		default:
