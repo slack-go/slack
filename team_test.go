@@ -3,8 +3,8 @@ package slack
 import (
 	"errors"
 	"net/http"
-	"testing"
 	"strings"
+	"testing"
 )
 
 var (
@@ -112,60 +112,59 @@ func TestGetAccessLogs(t *testing.T) {
 	login1 := logins[0]
 	login2 := logins[1]
 
-	if (login1.UserID != "F0UWHUX") {
+	if login1.UserID != "F0UWHUX" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.Username != "notalar") {
+	if login1.Username != "notalar" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.DateFirst != 1475684477) {
+	if login1.DateFirst != 1475684477 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.DateLast != 1475684645) {
+	if login1.DateLast != 1475684645 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.Count != 8) {
+	if login1.Count != 8 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.IP != "127.0.0.1") {
+	if login1.IP != "127.0.0.1" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (!strings.HasPrefix(login1.UserAgent, "SlackWeb")) {
+	if !strings.HasPrefix(login1.UserAgent, "SlackWeb") {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.ISP != "AT&T U-verse") {
+	if login1.ISP != "AT&T U-verse" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.Country != "US") {
+	if login1.Country != "US" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login1.Region != "IN") {
+	if login1.Region != "IN" {
 		t.Fatal(ErrIncorrectResponse)
 	}
 
 	// test that the null values from login2 are coming across correctly
-	if (login2.ISP != "") {
+	if login2.ISP != "" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login2.Country != "") {
+	if login2.Country != "" {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (login2.Region != "") {
+	if login2.Region != "" {
 		t.Fatal(ErrIncorrectResponse)
 	}
 
 	// test the paging
-	if (paging.Count != 2) {
+	if paging.Count != 2 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (paging.Total != 2) {
+	if paging.Total != 2 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (paging.Page != 1) {
+	if paging.Page != 1 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if (paging.Pages != 1) {
+	if paging.Pages != 1 {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
-
