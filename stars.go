@@ -48,13 +48,13 @@ func (api *Client) AddStarContext(ctx context.Context, channel string, item Item
 		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 
 	response := &SlackResponse{}
@@ -79,13 +79,13 @@ func (api *Client) RemoveStarContext(ctx context.Context, channel string, item I
 		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 
 	response := &SlackResponse{}

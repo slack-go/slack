@@ -142,16 +142,16 @@ func (api *Client) AddReactionContext(ctx context.Context, name string, item Ite
 		values.Set("name", name)
 	}
 	if item.Channel != "" {
-		values.Set("channel", string(item.Channel))
+		values.Set("channel", item.Channel)
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 
 	response := &SlackResponse{}
@@ -178,16 +178,16 @@ func (api *Client) RemoveReactionContext(ctx context.Context, name string, item 
 		values.Set("name", name)
 	}
 	if item.Channel != "" {
-		values.Set("channel", string(item.Channel))
+		values.Set("channel", item.Channel)
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 
 	response := &SlackResponse{}
@@ -211,16 +211,16 @@ func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params
 		"token": {api.token},
 	}
 	if item.Channel != "" {
-		values.Set("channel", string(item.Channel))
+		values.Set("channel", item.Channel)
 	}
 	if item.Timestamp != "" {
-		values.Set("timestamp", string(item.Timestamp))
+		values.Set("timestamp", item.Timestamp)
 	}
 	if item.File != "" {
-		values.Set("file", string(item.File))
+		values.Set("file", item.File)
 	}
 	if item.Comment != "" {
-		values.Set("file_comment", string(item.Comment))
+		values.Set("file_comment", item.Comment)
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
 		values.Set("full", strconv.FormatBool(params.Full))
