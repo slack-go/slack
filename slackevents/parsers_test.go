@@ -1,12 +1,10 @@
-package slack
+package slackevents
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
 )
-
-var c = New("my-token")
 
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
@@ -25,14 +23,14 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg, e := c.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg, e := ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
 	if e != nil {
+		fmt.Println(e)
 		t.Fail()
 	}
 	switch ev := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
-			fmt.Println(ev)
 		}
 	case *UnmarshallingErrorEvent:
 		{
@@ -56,8 +54,9 @@ func TestParseURLVerificationEvent(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	msg, e := c.ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent))
+	msg, e := ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(&TokenComparator{"fake-token"}))
 	if e != nil {
+		fmt.Println(e)
 		t.Fail()
 	}
 	switch ev := msg.Data.(type) {
@@ -89,8 +88,9 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg, e := c.ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent))
+	msg, e := ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
 	if e != nil {
+		fmt.Println(e)
 		t.Fail()
 	}
 	switch outterEvent := msg.Data.(type) {
@@ -110,5 +110,19 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 			fmt.Println(outterEvent)
 			t.Fail()
 		}
+	}
+}
+
+func TestBadTokenVerification(t *testing.T) {
+	urlVerificationEvent := `
+		{
+			"token": "fake-token",
+			"challenge": "aljdsflaji3jj",
+			"type": "url_verification"
+		}
+	`
+	_, e := ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(TokenComparator{"real-token"}))
+	if e == nil {
+		t.Fail()
 	}
 }
