@@ -7,6 +7,8 @@ This library supports most if not all of the `api.slack.com` REST
 calls, as well as the Real-Time Messaging protocol over websocket, in
 a fully managed way.
 
+Support for the EventsAPI has recently been added. It is still in its early stages but nearly all events have been added and tested (except for those events in [Developer Preview](https://api.slack.com/slack-apps-preview) mode).
+
 ## Change log
 
 ### v0.2.0 - Feb 10, 2018
@@ -75,6 +77,11 @@ func main() {
 ## Minimal RTM usage:
 
 See https://github.com/nlopes/slack/blob/master/examples/websocket/websocket.go
+
+
+## Minimal EventsAPI usage:
+
+See https://github.com/nlopes/slack/blob/master/examples/eventsapi/events.go
 
 
 ## Contributing
