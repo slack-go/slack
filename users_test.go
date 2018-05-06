@@ -1,12 +1,36 @@
 package slack
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/png"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"reflect"
+	"strconv"
+	"sync/atomic"
 	"testing"
 )
+
+func getTestUserProfileCustomField() UserProfileCustomField {
+	return UserProfileCustomField{
+		Value: "test value",
+		Alt:   "",
+		Label: "",
+	}
+}
+
+func getTestUserProfileCustomFields() UserProfileCustomFields {
+	return UserProfileCustomFields{
+		fields: map[string]UserProfileCustomField{
+			"Xxxxxx": getTestUserProfileCustomField(),
+		}}
+}
 
 func getTestUserProfile() UserProfile {
 	return UserProfile{
@@ -22,6 +46,7 @@ func getTestUserProfile() UserProfile {
 		Image48:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
 		Image72:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
 		Image192: "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Fields:   getTestUserProfileCustomFields(),
 	}
 }
 
@@ -81,8 +106,8 @@ func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
 func getUserByEmail(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		Ok   bool
-		User User
+		Ok   bool `json:"ok"`
+		User User `json:"user"`
 	}{
 		Ok:   true,
 		User: getTestUser(),
@@ -244,5 +269,261 @@ func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 
 	if up.StatusEmoji != "" {
 		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, "")
+	}
+}
+
+func TestGetUsers(t *testing.T) {
+	http.HandleFunc("/users.list", getUserPage(4))
+	expectedUser := getTestUser()
+
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	users, err := api.GetUsers()
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual([]User{expectedUser, expectedUser, expectedUser, expectedUser}, users) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+// returns n pages users.
+func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
+	var n int64
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var cpage int64
+		sresp := SlackResponse{
+			Ok: true,
+		}
+		members := []User{
+			getTestUser(),
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+			response, _ := json.Marshal(userResponseFull{
+				SlackResponse: sresp,
+				Members:       members,
+			})
+			rw.Write(response)
+			return
+		}
+		response, _ := json.Marshal(userResponseFull{
+			SlackResponse: sresp,
+			Members:       members,
+			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
+		})
+		rw.Write(response)
+		return
+	}
+}
+
+func TestSetUserPhoto(t *testing.T) {
+	file, fileContent, teardown := createUserPhoto(t)
+	defer teardown()
+
+	params := UserSetPhotoParams{CropX: 0, CropY: 0, CropW: 32}
+
+	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
+
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New(validToken)
+
+	err := api.SetUserPhoto(file.Name(), params)
+	if err != nil {
+		t.Fatalf("unexpected error: %+v\n", err)
+	}
+}
+
+func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.HandlerFunc {
+	const maxMemory = 1 << 20 // 1 MB
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseMultipartForm(maxMemory); err != nil {
+			httpTestErrReply(w, false, fmt.Sprintf("failed to parse multipart/form: %+v", err))
+			return
+		}
+
+		// Test for expected token
+		if v := r.Form.Get("token"); v != validToken {
+			httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value token=%v", validToken))
+			return
+		}
+
+		// Test for expected crop params
+		if wantParams.CropX != DEFAULT_USER_PHOTO_CROP_X {
+			if cx, err := strconv.Atoi(r.Form.Get("crop_x")); err != nil || cx != wantParams.CropX {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_x=%d", wantParams.CropX))
+				return
+			}
+		}
+		if wantParams.CropY != DEFAULT_USER_PHOTO_CROP_Y {
+			if cy, err := strconv.Atoi(r.Form.Get("crop_y")); err != nil || cy != wantParams.CropY {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_y=%d", wantParams.CropY))
+				return
+			}
+		}
+		if wantParams.CropW != DEFAULT_USER_PHOTO_CROP_W {
+			if cw, err := strconv.Atoi(r.Form.Get("crop_w")); err != nil || cw != wantParams.CropW {
+				httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value crop_w=%d", wantParams.CropW))
+				return
+			}
+		}
+
+		// Test for expected image
+		f, ok := r.MultipartForm.File["image"]
+		if !ok || len(f) == 0 {
+			httpTestErrReply(w, true, `expected multipart form file "image"`)
+			return
+		}
+		file, err := f[0].Open()
+		if err != nil {
+			httpTestErrReply(w, true, fmt.Sprintf("failed to open uploaded file: %+v", err))
+			return
+		}
+		gotBytes, err := ioutil.ReadAll(file)
+		if err != nil {
+			httpTestErrReply(w, true, fmt.Sprintf("failed to read uploaded file: %+v", err))
+			return
+		}
+		if !bytes.Equal(wantBytes, gotBytes) {
+			httpTestErrReply(w, true, "uploaded bytes did not match expected bytes")
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"ok":true}`)
+	}
+}
+
+// createUserPhoto generates a temp photo for testing. It returns the file handle, the file
+// contents, and a function that can be called to remove the file.
+func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
+	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
+	draw.Draw(photo, photo.Bounds(), image.Black, image.ZP, draw.Src)
+
+	f, err := ioutil.TempFile(os.TempDir(), "profile.png")
+	if err != nil {
+		t.Fatalf("failed to create test photo: %+v\n", err)
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(io.MultiWriter(&buf, f), photo); err != nil {
+		t.Fatalf("failed to write test photo: %+v\n", err)
+	}
+
+	teardown := func() {
+		if err := os.Remove(f.Name()); err != nil {
+			t.Fatalf("failed to remove test photo: %+v\n", err)
+		}
+	}
+
+	return f, buf.Bytes(), teardown
+}
+
+func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	profile := getTestUserProfile()
+	resp, _ := json.Marshal(&getUserProfileResponse{
+		SlackResponse: SlackResponse{Ok: true},
+		Profile:       &profile})
+	rw.Write(resp)
+}
+
+func TestGetUserProfile(t *testing.T) {
+	http.HandleFunc("/users.profile.get", getUserProfileHandler)
+	once.Do(startServer)
+	SLACK_API = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	exp := getTestUserProfile()
+	if profile.DisplayName != exp.DisplayName {
+		t.Fatalf(`profile.DisplayName = "%s", wanted "%s"`, profile.DisplayName, exp.DisplayName)
+	}
+}
+
+func TestSetFieldsMap(t *testing.T) {
+	p := &UserProfile{}
+	exp := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	p.SetFieldsMap(exp)
+	act := p.FieldsMap()
+	if !reflect.DeepEqual(act, exp) {
+		t.Fatalf(`p.FieldsMap() = %v, wanted %v`, act, exp)
+	}
+}
+
+func TestUserProfileCustomFieldsUnmarshalJSON(t *testing.T) {
+	fields := &UserProfileCustomFields{}
+	if err := json.Unmarshal([]byte(`[]`), fields); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal([]byte(`{
+	  "Xxxxxx": {
+	    "value": "test value",
+	    "alt": ""
+	  }
+	}`), fields); err != nil {
+		t.Fatal(err)
+	}
+	act := fields.ToMap()["Xxxxxx"].Value
+	exp := "test value"
+	if act != exp {
+		t.Fatalf(`fields.ToMap()["Xxxxxx"]["value"] = "%s", wanted "%s"`, act, exp)
+	}
+}
+
+func TestUserProfileCustomFieldsMarshalJSON(t *testing.T) {
+	fields := UserProfileCustomFields{}
+	b, err := json.Marshal(fields)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(b) != "[]" {
+		t.Fatalf(`string(b) = "%s", wanted "[]"`, string(b))
+	}
+	fields = getTestUserProfileCustomFields()
+	if _, err := json.Marshal(fields); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUserProfileCustomFieldsToMap(t *testing.T) {
+	m := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	fields := UserProfileCustomFields{fields: m}
+	act := fields.ToMap()
+	if !reflect.DeepEqual(act, m) {
+		t.Fatalf(`fields.ToMap() = %v, wanted %v`, act, m)
+	}
+}
+
+func TestUserProfileCustomFieldsLen(t *testing.T) {
+	fields := UserProfileCustomFields{
+		fields: map[string]UserProfileCustomField{
+			"Xxxxxx": getTestUserProfileCustomField(),
+		}}
+	if fields.Len() != 1 {
+		t.Fatalf(`fields.Len() = %d, wanted 1`, fields.Len())
+	}
+}
+
+func TestUserProfileCustomFieldsSetMap(t *testing.T) {
+	fields := UserProfileCustomFields{}
+	m := map[string]UserProfileCustomField{
+		"Xxxxxx": getTestUserProfileCustomField(),
+	}
+	fields.SetMap(m)
+	if !reflect.DeepEqual(fields.fields, m) {
+		t.Fatalf(`fields.fields = %v, wanted %v`, fields.fields, m)
 	}
 }

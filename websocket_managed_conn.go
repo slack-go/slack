@@ -27,6 +27,7 @@ import (
 func (rtm *RTM) ManageConnection() {
 	var connectionCount int
 	for {
+		rtm.mu.Lock()
 		connectionCount++
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
@@ -45,6 +46,7 @@ func (rtm *RTM) ManageConnection() {
 
 		rtm.conn = conn
 		rtm.isConnected = true
+		rtm.mu.Unlock()
 
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
@@ -291,20 +293,20 @@ func (rtm *RTM) receiveIncomingEvent() {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 	switch {
-	case err == io.EOF:
+	case err == io.ErrUnexpectedEOF:
 		// EOF's don't seem to signify a failed connection so instead we ignore
 		// them here and detect a failed connection upon attempting to send a
 		// 'PING' message
 
 		// trigger a 'PING' to detect potential websocket disconnect
 		rtm.forcePing <- true
-	case websocket.IsCloseError(err, websocket.CloseAbnormalClosure):
-		rtm.killChannel <- false
 	case err != nil:
+		// All other errors from ReadJSON come from NextReader, and should
+		// kill the read loop and force a reconnect.
 		rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{
 			ErrorObj: err,
 		}}
-		// force a ping here too?
+		rtm.killChannel <- false
 	case len(event) == 0:
 		rtm.Debugln("Received empty event")
 	default:
@@ -486,4 +488,7 @@ var EventMapping = map[string]interface{}{
 	"accounts_changed": AccountsChangedEvent{},
 
 	"reconnect_url": ReconnectUrlEvent{},
+
+	"member_joined_channel": MemberJoinedChannelEvent{},
+	"member_left_channel":   MemberLeftChannelEvent{},
 }

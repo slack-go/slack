@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -102,6 +103,7 @@ func (api *Client) NewRTM(options ...RTMOption) *RTM {
 		forcePing:        make(chan bool),
 		rawEvents:        make(chan json.RawMessage),
 		idGen:            NewSafeID(1),
+		mu:               &sync.Mutex{},
 	}
 
 	for _, opt := range options {
