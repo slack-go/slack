@@ -44,7 +44,7 @@ type getReactionsResponseFull struct {
 	FC struct {
 		Reactions []ItemReaction
 	} `json:"comment"`
-	SlackResponse
+	WebResponse
 }
 
 func (res getReactionsResponseFull) extractReactions() []ItemReaction {
@@ -102,7 +102,7 @@ type listReactionsResponseFull struct {
 		} `json:"comment"`
 	}
 	Paging `json:"paging"`
-	SlackResponse
+	WebResponse
 }
 
 func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
@@ -154,14 +154,12 @@ func (api *Client) AddReactionContext(ctx context.Context, name string, item Ite
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	if err := post(ctx, api.httpclient, "reactions.add", values, response, api.debug); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // RemoveReaction removes a reaction emoji from a message, file or file comment.
@@ -190,14 +188,12 @@ func (api *Client) RemoveReactionContext(ctx context.Context, name string, item 
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	if err := post(ctx, api.httpclient, "reactions.remove", values, response, api.debug); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // GetReactions returns details about the reactions on an item.

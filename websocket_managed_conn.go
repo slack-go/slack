@@ -93,11 +93,12 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		if err == nil {
 			return info, conn, nil
 		}
+
 		// check for fatal errors - currently only invalid_auth
-		if sErr, ok := err.(*WebError); ok && (sErr.Error() == "invalid_auth" || sErr.Error() == "account_inactive") {
+		if err.Error() == "invalid_auth" || err.Error() == "account_inactive" {
 			rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
-			return nil, nil, sErr
+			return nil, nil, err
 		}
 
 		// any other errors are treated as recoverable and we try again after
@@ -126,10 +127,10 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 // startRTMAndDial attempts to connect to the slack websocket. If useRTMStart is true,
 // then it returns the  full information returned by the "rtm.start" method on the
 // slack API. Else it uses the "rtm.connect" method to connect
-func (rtm *RTM) startRTMAndDial(useRTMStart bool) (*Info, *websocket.Conn, error) {
-	var info *Info
-	var url string
-	var err error
+func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn, err error) {
+	var (
+		url string
+	)
 
 	if useRTMStart {
 		rtm.Debugf("Starting RTM")

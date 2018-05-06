@@ -138,7 +138,7 @@ type UserPresence struct {
 type UserIdentityResponse struct {
 	User UserIdentity `json:"user"`
 	Team TeamIdentity `json:"team"`
-	SlackResponse
+	WebResponse
 }
 
 type UserIdentity struct {
@@ -172,7 +172,7 @@ type userResponseFull struct {
 	Members      []User                  `json:"members,omitempty"` // ListUsers
 	User         `json:"user,omitempty"` // GetUserInfo
 	UserPresence                         // GetUserPresence
-	SlackResponse
+	WebResponse
 	Metadata ResponseMetadata
 }
 
@@ -424,7 +424,7 @@ func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
 
 // SetUserPhotoContext changes the currently authenticated user's profile image using a custom context
 func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params UserSetPhotoParams) error {
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -442,10 +442,8 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 	if err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // DeleteUserPhoto deletes the current authenticated user's profile image
@@ -455,7 +453,7 @@ func (api *Client) DeleteUserPhoto() error {
 
 // DeleteUserPhotoContext deletes the current authenticated user's profile image with a custom context
 func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -464,10 +462,8 @@ func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // SetUserCustomStatus will set a custom status and emoji for the currently
@@ -541,7 +537,7 @@ func (api *Client) GetUserProfile(userID string, includeLabels bool) (*UserProfi
 }
 
 type getUserProfileResponse struct {
-	SlackResponse
+	WebResponse
 	Profile *UserProfile `json:"profile"`
 }
 

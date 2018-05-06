@@ -35,11 +35,6 @@ func SetHTTPClient(client HTTPRequester) {
 	customHTTPClient = client
 }
 
-type SlackResponse struct {
-	Ok    bool   `json:"ok"`
-	Error string `json:"error"`
-}
-
 // ResponseMetadata holds pagination metadata
 type ResponseMetadata struct {
 	Cursor string `json:"next_cursor"`
@@ -62,7 +57,7 @@ type AuthTestResponse struct {
 }
 
 type authTestResponseFull struct {
-	SlackResponse
+	WebResponse
 	AuthTestResponse
 }
 

@@ -124,7 +124,7 @@ func httpTestErrReply(w http.ResponseWriter, clientErr bool, msg string) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	body, _ := json.Marshal(&SlackResponse{
+	body, _ := json.Marshal(&WebResponse{
 		Ok: false, Error: msg,
 	})
 
@@ -296,7 +296,7 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 	var n int64
 	return func(rw http.ResponseWriter, r *http.Request) {
 		var cpage int64
-		sresp := SlackResponse{
+		sresp := WebResponse{
 			Ok: true,
 		}
 		members := []User{
@@ -305,16 +305,16 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 		if cpage = atomic.AddInt64(&n, 1); cpage == max {
 			response, _ := json.Marshal(userResponseFull{
-				SlackResponse: sresp,
-				Members:       members,
+				WebResponse: sresp,
+				Members:     members,
 			})
 			rw.Write(response)
 			return
 		}
 		response, _ := json.Marshal(userResponseFull{
-			SlackResponse: sresp,
-			Members:       members,
-			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
+			WebResponse: sresp,
+			Members:     members,
+			Metadata:    ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
 		})
 		rw.Write(response)
 	}
@@ -428,8 +428,8 @@ func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	profile := getTestUserProfile()
 	resp, _ := json.Marshal(&getUserProfileResponse{
-		SlackResponse: SlackResponse{Ok: true},
-		Profile:       &profile})
+		WebResponse: WebResponse{Ok: true},
+		Profile:     &profile})
 	rw.Write(resp)
 }
 

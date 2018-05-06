@@ -14,7 +14,7 @@ type channelResponseFull struct {
 	Topic        string    `json:"topic"`
 	NotInChannel bool      `json:"not_in_channel"`
 	History
-	SlackResponse
+	WebResponse
 }
 
 // Channel contains information about the channel

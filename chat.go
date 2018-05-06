@@ -26,7 +26,7 @@ type chatResponseFull struct {
 	Channel   string `json:"channel"`
 	Timestamp string `json:"ts"`
 	Text      string `json:"text"`
-	SlackResponse
+	WebResponse
 }
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
@@ -157,7 +157,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	return response.Channel, response.Timestamp, response.Text, nil
+	return response.Channel, response.Timestamp, response.Text, response.Err()
 }
 
 // ApplyMsgOptions utility function for debugging/testing chat requests.

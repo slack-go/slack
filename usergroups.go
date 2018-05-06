@@ -37,7 +37,7 @@ type userGroupResponseFull struct {
 	UserGroups []UserGroup `json:"usergroups"`
 	UserGroup  UserGroup   `json:"usergroup"`
 	Users      []string    `json:"users"`
-	SlackResponse
+	WebResponse
 }
 
 func userGroupRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*userGroupResponseFull, error) {

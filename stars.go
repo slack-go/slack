@@ -24,7 +24,7 @@ type StarredItem Item
 type listResponseFull struct {
 	Items  []Item `json:"items"`
 	Paging `json:"paging"`
-	SlackResponse
+	WebResponse
 }
 
 // NewStarsParameters initialises StarsParameters with default values
@@ -57,14 +57,12 @@ func (api *Client) AddStarContext(ctx context.Context, channel string, item Item
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	if err := post(ctx, api.httpclient, "stars.add", values, response, api.debug); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // RemoveStar removes a starred item from a channel
@@ -88,14 +86,12 @@ func (api *Client) RemoveStarContext(ctx context.Context, channel string, item I
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &SlackResponse{}
+	response := &WebResponse{}
 	if err := post(ctx, api.httpclient, "stars.remove", values, response, api.debug); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // ListStars returns information about the stars a user added

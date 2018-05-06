@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,14 +20,16 @@ import (
 )
 
 type WebResponse struct {
-	Ok    bool      `json:"ok"`
-	Error *WebError `json:"error"`
+	Ok    bool   `json:"ok"`
+	Error string `json:"error"`
 }
 
-type WebError string
+func (t WebResponse) Err() error {
+	if t.Ok {
+		return nil
+	}
 
-func (s WebError) Error() string {
-	return string(s)
+	return errors.New(t.Error)
 }
 
 type RateLimitedError struct {
@@ -175,7 +178,7 @@ func logResponse(resp *http.Response, debug bool) error {
 
 func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(SlackResponse{
+	response, _ := json.Marshal(WebResponse{
 		Ok: true,
 	})
 	rw.Write(response)
