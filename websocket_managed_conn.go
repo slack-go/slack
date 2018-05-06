@@ -412,7 +412,6 @@ var EventMapping = map[string]interface{}{
 	"message":         MessageEvent{},
 	"presence_change": PresenceChangeEvent{},
 	"user_typing":     UserTypingEvent{},
-	"app_mention":     AppMentionEvent{},
 
 	"channel_marked":          ChannelMarkedEvent{},
 	"channel_created":         ChannelCreatedEvent{},
