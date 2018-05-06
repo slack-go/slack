@@ -25,7 +25,7 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg, e := ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
 	if e != nil {
 		fmt.Println(e)
 		t.Fail()
@@ -56,7 +56,7 @@ func TestParseURLVerificationEvent(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	msg, e := ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(&TokenComparator{"fake-token"}))
+	msg, e := ParseEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(&TokenComparator{"fake-token"}))
 	if e != nil {
 		fmt.Println(e)
 		t.Fail()
@@ -90,7 +90,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`
-	msg, e := ParseEventsAPIEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
 	if e != nil {
 		fmt.Println(e)
 		t.Fail()
@@ -123,7 +123,7 @@ func TestBadTokenVerification(t *testing.T) {
 			"type": "url_verification"
 		}
 	`
-	_, e := ParseEventsAPIEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(TokenComparator{"real-token"}))
+	_, e := ParseEvent(json.RawMessage(urlVerificationEvent), OptionVerifyToken(TokenComparator{"real-token"}))
 	if e == nil {
 		t.Fail()
 	}
