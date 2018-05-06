@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -155,6 +156,11 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 
 	if err = post(ctx, api.httpclient, string(config.mode), config.values, &response, api.debug); err != nil {
 		return "", "", "", err
+	}
+
+	//Check slack response for error
+	if response.SlackResponse.Ok == false {
+		return "", "", "", fmt.Errorf("slack API error: %s", response.SlackResponse.Error)
 	}
 
 	return response.Channel, response.Timestamp, response.Text, nil
