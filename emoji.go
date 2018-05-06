@@ -8,7 +8,7 @@ import (
 
 type emojiResponseFull struct {
 	Emoji map[string]string `json:"emoji"`
-	SlackResponse
+	WebResponse
 }
 
 // GetEmoji retrieves all the emojis

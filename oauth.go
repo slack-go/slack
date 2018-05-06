@@ -26,7 +26,7 @@ type OAuthResponse struct {
 	IncomingWebhook OAuthResponseIncomingWebhook `json:"incoming_webhook"`
 	Bot             OAuthResponseBot             `json:"bot"`
 	UserID          string                       `json:"user_id,omitempty"`
-	SlackResponse
+	WebResponse
 }
 
 // GetOAuthToken retrieves an AccessToken

@@ -28,12 +28,12 @@ type DNDStatus struct {
 
 type dndResponseFull struct {
 	DNDStatus
-	SlackResponse
+	WebResponse
 }
 
 type dndTeamInfoResponse struct {
 	Users map[string]DNDStatus `json:"users"`
-	SlackResponse
+	WebResponse
 }
 
 func dndRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*dndResponseFull, error) {
@@ -59,15 +59,13 @@ func (api *Client) EndDNDContext(ctx context.Context) error {
 		"token": {api.token},
 	}
 
-	response := &SlackResponse{}
+	response := &WebResponse{}
 
 	if err := post(ctx, api.httpclient, "dnd.endDnd", values, response, api.debug); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // EndSnooze ends the current user's snooze mode

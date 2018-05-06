@@ -3,7 +3,6 @@ package slack
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/url"
 	"sync"
 	"time"
@@ -32,13 +31,11 @@ func (api *Client) StartRTMContext(ctx context.Context) (info *Info, websocketUR
 	response := &infoResponseFull{}
 	err = post(ctx, api.httpclient, "rtm.start", url.Values{"token": {api.token}}, response, api.debug)
 	if err != nil {
-		return nil, "", fmt.Errorf("post: %s", err)
+		return nil, "", err
 	}
-	if !response.Ok {
-		return nil, "", response.Error
-	}
+
 	api.Debugln("Using URL:", response.Info.URL)
-	return &response.Info, response.Info.URL, nil
+	return &response.Info, response.Info.URL, response.Err()
 }
 
 // ConnectRTM calls the "rtm.connect" endpoint and returns the provided URL and the compact Info block.
@@ -60,13 +57,11 @@ func (api *Client) ConnectRTMContext(ctx context.Context) (info *Info, websocket
 	err = post(ctx, api.httpclient, "rtm.connect", url.Values{"token": {api.token}}, response, api.debug)
 	if err != nil {
 		api.Debugf("Failed to connect to RTM: %s", err)
-		return nil, "", fmt.Errorf("post: %s", err)
+		return nil, "", err
 	}
-	if !response.Ok {
-		return nil, "", response.Error
-	}
+
 	api.Debugln("Using URL:", response.Info.URL)
-	return &response.Info, response.Info.URL, nil
+	return &response.Info, response.Info.URL, response.Err()
 }
 
 // RTMOption options for the managed RTM.
