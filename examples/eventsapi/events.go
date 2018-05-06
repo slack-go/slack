@@ -18,7 +18,7 @@ func main() {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(r.Body)
 		body := buf.String()
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), OptionVerifyToken(&TokenComparator{"TOKEN"}))
+		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{"TOKEN"}))
 		if e != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
