@@ -273,11 +273,8 @@ func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, comment
 		"file":  {fileID},
 		"id":    {commentID},
 	}
-	if _, err = fileRequest(ctx, api.httpclient, "files.comments.delete", values, api.debug); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = fileRequest(ctx, api.httpclient, "files.comments.delete", values, api.debug)
+	return err
 }
 
 // DeleteFile deletes a file
@@ -292,11 +289,8 @@ func (api *Client) DeleteFileContext(ctx context.Context, fileID string) (err er
 		"file":  {fileID},
 	}
 
-	if _, err = fileRequest(ctx, api.httpclient, "files.delete", values, api.debug); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = fileRequest(ctx, api.httpclient, "files.delete", values, api.debug)
+	return err
 }
 
 // RevokeFilePublicURL disables public/external sharing for a file

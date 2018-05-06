@@ -317,7 +317,6 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
 		})
 		rw.Write(response)
-		return
 	}
 }
 
