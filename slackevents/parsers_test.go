@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/ACollectionOfAtoms/slack"
 )
 
 func TestParserOuterCallBackEvent(t *testing.T) {
@@ -32,7 +34,7 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 	case *EventsAPICallbackEvent:
 		{
 		}
-	case *UnmarshallingErrorEvent:
+	case *slack.UnmarshallingErrorEvent:
 		{
 			fmt.Println("Unmarshalling Error!")
 			fmt.Println(ev)
