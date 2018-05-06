@@ -388,7 +388,7 @@ func (rtm *RTM) handlePong(event json.RawMessage) {
 // correct struct then this sends an UnmarshallingErrorEvent to the
 // IncomingEvents channel.
 func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
-	v, exists := eventMapping[typeStr]
+	v, exists := EventMapping[typeStr]
 	if !exists {
 		rtm.Debugf("RTM Error, received unmapped event %q: %s\n", typeStr, string(event))
 		err := fmt.Errorf("RTM Error: Received unmapped event %q: %s\n", typeStr, string(event))
@@ -407,10 +407,10 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 	rtm.IncomingEvents <- RTMEvent{typeStr, recvEvent}
 }
 
-// eventMapping holds a mapping of event names to their corresponding struct
+// EventMapping holds a mapping of event names to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var eventMapping = map[string]interface{}{
+var EventMapping = map[string]interface{}{
 	"message":         MessageEvent{},
 	"presence_change": PresenceChangeEvent{},
 	"user_typing":     UserTypingEvent{},
