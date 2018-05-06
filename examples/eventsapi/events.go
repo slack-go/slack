@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/ACollectionOfAtoms/slack"
+	"github.com/ACollectionOfAtoms/slack/slackevents"
 )
 
 var api = slack.New("TOKEN")
@@ -16,12 +17,12 @@ func main() {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(r.Body)
 		body := buf.String()
-		eventsAPIEvent, e := api.ParseEventsAPIEvent(json.RawMessage(body))
+		eventsAPIEvent, e := slackevents.ParseEventsAPIEvent(json.RawMessage(body))
 		if e != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		if eventsAPIEvent.Type == slack.URLVerification {
+		if eventsAPIEvent.Type == slackevents.URLVerification {
 			var r *slack.ChallengeResponse
 			err := json.Unmarshal([]byte(body), &r)
 			if err != nil {
@@ -30,11 +31,11 @@ func main() {
 			w.Header().Set("Content-Type", "text")
 			w.Write([]byte(r.Challenge))
 		}
-		if eventsAPIEvent.Type == slack.CallbackEvent {
+		if eventsAPIEvent.Type == slackevents.CallbackEvent {
 			postParams := slack.PostMessageParameters{}
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch ev := innerEvent.Data.(type) {
-			case *slack.AppMentionEvent:
+			case *slackevents.AppMentionEvent:
 				api.PostMessage(ev.Channel, "Yes, hello.", postParams)
 			}
 		}
