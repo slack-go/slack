@@ -173,7 +173,7 @@ type userResponseFull struct {
 	User         `json:"user,omitempty"` // GetUserInfo
 	UserPresence                         // GetUserPresence
 	WebResponse
-	Metadata ResponseMetadata
+	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
 type UserSetPhotoParams struct {
