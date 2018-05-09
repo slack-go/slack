@@ -26,7 +26,7 @@ type chatResponseFull struct {
 	Channel   string `json:"channel"`
 	Timestamp string `json:"ts"`
 	Text      string `json:"text"`
-	WebResponse
+	SlackResponse
 }
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request

@@ -44,7 +44,7 @@ type getReactionsResponseFull struct {
 	FC struct {
 		Reactions []ItemReaction
 	} `json:"comment"`
-	WebResponse
+	SlackResponse
 }
 
 func (res getReactionsResponseFull) extractReactions() []ItemReaction {
@@ -102,7 +102,7 @@ type listReactionsResponseFull struct {
 		} `json:"comment"`
 	}
 	Paging `json:"paging"`
-	WebResponse
+	SlackResponse
 }
 
 func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
@@ -154,7 +154,7 @@ func (api *Client) AddReactionContext(ctx context.Context, name string, item Ite
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "reactions.add", values, response, api.debug); err != nil {
 		return err
 	}
@@ -188,7 +188,7 @@ func (api *Client) RemoveReactionContext(ctx context.Context, name string, item 
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "reactions.remove", values, response, api.debug); err != nil {
 		return err
 	}

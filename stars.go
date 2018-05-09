@@ -24,7 +24,7 @@ type StarredItem Item
 type listResponseFull struct {
 	Items  []Item `json:"items"`
 	Paging `json:"paging"`
-	WebResponse
+	SlackResponse
 }
 
 // NewStarsParameters initialises StarsParameters with default values
@@ -57,7 +57,7 @@ func (api *Client) AddStarContext(ctx context.Context, channel string, item Item
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "stars.add", values, response, api.debug); err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (api *Client) RemoveStarContext(ctx context.Context, channel string, item I
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "stars.remove", values, response, api.debug); err != nil {
 		return err
 	}

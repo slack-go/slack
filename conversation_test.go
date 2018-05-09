@@ -208,11 +208,11 @@ func getTestMembers() []string {
 func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		Members          []string         `json:"members"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
 	}{
-		WebResponse:      WebResponse{Ok: true},
+		SlackResponse:    SlackResponse{Ok: true},
 		Members:          getTestMembers(),
 		ResponseMetaData: responseMetaData{NextCursor: ""},
 	})
@@ -279,11 +279,11 @@ func getTestChannel() *Channel {
 func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{
-		WebResponse: WebResponse{Ok: true},
-		Channel:     getTestChannel(),
+		SlackResponse: SlackResponse{Ok: true},
+		Channel:       getTestChannel(),
 	})
 	rw.Write(response)
 }
@@ -368,11 +368,11 @@ func TestKickUserFromConversation(t *testing.T) {
 func closeConversationHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		NoOp          bool `json:"no_op"`
 		AlreadyClosed bool `json:"already_closed"`
 	}{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 
@@ -423,10 +423,10 @@ func TestGetConversationInfo(t *testing.T) {
 func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		NotInChannel bool `json:"not_in_channel"`
 	}{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 
@@ -445,15 +445,15 @@ func TestLeaveConversation(t *testing.T) {
 func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		HasMore          bool `json:"has_more"`
 		ResponseMetaData struct {
 			NextCursor string `json:"next_cursor"`
 		} `json:"response_metadata"`
 		Messages []Message `json:"messages"`
 	}{
-		WebResponse: WebResponse{Ok: true},
-		Messages:    []Message{}})
+		SlackResponse: SlackResponse{Ok: true},
+		Messages:      []Message{}})
 	rw.Write(response)
 }
 
@@ -476,14 +476,14 @@ func TestGetConversationReplies(t *testing.T) {
 func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		ResponseMetaData struct {
 			NextCursor string `json:"next_cursor"`
 		} `json:"response_metadata"`
 		Channels []Channel `json:"channels"`
 	}{
-		WebResponse: WebResponse{Ok: true},
-		Channels:    []Channel{}})
+		SlackResponse: SlackResponse{Ok: true},
+		Channels:      []Channel{}})
 	rw.Write(response)
 }
 
@@ -503,12 +503,12 @@ func TestGetConversations(t *testing.T) {
 func openConversationHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		WebResponse
+		SlackResponse
 		NoOp        bool     `json:"no_op"`
 		AlreadyOpen bool     `json:"already_open"`
 		Channel     *Channel `json:"channel"`
 	}{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 
@@ -533,9 +533,9 @@ func joinConversationHandler(rw http.ResponseWriter, r *http.Request) {
 		ResponseMetaData *struct {
 			Warnings []string `json:"warnings"`
 		} `json:"response_metadata"`
-		WebResponse
+		SlackResponse
 	}{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 
@@ -554,7 +554,7 @@ func TestJoinConversation(t *testing.T) {
 func getConversationHistoryHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(GetConversationHistoryResponse{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 

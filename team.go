@@ -14,7 +14,7 @@ const (
 
 type TeamResponse struct {
 	Team TeamInfo `json:"team"`
-	WebResponse
+	SlackResponse
 }
 
 type TeamInfo struct {
@@ -28,7 +28,7 @@ type TeamInfo struct {
 type LoginResponse struct {
 	Logins []Login `json:"logins"`
 	Paging `json:"paging"`
-	WebResponse
+	SlackResponse
 }
 
 type Login struct {
@@ -46,7 +46,7 @@ type Login struct {
 
 type BillableInfoResponse struct {
 	BillableInfo map[string]BillingActive `json:"billable_info"`
-	WebResponse
+	SlackResponse
 }
 
 type BillingActive struct {

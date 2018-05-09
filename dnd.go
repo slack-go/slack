@@ -28,12 +28,12 @@ type DNDStatus struct {
 
 type dndResponseFull struct {
 	DNDStatus
-	WebResponse
+	SlackResponse
 }
 
 type dndTeamInfoResponse struct {
 	Users map[string]DNDStatus `json:"users"`
-	WebResponse
+	SlackResponse
 }
 
 func dndRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*dndResponseFull, error) {
@@ -59,7 +59,7 @@ func (api *Client) EndDNDContext(ctx context.Context) error {
 		"token": {api.token},
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 
 	if err := post(ctx, api.httpclient, "dnd.endDnd", values, response, api.debug); err != nil {
 		return err

@@ -120,7 +120,7 @@ type fileResponseFull struct {
 	Comments []Comment `json:"comments"`
 	Files    []File    `json:"files"`
 
-	WebResponse
+	SlackResponse
 }
 
 // NewGetFilesParameters provides an instance of GetFilesParameters with all the sane default values set

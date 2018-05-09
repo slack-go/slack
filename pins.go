@@ -9,7 +9,7 @@ import (
 type listPinsResponseFull struct {
 	Items  []Item
 	Paging `json:"paging"`
-	WebResponse
+	SlackResponse
 }
 
 // AddPin pins an item in a channel
@@ -33,7 +33,7 @@ func (api *Client) AddPinContext(ctx context.Context, channel string, item ItemR
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "pins.add", values, response, api.debug); err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (api *Client) RemovePinContext(ctx context.Context, channel string, item It
 		values.Set("file_comment", item.Comment)
 	}
 
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	if err := post(ctx, api.httpclient, "pins.remove", values, response, api.debug); err != nil {
 		return err
 	}
