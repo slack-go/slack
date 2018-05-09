@@ -158,7 +158,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 	}
 
 	if !cfg.TokenVerified {
-		return EventsAPIEvent{}, errors.New("No")
+		return EventsAPIEvent{}, errors.New("Invalid verification token")
 	}
 
 	if e.Type == CallbackEvent {
