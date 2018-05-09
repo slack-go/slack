@@ -81,6 +81,12 @@ func (rtm *RTM) ManageConnection() {
 // If useRTMStart is false then it uses rtm.connect to create the connection,
 // otherwise it uses rtm.start.
 func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocket.Conn, error) {
+	const (
+		errInvalidAuth      = "invalid_auth"
+		errInactiveAccount  = "account_inactive"
+		errMissingAuthToken = "not_authed"
+	)
+
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
 	boff := &backoff{
@@ -102,11 +108,13 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 			return info, conn, nil
 		}
 
-		// check for fatal errors - currently only invalid_auth
-		if err.Error() == "invalid_auth" || err.Error() == "account_inactive" {
+		// check for fatal errors
+		switch err.Error() {
+		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
 			rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, err
+		default:
 		}
 
 		// any other errors are treated as recoverable and we try again after
