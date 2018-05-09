@@ -57,7 +57,7 @@ type AuthTestResponse struct {
 }
 
 type authTestResponseFull struct {
-	WebResponse
+	SlackResponse
 	AuthTestResponse
 }
 

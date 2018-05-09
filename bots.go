@@ -16,7 +16,7 @@ type Bot struct {
 
 type botResponseFull struct {
 	Bot `json:"bot,omitempty"` // GetBotInfo
-	WebResponse
+	SlackResponse
 }
 
 func botRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*botResponseFull, error) {

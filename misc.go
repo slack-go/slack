@@ -19,12 +19,12 @@ import (
 	"time"
 )
 
-type WebResponse struct {
+type SlackResponse struct {
 	Ok    bool   `json:"ok"`
 	Error string `json:"error"`
 }
 
-func (t WebResponse) Err() error {
+func (t SlackResponse) Err() error {
 	if t.Ok {
 		return nil
 	}
@@ -178,7 +178,7 @@ func logResponse(resp *http.Response, debug bool) error {
 
 func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(WebResponse{
+	response, _ := json.Marshal(SlackResponse{
 		Ok: true,
 	})
 	rw.Write(response)

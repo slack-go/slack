@@ -88,7 +88,7 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 	response := struct {
 		Members          []string         `json:"members"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
-		WebResponse
+		SlackResponse
 	}{}
 	err := post(ctx, api.httpclient, "conversations.members", values, &response, api.debug)
 	if err != nil {
@@ -111,7 +111,7 @@ func (api *Client) ArchiveConversationContext(ctx context.Context, channelID str
 		"token":   {api.token},
 		"channel": {channelID},
 	}
-	response := WebResponse{}
+	response := SlackResponse{}
 	err := post(ctx, api.httpclient, "conversations.archive", values, &response, api.debug)
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID s
 		"token":   {api.token},
 		"channel": {channelID},
 	}
-	response := WebResponse{}
+	response := SlackResponse{}
 	err := post(ctx, api.httpclient, "conversations.unarchive", values, &response, api.debug)
 	if err != nil {
 		return err
@@ -153,7 +153,7 @@ func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID,
 		"topic":   {topic},
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, api.httpclient, "conversations.setTopic", values, &response, api.debug)
@@ -177,7 +177,7 @@ func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelI
 		"purpose": {purpose},
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, api.httpclient, "conversations.setPurpose", values, &response, api.debug)
@@ -201,7 +201,7 @@ func (api *Client) RenameConversationContext(ctx context.Context, channelID, cha
 		"name":    {channelName},
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, api.httpclient, "conversations.rename", values, &response, api.debug)
@@ -225,7 +225,7 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 		"users":   {strings.Join(users, ",")},
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{}
 	err := post(ctx, api.httpclient, "conversations.invite", values, &response, api.debug)
@@ -248,7 +248,7 @@ func (api *Client) KickUserFromConversationContext(ctx context.Context, channelI
 		"channel": {channelID},
 		"user":    {user},
 	}
-	response := WebResponse{}
+	response := SlackResponse{}
 	err := post(ctx, api.httpclient, "conversations.kick", values, &response, api.debug)
 	if err != nil {
 		return err
@@ -269,7 +269,7 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 		"channel": {channelID},
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		NoOp          bool `json:"no_op"`
 		AlreadyClosed bool `json:"already_closed"`
 	}{}
@@ -380,7 +380,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		values.Add("inclusive", "0")
 	}
 	response := struct {
-		WebResponse
+		SlackResponse
 		HasMore          bool `json:"has_more"`
 		ResponseMetaData struct {
 			NextCursor string `json:"next_cursor"`
@@ -426,7 +426,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 	response := struct {
 		Channels         []Channel        `json:"channels"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
-		WebResponse
+		SlackResponse
 	}{}
 	err = post(ctx, api.httpclient, "conversations.list", values, &response, api.debug)
 	if err != nil {
@@ -463,7 +463,7 @@ func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConv
 		Channel     *Channel `json:"channel"`
 		NoOp        bool     `json:"no_op"`
 		AlreadyOpen bool     `json:"already_open"`
-		WebResponse
+		SlackResponse
 	}{}
 	err := post(ctx, api.httpclient, "conversations.open", values, &response, api.debug)
 	if err != nil {
@@ -487,7 +487,7 @@ func (api *Client) JoinConversationContext(ctx context.Context, channelID string
 		ResponseMetaData *struct {
 			Warnings []string `json:"warnings"`
 		} `json:"response_metadata"`
-		WebResponse
+		SlackResponse
 	}{}
 	err := post(ctx, api.httpclient, "conversations.join", values, &response, api.debug)
 	if err != nil {
@@ -513,7 +513,7 @@ type GetConversationHistoryParameters struct {
 }
 
 type GetConversationHistoryResponse struct {
-	WebResponse
+	SlackResponse
 	HasMore          bool   `json:"has_more"`
 	PinCount         int    `json:"pin_count"`
 	Latest           string `json:"latest"`
