@@ -25,19 +25,26 @@ import (
 //
 // The defined error events are located in websocket_internals.go.
 func (rtm *RTM) ManageConnection() {
-	var connectionCount int
+	var (
+		err             error
+		connectionCount int
+		info            *Info
+		conn            *websocket.Conn
+	)
+
 	for {
+		// BEGIN SENSITIVE CODE, make sure lock is unlocked in this section.
 		rtm.mu.Lock()
 		connectionCount++
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
-		info, conn, err := rtm.connect(connectionCount, rtm.useRTMStart)
-		// if err != nil then the connection is successful - otherwise it is
-		// fatal
-		if err != nil {
+		if info, conn, err = rtm.connect(connectionCount, rtm.useRTMStart); err != nil {
+			// when the connection is unsuccessful its fatal, and we need to bail out.
 			rtm.Debugf("Failed to connect with RTM on try %d: %s", connectionCount, err)
+			rtm.mu.Unlock()
 			return
 		}
+
 		rtm.info = info
 		rtm.IncomingEvents <- RTMEvent{"connected", &ConnectedEvent{
 			ConnectionCount: connectionCount,
@@ -47,6 +54,7 @@ func (rtm *RTM) ManageConnection() {
 		rtm.conn = conn
 		rtm.isConnected = true
 		rtm.mu.Unlock()
+		// END SENSITIVE CODE
 
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
