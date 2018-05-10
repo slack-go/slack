@@ -62,6 +62,7 @@ type sharedLinks struct {
 type MessageEvent struct {
 	Type           string      `json:"type"`
 	User           string      `json:"user"`
+	Username	   string	   `json:"username"`
 	Text           string      `json:"text"`
 	TimeStamp      string      `json:"ts"`
 	Channel        string      `json:"channel"`
