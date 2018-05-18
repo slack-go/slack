@@ -50,6 +50,14 @@ type PostMessageParameters struct {
 	User    string `json:"user"`
 }
 
+// Optional parameters that can be added to a message update request, as per https://api.slack.com/methods/chat.update
+type UpdateMessageParameters struct {
+	AsUser      bool         `json:"as_user"`
+	Attachments []Attachment `json:"attachments"`
+	LinkNames   int          `json:"link_names"`
+	Parse       string       `json:"parse"`
+}
+
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
 func NewPostMessageParameters() PostMessageParameters {
 	return PostMessageParameters{
@@ -128,13 +136,20 @@ func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID s
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channelID, timestamp, text string) (string, string, string, error) {
-	return api.UpdateMessageContext(context.Background(), channelID, timestamp, text)
+func (api *Client) UpdateMessage(channelID, timestamp, text string, params UpdateMessageParameters) (string, string, string, error) {
+	return api.UpdateMessageContext(context.Background(), channelID, timestamp, text, params)
 }
 
 // UpdateMessageContext updates a message in a channel
-func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp, text string) (string, string, string, error) {
-	return api.SendMessageContext(ctx, channelID, MsgOptionUpdate(timestamp), MsgOptionText(text, true))
+func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp, text string, params UpdateMessageParameters) (string, string, string, error) {
+	return api.SendMessageContext(
+		ctx,
+		channelID,
+		MsgOptionUpdate(timestamp),
+		MsgOptionText(text, true),
+		MsgOptionAttachments(params.Attachments...),
+		MsgOptionUpdateMessageParmeters(params),
+	)
 }
 
 // SendMessage more flexible method for configuring messages.
@@ -380,6 +395,22 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 		if params.ReplyBroadcast != DEFAULT_MESSAGE_REPLY_BROADCAST {
 			config.values.Set("reply_broadcast", "true")
+		}
+
+		return nil
+	}
+}
+
+func MsgOptionUpdateMessageParmeters(params UpdateMessageParameters) MsgOption {
+	return func(config *sendConfig) error {
+		MsgOptionAsUser(params.AsUser)(config)
+
+		if params.Parse != DEFAULT_MESSAGE_PARSE {
+			config.values.Set("parse", params.Parse)
+		}
+
+		if params.LinkNames != DEFAULT_MESSAGE_LINK_NAMES {
+			config.values.Set("link_names", "1")
 		}
 
 		return nil
