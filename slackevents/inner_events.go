@@ -61,8 +61,9 @@ type sharedLinks struct {
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
 	Type           string      `json:"type"`
+	Subtype        string      `json:"subtype"`
 	User           string      `json:"user"`
-	Username	   string	   `json:"username"`
+	Username       string      `json:"username"`
 	Text           string      `json:"text"`
 	TimeStamp      string      `json:"ts"`
 	Channel        string      `json:"channel"`
