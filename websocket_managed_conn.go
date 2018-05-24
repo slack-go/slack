@@ -243,7 +243,9 @@ func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
 		case <-keepRunning:
 			return
 		default:
-			rtm.receiveIncomingEvent()
+			if err := rtm.receiveIncomingEvent(); err != nil {
+				return
+			}
 		}
 	}
 }
@@ -306,7 +308,8 @@ func (rtm *RTM) ping() error {
 
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
 // This will block until a frame is available from the websocket.
-func (rtm *RTM) receiveIncomingEvent() {
+// If the read from the websocket results in a fatal error, this function will return non-nil.
+func (rtm *RTM) receiveIncomingEvent() error {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 	switch {
@@ -324,12 +327,14 @@ func (rtm *RTM) receiveIncomingEvent() {
 			ErrorObj: err,
 		}}
 		rtm.killChannel <- false
+		return err
 	case len(event) == 0:
 		rtm.Debugln("Received empty event")
 	default:
 		rtm.Debugln("Incoming Event:", string(event[:]))
 		rtm.rawEvents <- event
 	}
+	return nil
 }
 
 // handleRawEvent takes a raw JSON message received from the slack websocket
