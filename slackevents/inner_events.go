@@ -70,7 +70,7 @@ type MessageEvent struct {
 	EventTimeStamp json.Number `json:"event_ts"`
 
 	// Message Subtypes
-	SubType 	   string      `json:"subtype,omitempty"`
+	SubType string `json:"subtype,omitempty"`
 
 	// bot_message (https://api.slack.com/events/message/bot_message)
 	BotID    string `json:"bot_id,omitempty"`
