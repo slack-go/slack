@@ -60,6 +60,7 @@ type sharedLinks struct {
 // if ChannelType = "mim", A message was posted in a multiparty direct message channel
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
+	// Basic Message Event - https://api.slack.com/events/message
 	Type           string      `json:"type"`
 	User           string      `json:"user"`
 	Text           string      `json:"text"`
@@ -67,6 +68,20 @@ type MessageEvent struct {
 	Channel        string      `json:"channel"`
 	ChannelType    string      `json:"channel_type"`
 	EventTimeStamp json.Number `json:"event_ts"`
+
+	// Message Subtypes
+	SubType 	   string      `json:"subtype,omitempty"`
+
+	// bot_message (https://api.slack.com/events/message/bot_message)
+	BotID    string `json:"bot_id,omitempty"`
+	Username string `json:"username,omitempty"`
+	Icons    *Icon  `json:"icons,omitempty"`
+}
+
+// Icon is used for bot messages
+type Icon struct {
+	IconURL   string `json:"icon_url,omitempty"`
+	IconEmoji string `json:"icon_emoji,omitempty"`
 }
 
 const (
