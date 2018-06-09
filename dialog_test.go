@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"net/http"
@@ -78,7 +79,7 @@ func TestSimpleDialog(t *testing.T) {
 
 func TestCreateSimpleDialog(t *testing.T) {
 	dialog := &Dialog{}
-	dialog.CallbackId = "ryde-46e2b0"
+	dialog.CallbackID = "ryde-46e2b0"
 	dialog.Title = "Request a Ride"
 	dialog.SubmitLabel = "Request"
 	dialog.NotifyOnCancel = true
@@ -121,7 +122,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.NotNil(t, dialog)
 
 	// Test the main dialog fields
-	assert.Equal(t, "ryde-46e2b0", dialog.CallbackId)
+	assert.Equal(t, "ryde-46e2b0", dialog.CallbackID)
 	assert.Equal(t, "Request a Ride", dialog.Title)
 	assert.Equal(t, "Request", dialog.SubmitLabel)
 	assert.Equal(t, true, dialog.NotifyOnCancel)
@@ -130,7 +131,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	textElement := dialog.Elements[0].(*DialogTextElement)
 	assert.Equal(t, "testing label", textElement.Label)
 	assert.Equal(t, "testing name", textElement.Name)
-	assert.Equal(t, "text", textElement.Type)
+	assert.Equal(t, InputTypeText, textElement.Type)
 	assert.Equal(t, "testing placeholder", textElement.Placeholder)
 	assert.Equal(t, true, textElement.Optional)
 	assert.Equal(t, "testing value", textElement.Value)
@@ -143,7 +144,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	selectElement := dialog.Elements[1].(*DialogSelectElement)
 	assert.Equal(t, "testing label", selectElement.Label)
 	assert.Equal(t, "testing name", selectElement.Name)
-	assert.Equal(t, "select", selectElement.Type)
+	assert.Equal(t, InputTypeSelect, selectElement.Type)
 	assert.Equal(t, "testing placeholder", selectElement.Placeholder)
 	assert.Equal(t, true, selectElement.Optional)
 	assert.Equal(t, "testing value", selectElement.Value)
@@ -302,4 +303,44 @@ func TestOpenDialog(t *testing.T) {
 		t.Errorf("Did not error with empty trigger, %s", err)
 		return
 	}
+}
+
+const (
+	triggerID      = "trigger_xyz"
+	callbackID     = "callback_xyz"
+	notifyOnCancel = false
+	title          = "Dialog_title"
+	submitLabel    = "Send"
+	token          = "xoxa-123-123-123-213"
+)
+
+func _mocDialog() *Dialog {
+	triggerID := triggerID
+	callbackID := callbackID
+	notifyOnCancel := notifyOnCancel
+	title := title
+	submitLabel := submitLabel
+
+	return &Dialog{
+		TriggerID:      triggerID,
+		CallbackID:     callbackID,
+		NotifyOnCancel: notifyOnCancel,
+		Title:          title,
+		SubmitLabel:    submitLabel,
+	}
+}
+
+func TestDialogCreate(t *testing.T) {
+	dialog := _mocDialog()
+	if dialog == nil {
+		t.Errorf("Should be able to construct a dialog")
+		t.Fail()
+	}
+}
+
+func ExampleDialog() {
+	dialog := _mocDialog()
+	fmt.Println(*dialog)
+	// Output:
+	// {trigger_xyz callback_xyz Dialog_title Send false []}
 }
