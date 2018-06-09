@@ -2,7 +2,7 @@ package slackevents
 
 import (
 	"encoding/json"
-	"github.com/alexstojda/slack"
+	"github.com/nlopes/slack"
 )
 
 type MessageActionResponse struct {
@@ -30,13 +30,4 @@ type MessageAction struct {
 	OriginalMessage  slack.Message            `json:"original_message"`
 	ResponseUrl      string                   `json:"response_url"`
 	TriggerId        string                   `json:"trigger_id"`
-}
-
-func UnmarshallMessageAction(payloadString string, p *MessageAction) {
-	byteString := []byte(payloadString)
-	err := json.Unmarshal(byteString, &p)
-	if err != nil {
-		print("An error occured: ")
-		print(err)
-	}
 }
