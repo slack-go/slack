@@ -331,6 +331,23 @@ func MsgOptionDisableMarkdown() MsgOption {
 	}
 }
 
+// this function combines multiple options into a single option.
+func MsgOptionCompose(options ...MsgOption) MsgOption {
+	return func(c *sendConfig) error {
+		for _, opt := range options { opt(c) }
+		return nil
+	}
+}
+
+func MsgOptionParse(b bool) MsgOption {
+	return func(c *sendConfig) error {
+		var v string
+		if b { v = "1" } else { v = "0" }
+		c.values.Set("parse", v)
+		return nil
+	}
+}
+
 // MsgOptionPostMessageParameters maintain backwards compatibility.
 func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 	return func(config *sendConfig) error {
