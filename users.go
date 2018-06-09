@@ -169,11 +169,11 @@ type TeamIdentity struct {
 }
 
 type userResponseFull struct {
-	Members      []User                  `json:"members,omitempty"` // ListUsers
-	User         `json:"user,omitempty"` // GetUserInfo
-	UserPresence                         // GetUserPresence
+	Members      []User        `json:"members,omitempty"`
+	User                       `json:"user,omitempty"`
+	UserPresence                        
 	SlackResponse
-	Metadata ResponseMetadata
+	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
 type UserSetPhotoParams struct {
