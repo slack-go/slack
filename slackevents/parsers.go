@@ -208,7 +208,7 @@ func ParseActionEvent(payloadString string, opts ...Option) (MessageAction, erro
 	}
 
 	if !cfg.TokenVerified {
-		return MessageAction{}, errors.New("no")
+		return MessageAction{}, errors.New("invalid verification token")
 	} else {
 		return action, nil
 	}
