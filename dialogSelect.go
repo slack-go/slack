@@ -22,10 +22,6 @@ type baseSelect struct {
 	DataSource SelectDataSource `json:"data_source"`
 }
 
-//------------------------------------------
-//		StaticSelectDialogInput
-//------------------------------------------
-
 // StaticSelectDialogInput can support all type except Dynamic menu
 type StaticSelectDialogInput struct {
 	baseSelect
@@ -44,6 +40,12 @@ type SelectOption struct {
 type OptionGroup struct {
 	Label   string         `json:"label"`
 	Options []SelectOption `json:"options"`
+}
+
+// ExternalSelectInputElement is a special case of `SelectInputElement``
+type ExternalSelectInputElement struct {
+	baseSelect
+	SelectedOptions []SelectOption `json:"selected_options"` //This option is invalid in external, where you must use selected_options
 }
 
 func makeOptions(options []string) []SelectOption {
@@ -122,14 +124,4 @@ func NewChannelsSelect(name, label string) *StaticSelectDialogInput {
 // NewUsersSelect returns a `Users` select
 func NewUsersSelect(name, label string) *StaticSelectDialogInput {
 	return newPresetSelect(name, label, UsersDataSource)
-}
-
-//------------------------------------------
-//		ExternalSelectInputElement
-//------------------------------------------
-
-// ExternalSelectInputElement is a special case of `SelectInputElement``
-type ExternalSelectInputElement struct {
-	baseSelect
-	SelectedOptions []SelectOption `json:"selected_options"` //This option is invalid in external, where you must use selected_options
 }
