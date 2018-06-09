@@ -334,7 +334,11 @@ func MsgOptionDisableMarkdown() MsgOption {
 // this function combines multiple options into a single option.
 func MsgOptionCompose(options ...MsgOption) MsgOption {
 	return func(c *sendConfig) error {
-		for _, opt := range options { opt(c) }
+		for _, opt := range options {
+			if err := opt(c); err != nil {
+				return err
+			}
+		}
 		return nil
 	}
 }
