@@ -25,7 +25,7 @@ type groupResponseFull struct {
 	AlreadyInGroup bool    `json:"already_in_group"`
 	Channel        Channel `json:"channel"`
 	History
-	WebResponse
+	SlackResponse
 }
 
 func groupRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*groupResponseFull, error) {

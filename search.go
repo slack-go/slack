@@ -69,7 +69,7 @@ type searchResponseFull struct {
 	Query          string `json:"query"`
 	SearchMessages `json:"messages"`
 	SearchFiles    `json:"files"`
-	WebResponse
+	SlackResponse
 }
 
 func NewSearchParameters() SearchParameters {

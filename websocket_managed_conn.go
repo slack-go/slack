@@ -25,19 +25,26 @@ import (
 //
 // The defined error events are located in websocket_internals.go.
 func (rtm *RTM) ManageConnection() {
-	var connectionCount int
+	var (
+		err             error
+		connectionCount int
+		info            *Info
+		conn            *websocket.Conn
+	)
+
 	for {
+		// BEGIN SENSITIVE CODE, make sure lock is unlocked in this section.
 		rtm.mu.Lock()
 		connectionCount++
 		// start trying to connect
 		// the returned err is already passed onto the IncomingEvents channel
-		info, conn, err := rtm.connect(connectionCount, rtm.useRTMStart)
-		// if err != nil then the connection is successful - otherwise it is
-		// fatal
-		if err != nil {
+		if info, conn, err = rtm.connect(connectionCount, rtm.useRTMStart); err != nil {
+			// when the connection is unsuccessful its fatal, and we need to bail out.
 			rtm.Debugf("Failed to connect with RTM on try %d: %s", connectionCount, err)
+			rtm.mu.Unlock()
 			return
 		}
+
 		rtm.info = info
 		rtm.IncomingEvents <- RTMEvent{"connected", &ConnectedEvent{
 			ConnectionCount: connectionCount,
@@ -47,6 +54,7 @@ func (rtm *RTM) ManageConnection() {
 		rtm.conn = conn
 		rtm.isConnected = true
 		rtm.mu.Unlock()
+		// END SENSITIVE CODE
 
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
@@ -73,6 +81,12 @@ func (rtm *RTM) ManageConnection() {
 // If useRTMStart is false then it uses rtm.connect to create the connection,
 // otherwise it uses rtm.start.
 func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocket.Conn, error) {
+	const (
+		errInvalidAuth      = "invalid_auth"
+		errInactiveAccount  = "account_inactive"
+		errMissingAuthToken = "not_authed"
+	)
+
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
 	boff := &backoff{
@@ -94,11 +108,13 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 			return info, conn, nil
 		}
 
-		// check for fatal errors - currently only invalid_auth
-		if err.Error() == "invalid_auth" || err.Error() == "account_inactive" {
+		// check for fatal errors
+		switch err.Error() {
+		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
 			rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, err
+		default:
 		}
 
 		// any other errors are treated as recoverable and we try again after
@@ -227,7 +243,9 @@ func (rtm *RTM) handleIncomingEvents(keepRunning <-chan bool) {
 		case <-keepRunning:
 			return
 		default:
-			rtm.receiveIncomingEvent()
+			if err := rtm.receiveIncomingEvent(); err != nil {
+				return
+			}
 		}
 	}
 }
@@ -290,7 +308,8 @@ func (rtm *RTM) ping() error {
 
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
 // This will block until a frame is available from the websocket.
-func (rtm *RTM) receiveIncomingEvent() {
+// If the read from the websocket results in a fatal error, this function will return non-nil.
+func (rtm *RTM) receiveIncomingEvent() error {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 	switch {
@@ -308,12 +327,14 @@ func (rtm *RTM) receiveIncomingEvent() {
 			ErrorObj: err,
 		}}
 		rtm.killChannel <- false
+		return err
 	case len(event) == 0:
 		rtm.Debugln("Received empty event")
 	default:
 		rtm.Debugln("Incoming Event:", string(event[:]))
 		rtm.rawEvents <- event
 	}
+	return nil
 }
 
 // handleRawEvent takes a raw JSON message received from the slack websocket

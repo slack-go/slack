@@ -9,7 +9,7 @@ import (
 func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(chatResponseFull{
-		WebResponse: WebResponse{Ok: false, Error: "channel_not_found"},
+		SlackResponse: SlackResponse{Ok: false, Error: "channel_not_found"},
 	})
 	rw.Write(response)
 }
