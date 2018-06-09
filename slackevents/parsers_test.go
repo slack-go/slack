@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ACollectionOfAtoms/slack"
+	"github.com/nlopes/slack"
 )
 
 func TestParserOuterCallBackEvent(t *testing.T) {
@@ -17,7 +17,6 @@ func TestParserOuterCallBackEvent(t *testing.T) {
 				"event": {
 								"type": "app_mention",
 								"event_ts": "1234567890.123456",
-								"thread_ts": "1234567890.123456",
 								"user": "UXXXXXXX1"
 				},
 				"type": "event_callback",
@@ -83,7 +82,6 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 				"event": {
 								"type": "app_mention",
 								"event_ts": "1234567890.123456",
-								"thread_ts": "1234567890.123456",
 								"user": "UXXXXXXX1"
 				},
 				"type": "event_callback",

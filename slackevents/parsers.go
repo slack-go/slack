@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/ACollectionOfAtoms/slack"
+	"github.com/nlopes/slack"
 )
 
 // eventsMap checks both slack.EventsMapping and
@@ -191,4 +191,25 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 		urlVerificationEvent,
 		EventsAPIInnerEvent{},
 	}, nil
+}
+
+func ParseActionEvent(payloadString string, opts ...Option) (MessageAction, error) {
+	byteString := []byte(payloadString)
+	action := MessageAction{}
+	err := json.Unmarshal(byteString, &action)
+	if err != nil {
+		return MessageAction{}, errors.New( "MessageAction unmarshalling failed")
+	}
+
+	cfg := &Config{}
+	cfg.VerificationToken = action.Token
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	if !cfg.TokenVerified {
+		return MessageAction{}, errors.New("invalid verification token")
+	} else {
+		return action, nil
+	}
 }

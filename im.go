@@ -18,7 +18,7 @@ type imResponseFull struct {
 	Channel       imChannel `json:"channel"`
 	IMs           []IM      `json:"ims"`
 	History
-	WebResponse
+	SlackResponse
 }
 
 // IM contains information related to the Direct Message channel

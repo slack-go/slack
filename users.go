@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/url"
 	"strconv"
 )
@@ -138,7 +137,7 @@ type UserPresence struct {
 type UserIdentityResponse struct {
 	User UserIdentity `json:"user"`
 	Team TeamIdentity `json:"team"`
-	WebResponse
+	SlackResponse
 }
 
 type UserIdentity struct {
@@ -169,11 +168,11 @@ type TeamIdentity struct {
 }
 
 type userResponseFull struct {
-	Members      []User                  `json:"members,omitempty"` // ListUsers
-	User         `json:"user,omitempty"` // GetUserInfo
-	UserPresence                         // GetUserPresence
-	WebResponse
-	Metadata ResponseMetadata
+	Members      []User        `json:"members,omitempty"`
+	User                       `json:"user,omitempty"`
+	UserPresence                        
+	SlackResponse
+	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
 type UserSetPhotoParams struct {
@@ -312,7 +311,6 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 	}
 
 	if resp, err = userRequest(ctx, t.c.httpclient, "users.list", values, t.c.debug); err != nil {
-		log.Println("error during user request", err)
 		return t, err
 	}
 
@@ -424,7 +422,7 @@ func (api *Client) SetUserPhoto(image string, params UserSetPhotoParams) error {
 
 // SetUserPhotoContext changes the currently authenticated user's profile image using a custom context
 func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params UserSetPhotoParams) error {
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -453,7 +451,7 @@ func (api *Client) DeleteUserPhoto() error {
 
 // DeleteUserPhotoContext deletes the current authenticated user's profile image with a custom context
 func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
-	response := &WebResponse{}
+	response := &SlackResponse{}
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -537,7 +535,7 @@ func (api *Client) GetUserProfile(userID string, includeLabels bool) (*UserProfi
 }
 
 type getUserProfileResponse struct {
-	WebResponse
+	SlackResponse
 	Profile *UserProfile `json:"profile"`
 }
 

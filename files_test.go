@@ -110,14 +110,14 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 func authTestHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(authTestResponseFull{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 
 func uploadFileHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(fileResponseFull{
-		WebResponse: WebResponse{Ok: true}})
+		SlackResponse: SlackResponse{Ok: true}})
 	rw.Write(response)
 }
 

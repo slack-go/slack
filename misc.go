@@ -19,12 +19,12 @@ import (
 	"time"
 )
 
-type WebResponse struct {
+type SlackResponse struct {
 	Ok    bool   `json:"ok"`
 	Error string `json:"error"`
 }
 
-func (t WebResponse) Err() error {
+func (t SlackResponse) Err() error {
 	if t.Ok {
 		return nil
 	}
@@ -66,7 +66,7 @@ func fileUploadReq(ctx context.Context, path, fieldname, filename string, values
 	return req, nil
 }
 
-func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error {
+func parseResponseBody(body io.ReadCloser, intf interface{}, debug bool) error {
 	response, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 		logger.Printf("parseResponseBody: %s\n", string(response))
 	}
 
-	return json.Unmarshal(response, &intf)
+	return json.Unmarshal(response, intf)
 }
 
 func postLocalWithMultipartResponse(ctx context.Context, client HTTPRequester, path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
@@ -119,7 +119,7 @@ func postWithMultipartResponse(ctx context.Context, client HTTPRequester, path, 
 		return fmt.Errorf("Slack server error: %s.", resp.Status)
 	}
 
-	return parseResponseBody(resp.Body, &intf, debug)
+	return parseResponseBody(resp.Body, intf, debug)
 }
 
 func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
@@ -151,7 +151,7 @@ func postForm(ctx context.Context, client HTTPRequester, endpoint string, values
 		return fmt.Errorf("Slack server error: %s.", resp.Status)
 	}
 
-	return parseResponseBody(resp.Body, &intf, debug)
+	return parseResponseBody(resp.Body, intf, debug)
 }
 
 func post(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
@@ -178,7 +178,7 @@ func logResponse(resp *http.Response, debug bool) error {
 
 func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(WebResponse{
+	response, _ := json.Marshal(SlackResponse{
 		Ok: true,
 	})
 	rw.Write(response)
