@@ -48,19 +48,8 @@ type ExternalSelectInputElement struct {
 	SelectedOptions []SelectOption `json:"selected_options"` //This option is invalid in external, where you must use selected_options
 }
 
-func makeOptions(options []string) []SelectOption {
-	selectOptions := make([]SelectOption, len(options))
-	for idx, value := range options {
-		selectOptions[idx] = SelectOption{
-			Label: value,
-			Value: value,
-		}
-	}
-	return selectOptions
-}
-
 // NewStaticSelectDialogInput constructor for a `static` datasource menu input
-func NewStaticSelectDialogInput(name, label string, options []string) *StaticSelectDialogInput {
+func NewStaticSelectDialogInput(name, label string, options []SelectOption) *StaticSelectDialogInput {
 	return &StaticSelectDialogInput{
 		baseSelect: baseSelect{
 			DialogInput: DialogInput{
@@ -71,7 +60,7 @@ func NewStaticSelectDialogInput(name, label string, options []string) *StaticSel
 			},
 			DataSource: StaticDataSource,
 		},
-		Options: makeOptions(options),
+		Options: options,
 	}
 }
 
@@ -81,7 +70,7 @@ func NewGroupedSelectDialoginput(name, label string, groups map[string][]string)
 	for groupName, options := range groups {
 		optionGroups = append(optionGroups, OptionGroup{
 			Label:   groupName,
-			Options: makeOptions(options),
+			Options: optionsFromArray(options),
 		})
 	}
 	return &StaticSelectDialogInput{
@@ -95,6 +84,30 @@ func NewGroupedSelectDialoginput(name, label string, groups map[string][]string)
 		},
 		OptionGroups: optionGroups,
 	}
+}
+
+func optionsFromArray(options []string) []SelectOption {
+	selectOptions := make([]SelectOption, len(options))
+	for idx, value := range options {
+		selectOptions[idx] = SelectOption{
+			Label: value,
+			Value: value,
+		}
+	}
+	return selectOptions
+}
+
+func optionsFromMap(options map[string]string) []SelectOption {
+	selectOptions := []SelectOption{}
+	var option SelectOption
+	for key, value := range options {
+		option = SelectOption{
+			Label: key,
+			Value: value,
+		}
+		selectOptions = append(selectOptions, option)
+	}
+	return selectOptions
 }
 
 func newPresetSelect(name, label string, dataSourceType SelectDataSource) *StaticSelectDialogInput {
