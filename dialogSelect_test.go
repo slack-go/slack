@@ -27,6 +27,7 @@ func TestOptionsFromMap(t *testing.T) {
 	assert.Equal(t, "key", firstOption.Label)
 	assert.Equal(t, "myValue", firstOption.Value)
 }
+
 func TestStaticSelectFromArray(t *testing.T) {
 	name := "static select"
 	label := "Static Select Label"
@@ -56,6 +57,24 @@ func TestStaticSelectFromDictionary(t *testing.T) {
 }
 
 func TestStaticGroupedSelect(t *testing.T) {
+	group1 := make(map[string]string)
+	group1["G1_O1"] = "First (1)"
+	group1["G1_O2"] = "Second (1)"
+
+	group2 := make(map[string]string)
+	group2["G2_O1"] = "First (2)"
+	group2["G2_O2"] = "Second (2)"
+
+	groups := make(map[string]map[string]string)
+	groups["Group 1"] = group1
+	groups["Group 2"] = group2
+
+	groupSelect := NewGroupedSelectDialoginput("groupSelect", "User Label", groups)
+	assert.Equal(t, InputTypeSelect, groupSelect.Type)
+	assert.Equal(t, "groupSelect", groupSelect.Name)
+	assert.Equal(t, "User Label", groupSelect.Label)
+	assert.Nil(t, groupSelect.Options)
+	assert.NotNil(t, groupSelect.OptionGroups)
 }
 
 func TestStaticExternalDataSourceSelect(t *testing.T) {

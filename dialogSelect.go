@@ -65,12 +65,12 @@ func NewStaticSelectDialogInput(name, label string, options []SelectOption) *Sta
 }
 
 // NewGroupedSelectDialoginput a grouped options select input for Dialogs
-func NewGroupedSelectDialoginput(name, label string, groups map[string][]string) *StaticSelectDialogInput {
+func NewGroupedSelectDialoginput(name, label string, groups map[string]map[string]string) *StaticSelectDialogInput {
 	optionGroups := []OptionGroup{}
 	for groupName, options := range groups {
 		optionGroups = append(optionGroups, OptionGroup{
 			Label:   groupName,
-			Options: optionsFromArray(options),
+			Options: optionsFromMap(options),
 		})
 	}
 	return &StaticSelectDialogInput{
@@ -98,30 +98,18 @@ func optionsFromArray(options []string) []SelectOption {
 }
 
 func optionsFromMap(options map[string]string) []SelectOption {
-	selectOptions := []SelectOption{}
+	selectOptions := make([]SelectOption, len(options))
+	idx := 0
 	var option SelectOption
 	for key, value := range options {
 		option = SelectOption{
 			Label: key,
 			Value: value,
 		}
-		selectOptions = append(selectOptions, option)
+		selectOptions[idx] = option
+		idx++
 	}
 	return selectOptions
-}
-
-func newPresetSelect(name, label string, dataSourceType SelectDataSource) *StaticSelectDialogInput {
-	return &StaticSelectDialogInput{
-		baseSelect: baseSelect{
-			DialogInput: DialogInput{
-				Type:  InputTypeSelect,
-				Label: label,
-				Name:  name,
-			},
-			DataSource: dataSourceType,
-		},
-	}
-
 }
 
 // NewConversationsSelect returns a `Conversations` select
@@ -137,4 +125,18 @@ func NewChannelsSelect(name, label string) *StaticSelectDialogInput {
 // NewUsersSelect returns a `Users` select
 func NewUsersSelect(name, label string) *StaticSelectDialogInput {
 	return newPresetSelect(name, label, UsersDataSource)
+}
+
+func newPresetSelect(name, label string, dataSourceType SelectDataSource) *StaticSelectDialogInput {
+	return &StaticSelectDialogInput{
+		baseSelect: baseSelect{
+			DialogInput: DialogInput{
+				Type:  InputTypeSelect,
+				Label: label,
+				Name:  name,
+			},
+			DataSource: dataSourceType,
+		},
+	}
+
 }
