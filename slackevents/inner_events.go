@@ -69,6 +69,7 @@ type MessageEvent struct {
 	Channel        string      `json:"channel"`
 	ChannelType    string      `json:"channel_type"`
 	EventTimeStamp json.Number `json:"event_ts"`
+	Hidden         bool        `json:"hidden"`
 }
 
 const (
