@@ -67,10 +67,10 @@ type MessageEvent struct {
 	Username        string      `json:"username"`
 	Text            string      `json:"text"`
 	TimeStamp       string      `json:"ts"`
+	ThreadTimeStamp string      `json:"thread_ts"`
 	Channel         string      `json:"channel"`
 	ChannelType     string      `json:"channel_type"`
 	EventTimeStamp  json.Number `json:"event_ts"`
-	ThreadTimeStamp string      `json:"thread_ts"`
 }
 
 const (
