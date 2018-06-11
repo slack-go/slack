@@ -64,6 +64,7 @@ func TestStaticGroupedSelect(t *testing.T) {
 	group2 := make(map[string]string)
 	group2["G2_O1"] = "First (2)"
 	group2["G2_O2"] = "Second (2)"
+	group2["G2_O3"] = "Third (2)"
 
 	groups := make(map[string]map[string]string)
 	groups["Group 1"] = group1
@@ -75,16 +76,23 @@ func TestStaticGroupedSelect(t *testing.T) {
 	assert.Equal(t, "User Label", groupSelect.Label)
 	assert.Nil(t, groupSelect.Options)
 	assert.NotNil(t, groupSelect.OptionGroups)
-}
-
-func TestStaticExternalDataSourceSelect(t *testing.T) {
+	assert.Equal(t, 2, len(groupSelect.OptionGroups))
 }
 
 func TestConversationSelect(t *testing.T) {
+	convoSelect := NewConversationsSelect("", "")
+	assert.Equal(t, InputTypeSelect, convoSelect.Type)
+	assert.Equal(t, ConversationsDataSource, convoSelect.DataSource)
 }
 
 func TestChannelSelect(t *testing.T) {
+	convoSelect := NewChannelsSelect("", "")
+	assert.Equal(t, InputTypeSelect, convoSelect.Type)
+	assert.Equal(t, ChannelsDataSource, convoSelect.DataSource)
 }
 
 func TestUserSelect(t *testing.T) {
+	convoSelect := NewUsersSelect("", "")
+	assert.Equal(t, InputTypeSelect, convoSelect.Type)
+	assert.Equal(t, UsersDataSource, convoSelect.DataSource)
 }
