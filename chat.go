@@ -31,7 +31,7 @@ type chatResponseFull struct {
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
 type PostMessageParameters struct {
-	Username        string       `json:"user_name"`
+	Username        string       `json:"username"`
 	AsUser          bool         `json:"as_user"`
 	Parse           string       `json:"parse"`
 	ThreadTimestamp string       `json:"thread_ts"`
