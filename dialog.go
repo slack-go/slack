@@ -86,5 +86,5 @@ func (api *Client) OpenDialogContext(ctx context.Context, dialog Dialog) (err er
 	}
 
 	response := &DialogOpenResponse{}
-	return postForm(ctx, api.httpclient, "dialog.open", values, response, api.debug)
+	return postForm(ctx, api.httpclient, SLACK_API+"dialog.open", values, response, api.debug)
 }
