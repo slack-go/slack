@@ -144,14 +144,23 @@ type Icons struct {
 // Info contains various details about Users, Channels, Bots and the authenticated user.
 // It is returned by StartRTM or included in the "ConnectedEvent" RTM event.
 type Info struct {
-	URL      string       `json:"url,omitempty"`
-	User     *UserDetails `json:"self,omitempty"`
-	Team     *Team        `json:"team,omitempty"`
-	Users    []User       `json:"users,omitempty"`
-	Channels []Channel    `json:"channels,omitempty"`
-	Groups   []Group      `json:"groups,omitempty"`
-	Bots     []Bot        `json:"bots,omitempty"`
-	IMs      []IM         `json:"ims,omitempty"`
+	URL        string              `json:"url,omitempty"`
+	User       *UserDetails        `json:"self,omitempty"`
+	Team       *Team               `json:"team,omitempty"`
+	Users      []User              `json:"users,omitempty"`
+	Channels   []Channel           `json:"channels,omitempty"`
+	Groups     []Group             `json:"groups,omitempty"`
+	Bots       []Bot               `json:"bots,omitempty"`
+	IMs        []IM                `json:"ims,omitempty"`
+	id2user    map[string]*User    // used for locate user by id
+	name2user  map[string][]*User  // used for locate user by name
+	id2bot     map[string]*Bot     // used for locate bot by id
+	name2bot   map[string][]*Bot   // used for locate bot by name
+	id2chan    map[string]*Channel // used for locate channel by id
+	name2chan  map[string]*Channel // used for locate channel by name
+	id2group   map[string]*Group   // used for locate group by id
+	name2group map[string]*Group   // used for locate group by name
+	id2im      map[string]*IM      // used for locate IM by id
 }
 
 type infoResponseFull struct {
@@ -160,51 +169,121 @@ type infoResponseFull struct {
 }
 
 // GetBotByID returns a bot given a bot id
-func (info Info) GetBotByID(botID string) *Bot {
-	for _, bot := range info.Bots {
-		if bot.ID == botID {
-			return &bot
-		}
+func (info *Info) GetBotByID(botID string) *Bot {
+	if info.id2bot == nil {
+		info.id2bot = make(map[string]*Bot, 32)
+	} else if bot := info.id2bot[botID]; bot != nil {
+		return bot
 	}
-	return nil
+
+	for _, bot := range info.Bots {
+		info.id2bot[bot.ID] = &bot
+	}
+
+	return info.id2bot[botID]
 }
 
 // GetUserByID returns a user given a user id
-func (info Info) GetUserByID(userID string) *User {
-	for _, user := range info.Users {
-		if user.ID == userID {
-			return &user
-		}
+func (info *Info) GetUserByID(userID string) *User {
+	if info.id2user == nil {
+		info.id2user = make(map[string]*User, 32)
+	} else if user := info.id2user[userID]; user != nil {
+		return user
 	}
-	return nil
+
+	for _, user := range info.Users {
+		info.id2user[user.ID] = &user
+	}
+
+	return info.id2user[userID]
+}
+
+// GetUserByName retrieves user(maybe more than one) information by user name
+func (info *Info) GetUserByName(userName string) []*User {
+	if info.name2user == nil {
+		info.name2user = make(map[string][]*User, 32)
+	} else if list := info.name2user[userName]; list != nil {
+		return list
+	}
+
+	for i, user := range info.Users {
+		info.name2user[user.Name] = append(info.name2user[user.Name], &info.Users[i])
+	}
+
+	return info.name2user[userName]
 }
 
 // GetChannelByID returns a channel given a channel id
-func (info Info) GetChannelByID(channelID string) *Channel {
-	for _, channel := range info.Channels {
-		if channel.ID == channelID {
-			return &channel
-		}
+func (info *Info) GetChannelByID(channelID string) *Channel {
+	if info.id2chan == nil {
+		info.id2chan = make(map[string]*Channel, 32)
+	} else if ch := info.id2chan[channelID]; ch != nil {
+		return ch
 	}
-	return nil
+
+	for _, ch := range info.Channels {
+		info.id2chan[ch.ID] = &ch
+	}
+
+	return info.id2chan[channelID]
+}
+
+// GetChannelByName returns a channel given a channel name
+func (info *Info) GetChannelByName(channelName string) *Channel {
+	if info.name2chan == nil {
+		info.name2chan = make(map[string]*Channel, 32)
+	} else if ch := info.name2chan[channelName]; ch != nil {
+		return ch
+	}
+
+	for _, ch := range info.Channels {
+		info.name2chan[ch.Name] = &ch
+	}
+
+	return info.name2chan[channelName]
 }
 
 // GetGroupByID returns a group given a group id
-func (info Info) GetGroupByID(groupID string) *Group {
-	for _, group := range info.Groups {
-		if group.ID == groupID {
-			return &group
-		}
+func (info *Info) GetGroupByID(groupID string) *Group {
+	if info.id2group == nil {
+		info.id2group = make(map[string]*Group, 32)
+	} else if gp := info.id2group[groupID]; gp != nil {
+		return gp
 	}
-	return nil
+
+	for _, gp := range info.Groups {
+		info.id2group[gp.ID] = &gp
+	}
+
+	return info.id2group[groupID]
+}
+
+// GetGroupByName returns a group given a group name
+func (info *Info) GetGroupByName(groupName string) *Group {
+	if info.name2group == nil {
+		info.name2group = make(map[string]*Group, 32)
+	} else if gp := info.name2group[groupName]; gp != nil {
+		return gp
+	}
+
+	for _, gp := range info.Groups {
+		info.name2group[gp.Name] = &gp
+	}
+
+	return info.name2group[groupName]
 }
 
 // GetIMByID returns an IM given an IM id
-func (info Info) GetIMByID(imID string) *IM {
-	for _, im := range info.IMs {
-		if im.ID == imID {
-			return &im
-		}
+func (info *Info) GetIMByID(imID string) *IM {
+	if info.id2im == nil {
+		info.id2im = make(map[string]*IM, 32)
+	} else if im := info.id2im[imID]; im != nil {
+		return im
 	}
-	return nil
+
+	for _, im := range info.IMs {
+		info.id2im[im.ID] = &im
+	}
+
+	return info.id2im[imID]
 }
