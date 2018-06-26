@@ -9,12 +9,12 @@ import (
 // Dialog as in Slack dialogs
 // 	https://api.slack.com/dialogs#option_element_attributes#top-level_dialog_attributes
 type Dialog struct {
-	TriggerID      string          `json:"trigger_id,omitempty"`
-	CallbackID     string          `json:"callback_id"`
+	TriggerID      string          `json:"trigger_id,omitempty"` //Required
+	CallbackID     string          `json:"callback_id"`          //Required
 	NotifyOnCancel bool            `json:"notify_on_cancel"`
-	Title          string          `json:"title"`
+	Title          string          `json:"title"` //Required
 	SubmitLabel    string          `json:"submit_label,omitempty"`
-	Elements       []DialogElement `json:"elements"`
+	Elements       []DialogElement `json:"elements"` //Required
 }
 
 // DialogElement Abstract interface for Elements
@@ -57,9 +57,9 @@ type DialogSubmitCallback struct {
 
 // DialogOpenResponse response from `dialog.open`
 type DialogOpenResponse struct {
-	Ok                     bool             `json:"ok"`
-	Error                  string           `json:"error"`
-	DialogResponseMetadata ResponseMetadata `json:"response_metadata"`
+	Ok                     bool                   `json:"ok"`
+	Error                  string                 `json:"error"`
+	DialogResponseMetadata DialogResponseMetadata `json:"response_metadata"`
 }
 
 // DialogResponseMetadata lists the error messages
