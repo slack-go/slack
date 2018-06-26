@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/url"
@@ -22,9 +23,9 @@ const (
 
 // File contains all the information for a file
 type File struct {
-	ID        string   `json:"id"`
-	Created   JSONTime `json:"created"`
-	Timestamp JSONTime `json:"timestamp"`
+	ID        string      `json:"id"`
+	Created   JSONTime    `json:"created"`
+	Timestamp json.Number `json:"timestamp"`
 
 	Name              string `json:"name"`
 	Title             string `json:"title"`
