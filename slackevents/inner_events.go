@@ -60,13 +60,16 @@ type sharedLinks struct {
 // if ChannelType = "mim", A message was posted in a multiparty direct message channel
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
-	Type           string      `json:"type"`
-	User           string      `json:"user"`
-	Text           string      `json:"text"`
-	TimeStamp      string      `json:"ts"`
-	Channel        string      `json:"channel"`
-	ChannelType    string      `json:"channel_type"`
-	EventTimeStamp json.Number `json:"event_ts"`
+	Type            string      `json:"type"`
+	Subtype         string      `json:"subtype"`
+	User            string      `json:"user"`
+	Username        string      `json:"username"`
+	Text            string      `json:"text"`
+	TimeStamp       string      `json:"ts"`
+	ThreadTimeStamp string      `json:"thread_ts"`
+	Channel         string      `json:"channel"`
+	ChannelType     string      `json:"channel_type"`
+	EventTimeStamp  json.Number `json:"event_ts"`
 }
 
 const (

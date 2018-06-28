@@ -29,7 +29,31 @@ func (t SlackResponse) Err() error {
 		return nil
 	}
 
+	// handle pure text based responses like chat.post
+	// which while they have a slack response in their data structure
+	// it doesn't actually get set during parsing.
+	if strings.TrimSpace(t.Error) == "" {
+		return nil
+	}
+
 	return errors.New(t.Error)
+}
+
+// StatusCodeError represents an http response error.
+// type httpStatusCode interface { HTTPStatusCode() int } to handle it.
+type statusCodeError struct {
+	Code   int
+	Status string
+}
+
+func (t statusCodeError) Error() string {
+	// TODO: this is a bad error string, should clean it up with a breaking changes
+	// merger.
+	return fmt.Sprintf("Slack server error: %s.", t.Status)
+}
+
+func (t statusCodeError) HTTPStatusCode() int {
+	return t.Code
 }
 
 type RateLimitedError struct {
@@ -66,7 +90,7 @@ func fileUploadReq(ctx context.Context, path, fieldname, filename string, values
 	return req, nil
 }
 
-func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error {
+func parseResponseBody(body io.ReadCloser, intf interface{}, debug bool) error {
 	response, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
@@ -77,7 +101,7 @@ func parseResponseBody(body io.ReadCloser, intf *interface{}, debug bool) error 
 		logger.Printf("parseResponseBody: %s\n", string(response))
 	}
 
-	return json.Unmarshal(response, &intf)
+	return json.Unmarshal(response, intf)
 }
 
 func postLocalWithMultipartResponse(ctx context.Context, client HTTPRequester, path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
@@ -116,10 +140,10 @@ func postWithMultipartResponse(ctx context.Context, client HTTPRequester, path, 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
 		logResponse(resp, debug)
-		return fmt.Errorf("Slack server error: %s.", resp.Status)
+		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
-	return parseResponseBody(resp.Body, &intf, debug)
+	return parseResponseBody(resp.Body, intf, debug)
 }
 
 func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
@@ -148,10 +172,10 @@ func postForm(ctx context.Context, client HTTPRequester, endpoint string, values
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
 		logResponse(resp, debug)
-		return fmt.Errorf("Slack server error: %s.", resp.Status)
+		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
-	return parseResponseBody(resp.Body, &intf, debug)
+	return parseResponseBody(resp.Body, intf, debug)
 }
 
 func post(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
