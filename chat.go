@@ -24,12 +24,15 @@ const (
 
 type chatResponseFull struct {
 	Channel          string `json:"channel"`
-	Timestamp        string `json:"ts"`
-	MessageTimeStamp string `json:"message_ts"`
+	Timestamp        string `json:"ts"`         //Regualr message timestamp
+	MessageTimeStamp string `json:"message_ts"` //Ephemeral message timestamp
 	Text             string `json:"text"`
 	SlackResponse
 }
 
+// getMessageTimestamp will inspect the `chatResponseFull` to ruturn a timestamp value
+// in `chat.postMessage` its under `ts`
+// in `chat.postEphemeral` its under `message_ts`
 func (c chatResponseFull) getMessageTimestamp() string {
 	if len(c.Timestamp) > 0 {
 		return c.Timestamp
