@@ -115,3 +115,21 @@ func TestMessageEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestBotMessageEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "message",
+				"subtype": "bot_message",
+				"ts": "1358877455.000010",
+				"text": "Pushing is the answer",
+				"bot_id": "BB12033",
+				"username": "github",
+				"icons": {}
+		}
+	`)
+	err := json.Unmarshal(rawE, &MessageEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
