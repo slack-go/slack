@@ -27,7 +27,7 @@ func main() {
 			fmt.Println("Infos:", ev.Info)
 			fmt.Println("Connection counter:", ev.ConnectionCount)
 			// Replace C2147483705 with your Channel ID
-			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C2147483705"))
+			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C2147483705", ""))
 
 		case *slack.MessageEvent:
 			fmt.Printf("Message: %v\n", ev)
