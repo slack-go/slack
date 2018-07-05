@@ -130,13 +130,14 @@ type Pong struct {
 // NewOutgoingMessage prepares an OutgoingMessage that the user can
 // use to send a message. Use this function to properly set the
 // messageID.
-func (rtm *RTM) NewOutgoingMessage(text string, channelID string) *OutgoingMessage {
+func (rtm *RTM) NewOutgoingMessage(text string, channelID string, threadTimestamp string) *OutgoingMessage {
 	id := rtm.idGen.Next()
 	return &OutgoingMessage{
-		ID:      id,
-		Type:    "message",
-		Channel: channelID,
-		Text:    text,
+		ID:              id,
+		Type:            "message",
+		Channel:         channelID,
+		Text:            text,
+		ThreadTimestamp: threadTimestamp,
 	}
 }
 
