@@ -342,6 +342,22 @@ func MsgOptionDisableMarkdown() MsgOption {
 	}
 }
 
+// MsgOptionTS sets the thread TS of the message to enable creating or replying to a thread
+func MsgOptionTS(ts string) MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("thread_ts", ts)
+		return nil
+	}
+}
+
+// MsgOptionBroadcast sets reply_broadcast to true
+func MsgOptionBroadcast() MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("reply_broadcast", "true")
+		return nil
+	}
+}
+
 // this function combines multiple options into a single option.
 func MsgOptionCompose(options ...MsgOption) MsgOption {
 	return func(c *sendConfig) error {
