@@ -8,7 +8,7 @@ type OutgoingMessage struct {
 	Text            string `json:"text,omitempty"`
 	Type            string `json:"type,omitempty"`
 	ThreadTimestamp string `json:"thread_ts,omitempty"`
-	ThreadBroadcast bool   `json:"thread_broadcast,omitempty"`
+	ThreadBroadcast bool   `json:"reply_broadcast,omitempty"`
 }
 
 // Message is an auxiliary type to allow us to have a message containing sub messages
