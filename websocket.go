@@ -20,8 +20,9 @@ const (
 //
 // Create this element with Client's NewRTM() or NewRTMWithOptions(*RTMOptions)
 type RTM struct {
-	idGen IDGenerator
-	pings map[int]time.Time
+	idGen        IDGenerator
+	pingInterval time.Duration
+	pingDeadman  *time.Timer
 
 	// Connection life-cycle
 	conn             *websocket.Conn
@@ -83,12 +84,6 @@ func (rtm *RTM) Disconnect() error {
 	return nil
 }
 
-// Reconnect only makes sense if you've successfully disconnectd with Disconnect().
-func (rtm *RTM) Reconnect() error {
-	logger.Println("RTM::Reconnect not implemented!")
-	return nil
-}
-
 // GetInfo returns the info structure received when calling
 // "startrtm", holding all channels, groups and other metadata needed
 // to implement a full chat client. It will be non-nil after a call to
@@ -107,4 +102,12 @@ func (rtm *RTM) SendMessage(msg *OutgoingMessage) {
 	}
 
 	rtm.outgoingMessages <- *msg
+}
+
+func (rtm *RTM) resetDeadman() {
+	timerReset(rtm.pingDeadman, deadmanDuration(rtm.pingInterval))
+}
+
+func deadmanDuration(d time.Duration) time.Duration {
+	return d * 4
 }

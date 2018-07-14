@@ -118,14 +118,16 @@ type Event struct {
 
 // Ping contains information about a Ping Event
 type Ping struct {
-	ID   int    `json:"id"`
-	Type string `json:"type"`
+	ID        int    `json:"id"`
+	Type      string `json:"type"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 // Pong contains information about a Pong Event
 type Pong struct {
-	Type    string `json:"type"`
-	ReplyTo int    `json:"reply_to"`
+	Type      string `json:"type"`
+	ReplyTo   int    `json:"reply_to"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 // NewOutgoingMessage prepares an OutgoingMessage that the user can
