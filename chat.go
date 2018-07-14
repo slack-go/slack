@@ -164,7 +164,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	if err = post(ctx, api.httpclient, string(config.mode), config.values, &response, api.debug); err != nil {
+	if err = postPath(ctx, api.httpclient, string(config.mode), config.values, &response, api.debug); err != nil {
 		return "", "", "", err
 	}
 
@@ -373,7 +373,11 @@ func MsgOptionCompose(options ...MsgOption) MsgOption {
 func MsgOptionParse(b bool) MsgOption {
 	return func(c *sendConfig) error {
 		var v string
-		if b { v = "1" } else { v = "0" }
+		if b {
+			v = "1"
+		} else {
+			v = "0"
+		}
 		c.values.Set("parse", v)
 		return nil
 	}
