@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"net/http"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Dialogs
@@ -17,8 +18,8 @@ var simpleDialog = `{
 }`
 
 var simpleTextElement = `{
-    "label": "testing label",
-    "name": "testing name",
+	"label": "testing label",
+	"name": "testing name",
 	"type": "text",
 	"placeholder": "testing placeholder",
 	"optional": true,
@@ -30,8 +31,8 @@ var simpleTextElement = `{
 }`
 
 var simpleSelectElement = `{
-    "label": "testing label",
-    "name": "testing name",
+	"label": "testing label",
+	"name": "testing name",
 	"type": "select",
 	"placeholder": "testing placeholder",
 	"optional": true,
@@ -61,7 +62,7 @@ func unmarshalDialog() (*Dialog, error) {
 		return nil, err
 	}
 
-	dialog.Elements = []DialogElement {
+	dialog.Elements = []DialogElement{
 		textElement,
 		selectElement,
 	}

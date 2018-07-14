@@ -12,6 +12,15 @@ import (
 
 const (
 	websocketDefaultTimeout = 10 * time.Second
+	defaultPingInterval     = 30 * time.Second
+)
+
+const (
+	rtmEventTypeAck                 = ""
+	rtmEventTypeHello               = "hello"
+	rtmEventTypeGoodbye             = "goodbye"
+	rtmEventTypePong                = "pong"
+	rtmEventTypeDesktopNotification = "desktop_notification"
 )
 
 // StartRTM calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
@@ -83,6 +92,14 @@ func RTMOptionDialer(d *websocket.Dialer) RTMOption {
 	}
 }
 
+// RTMOptionPingInterval determines how often to deliver a ping message to slack.
+func RTMOptionPingInterval(d time.Duration) RTMOption {
+	return func(rtm *RTM) {
+		rtm.pingInterval = d
+		rtm.resetDeadman()
+	}
+}
+
 // NewRTM returns a RTM, which provides a fully managed connection to
 // Slack's websocket-based Real-Time Messaging protocol.
 func (api *Client) NewRTM(options ...RTMOption) *RTM {
@@ -90,7 +107,8 @@ func (api *Client) NewRTM(options ...RTMOption) *RTM {
 		Client:           *api,
 		IncomingEvents:   make(chan RTMEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
-		pings:            make(map[int]time.Time),
+		pingInterval:     defaultPingInterval,
+		pingDeadman:      time.NewTimer(deadmanDuration(defaultPingInterval)),
 		isConnected:      false,
 		wasIntentional:   true,
 		killChannel:      make(chan bool),
