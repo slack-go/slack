@@ -146,14 +146,7 @@ func postWithMultipartResponse(ctx context.Context, client HTTPRequester, path, 
 	return parseResponseBody(resp.Body, intf, debug)
 }
 
-func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
-	reqBody := strings.NewReader(values.Encode())
-	req, err := http.NewRequest("POST", endpoint, reqBody)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
+func doPost(ctx context.Context, client HTTPRequester, req *http.Request, intf interface{}, debug bool) error {
 	req = req.WithContext(ctx)
 	resp, err := client.Do(req)
 	if err != nil {
@@ -176,6 +169,27 @@ func postForm(ctx context.Context, client HTTPRequester, endpoint string, values
 	}
 
 	return parseResponseBody(resp.Body, intf, debug)
+}
+
+func postJson(ctx context.Context, client HTTPRequester, endpoint, token string, json []byte, intf interface{}, debug bool) error {
+	reqBody := bytes.NewBuffer(json)
+	req, err := http.NewRequest("POST", endpoint, reqBody)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	return doPost(ctx, client, req, intf, debug)
+}
+
+func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
+	reqBody := strings.NewReader(values.Encode())
+	req, err := http.NewRequest("POST", endpoint, reqBody)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	return doPost(ctx, client, req, intf, debug)
 }
 
 func post(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
