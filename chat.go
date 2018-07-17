@@ -207,6 +207,7 @@ const (
 	chatPostMessage   sendMode = "chat.postMessage"
 	chatDelete        sendMode = "chat.delete"
 	chatPostEphemeral sendMode = "chat.postEphemeral"
+	chatMeMessage     sendMode = "chat.meMessage"
 )
 
 type sendConfig struct {
@@ -243,6 +244,14 @@ func MsgOptionPostEphemeral2(userID string) MsgOption {
 		MsgOptionUser(userID)(config)
 		config.values.Del("ts")
 
+		return nil
+	}
+}
+
+// MsgOptionMeMessage posts a "me message" type from the calling user
+func MsgOptionMeMessage() MsgOption {
+	return func(config *sendConfig) error {
+		config.mode = chatMeMessage
 		return nil
 	}
 }
