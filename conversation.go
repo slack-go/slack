@@ -337,6 +337,10 @@ func (api *Client) LeaveConversationContext(ctx context.Context, channelID strin
 	}
 
 	response, err := channelRequest(ctx, api.httpclient, "conversations.leave", values, api.debug)
+	if err != nil {
+		return false, err
+	}
+
 	return response.NotInChannel, err
 }
 
