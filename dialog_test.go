@@ -299,7 +299,7 @@ func TestOpenDialog(t *testing.T) {
 	}
 	err = api.OpenDialog("", *dialog)
 	if err == nil {
-		t.Errorf("Did not error with empty trigger", err)
+		t.Errorf("Did not error with empty trigger: %s", err)
 		return
 	}
 }
