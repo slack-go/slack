@@ -70,6 +70,11 @@ type MessageEvent struct {
 	ChannelType     string      `json:"channel_type"`
 	EventTimeStamp  json.Number `json:"event_ts"`
 
+	// Edited Message
+	Message         *MessageEvent `json:"message,omitempty"`
+	PreviousMessage *MessageEvent `json:"previous_message,omitempty"`
+	Edited          *Edited       `json:"edited,omitempty"`
+
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
 
@@ -79,10 +84,22 @@ type MessageEvent struct {
 	Icons    *Icon  `json:"icons,omitempty"`
 }
 
+// Edited is included when a Message is edited
+type Edited struct {
+	User      string `json:"user"`
+	TimeStamp string `json:"ts"`
+}
+
 // Icon is used for bot messages
 type Icon struct {
 	IconURL   string `json:"icon_url,omitempty"`
 	IconEmoji string `json:"icon_emoji,omitempty"`
+}
+
+// IsEdited checks if the MessageEvent is caused by an edit
+func (e MessageEvent) IsEdited() bool {
+	return e.Message != nil &&
+		e.Message.Edited != nil
 }
 
 const (

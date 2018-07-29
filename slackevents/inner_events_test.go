@@ -107,7 +107,17 @@ func TestMessageEvent(t *testing.T) {
 				"text": "Live long and prospect.",
 				"ts": "1355517523.000005",
 				"event_ts": "1355517523.000005",
-				"channel_type": "channel"
+				"channel_type": "channel",
+				"message": {
+					"text": "To infinity and beyond.",
+					"edited": {
+						"user": "U2147483697",
+						"ts": "1355517524.000000"
+					}
+				},
+				"previous_message": {
+					"text": "Live long and prospect."
+				}
 		}
 	`)
 	err := json.Unmarshal(rawE, &MessageEvent{})
