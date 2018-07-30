@@ -241,7 +241,7 @@ func TestGetUsersInConversation(t *testing.T) {
 }
 
 func TestArchiveConversation(t *testing.T) {
-	http.HandleFunc("/conversations.archive", okJsonHandler)
+	http.HandleFunc("/conversations.archive", okJSONHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
@@ -253,7 +253,7 @@ func TestArchiveConversation(t *testing.T) {
 }
 
 func TestUnArchiveConversation(t *testing.T) {
-	http.HandleFunc("/conversations.unarchive", okJsonHandler)
+	http.HandleFunc("/conversations.unarchive", okJSONHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
@@ -354,7 +354,7 @@ func TestInviteUsersToConversation(t *testing.T) {
 }
 
 func TestKickUserFromConversation(t *testing.T) {
-	http.HandleFunc("/conversations.kick", okJsonHandler)
+	http.HandleFunc("/conversations.kick", okJSONHandler)
 	once.Do(startServer)
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")

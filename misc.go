@@ -171,6 +171,7 @@ func doPost(ctx context.Context, client HTTPRequester, req *http.Request, intf i
 	return parseResponseBody(resp.Body, intf, debug)
 }
 
+// post JSON.
 func postJSON(ctx context.Context, client HTTPRequester, endpoint, token string, json []byte, intf interface{}, debug bool) error {
 	reqBody := bytes.NewBuffer(json)
 	req, err := http.NewRequest("POST", endpoint, reqBody)
@@ -182,6 +183,7 @@ func postJSON(ctx context.Context, client HTTPRequester, endpoint, token string,
 	return doPost(ctx, client, req, intf, debug)
 }
 
+// post a url encoded form.
 func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
 	reqBody := strings.NewReader(values.Encode())
 	req, err := http.NewRequest("POST", endpoint, reqBody)
@@ -192,7 +194,8 @@ func postForm(ctx context.Context, client HTTPRequester, endpoint string, values
 	return doPost(ctx, client, req, intf, debug)
 }
 
-func postPath(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
+// post to a slack web method.
+func postSlackMethod(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
 	return postForm(ctx, client, SLACK_API+path, values, intf, debug)
 }
 
@@ -214,7 +217,7 @@ func logResponse(resp *http.Response, debug bool) error {
 	return nil
 }
 
-func okJsonHandler(rw http.ResponseWriter, r *http.Request) {
+func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(SlackResponse{
 		Ok: true,
