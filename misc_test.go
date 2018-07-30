@@ -41,7 +41,7 @@ func TestParseResponse(t *testing.T) {
 		"token": {validToken},
 	}
 	responsePartial := &SlackResponse{}
-	err := postPath(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -53,7 +53,7 @@ func TestParseResponseNoToken(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	values := url.Values{}
 	responsePartial := &SlackResponse{}
-	err := postPath(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -73,7 +73,7 @@ func TestParseResponseInvalidToken(t *testing.T) {
 		"token": {"whatever"},
 	}
 	responsePartial := &SlackResponse{}
-	err := postPath(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return

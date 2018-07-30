@@ -164,7 +164,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	if err = postPath(ctx, api.httpclient, string(config.mode), config.values, &response, api.debug); err != nil {
+	if err = postSlackMethod(ctx, api.httpclient, string(config.mode), config.values, &response, api.debug); err != nil {
 		return "", "", "", err
 	}
 

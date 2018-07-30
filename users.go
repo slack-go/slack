@@ -547,7 +547,7 @@ func (api *Client) GetUserProfileContext(ctx context.Context, userID string, inc
 	}
 	resp := &getUserProfileResponse{}
 
-	err := postPath(ctx, api.httpclient, "users.profile.get", values, &resp, api.debug)
+	err := postSlackMethod(ctx, api.httpclient, "users.profile.get", values, &resp, api.debug)
 	if err != nil {
 		return nil, err
 	}

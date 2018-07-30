@@ -38,7 +38,7 @@ func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) StartRTMContext(ctx context.Context) (info *Info, websocketURL string, err error) {
 	response := &infoResponseFull{}
-	err = postPath(ctx, api.httpclient, "rtm.start", url.Values{"token": {api.token}}, response, api.debug)
+	err = postSlackMethod(ctx, api.httpclient, "rtm.start", url.Values{"token": {api.token}}, response, api.debug)
 	if err != nil {
 		return nil, "", err
 	}
@@ -63,7 +63,7 @@ func (api *Client) ConnectRTM() (info *Info, websocketURL string, err error) {
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) ConnectRTMContext(ctx context.Context) (info *Info, websocketURL string, err error) {
 	response := &infoResponseFull{}
-	err = postPath(ctx, api.httpclient, "rtm.connect", url.Values{"token": {api.token}}, response, api.debug)
+	err = postSlackMethod(ctx, api.httpclient, "rtm.connect", url.Values{"token": {api.token}}, response, api.debug)
 	if err != nil {
 		api.Debugf("Failed to connect to RTM: %s", err)
 		return nil, "", err
