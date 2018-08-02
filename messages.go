@@ -69,7 +69,7 @@ type Msg struct {
 	ParentUserId string  `json:"parent_user_id,omitempty"`
 
 	// file_share, file_comment, file_mention
-	File *File `json:"file,omitempty"`
+	Files []File `json:"files,omitempty"`
 
 	// file_share
 	Upload bool `json:"upload,omitempty"`
