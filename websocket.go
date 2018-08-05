@@ -72,9 +72,14 @@ func (rtm *RTM) Disconnect() error {
 	// avoid RTM disconnect race conditions
 	rtm.mu.Lock()
 	defer rtm.mu.Unlock()
-	// this channel is always closed on disconnect. lets the ManagedConnection() function
-	// properly clean up.
-	close(rtm.disconnected)
+
+	// always push into the disconnected channel when invoked,
+	// this lets the ManagedConnection() function properly clean up.
+	// if the buffer is full then just continue on.
+	select {
+	case rtm.disconnected <- struct{}{}:
+	default:
+	}
 
 	if !rtm.isConnected {
 		return errors.New("Invalid call to Disconnect - Slack API is already disconnected")
