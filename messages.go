@@ -89,8 +89,8 @@ type Msg struct {
 
 	// slash commands and interactive messages
 	ResponseType    string `json:"response_type,omitempty"`
-	ReplaceOriginal bool   `json:"replace_original,omitempty"`
-	DeleteOriginal  bool   `json:"delete_original,omitempty"`
+	ReplaceOriginal bool   `json:"replace_original"`
+	DeleteOriginal  bool   `json:"delete_original"`
 }
 
 // Icon is used for bot messages
