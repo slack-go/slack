@@ -27,7 +27,7 @@ type MessageAction struct {
 	MessageTimestamp json.Number              `json:"message_ts"`
 	AttachmentId     json.Number              `json:"attachment_id"`
 	Token            string                   `json:"token"`
-	OriginalMessage  slack.Message            `json:"original_message"`
+	OriginalMessage  slack.Message            `json:"message"`
 	ResponseUrl      string                   `json:"response_url"`
 	TriggerId        string                   `json:"trigger_id"`
 }
