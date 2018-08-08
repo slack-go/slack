@@ -12,6 +12,7 @@ func TestAppMention(t *testing.T) {
 				"user": "U061F7AUR",
 				"text": "<@U0LAN0Z89> is it everything a river should be?",
 				"ts": "1515449522.000016",
+				"thread_ts": "1515449522.000016",
 				"channel": "C0LAN2Q65",
 				"event_ts": "1515449522000016"
 		}

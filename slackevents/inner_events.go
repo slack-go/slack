@@ -12,12 +12,13 @@ type EventsAPIInnerEvent struct {
 
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
-	Type           string      `json:"type"`
-	User           string      `json:"user"`
-	Text           string      `json:"text"`
-	TimeStamp      string      `json:"ts"`
-	Channel        string      `json:"channel"`
-	EventTimeStamp json.Number `json:"event_ts"`
+	Type            string      `json:"type"`
+	User            string      `json:"user"`
+	Text            string      `json:"text"`
+	TimeStamp       string      `json:"ts"`
+	ThreadTimeStamp string      `json:"thread_ts"`
+	Channel         string      `json:"channel"`
+	EventTimeStamp  json.Number `json:"event_ts"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.
