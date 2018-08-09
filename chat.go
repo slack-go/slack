@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/url"
 	"strings"
 )
@@ -445,4 +446,38 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 
 		return nil
 	}
+}
+
+// GetPermalinkParameters are the parameters required to get a permalink to a message
+type GetPermalinkParameters struct {
+	Channel string
+	Ts      string
+}
+
+// GetPermalink returns the permalink for a message
+func (api *Client) GetPermalink(params *GetPermalinkParameters) (string, error) {
+	return api.GetPermalinkContext(context.Background(), params)
+}
+
+// GetPermalinkContext returns the permalink for a message with a custom context
+func (api *Client) GetPermalinkContext(ctx context.Context, params *GetPermalinkParameters) (string, error) {
+	values := url.Values{
+		"token":      {api.token},
+		"channel":    {params.Channel},
+		"message_ts": {params.Ts},
+	}
+
+	response := struct {
+		Channel   string `json:"channel"`
+		Permalink string `json:"permalink"`
+		SlackResponse
+	}{}
+	err := postSlackMethod(ctx, api.httpclient, "chat.GetPermalink", values, &response, api.debug)
+	if err != nil {
+		return "", err
+	}
+	if !response.Ok {
+		return "", errors.New(response.Error)
+	}
+	return response.Permalink, nil
 }
