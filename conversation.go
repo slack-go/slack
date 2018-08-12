@@ -29,6 +29,8 @@ type conversation struct {
 	NameNormalized     string   `json:"name_normalized"`
 	NumMembers         int      `json:"num_members"`
 	Priority           float64  `json:"priority"`
+	User               string   `json:"user"`
+
 	// TODO support pending_shared
 	// TODO support previous_names
 }
@@ -42,7 +44,6 @@ type groupConversation struct {
 	Members    []string `json:"members"`
 	Topic      Topic    `json:"topic"`
 	Purpose    Purpose  `json:"purpose"`
-	User       string   `json:"user"`
 }
 
 // Topic contains information about the topic
