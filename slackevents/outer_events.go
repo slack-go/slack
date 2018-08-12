@@ -9,6 +9,7 @@ import (
 // EventsAPIEvent is the base EventsAPIEvent
 type EventsAPIEvent struct {
 	Token      string `json:"token"`
+	TeamID     string `json:"team_id"`
 	Type       string `json:"type"`
 	Data       interface{}
 	InnerEvent EventsAPIInnerEvent
