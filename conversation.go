@@ -42,6 +42,7 @@ type groupConversation struct {
 	Members    []string `json:"members"`
 	Topic      Topic    `json:"topic"`
 	Purpose    Purpose  `json:"purpose"`
+	User       string   `json:"user"`
 }
 
 // Topic contains information about the topic
