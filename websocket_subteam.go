@@ -25,7 +25,7 @@ type SubteamSelfAddedEvent struct {
 	SubteamID string `json:"subteam_id"`
 }
 
-// SubteamSelfAddedEvent represents an event of you have been removed from a User Group
+// SubteamSelfRemovedEvent represents an event of you have been removed from a User Group
 type SubteamSelfRemovedEvent SubteamSelfAddedEvent
 
 // SubteamUpdatedEvent represents an event of an existing User Group has been updated or its members changed
