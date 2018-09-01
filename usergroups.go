@@ -25,6 +25,7 @@ type UserGroup struct {
 	DeletedBy   string         `json:"deleted_by"`
 	Prefs       UserGroupPrefs `json:"prefs"`
 	UserCount   int            `json:"user_count"`
+	Users       []string       `json:"users"`
 }
 
 // UserGroupPrefs contains default channels and groups (private channels)
@@ -121,15 +122,43 @@ func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string)
 	return response.UserGroup, nil
 }
 
+// GetUserGroupsParams contains arguments for GetUserGroups call
+type GetUserGroupsParams struct {
+	// IncludeCount	- Include the number of users in each User Group. Default: false
+	IncludeCount bool
+	// IncludeDisabled - Include disabled User Groups. Default: false
+	IncludeDisabled bool
+	// IncludeUsers - Include the list of users for each User Group. Default: false
+	IncludeUsers bool
+}
+
+// NewGetUserGroupsParams creates a new instance GetUserGroupsParams with defaults
+func NewGetUserGroupsParams() GetUserGroupsParams {
+	return GetUserGroupsParams{
+		IncludeCount:    false,
+		IncludeDisabled: false,
+		IncludeUsers:    false,
+	}
+}
+
 // GetUserGroups returns a list of user groups for the team
-func (api *Client) GetUserGroups() ([]UserGroup, error) {
-	return api.GetUserGroupsContext(context.Background())
+func (api *Client) GetUserGroups(params GetUserGroupsParams) ([]UserGroup, error) {
+	return api.GetUserGroupsContext(context.Background(), params)
 }
 
 // GetUserGroupsContext returns a list of user groups for the team with a custom context
-func (api *Client) GetUserGroupsContext(ctx context.Context) ([]UserGroup, error) {
+func (api *Client) GetUserGroupsContext(ctx context.Context, params GetUserGroupsParams) ([]UserGroup, error) {
 	values := url.Values{
 		"token": {api.token},
+	}
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+	if params.IncludeDisabled {
+		values.Add("include_disabled", "true")
+	}
+	if params.IncludeUsers {
+		values.Add("include_users", "true")
 	}
 
 	response, err := userGroupRequest(ctx, api.httpclient, "usergroups.list", values, api.debug)
