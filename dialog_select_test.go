@@ -70,7 +70,7 @@ func TestStaticGroupedSelect(t *testing.T) {
 	groups["Group 1"] = group1
 	groups["Group 2"] = group2
 
-	groupSelect := NewGroupedSelectDialoginput("groupSelect", "User Label", groups)
+	groupSelect := NewGroupedSelectDialogInput("groupSelect", "User Label", groups)
 	assert.Equal(t, InputTypeSelect, groupSelect.Type)
 	assert.Equal(t, "groupSelect", groupSelect.Name)
 	assert.Equal(t, "User Label", groupSelect.Label)
@@ -82,17 +82,17 @@ func TestStaticGroupedSelect(t *testing.T) {
 func TestConversationSelect(t *testing.T) {
 	convoSelect := NewConversationsSelect("", "")
 	assert.Equal(t, InputTypeSelect, convoSelect.Type)
-	assert.Equal(t, ConversationsDataSource, convoSelect.DataSource)
+	assert.Equal(t, DialogDataSourceConversations, convoSelect.DataSource)
 }
 
 func TestChannelSelect(t *testing.T) {
 	convoSelect := NewChannelsSelect("", "")
 	assert.Equal(t, InputTypeSelect, convoSelect.Type)
-	assert.Equal(t, ChannelsDataSource, convoSelect.DataSource)
+	assert.Equal(t, DialogDataSourceChannels, convoSelect.DataSource)
 }
 
 func TestUserSelect(t *testing.T) {
 	convoSelect := NewUsersSelect("", "")
 	assert.Equal(t, InputTypeSelect, convoSelect.Type)
-	assert.Equal(t, UsersDataSource, convoSelect.DataSource)
+	assert.Equal(t, DialogDataSourceUsers, convoSelect.DataSource)
 }

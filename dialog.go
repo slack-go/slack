@@ -47,30 +47,6 @@ type Dialog struct {
 // DialogElement abstract type for dialogs.
 type DialogElement interface{}
 
-// DialogTextElement text element for dialogs
-type DialogTextElement struct {
-	DialogInput
-	Value     string `json:"value,omitempty"`      //Optional.
-	MaxLength int    `json:"max_length,omitempty"` //Optional.
-	MinLength int    `json:"min_length,omitempty"` //Optional. Default value is 0.
-	Hint      string `json:"hint,omitempty"`       //Optional.
-	Subtype   string `json:"subtype,omitempty"`    //Optional. Allowed values: "email", "number", "tel", "url".
-}
-
-type DialogSelectElement struct {
-	DialogInput
-	Value           string                `json:"value,omitempty"`            //Optional.
-	DataSource      string                `json:"data_source,omitempty"`      //Optional. Allowed values: "users", "channels", "conversations", "external".
-	SelectedOptions string                `json:"selected_options,omitempty"` //Optional. Default value for "external" only
-	Options         []DialogElementOption `json:"options,omitempty"`          //One of options or option_groups is required.
-	OptionGroups    []DialogElementOption `json:"option_groups,omitempty"`    //Provide up to 100 options.
-}
-
-type DialogElementOption struct {
-	Label string `json:"label"` // Required.
-	Value string `json:"value"` // Required.
-}
-
 // DialogCallback is sent from Slack when a user submits a form from within a dialog
 type DialogCallback struct {
 	Type        string            `json:"type"`
@@ -108,12 +84,14 @@ type DialogResponseMetadata struct {
 	Messages []string `json:"messages"`
 }
 
-// OpenDialog opens a dialog window where the triggerId originated from
+// OpenDialog opens a dialog window where the triggerID originated from.
+// EXPERIMENTAL: dialog functionality is currently experimental, api is not considered stable.
 func (api *Client) OpenDialog(triggerID string, dialog Dialog) (err error) {
 	return api.OpenDialogContext(context.Background(), triggerID, dialog)
 }
 
 // OpenDialogContext opens a dialog window where the triggerId originated from with a custom context
+// EXPERIMENTAL: dialog functionality is currently experimental, api is not considered stable.
 func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dialog Dialog) (err error) {
 	if triggerID == "" {
 		return errors.New("received empty parameters")

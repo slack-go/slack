@@ -4,14 +4,14 @@ package slack
 type TextInputSubtype string
 
 const (
-	// EmailTextInputSubtype email keyboard
-	EmailTextInputSubtype TextInputSubtype = "email"
-	// NumberTextInputSubtype numeric keyboard
-	NumberTextInputSubtype TextInputSubtype = "number"
-	// TelTextInputSubtype Phone keyboard
-	TelTextInputSubtype TextInputSubtype = "tel"
-	// URLTextInputSubtype Phone keyboard
-	URLTextInputSubtype TextInputSubtype = "url"
+	// InputSubtypeEmail email keyboard
+	InputSubtypeEmail TextInputSubtype = "email"
+	// InputSubtypeNumber numeric keyboard
+	InputSubtypeNumber TextInputSubtype = "number"
+	// InputSubtypeTel Phone keyboard
+	InputSubtypeTel TextInputSubtype = "tel"
+	// InputSubtypeURL Phone keyboard
+	InputSubtypeURL TextInputSubtype = "url"
 )
 
 // TextInputElement subtype of DialogInput
