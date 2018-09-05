@@ -286,7 +286,7 @@ func openDialogHandler(rw http.ResponseWriter, r *http.Request) {
 func TestOpenDialog(t *testing.T) {
 	http.HandleFunc("/dialog.open", openDialogHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	dialog, err := unmarshalDialog()
 	if err != nil {
