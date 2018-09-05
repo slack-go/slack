@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/url"
-	"strings"
+
+	"github.com/nlopes/slack/slackutilsx"
 )
 
 const (
@@ -195,11 +196,6 @@ func applyMsgOptions(token, channel string, options ...MsgOption) (sendConfig, e
 	return config, nil
 }
 
-func escapeMessage(message string) string {
-	replacer := strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;")
-	return replacer.Replace(message)
-}
-
 type sendMode string
 
 const (
@@ -297,7 +293,7 @@ func MsgOptionUser(userID string) MsgOption {
 func MsgOptionText(text string, escape bool) MsgOption {
 	return func(config *sendConfig) error {
 		if escape {
-			text = escapeMessage(text)
+			text = slackutilsx.EscapeMessage(text)
 		}
 		config.values.Add("text", text)
 		return nil

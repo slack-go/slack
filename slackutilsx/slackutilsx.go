@@ -2,7 +2,10 @@
 // its for experimental functionality and utilities.
 package slackutilsx
 
-import "unicode/utf8"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 // ChannelType the type of channel based on the channelID
 type ChannelType int
@@ -21,18 +24,18 @@ func (t ChannelType) String() string {
 }
 
 const (
-	// Unknown represents channels we cannot properly detect.
+	// CTypeUnknown represents channels we cannot properly detect.
 	CTypeUnknown ChannelType = iota
-	// DM is a private channel between two slack users.
+	// CTypeDM is a private channel between two slack users.
 	CTypeDM
-	// Group is a group channel.
+	// CTypeGroup is a group channel.
 	CTypeGroup
-	// Channel is a public channel.
+	// CTypeChannel is a public channel.
 	CTypeChannel
 )
 
 // DetectChannelType converts a channelID to a ChannelType.
-// channelID must not be empty. However, if it is not empty, the channel type will default to Unknown.
+// channelID must not be empty. However, if it is empty, the channel type will default to Unknown.
 func DetectChannelType(channelID string) ChannelType {
 	// intentionally ignore the error and just default to CTypeUnknown
 	switch r, _ := utf8.DecodeRuneInString(channelID); r {
@@ -45,4 +48,10 @@ func DetectChannelType(channelID string) ChannelType {
 	default:
 		return CTypeUnknown
 	}
+}
+
+// EscapeMessage text
+func EscapeMessage(message string) string {
+	replacer := strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;")
+	return replacer.Replace(message)
 }
