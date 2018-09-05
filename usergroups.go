@@ -122,32 +122,50 @@ func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string)
 	return response.UserGroup, nil
 }
 
-// GetUserGroupsParams contains arguments for GetUserGroups call
-type GetUserGroupsParams struct {
-	// IncludeCount	- Include the number of users in each User Group. Default: false
-	IncludeCount bool
-	// IncludeDisabled - Include disabled User Groups. Default: false
-	IncludeDisabled bool
-	// IncludeUsers - Include the list of users for each User Group. Default: false
-	IncludeUsers bool
-}
+// GetUserGroupsOption options for the GetUserGroups method call.
+type GetUserGroupsOption func(*GetUserGroupsParams)
 
-// NewGetUserGroupsParams creates a new instance GetUserGroupsParams with defaults
-func NewGetUserGroupsParams() GetUserGroupsParams {
-	return GetUserGroupsParams{
-		IncludeCount:    false,
-		IncludeDisabled: false,
-		IncludeUsers:    false,
+// GetUserGroupsOptionIncludeCount include the number of users in each User Group (default: false)
+func GetUserGroupsOptionIncludeCount(b bool) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.IncludeCount = b
 	}
 }
 
+// GetUserGroupsOptionIncludeDisabled include disabled User Groups (default: false)
+func GetUserGroupsOptionIncludeDisabled(b bool) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.IncludeDisabled = b
+	}
+}
+
+// GetUserGroupsOptionIncludeUsers include the list of users for each User Group (default: false)
+func GetUserGroupsOptionIncludeUsers(b bool) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.IncludeUsers = b
+	}
+}
+
+// GetUserGroupsParams contains arguments for GetUserGroups method call
+type GetUserGroupsParams struct {
+	IncludeCount    bool
+	IncludeDisabled bool
+	IncludeUsers    bool
+}
+
 // GetUserGroups returns a list of user groups for the team
-func (api *Client) GetUserGroups(params GetUserGroupsParams) ([]UserGroup, error) {
-	return api.GetUserGroupsContext(context.Background(), params)
+func (api *Client) GetUserGroups(options ...GetUserGroupsOption) ([]UserGroup, error) {
+	return api.GetUserGroupsContext(context.Background(), options...)
 }
 
 // GetUserGroupsContext returns a list of user groups for the team with a custom context
-func (api *Client) GetUserGroupsContext(ctx context.Context, params GetUserGroupsParams) ([]UserGroup, error) {
+func (api *Client) GetUserGroupsContext(ctx context.Context, options ...GetUserGroupsOption) ([]UserGroup, error) {
+	params := GetUserGroupsParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token": {api.token},
 	}

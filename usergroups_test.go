@@ -145,10 +145,7 @@ func TestGetUserGroups(t *testing.T) {
 	SLACK_API = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
-	params := NewGetUserGroupsParams()
-	params.IncludeUsers = true
-
-	userGroups, err := api.GetUserGroups(params)
+	userGroups, err := api.GetUserGroups(GetUserGroupsOptionIncludeUsers(true))
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
