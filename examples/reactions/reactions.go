@@ -17,10 +17,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
-	api := slack.New(apiToken)
-	if debug {
-		api.SetDebug(true)
-	}
+	api := slack.New(apiToken, slack.OptionDebug(debug))
 
 	var (
 		postAsUserName  string
@@ -56,8 +53,7 @@ func main() {
 	fmt.Printf("Posting as %s (%s) in DM with %s (%s), channel %s\n", postAsUserName, postAsUserID, postToUserName, postToUserID, postToChannelID)
 
 	// Post a message.
-	postParams := slack.PostMessageParameters{}
-	channelID, timestamp, err := api.PostMessage(postToChannelID, "Is this any good?", postParams)
+	channelID, timestamp, err := api.PostMessage(postToChannelID, slack.MsgOptionText("Is this any good?", false))
 	if err != nil {
 		fmt.Printf("Error posting message: %s\n", err)
 		return
@@ -67,13 +63,13 @@ func main() {
 	msgRef := slack.NewRefToMessage(channelID, timestamp)
 
 	// React with :+1:
-	if err := api.AddReaction("+1", msgRef); err != nil {
+	if err = api.AddReaction("+1", msgRef); err != nil {
 		fmt.Printf("Error adding reaction: %s\n", err)
 		return
 	}
 
 	// React with :-1:
-	if err := api.AddReaction("cry", msgRef); err != nil {
+	if err = api.AddReaction("cry", msgRef); err != nil {
 		fmt.Printf("Error adding reaction: %s\n", err)
 		return
 	}

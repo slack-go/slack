@@ -8,7 +8,6 @@ import (
 
 func main() {
 	api := slack.New("YOUR_TOKEN_HERE")
-	params := slack.PostMessageParameters{}
 	attachment := slack.Attachment{
 		Pretext: "some pretext",
 		Text:    "some text",
@@ -22,8 +21,8 @@ func main() {
 			},
 		*/
 	}
-	params.Attachments = []slack.Attachment{attachment}
-	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", params)
+
+	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", slack.MsgOptionText("Some text", false), slack.MsgOptionAttachments(attachment))
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

@@ -41,7 +41,7 @@ func (h *fileCommentHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_DeleteFileComment(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		title       string
@@ -125,7 +125,7 @@ func TestUploadFile(t *testing.T) {
 	http.HandleFunc("/auth.test", authTestHandler)
 	http.HandleFunc("/files.upload", uploadFileHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	params := FileUploadParameters{
 		Filename: "test.txt", Content: "test content",

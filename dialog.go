@@ -108,8 +108,8 @@ func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dial
 	}
 
 	response := &DialogOpenResponse{}
-	endpoint := SLACK_API + "dialog.open"
-	if err := postJSON(ctx, api.httpclient, endpoint, api.token, encoded, response, api.debug); err != nil {
+	endpoint := APIURL + "dialog.open"
+	if err := postJSON(ctx, api.httpclient, endpoint, api.token, encoded, response, api); err != nil {
 		return err
 	}
 

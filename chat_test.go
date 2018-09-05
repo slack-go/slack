@@ -17,16 +17,16 @@ func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 func TestPostMessageInvalidChannel(t *testing.T) {
 	http.HandleFunc("/chat.postMessage", postMessageInvalidChannelHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
-	_, _, err := api.PostMessage("CXXXXXXXX", "hello", PostMessageParameters{})
+	_, _, err := api.PostMessage("CXXXXXXXX", MsgOptionText("hello", false))
 	if err == nil {
-		t.Errorf("Expected error: %s; instead succeeded", "channel_not_found")
+		t.Errorf("Expected error: channel_not_found; instead succeeded")
 		return
 	}
 
 	if err.Error() != "channel_not_found" {
-		t.Errorf("Expected error: %s; received: %s", "channel_not_found", err)
+		t.Errorf("Expected error: channel_not_found; received: %s", err)
 		return
 	}
 }

@@ -17,10 +17,7 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
-	api := slack.New(apiToken)
-	if debug {
-		api.SetDebug(true)
-	}
+	api := slack.New(apiToken, slack.OptionDebug(debug))
 
 	// Get all stars for the usr.
 	params := slack.NewStarsParameters()
