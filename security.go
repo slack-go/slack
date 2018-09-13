@@ -16,8 +16,8 @@ type SecretsVerifier struct {
 	requestBody string
 }
 
-// NewSecretVerifierFromHeader returns a new SecretsVerifier object in exchange for an http.Header object
-func NewSecretVerifierFromHeader(header http.Header) (SecretsVerifier, error) {
+// NewSecretsVerifierFromHeader returns a new SecretsVerifier object in exchange for an http.Header object
+func NewSecretsVerifierFromHeader(header http.Header) (SecretsVerifier, error) {
 	if header["X-Slack-Signature"][0] == "" || header["X-Slack-Request-Timestamp"][0] == "" {
 		return SecretsVerifier{}, errors.New("headers are empty, cannot create SecretsVerifier")
 	}
@@ -43,7 +43,6 @@ func (v SecretsVerifier) Ensure(signingSecret string) error {
 	actualSignature := "v0=" + string(hex.EncodeToString(mac.Sum(nil)))
 	fmt.Printf("actual: %s expected: %s", actualSignature, v.slackSig)
 	if actualSignature == v.slackSig {
-		fmt.Printf("bingo")
 		return nil
 	}
 
