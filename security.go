@@ -46,5 +46,5 @@ func (v SecretsVerifier) Ensure(signingSecret string) error {
 		return nil
 	}
 
-	return errors.New("invalid token")
+	return errors.New("invalid request")
 }
