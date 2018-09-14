@@ -37,7 +37,7 @@ func (v *SecretsVerifier) Write(body []byte) (n int, err error) {
 }
 
 // Ensure compares the signature sent from Slack with the actual computed hash to judge validity
-func (v SecretsVerifier) Ensure(signingSecret string) error {
+func (v SecretsVerifier) Ensure() error {
 	computed := "v0=" + string(hex.EncodeToString(v.hmac.Sum(nil)))
 	if computed == v.slackSig {
 		return nil
