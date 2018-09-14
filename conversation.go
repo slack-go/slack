@@ -134,7 +134,7 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 		ResponseMetaData responseMetaData `json:"response_metadata"`
 		SlackResponse
 	}{}
-	err = post(ctx, api.httpclient, "users.conversations", values, &response, api.debug)
+	err = postSlackMethod(ctx, api.httpclient, "users.conversations", values, &response, api.debug)
 	if err != nil {
 		return nil, "", err
 	}
