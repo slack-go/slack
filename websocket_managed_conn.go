@@ -274,7 +274,7 @@ func (rtm *RTM) sendWithDeadline(msg interface{}) error {
 // and instead lets a future failed 'PING' detect the failed connection.
 func (rtm *RTM) sendOutgoingMessage(msg OutgoingMessage) {
 	rtm.Debugln("Sending message:", msg)
-	if len(msg.Text) > MaxMessageTextLength {
+	if len([]rune(msg.Text)) > MaxMessageTextLength {
 		rtm.IncomingEvents <- RTMEvent{"outgoing_error", &MessageTooLongEvent{
 			Message:   msg,
 			MaxLength: MaxMessageTextLength,
