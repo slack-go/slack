@@ -210,6 +210,10 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroup UserGro
 		values["description"] = []string{userGroup.Description}
 	}
 
+	if len(userGroup.Prefs.Channels) > 0 {
+		values["channels"] = []string{strings.Join(userGroup.Prefs.Channels, ",")}
+	}
+
 	response, err := userGroupRequest(ctx, api.httpclient, "usergroups.update", values, api.debug)
 	if err != nil {
 		return UserGroup{}, err
