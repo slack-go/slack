@@ -20,7 +20,7 @@ type SecretsVerifier struct {
 // NewSecretsVerifier returns a SecretsVerifier object in exchange for an http.Header object and signing secret
 func NewSecretsVerifier(header http.Header, signingSecret string) (SecretsVerifier, error) {
 	if header["X-Slack-Signature"][0] == "" || header["X-Slack-Request-Timestamp"][0] == "" {
-		return SecretsVerifier{}, errors.New("headers are empty, cannot create SecretsVerifier")
+		return SecretsVerifier{}, errors.New("Headers are empty, cannot create SecretsVerifier")
 	}
 
 	hash := hmac.New(sha256.New, []byte(signingSecret))
@@ -43,5 +43,5 @@ func (v SecretsVerifier) Ensure() error {
 		return nil
 	}
 
-	return fmt.Errorf("invalid request verification token %s, expected %s", v.slackSig, computed)
+	return fmt.Errorf("Expected signing signature: %s, but computed: %s", v.slackSig, computed)
 }
