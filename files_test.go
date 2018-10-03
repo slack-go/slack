@@ -141,4 +141,13 @@ func TestUploadFile(t *testing.T) {
 	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
+
+	largeByt := make([]byte, 1073742000*3)
+	reader = bytes.NewBuffer(largeByt)
+	params = FileUploadParameters{
+		Filename: "test.txt", Reader: reader,
+		Channels: []string{"CXXXXXXXX"}}
+	if _, err := api.UploadFile(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
 }
