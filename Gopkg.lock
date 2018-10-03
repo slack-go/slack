@@ -14,10 +14,10 @@
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "816c9085562cd7ee03e7f8188a1cfd942858cded"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
