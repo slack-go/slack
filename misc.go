@@ -65,23 +65,22 @@ func (e *RateLimitedError) Error() string {
 	return fmt.Sprintf("Slack rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
-func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
-	body := &bytes.Buffer{}
-	wr := multipart.NewWriter(body)
 
-	ioWriter, err := wr.CreateFormFile(fieldname, filename)
-	if err != nil {
-		wr.Close()
-		return nil, err
-	}
-	_, err = io.Copy(ioWriter, r)
-	if err != nil {
-		wr.Close()
-		return nil, err
-	}
-	// Close the multipart writer or the footer won't be written
-	wr.Close()
-	req, err := http.NewRequest("POST", path, body)
+func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
+	pipeReader, pipeWriter := io.Pipe()
+	wr := multipart.NewWriter(pipeWriter)
+	go func() {
+		defer pipeWriter.Close()
+		ioWriter, err := wr.CreateFormFile(fieldname, filename)
+		if err != nil {
+		}
+		_, err = io.Copy(ioWriter, r)
+		if err != nil {
+		}
+		if err := wr.Close(); err != nil {
+		}
+	}()
+	req, err := http.NewRequest("POST", path, pipeReader)
 	req = req.WithContext(ctx)
 	if err != nil {
 		return nil, err
