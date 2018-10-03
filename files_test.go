@@ -142,7 +142,7 @@ func TestUploadFile(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 	}
 
-	largeByt := make([]byte, 1073742000*3)
+	largeByt := make([]byte, 107374200)
 	reader = bytes.NewBuffer(largeByt)
 	params = FileUploadParameters{
 		Filename: "test.txt", Reader: reader,

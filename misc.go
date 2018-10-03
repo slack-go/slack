@@ -65,7 +65,6 @@ func (e *RateLimitedError) Error() string {
 	return fmt.Sprintf("Slack rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
-
 func fileUploadReq(ctx context.Context, path, fieldname, filename string, values url.Values, r io.Reader) (*http.Request, error) {
 	pipeReader, pipeWriter := io.Pipe()
 	wr := multipart.NewWriter(pipeWriter)
@@ -73,11 +72,14 @@ func fileUploadReq(ctx context.Context, path, fieldname, filename string, values
 		defer pipeWriter.Close()
 		ioWriter, err := wr.CreateFormFile(fieldname, filename)
 		if err != nil {
+			fmt.Println(err)
 		}
 		_, err = io.Copy(ioWriter, r)
 		if err != nil {
+			fmt.Println(err)
 		}
 		if err := wr.Close(); err != nil {
+			fmt.Println(err)
 		}
 	}()
 	req, err := http.NewRequest("POST", path, pipeReader)
