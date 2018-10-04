@@ -88,6 +88,16 @@ type MessageEvent struct {
 	Files  []File `json:"files"`
 }
 
+// MemberJoinedChannelEvent A member join a channel
+type MemberJoinedChannelEvent struct {
+	Type        string `json:"type"`
+	User        string `json:"user"`
+	Channel     string `json:"channel"`
+	ChannelType string `json:"channel_type"`
+	Team        string `json:"team"`
+	Inviter     string `json:"inviter"`
+}
+
 // File is a file upload
 type File struct {
 	ID                 string `json:"id"`
@@ -169,6 +179,8 @@ const (
 	LinkShared = "link_shared"
 	// Message A message was posted to a channel, private channel (group), im, or mim
 	Message = "message"
+	// Member Joined Channel
+	MemberJoinedChannel = "member_joined_channel"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -181,4 +193,5 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
 	Message:               MessageEvent{},
+	MemberJoinedChannel:   MemberJoinedChannelEvent{},
 }
