@@ -143,6 +143,13 @@ func OptionVerifyToken(v verifier) Option {
 	}
 }
 
+// OptionNoVerifyToken skips the check of the Slack verification token
+func OptionNoVerifyToken() Option {
+	return func(cfg *Config) {
+		cfg.TokenVerified = true
+	}
+}
+
 type TokenComparator struct {
 	VerificationToken string
 }
