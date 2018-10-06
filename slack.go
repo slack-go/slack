@@ -13,7 +13,7 @@ import (
 var APIURL = "https://slack.com/api/"
 
 // WEBAPIURLFormat ...
-var WEBAPIURLFormat = "https://%s.slack.com/api/users.admin.%s?t=%s"
+const WEBAPIURLFormat = "https://%s.slack.com/api/users.admin.%s?t=%d"
 
 // httpClient defines the minimal interface needed for an http.Client to be implemented.
 type httpClient interface {
