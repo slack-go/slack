@@ -39,6 +39,7 @@ type Dialog struct {
 	TriggerID      string          `json:"trigger_id"`  //Required
 	CallbackID     string          `json:"callback_id"` //Required
 	Title          string          `json:"title"`
+	State          string          `json:"state,omitempty"` //Optional.
 	SubmitLabel    string          `json:"submit_label,omitempty"`
 	NotifyOnCancel bool            `json:"notify_on_cancel"`
 	Elements       []DialogElement `json:"elements"`
@@ -58,6 +59,7 @@ type DialogCallback struct {
 	Token       string            `json:"token"`
 	ResponseURL string            `json:"response_url"`
 	Submission  map[string]string `json:"submission"`
+	State       string            `json:"state,omitempty"` //Optional.
 }
 
 // DialogSuggestionCallback is sent from Slack when a user types in a select field with an external data source
