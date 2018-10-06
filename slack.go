@@ -52,7 +52,7 @@ type Client struct {
 	token      string
 	info       Info
 	debug      bool
-	log        logInternal
+	log        ilogger
 	httpclient httpClient
 }
 
@@ -74,9 +74,9 @@ func OptionDebug(b bool) func(*Client) {
 }
 
 // OptionLog set logging for client.
-func OptionLog(l logProvider) func(*Client) {
+func OptionLog(l logger) func(*Client) {
 	return func(c *Client) {
-		c.log = ilogger{logProvider: l}
+		c.log = internalLog{logger: l}
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 
 func TestLogging(t *testing.T) {
 	buf := bytes.NewBufferString("")
-	logger := ilogger{logProvider: log.New(buf, "", 0|log.Lshortfile)}
+	logger := internalLog{logger: log.New(buf, "", 0|log.Lshortfile)}
 	logger.Println("test line 123")
 	assert.Equal(t, buf.String(), "logger_test.go:14: test line 123\n")
 	buf.Truncate(0)
