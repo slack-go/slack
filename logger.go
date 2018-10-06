@@ -4,18 +4,18 @@ import (
 	"fmt"
 )
 
-// logProvider is a logger interface compatible with both stdlib and some
-// 3rd party loggers such as logrus.
-type logProvider interface {
+// logger is a logger interface compatible with both stdlib and some
+// 3rd party loggers.
+type logger interface {
 	Output(int, string) error
 }
 
-// logInternal represents the internal logging api we use.
-type logInternal interface {
+// ilogger represents the internal logging api we use.
+type ilogger interface {
+	logger
 	Print(...interface{})
 	Printf(string, ...interface{})
 	Println(...interface{})
-	Output(int, string) error
 }
 
 type debug interface {
@@ -27,23 +27,23 @@ type debug interface {
 	Debugln(v ...interface{})
 }
 
-// ilogger implements the additional methods used by our internal logging.
-type ilogger struct {
-	logProvider
+// internalLog implements the additional methods used by our internal logging.
+type internalLog struct {
+	logger
 }
 
 // Println replicates the behaviour of the standard logger.
-func (t ilogger) Println(v ...interface{}) {
+func (t internalLog) Println(v ...interface{}) {
 	t.Output(2, fmt.Sprintln(v...))
 }
 
 // Printf replicates the behaviour of the standard logger.
-func (t ilogger) Printf(format string, v ...interface{}) {
+func (t internalLog) Printf(format string, v ...interface{}) {
 	t.Output(2, fmt.Sprintf(format, v...))
 }
 
 // Print replicates the behaviour of the standard logger.
-func (t ilogger) Print(v ...interface{}) {
+func (t internalLog) Print(v ...interface{}) {
 	t.Output(2, fmt.Sprint(v...))
 }
 
