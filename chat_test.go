@@ -55,7 +55,7 @@ func TestGetPermalink(t *testing.T) {
 	})
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	pp := PermalinkParameters{Channel: channel, Ts: timeStamp}
 	pl, err := api.GetPermalink(&pp)
