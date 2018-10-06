@@ -200,11 +200,11 @@ func postSlackMethod(ctx context.Context, client httpClient, path string, values
 }
 
 // get a slack web method.
-func getSlackMethod(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
-	return getResource(ctx, client, SLACK_API+path, values, intf, debug)
+func getSlackMethod(ctx context.Context, client httpClient, path string, values url.Values, intf interface{}, d debug) error {
+	return getResource(ctx, client, APIURL+path, values, intf, d)
 }
 
-func getResource(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
+func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return err
@@ -212,7 +212,7 @@ func getResource(ctx context.Context, client HTTPRequester, endpoint string, val
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.URL.RawQuery = values.Encode()
 
-	return doPost(ctx, client, req, intf, debug)
+	return doPost(ctx, client, req, intf, d)
 }
 
 func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d debug) error {

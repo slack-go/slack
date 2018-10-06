@@ -474,7 +474,7 @@ func (api *Client) GetPermalinkContext(ctx context.Context, params *PermalinkPar
 		Permalink string `json:"permalink"`
 		SlackResponse
 	}{}
-	err := getSlackMethod(ctx, api.httpclient, "chat.getPermalink", values, &response, api.debug)
+	err := getSlackMethod(ctx, api.httpclient, "chat.getPermalink", values, &response, api)
 	if err != nil {
 		return "", err
 	}
