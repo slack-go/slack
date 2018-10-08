@@ -128,3 +128,18 @@ func TestBadTokenVerification(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestNoTokenVerification(t *testing.T) {
+	urlVerificationEvent := `
+		{
+			"token": "fake-token",
+			"challenge": "aljdsflaji3jj",
+			"type": "url_verification"
+		}
+	`
+	_, e := ParseEvent(json.RawMessage(urlVerificationEvent), OptionNoVerifyToken())
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+}

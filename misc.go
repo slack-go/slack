@@ -19,6 +19,7 @@ import (
 	"time"
 )
 
+// SlackResponse handles parsing out errors from the web api.
 type SlackResponse struct {
 	Ok    bool   `json:"ok"`
 	Error string `json:"error"`
@@ -90,21 +91,20 @@ func fileUploadReq(ctx context.Context, path, fieldname, filename string, values
 	return req, nil
 }
 
-func parseResponseBody(body io.ReadCloser, intf interface{}, debug bool) error {
+func parseResponseBody(body io.ReadCloser, intf interface{}, d debug) error {
 	response, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
 	}
 
-	// FIXME: will be api.Debugf
-	if debug {
-		logger.Printf("parseResponseBody: %s\n", string(response))
+	if d.Debug() {
+		d.Debugln("parseResponseBody", string(response))
 	}
 
 	return json.Unmarshal(response, intf)
 }
 
-func postLocalWithMultipartResponse(ctx context.Context, client HTTPRequester, path, fpath, fieldname string, values url.Values, intf interface{}, debug bool) error {
+func postLocalWithMultipartResponse(ctx context.Context, client httpClient, path, fpath, fieldname string, values url.Values, intf interface{}, d debug) error {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {
 		return err
@@ -114,11 +114,11 @@ func postLocalWithMultipartResponse(ctx context.Context, client HTTPRequester, p
 		return err
 	}
 	defer file.Close()
-	return postWithMultipartResponse(ctx, client, path, filepath.Base(fpath), fieldname, values, file, intf, debug)
+	return postWithMultipartResponse(ctx, client, path, filepath.Base(fpath), fieldname, values, file, intf, d)
 }
 
-func postWithMultipartResponse(ctx context.Context, client HTTPRequester, path, name, fieldname string, values url.Values, r io.Reader, intf interface{}, debug bool) error {
-	req, err := fileUploadReq(ctx, SLACK_API+path, fieldname, name, values, r)
+func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname string, values url.Values, r io.Reader, intf interface{}, d debug) error {
+	req, err := fileUploadReq(ctx, APIURL+path, fieldname, name, values, r)
 	if err != nil {
 		return err
 	}
@@ -139,14 +139,14 @@ func postWithMultipartResponse(ctx context.Context, client HTTPRequester, path, 
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
-		logResponse(resp, debug)
+		logResponse(resp, d)
 		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
-	return parseResponseBody(resp.Body, intf, debug)
+	return parseResponseBody(resp.Body, intf, d)
 }
 
-func doPost(ctx context.Context, client HTTPRequester, req *http.Request, intf interface{}, debug bool) error {
+func doPost(ctx context.Context, client httpClient, req *http.Request, intf interface{}, d debug) error {
 	req = req.WithContext(ctx)
 	resp, err := client.Do(req)
 	if err != nil {
@@ -164,15 +164,15 @@ func doPost(ctx context.Context, client HTTPRequester, req *http.Request, intf i
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
-		logResponse(resp, debug)
+		logResponse(resp, d)
 		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
-	return parseResponseBody(resp.Body, intf, debug)
+	return parseResponseBody(resp.Body, intf, d)
 }
 
 // post JSON.
-func postJSON(ctx context.Context, client HTTPRequester, endpoint, token string, json []byte, intf interface{}, debug bool) error {
+func postJSON(ctx context.Context, client httpClient, endpoint, token string, json []byte, intf interface{}, d debug) error {
 	reqBody := bytes.NewBuffer(json)
 	req, err := http.NewRequest("POST", endpoint, reqBody)
 	if err != nil {
@@ -180,38 +180,53 @@ func postJSON(ctx context.Context, client HTTPRequester, endpoint, token string,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	return doPost(ctx, client, req, intf, debug)
+	return doPost(ctx, client, req, intf, d)
 }
 
 // post a url encoded form.
-func postForm(ctx context.Context, client HTTPRequester, endpoint string, values url.Values, intf interface{}, debug bool) error {
+func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
 	reqBody := strings.NewReader(values.Encode())
 	req, err := http.NewRequest("POST", endpoint, reqBody)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	return doPost(ctx, client, req, intf, debug)
+	return doPost(ctx, client, req, intf, d)
 }
 
 // post to a slack web method.
-func postSlackMethod(ctx context.Context, client HTTPRequester, path string, values url.Values, intf interface{}, debug bool) error {
-	return postForm(ctx, client, SLACK_API+path, values, intf, debug)
+func postSlackMethod(ctx context.Context, client httpClient, path string, values url.Values, intf interface{}, d debug) error {
+	return postForm(ctx, client, APIURL+path, values, intf, d)
 }
 
-func parseAdminResponse(ctx context.Context, client HTTPRequester, method string, teamName string, values url.Values, intf interface{}, debug bool) error {
-	endpoint := fmt.Sprintf(SLACK_WEB_API_FORMAT, teamName, method, time.Now().Unix())
-	return postForm(ctx, client, endpoint, values, intf, debug)
+// get a slack web method.
+func getSlackMethod(ctx context.Context, client httpClient, path string, values url.Values, intf interface{}, d debug) error {
+	return getResource(ctx, client, APIURL+path, values, intf, d)
 }
 
-func logResponse(resp *http.Response, debug bool) error {
-	if debug {
+func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.URL.RawQuery = values.Encode()
+
+	return doPost(ctx, client, req, intf, d)
+}
+
+func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d debug) error {
+	endpoint := fmt.Sprintf(WEBAPIURLFormat, teamName, method, time.Now().Unix())
+	return postForm(ctx, client, endpoint, values, intf, d)
+}
+
+func logResponse(resp *http.Response, d debug) error {
+	if d.Debug() {
 		text, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			return err
 		}
-
-		logger.Print(string(text))
+		d.Debugln(string(text))
 	}
 
 	return nil

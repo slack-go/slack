@@ -38,7 +38,7 @@ func (rh *pinsHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_AddPin(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		channel    string
@@ -86,7 +86,7 @@ func TestSlack_AddPin(t *testing.T) {
 
 func TestSlack_RemovePin(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		channel    string
@@ -134,7 +134,7 @@ func TestSlack_RemovePin(t *testing.T) {
 
 func TestSlack_ListPins(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	rh := newPinsHandler()
 	http.HandleFunc("/pins.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })

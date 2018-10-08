@@ -20,15 +20,13 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
-	api := slack.New(apiToken)
-	if debug {
-		api.SetDebug(true)
-	}
+	api := slack.New(apiToken, slack.OptionDebug(debug))
 
 	var (
 		postAsUserName  string
 		postAsUserID    string
 		postToChannelID string
+		channels        []slack.Channel
 	)
 
 	// Find the user to post as.
@@ -51,8 +49,7 @@ func main() {
 		// If the channel exists, that means we just need to unarchive it
 		if err.Error() == "name_taken" {
 			err = nil
-			channels, err := api.GetChannels(false)
-			if err != nil {
+			if channels, err = api.GetChannels(false); err != nil {
 				fmt.Println("Could not retrieve channels")
 				return
 			}
@@ -80,8 +77,7 @@ func main() {
 	fmt.Printf("Posting as %s (%s) in channel %s\n", postAsUserName, postAsUserID, postToChannelID)
 
 	// Post a message.
-	postParams := slack.PostMessageParameters{}
-	channelID, timestamp, err := api.PostMessage(postToChannelID, "Is this any good?", postParams)
+	channelID, timestamp, err := api.PostMessage(postToChannelID, slack.MsgOptionText("Is this any good?", false))
 	if err != nil {
 		fmt.Printf("Error posting message: %s\n", err)
 		return
@@ -91,7 +87,7 @@ func main() {
 	msgRef := slack.NewRefToMessage(channelID, timestamp)
 
 	// Add message pin to channel
-	if err := api.AddPin(channelID, msgRef); err != nil {
+	if err = api.AddPin(channelID, msgRef); err != nil {
 		fmt.Printf("Error adding pin: %s\n", err)
 		return
 	}

@@ -31,7 +31,7 @@ func TestGetTeamInfo(t *testing.T) {
 	http.HandleFunc("/team.info", getTeamInfo)
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	teamInfo, err := api.GetTeamInfo()
@@ -95,7 +95,7 @@ func TestGetAccessLogs(t *testing.T) {
 	http.HandleFunc("/team.accessLogs", getTeamAccessLogs)
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	logins, paging, err := api.GetAccessLogs(NewAccessLogParameters())

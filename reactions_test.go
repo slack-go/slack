@@ -41,7 +41,7 @@ func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_AddReaction(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		name       string
@@ -90,7 +90,7 @@ func TestSlack_AddReaction(t *testing.T) {
 
 func TestSlack_RemoveReaction(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		name       string
@@ -139,7 +139,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 
 func TestSlack_GetReactions(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		ref           ItemRef
@@ -254,7 +254,7 @@ func TestSlack_GetReactions(t *testing.T) {
 
 func TestSlack_ListReactions(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	rh := newReactionsHandler()
 	http.HandleFunc("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })

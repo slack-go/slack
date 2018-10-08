@@ -170,7 +170,7 @@ func TestGetUserIdentity(t *testing.T) {
 	http.HandleFunc("/users.identity", getUserIdentity)
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	identity, err := api.GetUserIdentity()
@@ -211,7 +211,7 @@ func TestGetUserByEmail(t *testing.T) {
 	expectedUser := getTestUser()
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	user, err := api.GetUserByEmail("test@test.com")
@@ -232,7 +232,7 @@ func TestUserCustomStatus(t *testing.T) {
 	http.HandleFunc("/users.profile.set", setUserProfile)
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	testSetUserCustomStatus(api, up, t)
@@ -277,7 +277,7 @@ func TestGetUsers(t *testing.T) {
 	expectedUser := getTestUser()
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	users, err := api.GetUsers()
@@ -329,7 +329,7 @@ func TestSetUserPhoto(t *testing.T) {
 	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New(validToken)
 
 	err := api.SetUserPhoto(file.Name(), params)
@@ -436,7 +436,7 @@ func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
 func TestGetUserProfile(t *testing.T) {
 	http.HandleFunc("/users.profile.get", getUserProfileHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	profile, err := api.GetUserProfile("UXXXXXXXX", false)
 	if err != nil {

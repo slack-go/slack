@@ -17,5 +17,5 @@ func main() {
 		fmt.Printf("%s\n", err)
 	}
 
-	api.PostMessage(channelID, "Hello World!", slack.PostMessageParameters{})
+	api.PostMessage(channelID, slack.MsgOptionText("Hello World!", false))
 }

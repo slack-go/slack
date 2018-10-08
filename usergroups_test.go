@@ -61,7 +61,7 @@ func (ugh *userGroupsHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestCreateUserGroup(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	tests := []struct {
@@ -142,7 +142,7 @@ func TestGetUserGroups(t *testing.T) {
 	http.HandleFunc("/usergroups.list", getUserGroups)
 
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 
 	userGroups, err := api.GetUserGroups(GetUserGroupsOptionIncludeUsers(true))
