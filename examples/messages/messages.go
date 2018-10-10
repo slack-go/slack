@@ -8,21 +8,26 @@ import (
 
 func main() {
 	api := slack.New("YOUR_TOKEN_HERE")
-	attachment := slack.Attachment{
-		Pretext: "some pretext",
-		Text:    "some text",
-		// Uncomment the following part to send a field too
-		/*
-			Fields: []slack.AttachmentField{
-				slack.AttachmentField{
-					Title: "a",
-					Value: "no",
-				},
+
+	params := slack.PostMessageParameters{
+		Attachments: []slack.Attachment{
+			{
+				Pretext: "some pretext",
+				Text:    "some text",
+				// Uncomment the following part to send a field too
+				/*
+					Fields: []slack.AttachmentField{
+						slack.AttachmentField{
+							Title: "a",
+							Value: "no",
+						},
+					},
+				*/
 			},
-		*/
+		},
 	}
 
-	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", slack.MsgOptionText("Some text", false), slack.MsgOptionAttachments(attachment))
+	channelID, timestamp, err := api.PostMessage("CHNNEL_ID", "Some text", params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
