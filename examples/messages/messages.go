@@ -27,7 +27,7 @@ func main() {
 		},
 	}
 
-	channelID, timestamp, err := api.PostMessage("CHNNEL_ID", "Some text", params)
+	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
