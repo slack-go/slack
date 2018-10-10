@@ -85,7 +85,7 @@ func New(token string, options ...Option) *Client {
 	s := &Client{
 		token:      token,
 		httpclient: &http.Client{},
-		log:        log.New(os.Stdout, "nlopes/slack", log.LstdFlags|log.Lshortfile),
+		log:        log.New(os.Stderr, "nlopes/slack", log.LstdFlags|log.Lshortfile),
 	}
 
 	for _, opt := range options {
