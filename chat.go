@@ -21,6 +21,7 @@ const (
 	DEFAULT_MESSAGE_ICON_EMOJI       = ""
 	DEFAULT_MESSAGE_MARKDOWN         = true
 	DEFAULT_MESSAGE_ESCAPE_TEXT      = true
+	DEFAULT_MESSAGE_REPLACE_ORIGINAL = false
 )
 
 type chatResponseFull struct {
@@ -56,6 +57,7 @@ type PostMessageParameters struct {
 	IconEmoji       string       `json:"icon_emoji"`
 	Markdown        bool         `json:"mrkdwn,omitempty"`
 	EscapeText      bool         `json:"escape_text"`
+	ReplaceOriginal bool         `json:"replace_original"`
 
 	// chat.postEphemeral support
 	Channel string `json:"channel"`
@@ -78,6 +80,7 @@ func NewPostMessageParameters() PostMessageParameters {
 		IconEmoji:       DEFAULT_MESSAGE_ICON_EMOJI,
 		Markdown:        DEFAULT_MESSAGE_MARKDOWN,
 		EscapeText:      DEFAULT_MESSAGE_ESCAPE_TEXT,
+		ReplaceOriginal: DEFAULT_MESSAGE_REPLACE_ORIGINAL,
 	}
 }
 
