@@ -15,6 +15,7 @@ type MessageActionResponse struct {
 type MessageActionEntity struct {
 	ID     string `json:"id"`
 	Domain string `json:"domain"`
+	Name   string `json:"name"`
 }
 
 type MessageAction struct {
