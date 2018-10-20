@@ -278,6 +278,14 @@ func MsgOptionUser(userID string) MsgOption {
 	}
 }
 
+// MsgOptionUsername set the username for the message.
+func MsgOptionUsername(username string) MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("username", username)
+		return nil
+	}
+}
+
 // MsgOptionText provide the text for the message, optionally escape the provided
 // text.
 func MsgOptionText(text string, escape bool) MsgOption {
