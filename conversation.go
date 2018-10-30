@@ -118,7 +118,9 @@ func (api *Client) GetConversationsForUser(params *GetConversationsForUserParame
 func (api *Client) GetConversationsForUserContext(ctx context.Context, params *GetConversationsForUserParameters) (channels []Channel, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
-		"user":  {params.UserID},
+	}
+	if params.UserID != "" {
+		values.Add("user", params.UserID)
 	}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
