@@ -147,6 +147,11 @@ func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestam
 	return api.SendMessageContext(ctx, channelID, MsgOptionUpdate(timestamp), MsgOptionCompose(options...))
 }
 
+// UnfurlMessage unfurls a message in a channel
+func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(context.Background(), channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
+}
+
 // SendMessage more flexible method for configuring messages.
 func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, error) {
 	return api.SendMessageContext(context.Background(), channel, options...)
@@ -204,6 +209,7 @@ const (
 	chatDelete        sendMode = "chat.delete"
 	chatPostEphemeral sendMode = "chat.postEphemeral"
 	chatMeMessage     sendMode = "chat.meMessage"
+	chatUnfurl        sendMode = "chat.unfurl"
 )
 
 type sendConfig struct {
@@ -256,6 +262,19 @@ func MsgOptionDelete(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
 		config.endpoint = APIURL + string(chatDelete)
 		config.values.Add("ts", timestamp)
+		return nil
+	}
+}
+
+// MsgOptionUnfurl unfurls a message based on the timestamp.
+func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = APIURL + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		unfurlsStr, err := json.Marshal(unfurls)
+		if err == nil {
+			config.values.Add("unfurls", string(unfurlsStr))
+		}
 		return nil
 	}
 }
