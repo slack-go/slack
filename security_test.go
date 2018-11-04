@@ -32,7 +32,7 @@ func TestExpiredTimestamp(t *testing.T) {
 	}
 }
 
-func TestNewSecretsVerifier(t *testing.T) {
+func TestUnsafeSignatureVerifier(t *testing.T) {
 	tests := []struct {
 		title         string
 		header        http.Header
@@ -96,10 +96,13 @@ func TestEnsure(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		sv, _ := NewSecretsVerifier(test.header, test.signingSecret)
+		sv, err := unsafeSignatureVerifier(test.header, test.signingSecret)
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
+		}
 		io.WriteString(&sv, test.body)
 
-		err := sv.Ensure()
+		err = sv.Ensure()
 
 		if !test.expectError && err != nil {
 			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
