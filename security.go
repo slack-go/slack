@@ -9,6 +9,7 @@ import (
 	"hash"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,11 +21,15 @@ const (
 
 // SecretsVerifier contains the information needed to verify that the request comes from Slack
 type SecretsVerifier struct {
-	signature string
+	signature []byte
 	hmac      hash.Hash
 }
 
 func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifier, err error) {
+	var (
+		bsignature []byte
+	)
+
 	signature := header.Get(hSignature)
 	stimestamp := header.Get(hTimestamp)
 
@@ -32,11 +37,15 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 		return SecretsVerifier{}, errors.New("missing headers")
 	}
 
+	if bsignature, err = hex.DecodeString(strings.TrimPrefix(signature, "v0=")); err != nil {
+		return SecretsVerifier{}, err
+	}
+
 	hash := hmac.New(sha256.New, []byte(secret))
 	hash.Write([]byte(fmt.Sprintf("v0:%s:", stimestamp)))
 
 	return SecretsVerifier{
-		signature: signature,
+		signature: bsignature,
 		hmac:      hash,
 	}, nil
 }
@@ -50,7 +59,7 @@ func NewSecretsVerifier(header http.Header, secret string) (sv SecretsVerifier, 
 	stimestamp := header.Get(hTimestamp)
 
 	if sv, err = unsafeSignatureVerifier(header, secret); err != nil {
-		return sv, err
+		return SecretsVerifier{}, err
 	}
 
 	if timestamp, err = strconv.ParseInt(stimestamp, 10, 64); err != nil {
@@ -59,7 +68,7 @@ func NewSecretsVerifier(header http.Header, secret string) (sv SecretsVerifier, 
 
 	diff := absDuration(time.Now().Sub(time.Unix(timestamp, 0)))
 	if diff > 5*time.Minute {
-		return sv, fmt.Errorf("timestamp is too old")
+		return SecretsVerifier{}, fmt.Errorf("timestamp is too old")
 	}
 
 	return sv, err
@@ -71,10 +80,9 @@ func (v *SecretsVerifier) Write(body []byte) (n int, err error) {
 
 // Ensure compares the signature sent from Slack with the actual computed hash to judge validity
 func (v SecretsVerifier) Ensure() error {
-	computed := "v0=" + string(hex.EncodeToString(v.hmac.Sum(nil)))
-
+	computed := v.hmac.Sum(nil)
 	// use hmac.Equal prevent leaking timing information.
-	if hmac.Equal([]byte(computed), []byte(v.signature)) {
+	if hmac.Equal(computed, v.signature) {
 		return nil
 	}
 
