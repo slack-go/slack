@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"net/url"
 )
 
@@ -19,10 +18,8 @@ func authRequest(ctx context.Context, client httpClient, path string, values url
 	if err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-	return response, nil
+
+	return response, response.Err()
 }
 
 // SendAuthRevoke will send a revocation for our token
