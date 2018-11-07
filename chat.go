@@ -275,7 +275,7 @@ func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption 
 		if err == nil {
 			config.values.Add("unfurls", string(unfurlsStr))
 		}
-		return nil
+		return err
 	}
 }
 
