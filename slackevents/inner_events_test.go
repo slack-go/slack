@@ -144,3 +144,59 @@ func TestBotMessageEvent(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPinAdded(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "pin_added",
+				"user": "U061F7AUR",
+				"item": {
+					"type": "message",
+					"channel":"C0LAN2Q65",
+					"message":{
+						"type":"message",
+						"user":"U061F7AUR",
+						"text": "<@U0LAN0Z89> is it everything a river should be?",
+						"ts":"1539904112.000100",
+						"pinned_to":["C0LAN2Q65"],
+						"replace_original":false,
+						"delete_original":false
+					}
+				},
+				"channel_id":"C0LAN2Q65",
+				"event_ts": "1515449522000016"
+		}
+	`)
+	err := json.Unmarshal(rawE, &PinAddedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestPinRemoved(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "pin_removed",
+				"user": "U061F7AUR",
+				"item": {
+					"type": "message",
+					"channel":"C0LAN2Q65",
+					"message":{
+						"type":"message",
+						"user":"U061F7AUR",
+						"text": "<@U0LAN0Z89> is it everything a river should be?",
+						"ts":"1539904112.000100",
+						"pinned_to":["C0LAN2Q65"],
+						"replace_original":false,
+						"delete_original":false
+					}
+				},
+				"channel_id":"C0LAN2Q65",
+				"event_ts": "1515449522000016"
+		}
+	`)
+	err := json.Unmarshal(rawE, &PinRemovedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
