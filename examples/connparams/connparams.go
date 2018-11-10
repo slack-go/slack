@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 
 	"github.com/nlopes/slack"
@@ -16,8 +17,8 @@ func main() {
 	)
 
 	// turn on the batch_presence_aware option
-	rtm := api.NewRTM(slack.RTMOptionConnParams(map[string]string{
-		"batch_presence_aware": "1",
+	rtm := api.NewRTM(slack.RTMOptionConnParams(url.Values{
+		"batch_presence_aware": {"1"},
 	}))
 	go rtm.ManageConnection()
 

@@ -101,7 +101,7 @@ func RTMOptionPingInterval(d time.Duration) RTMOption {
 }
 
 // RTMOptionConnParams installs parameters to embed into the connection URL.
-func RTMOptionConnParams(connParams map[string]string) RTMOption {
+func RTMOptionConnParams(connParams url.Values) RTMOption {
 	return func(rtm *RTM) {
 		rtm.connParams = connParams
 	}

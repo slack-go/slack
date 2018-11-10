@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 	"sync"
 	"time"
 
@@ -56,7 +57,7 @@ type RTM struct {
 	mu *sync.Mutex
 
 	// connParams is a map of flags for connection parameters.
-	connParams map[string]string
+	connParams url.Values
 }
 
 // Disconnect and wait, blocking until a successful disconnection.

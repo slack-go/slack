@@ -163,11 +163,7 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 	if err != nil {
 		return nil, nil, err
 	}
-	q := u.Query()
-	for k, v := range rtm.connParams {
-		q.Set(k, v)
-	}
-	u.RawQuery = q.Encode()
+	u.RawQuery = rtm.connParams.Encode()
 	url = u.String()
 
 	rtm.Debugf("Dialing to websocket on url %s", url)
