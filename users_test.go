@@ -103,6 +103,18 @@ func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
+func getUserInfo(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Ok   bool `json:"ok"`
+		User User `json:"user"`
+	}{
+		Ok:   true,
+		User: getTestUser(),
+	})
+	rw.Write(response)
+}
+
 func getUserByEmail(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
@@ -202,6 +214,24 @@ func TestGetUserIdentity(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if identity.Team.Image34 == "" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUserInfo(t *testing.T) {
+	http.HandleFunc("/users.info", getUserInfo)
+	expectedUser := getTestUser()
+
+	once.Do(startServer)
+	APIURL = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	user, err := api.GetUserInfo("UXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(expectedUser, *user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
