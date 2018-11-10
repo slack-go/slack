@@ -100,6 +100,13 @@ func RTMOptionPingInterval(d time.Duration) RTMOption {
 	}
 }
 
+// RTMOptionConnParams installs parameters to embed into the connection URL.
+func RTMOptionConnParams(connParams map[string]string) RTMOption {
+	return func(rtm *RTM) {
+		rtm.connParams = connParams
+	}
+}
+
 // NewRTM returns a RTM, which provides a fully managed connection to
 // Slack's websocket-based Real-Time Messaging protocol.
 func (api *Client) NewRTM(options ...RTMOption) *RTM {

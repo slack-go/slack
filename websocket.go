@@ -54,6 +54,9 @@ type RTM struct {
 
 	// mu is mutex used to prevent RTM connection race conditions
 	mu *sync.Mutex
+
+	// connParams is a map of flags for connection parameters.
+	connParams map[string]string
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
