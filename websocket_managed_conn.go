@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	stdurl "net/url"
 	"reflect"
 	"time"
 
@@ -156,6 +157,18 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 		rtm.Debugf("Failed to start or connect to RTM: %s", err)
 		return nil, nil, err
 	}
+
+	// install connection parameters
+	u, err := stdurl.Parse(url)
+	if err != nil {
+		return nil, nil, err
+	}
+	q := u.Query()
+	for k, v := range rtm.connParams {
+		q.Set(k, v)
+	}
+	u.RawQuery = q.Encode()
+	url = u.String()
 
 	rtm.Debugf("Dialing to websocket on url %s", url)
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
