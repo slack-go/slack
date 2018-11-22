@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// APIURL a dded as a var so that we can change this for testing purposes
+// APIURL added as a var so that we can change this for testing purposes
 var APIURL = "https://slack.com/api/"
 
 // WEBAPIURLFormat ...
