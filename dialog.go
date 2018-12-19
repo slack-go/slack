@@ -68,6 +68,17 @@ type DialogResponseMetadata struct {
 	Messages []string `json:"messages"`
 }
 
+// DialogInputValidationError is an error when user inputs incorrect value to form from within a dialog
+type DialogInputValidationError struct {
+	Name  string `json:"name"`
+	Error string `json:"error"`
+}
+
+// DialogInputValidationErrors lists the name of field and that error messages
+type DialogInputValidationErrors struct {
+	Errors []DialogInputValidationError `json:"errors"`
+}
+
 // OpenDialog opens a dialog window where the triggerID originated from.
 // EXPERIMENTAL: dialog functionality is currently experimental, api is not considered stable.
 func (api *Client) OpenDialog(triggerID string, dialog Dialog) (err error) {
