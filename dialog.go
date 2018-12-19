@@ -14,7 +14,7 @@ const (
 	InputTypeText InputType = "text"
 	// InputTypeTextArea textarea input
 	InputTypeTextArea InputType = "textarea"
-	// InputTypeSelect textfield input
+	// InputTypeSelect select menus input
 	InputTypeSelect InputType = "select"
 )
 
