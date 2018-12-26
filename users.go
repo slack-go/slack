@@ -226,8 +226,9 @@ func (api *Client) GetUserInfo(user string) (*User, error) {
 // GetUserInfoContext will retrieve the complete user information with a custom context
 func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, error) {
 	values := url.Values{
-		"token": {api.token},
-		"user":  {user},
+		"token":          {api.token},
+		"user":           {user},
+		"include_locale": {"true"},
 	}
 
 	response, err := userRequest(ctx, api.httpclient, "users.info", values, api)
