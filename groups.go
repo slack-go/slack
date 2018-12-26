@@ -256,8 +256,9 @@ func (api *Client) GetGroupInfo(group string) (*Group, error) {
 // GetGroupInfoContext retrieves the given group with a custom context
 func (api *Client) GetGroupInfoContext(ctx context.Context, group string) (*Group, error) {
 	values := url.Values{
-		"token":   {api.token},
-		"channel": {group},
+		"token":          {api.token},
+		"channel":        {group},
+		"include_locale": {strconv.FormatBool(true)},
 	}
 
 	response, err := groupRequest(ctx, api.httpclient, "groups.info", values, api)
