@@ -173,8 +173,9 @@ func (api *Client) GetChannelInfo(channelID string) (*Channel, error) {
 // see https://api.slack.com/methods/channels.info
 func (api *Client) GetChannelInfoContext(ctx context.Context, channelID string) (*Channel, error) {
 	values := url.Values{
-		"token":   {api.token},
-		"channel": {channelID},
+		"token":          {api.token},
+		"channel":        {channelID},
+		"include_locale": {strconv.FormatBool(true)},
 	}
 
 	response, err := channelRequest(ctx, api.httpclient, "channels.info", values, api)
