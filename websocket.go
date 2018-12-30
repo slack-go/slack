@@ -103,7 +103,7 @@ func (rtm *RTM) SendMessage(msg *OutgoingMessage) {
 }
 
 func (rtm *RTM) resetDeadman() {
-	timerReset(rtm.pingDeadman, deadmanDuration(rtm.pingInterval))
+	rtm.pingDeadman.Reset(deadmanDuration(rtm.pingInterval))
 }
 
 func deadmanDuration(d time.Duration) time.Duration {
