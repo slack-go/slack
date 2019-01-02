@@ -93,6 +93,8 @@ type File struct {
 //
 // There are three ways to upload a file. You can either set Content if file is small, set Reader if file is large,
 // or provide a local file path in File to upload it from your filesystem.
+//
+// Note that when using the Reader option, you *must* specify the Filename, otherwise the Slack API isn't happy.
 type FileUploadParameters struct {
 	File            string
 	Content         string
