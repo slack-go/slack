@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -149,5 +150,24 @@ func TestUploadFile(t *testing.T) {
 		Channels: []string{"CXXXXXXXX"}}
 	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
+func TestUploadFileWithoutFilename(t *testing.T) {
+	once.Do(startServer)
+	APIURL = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	reader := bytes.NewBufferString("test reader")
+	params := FileUploadParameters{
+		Reader:   reader,
+		Channels: []string{"CXXXXXXXX"}}
+	_, err := api.UploadFile(params)
+	if err == nil {
+		t.Fatal("Expected error when omitting filename, instead got nil")
+	}
+
+	if !strings.Contains(err.Error(), ".Filename is mandatory when supplying a Reader") {
+		t.Errorf("Error message should mention empty FileUploadParameters.Filename when supplying a Reader to UploadFile")
 	}
 }
