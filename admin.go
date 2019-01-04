@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 type adminResponse struct {
@@ -194,17 +195,18 @@ func (api *Client) SetUltraRestrictedContext(ctx context.Context, teamName, uid,
 }
 
 // SetRestricted converts a user into a restricted account
-func (api *Client) SetRestricted(teamName, uid string) error {
-	return api.SetRestrictedContext(context.Background(), teamName, uid)
+func (api *Client) SetRestricted(teamName, uid string, channelIds ...string) error {
+	return api.SetRestrictedContext(context.Background(), teamName, uid, channelIds...)
 }
 
 // SetRestrictedContext converts a user into a restricted account with a custom context
-func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid string) error {
+func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid string, channelIds ...string) error {
 	values := url.Values{
 		"user":       {uid},
 		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
+		"channels":   {strings.Join(channelIds, ",")},
 	}
 
 	_, err := adminRequest(ctx, api.httpclient, "setRestricted", teamName, values, api)
