@@ -2,7 +2,6 @@
   "DisableAll": true,
   "Enable": [
     "structcheck",
-    "gofmt",
     "vet",
     "misspell",
     "unconvert",
