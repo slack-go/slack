@@ -50,7 +50,6 @@ type authTestResponseFull struct {
 // Client for the slack api.
 type Client struct {
 	token      string
-	info       Info
 	debug      bool
 	log        ilogger
 	httpclient httpClient

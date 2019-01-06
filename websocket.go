@@ -39,8 +39,6 @@ type RTM struct {
 	wasIntentional   bool
 	isConnected      bool
 
-	websocketURL string
-
 	// UserDetails upon connection
 	info *Info
 
