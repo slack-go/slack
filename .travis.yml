@@ -12,8 +12,7 @@ before_install:
   - export PATH=$HOME/gopath/bin:$PATH
 
 script:
-  - go test -race ./...
-  - go test -cover ./...
+  - go test -race -cover ./...
 
 matrix:
   allow_failures:
