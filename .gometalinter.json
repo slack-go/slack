@@ -1,0 +1,15 @@
+{
+  "DisableAll": true,
+  "Enable": [
+    "structcheck",
+    "gofmt",
+    "vet",
+    "misspell",
+    "unconvert",
+    "interfacer",
+    "goimports"
+  ],
+  "Vendor": true,
+  "Exclude": ["vendor"],
+  "Deadline": "300s"
+}
