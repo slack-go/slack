@@ -1,10 +1,10 @@
 package slack
 
 import (
-	"testing"
-	"net/http"
 	"encoding/json"
+	"net/http"
 	"reflect"
+	"testing"
 )
 
 func TestPostWebhook_OK(t *testing.T) {
