@@ -15,7 +15,7 @@ type EventsAPIEvent struct {
 	InnerEvent EventsAPIInnerEvent
 }
 
-// EventsAPIURLVerificationEvent recieved when configuring a EventsAPI driven app
+// EventsAPIURLVerificationEvent received when configuring a EventsAPI driven app
 type EventsAPIURLVerificationEvent struct {
 	Token     string `json:"token"`
 	Challenge string `json:"challenge"`
