@@ -38,7 +38,7 @@ func (rh *remindersHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_AddReminder(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	tests := []struct {
 		chanID     string
@@ -76,20 +76,37 @@ func TestSlack_AddReminder(t *testing.T) {
 			"",
 			"someUserID",
 			"hello world",
-			"tomorrow at 10am",
+			"tomorrow at 9am",
 			map[string]string{
 				"text": "hello world",
-				"time": "tomorrow at 10am",
+				"time": "tomorrow at 9am",
 				"user": "someUserID",
 			},
 			false,
+		},
+		{
+			"",
+			"someUserID",
+			"trigger-error",
+			"tomorrow at 9am",
+			map[string]string{
+				"text": "trigger-error",
+				"time": "tomorrow at 9am",
+				"user": "someUserID",
+			},
+			true,
 		},
 	}
 	var rh *remindersHandler
 	http.HandleFunc("/reminders.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newRemindersHandler()
-		err := api.AddReminder(test.chanID, test.userID, test.text, test.time)
+		var err error
+		if test.chanID != "" {
+			err = api.AddChannelReminder(test.chanID, test.text, test.time)
+		} else {
+			err = api.AddUserReminder(test.userID, test.text, test.time)
+		}
 		if test.expectErr == false && err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		} else if test.expectErr == true && err == nil {
