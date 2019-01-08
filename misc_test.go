@@ -36,12 +36,12 @@ func setParseResponseHandler() {
 func TestParseResponse(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {validToken},
 	}
 	responsePartial := &SlackResponse{}
-	err := post(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -50,15 +50,15 @@ func TestParseResponse(t *testing.T) {
 func TestParseResponseNoToken(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	values := url.Values{}
 	responsePartial := &SlackResponse{}
-	err := post(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if responsePartial.Ok == true {
+	if responsePartial.Ok {
 		t.Errorf("Unexpected error: %s", err)
 	} else if responsePartial.Error != "not_authed" {
 		t.Errorf("got %v; want %v", responsePartial.Error, "not_authed")
@@ -68,17 +68,17 @@ func TestParseResponseNoToken(t *testing.T) {
 func TestParseResponseInvalidToken(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {"whatever"},
 	}
 	responsePartial := &SlackResponse{}
-	err := post(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, false)
+	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if responsePartial.Ok == true {
+	if responsePartial.Ok {
 		t.Errorf("Unexpected error: %s", err)
 	} else if responsePartial.Error != "invalid_auth" {
 		t.Errorf("got %v; want %v", responsePartial.Error, "invalid_auth")

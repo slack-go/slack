@@ -12,9 +12,9 @@ type adminResponse struct {
 	Error string `json:"error"`
 }
 
-func adminRequest(ctx context.Context, client HTTPRequester, method string, teamName string, values url.Values, debug bool) (*adminResponse, error) {
+func adminRequest(ctx context.Context, client httpClient, method string, teamName string, values url.Values, d debug) (*adminResponse, error) {
 	adminResponse := &adminResponse{}
-	err := parseAdminResponse(ctx, client, method, teamName, values, adminResponse, debug)
+	err := parseAdminResponse(ctx, client, method, teamName, values, adminResponse, d)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (api *Client) DisableUserContext(ctx context.Context, teamName string, uid 
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setInactive", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "setInactive", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
 	}
@@ -62,11 +62,12 @@ func (api *Client) InviteGuestContext(ctx context.Context, teamName, channel, fi
 		"last_name":        {lastName},
 		"ultra_restricted": {"1"},
 		"token":            {api.token},
+		"resend":           {"true"},
 		"set_active":       {"true"},
 		"_attempts":        {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to invite single-channel guest: %s", err)
 	}
@@ -88,11 +89,12 @@ func (api *Client) InviteRestrictedContext(ctx context.Context, teamName, channe
 		"last_name":  {lastName},
 		"restricted": {"1"},
 		"token":      {api.token},
+		"resend":     {"true"},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to restricted account: %s", err)
 	}
@@ -116,7 +118,7 @@ func (api *Client) InviteToTeamContext(ctx context.Context, teamName, firstName,
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to invite to team: %s", err)
 	}
@@ -138,7 +140,7 @@ func (api *Client) SetRegularContext(ctx context.Context, teamName, user string)
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setRegular", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "setRegular", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to change the user (%s) to a regular user: %s", user, err)
 	}
@@ -160,7 +162,7 @@ func (api *Client) SendSSOBindingEmailContext(ctx context.Context, teamName, use
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "sendSSOBind", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "sendSSOBind", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
 	}
@@ -183,7 +185,7 @@ func (api *Client) SetUltraRestrictedContext(ctx context.Context, teamName, uid,
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setUltraRestricted", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "setUltraRestricted", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
 	}
@@ -205,7 +207,7 @@ func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid strin
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setRestricted", teamName, values, api.debug)
+	_, err := adminRequest(ctx, api.httpclient, "setRestricted", teamName, values, api)
 	if err != nil {
 		return fmt.Errorf("Failed to restrict account: %s", err)
 	}

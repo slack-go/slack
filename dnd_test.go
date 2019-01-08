@@ -12,7 +12,7 @@ func TestSlack_EndDND(t *testing.T) {
 		w.Write([]byte(`{ "ok": true }`))
 	})
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	err := api.EndDND()
 	if err != nil {
@@ -36,7 +36,7 @@ func TestSlack_EndSnooze(t *testing.T) {
 		SnoozeInfo:         SnoozeInfo{SnoozeEnabled: false},
 	}
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	snoozeState, err := api.EndSnooze()
 	if err != nil {
@@ -72,7 +72,7 @@ func TestSlack_GetDNDInfo(t *testing.T) {
 		},
 	}
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	userDNDInfoResponse, err := api.GetDNDInfo(nil)
 	if err != nil {
@@ -104,19 +104,19 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
         }`))
 	})
 	usersDNDInfo := map[string]DNDStatus{
-		"U023BECGF": DNDStatus{
+		"U023BECGF": {
 			Enabled:            true,
 			NextStartTimestamp: 1450387800,
 			NextEndTimestamp:   1450423800,
 		},
-		"U058CJVAA": DNDStatus{
+		"U058CJVAA": {
 			Enabled:            false,
 			NextStartTimestamp: 1,
 			NextEndTimestamp:   1,
 		},
 	}
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	usersDNDInfoResponse, err := api.GetDNDTeamInfo(nil)
 	if err != nil {
@@ -146,7 +146,7 @@ func TestSlack_SetSnooze(t *testing.T) {
 		},
 	}
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	snoozeResponse, err := api.SetSnooze(60)
 	if err != nil {

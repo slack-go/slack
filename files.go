@@ -93,14 +93,15 @@ type File struct {
 // There are three ways to upload a file. You can either set Content if file is small, set Reader if file is large,
 // or provide a local file path in File to upload it from your filesystem.
 type FileUploadParameters struct {
-	File           string
-	Content        string
-	Reader         io.Reader
-	Filetype       string
-	Filename       string
-	Title          string
-	InitialComment string
-	Channels       []string
+	File            string
+	Content         string
+	Reader          io.Reader
+	Filetype        string
+	Filename        string
+	Title           string
+	InitialComment  string
+	Channels        []string
+	ThreadTimestamp string
 }
 
 // GetFilesParameters contains all the parameters necessary (including the optional ones) for a GetFiles() request
@@ -136,16 +137,14 @@ func NewGetFilesParameters() GetFilesParameters {
 	}
 }
 
-func fileRequest(ctx context.Context, client HTTPRequester, path string, values url.Values, debug bool) (*fileResponseFull, error) {
+func fileRequest(ctx context.Context, client httpClient, path string, values url.Values, d debug) (*fileResponseFull, error) {
 	response := &fileResponseFull{}
-	err := postForm(ctx, client, SLACK_API+path, values, response, debug)
+	err := postForm(ctx, client, APIURL+path, values, response, d)
 	if err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-	return response, nil
+
+	return response, response.Err()
 }
 
 // GetFileInfo retrieves a file and related comments
@@ -162,7 +161,7 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 		"page":  {strconv.Itoa(page)},
 	}
 
-	response, err := fileRequest(ctx, api.httpclient, "files.info", values, api.debug)
+	response, err := fileRequest(ctx, api.httpclient, "files.info", values, api)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -201,7 +200,7 @@ func (api *Client) GetFilesContext(ctx context.Context, params GetFilesParameter
 		values.Add("page", strconv.Itoa(params.Page))
 	}
 
-	response, err := fileRequest(ctx, api.httpclient, "files.list", values, api.debug)
+	response, err := fileRequest(ctx, api.httpclient, "files.list", values, api)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -237,24 +236,45 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 	if params.InitialComment != "" {
 		values.Add("initial_comment", params.InitialComment)
 	}
+	if params.ThreadTimestamp != "" {
+		values.Add("thread_ts", params.ThreadTimestamp)
+	}
 	if len(params.Channels) != 0 {
 		values.Add("channels", strings.Join(params.Channels, ","))
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
-		err = postForm(ctx, api.httpclient, SLACK_API+"files.upload", values, response, api.debug)
+		err = postForm(ctx, api.httpclient, APIURL+"files.upload", values, response, api)
 	} else if params.File != "" {
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, SLACK_API+"files.upload", params.File, "file", values, response, api.debug)
+		err = postLocalWithMultipartResponse(ctx, api.httpclient, "files.upload", params.File, "file", values, response, api)
 	} else if params.Reader != nil {
-		err = postWithMultipartResponse(ctx, api.httpclient, SLACK_API+"files.upload", params.Filename, "file", values, params.Reader, response, api.debug)
+		err = postWithMultipartResponse(ctx, api.httpclient, "files.upload", params.Filename, "file", values, params.Reader, response, api)
 	}
 	if err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
+
+	return &response.File, response.Err()
+}
+
+// DeleteFileComment deletes a file's comment
+func (api *Client) DeleteFileComment(commentID, fileID string) error {
+	return api.DeleteFileCommentContext(context.Background(), fileID, commentID)
+}
+
+// DeleteFileCommentContext deletes a file's comment with a custom context
+func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, commentID string) (err error) {
+	if fileID == "" || commentID == "" {
+		return errors.New("received empty parameters")
 	}
-	return &response.File, nil
+
+	values := url.Values{
+		"token": {api.token},
+		"file":  {fileID},
+		"id":    {commentID},
+	}
+	_, err = fileRequest(ctx, api.httpclient, "files.comments.delete", values, api)
+	return err
 }
 
 // DeleteFile deletes a file
@@ -269,11 +289,8 @@ func (api *Client) DeleteFileContext(ctx context.Context, fileID string) (err er
 		"file":  {fileID},
 	}
 
-	if _, err = fileRequest(ctx, api.httpclient, "files.delete", values, api.debug); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = fileRequest(ctx, api.httpclient, "files.delete", values, api)
+	return err
 }
 
 // RevokeFilePublicURL disables public/external sharing for a file
@@ -288,7 +305,7 @@ func (api *Client) RevokeFilePublicURLContext(ctx context.Context, fileID string
 		"file":  {fileID},
 	}
 
-	response, err := fileRequest(ctx, api.httpclient, "files.revokePublicURL", values, api.debug)
+	response, err := fileRequest(ctx, api.httpclient, "files.revokePublicURL", values, api)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +324,7 @@ func (api *Client) ShareFilePublicURLContext(ctx context.Context, fileID string)
 		"file":  {fileID},
 	}
 
-	response, err := fileRequest(ctx, api.httpclient, "files.sharedPublicURL", values, api.debug)
+	response, err := fileRequest(ctx, api.httpclient, "files.sharedPublicURL", values, api)
 	if err != nil {
 		return nil, nil, nil, err
 	}
