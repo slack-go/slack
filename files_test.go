@@ -167,7 +167,7 @@ func TestUploadFileWithoutFilename(t *testing.T) {
 		t.Fatal("Expected error when omitting filename, instead got nil")
 	}
 
-	if !strings.Contains(err.Error(), ".Filename is mandatory when supplying a Reader") {
-		t.Errorf("Error message should mention empty FileUploadParameters.Filename when supplying a Reader to UploadFile")
+	if !strings.Contains(err.Error(), ".Filename is mandatory") {
+		t.Errorf("Error message should mention empty FileUploadParameters.Filename")
 	}
 }
