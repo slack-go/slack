@@ -78,16 +78,31 @@ type File struct {
 	Lines            int    `json:"lines"`
 	LinesMore        int    `json:"lines_more"`
 
-	IsPublic        bool        `json:"is_public"`
-	PublicURLShared bool        `json:"public_url_shared"`
-	Channels        []string    `json:"channels"`
-	Groups          []string    `json:"groups"`
-	IMs             []string    `json:"ims"`
-	InitialComment  Comment     `json:"initial_comment"`
-	CommentsCount   int         `json:"comments_count"`
-	NumStars        int         `json:"num_stars"`
-	IsStarred       bool        `json:"is_starred"`
-	Shares          interface{} `json:"shares"`
+	IsPublic        bool     `json:"is_public"`
+	PublicURLShared bool     `json:"public_url_shared"`
+	Channels        []string `json:"channels"`
+	Groups          []string `json:"groups"`
+	IMs             []string `json:"ims"`
+	InitialComment  Comment  `json:"initial_comment"`
+	CommentsCount   int      `json:"comments_count"`
+	NumStars        int      `json:"num_stars"`
+	IsStarred       bool     `json:"is_starred"`
+	Shares          share    `json:"shares"`
+}
+
+type share struct {
+	Public map[string][]shareFileInfo `json:"public"`
+}
+
+type shareFileInfo struct {
+	ReplyUsers      string `json:"reply_users"`
+	ReplyUsersCount int    `json:"reply_users_count"`
+	ReplyCount      int    `json:"reply_count"`
+	Ts              string `json:"ts"`
+	ThreadTs        string `json:"thread_ts"`
+	LatestReply     string `json:"latest_reply"`
+	ChannelName     string `json:"channel_name"`
+	TeamID          string `json:"team_id"`
 }
 
 // FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
