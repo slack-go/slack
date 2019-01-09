@@ -95,13 +95,13 @@ type share struct {
 
 type shareFileInfo struct {
 	ReplyUsers      []string `json:"reply_users"`
-	ReplyUsersCount int    `json:"reply_users_count"`
-	ReplyCount      int    `json:"reply_count"`
-	Ts              string `json:"ts"`
-	ThreadTs        string `json:"thread_ts"`
-	LatestReply     string `json:"latest_reply"`
-	ChannelName     string `json:"channel_name"`
-	TeamID          string `json:"team_id"`
+	ReplyUsersCount int      `json:"reply_users_count"`
+	ReplyCount      int      `json:"reply_count"`
+	Ts              string   `json:"ts"`
+	ThreadTs        string   `json:"thread_ts"`
+	LatestReply     string   `json:"latest_reply"`
+	ChannelName     string   `json:"channel_name"`
+	TeamID          string   `json:"team_id"`
 }
 
 // FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
