@@ -28,8 +28,9 @@ func (rh *remindersHandler) handler(w http.ResponseWriter, r *http.Request) {
 	rh.accumulateFormValue("user", r)
 	rh.accumulateFormValue("text", r)
 	rh.accumulateFormValue("time", r)
+	rh.accumulateFormValue("reminder", r)
 	w.Header().Set("Content-Type", "application/json")
-	if rh.gotParams["text"] == "trigger-error" {
+	if rh.gotParams["text"] == "trigger-error" || rh.gotParams["reminder"] == "trigger-error" {
 		w.Write([]byte(`{ "ok": false, "error": "oh no" }`))
 	} else {
 		w.Write([]byte(`{ "ok": true }`))
@@ -107,6 +108,46 @@ func TestSlack_AddReminder(t *testing.T) {
 		} else {
 			err = api.AddUserReminder(test.userID, test.text, test.time)
 		}
+		if test.expectErr == false && err != nil {
+			t.Fatalf("%d: Unexpected error: %s", i, err)
+		} else if test.expectErr == true && err == nil {
+			t.Fatalf("%d: Expected error but got none!", i)
+		}
+		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
+			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
+		}
+	}
+}
+
+func TestSlack_DeleteReminder(t *testing.T) {
+	once.Do(startServer)
+	APIURL = "http://" + serverAddr + "/"
+	api := New("testing-token")
+	tests := []struct {
+		reminder   string
+		wantParams map[string]string
+		expectErr  bool
+	}{
+		{
+			"foo",
+			map[string]string{
+				"reminder": "foo",
+			},
+			false,
+		},
+		{
+			"trigger-error",
+			map[string]string{
+				"reminder": "trigger-error",
+			},
+			true,
+		},
+	}
+	var rh *remindersHandler
+	http.HandleFunc("/reminders.delete", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	for i, test := range tests {
+		rh = newRemindersHandler()
+		err := api.DeleteReminder(test.reminder)
 		if test.expectErr == false && err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		} else if test.expectErr == true && err == nil {

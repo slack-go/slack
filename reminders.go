@@ -6,9 +6,9 @@ import (
 	"net/url"
 )
 
-func (api *Client) addReminder(ctx context.Context, values url.Values) error {
+func (api *Client) doReminder(ctx context.Context, path string, values url.Values) error {
 	response := &SlackResponse{}
-	if err := postSlackMethod(ctx, api.httpclient, "reminders.add", values, response, api); err != nil {
+	if err := postSlackMethod(ctx, api.httpclient, path, values, response, api); err != nil {
 		return err
 	}
 	if !response.Ok {
@@ -17,7 +17,7 @@ func (api *Client) addReminder(ctx context.Context, values url.Values) error {
 	return nil
 }
 
-// AddChannelReminder adds a reminder for a channel with a custom context.
+// AddChannelReminder adds a reminder for a channel.
 //
 // See https://api.slack.com/methods/reminders.add (NOTE: the ability to set
 // reminders on a channel is currently undocumented but has been tested to
@@ -29,10 +29,10 @@ func (api *Client) AddChannelReminder(channelID, text, time string) error {
 		"time":    {time},
 		"channel": {channelID},
 	}
-	return api.addReminder(context.Background(), values)
+	return api.doReminder(context.Background(), "reminders.add", values)
 }
 
-// AddUserReminder adds a reminder for a user with a custom context.
+// AddUserReminder adds a reminder for a user.
 //
 // See https://api.slack.com/methods/reminders.add (NOTE: the ability to set
 // reminders on a channel is currently undocumented but has been tested to
@@ -44,5 +44,16 @@ func (api *Client) AddUserReminder(userID, text, time string) error {
 		"time":  {time},
 		"user":  {userID},
 	}
-	return api.addReminder(context.Background(), values)
+	return api.doReminder(context.Background(), "reminders.add", values)
+}
+
+// DeleteReminder deletes an existing reminder.
+//
+// See https://api.slack.com/methods/reminders.delete
+func (api *Client) DeleteReminder(name string) error {
+	values := url.Values{
+		"token":    {api.token},
+		"reminder": {name},
+	}
+	return api.doReminder(context.Background(), "reminders.delete", values)
 }
