@@ -4,17 +4,33 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"time"
 )
 
-func (api *Client) doReminder(ctx context.Context, path string, values url.Values) error {
-	response := &SlackResponse{}
+type Reminder struct {
+	ID         string    `json:"id"`
+	Creator    string    `json:"creator"`
+	User       string    `json:"user"`
+	Text       string    `json:"text"`
+	Recurring  bool      `json:"recurring"`
+	Time       time.Time `json:"time"`
+	CompleteTS int       `json:"complete_ts"`
+}
+
+type reminderResp struct {
+	SlackResponse
+	Reminder Reminder `json:"reminder"`
+}
+
+func (api *Client) doReminder(ctx context.Context, path string, values url.Values) (*Reminder, error) {
+	response := &reminderResp{}
 	if err := postSlackMethod(ctx, api.httpclient, path, values, response, api); err != nil {
-		return err
+		return nil, err
 	}
 	if !response.Ok {
-		return errors.New(response.Error)
+		return nil, errors.New(response.Error)
 	}
-	return nil
+	return &response.Reminder, nil
 }
 
 // AddChannelReminder adds a reminder for a channel.
@@ -22,7 +38,7 @@ func (api *Client) doReminder(ctx context.Context, path string, values url.Value
 // See https://api.slack.com/methods/reminders.add (NOTE: the ability to set
 // reminders on a channel is currently undocumented but has been tested to
 // work)
-func (api *Client) AddChannelReminder(channelID, text, time string) error {
+func (api *Client) AddChannelReminder(channelID, text, time string) (*Reminder, error) {
 	values := url.Values{
 		"token":   {api.token},
 		"text":    {text},
@@ -37,7 +53,7 @@ func (api *Client) AddChannelReminder(channelID, text, time string) error {
 // See https://api.slack.com/methods/reminders.add (NOTE: the ability to set
 // reminders on a channel is currently undocumented but has been tested to
 // work)
-func (api *Client) AddUserReminder(userID, text, time string) error {
+func (api *Client) AddUserReminder(userID, text, time string) (*Reminder, error) {
 	values := url.Values{
 		"token": {api.token},
 		"text":  {text},
@@ -50,10 +66,17 @@ func (api *Client) AddUserReminder(userID, text, time string) error {
 // DeleteReminder deletes an existing reminder.
 //
 // See https://api.slack.com/methods/reminders.delete
-func (api *Client) DeleteReminder(name string) error {
+func (api *Client) DeleteReminder(id string) error {
 	values := url.Values{
 		"token":    {api.token},
-		"reminder": {name},
+		"reminder": {id},
 	}
-	return api.doReminder(context.Background(), "reminders.delete", values)
+	response := &SlackResponse{}
+	if err := postSlackMethod(context.Background(), api.httpclient, "reminders.delete", values, response, api); err != nil {
+		return err
+	}
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+	return nil
 }
