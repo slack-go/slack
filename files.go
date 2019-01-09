@@ -94,7 +94,7 @@ type share struct {
 }
 
 type shareFileInfo struct {
-	ReplyUsers      string `json:"reply_users"`
+	ReplyUsers      []string `json:"reply_users"`
 	ReplyUsersCount int    `json:"reply_users_count"`
 	ReplyCount      int    `json:"reply_count"`
 	Ts              string `json:"ts"`
