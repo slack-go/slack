@@ -104,9 +104,9 @@ func TestSlack_AddReminder(t *testing.T) {
 		rh = newRemindersHandler()
 		var err error
 		if test.chanID != "" {
-			err = api.AddChannelReminder(test.chanID, test.text, test.time)
+			_, err = api.AddChannelReminder(test.chanID, test.text, test.time)
 		} else {
-			err = api.AddUserReminder(test.userID, test.text, test.time)
+			_, err = api.AddUserReminder(test.userID, test.text, test.time)
 		}
 		if test.expectErr == false && err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
