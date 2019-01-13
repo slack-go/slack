@@ -16,6 +16,7 @@ type OutgoingMessage struct {
 type Message struct {
 	Msg
 	SubMessage *Msg `json:"message,omitempty"`
+	PreviousMessage *Msg `json:"previous_message,omitempty"`
 }
 
 // Msg contains information about a slack message
