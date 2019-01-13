@@ -22,7 +22,7 @@ func main() {
 		*/
 	}
 
-	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", slack.MsgOptionText("Some text", false), slack.MsgOptionAttachments(attachment))
+	channelID, timestamp, err := api.PostMessage("CHANNEL_ID", "Some text", slack.NewPostMessageParameters())
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
