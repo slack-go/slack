@@ -72,8 +72,5 @@ func (api *Client) DeleteReminder(id string) error {
 	if err := postSlackMethod(context.Background(), api.httpclient, "reminders.delete", values, response, api); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+	return response.Err()
 }
