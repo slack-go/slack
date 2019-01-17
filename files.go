@@ -86,14 +86,14 @@ type File struct {
 	CommentsCount   int      `json:"comments_count"`
 	NumStars        int      `json:"num_stars"`
 	IsStarred       bool     `json:"is_starred"`
-	Shares          share    `json:"shares"`
+	Shares          Share    `json:"shares"`
 }
 
-type share struct {
-	Public map[string][]shareFileInfo `json:"public"`
+type Share struct {
+	Public map[string][]ShareFileInfo `json:"public"`
 }
 
-type shareFileInfo struct {
+type ShareFileInfo struct {
 	ReplyUsers      []string `json:"reply_users"`
 	ReplyUsersCount int      `json:"reply_users_count"`
 	ReplyCount      int      `json:"reply_count"`
