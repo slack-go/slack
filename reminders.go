@@ -27,10 +27,7 @@ func (api *Client) doReminder(ctx context.Context, path string, values url.Value
 	if err := postSlackMethod(ctx, api.httpclient, path, values, response, api); err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-	return &response.Reminder, nil
+	return &response.Reminder, response.Err()
 }
 
 // AddChannelReminder adds a reminder for a channel.
