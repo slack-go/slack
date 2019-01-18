@@ -113,25 +113,6 @@ func (api *Client) CreateChildGroupContext(ctx context.Context, group string) (*
 	return &response.Group, nil
 }
 
-// CloseGroup closes a private group
-func (api *Client) CloseGroup(group string) (bool, bool, error) {
-	return api.CloseGroupContext(context.Background(), group)
-}
-
-// CloseGroupContext closes a private group with a custom context
-func (api *Client) CloseGroupContext(ctx context.Context, group string) (bool, bool, error) {
-	values := url.Values{
-		"token":   {api.token},
-		"channel": {group},
-	}
-
-	response, err := imRequest(ctx, api.httpclient, "groups.close", values, api)
-	if err != nil {
-		return false, false, err
-	}
-	return response.NoOp, response.AlreadyClosed, nil
-}
-
 // GetGroupHistory fetches all the history for a private group
 func (api *Client) GetGroupHistory(group string, params HistoryParameters) (*History, error) {
 	return api.GetGroupHistoryContext(context.Background(), group, params)
