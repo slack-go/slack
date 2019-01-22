@@ -404,6 +404,22 @@ func MsgOptionParse(b bool) MsgOption {
 	}
 }
 
+// MsgOptionIconURL sets an icon URL
+func MsgOptionIconURL(iconURL string) MsgOption {
+	return func(c *sendConfig) error {
+		c.values.Set("icon_url", iconURL)
+		return nil
+	}
+}
+
+// MsgOptionIconEmoji sets an icon emoji
+func MsgOptionIconEmoji(iconEmoji string) MsgOption {
+	return func(c *sendConfig) error {
+		c.values.Set("icon_emoji", iconEmoji)
+		return nil
+	}
+}
+
 // UnsafeMsgOptionEndpoint deliver the message to the specified endpoint.
 // NOTE: USE AT YOUR OWN RISK: No issues relating to the use of this Option
 // will be supported by the library, it is subject to change without notice that
