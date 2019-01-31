@@ -1,0 +1,26 @@
+language: go
+
+install: true
+
+matrix:
+  allow_failures:
+    - go: tip
+  include:
+  - go: "1.8.x"
+    script:  go test -v ./...
+  - go: "1.9.x"
+    script:  go test -v ./...
+  - go: "1.10.x"
+    script:  go test -v ./...
+  - go: "1.11.x"
+    script: go test -v -mod=vendor ./...
+  - go: "tip"
+    script: go test -v -mod=vendor ./...
+
+script:
+- make all
+env:
+  global:
+    secure: msQu3239DySBTGgAOBjnT6EzoiyEVbJ2Wncwx0eVFsf+xlwDr8SjY/6JD7k7wLngmmsi7bYz6nRRfEYlN6+xoYcMfpMsXKDbF5MbGRKj3YwjELYE8gqwIUfo0B6+2WmbdA9e9Fc/VdebLeDuUTlVg8ptEjhqxFCUezMowi6I2l4qJTSpBVVK6i+Fltv0TpQ8Q76acc+ATCN5A2//z9aGk39w+JynqeLgDoBNpL9am6cfgFmlXddV/T7IiYWyEevjSSsszrcFbAcKluWPGam58SwyFLci0yV6B32Ok1JduO/2RESPTiDy24yXw5xs07W7+w9J0CNzAWUHdX9nQ6hpIBcq4v/PwYO2Nr+OGcDxty7O/66ckfZZBMY3JsU57dpZwfy2L9v+zWe9BlPGYhwb+L1nwJWNcZrdRhPGh2zkopTOevMsSUu7RdLz/XN593MgVkhHlE+2l/ljfEy71yrfIhCCC6dOgRN83/mlK4oNgxaVrNtsO1pKppTYRsdomOHBvPiIE1AHu3kK9Qp+4UNVHGRDbeWgRoXzqOzlU4RNp7QtpGDAD09iv9RM+AfbSwbqDkcN61BLV+gZfWzO5WxqSTEcT4Vl3Ln6Db14kq+r9cuBIDxsHPDFh+eSp/tY5yNBONINYAdRh7FbJDp1nyK77UK+IFXPNMzYqR/DPu00SnY=
+  matrix:
+    - GO111MODULE=on
