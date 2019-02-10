@@ -67,11 +67,11 @@ func (e *RateLimitedError) Error() string {
 
 func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Reader) (*http.Request, error) {
 	req, err := http.NewRequest("POST", path, r)
-
-	req = req.WithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
+	req = req.WithContext(ctx)
+
 	req.URL.RawQuery = (values).Encode()
 	return req, nil
 }
