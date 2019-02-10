@@ -187,6 +187,11 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 	return &response.File, response.Comments, &response.Paging, nil
 }
 
+// GetFile retreives a given file from its private download URL
+func (api *Client) GetFile(file *File, writer io.Writer) error {
+	return downloadFile(api.httpclient, api.token, file.URLPrivateDownload, writer, api)
+}
+
 // GetFiles retrieves all files according to the parameters given
 func (api *Client) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	return api.GetFilesContext(context.Background(), params)
