@@ -88,7 +88,7 @@ func (v SecretsVerifier) Ensure() error {
 		return nil
 	}
 
-	return fmt.Errorf("Expected signing signature: %s, but computed: %s", v.signature, computed)
+	return fmt.Errorf("Expected signing signature: %s, but computed: %s", hex.EncodeToString(v.signature), hex.EncodeToString(computed))
 }
 
 func abs64(n int64) int64 {
