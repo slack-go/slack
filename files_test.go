@@ -3,6 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -37,6 +38,51 @@ func (h *fileCommentHandler) handler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{ "ok": false, "error": "errored" }`))
 	} else {
 		w.Write([]byte(`{ "ok": true }`))
+	}
+}
+
+type mockHTTPClient struct{}
+
+func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
+	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(`OK`))}, nil
+}
+
+func TestSlack_GetFile(t *testing.T) {
+	APIURL = "http://" + serverAddr + "/"
+	api := &Client{
+		token:      "testing-token",
+		httpclient: &mockHTTPClient{},
+	}
+
+	tests := []struct {
+		title       string
+		file        *File
+		expectError bool
+	}{
+		{
+			title: "Testing with valid file",
+			file: &File{
+				URLPrivateDownload: "https://files.slack.com/files-pri/T99999999-FGGGGGGGG/download/test.csv",
+			},
+			expectError: false,
+		},
+		{
+			title: "Testing with invalid file (empty URL)",
+			file: &File{
+				URLPrivateDownload: "",
+			},
+			expectError: true,
+		},
+	}
+
+	for _, test := range tests {
+		err := api.GetFile(test.file, &bytes.Buffer{})
+
+		if !test.expectError && err != nil {
+			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
+		} else if test.expectError == true && err == nil {
+			log.Fatalf("Expected error but got none")
+		}
 	}
 }
 
