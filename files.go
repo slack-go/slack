@@ -188,8 +188,8 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 }
 
 // GetFile retreives a given file from its private download URL
-func (api *Client) GetFile(file *File, writer io.Writer) error {
-	return downloadFile(api.httpclient, api.token, file.URLPrivateDownload, writer, api)
+func (api *Client) GetFile(downloadURL string, writer io.Writer) error {
+	return downloadFile(api.httpclient, api.token, downloadURL, writer, api)
 }
 
 // GetFiles retrieves all files according to the parameters given
