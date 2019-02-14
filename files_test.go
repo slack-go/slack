@@ -56,27 +56,23 @@ func TestSlack_GetFile(t *testing.T) {
 
 	tests := []struct {
 		title       string
-		file        *File
+		downloadURL string
 		expectError bool
 	}{
 		{
-			title: "Testing with valid file",
-			file: &File{
-				URLPrivateDownload: "https://files.slack.com/files-pri/T99999999-FGGGGGGGG/download/test.csv",
-			},
+			title:       "Testing with valid file",
+			downloadURL: "https://files.slack.com/files-pri/T99999999-FGGGGGGGG/download/test.csv",
 			expectError: false,
 		},
 		{
-			title: "Testing with invalid file (empty URL)",
-			file: &File{
-				URLPrivateDownload: "",
-			},
+			title:       "Testing with invalid file (empty URL)",
+			downloadURL: "",
 			expectError: true,
 		},
 	}
 
 	for _, test := range tests {
-		err := api.GetFile(test.file, &bytes.Buffer{})
+		err := api.GetFile(test.downloadURL, &bytes.Buffer{})
 
 		if !test.expectError && err != nil {
 			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
