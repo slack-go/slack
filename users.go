@@ -100,28 +100,29 @@ type UserProfileCustomField struct {
 
 // User contains all the information of a user
 type User struct {
-	ID                string      `json:"id"`
-	TeamID            string      `json:"team_id"`
-	Name              string      `json:"name"`
-	Deleted           bool        `json:"deleted"`
-	Color             string      `json:"color"`
-	RealName          string      `json:"real_name"`
-	TZ                string      `json:"tz,omitempty"`
-	TZLabel           string      `json:"tz_label"`
-	TZOffset          int         `json:"tz_offset"`
-	Profile           UserProfile `json:"profile"`
-	IsBot             bool        `json:"is_bot"`
-	IsAdmin           bool        `json:"is_admin"`
-	IsOwner           bool        `json:"is_owner"`
-	IsPrimaryOwner    bool        `json:"is_primary_owner"`
-	IsRestricted      bool        `json:"is_restricted"`
-	IsUltraRestricted bool        `json:"is_ultra_restricted"`
-	IsStranger        bool        `json:"is_stranger"`
-	IsAppUser         bool        `json:"is_app_user"`
-	Has2FA            bool        `json:"has_2fa"`
-	HasFiles          bool        `json:"has_files"`
-	Presence          string      `json:"presence"`
-	Locale            string      `json:"locale"`
+	ID                string         `json:"id"`
+	TeamID            string         `json:"team_id"`
+	Name              string         `json:"name"`
+	Deleted           bool           `json:"deleted"`
+	Color             string         `json:"color"`
+	RealName          string         `json:"real_name"`
+	TZ                string         `json:"tz,omitempty"`
+	TZLabel           string         `json:"tz_label"`
+	TZOffset          int            `json:"tz_offset"`
+	Profile           UserProfile    `json:"profile"`
+	IsBot             bool           `json:"is_bot"`
+	IsAdmin           bool           `json:"is_admin"`
+	IsOwner           bool           `json:"is_owner"`
+	IsPrimaryOwner    bool           `json:"is_primary_owner"`
+	IsRestricted      bool           `json:"is_restricted"`
+	IsUltraRestricted bool           `json:"is_ultra_restricted"`
+	IsStranger        bool           `json:"is_stranger"`
+	IsAppUser         bool           `json:"is_app_user"`
+	Has2FA            bool           `json:"has_2fa"`
+	HasFiles          bool           `json:"has_files"`
+	Presence          string         `json:"presence"`
+	Locale            string         `json:"locale"`
+	Enterprise        EnterpriseUser `json:"enterprise_user,omitempty"`
 }
 
 // UserPresence contains details about a user online status
@@ -150,6 +151,17 @@ type UserIdentity struct {
 	Image72  string `json:"image_72"`
 	Image192 string `json:"image_192"`
 	Image512 string `json:"image_512"`
+}
+
+// EnterpriseUser is present when a user is part of Slack Enterprise Grid
+// https://api.slack.com/types/user#enterprise_grid_user_objects
+type EnterpriseUser struct {
+	ID             string   `json:"id"`
+	EnterpriseID   string   `json:"enterprise_id"`
+	EnterpriseName string   `json:"enterprise_name"`
+	IsAdmin        bool     `json:"is_admin"`
+	IsOwner        bool     `json:"is_owner"`
+	Teams          []string `json:"teams"`
 }
 
 type TeamIdentity struct {
