@@ -11,6 +11,44 @@ var (
 	ErrIncorrectResponse = errors.New("Response is incorrect")
 )
 
+func getTeamProfile(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response := []byte(`{
+		"ok":true,
+		"profile":{
+			 "fields":[
+					{
+						"id":"XXXD7KN555",
+						"ordering":2,
+						"field_name":"",
+						"label":"Skype",
+						"hint":"This will be displayed on your profile.",
+						"type":"text",
+						"possible_values":null,
+						"options":null,
+						"is_hidden":true
+				},
+				{
+					"id":"XXXGGE5AAN7",
+					"ordering":4,
+					"field_name":"title",
+					"label":"Title",
+					"hint":"",
+					"type":"text",
+					"possible_values":null,
+					"options":{
+						"is_protected":true,
+						"is_scim":true
+					},
+					"is_hidden":false
+					}
+				]
+			}
+		}`)
+
+	rw.Write(response)
+}
+
 func getTeamInfo(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{"ok": true, "team": {
@@ -25,6 +63,39 @@ func getTeamInfo(rw http.ResponseWriter, r *http.Request) {
           }
 		}}`)
 	rw.Write(response)
+}
+
+func TestGetTeamProfile(t *testing.T) {
+	http.HandleFunc("/team.profile.get", getTeamProfile)
+
+	once.Do(startServer)
+	APIURL = "http://" + serverAddr + "/"
+	api := New("testing-token")
+
+	teamProfile, err := api.GetTeamProfile()
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	// t.Fatal refers to -> t.Errorf & return
+	if teamProfile.Fields[0].ID != "XXXD7KN555" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if teamProfile.Fields[0].Label != "Skype" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
+	if teamProfile.Fields[1].ID != "XXXGGE5AAN7" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if teamProfile.Fields[1].Label != "Title" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if !teamProfile.Fields[1].Options["is_protected"] {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
 }
 
 func TestGetTeamInfo(t *testing.T) {

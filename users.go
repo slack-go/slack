@@ -476,6 +476,56 @@ func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
 	return response.Err()
 }
 
+// SetUserCustomFields sets Custom Profile fields on the provided users account.  Due to the non-repeating elements
+// within the request, a map fields is required.  The key in the map signifies the field that will be updated.
+//
+// See GetTeamProfile for information to retrieve possible fields for your account.
+func (api *Client) SetUserCustomFields(userID string, customFields map[string]UserProfileCustomField) error {
+	return api.SetUserCustomFieldsContext(context.Background(), userID, customFields)
+}
+
+// SetUserCustomFieldsContext will set a custom status and emoji for the currently authenticated user with a custom context
+//
+// For more information see SetUserCustomFields
+func (api *Client) SetUserCustomFieldsContext(ctx context.Context, userID string, customFields map[string]UserProfileCustomField) error {
+
+	// Convert data to data type with custom marshall / unmarshall
+	// For more information, see UserProfileCustomFields definition.
+	updateFields := UserProfileCustomFields{}
+	updateFields.SetMap(customFields)
+
+	// This anonymous struct is needed to set the fields level of the request data.  The base struct for
+	// UserProfileCustomFields has an unexported variable named fields that does not contain a struct tag,
+	// which has resulted in this configuration.
+	profile, err := json.Marshal(&struct {
+		Fields UserProfileCustomFields `json:"fields"`
+	}{
+		Fields: updateFields,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{
+		"token":   {api.token},
+		"user":    {userID},
+		"profile": {string(profile)},
+	}
+
+	response := &userResponseFull{}
+	if err := postForm(ctx, api.httpclient, APIURL+"users.profile.set", values, response, api); err != nil {
+		return err
+	}
+
+	if !response.Ok {
+		return errors.New(response.Error)
+	}
+
+	return nil
+
+}
+
 // SetUserCustomStatus will set a custom status and emoji for the currently
 // authenticated user. If statusEmoji is "" and statusText is not, the Slack API
 // will automatically set it to ":speech_balloon:". Otherwise, if both are ""
