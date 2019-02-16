@@ -484,7 +484,7 @@ func (api *Client) SetUserCustomFields(userID string, customFields map[string]Us
 	return api.SetUserCustomFieldsContext(context.Background(), userID, customFields)
 }
 
-// SetUserCustomFieldsContext will set a custom status and emoji for the currently authenticated user with a custom context
+// SetUserCustomFieldsContext will set a users custom profile field with context.
 //
 // For more information see SetUserCustomFields
 func (api *Client) SetUserCustomFieldsContext(ctx context.Context, userID string, customFields map[string]UserProfileCustomField) error {
