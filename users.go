@@ -37,6 +37,7 @@ type UserProfile struct {
 	ApiAppID              string                  `json:"api_app_id,omitempty"`
 	StatusText            string                  `json:"status_text,omitempty"`
 	StatusEmoji           string                  `json:"status_emoji,omitempty"`
+	StatusExpiration      int                     `json:"status_expiration"`
 	Team                  string                  `json:"team"`
 	Fields                UserProfileCustomFields `json:"fields"`
 }
@@ -479,15 +480,16 @@ func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
 // SetUserCustomStatus will set a custom status and emoji for the currently
 // authenticated user. If statusEmoji is "" and statusText is not, the Slack API
 // will automatically set it to ":speech_balloon:". Otherwise, if both are ""
-// the Slack API will unset the custom status/emoji.
-func (api *Client) SetUserCustomStatus(statusText, statusEmoji string) error {
-	return api.SetUserCustomStatusContext(context.Background(), statusText, statusEmoji)
+// the Slack API will unset the custom status/emoji. If statusExpiration is set to 0
+// the status will not expire.
+func (api *Client) SetUserCustomStatus(statusText, statusEmoji string, statusExpiration int) error {
+	return api.SetUserCustomStatusContext(context.Background(), statusText, statusEmoji, statusExpiration)
 }
 
 // SetUserCustomStatusContext will set a custom status and emoji for the currently authenticated user with a custom context
 //
 // For more information see SetUserCustomStatus
-func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, statusEmoji string) error {
+func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, statusEmoji string, statusExpiration int) error {
 	// XXX(theckman): this anonymous struct is for making requests to the Slack
 	// API for setting and unsetting a User's Custom Status/Emoji. To change
 	// these values we must provide a JSON document as the profile POST field.
@@ -500,11 +502,13 @@ func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, s
 	// - https://api.slack.com/docs/presence-and-status#custom_status
 	profile, err := json.Marshal(
 		&struct {
-			StatusText  string `json:"status_text"`
-			StatusEmoji string `json:"status_emoji"`
+			StatusText       string `json:"status_text"`
+			StatusEmoji      string `json:"status_emoji"`
+			StatusExpiration int    `json:"status_expiration"`
 		}{
-			StatusText:  statusText,
-			StatusEmoji: statusEmoji,
+			StatusText:       statusText,
+			StatusEmoji:      statusEmoji,
+			StatusExpiration: statusExpiration,
 		},
 	)
 
@@ -538,7 +542,7 @@ func (api *Client) UnsetUserCustomStatus() error {
 // UnsetUserCustomStatusContext removes the custom status message for the currently authenticated user
 // with a custom context. This is a convenience method that wraps (*Client).SetUserCustomStatus().
 func (api *Client) UnsetUserCustomStatusContext(ctx context.Context) error {
-	return api.SetUserCustomStatusContext(ctx, "", "")
+	return api.SetUserCustomStatusContext(ctx, "", "", 0)
 }
 
 // GetUserProfile retrieves a user's profile information.
