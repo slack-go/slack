@@ -482,14 +482,14 @@ func (api *Client) DeleteUserPhotoContext(ctx context.Context) error {
 // will automatically set it to ":speech_balloon:". Otherwise, if both are ""
 // the Slack API will unset the custom status/emoji. If statusExpiration is set to 0
 // the status will not expire.
-func (api *Client) SetUserCustomStatus(statusText, statusEmoji string, statusExpiration int) error {
+func (api *Client) SetUserCustomStatus(statusText, statusEmoji string, statusExpiration int64) error {
 	return api.SetUserCustomStatusContext(context.Background(), statusText, statusEmoji, statusExpiration)
 }
 
 // SetUserCustomStatusContext will set a custom status and emoji for the currently authenticated user with a custom context
 //
 // For more information see SetUserCustomStatus
-func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, statusEmoji string, statusExpiration int) error {
+func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, statusEmoji string, statusExpiration int64) error {
 	// XXX(theckman): this anonymous struct is for making requests to the Slack
 	// API for setting and unsetting a User's Custom Status/Emoji. To change
 	// these values we must provide a JSON document as the profile POST field.
@@ -504,7 +504,7 @@ func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, s
 		&struct {
 			StatusText       string `json:"status_text"`
 			StatusEmoji      string `json:"status_emoji"`
-			StatusExpiration int    `json:"status_expiration"`
+			StatusExpiration int64  `json:"status_expiration"`
 		}{
 			StatusText:       statusText,
 			StatusEmoji:      statusEmoji,
