@@ -339,17 +339,19 @@ func (api *Client) GetUsersPaginated(options ...GetUsersOption) UserPagination {
 }
 
 // GetUsers returns the list of users (with their detailed information)
-func (api *Client) GetUsers() ([]User, error) {
-	return api.GetUsersContext(context.Background())
+func (api *Client) GetUsers(options ...GetUsersOption) ([]User, error) {
+	return api.GetUsersContext(context.Background(), options...)
 }
 
 // GetUsersContext returns the list of users (with their detailed information) with a custom context
-func (api *Client) GetUsersContext(ctx context.Context) (results []User, err error) {
+func (api *Client) GetUsersContext(
+	ctx context.Context, options ...GetUsersOption,
+) (results []User, err error) {
 	var (
 		p UserPagination
 	)
 
-	for p = api.GetUsersPaginated(); !p.Done(err); p, err = p.Next(ctx) {
+	for p = api.GetUsersPaginated(options...); !p.Done(err); p, err = p.Next(ctx) {
 		results = append(results, p.Users...)
 	}
 
