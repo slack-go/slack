@@ -462,26 +462,81 @@ func TestGetConversationReplies(t *testing.T) {
 	}
 }
 
-func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(struct {
-		SlackResponse
-		ResponseMetaData struct {
-			NextCursor string `json:"next_cursor"`
-		} `json:"response_metadata"`
-		Channels []Channel `json:"channels"`
-	}{
-		SlackResponse: SlackResponse{Ok: true},
-		Channels:      []Channel{}})
-	rw.Write(response)
+func getAllConversationsHandler(t *testing.T) func(w http.ResponseWriter, r *http.Request) {
+	type ResponseMetaData struct {
+		NextCursor string `json:"next_cursor"`
+	}
+	var reqCount int
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		assert.NoError(t, err, "Error parsing form values")
+		cursor := r.FormValue("cursor")
+		if reqCount != 0 {
+			assert.Equal(t, string(reqCount), cursor)
+		} else {
+			assert.Empty(t, cursor)
+		}
+		reqCount++
+		limit := r.FormValue("limit")
+		assert.Equal(t, "1000", limit, "Params limit doesnt match")
+		response := struct {
+			SlackResponse
+			ResponseMetaData ResponseMetaData `json:"response_metadata"`
+			Channels         []Channel        `json:"channels"`
+		}{
+			SlackResponse: SlackResponse{Ok: true},
+			Channels: []Channel{
+				Channel{
+					GroupConversation: GroupConversation{
+						Conversation: Conversation{
+							ID: string(reqCount),
+						},
+					},
+				},
+			},
+			ResponseMetaData: ResponseMetaData{
+				NextCursor: string(reqCount),
+			},
+		}
+		if reqCount == 2 {
+			response.ResponseMetaData.NextCursor = ""
+		}
+		data, _ := json.Marshal(response)
+		w.Write(data)
+	}
 }
 
-func TestGetConversations(t *testing.T) {
-	http.HandleFunc("/conversations.list", getConversationsHander)
+func TestGetAllConversations(t *testing.T) {
+	http.HandleFunc("/conversations.list", getAllConversationsHandler(t))
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	params := GetConversationsParameters{}
-	_, _, err := api.GetConversations(&params)
+	conversations, err := api.GetAllConversations(&GetConversationsParameters{
+		Limit: 1000,
+	})
+	assert.Len(t, conversations, 2)
+	for i := 0; i < 2; i++ {
+		assert.Equal(t, conversations[i].ID, string(i+1))
+	}
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestGetAllConversationsForUser(t *testing.T) {
+	http.HandleFunc("/users.conversations", getAllConversationsHandler(t))
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	conversations, err := api.GetAllConversationsForUser(
+		&GetConversationsForUserParameters{
+			Limit:  1000,
+			UserID: "123",
+		},
+	)
+	assert.Len(t, conversations, 2)
+	for i := 0; i < 2; i++ {
+		assert.Equal(t, conversations[i].ID, string(i+1))
+	}
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return

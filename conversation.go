@@ -111,6 +111,29 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 	return response.Members, response.ResponseMetaData.NextCursor, nil
 }
 
+// GetAllConversationsForUser gets all conversations for a given user
+func (api *Client) GetAllConversationsForUser(
+	params *GetConversationsForUserParameters,
+) ([]*Channel, error) {
+	var finished bool
+	var results []*Channel
+	for !finished {
+		paginatedCh, nextCursor, err := api.GetConversationsForUser(params)
+		if err != nil {
+			return nil, err
+		}
+		for i := 0; i < len(paginatedCh); i++ {
+			results = append(results, &paginatedCh[i])
+		}
+		if nextCursor == "" {
+			finished = true
+		} else {
+			params.Cursor = nextCursor
+		}
+	}
+	return results, nil
+}
+
 // GetConversationsForUser returns the list conversations for a given user
 func (api *Client) GetConversationsForUser(params *GetConversationsForUserParameters) (channels []Channel, nextCursor string, err error) {
 	return api.GetConversationsForUserContext(context.Background(), params)
@@ -454,7 +477,27 @@ type GetConversationsParameters struct {
 	Types           []string
 }
 
-// GetConversations returns the list of channels in a Slack team
+// GetAllConversations is a helper used to traverse paginations and get the list of all channels
+func (api *Client) GetAllConversations(params *GetConversationsParameters) ([]*Channel, error) {
+	var channels []*Channel
+	var finished bool
+	for !finished {
+		ch, cursor, err := api.GetConversations(params)
+		if err != nil {
+			return channels, err
+		}
+		for i := 0; i < len(ch); i++ {
+			channels = append(channels, &ch[i])
+		}
+		if cursor == "" {
+			finished = true
+		}
+		params.Cursor = cursor
+	}
+	return channels, nil
+}
+
+// GetConversations returns a paginated list of channels in a Slack team
 func (api *Client) GetConversations(params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
 	return api.GetConversationsContext(context.Background(), params)
 }
