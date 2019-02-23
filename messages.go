@@ -92,6 +92,9 @@ type Msg struct {
 	ResponseType    string `json:"response_type,omitempty"`
 	ReplaceOriginal bool   `json:"replace_original"`
 	DeleteOriginal  bool   `json:"delete_original"`
+
+	// Block type Message
+	Blocks []Block `json:"blocks,omitempty"`
 }
 
 // Icon is used for bot messages
