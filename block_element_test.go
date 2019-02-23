@@ -34,7 +34,7 @@ func TestNewOptionsSelectBlockElement(t *testing.T) {
 	testOption := NewOptionBlockObject("test", testOptionText)
 
 	option := NewOptionsSelectBlockElement("static_select", nil, "test", testOption)
-	assert.Equal(t, option.Type, "select")
+	assert.Equal(t, option.Type, "static_select")
 	assert.Equal(t, len(option.Options), 1)
 	assert.Nil(t, option.OptionGroups)
 
