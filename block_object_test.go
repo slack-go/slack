@@ -10,7 +10,7 @@ func TestNewImageBlockObject(t *testing.T) {
 
 	imageObject := NewImageBlockObject("https://api.slack.com/img/blocks/bkb_template_images/beagle.png", "Beagle")
 
-	assert.Equal(t, imageObject.Type, "image")
+	assert.Equal(t, string(imageObject.Type), "image")
 	assert.Equal(t, imageObject.AltText, "Beagle")
 	assert.Contains(t, imageObject.ImageURL, "beagle.png")
 

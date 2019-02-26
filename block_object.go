@@ -7,8 +7,8 @@ package slack
 // BlockObject defines an interface that all block object types should
 // implement.
 // @TODO: Is this interface needed?
-type BlockObject interface {
-	ValidateObject() bool
+type blockObject interface {
+	validateType() MessageObjectType
 }
 
 // ImageBlockObject An element to insert an image - this element can be used
@@ -17,20 +17,20 @@ type BlockObject interface {
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#image
 type ImageBlockObject struct {
-	Type     string `json:"type"`
-	ImageURL string `json:"image_url"`
-	AltText  string `json:"alt_text"`
+	Type     MessageObjectType `json:"type"`
+	ImageURL string            `json:"image_url"`
+	AltText  string            `json:"alt_text"`
 }
 
-// ValidateObject performs validation checks to ensure the element is valid
-func (s ImageBlockObject) ValidateObject() bool {
-	return true
+// validateType enforces block objects for element and block parameters
+func (s ImageBlockObject) validateType() MessageObjectType {
+	return s.Type
 }
 
 // NewImageBlockObject returns a new instance of an image block element
 func NewImageBlockObject(imageURL, altText string) *ImageBlockObject {
 	return &ImageBlockObject{
-		Type:     "image",
+		Type:     motImage,
 		ImageURL: imageURL,
 		AltText:  altText,
 	}
@@ -46,9 +46,9 @@ type TextBlockObject struct {
 	Verbatim bool   `json:"verbatim,omitempty"`
 }
 
-// ValidateObject performs validation checks to ensure the element is valid
-func (s *TextBlockObject) ValidateObject() bool {
-	return true
+// validateType enforces block objects for element and block parameters
+func (s TextBlockObject) validateType() MessageObjectType {
+	return MessageObjectType(s.Type)
 }
 
 // NewTextBlockObject returns an instance of a new Text Block Object
@@ -73,9 +73,9 @@ type ConfirmationBlockObject struct {
 	Deny    *TextBlockObject `json:"deny"`
 }
 
-// ValidateObject performs validation checks to ensure the element is valid
-func (s *ConfirmationBlockObject) ValidateObject() bool {
-	return true
+// validateType enforces block objects for element and block parameters
+func (s ConfirmationBlockObject) validateType() MessageObjectType {
+	return motConfirmation
 }
 
 // NewConfirmationBlockObject returns an instance of a new Confirmation Block Object
@@ -96,17 +96,17 @@ type OptionBlockObject struct {
 	Value string           `json:"value"`
 }
 
-// ValidateObject performs validation checks to ensure the element is valid
-func (s *OptionBlockObject) ValidateObject() bool {
-	return true
-}
-
 // NewOptionBlockObject returns an instance of a new Option Block Element
 func NewOptionBlockObject(value string, text *TextBlockObject) *OptionBlockObject {
 	return &OptionBlockObject{
 		Text:  text,
 		Value: value,
 	}
+}
+
+// validateType enforces block objects for element and block parameters
+func (s OptionBlockObject) validateType() MessageObjectType {
+	return motOption
 }
 
 // OptionGroupBlockObject Provides a way to group options in a select menu.
@@ -117,9 +117,9 @@ type OptionGroupBlockObject struct {
 	Options []*OptionBlockObject `json:"options"`
 }
 
-// ValidateObject performs validation checks to ensure the element is valid
-func (s *OptionGroupBlockObject) ValidateObject() bool {
-	return true
+// validateType enforces block objects for element and block parameters
+func (s OptionGroupBlockObject) validateType() MessageObjectType {
+	return motOptionGroup
 }
 
 // NewOptionGroupBlockElement returns an instance of a new option group block element
