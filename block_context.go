@@ -1,27 +1,24 @@
 package slack
 
-import "strings"
-
 // ContextBlock defines data that is used to display message context, which can
 // include both images and text.
 //
 // More Information: https://api.slack.com/reference/messaging/blocks#actions
 type ContextBlock struct {
-	Type     string        `json:"type"`
-	BlockID  string        `json:"block_id,omitempty"`
-	Elements []BlockObject `json:"elements"`
+	Type     MessageBlockType `json:"type"`
+	BlockID  string           `json:"block_id,omitempty"`
+	Elements []blockObject    `json:"elements"`
 }
 
-// ValidateBlock ensures that the type set to the block is found in the list of
-// valid slack block.
-func (s *ContextBlock) ValidateBlock() bool {
-	return isStringInSlice(validBlockList, strings.ToLower(s.Type))
+// blockType returns the type of the block
+func (s ContextBlock) blockType() MessageBlockType {
+	return s.Type
 }
 
 // NewContextBlock returns a newinstance of a context block
-func NewContextBlock(blockID string, elements ...BlockObject) *ContextBlock {
+func NewContextBlock(blockID string, elements ...blockObject) *ContextBlock {
 	return &ContextBlock{
-		Type:     "context",
+		Type:     mbtContext,
 		BlockID:  blockID,
 		Elements: elements,
 	}

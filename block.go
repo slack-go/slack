@@ -4,25 +4,39 @@ package slack
 
 // More Information: https://api.slack.com/block-kit
 
-var (
-	// validBlockList contains a list of
-	validBlockList = []string{
-		"section",
-		"divider",
-		"image",
-		"actions",
-		"context",
-	}
+// MessageBlockType defines a named string type to define each block type
+// as a constant for use within the package.
+type MessageBlockType string
+type MessageElementType string
+type MessageObjectType string
+
+const (
+	mbtSection MessageBlockType = "section"
+	mbtDivider MessageBlockType = "divider"
+	mbtImage   MessageBlockType = "image"
+	mbtAction  MessageBlockType = "actions"
+	mbtContext MessageBlockType = "context"
+
+	metImage      MessageElementType = "image"
+	metButton     MessageElementType = "button"
+	metOverflow   MessageElementType = "overflow"
+	metDatepicker MessageElementType = "datepicker"
+	metSelect     MessageElementType = "static_select"
+
+	motImage        MessageObjectType = "image"
+	motConfirmation MessageObjectType = "confirmation"
+	motOption       MessageObjectType = "option"
+	motOptionGroup  MessageObjectType = "option_group"
 )
 
-// Block defines an interface all block types should implement
+// block defines an interface all block types should implement
 // to ensure consistency between blocks.
-type Block interface {
-	ValidateBlock() bool
+type block interface {
+	blockType() MessageBlockType
 }
 
 // NewBlockMessage creates a new Message that contains one or more blocks to be displayed
-func NewBlockMessage(blocks ...Block) Message {
+func NewBlockMessage(blocks ...block) Message {
 	return Message{
 		Msg: Msg{
 			Blocks: blocks,
@@ -30,13 +44,8 @@ func NewBlockMessage(blocks ...Block) Message {
 	}
 }
 
-// isStringInSlice is a helper function used in validating the block structs to
-// verify a valid type has been used.
-func isStringInSlice(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
+// AddBlockMessage appends a block to the end of the existing list of blocks
+func AddBlockMessage(message Message, newBlk block) Message {
+	message.Msg.Blocks = append(message.Msg.Blocks, newBlk)
+	return message
 }

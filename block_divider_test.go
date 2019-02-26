@@ -9,6 +9,6 @@ import (
 func TestNewDividerBlock(t *testing.T) {
 
 	dividerBlock := NewDividerBlock()
-	assert.Equal(t, dividerBlock.Type, "divider")
+	assert.Equal(t, string(dividerBlock.Type), "divider")
 
 }

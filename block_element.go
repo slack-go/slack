@@ -2,10 +2,10 @@ package slack
 
 // https://api.slack.com/reference/messaging/block-elements
 
-// BlockElement defines an interface that all block element types should
+// blockElement defines an interface that all block element types should
 // implement.
-type BlockElement interface {
-	ValidateElement() bool
+type blockElement interface {
+	blockType() MessageElementType
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
@@ -14,20 +14,20 @@ type BlockElement interface {
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#image
 type ImageBlockElement struct {
-	Type     string `json:"type"`
-	ImageURL string `json:"image_url"`
-	AltText  string `json:"alt_text"`
+	Type     MessageElementType `json:"type"`
+	ImageURL string             `json:"image_url"`
+	AltText  string             `json:"alt_text"`
 }
 
-// ValidateElement performs validation checks to ensure the element is valid
-func (s ImageBlockElement) ValidateElement() bool {
-	return true
+// validateType enforces block objects for block parameters
+func (s ImageBlockElement) blockType() MessageElementType {
+	return s.Type
 }
 
 // NewImageBlockElement returns a new instance of an image block element
 func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	return &ImageBlockElement{
-		Type:     "image",
+		Type:     metImage,
 		ImageURL: imageURL,
 		AltText:  altText,
 	}
@@ -39,7 +39,7 @@ func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#button
 type ButtonBlockElement struct {
-	Type     string                   `json:"type,omitempty"`
+	Type     MessageElementType       `json:"type,omitempty"`
 	Text     *TextBlockObject         `json:"text"`
 	ActionID string                   `json:"action_id,omitempty"`
 	URL      string                   `json:"url,omitempty"`
@@ -47,15 +47,15 @@ type ButtonBlockElement struct {
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-// ValidateElement performs validation checks to ensure the element is valid
-func (s ButtonBlockElement) ValidateElement() bool {
-	return true
+// validateType enforces block objects for block parameters
+func (s ButtonBlockElement) blockType() MessageElementType {
+	return s.Type
 }
 
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
 func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *ButtonBlockElement {
 	return &ButtonBlockElement{
-		Type:     "button",
+		Type:     metButton,
 		ActionID: actionID,
 		Text:     text,
 		Value:    value,
@@ -76,9 +76,9 @@ type SelectBlockElement struct {
 	Confirm       *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
-// ValidateElement performs validation checks to ensure the element is valid
-func (s SelectBlockElement) ValidateElement() bool {
-	return true
+// validateType enforces block objects for block parameters
+func (s SelectBlockElement) blockType() MessageElementType {
+	return MessageElementType(s.Type)
 }
 
 // NewOptionsSelectBlockElement returns a new instance of SelectBlockElement for use with
@@ -115,21 +115,21 @@ func NewOptionsGroupSelectBlockElement(
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#overflow
 type OverflowBlockElement struct {
-	Type     string                   `json:"type"`
+	Type     MessageElementType       `json:"type"`
 	ActionID string                   `json:"action_id,omitempty"`
 	Options  []*OptionBlockObject     `json:"options"`
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-// ValidateElement performs validation checks to ensure the element is valid
-func (s OverflowBlockElement) ValidateElement() bool {
-	return true
+// validateType enforces block objects for block parameters
+func (s OverflowBlockElement) blockType() MessageElementType {
+	return s.Type
 }
 
 // NewOverflowBlockElement returns an instance of a new Overflow Block Element
 func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *OverflowBlockElement {
 	return &OverflowBlockElement{
-		Type:     "overflow",
+		Type:     metOverflow,
 		ActionID: actionID,
 		Options:  options,
 	}
@@ -141,22 +141,22 @@ func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *Ov
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#datepicker
 type DatePickerBlockElement struct {
-	Type        string                   `json:"type"`
+	Type        MessageElementType       `json:"type"`
 	ActionID    string                   `json:"action_id"`
 	Placeholder *TextBlockObject         `json:"placeholder,omitempty"`
 	InitialDate string                   `json:"initial_date,omitempty"`
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-// ValidateElement performs validation checks to ensure the element is valid
-func (s DatePickerBlockElement) ValidateElement() bool {
-	return true
+// validateType enforces block objects for block parameters
+func (s DatePickerBlockElement) blockType() MessageElementType {
+	return s.Type
 }
 
 // NewDatePickerBlockElement returns an instance of a date picker element
 func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 	return &DatePickerBlockElement{
-		Type:     "datepicker",
+		Type:     metDatepicker,
 		ActionID: actionID,
 	}
 }

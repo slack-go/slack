@@ -10,7 +10,7 @@ func TestNewImageBlockElement(t *testing.T) {
 
 	imageElement := NewImageBlockObject("https://api.slack.com/img/blocks/bkb_template_images/tripAgentLocationMarker.png", "Location Pin Icon")
 
-	assert.Equal(t, imageElement.Type, "image")
+	assert.Equal(t, string(imageElement.Type), "image")
 	assert.Contains(t, imageElement.ImageURL, "tripAgentLocationMarker")
 	assert.Equal(t, imageElement.AltText, "Location Pin Icon")
 
@@ -21,7 +21,7 @@ func TestNewButtonBlockElement(t *testing.T) {
 	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
 	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
 
-	assert.Equal(t, btnElement.Type, "button")
+	assert.Equal(t, string(btnElement.Type), "button")
 	assert.Equal(t, btnElement.ActionID, "test")
 	assert.Equal(t, btnElement.Value, "click_me_123")
 	assert.Equal(t, btnElement.Text.Text, "Next 2 Results")
@@ -49,7 +49,7 @@ func TestNewOptionsGroupSelectBlockElement(t *testing.T) {
 
 	optGroup := NewOptionsGroupSelectBlockElement("static_select", nil, "test", testGroupOption)
 
-	assert.Equal(t, optGroup.Type, "static_select")
+	assert.Equal(t, string(optGroup.Type), "static_select")
 	assert.Equal(t, optGroup.ActionID, "test")
 	assert.Equal(t, len(optGroup.OptionGroups), 1)
 
@@ -70,7 +70,7 @@ func TestNewOverflowBlockElement(t *testing.T) {
 	// Build overflow section
 	overflowElement := NewOverflowBlockElement("test", overflowOptionOne, overflowOptionTwo, overflowOptionThree)
 
-	assert.Equal(t, overflowElement.Type, "overflow")
+	assert.Equal(t, string(overflowElement.Type), "overflow")
 	assert.Equal(t, overflowElement.ActionID, "test")
 	assert.Equal(t, len(overflowElement.Options), 3)
 
@@ -80,7 +80,7 @@ func TestNewDatePickerBlockElement(t *testing.T) {
 
 	datepickerElement := NewDatePickerBlockElement("test")
 
-	assert.Equal(t, datepickerElement.Type, "datepicker")
+	assert.Equal(t, string(datepickerElement.Type), "datepicker")
 	assert.Equal(t, datepickerElement.ActionID, "test")
 
 }
