@@ -67,10 +67,11 @@ type GetUsersInConversationParameters struct {
 }
 
 type GetConversationsForUserParameters struct {
-	UserID string
-	Cursor string
-	Types  []string
-	Limit  int
+	UserID          string
+	Cursor          string
+	Types           []string
+	Limit           int
+	ExcludeArchived bool
 }
 
 type responseMetaData struct {
@@ -130,6 +131,9 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	}
 	if params.Types != nil {
 		values.Add("types", strings.Join(params.Types, ","))
+	}
+	if params.ExcludeArchived {
+		values.Add("exclude_archived", "true")
 	}
 	response := struct {
 		Channels         []Channel        `json:"channels"`
