@@ -507,7 +507,7 @@ func (api *Client) SetUserCustomFieldsContext(ctx context.Context, userID string
 	}
 
 	if !response.Ok {
-		return errors.New(response.Error)
+		return response.Err()
 	}
 
 	return nil
