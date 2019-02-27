@@ -9,13 +9,13 @@ import (
 )
 
 type WebhookMessage struct {
-	Username    string       `json:"username,omitempty"`
-	IconEmoji   string       `json:"icon_emoji,omitempty"`
-	IconURL     string       `json:"icon_url,omitempty"`
-	Channel     string       `json:"channel,omitempty"`
-	ThreadTS    string       `json:"thread_ts,omitempty"`
-	Text        string       `json:"text,omitempty"`
-	Attachments []Attachment `json:"attachments,omitempty"`
+	Username         string       `json:"username,omitempty"`
+	IconEmoji        string       `json:"icon_emoji,omitempty"`
+	IconURL          string       `json:"icon_url,omitempty"`
+	Channel          string       `json:"channel,omitempty"`
+	ThreadTimestamp  string       `json:"thread_ts,omitempty"`
+	Text             string       `json:"text,omitempty"`
+	Attachments      []Attachment `json:"attachments,omitempty"`
 }
 
 func PostWebhook(url string, msg *WebhookMessage) error {
