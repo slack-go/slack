@@ -271,12 +271,12 @@ func TestUserCustomStatus(t *testing.T) {
 
 func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 	const (
-		statusText  = "testStatus"
-		statusEmoji = ":construction:"
+		statusText       = "testStatus"
+		statusEmoji      = ":construction:"
+		statusExpiration = 1551619082
 	)
-
-	if err := api.SetUserCustomStatus(statusText, statusEmoji); err != nil {
-		t.Fatalf(`SetUserCustomStatus(%q, %q) = %#v, want <nil>`, statusText, statusEmoji, err)
+	if err := api.SetUserCustomStatus(statusText, statusEmoji, statusExpiration); err != nil {
+		t.Fatalf(`SetUserCustomStatus(%q, %q, %q) = %#v, want <nil>`, statusText, statusEmoji, statusExpiration, err)
 	}
 
 	if up.StatusText != statusText {
@@ -285,6 +285,9 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 
 	if up.StatusEmoji != statusEmoji {
 		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, statusEmoji)
+	}
+	if up.StatusExpiration != statusExpiration {
+		t.Fatalf(`UserProfile.StatusExpiration = %q, want %q`, up.StatusExpiration, statusExpiration)
 	}
 }
 
