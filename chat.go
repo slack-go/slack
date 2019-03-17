@@ -330,6 +330,21 @@ func MsgOptionAttachments(attachments ...Attachment) MsgOption {
 	}
 }
 
+// MsgOptionBlocks sets blocks for the message
+func MsgOptionBlocks(blocks ...Block) MsgOption {
+	return func(config *sendConfig) error {
+		if blocks == nil {
+			return nil
+		}
+
+		blocks, err := json.Marshal(blocks)
+		if err == nil {
+			config.values.Set("blocks", string(blocks))
+		}
+		return err
+	}
+}
+
 // MsgOptionEnableLinkUnfurl enables link unfurling
 func MsgOptionEnableLinkUnfurl() MsgOption {
 	return func(config *sendConfig) error {
