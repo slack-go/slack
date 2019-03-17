@@ -6,7 +6,7 @@ package slack
 type ActionBlock struct {
 	Type     MessageBlockType `json:"type"`
 	BlockID  string           `json:"block_id,omitempty"`
-	Elements []blockElement   `json:"elements"`
+	Elements []BlockElement   `json:"elements"`
 }
 
 // blockType returns the type of the block
@@ -15,7 +15,7 @@ func (s ActionBlock) blockType() MessageBlockType {
 }
 
 // NewActionBlock returns a new instance of an Action Block
-func NewActionBlock(blockID string, elements ...blockElement) *ActionBlock {
+func NewActionBlock(blockID string, elements ...BlockElement) *ActionBlock {
 	return &ActionBlock{
 		Type:     mbtAction,
 		BlockID:  blockID,

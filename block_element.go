@@ -2,9 +2,8 @@ package slack
 
 // https://api.slack.com/reference/messaging/block-elements
 
-// blockElement defines an interface that all block element types should
-// implement.
-type blockElement interface {
+// BlockElement defines an interface that all block element types should implement.
+type BlockElement interface {
 	blockType() MessageElementType
 }
 
