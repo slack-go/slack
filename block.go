@@ -31,12 +31,12 @@ const (
 
 // block defines an interface all block types should implement
 // to ensure consistency between blocks.
-type block interface {
+type Block interface {
 	blockType() MessageBlockType
 }
 
 // NewBlockMessage creates a new Message that contains one or more blocks to be displayed
-func NewBlockMessage(blocks ...block) Message {
+func NewBlockMessage(blocks ...Block) Message {
 	return Message{
 		Msg: Msg{
 			Blocks: blocks,
@@ -45,7 +45,7 @@ func NewBlockMessage(blocks ...block) Message {
 }
 
 // AddBlockMessage appends a block to the end of the existing list of blocks
-func AddBlockMessage(message Message, newBlk block) Message {
+func AddBlockMessage(message Message, newBlk Block) Message {
 	message.Msg.Blocks = append(message.Msg.Blocks, newBlk)
 	return message
 }
