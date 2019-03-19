@@ -11,6 +11,7 @@ type BlockObject interface {
 	validateType() MessageObjectType
 }
 
+// BlockObject object types
 const (
 	MarkdownType  = "mrkdwn"
 	PlainTextType = "plain_text"
