@@ -7,7 +7,7 @@ package slack
 // BlockObject defines an interface that all block object types should
 // implement.
 // @TODO: Is this interface needed?
-type blockObject interface {
+type BlockObject interface {
 	validateType() MessageObjectType
 }
 
