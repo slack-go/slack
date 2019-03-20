@@ -15,7 +15,6 @@ func (s DividerBlock) blockType() MessageBlockType {
 
 // NewDividerBlock returns a new instance of a divider block
 func NewDividerBlock() *DividerBlock {
-
 	return &DividerBlock{
 		Type: mbtDivider,
 	}

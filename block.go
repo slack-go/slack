@@ -29,14 +29,8 @@ const (
 	motOptionGroup  MessageObjectType = "option_group"
 )
 
-// block defines an interface all block types should implement
+// Block defines an interface all block types should implement
 // to ensure consistency between blocks.
-type block interface {
-	blockType() MessageBlockType
-}
-
-// Block is the exported version of the block interface and is used to pass
-// multiple blocks in exported variadic functions, etc.
 type Block interface {
 	blockType() MessageBlockType
 }
@@ -51,7 +45,7 @@ func NewBlockMessage(blocks ...Block) Message {
 }
 
 // AddBlockMessage appends a block to the end of the existing list of blocks
-func AddBlockMessage(message Message, newBlk block) Message {
+func AddBlockMessage(message Message, newBlk Block) Message {
 	message.Msg.Blocks = append(message.Msg.Blocks, newBlk)
 	return message
 }
