@@ -1,5 +1,9 @@
 package slack
 
+import (
+	"encoding/json"
+)
+
 // @NOTE: Blocks are in beta and subject to change.
 
 // More Information: https://api.slack.com/block-kit
@@ -33,6 +37,60 @@ const (
 // to ensure consistency between blocks.
 type Block interface {
 	blockType() MessageBlockType
+}
+
+// Blocks is a convenience struct defined to allow dynamic unmarshalling of
+// the "blocks" value in Slack's JSON response, which varies depending on block type
+type Blocks struct {
+	BlockSet []Block `json:"blocks"`
+}
+
+// UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
+// unmarshalling is delegated and proper type determination can be made before unmarshal
+func (b *Blocks) UnmarshalJSON(data []byte) error {
+	var raw []json.RawMessage
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	var blocks Blocks
+	for _, r := range raw {
+		var obj map[string]interface{}
+		err := json.Unmarshal(r, &obj)
+		if err != nil {
+			return err
+		}
+
+		blockType := ""
+		if t, ok := obj["type"].(string); ok {
+			blockType = t
+		}
+
+		var block Block
+		switch blockType {
+		case "actions":
+			block = &ActionBlock{}
+		case "context":
+			block = &ContextBlock{}
+		case "divider":
+			block = &DividerBlock{}
+		case "image":
+			block = &ImageBlock{}
+		case "section":
+			block = &SectionBlock{}
+		}
+
+		err = json.Unmarshal(r, block)
+		if err != nil {
+			return err
+		}
+
+		blocks.BlockSet = append(blocks.BlockSet, block)
+	}
+
+	*b = blocks
+	return nil
 }
 
 // NewBlockMessage creates a new Message that contains one or more blocks to be displayed
