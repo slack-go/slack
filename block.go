@@ -95,15 +95,16 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 
 // NewBlockMessage creates a new Message that contains one or more blocks to be displayed
 func NewBlockMessage(blocks ...Block) Message {
+
 	return Message{
 		Msg: Msg{
-			Blocks: blocks,
+			Blocks: Blocks{BlockSet: blocks},
 		},
 	}
 }
 
 // AddBlockMessage appends a block to the end of the existing list of blocks
 func AddBlockMessage(message Message, newBlk Block) Message {
-	message.Msg.Blocks = append(message.Msg.Blocks, newBlk)
+	message.Msg.Blocks.BlockSet = append(message.Msg.Blocks.BlockSet, newBlk)
 	return message
 }

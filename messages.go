@@ -94,7 +94,7 @@ type Msg struct {
 	DeleteOriginal  bool   `json:"delete_original"`
 
 	// Block type Message
-	Blocks []Block `json:"blocks,omitempty"`
+	Blocks Blocks `json:"blocks,omitempty"`
 }
 
 // Icon is used for bot messages
