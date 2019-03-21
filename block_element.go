@@ -1,10 +1,66 @@
 package slack
 
+import "encoding/json"
+
 // https://api.slack.com/reference/messaging/block-elements
 
 // BlockElement defines an interface that all block element types should implement.
 type BlockElement interface {
 	blockType() MessageElementType
+}
+
+// BlockElements is a convenience struct defined to allow dynamic unmarshalling of
+// the "elements" value in Slack's JSON response, which varies depending on BlockElement type
+type BlockElements struct {
+	BlockElementSet []BlockElement `json:"element"`
+}
+
+// UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
+// unmarshalling is delegated and proper type determination can be made before unmarshal
+func (b *BlockElements) UnmarshalJSON(data []byte) error {
+	var raw []json.RawMessage
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	var blockElements BlockElements
+	for _, r := range raw {
+		var obj map[string]interface{}
+		err := json.Unmarshal(r, &obj)
+		if err != nil {
+			return err
+		}
+
+		var blockElementType string
+		if t, ok := obj["type"].(string); ok {
+			blockElementType = t
+		}
+
+		var blockElement BlockElement
+		switch blockElementType {
+		case "image":
+			blockElement = &ImageBlockElement{}
+		case "button":
+			blockElement = &ButtonBlockElement{}
+		case "overflow":
+			blockElement = &OverflowBlockElement{}
+		case "datepicker":
+			blockElement = &DatePickerBlockElement{}
+		case "static_select":
+			blockElement = &SelectBlockElement{}
+		}
+
+		err = json.Unmarshal(r, blockElement)
+		if err != nil {
+			return err
+		}
+
+		blockElements.BlockElementSet = append(blockElements.BlockElementSet, blockElement)
+	}
+
+	*b = blockElements
+	return nil
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
