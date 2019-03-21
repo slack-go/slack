@@ -15,7 +15,7 @@ type BlockElements struct {
 	BlockElementSet []BlockElement `json:"element"`
 }
 
-// UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
+// UnmarshalJSON implements the Unmarshaller interface for BlockElements, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *BlockElements) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
