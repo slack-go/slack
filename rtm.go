@@ -112,14 +112,13 @@ func RTMOptionConnParams(connParams url.Values) RTMOption {
 func (api *Client) NewRTM(options ...RTMOption) *RTM {
 	result := &RTM{
 		Client:           *api,
-		wasIntentional:   true,
-		isConnected:      false,
 		IncomingEvents:   make(chan RTMEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
 		pingInterval:     defaultPingInterval,
 		pingDeadman:      time.NewTimer(deadmanDuration(defaultPingInterval)),
 		killChannel:      make(chan bool),
-		disconnected:     make(chan struct{}, 1),
+		disconnected:     make(chan struct{}),
+		disconnectedm:    &sync.Once{},
 		forcePing:        make(chan bool),
 		rawEvents:        make(chan json.RawMessage),
 		idGen:            NewSafeID(1),
