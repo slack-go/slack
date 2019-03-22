@@ -23,9 +23,7 @@ type imResponseFull struct {
 // IM contains information related to the Direct Message channel
 type IM struct {
 	conversation
-	IsIM          bool   `json:"is_im"`
-	User          string `json:"user"`
-	IsUserDeleted bool   `json:"is_user_deleted"`
+	IsUserDeleted bool `json:"is_user_deleted"`
 }
 
 func imRequest(ctx context.Context, client httpClient, path string, values url.Values, d debug) (*imResponseFull, error) {
