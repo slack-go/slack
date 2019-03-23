@@ -12,7 +12,6 @@ const (
 	DEFAULT_USER_PHOTO_CROP_X = -1
 	DEFAULT_USER_PHOTO_CROP_Y = -1
 	DEFAULT_USER_PHOTO_CROP_W = -1
-	errPaginationComplete     = errorString("pagination complete")
 )
 
 // UserProfile contains all the information details of a given user

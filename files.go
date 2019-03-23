@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -292,7 +291,7 @@ func (api *Client) DeleteFileComment(commentID, fileID string) error {
 // DeleteFileCommentContext deletes a file's comment with a custom context
 func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, commentID string) (err error) {
 	if fileID == "" || commentID == "" {
-		return errors.New("received empty parameters")
+		return ErrParametersMissing
 	}
 
 	values := url.Values{
