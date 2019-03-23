@@ -265,12 +265,6 @@ func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-type errorString string
-
-func (t errorString) Error() string {
-	return string(t)
-}
-
 // timerReset safely reset a timer, see time.Timer.Reset for details.
 func timerReset(t *time.Timer, d time.Duration) {
 	if !t.Stop() {
