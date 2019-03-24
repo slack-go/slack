@@ -24,7 +24,7 @@ type ContextElements struct {
 	TextObjects   []*TextBlockObject
 }
 
-// NewContextBlock returns a newinstance of a context block
+// NewContextBlock returns a new instance of a context block
 func NewContextBlock(blockID string, elements ContextElements) *ContextBlock {
 	return &ContextBlock{
 		Type:     mbtContext,
