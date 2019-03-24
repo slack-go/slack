@@ -16,9 +16,11 @@ func (s ActionBlock) blockType() MessageBlockType {
 
 // NewActionBlock returns a new instance of an Action Block
 func NewActionBlock(blockID string, elements ...BlockElement) *ActionBlock {
+	e := BlockElements{}
+	e.appendToBlockElements(elements)
 	return &ActionBlock{
 		Type:     mbtAction,
 		BlockID:  blockID,
-		Elements: BlockElements{BlockElementSet: elements},
+		Elements: e,
 	}
 }
