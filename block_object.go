@@ -12,7 +12,7 @@ import (
 // implement.
 // @TODO: Is this interface needed?
 
-// BlockObject object types
+// blockObject object types
 const (
 	MarkdownType  = "mrkdwn"
 	PlainTextType = "plain_text"
@@ -25,7 +25,7 @@ const (
 
 type MessageObjectType string
 
-type BlockObject interface {
+type blockObject interface {
 	validateType() MessageObjectType
 }
 
@@ -107,7 +107,7 @@ func getBlockObjectType(obj map[string]interface{}) string {
 	return ""
 }
 
-func unmarshalBlockObject(r json.RawMessage, object BlockObject) (BlockObject, error) {
+func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, error) {
 	err := json.Unmarshal(r, object)
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func unmarshalBlockObject(r json.RawMessage, object BlockObject) (BlockObject, e
 	return object, nil
 }
 
-func (o *BlockObjects) appendToBlockObjects(appendObjects []BlockObject) {
+func (o *BlockObjects) appendToBlockObjects(appendObjects []blockObject) {
 	for _, object := range appendObjects {
 		switch object.(type) {
 		case *TextBlockObject:
