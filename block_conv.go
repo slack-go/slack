@@ -89,6 +89,8 @@ func (b *Blocks) appendToBlocks(appendBlocks []Block) {
 
 // Conv/JSON encoding logic for BlockElements
 
+// MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
 func (e *BlockElements) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(toBlockElementSlice(e))
 	if err != nil {
@@ -204,6 +206,8 @@ func toBlockElementSlice(elements *BlockElements) []BlockElement {
 
 // Conv/JSON encoding related logic for Accessory
 
+// MarshalJSON implements the Marshaller interface for Accessory so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
 func (a *Accessory) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(toBlockElement(a))
 	if err != nil {
@@ -291,6 +295,8 @@ func toBlockElement(element *Accessory) BlockElement {
 
 // Conv/JSON encoding related logic for ContextElements
 
+// MarshalJSON implements the Marshaller interface for ContextElements so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
 func (e *ContextElements) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(toMixedElements(e))
 	if err != nil {
