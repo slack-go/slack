@@ -1,5 +1,9 @@
 package slack
 
+import (
+	"encoding/json"
+)
+
 // Block Objects are also known as Composition Objects
 //
 // For more information: https://api.slack.com/reference/messaging/composition-objects
@@ -7,38 +11,122 @@ package slack
 // BlockObject defines an interface that all block object types should
 // implement.
 // @TODO: Is this interface needed?
-type BlockObject interface {
-	validateType() MessageObjectType
-}
 
 // BlockObject object types
 const (
 	MarkdownType  = "mrkdwn"
 	PlainTextType = "plain_text"
+	// The following objects don't actually have types and their corresponding
+	// const values are just for internal use
+	motConfirmation = "confirm"
+	motOption       = "option"
+	motOptionGroup  = "option_group"
 )
 
-// ImageBlockObject An element to insert an image - this element can be used
-// in section and context blocks only. If you want a block with only an image
-// in it, you're looking for the image block.
-//
-// More Information: https://api.slack.com/reference/messaging/block-elements#image
-type ImageBlockObject struct {
-	Type     MessageObjectType `json:"type"`
-	ImageURL string            `json:"image_url"`
-	AltText  string            `json:"alt_text"`
+type MessageObjectType string
+
+type BlockObject interface {
+	validateType() MessageObjectType
 }
 
-// validateType enforces block objects for element and block parameters
-func (s ImageBlockObject) validateType() MessageObjectType {
-	return s.Type
+type BlockObjects struct {
+	TextObjects         []*TextBlockObject
+	ConfirmationObjects []*ConfirmationBlockObject
+	OptionObjects       []*OptionBlockObject
+	OptionGroupObjects  []*OptionGroupBlockObject
 }
 
-// NewImageBlockObject returns a new instance of an image block element
-func NewImageBlockObject(imageURL, altText string) *ImageBlockObject {
-	return &ImageBlockObject{
-		Type:     motImage,
-		ImageURL: imageURL,
-		AltText:  altText,
+// UnmarshalJSON implements the Unmarshaller interface for BlockObjects, so that any JSON
+// unmarshalling is delegated and proper type determination can be made before unmarshal
+func (b *BlockObjects) UnmarshalJSON(data []byte) error {
+	var raw []json.RawMessage
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range raw {
+		var obj map[string]interface{}
+		err := json.Unmarshal(r, &obj)
+		if err != nil {
+			return err
+		}
+
+		blockObjectType := getBlockObjectType(obj)
+
+		switch blockObjectType {
+		case PlainTextType, MarkdownType:
+			object, err := unmarshalBlockObject(r, &TextBlockObject{})
+			if err != nil {
+				return err
+			}
+			b.TextObjects = append(b.TextObjects, object.(*TextBlockObject))
+		case motConfirmation:
+			object, err := unmarshalBlockObject(r, &ConfirmationBlockObject{})
+			if err != nil {
+				return err
+			}
+			b.ConfirmationObjects = append(b.ConfirmationObjects, object.(*ConfirmationBlockObject))
+		case motOption:
+			object, err := unmarshalBlockObject(r, &OptionBlockObject{})
+			if err != nil {
+				return err
+			}
+			b.OptionObjects = append(b.OptionObjects, object.(*OptionBlockObject))
+		case motOptionGroup:
+			object, err := unmarshalBlockObject(r, &OptionGroupBlockObject{})
+			if err != nil {
+				return err
+			}
+			b.OptionGroupObjects = append(b.OptionGroupObjects, object.(*OptionGroupBlockObject))
+
+		}
+	}
+
+	return nil
+}
+
+// Ideally would have a better way to identify the block objects for
+// type casting at time of unmarshalling, should be adapted if possible
+// to accomplish in a more reliable manner.
+func getBlockObjectType(obj map[string]interface{}) string {
+	if t, ok := obj["type"].(string); ok {
+		return t
+	}
+	if _, ok := obj["confirm"].(string); ok {
+		return "confirm"
+	}
+	if _, ok := obj["options"].(string); ok {
+		return "option_group"
+	}
+	if _, ok := obj["text"].(string); ok {
+		if _, ok := obj["value"].(string); ok {
+			return "option"
+		}
+	}
+	return ""
+}
+
+func unmarshalBlockObject(r json.RawMessage, object BlockObject) (BlockObject, error) {
+	err := json.Unmarshal(r, object)
+	if err != nil {
+		return nil, err
+	}
+	return object, nil
+}
+
+func (o *BlockObjects) appendToBlockObjects(appendObjects []BlockObject) {
+	for _, object := range appendObjects {
+		switch object.(type) {
+		case *TextBlockObject:
+			o.TextObjects = append(o.TextObjects, object.(*TextBlockObject))
+		case *ConfirmationBlockObject:
+			o.ConfirmationObjects = append(o.ConfirmationObjects, object.(*ConfirmationBlockObject))
+		case *OptionBlockObject:
+			o.OptionObjects = append(o.OptionObjects, object.(*OptionBlockObject))
+		case *OptionGroupBlockObject:
+			o.OptionGroupObjects = append(o.OptionGroupObjects, object.(*OptionGroupBlockObject))
+		}
 	}
 }
 
@@ -55,6 +143,11 @@ type TextBlockObject struct {
 // validateType enforces block objects for element and block parameters
 func (s TextBlockObject) validateType() MessageObjectType {
 	return MessageObjectType(s.Type)
+}
+
+// validateType enforces block objects for element and block parameters
+func (s TextBlockObject) mixedElementType() mixedElementType {
+	return mixedElementText
 }
 
 // NewTextBlockObject returns an instance of a new Text Block Object
