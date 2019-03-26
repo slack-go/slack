@@ -20,6 +20,14 @@ type ContextElements struct {
 	TextObjects   []*TextBlockObject
 }
 
+// NewContextElements is a convenience method for generating ContextElements
+func NewContextElements(imageElements []*ImageBlockElement, textObjects []*TextBlockObject) ContextElements {
+	return ContextElements{
+		ImageElements: imageElements,
+		TextObjects:   textObjects,
+	}
+}
+
 // NewContextBlock returns a new instance of a context block
 func NewContextBlock(blockID string, elements ContextElements) *ContextBlock {
 	return &ContextBlock{
