@@ -52,6 +52,8 @@ type ActionCallbacks struct {
 	BlockActions      []*BlockAction
 }
 
+// UnmarshalJSON implements the Marshaller interface in order to delegate
+// marshalling and allow for proper type assertion when decoding the response
 func (a *ActionCallbacks) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 	err := json.Unmarshal(data, &raw)
