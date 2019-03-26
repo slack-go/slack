@@ -2,7 +2,7 @@ package slack
 
 import "encoding/json"
 
-// Conv/JSON encoding logic for Blocks
+// Marshalling/unmarshalling logic for Blocks
 
 // UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
@@ -87,7 +87,7 @@ func (b *Blocks) appendToBlocks(appendBlocks []Block) {
 	}
 }
 
-// Conv/JSON encoding logic for BlockElements
+// Marshalling/unmarshalling logic for BlockElements
 
 // MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
@@ -204,7 +204,7 @@ func toBlockElementSlice(elements *BlockElements) []BlockElement {
 	return slice
 }
 
-// Conv/JSON encoding related logic for Accessory
+// Marshalling/unmarshalling logic for Accessory
 
 // MarshalJSON implements the Marshaller interface for Accessory so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
@@ -293,7 +293,7 @@ func toBlockElement(element *Accessory) BlockElement {
 	return nil
 }
 
-// Conv/JSON encoding related logic for ContextElements
+// Marshalling/unmarsalling logic for ContextElements
 
 // MarshalJSON implements the Marshaller interface for ContextElements so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
@@ -316,4 +316,44 @@ func toMixedElements(elements *ContextElements) []mixedElement {
 	}
 
 	return slice
+}
+
+// UnmarshalJSON implements the Unmarshaller interface for ContextElements, so that any JSON
+// unmarshalling is delegated and proper type determination can be made before unmarshal
+func (e *ContextElements) UnmarshalJSON(data []byte) error {
+	var raw []json.RawMessage
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range raw {
+		var obj map[string]interface{}
+		err := json.Unmarshal(r, &obj)
+		if err != nil {
+			return err
+		}
+
+		contextElementType := ""
+		if t, ok := obj["type"].(string); ok {
+			contextElementType = t
+		}
+
+		switch contextElementType {
+		case PlainTextType, MarkdownType:
+			elem, err := unmarshalBlockObject(r, &TextBlockObject{})
+			if err != nil {
+				return err
+			}
+			e.TextObjects = append(e.TextObjects, elem.(*TextBlockObject))
+		case "image":
+			elem, err := unmarshalBlockElement(r, &ImageBlockElement{})
+			if err != nil {
+				return err
+			}
+			e.ImageElements = append(e.ImageElements, elem.(*ImageBlockElement))
+		}
+	}
+
+	return nil
 }
