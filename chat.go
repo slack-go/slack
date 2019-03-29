@@ -31,6 +31,22 @@ type chatResponseFull struct {
 	SlackResponse
 }
 
+type scheduledMessageFull struct {
+	ScheduledMessages []ScheduledMessage `json:"scheduled_messages"`
+	ResponseMetadata  struct {
+		NextCursor string `json:"next_cursor"`
+	} `json:"response_metadata"`
+	SlackResponse
+}
+
+// ScheduledMessage defines currently scheduled messages within the workspacee
+type ScheduledMessage struct {
+	ID          string `json:"id"`
+	ChannelID   string `json:"channel_id"`
+	PostAt      int    `json:"post_at"`
+	DateCreated int    `json:"date_created"`
+}
+
 // getMessageTimestamp will inspect the `chatResponseFull` to ruturn a timestamp value
 // in `chat.postMessage` its under `ts`
 // in `chat.postEphemeral` its under `message_ts`
@@ -155,6 +171,61 @@ func (api *Client) SendMessage(channel string, options ...MsgOption) (string, st
 	return api.SendMessageContext(context.Background(), channel, options...)
 }
 
+// PostScheduledMessage schedules a messagee to be sent at a later date
+// Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
+// See https://api.slack.com/messaging/scheduling for more information on scheduling
+func (api *Client) PostScheduledMessage(channelID string, timestamp string, options ...MsgOption) (string, string, error) {
+	respChannel, respTimestamp, err := api.PostScheduledMessageContext(
+		context.Background(),
+		channelID,
+		timestamp,
+		MsgOptionCompose(options...),
+	)
+	return respChannel, respTimestamp, err
+}
+
+// PostScheduledMessageContext schedules a message to be sent with custom context
+// See PostScheduledMessage for more information
+func (api *Client) PostScheduledMessageContext(ctx context.Context, channelID string, timestamp string, options ...MsgOption) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.SendMessageContext(
+		ctx,
+		channelID,
+		MsgOptionSchedule(timestamp),
+		MsgOptionCompose(options...),
+	)
+	return respChannel, respTimestamp, err
+}
+
+// ListScheduledMessage retrieves a list of scheduled messages for the provided channel
+func (api *Client) ListScheduledMessage(channelID string, options ...MsgOption) ([]ScheduledMessage, string, error) {
+	return api.ListScheduledMessageContext(
+		context.Background(),
+		channelID,
+		options...,
+	)
+}
+
+// ListScheduledMessageContext retrieves a list of scheduled messages for the given channel
+func (api *Client) ListScheduledMessageContext(ctx context.Context, channelID string, options ...MsgOption) ([]ScheduledMessage, string, error) {
+	var (
+		config   sendConfig
+		response scheduledMessageFull
+		err      error
+	)
+
+	options = append(options, MsgOptionListSchedule())
+
+	if config, err = applyMsgOptions(api.token, channelID, options...); err != nil {
+		return nil, "", err
+	}
+
+	if err = postForm(ctx, api.httpclient, config.endpoint, config.values, &response, api); err != nil {
+		return nil, "", err
+	}
+
+	return response.ScheduledMessages, response.ResponseMetadata.NextCursor, response.Err()
+}
+
 // SendMessageContext more flexible method for configuring messages with a custom context.
 func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (channel string, timestamp string, text string, err error) {
 	var (
@@ -171,6 +242,33 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 	}
 
 	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+}
+
+// DeleteScheduledMessage removes a scheduled message
+// Note that messages scheduled to be sent within the next 60 seconds will fail to delete as they
+// are already being processed by Slack.  You will receive a failure message stating the ID does not
+// exist.
+func (api *Client) DeleteScheduledMessage(channelID, scheduledMessageID string) (string, string, error) {
+	respChannel, respTimestamp, err := api.DeleteScheduledMessageContext(
+		context.Background(),
+		channelID,
+		scheduledMessageID,
+	)
+	return respChannel, respTimestamp, err
+
+}
+
+// DeleteScheduledMessageContext removes a scheduled message with custom context.
+// See DeleteScheduledMessage for more information
+func (api *Client) DeleteScheduledMessageContext(ctx context.Context, channelID, scheduledMessageID string) (string, string, error) {
+	respChannel, respTimestamp, _, err := api.SendMessageContext(
+		ctx,
+		channelID,
+		MsgOptionDeleteSchedule(scheduledMessageID),
+		MsgOptionCompose(),
+	)
+	return respChannel, respTimestamp, err
+
 }
 
 // UnsafeApplyMsgOptions utility function for debugging/testing chat requests.
@@ -208,6 +306,10 @@ const (
 	chatPostEphemeral sendMode = "chat.postEphemeral"
 	chatMeMessage     sendMode = "chat.meMessage"
 	chatUnfurl        sendMode = "chat.unfurl"
+
+	chatScheduleMessage       sendMode = "chat.scheduleMessage"
+	chatListScheduledMessage  sendMode = "chat.scheduledMessages.list"
+	chatDeleteScheduedMessage sendMode = "chat.deleteScheduledMessage"
 )
 
 type sendConfig struct {
@@ -234,6 +336,14 @@ func MsgOptionPostEphemeral(userID string) MsgOption {
 		MsgOptionUser(userID)(config)
 		config.values.Del("ts")
 
+		return nil
+	}
+}
+
+// MsgOptionListSchedule deletes a message based on the timestamp.
+func MsgOptionListSchedule() MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = APIURL + string(chatListScheduledMessage)
 		return nil
 	}
 }
@@ -431,6 +541,50 @@ func MsgOptionIconURL(iconURL string) MsgOption {
 func MsgOptionIconEmoji(iconEmoji string) MsgOption {
 	return func(c *sendConfig) error {
 		c.values.Set("icon_emoji", iconEmoji)
+		return nil
+	}
+}
+
+// MsgOptionCursor sets the cursor value when searching foor scheduled messages
+func MsgOptionCursor(cursor string) MsgOption {
+	return func(c *sendConfig) error {
+		c.values.Set("cursor", cursor)
+		return nil
+	}
+}
+
+// MsgOptionLatest sets start latest (closest to current time) search parameter
+func MsgOptionLatest(latest string) MsgOption {
+	return func(c *sendConfig) error {
+		c.values.Set("latest", latest)
+		return nil
+	}
+}
+
+// MsgOptionOldest sets start oldest (furthest to current time) search parameter
+func MsgOptionOldest(oldest string) MsgOption {
+	return func(c *sendConfig) error {
+		c.values.Set("oldest", oldest)
+		return nil
+	}
+}
+
+// MsgOptionSchedule schedules a message at the given time
+// timestamp should be in UTC
+func MsgOptionSchedule(timestamp string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = APIURL + string(chatScheduleMessage)
+		config.values.Add("post_at", timestamp)
+		return nil
+	}
+}
+
+// MsgOptionDeleteSchedule removes a scheduled message
+func MsgOptionDeleteSchedule(scheduledMessageID string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = APIURL + string(chatDeleteScheduedMessage)
+		config.values.Add("scheduled_message_id", scheduledMessageID)
+
 		return nil
 	}
 }
