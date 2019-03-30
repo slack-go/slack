@@ -88,6 +88,43 @@ type MessageEvent struct {
 	Files  []File `json:"files"`
 }
 
+// MemberJoinedChannelEvent A member join a channel
+type MemberJoinedChannelEvent struct {
+	Type        string `json:"type"`
+	User        string `json:"user"`
+	Channel     string `json:"channel"`
+	ChannelType string `json:"channel_type"`
+	Team        string `json:"team"`
+	Inviter     string `json:"inviter"`
+}
+
+type pinEvent struct {
+	Type           string `json:"type"`
+	User           string `json:"user"`
+	Item           Item   `json:"item"`
+	Channel        string `json:"channel_id"`
+	EventTimestamp string `json:"event_ts"`
+	HasPins        bool   `json:"has_pins,omitempty"`
+}
+
+// PinAddedEvent An item was pinned to a channel - https://api.slack.com/events/pin_added
+type PinAddedEvent pinEvent
+
+// PinRemovedEvent An item was unpinned from a channel - https://api.slack.com/events/pin_removed
+type PinRemovedEvent pinEvent
+
+// JSONTime exists so that we can have a String method converting the date
+type JSONTime int64
+
+// Comment contains all the information relative to a comment
+type Comment struct {
+	ID        string   `json:"id,omitempty"`
+	Created   JSONTime `json:"created,omitempty"`
+	Timestamp JSONTime `json:"timestamp,omitempty"`
+	User      string   `json:"user,omitempty"`
+	Comment   string   `json:"comment,omitempty"`
+}
+
 // File is a file upload
 type File struct {
 	ID                 string `json:"id"`
@@ -150,6 +187,27 @@ type Icon struct {
 	IconEmoji string `json:"icon_emoji,omitempty"`
 }
 
+// Item is any type of slack message - message, file, or file comment.
+type Item struct {
+	Type      string       `json:"type"`
+	Channel   string       `json:"channel,omitempty"`
+	Message   *ItemMessage `json:"message,omitempty"`
+	File      *File        `json:"file,omitempty"`
+	Comment   *Comment     `json:"comment,omitempty"`
+	Timestamp string       `json:"ts,omitempty"`
+}
+
+// ItemMessage is the event message
+type ItemMessage struct {
+	Type            string   `json:"type"`
+	User            string   `json:"user"`
+	Text            string   `json:"text"`
+	Timestamp       string   `json:"ts"`
+	PinnedTo        []string `json:"pinned_to"`
+	ReplaceOriginal bool     `json:"replace_original"`
+	DeleteOriginal  bool     `json:"delete_original"`
+}
+
 // IsEdited checks if the MessageEvent is caused by an edit
 func (e MessageEvent) IsEdited() bool {
 	return e.Message != nil &&
@@ -169,6 +227,12 @@ const (
 	LinkShared = "link_shared"
 	// Message A message was posted to a channel, private channel (group), im, or mim
 	Message = "message"
+	// Member Joined Channel
+	MemberJoinedChannel = "member_joined_channel"
+	// PinAdded An item was pinned to a channel
+	PinAdded = "pin_added"
+	// PinRemoved An item was unpinned from a channel
+	PinRemoved = "pin_removed"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -181,4 +245,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
 	Message:               MessageEvent{},
+	MemberJoinedChannel:   MemberJoinedChannelEvent{},
+	PinAdded:              PinAddedEvent{},
+	PinRemoved:            PinRemovedEvent{},
 }

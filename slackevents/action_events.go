@@ -13,23 +13,24 @@ type MessageActionResponse struct {
 }
 
 type MessageActionEntity struct {
-	Id     string `json:"id"`
+	ID     string `json:"id"`
 	Domain string `json:"domain"`
+	Name   string `json:"name"`
 }
 
 type MessageAction struct {
 	Type             string                   `json:"type"`
 	Actions          []slack.AttachmentAction `json:"actions"`
-	CallbackId       string                   `json:"callback_id"`
+	CallbackID       string                   `json:"callback_id"`
 	Team             MessageActionEntity      `json:"team"`
 	Channel          MessageActionEntity      `json:"channel"`
 	User             MessageActionEntity      `json:"user"`
 	ActionTimestamp  json.Number              `json:"action_ts"`
 	MessageTimestamp json.Number              `json:"message_ts"`
-	AttachmentId     json.Number              `json:"attachment_id"`
+	AttachmentID     json.Number              `json:"attachment_id"`
 	Token            string                   `json:"token"`
 	Message          slack.Message            `json:"message"`
 	OriginalMessage  slack.Message            `json:"original_message"`
-	ResponseUrl      string                   `json:"response_url"`
-	TriggerId        string                   `json:"trigger_id"`
+	ResponseURL      string                   `json:"response_url"`
+	TriggerID        string                   `json:"trigger_id"`
 }

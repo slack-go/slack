@@ -19,7 +19,7 @@ func TestRTMSingleConnect(t *testing.T) {
 	go testServer.Start()
 
 	// Setup and start the RTM.
-	slack.SLACK_API = testServer.GetAPIURL()
+	slack.APIURL = testServer.GetAPIURL()
 	api := slack.New(testToken)
 	rtm := api.NewRTM(slack.RTMOptionUseStart(true))
 	go rtm.ManageConnection()

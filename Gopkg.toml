@@ -10,7 +10,7 @@ ignored = ["github.com/lusis/slack-test"]
 
 [[constraint]]
   name = "github.com/pkg/errors"
-  branch = "master"
+  version = "0.8.0"
 
 [prune]
   go-tests = true

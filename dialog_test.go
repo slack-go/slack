@@ -201,7 +201,7 @@ func TestSimpleCallback(t *testing.T) {
 
 func assertSimpleCallback(t *testing.T, callback *DialogCallback) {
 	assert.NotNil(t, callback)
-	assert.Equal(t, "dialog_submission", callback.Type)
+	assert.Equal(t, InteractionTypeDialogSubmission, callback.Type)
 	assert.Equal(t, "employee_offsite_1138b", callback.CallbackID)
 	assert.Equal(t, "T1ABCD2E12", callback.Team.ID)
 	assert.Equal(t, "coverbands", callback.Team.Domain)
@@ -243,8 +243,8 @@ var simpleSuggestionCallback = `{
   "callback_id": "bugs"
 }`
 
-func unmarshalSuggestionCallback(j string) (*DialogSuggestionCallback, error) {
-	callback := &DialogSuggestionCallback{}
+func unmarshalSuggestionCallback(j string) (*InteractionCallback, error) {
+	callback := &InteractionCallback{}
 	if err := json.Unmarshal([]byte(j), &callback); err != nil {
 		return nil, err
 	}
@@ -257,9 +257,9 @@ func TestSimpleSuggestionCallback(t *testing.T) {
 	assertSimpleSuggestionCallback(t, callback)
 }
 
-func assertSimpleSuggestionCallback(t *testing.T, callback *DialogSuggestionCallback) {
+func assertSimpleSuggestionCallback(t *testing.T, callback *InteractionCallback) {
 	assert.NotNil(t, callback)
-	assert.Equal(t, "dialog_suggestion", callback.Type)
+	assert.Equal(t, InteractionTypeDialogSuggestion, callback.Type)
 	assert.Equal(t, "W3VDvuzi2nRLsiaDOsmJranO", callback.Token)
 	assert.Equal(t, "1528203589.238335", callback.ActionTs)
 	assert.Equal(t, "T24BK35ML", callback.Team.ID)
@@ -268,7 +268,7 @@ func assertSimpleSuggestionCallback(t *testing.T, callback *DialogSuggestionCall
 	assert.Equal(t, "gbelson", callback.User.Name)
 	assert.Equal(t, "C012AB3CD", callback.Channel.ID)
 	assert.Equal(t, "triage-platform", callback.Channel.Name)
-	assert.Equal(t, "external_data", callback.ElementName)
+	assert.Equal(t, "external_data", callback.Name)
 	assert.Equal(t, "test", callback.Value)
 	assert.Equal(t, "bugs", callback.CallbackID)
 }
@@ -286,7 +286,7 @@ func openDialogHandler(rw http.ResponseWriter, r *http.Request) {
 func TestOpenDialog(t *testing.T) {
 	http.HandleFunc("/dialog.open", openDialogHandler)
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
+	APIURL = "http://" + serverAddr + "/"
 	api := New("testing-token")
 	dialog, err := unmarshalDialog()
 	if err != nil {
@@ -342,5 +342,5 @@ func ExampleDialog() {
 	dialog := _mocDialog()
 	fmt.Println(*dialog)
 	// Output:
-	// {trigger_xyz callback_xyz Dialog_title Send false []}
+	// {trigger_xyz callback_xyz  Dialog_title Send false []}
 }
