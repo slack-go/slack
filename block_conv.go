@@ -72,17 +72,17 @@ func unmarshalBlock(r json.RawMessage, block Block) (Block, error) {
 
 func (b *Blocks) appendToBlocks(appendBlocks []Block) {
 	for _, block := range appendBlocks {
-		switch block.(type) {
+		switch blockType := block.(type) {
 		case *ActionBlock:
-			b.ActionBlocks = append(b.ActionBlocks, block.(*ActionBlock))
+			b.ActionBlocks = append(b.ActionBlocks, blockType)
 		case *ContextBlock:
-			b.ContextBlocks = append(b.ContextBlocks, block.(*ContextBlock))
+			b.ContextBlocks = append(b.ContextBlocks, blockType)
 		case *DividerBlock:
-			b.DividerBlocks = append(b.DividerBlocks, block.(*DividerBlock))
+			b.DividerBlocks = append(b.DividerBlocks, blockType)
 		case *ImageBlock:
-			b.ImageBlocks = append(b.ImageBlocks, block.(*ImageBlock))
+			b.ImageBlocks = append(b.ImageBlocks, blockType)
 		case *SectionBlock:
-			b.SectionBlocks = append(b.SectionBlocks, block.(*SectionBlock))
+			b.SectionBlocks = append(b.SectionBlocks, blockType)
 		}
 	}
 }
@@ -168,17 +168,17 @@ func unmarshalBlockElement(r json.RawMessage, element BlockElement) (BlockElemen
 
 func (e *BlockElements) appendToBlockElements(appendElements []BlockElement) {
 	for _, element := range appendElements {
-		switch element.(type) {
+		switch elementType := element.(type) {
 		case *ImageBlockElement:
-			e.ImageElements = append(e.ImageElements, element.(*ImageBlockElement))
+			e.ImageElements = append(e.ImageElements, elementType)
 		case *ButtonBlockElement:
-			e.ButtonElements = append(e.ButtonElements, element.(*ButtonBlockElement))
+			e.ButtonElements = append(e.ButtonElements, elementType)
 		case *OverflowBlockElement:
-			e.OverflowElements = append(e.OverflowElements, element.(*OverflowBlockElement))
+			e.OverflowElements = append(e.OverflowElements, elementType)
 		case *DatePickerBlockElement:
-			e.DatePickerElements = append(e.DatePickerElements, element.(*DatePickerBlockElement))
+			e.DatePickerElements = append(e.DatePickerElements, elementType)
 		case *SelectBlockElement:
-			e.SelectElements = append(e.SelectElements, element.(*SelectBlockElement))
+			e.SelectElements = append(e.SelectElements, elementType)
 		}
 	}
 }
