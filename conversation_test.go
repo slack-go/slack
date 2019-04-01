@@ -266,7 +266,7 @@ func TestUnArchiveConversation(t *testing.T) {
 
 func getTestChannel() *Channel {
 	return &Channel{
-		groupConversation: groupConversation{
+		GroupConversation: GroupConversation{
 			Topic: Topic{
 				Value: "response topic",
 			},
