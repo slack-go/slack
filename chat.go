@@ -265,7 +265,6 @@ func (api *Client) DeleteScheduledMessageContext(ctx context.Context, channelID,
 		ctx,
 		channelID,
 		MsgOptionDeleteSchedule(scheduledMessageID),
-		MsgOptionCompose(),
 	)
 	return respChannel, respTimestamp, err
 
@@ -545,7 +544,7 @@ func MsgOptionIconEmoji(iconEmoji string) MsgOption {
 	}
 }
 
-// MsgOptionCursor sets the cursor value when searching foor scheduled messages
+// MsgOptionCursor sets the cursor value when searching for scheduled messages
 func MsgOptionCursor(cursor string) MsgOption {
 	return func(c *sendConfig) error {
 		c.values.Set("cursor", cursor)
