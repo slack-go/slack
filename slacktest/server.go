@@ -36,21 +36,22 @@ func NewTestServer(custom ...binder) *Server {
 	channels := &serverChannels{}
 	groups := &serverGroups{}
 	s := &Server{
-		mux: http.NewServeMux(),
+		registered: map[string]struct{}{},
+		mux:        http.NewServeMux(),
 	}
-
-	s.mux.Handle("/ws", contextHandler(s, wsHandler))
-	s.mux.Handle("/rtm.start", contextHandler(s, rtmStartHandler))
-	s.mux.Handle("/rtm.connect", contextHandler(s, rtmConnectHandler))
-	s.mux.Handle("/chat.postMessage", contextHandler(s, postMessageHandler))
-	s.mux.Handle("/channels.list", contextHandler(s, listChannelsHandler))
-	s.mux.Handle("/groups.list", contextHandler(s, listGroupsHandler))
-	s.mux.Handle("/users.info", contextHandler(s, usersInfoHandler))
-	s.mux.Handle("/bots.info", contextHandler(s, botsInfoHandler))
 
 	for _, c := range custom {
 		c(s)
 	}
+
+	s.Handle("/ws", wsHandler)
+	s.Handle("/rtm.start", rtmStartHandler)
+	s.Handle("/rtm.connect", rtmConnectHandler)
+	s.Handle("/chat.postMessage", postMessageHandler)
+	s.Handle("/channels.list", listChannelsHandler)
+	s.Handle("/groups.list", listGroupsHandler)
+	s.Handle("/users.info", usersInfoHandler)
+	s.Handle("/bots.info", botsInfoHandler)
 
 	httpserver := httptest.NewUnstartedServer(s.mux)
 	addr := httpserver.Listener.Addr().String()
@@ -73,6 +74,12 @@ func NewTestServer(custom ...binder) *Server {
 
 // Handle allow for customizing endpoints
 func (sts *Server) Handle(pattern string, handler http.HandlerFunc) {
+	if _, found := sts.registered[pattern]; found {
+		log.Printf("route already registered: %s\n", pattern)
+		return
+	}
+
+	sts.registered[pattern] = struct{}{}
 	sts.mux.Handle(pattern, contextHandler(sts, handler))
 }
 

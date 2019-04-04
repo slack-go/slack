@@ -64,6 +64,7 @@ type serverGroups struct {
 
 // Server represents a Slack Test server
 type Server struct {
+	registered map[string]struct{}
 	server     *httptest.Server
 	mux        *http.ServeMux
 	Logger     *log.Logger
