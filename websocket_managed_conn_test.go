@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	slacktest "github.com/lusis/slack-test"
 	"github.com/nlopes/slack"
+	"github.com/nlopes/slack/slacktest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,15 +55,78 @@ func TestRTMDisconnect(t *testing.T) {
 	assert.True(t, disconnectedReceived, "Should have received a disconnected event from the RTM instance.")
 }
 
+// func TestRTMConnectRateLimit(t *testing.T) {
+// 	// Set up the test server.
+// 	testServer := slacktest.NewTestServer(
+// 		func(c slacktest.Customize) {
+// 			c.Handle("/rtm.connect", (w http.ResponseWriter, r *http.Request) {
+//
+// 			})
+// 		},
+// 	)
+// 	go testServer.Start()
+//
+// 	// Setup and start the RTM.
+// 	api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
+// 	rtm := api.NewRTM()
+// 	go rtm.ManageConnection()
+//
+// 	// Observe incoming messages.
+// 	done := make(chan struct{})
+// 	connectingReceived := false
+// 	connectedReceived := false
+// 	testMessageReceived := false
+// 	go func() {
+// 		for msg := range rtm.IncomingEvents {
+// 			switch ev := msg.Data.(type) {
+// 			case *slack.ConnectingEvent:
+// 				if connectingReceived {
+// 					t.Error("Received multiple connecting events.")
+// 					t.Fail()
+// 				}
+// 				connectingReceived = true
+// 			case *slack.ConnectedEvent:
+// 				if connectedReceived {
+// 					t.Error("Received multiple connected events.")
+// 					t.Fail()
+// 				}
+// 				connectedReceived = true
+// 			case *slack.MessageEvent:
+// 				if ev.Text == testMessage {
+// 					testMessageReceived = true
+// 					rtm.Disconnect()
+// 				}
+// 				t.Logf("Discarding message with content %+v", ev)
+// 			case *slack.DisconnectedEvent:
+// 				if ev.Intentional {
+// 					done <- struct{}{}
+// 					return
+// 				}
+// 			default:
+// 				t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+// 			}
+// 		}
+// 	}()
+//
+// 	// Send a message and sleep for some time to make sure the message can be processed client-side.
+// 	testServer.SendDirectMessageToBot(testMessage)
+// 	<-done
+// 	testServer.Stop()
+//
+// 	// Verify that all expected events have been received by the RTM client.
+// 	assert.True(t, connectingReceived, "Should have received a connecting event from the RTM instance.")
+// 	assert.True(t, connectedReceived, "Should have received a connected event from the RTM instance.")
+// 	assert.True(t, testMessageReceived, "Should have received a test message from the server.")
+// }
+
 func TestRTMSingleConnect(t *testing.T) {
 	// Set up the test server.
 	testServer := slacktest.NewTestServer()
 	go testServer.Start()
 
 	// Setup and start the RTM.
-	slack.APIURL = testServer.GetAPIURL()
-	api := slack.New(testToken)
-	rtm := api.NewRTM(slack.RTMOptionUseStart(true))
+	api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
+	rtm := api.NewRTM()
 	go rtm.ManageConnection()
 
 	// Observe incoming messages.

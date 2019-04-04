@@ -31,8 +31,7 @@ func TestGetTeamInfo(t *testing.T) {
 	http.HandleFunc("/team.info", getTeamInfo)
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	teamInfo, err := api.GetTeamInfo()
 	if err != nil {
@@ -95,8 +94,7 @@ func TestGetAccessLogs(t *testing.T) {
 	http.HandleFunc("/team.accessLogs", getTeamAccessLogs)
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	logins, paging, err := api.GetAccessLogs(NewAccessLogParameters())
 	if err != nil {
