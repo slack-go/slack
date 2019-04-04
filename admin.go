@@ -2,29 +2,19 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 )
 
-type adminResponse struct {
-	OK    bool   `json:"ok"`
-	Error string `json:"error"`
-}
-
-func adminRequest(ctx context.Context, client httpClient, method string, teamName string, values url.Values, d debug) (*adminResponse, error) {
-	adminResponse := &adminResponse{}
-	err := parseAdminResponse(ctx, client, method, teamName, values, adminResponse, d)
+func (api *Client) adminRequest(ctx context.Context, method string, teamName string, values url.Values) error {
+	resp := &SlackResponse{}
+	err := parseAdminResponse(ctx, api.httpclient, method, teamName, values, resp, api)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if !adminResponse.OK {
-		return nil, errors.New(adminResponse.Error)
-	}
-
-	return adminResponse, nil
+	return resp.Err()
 }
 
 // DisableUser disabled a user account, given a user ID
@@ -41,9 +31,8 @@ func (api *Client) DisableUserContext(ctx context.Context, teamName string, uid 
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setInactive", teamName, values, api)
-	if err != nil {
-		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
+	if err := api.adminRequest(ctx, "setInactive", teamName, values); err != nil {
+		return fmt.Errorf("failed to disable user with id '%s': %s", uid, err)
 	}
 
 	return nil
@@ -68,7 +57,7 @@ func (api *Client) InviteGuestContext(ctx context.Context, teamName, channel, fi
 		"_attempts":        {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to invite single-channel guest: %s", err)
 	}
@@ -95,7 +84,7 @@ func (api *Client) InviteRestrictedContext(ctx context.Context, teamName, channe
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to restricted account: %s", err)
 	}
@@ -119,7 +108,7 @@ func (api *Client) InviteToTeamContext(ctx context.Context, teamName, firstName,
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "invite", teamName, values, api)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to invite to team: %s", err)
 	}
@@ -141,7 +130,7 @@ func (api *Client) SetRegularContext(ctx context.Context, teamName, user string)
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setRegular", teamName, values, api)
+	err := api.adminRequest(ctx, "setRegular", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to change the user (%s) to a regular user: %s", user, err)
 	}
@@ -163,7 +152,7 @@ func (api *Client) SendSSOBindingEmailContext(ctx context.Context, teamName, use
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "sendSSOBind", teamName, values, api)
+	err := api.adminRequest(ctx, "sendSSOBind", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
 	}
@@ -186,7 +175,7 @@ func (api *Client) SetUltraRestrictedContext(ctx context.Context, teamName, uid,
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setUltraRestricted", teamName, values, api)
+	err := api.adminRequest(ctx, "setUltraRestricted", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
 	}
@@ -209,9 +198,9 @@ func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid strin
 		"channels":   {strings.Join(channelIds, ",")},
 	}
 
-	_, err := adminRequest(ctx, api.httpclient, "setRestricted", teamName, values, api)
+	err := api.adminRequest(ctx, "setRestricted", teamName, values)
 	if err != nil {
-		return fmt.Errorf("Failed to restrict account: %s", err)
+		return fmt.Errorf("failed to restrict account: %s", err)
 	}
 
 	return nil
