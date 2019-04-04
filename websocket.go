@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"net/url"
 	"sync"
 	"time"
@@ -74,7 +73,7 @@ func (rtm *RTM) Disconnect() error {
 	case rtm.killChannel <- true:
 		return nil
 	case <-rtm.disconnected:
-		return errors.New("Invalid call to Disconnect - Slack API is already disconnected")
+		return ErrAlreadyDisconnected
 	}
 }
 

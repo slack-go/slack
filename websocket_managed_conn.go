@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/nlopes/slack/internal/timex"
 )
 
 // ManageConnection can be called on a Slack RTM instance returned by the
@@ -87,13 +88,14 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
 	boff := &backoff{
-		Min:    100 * time.Millisecond,
-		Max:    5 * time.Minute,
-		Factor: 2,
-		Jitter: true,
+		Max: 5 * time.Minute,
 	}
 
 	for {
+		var (
+			backoff time.Duration
+		)
+
 		// send connecting event
 		rtm.IncomingEvents <- RTMEvent{"connecting", &ConnectingEvent{
 			Attempt:         boff.attempts + 1,
@@ -109,7 +111,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		// check for fatal errors
 		switch err.Error() {
 		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
-			rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
+			rtm.Debugf("invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, err
 		default:
@@ -118,32 +120,39 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		switch actual := err.(type) {
 		case statusCodeError:
 			if actual.Code == http.StatusNotFound {
-				rtm.Debugf("Invalid auth when connecting with RTM: %s", err)
+				rtm.Debugf("invalid auth when connecting with RTM: %s", err)
 				rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 				return nil, nil, err
 			}
+		case *RateLimitedError:
+			backoff = actual.RetryAfter
 		default:
 		}
 
+		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
 		rtm.IncomingEvents <- RTMEvent{"connection_error", &ConnectionErrorEvent{
 			Attempt:  boff.attempts,
+			Backoff:  backoff,
 			ErrorObj: err,
 		}}
 
 		// check if Disconnect() has been invoked.
 		select {
+		case intentional := <-rtm.killChannel:
+			if intentional {
+				rtm.killConnection(intentional)
+				return nil, nil, ErrRTMDisconnected
+			}
 		case <-rtm.disconnected:
-			return nil, nil, fmt.Errorf("disconnect received while trying to connect")
+			return nil, nil, ErrRTMDisconnected
 		default:
 		}
 
 		// get time we should wait before attempting to connect again
-		dur := boff.Duration()
-		rtm.Debugf("reconnection %d failed: %s", boff.attempts+1, err)
-		rtm.Debugln(" -> reconnecting in", dur)
-		time.Sleep(dur)
+		rtm.Debugf("reconnection %d failed: %s reconnecting in %v\n", boff.attempts, err, backoff)
+		time.Sleep(backoff)
 	}
 }
 
@@ -196,10 +205,13 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 //
 // This should not be called directly! Instead a boolean value (true for
 // intentional, false otherwise) should be sent to the killChannel on the RTM.
-func (rtm *RTM) killConnection(intentional bool) error {
+func (rtm *RTM) killConnection(intentional bool) (err error) {
 	rtm.Debugln("killing connection")
 
-	err := rtm.conn.Close()
+	if rtm.conn != nil {
+		err = rtm.conn.Close()
+	}
+
 	rtm.IncomingEvents <- RTMEvent{"disconnected", &DisconnectedEvent{intentional}}
 
 	if intentional {
