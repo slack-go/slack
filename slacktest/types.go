@@ -32,9 +32,6 @@ const ServerBotGroupsContextKey contextKey = "__SERVER_GROUPS__"
 // ServerBotHubNameContextKey is the context key for passing along the server name registered in the hub
 const ServerBotHubNameContextKey contextKey = "__SERVER_HUBNAME__"
 
-var seenInboundMessages *messageCollection
-var seenOutboundMessages *messageCollection
-
 var masterHub = newHub()
 
 type hub struct {
@@ -64,16 +61,18 @@ type serverGroups struct {
 
 // Server represents a Slack Test server
 type Server struct {
-	registered map[string]struct{}
-	server     *httptest.Server
-	mux        *http.ServeMux
-	Logger     *log.Logger
-	BotName    string
-	BotID      string
-	ServerAddr string
-	SeenFeed   chan (string)
-	channels   *serverChannels
-	groups     *serverGroups
+	registered           map[string]struct{}
+	server               *httptest.Server
+	mux                  *http.ServeMux
+	Logger               *log.Logger
+	BotName              string
+	BotID                string
+	ServerAddr           string
+	SeenFeed             chan (string)
+	channels             *serverChannels
+	groups               *serverGroups
+	seenInboundMessages  *messageCollection
+	seenOutboundMessages *messageCollection
 }
 
 type fullInfoSlackResponse struct {

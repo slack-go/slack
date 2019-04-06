@@ -45,7 +45,7 @@ func listGroupsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // handle chat.postMessage
-func postMessageHandler(w http.ResponseWriter, r *http.Request) {
+func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -102,7 +102,7 @@ func postMessageHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
-	go queueForWebsocket(string(jsonMessage), serverAddr)
+	go sts.queueForWebsocket(string(jsonMessage), serverAddr)
 	_, _ = w.Write([]byte(resp))
 }
 
@@ -166,7 +166,7 @@ func rtmStartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -217,7 +217,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			continue
 		} else {
-			go postProcessMessage(message, serverAddr)
+			go sts.postProcessMessage(message, serverAddr)
 		}
 	}
 }

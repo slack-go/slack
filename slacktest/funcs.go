@@ -10,16 +10,15 @@ import (
 	slack "github.com/nlopes/slack"
 )
 
-func queueForWebsocket(s, hubname string) {
+func (sts *Server) queueForWebsocket(s, hubname string) {
 	channel, err := getHubForServer(hubname)
 	if err != nil {
 		log.Printf("Unable to get server's channels: %s", err.Error())
 	}
-	seenOutboundMessages.Lock()
-	seenOutboundMessages.messages = append(seenOutboundMessages.messages, s)
-	seenOutboundMessages.Unlock()
+	sts.seenOutboundMessages.Lock()
+	sts.seenOutboundMessages.messages = append(sts.seenOutboundMessages.messages, s)
+	sts.seenOutboundMessages.Unlock()
 	channel.sent <- s
-
 }
 
 func handlePendingMessages(c *websocket.Conn, hubname string) {
@@ -37,15 +36,15 @@ func handlePendingMessages(c *websocket.Conn, hubname string) {
 	}
 }
 
-func postProcessMessage(m, hubname string) {
+func (sts *Server) postProcessMessage(m, hubname string) {
 	channel, err := getHubForServer(hubname)
 	if err != nil {
 		log.Printf("Unable to get server's channels: %s", err.Error())
 		return
 	}
-	seenInboundMessages.Lock()
-	seenInboundMessages.messages = append(seenInboundMessages.messages, m)
-	seenInboundMessages.Unlock()
+	sts.seenInboundMessages.Lock()
+	sts.seenInboundMessages.messages = append(sts.seenInboundMessages.messages, m)
+	sts.seenInboundMessages.Unlock()
 	// send to firehose
 	channel.seen <- m
 }
