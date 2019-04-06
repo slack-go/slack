@@ -29,7 +29,7 @@ func TestServerSendMessageToChannel(t *testing.T) {
 	go s.Start()
 	s.SendMessageToChannel("C123456789", "some text")
 	time.Sleep(2 * time.Second)
-	assert.True(t, s.SawOutgoingMessage("some texT"))
+	assert.True(t, s.SawOutgoingMessage("some text"))
 	s.Stop()
 }
 
