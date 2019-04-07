@@ -30,9 +30,5 @@ func PostWebhook(url string, msg *WebhookMessage) error {
 		return errors.Wrap(err, "failed to post webhook")
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return statusCodeError{Code: response.StatusCode, Status: response.Status}
-	}
-
-	return nil
+	return checkStatusCode(response, discard{})
 }
