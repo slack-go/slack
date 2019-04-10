@@ -14,6 +14,6 @@ func TestNewActionBlock(t *testing.T) {
 	actionBlock := NewActionBlock("test", approveBtn)
 	assert.Equal(t, string(actionBlock.Type), "actions")
 	assert.Equal(t, actionBlock.BlockID, "test")
-	assert.Equal(t, len(actionBlock.Elements.ButtonElements), 1)
+	assert.Equal(t, len(actionBlock.Elements.BlockElementSet), 1)
 
 }

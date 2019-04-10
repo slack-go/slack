@@ -11,6 +11,6 @@ func TestNewBlockMessage(t *testing.T) {
 	dividerBlock := NewDividerBlock()
 	blockMessage := NewBlockMessage(dividerBlock)
 
-	assert.Equal(t, len(blockMessage.Msg.Blocks.DividerBlocks), 1)
+	assert.Equal(t, len(blockMessage.Msg.Blocks.BlockSet), 1)
 
 }
