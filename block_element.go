@@ -54,7 +54,7 @@ func NewAccessory(element BlockElement) *Accessory {
 // BlockElements is a convenience struct defined to allow dynamic unmarshalling of
 // the "elements" value in Slack's JSON response, which varies depending on BlockElement type
 type BlockElements struct {
-	BlockElementSet []BlockElement `json:"element"`
+	BlockElementSet []BlockElement `json:"elements"`
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
