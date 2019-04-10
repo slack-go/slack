@@ -9,20 +9,20 @@ const (
 	metDatepicker MessageElementType = "datepicker"
 	metSelect     MessageElementType = "static_select"
 
-	mixedElementImage mixedElementType = "mixed_image"
-	mixedElementText  mixedElementType = "mixed_text"
+	mixedElementImage MixedElementType = "mixed_image"
+	mixedElementText  MixedElementType = "mixed_text"
 )
 
 type MessageElementType string
-type mixedElementType string
+type MixedElementType string
 
 // BlockElement defines an interface that all block element types should implement.
 type BlockElement interface {
 	elementType() MessageElementType
 }
 
-type mixedElement interface {
-	mixedElementType() mixedElementType
+type MixedElement interface {
+	mixedElementType() MixedElementType
 }
 
 type Accessory struct {
@@ -51,13 +51,10 @@ func NewAccessory(element BlockElement) *Accessory {
 	return nil
 }
 
+// BlockElements is a convenience struct defined to allow dynamic unmarshalling of
 // the "elements" value in Slack's JSON response, which varies depending on BlockElement type
 type BlockElements struct {
-	ImageElements      []*ImageBlockElement
-	ButtonElements     []*ButtonBlockElement
-	OverflowElements   []*OverflowBlockElement
-	DatePickerElements []*DatePickerBlockElement
-	SelectElements     []*SelectBlockElement
+	BlockElementSet []BlockElement `json:"element"`
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
@@ -75,7 +72,7 @@ func (s ImageBlockElement) elementType() MessageElementType {
 	return s.Type
 }
 
-func (s ImageBlockElement) mixedElementType() mixedElementType {
+func (s ImageBlockElement) mixedElementType() MixedElementType {
 	return mixedElementImage
 }
 

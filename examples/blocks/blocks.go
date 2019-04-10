@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/alyosha/slack"
+	"github.com/nlopes/slack"
 )
 
 // The functions below mock the different templates slack has as examples on their website.

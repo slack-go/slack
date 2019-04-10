@@ -16,15 +16,13 @@ func (s ContextBlock) blockType() MessageBlockType {
 }
 
 type ContextElements struct {
-	ImageElements []*ImageBlockElement
-	TextObjects   []*TextBlockObject
+	ContextElementSet []MixedElement
 }
 
 // NewContextElements is a convenience method for generating ContextElements
-func NewContextElements(imageElements []*ImageBlockElement, textObjects []*TextBlockObject) ContextElements {
+func NewContextElements(contextElements []MixedElement) ContextElements {
 	return ContextElements{
-		ImageElements: imageElements,
-		TextObjects:   textObjects,
+		ContextElementSet: contextElements,
 	}
 }
 
