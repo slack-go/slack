@@ -1,18 +1,22 @@
 package slack
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-// Marshalling/unmarshalling logic for Blocks
+	"github.com/pkg/errors"
+)
 
 // UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *Blocks) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
+
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
+	var blocks Blocks
 	for _, r := range raw {
 		var obj map[string]interface{}
 		err := json.Unmarshal(r, &obj)
@@ -25,79 +29,32 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			blockType = t
 		}
 
+		var block Block
 		switch blockType {
 		case "actions":
-			block, err := unmarshalBlock(r, &ActionBlock{})
-			if err != nil {
-				return err
-			}
-			b.ActionBlocks = append(b.ActionBlocks, block.(*ActionBlock))
+			block = &ActionBlock{}
 		case "context":
-			block, err := unmarshalBlock(r, &ContextBlock{})
-			if err != nil {
-				return err
-			}
-			b.ContextBlocks = append(b.ContextBlocks, block.(*ContextBlock))
+			block = &ContextBlock{}
 		case "divider":
-			block, err := unmarshalBlock(r, &DividerBlock{})
-			if err != nil {
-				return err
-			}
-			b.DividerBlocks = append(b.DividerBlocks, block.(*DividerBlock))
+			block = &DividerBlock{}
 		case "image":
-			block, err := unmarshalBlock(r, &ImageBlock{})
-			if err != nil {
-				return err
-			}
-			b.ImageBlocks = append(b.ImageBlocks, block.(*ImageBlock))
+			block = &ImageBlock{}
 		case "section":
-			block, err := unmarshalBlock(r, &SectionBlock{})
-			if err != nil {
-				return err
-			}
-			b.SectionBlocks = append(b.SectionBlocks, block.(*SectionBlock))
+			block = &SectionBlock{}
+		default:
+			return errors.New("unsupported block type")
 		}
+
+		err = json.Unmarshal(r, block)
+		if err != nil {
+			return err
+		}
+
+		blocks.BlockSet = append(blocks.BlockSet, block)
 	}
 
+	*b = blocks
 	return nil
-}
-
-func unmarshalBlock(r json.RawMessage, block Block) (Block, error) {
-	err := json.Unmarshal(r, block)
-	if err != nil {
-		return nil, err
-	}
-	return block, nil
-}
-
-func (b *Blocks) appendToBlocks(appendBlocks []Block) {
-	for _, block := range appendBlocks {
-		switch blockType := block.(type) {
-		case *ActionBlock:
-			b.ActionBlocks = append(b.ActionBlocks, blockType)
-		case *ContextBlock:
-			b.ContextBlocks = append(b.ContextBlocks, blockType)
-		case *DividerBlock:
-			b.DividerBlocks = append(b.DividerBlocks, blockType)
-		case *ImageBlock:
-			b.ImageBlocks = append(b.ImageBlocks, blockType)
-		case *SectionBlock:
-			b.SectionBlocks = append(b.SectionBlocks, blockType)
-		}
-	}
-}
-
-// Marshalling/unmarshalling logic for BlockElements
-
-// MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
-// marshalling is delegated and proper type determination can be made before marshal
-func (e *BlockElements) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(toBlockElementSlice(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes, nil
 }
 
 // UnmarshalJSON implements the Unmarshaller interface for BlockElements, so that any JSON
@@ -109,6 +66,7 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	var blockElements BlockElements
 	for _, r := range raw {
 		var obj map[string]interface{}
 		err := json.Unmarshal(r, &obj)
@@ -121,90 +79,33 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElementType = t
 		}
 
+		var blockElement BlockElement
 		switch blockElementType {
 		case "image":
-			element, err := unmarshalBlockElement(r, &ImageBlockElement{})
-			if err != nil {
-				return err
-			}
-			b.ImageElements = append(b.ImageElements, element.(*ImageBlockElement))
+			blockElement = &ImageBlockElement{}
 		case "button":
-			element, err := unmarshalBlockElement(r, &ButtonBlockElement{})
-			if err != nil {
-				return err
-			}
-			b.ButtonElements = append(b.ButtonElements, element.(*ButtonBlockElement))
+			blockElement = &ButtonBlockElement{}
 		case "overflow":
-			element, err := unmarshalBlockElement(r, &OverflowBlockElement{})
-			if err != nil {
-				return err
-			}
-			b.OverflowElements = append(b.OverflowElements, element.(*OverflowBlockElement))
+			blockElement = &OverflowBlockElement{}
 		case "datepicker":
-			element, err := unmarshalBlockElement(r, &DatePickerBlockElement{})
-			if err != nil {
-				return err
-			}
-			b.DatePickerElements = append(b.DatePickerElements, element.(*DatePickerBlockElement))
+			blockElement = &DatePickerBlockElement{}
 		case "static_select":
-			element, err := unmarshalBlockElement(r, &SelectBlockElement{})
-			if err != nil {
-				return err
-			}
-			b.SelectElements = append(b.SelectElements, element.(*SelectBlockElement))
+			blockElement = &SelectBlockElement{}
+		default:
+			return errors.New("unsupported block element type")
 		}
+
+		err = json.Unmarshal(r, blockElement)
+		if err != nil {
+			return err
+		}
+
+		blockElements.BlockElementSet = append(blockElements.BlockElementSet, blockElement)
 	}
 
+	*b = blockElements
 	return nil
 }
-
-func unmarshalBlockElement(r json.RawMessage, element BlockElement) (BlockElement, error) {
-	err := json.Unmarshal(r, element)
-	if err != nil {
-		return nil, err
-	}
-	return element, nil
-}
-
-func (e *BlockElements) appendToBlockElements(appendElements []BlockElement) {
-	for _, element := range appendElements {
-		switch elementType := element.(type) {
-		case *ImageBlockElement:
-			e.ImageElements = append(e.ImageElements, elementType)
-		case *ButtonBlockElement:
-			e.ButtonElements = append(e.ButtonElements, elementType)
-		case *OverflowBlockElement:
-			e.OverflowElements = append(e.OverflowElements, elementType)
-		case *DatePickerBlockElement:
-			e.DatePickerElements = append(e.DatePickerElements, elementType)
-		case *SelectBlockElement:
-			e.SelectElements = append(e.SelectElements, elementType)
-		}
-	}
-}
-
-func toBlockElementSlice(elements *BlockElements) []BlockElement {
-	var slice []BlockElement
-	for _, element := range elements.ImageElements {
-		slice = append(slice, element)
-	}
-	for _, element := range elements.ButtonElements {
-		slice = append(slice, element)
-	}
-	for _, element := range elements.OverflowElements {
-		slice = append(slice, element)
-	}
-	for _, element := range elements.DatePickerElements {
-		slice = append(slice, element)
-	}
-	for _, element := range elements.SelectElements {
-		slice = append(slice, element)
-	}
-
-	return slice
-}
-
-// Marshalling/unmarshalling logic for Accessory
 
 // MarshalJSON implements the Marshaller interface for Accessory so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
@@ -273,6 +174,14 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func unmarshalBlockElement(r json.RawMessage, element BlockElement) (BlockElement, error) {
+	err := json.Unmarshal(r, element)
+	if err != nil {
+		return nil, err
+	}
+	return element, nil
+}
+
 func toBlockElement(element *Accessory) BlockElement {
 	if element.ImageElement != nil {
 		return element.ImageElement
@@ -291,31 +200,6 @@ func toBlockElement(element *Accessory) BlockElement {
 	}
 
 	return nil
-}
-
-// Marshalling/unmarsalling logic for ContextElements
-
-// MarshalJSON implements the Marshaller interface for ContextElements so that any JSON
-// marshalling is delegated and proper type determination can be made before marshal
-func (e *ContextElements) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(toMixedElements(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes, nil
-}
-
-func toMixedElements(elements *ContextElements) []mixedElement {
-	var slice []mixedElement
-	for _, element := range elements.ImageElements {
-		slice = append(slice, element)
-	}
-	for _, element := range elements.TextObjects {
-		slice = append(slice, element)
-	}
-
-	return slice
 }
 
 // UnmarshalJSON implements the Unmarshaller interface for ContextElements, so that any JSON
@@ -345,13 +229,17 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 			if err != nil {
 				return err
 			}
-			e.TextObjects = append(e.TextObjects, elem.(*TextBlockObject))
+
+			e.ContextElementSet = append(e.ContextElementSet, elem.(*TextBlockObject))
 		case "image":
 			elem, err := unmarshalBlockElement(r, &ImageBlockElement{})
 			if err != nil {
 				return err
 			}
-			e.ImageElements = append(e.ImageElements, elem.(*ImageBlockElement))
+
+			e.ContextElementSet = append(e.ContextElementSet, elem.(*ImageBlockElement))
+		default:
+			return errors.New("unsupported context element type")
 		}
 	}
 
