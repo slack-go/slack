@@ -41,6 +41,8 @@ type AuthTestResponse struct {
 	User   string `json:"user"`
 	TeamID string `json:"team_id"`
 	UserID string `json:"user_id"`
+	// EnterpriseID is only returned when an enterprise id present
+	EnterpriseID string `json:"enterprise_id,omitempty"`
 }
 
 type authTestResponseFull struct {
