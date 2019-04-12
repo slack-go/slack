@@ -6,9 +6,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOptionsFromArray(t *testing.T) {
+func selectOptionsFromArray(options ...string) []DialogSelectOption {
+	selectOptions := make([]DialogSelectOption, len(options))
+	for idx, value := range options {
+		selectOptions[idx] = DialogSelectOption{
+			Label: value,
+			Value: value,
+		}
+	}
+	return selectOptions
+}
+
+func selectOptionsFromMap(options map[string]string) []DialogSelectOption {
+	selectOptions := make([]DialogSelectOption, len(options))
+	idx := 0
+	var option DialogSelectOption
+	for key, value := range options {
+		option = DialogSelectOption{
+			Label: key,
+			Value: value,
+		}
+		selectOptions[idx] = option
+		idx++
+	}
+	return selectOptions
+}
+
+func TestSelectOptionsFromArray(t *testing.T) {
 	options := []string{"opt 1"}
-	expectedOptions := optionsFromArray(options)
+	expectedOptions := selectOptionsFromArray(options...)
 	assert.Equal(t, len(options), len(expectedOptions))
 
 	firstOption := expectedOptions[0]
@@ -20,7 +46,7 @@ func TestOptionsFromMap(t *testing.T) {
 	options := make(map[string]string)
 	options["key"] = "myValue"
 
-	selectOptions := optionsFromMap(options)
+	selectOptions := selectOptionsFromMap(options)
 	assert.Equal(t, 1, len(selectOptions))
 
 	firstOption := selectOptions[0]
@@ -31,8 +57,7 @@ func TestOptionsFromMap(t *testing.T) {
 func TestStaticSelectFromArray(t *testing.T) {
 	name := "static select"
 	label := "Static Select Label"
-	options := []string{"opt 1", "opt 2", "opt 3"}
-	expectedOptions := optionsFromArray(options)
+	expectedOptions := selectOptionsFromArray("opt 1", "opt 2", "opt 3")
 
 	selectInput := NewStaticSelectDialogInput(name, label, expectedOptions)
 	assert.Equal(t, name, selectInput.Name)
@@ -48,7 +73,7 @@ func TestStaticSelectFromDictionary(t *testing.T) {
 	optionsMap["option_1"] = "First"
 	optionsMap["option_2"] = "Second"
 	optionsMap["option_3"] = "Third"
-	expectedOptions := optionsFromMap(optionsMap)
+	expectedOptions := selectOptionsFromMap(optionsMap)
 
 	selectInput := NewStaticSelectDialogInput(name, label, expectedOptions)
 	assert.Equal(t, name, selectInput.Name)
@@ -56,21 +81,25 @@ func TestStaticSelectFromDictionary(t *testing.T) {
 	assert.Equal(t, expectedOptions, selectInput.Options)
 }
 
+func TestNewDialogOptionGroup(t *testing.T) {
+	expectedOptions := selectOptionsFromArray("option_1", "option_2")
+
+	label := "GroupLabel"
+	optionGroup := NewDialogOptionGroup(label, expectedOptions...)
+
+	assert.Equal(t, label, optionGroup.Label)
+	assert.Equal(t, expectedOptions, optionGroup.Options)
+
+}
+
 func TestStaticGroupedSelect(t *testing.T) {
-	group1 := make(map[string]string)
-	group1["G1_O1"] = "First (1)"
-	group1["G1_O2"] = "Second (1)"
 
-	group2 := make(map[string]string)
-	group2["G2_O1"] = "First (2)"
-	group2["G2_O2"] = "Second (2)"
-	group2["G2_O3"] = "Third (2)"
+	groupOpt1 := NewDialogOptionGroup("group1", selectOptionsFromArray("G1_01", "G1_02")...)
+	groupOpt2 := NewDialogOptionGroup("group2", selectOptionsFromArray("G2_01", "G2_02", "G2_03")...)
 
-	groups := make(map[string]map[string]string)
-	groups["Group 1"] = group1
-	groups["Group 2"] = group2
+	options := []DialogOptionGroup{groupOpt1, groupOpt2}
 
-	groupSelect := NewGroupedSelectDialogInput("groupSelect", "User Label", groups)
+	groupSelect := NewGroupedSelectDialogInput("groupSelect", "User Label", options)
 	assert.Equal(t, InputTypeSelect, groupSelect.Type)
 	assert.Equal(t, "groupSelect", groupSelect.Name)
 	assert.Equal(t, "User Label", groupSelect.Label)
