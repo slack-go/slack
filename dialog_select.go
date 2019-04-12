@@ -55,14 +55,7 @@ func NewStaticSelectDialogInput(name, label string, options []DialogSelectOption
 }
 
 // NewGroupedSelectDialogInput creates grouped options select input for Dialogs.
-func NewGroupedSelectDialogInput(name, label string, groups map[string]map[string]string) *DialogInputSelect {
-	optionGroups := []DialogOptionGroup{}
-	for groupName, options := range groups {
-		optionGroups = append(optionGroups, DialogOptionGroup{
-			Label:   groupName,
-			Options: optionsFromMap(options),
-		})
-	}
+func NewGroupedSelectDialogInput(name, label string, options []DialogOptionGroup) *DialogInputSelect {
 	return &DialogInputSelect{
 		DialogInput: DialogInput{
 			Type:  InputTypeSelect,
@@ -70,34 +63,15 @@ func NewGroupedSelectDialogInput(name, label string, groups map[string]map[strin
 			Label: label,
 		},
 		DataSource:   DialogDataSourceStatic,
-		OptionGroups: optionGroups,
-	}
+		OptionGroups: options}
 }
 
-func optionsFromArray(options []string) []DialogSelectOption {
-	selectOptions := make([]DialogSelectOption, len(options))
-	for idx, value := range options {
-		selectOptions[idx] = DialogSelectOption{
-			Label: value,
-			Value: value,
-		}
+// NewDialogOptionGroup creates a DialogOptionGroup from several select options
+func NewDialogOptionGroup(label string, options ...DialogSelectOption) DialogOptionGroup {
+	return DialogOptionGroup{
+		Label:   label,
+		Options: options,
 	}
-	return selectOptions
-}
-
-func optionsFromMap(options map[string]string) []DialogSelectOption {
-	selectOptions := make([]DialogSelectOption, len(options))
-	idx := 0
-	var option DialogSelectOption
-	for key, value := range options {
-		option = DialogSelectOption{
-			Label: key,
-			Value: value,
-		}
-		selectOptions[idx] = option
-		idx++
-	}
-	return selectOptions
 }
 
 // NewConversationsSelect returns a `Conversations` select
