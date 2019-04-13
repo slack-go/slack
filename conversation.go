@@ -8,7 +8,7 @@ import (
 )
 
 // Conversation is the foundation for IM and BaseGroupConversation
-type conversation struct {
+type Conversation struct {
 	ID                 string   `json:"id"`
 	Created            JSONTime `json:"created"`
 	IsOpen             bool     `json:"is_open"`
@@ -35,8 +35,8 @@ type conversation struct {
 }
 
 // GroupConversation is the foundation for Group and Channel
-type groupConversation struct {
-	conversation
+type GroupConversation struct {
+	Conversation
 	Name       string   `json:"name"`
 	Creator    string   `json:"creator"`
 	IsArchived bool     `json:"is_archived"`

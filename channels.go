@@ -18,7 +18,7 @@ type channelResponseFull struct {
 
 // Channel contains information about the channel
 type Channel struct {
-	groupConversation
+	GroupConversation
 	IsChannel bool   `json:"is_channel"`
 	IsGeneral bool   `json:"is_general"`
 	IsMember  bool   `json:"is_member"`

@@ -54,8 +54,8 @@ func TestDialogCallback(t *testing.T) {
 		ActionTs:    "936893340.702759",
 		Team:        Team{ID: "T1ABCD2E12", Name: "", Domain: "coverbands"},
 		Channel: Channel{
-			groupConversation: groupConversation{
-				conversation: conversation{
+			GroupConversation: GroupConversation{
+				Conversation: Conversation{
 					ID: "C1AB2C3DE",
 				},
 				Name: "coverthon-1999",
