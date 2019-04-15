@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"sync"
 	"testing"
+
+	"github.com/nlopes/slack/slackutilsx"
 )
 
 var (
@@ -82,5 +84,21 @@ func TestParseResponseInvalidToken(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 	} else if responsePartial.Error != "invalid_auth" {
 		t.Errorf("got %v; want %v", responsePartial.Error, "invalid_auth")
+	}
+}
+
+func TestRetryable(t *testing.T) {
+	for _, e := range []error{
+		&RateLimitedError{},
+		statusCodeError{Code: http.StatusInternalServerError},
+		statusCodeError{Code: http.StatusTooManyRequests},
+	} {
+		r, ok := e.(slackutilsx.Retryable)
+		if !ok {
+			t.Errorf("expected %#v to implement Retryable", e)
+		}
+		if !r.Retryable() {
+			t.Errorf("expected %#v to be Retryable", e)
+		}
 	}
 }
