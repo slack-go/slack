@@ -180,6 +180,7 @@ func assertSimpleIM(t *testing.T, im *IM) {
 	assert.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
 	assert.Equal(t, true, im.IsIM)
+	assert.Equal(t, "U024BE7LH", im.User)
 	assert.Equal(t, JSONTime(1360782804), im.Created)
 	assert.Equal(t, false, im.IsUserDeleted)
 	assert.Equal(t, true, im.IsOpen)
@@ -192,6 +193,7 @@ func TestCreateSimpleIM(t *testing.T) {
 	im := &IM{}
 	im.ID = "D024BFF1M"
 	im.IsIM = true
+	im.User = "U024BE7LH"
 	im.Created = JSONTime(1360782804)
 	im.IsUserDeleted = false
 	im.IsOpen = true
