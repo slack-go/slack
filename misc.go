@@ -55,6 +55,13 @@ func (t statusCodeError) HTTPStatusCode() int {
 	return t.Code
 }
 
+func (t statusCodeError) Retryable() bool {
+	if t.Code >= 500 || t.Code == http.StatusTooManyRequests {
+		return true
+	}
+	return false
+}
+
 // RateLimitedError represents the rate limit respond from slack
 type RateLimitedError struct {
 	RetryAfter time.Duration
@@ -62,6 +69,10 @@ type RateLimitedError struct {
 
 func (e *RateLimitedError) Error() string {
 	return fmt.Sprintf("slack rate limit exceeded, retry after %s", e.RetryAfter)
+}
+
+func (e *RateLimitedError) Retryable() bool {
+	return true
 }
 
 func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Reader) (*http.Request, error) {
