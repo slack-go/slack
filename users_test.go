@@ -67,6 +67,7 @@ func getTestUser() User {
 		IsPrimaryOwner:    false,
 		IsRestricted:      false,
 		IsUltraRestricted: false,
+		Updated:           1555425715,
 		Has2FA:            false,
 	}
 }
