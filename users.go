@@ -121,6 +121,7 @@ type User struct {
 	HasFiles          bool           `json:"has_files"`
 	Presence          string         `json:"presence"`
 	Locale            string         `json:"locale"`
+	Updated           JSONTime       `json:"updated"`
 	Enterprise        EnterpriseUser `json:"enterprise_user,omitempty"`
 }
 
