@@ -412,9 +412,9 @@ func MsgOptionParse(b bool) MsgOption {
 	return func(c *sendConfig) error {
 		var v string
 		if b {
-			v = "1"
+			v = "full"
 		} else {
-			v = "0"
+			v = "none"
 		}
 		c.values.Set("parse", v)
 		return nil
