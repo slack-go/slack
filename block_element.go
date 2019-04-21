@@ -9,20 +9,20 @@ const (
 	metDatepicker MessageElementType = "datepicker"
 	metSelect     MessageElementType = "static_select"
 
-	mixedElementImage mixedElementType = "mixed_image"
-	mixedElementText  mixedElementType = "mixed_text"
+	mixedElementImage MixedElementType = "mixed_image"
+	mixedElementText  MixedElementType = "mixed_text"
 )
 
 type MessageElementType string
-type mixedElementType string
+type MixedElementType string
 
 // BlockElement defines an interface that all block element types should implement.
 type BlockElement interface {
 	elementType() MessageElementType
 }
 
-type mixedElement interface {
-	mixedElementType() mixedElementType
+type MixedElement interface {
+	mixedElementType() MixedElementType
 }
 
 type Accessory struct {
@@ -51,13 +51,10 @@ func NewAccessory(element BlockElement) *Accessory {
 	return nil
 }
 
+// BlockElements is a convenience struct defined to allow dynamic unmarshalling of
 // the "elements" value in Slack's JSON response, which varies depending on BlockElement type
 type BlockElements struct {
-	ImageElements      []*ImageBlockElement
-	ButtonElements     []*ButtonBlockElement
-	OverflowElements   []*OverflowBlockElement
-	DatePickerElements []*DatePickerBlockElement
-	SelectElements     []*SelectBlockElement
+	BlockElementSet []BlockElement `json:"elements"`
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
@@ -71,11 +68,12 @@ type ImageBlockElement struct {
 	AltText  string             `json:"alt_text"`
 }
 
+// elementType returns the type of the Element
 func (s ImageBlockElement) elementType() MessageElementType {
 	return s.Type
 }
 
-func (s ImageBlockElement) mixedElementType() mixedElementType {
+func (s ImageBlockElement) mixedElementType() MixedElementType {
 	return mixedElementImage
 }
 
@@ -130,6 +128,7 @@ type SelectBlockElement struct {
 	Confirm       *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s SelectBlockElement) elementType() MessageElementType {
 	return MessageElementType(s.Type)
 }
@@ -174,6 +173,7 @@ type OverflowBlockElement struct {
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s OverflowBlockElement) elementType() MessageElementType {
 	return s.Type
 }
@@ -200,6 +200,7 @@ type DatePickerBlockElement struct {
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s DatePickerBlockElement) elementType() MessageElementType {
 	return s.Type
 }

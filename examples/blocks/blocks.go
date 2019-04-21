@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/alyosha/slack"
+	"github.com/nlopes/slack"
 )
 
 // The functions below mock the different templates slack has as examples on their website.
@@ -153,8 +153,7 @@ func exampleThree() {
 	conflictSection := slack.NewContextBlock(
 		"",
 		slack.NewContextElements(
-			[]*slack.ImageBlockElement{conflictImage},
-			[]*slack.TextBlockObject{conflictText},
+			[]slack.MixedElement{conflictImage, conflictText},
 		),
 	)
 
@@ -225,8 +224,7 @@ func exampleFour() {
 	// Option One Votes
 	optOneVoteText := slack.NewTextBlockObject("plain_text", "3 votes", true, false)
 	contextElements := slack.NewContextElements(
-		[]*slack.ImageBlockElement{profileOne, profileTwo, profileThree},
-		[]*slack.TextBlockObject{optOneVoteText},
+		[]slack.MixedElement{profileOne, profileTwo, profileThree, optOneVoteText},
 	)
 	optOneContext := slack.NewContextBlock("", contextElements)
 
@@ -237,8 +235,7 @@ func exampleFour() {
 	// Option Two Votes
 	optTwoVoteText := slack.NewTextBlockObject("plain_text", "2 votes", true, false)
 	contextElements = slack.NewContextElements(
-		[]*slack.ImageBlockElement{profileFour, profileTwo},
-		[]*slack.TextBlockObject{optTwoVoteText},
+		[]slack.MixedElement{profileFour, profileTwo, optTwoVoteText},
 	)
 	optTwoContext := slack.NewContextBlock("", contextElements)
 
@@ -248,7 +245,7 @@ func exampleFour() {
 
 	// Option Three Votes
 	optThreeVoteText := slack.NewTextBlockObject("plain_text", "No votes", true, false)
-	contextElements = slack.NewContextElements(nil, []*slack.TextBlockObject{optThreeVoteText})
+	contextElements = slack.NewContextElements([]slack.MixedElement{optThreeVoteText})
 	optThreeContext := slack.NewContextBlock("", contextElements)
 
 	// Suggestions Action
@@ -314,8 +311,7 @@ func exampleFive() {
 	hotelOneLoc := slack.NewTextBlockObject("plain_text", "Location: Central Business District", true, false)
 
 	contextElements := slack.NewContextElements(
-		[]*slack.ImageBlockElement{locationPinImage},
-		[]*slack.TextBlockObject{hotelOneLoc},
+		[]slack.MixedElement{locationPinImage, hotelOneLoc},
 	)
 
 	hotelOneSection := slack.NewSectionBlock(hotelOneInfo, nil, slack.NewAccessory(hotelOneImage))
@@ -327,8 +323,7 @@ func exampleFive() {
 	hotelTwoLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
 	contextElements = slack.NewContextElements(
-		[]*slack.ImageBlockElement{locationPinImage},
-		[]*slack.TextBlockObject{hotelTwoLoc},
+		[]slack.MixedElement{locationPinImage, hotelTwoLoc},
 	)
 
 	hotelTwoSection := slack.NewSectionBlock(hotelTwoInfo, nil, slack.NewAccessory(hotelTwoImage))
@@ -340,8 +335,7 @@ func exampleFive() {
 	hotelThreeLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
 	contextElements = slack.NewContextElements(
-		[]*slack.ImageBlockElement{locationPinImage},
-		[]*slack.TextBlockObject{hotelThreeLoc},
+		[]slack.MixedElement{locationPinImage, hotelThreeLoc},
 	)
 	hotelThreeSection := slack.NewSectionBlock(hotelThreeInfo, nil, slack.NewAccessory(hotelThreeImage))
 	hotelThreeContext := slack.NewContextBlock("", contextElements)

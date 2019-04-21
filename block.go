@@ -25,11 +25,7 @@ type Block interface {
 // Blocks is a convenience struct defined to allow dynamic unmarshalling of
 // the "blocks" value in Slack's JSON response, which varies depending on block type
 type Blocks struct {
-	ActionBlocks  []*ActionBlock
-	ContextBlocks []*ContextBlock
-	DividerBlocks []*DividerBlock
-	ImageBlocks   []*ImageBlock
-	SectionBlocks []*SectionBlock
+	BlockSet []Block `json:"blocks"`
 }
 
 // BlockAction is the action callback sent when a block is interacted with
@@ -42,24 +38,24 @@ type BlockAction struct {
 	ActionTs string          `json:"action_ts"`
 }
 
-// actionType returns the type of the block action
+// actionType returns the type of the action
 func (b BlockAction) actionType() actionType {
 	return b.Type
 }
 
 // NewBlockMessage creates a new Message that contains one or more blocks to be displayed
 func NewBlockMessage(blocks ...Block) Message {
-	b := Blocks{}
-	b.appendToBlocks(blocks)
 	return Message{
 		Msg: Msg{
-			Blocks: b,
+			Blocks: Blocks{
+				BlockSet: blocks,
+			},
 		},
 	}
 }
 
 // AddBlockMessage appends a block to the end of the existing list of blocks
 func AddBlockMessage(message Message, newBlk Block) Message {
-	message.Msg.Blocks.appendToBlocks([]Block{newBlk})
+	message.Msg.Blocks.BlockSet = append(message.Msg.Blocks.BlockSet, newBlk)
 	return message
 }
