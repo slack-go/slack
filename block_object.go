@@ -146,8 +146,8 @@ func (s TextBlockObject) validateType() MessageObjectType {
 }
 
 // validateType enforces block objects for element and block parameters
-func (s TextBlockObject) mixedElementType() MixedElementType {
-	return mixedElementText
+func (s TextBlockObject) MixedElementType() MixedElementType {
+	return MixedElementText
 }
 
 // NewTextBlockObject returns an instance of a new Text Block Object

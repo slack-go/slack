@@ -29,7 +29,7 @@ func NewContextElements(contextElements []MixedElement) ContextElements {
 // NewContextBlock returns a new instance of a context block
 func NewContextBlock(blockID string, elements ContextElements) *ContextBlock {
 	return &ContextBlock{
-		Type:     mbtContext,
+		Type:     MbtContext,
 		BlockID:  blockID,
 		Elements: elements,
 	}
