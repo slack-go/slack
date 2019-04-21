@@ -11,6 +11,10 @@ import (
 func (b *Blocks) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 
+	if string(data) == "{\"blocks\":null}" {
+		return nil
+	}
+
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
@@ -61,6 +65,11 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *BlockElements) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
+
+	if string(data) == "{\"elements\":null}" {
+		return nil
+	}
+
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
@@ -122,6 +131,11 @@ func (a *Accessory) MarshalJSON() ([]byte, error) {
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (a *Accessory) UnmarshalJSON(data []byte) error {
 	var r json.RawMessage
+
+	if string(data) == "{\"accessory\":null}" {
+		return nil
+	}
+
 	err := json.Unmarshal(data, &r)
 	if err != nil {
 		return err
@@ -206,6 +220,11 @@ func toBlockElement(element *Accessory) BlockElement {
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (e *ContextElements) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
+
+	if string(data) == "{\"elements\":null}" {
+		return nil
+	}
+
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
