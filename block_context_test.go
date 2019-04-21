@@ -18,6 +18,6 @@ func TestNewContextBlock(t *testing.T) {
 	contextBlock := NewContextBlock("test", contextElements)
 	assert.Equal(t, string(contextBlock.Type), "context")
 	assert.Equal(t, contextBlock.BlockID, "test")
-	assert.Equal(t, len(contextBlock.Elements.ContextElementSet), 1)
+	assert.Equal(t, len(contextBlock.Elements.ContextElementSet), 2)
 
 }
