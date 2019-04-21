@@ -38,7 +38,7 @@ type BlockAction struct {
 	ActionTs string          `json:"action_ts"`
 }
 
-// actionType returns the type of the block action
+// actionType returns the type of the action
 func (b BlockAction) actionType() actionType {
 	return b.Type
 }
