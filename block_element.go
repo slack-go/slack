@@ -68,6 +68,7 @@ type ImageBlockElement struct {
 	AltText  string             `json:"alt_text"`
 }
 
+// elementType returns the type of the Element
 func (s ImageBlockElement) elementType() MessageElementType {
 	return s.Type
 }
@@ -127,6 +128,7 @@ type SelectBlockElement struct {
 	Confirm       *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s SelectBlockElement) elementType() MessageElementType {
 	return MessageElementType(s.Type)
 }
@@ -171,6 +173,7 @@ type OverflowBlockElement struct {
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s OverflowBlockElement) elementType() MessageElementType {
 	return s.Type
 }
@@ -197,6 +200,7 @@ type DatePickerBlockElement struct {
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
+// elementType returns the type of the Element
 func (s DatePickerBlockElement) elementType() MessageElementType {
 	return s.Type
 }
