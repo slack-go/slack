@@ -28,7 +28,7 @@ type AttachmentAction struct {
 	URL             string                        `json:"url,omitempty"`              // Optional.
 }
 
-// actionType returns the type of the block
+// actionType returns the type of the action
 func (a AttachmentAction) actionType() actionType {
 	return a.Type
 }
