@@ -53,6 +53,7 @@ func NewTestServer(custom ...binder) *Server {
 	s.Handle("/groups.list", listGroupsHandler)
 	s.Handle("/users.info", usersInfoHandler)
 	s.Handle("/bots.info", botsInfoHandler)
+	s.Handle("/auth.test", authTestHandler)
 
 	httpserver := httptest.NewUnstartedServer(s.mux)
 	addr := httpserver.Listener.Addr().String()

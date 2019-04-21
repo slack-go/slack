@@ -7,6 +7,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAuthTestHandler(t *testing.T) {
+	s := NewTestServer()
+	go s.Start()
+
+	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
+	user, err := client.AuthTest()
+	assert.NoError(t, err, "should not error out")
+	assert.Equal(t, defaultTeamName, user.Team, "user ID should be correct")
+	assert.Equal(t, defaultTeamID, user.TeamID, "user ID should be correct")
+	assert.Equal(t, defaultNonBotUserID, user.UserID, "user ID should be correct")
+	assert.Equal(t, defaultNonBotUserName, user.User, "user ID should be correct")
+}
+
 func TestPostMessageHandler(t *testing.T) {
 	s := NewTestServer()
 	go s.Start()
