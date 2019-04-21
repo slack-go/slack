@@ -48,6 +48,17 @@ var defaultGroupsListJSON = fmt.Sprintf(`
 		}
 		`, defaultGroupJSON)
 
+var defaultAuthTestJSON = fmt.Sprintf(`
+	{
+		"ok": true,
+		"url": "https://localhost.localdomain/",
+		"team": "%s",
+		"user": "%s",
+		"team_id": "%s",
+		"user_id": "%s"
+	}
+`, defaultTeamName, defaultNonBotUserName, defaultTeamID, defaultNonBotUserID)
+
 var defaultUsersInfoJSON = fmt.Sprintf(`
 	{
 		"ok":true,

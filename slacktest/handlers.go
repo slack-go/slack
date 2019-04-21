@@ -26,7 +26,12 @@ func contextHandler(server *Server, next http.HandlerFunc) http.Handler {
 	})
 }
 
-func usersInfoHandler(w http.ResponseWriter, r *http.Request) {
+// handle auth.test
+func authTestHandler(w http.ResponseWriter, _ *http.Request) {
+	_, _ = w.Write([]byte(defaultAuthTestJSON))
+}
+
+func usersInfoHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultUsersInfoJSON))
 }
 
@@ -35,12 +40,12 @@ func botsInfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // handle channels.list
-func listChannelsHandler(w http.ResponseWriter, r *http.Request) {
+func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultChannelsListJSON))
 }
 
 // handle groups.list
-func listGroupsHandler(w http.ResponseWriter, r *http.Request) {
+func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultGroupsListJSON))
 }
 
