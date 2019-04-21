@@ -19,7 +19,7 @@ const (
 // Block defines an interface all block types should implement
 // to ensure consistency between blocks.
 type Block interface {
-	blockType() MessageBlockType
+	BlockType() MessageBlockType
 }
 
 // Blocks is a convenience struct defined to allow dynamic unmarshalling of

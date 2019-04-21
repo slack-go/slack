@@ -11,8 +11,8 @@ type ImageBlock struct {
 	Title    *TextBlockObject `json:"title"`
 }
 
-// blockType returns the type of the block
-func (s ImageBlock) blockType() MessageBlockType {
+// BlockType returns the type of the block
+func (s ImageBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 
