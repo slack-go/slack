@@ -10,8 +10,8 @@ type ContextBlock struct {
 	Elements ContextElements  `json:"elements"`
 }
 
-// blockType returns the type of the block
-func (s ContextBlock) blockType() MessageBlockType {
+// BlockType returns the type of the block
+func (s ContextBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 

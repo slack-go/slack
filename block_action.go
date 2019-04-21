@@ -9,8 +9,8 @@ type ActionBlock struct {
 	Elements BlockElements    `json:"elements"`
 }
 
-// blockType returns the type of the block
-func (s ActionBlock) blockType() MessageBlockType {
+// BlockType returns the type of the block
+func (s ActionBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 

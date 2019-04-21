@@ -8,8 +8,8 @@ type DividerBlock struct {
 	BlockID string           `json:"block_id,omitempty"`
 }
 
-// blockType returns the type of the block
-func (s DividerBlock) blockType() MessageBlockType {
+// BlockType returns the type of the block
+func (s DividerBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 

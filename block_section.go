@@ -11,8 +11,8 @@ type SectionBlock struct {
 	Accessory *Accessory         `json:"accessory,omitempty"`
 }
 
-// blockType returns the type of the block
-func (s SectionBlock) blockType() MessageBlockType {
+// BlockType returns the type of the block
+func (s SectionBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 
