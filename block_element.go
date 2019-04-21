@@ -7,10 +7,15 @@ const (
 	MetButton     MessageElementType = "button"
 	MetOverflow   MessageElementType = "overflow"
 	MetDatepicker MessageElementType = "datepicker"
-	MetSelect     MessageElementType = "static_select"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
+
+	OptTypeStatic        string = "static_select"
+	OptTypeExternal      string = "external_select"
+	OptTypeUser          string = "users_select"
+	OptTypeConversations string = "conversations_select"
+	OptTypeChannels      string = "channels_select"
 )
 
 type MessageElementType string
@@ -120,7 +125,7 @@ func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *Butto
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#select
 type SelectBlockElement struct {
-	Type          MessageElementType        `json:"type,omitempty"`
+	Type          string                    `json:"type,omitempty"`
 	Placeholder   *TextBlockObject          `json:"placeholder,omitempty"`
 	ActionID      string                    `json:"action_id,omitempty"`
 	Options       []*OptionBlockObject      `json:"options,omitempty"`
@@ -131,7 +136,7 @@ type SelectBlockElement struct {
 
 // ElementType returns the type of the Element
 func (s SelectBlockElement) ElementType() MessageElementType {
-	return s.Type
+	return MessageElementType(s.Type)
 }
 
 // NewOptionsSelectBlockElement returns a new instance of SelectBlockElement for use with
