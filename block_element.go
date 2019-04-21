@@ -3,14 +3,14 @@ package slack
 // https://api.slack.com/reference/messaging/block-elements
 
 const (
-	metImage      MessageElementType = "image"
-	metButton     MessageElementType = "button"
-	metOverflow   MessageElementType = "overflow"
-	metDatepicker MessageElementType = "datepicker"
-	metSelect     MessageElementType = "static_select"
+	MetImage      MessageElementType = "image"
+	MetButton     MessageElementType = "button"
+	MetOverflow   MessageElementType = "overflow"
+	MetDatepicker MessageElementType = "datepicker"
+	MetSelect     MessageElementType = "static_select"
 
-	mixedElementImage MixedElementType = "mixed_image"
-	mixedElementText  MixedElementType = "mixed_text"
+	MixedElementImage MixedElementType = "mixed_image"
+	MixedElementText  MixedElementType = "mixed_text"
 )
 
 type MessageElementType string
@@ -18,11 +18,11 @@ type MixedElementType string
 
 // BlockElement defines an interface that all block element types should implement.
 type BlockElement interface {
-	elementType() MessageElementType
+	ElementType() MessageElementType
 }
 
 type MixedElement interface {
-	mixedElementType() MixedElementType
+	MixedElementType() MixedElementType
 }
 
 type Accessory struct {
@@ -68,19 +68,19 @@ type ImageBlockElement struct {
 	AltText  string             `json:"alt_text"`
 }
 
-// elementType returns the type of the Element
-func (s ImageBlockElement) elementType() MessageElementType {
+// ElementType returns the type of the Element
+func (s ImageBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-func (s ImageBlockElement) mixedElementType() MixedElementType {
-	return mixedElementImage
+func (s ImageBlockElement) MixedElementType() MixedElementType {
+	return MixedElementImage
 }
 
 // NewImageBlockElement returns a new instance of an image block element
 func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	return &ImageBlockElement{
-		Type:     metImage,
+		Type:     MetImage,
 		ImageURL: imageURL,
 		AltText:  altText,
 	}
@@ -100,14 +100,15 @@ type ButtonBlockElement struct {
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-func (s ButtonBlockElement) elementType() MessageElementType {
+// ElementType returns the type of the element
+func (s ButtonBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
 func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *ButtonBlockElement {
 	return &ButtonBlockElement{
-		Type:     metButton,
+		Type:     MetButton,
 		ActionID: actionID,
 		Text:     text,
 		Value:    value,
@@ -119,7 +120,7 @@ func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *Butto
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#select
 type SelectBlockElement struct {
-	Type          string                    `json:"type,omitempty"`
+	Type          MessageElementType        `json:"type,omitempty"`
 	Placeholder   *TextBlockObject          `json:"placeholder,omitempty"`
 	ActionID      string                    `json:"action_id,omitempty"`
 	Options       []*OptionBlockObject      `json:"options,omitempty"`
@@ -128,9 +129,9 @@ type SelectBlockElement struct {
 	Confirm       *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
-// elementType returns the type of the Element
-func (s SelectBlockElement) elementType() MessageElementType {
-	return MessageElementType(s.Type)
+// ElementType returns the type of the Element
+func (s SelectBlockElement) ElementType() MessageElementType {
+	return s.Type
 }
 
 // NewOptionsSelectBlockElement returns a new instance of SelectBlockElement for use with
@@ -173,15 +174,15 @@ type OverflowBlockElement struct {
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-// elementType returns the type of the Element
-func (s OverflowBlockElement) elementType() MessageElementType {
+// ElementType returns the type of the Element
+func (s OverflowBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
 // NewOverflowBlockElement returns an instance of a new Overflow Block Element
 func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *OverflowBlockElement {
 	return &OverflowBlockElement{
-		Type:     metOverflow,
+		Type:     MetOverflow,
 		ActionID: actionID,
 		Options:  options,
 	}
@@ -200,15 +201,15 @@ type DatePickerBlockElement struct {
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
-// elementType returns the type of the Element
-func (s DatePickerBlockElement) elementType() MessageElementType {
+// ElementType returns the type of the Element
+func (s DatePickerBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
 // NewDatePickerBlockElement returns an instance of a date picker element
 func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 	return &DatePickerBlockElement{
-		Type:     metDatepicker,
+		Type:     MetDatepicker,
 		ActionID: actionID,
 	}
 }
