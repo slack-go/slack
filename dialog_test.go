@@ -286,8 +286,7 @@ func openDialogHandler(rw http.ResponseWriter, r *http.Request) {
 func TestOpenDialog(t *testing.T) {
 	http.HandleFunc("/dialog.open", openDialogHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	dialog, err := unmarshalDialog()
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)

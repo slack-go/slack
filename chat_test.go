@@ -17,8 +17,7 @@ func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 func TestPostMessageInvalidChannel(t *testing.T) {
 	http.HandleFunc("/chat.postMessage", postMessageInvalidChannelHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, _, err := api.PostMessage("CXXXXXXXX", MsgOptionText("hello", false))
 	if err == nil {
 		t.Errorf("Expected error: channel_not_found; instead succeeded")
@@ -55,8 +54,7 @@ func TestGetPermalink(t *testing.T) {
 	})
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	pp := PermalinkParameters{Channel: channel, Ts: timeStamp}
 	pl, err := api.GetPermalink(&pp)
 

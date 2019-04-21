@@ -39,8 +39,7 @@ func (rh *remindersHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_AddReminder(t *testing.T) {
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		chanID     string
 		userID     string
@@ -121,8 +120,7 @@ func TestSlack_AddReminder(t *testing.T) {
 
 func TestSlack_DeleteReminder(t *testing.T) {
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		reminder   string
 		wantParams map[string]string

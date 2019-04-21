@@ -3,7 +3,6 @@ package slack
 import (
 	"context"
 	"encoding/json"
-	"errors"
 )
 
 // InputType is the type of the dialog input type
@@ -89,7 +88,7 @@ func (api *Client) OpenDialog(triggerID string, dialog Dialog) (err error) {
 // EXPERIMENTAL: dialog functionality is currently experimental, api is not considered stable.
 func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dialog Dialog) (err error) {
 	if triggerID == "" {
-		return errors.New("received empty parameters")
+		return ErrParametersMissing
 	}
 
 	req := DialogTrigger{
@@ -103,7 +102,7 @@ func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dial
 	}
 
 	response := &DialogOpenResponse{}
-	endpoint := APIURL + "dialog.open"
+	endpoint := api.endpoint + "dialog.open"
 	if err := postJSON(ctx, api.httpclient, endpoint, api.token, encoded, response, api); err != nil {
 		return err
 	}

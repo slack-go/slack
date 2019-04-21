@@ -48,8 +48,8 @@ func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
 }
 
 func TestSlack_GetFile(t *testing.T) {
-	APIURL = "http://" + serverAddr + "/"
 	api := &Client{
+		endpoint:   "http://" + serverAddr + "/",
 		token:      "testing-token",
 		httpclient: &mockHTTPClient{},
 	}
@@ -84,8 +84,7 @@ func TestSlack_GetFile(t *testing.T) {
 
 func TestSlack_DeleteFileComment(t *testing.T) {
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		title       string
 		body        url.Values
@@ -168,8 +167,7 @@ func TestUploadFile(t *testing.T) {
 	http.HandleFunc("/auth.test", authTestHandler)
 	http.HandleFunc("/files.upload", uploadFileHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := FileUploadParameters{
 		Filename: "test.txt", Content: "test content",
 		Channels: []string{"CXXXXXXXX"}}
@@ -197,8 +195,7 @@ func TestUploadFile(t *testing.T) {
 
 func TestUploadFileWithoutFilename(t *testing.T) {
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	reader := bytes.NewBufferString("test reader")
 	params := FileUploadParameters{

@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"sync"
 	"testing"
+
+	"github.com/nlopes/slack/slackutilsx"
 )
 
 var (
@@ -36,12 +38,12 @@ func setParseResponseHandler() {
 func TestParseResponse(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
+	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {validToken},
 	}
 	responsePartial := &SlackResponse{}
-	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -50,10 +52,10 @@ func TestParseResponse(t *testing.T) {
 func TestParseResponseNoToken(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
+	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{}
 	responsePartial := &SlackResponse{}
-	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -68,12 +70,12 @@ func TestParseResponseNoToken(t *testing.T) {
 func TestParseResponseInvalidToken(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
+	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {"whatever"},
 	}
 	responsePartial := &SlackResponse{}
-	err := postSlackMethod(context.Background(), http.DefaultClient, "parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -82,5 +84,21 @@ func TestParseResponseInvalidToken(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 	} else if responsePartial.Error != "invalid_auth" {
 		t.Errorf("got %v; want %v", responsePartial.Error, "invalid_auth")
+	}
+}
+
+func TestRetryable(t *testing.T) {
+	for _, e := range []error{
+		&RateLimitedError{},
+		statusCodeError{Code: http.StatusInternalServerError},
+		statusCodeError{Code: http.StatusTooManyRequests},
+	} {
+		r, ok := e.(slackutilsx.Retryable)
+		if !ok {
+			t.Errorf("expected %#v to implement Retryable", e)
+		}
+		if !r.Retryable() {
+			t.Errorf("expected %#v to be Retryable", e)
+		}
 	}
 }
