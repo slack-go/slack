@@ -6,6 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+type sumtype struct {
+	typeVal string `json:"type"`
+}
+
 // UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *Blocks) UnmarshalJSON(data []byte) error {
@@ -22,15 +26,15 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 
 	var blocks Blocks
 	for _, r := range raw {
-		var obj map[string]interface{}
-		err := json.Unmarshal(r, &obj)
+		s := sumtype{}
+		err := json.Unmarshal(r, &s)
 		if err != nil {
 			return err
 		}
 
 		var blockType string
-		if t, ok := obj["type"].(string); ok {
-			blockType = t
+		if s.typeVal != "" {
+			blockType = s.typeVal
 		}
 
 		var block Block
@@ -77,15 +81,15 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 
 	var blockElements BlockElements
 	for _, r := range raw {
-		var obj map[string]interface{}
-		err := json.Unmarshal(r, &obj)
+		s := sumtype{}
+		err := json.Unmarshal(r, &s)
 		if err != nil {
 			return err
 		}
 
 		var blockElementType string
-		if t, ok := obj["type"].(string); ok {
-			blockElementType = t
+		if s.typeVal != "" {
+			blockElementType = s.typeVal
 		}
 
 		var blockElement BlockElement
@@ -109,7 +113,7 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		blockElements.BlockElementSet = append(blockElements.BlockElementSet, blockElement)
+		blockElements.ElementSet = append(blockElements.ElementSet, blockElement)
 	}
 
 	*b = blockElements
@@ -141,15 +145,15 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var obj map[string]interface{}
-	err = json.Unmarshal(r, &obj)
+	s := sumtype{}
+	err = json.Unmarshal(r, &s)
 	if err != nil {
 		return err
 	}
 
 	var blockElementType string
-	if t, ok := obj["type"].(string); ok {
-		blockElementType = t
+	if s.typeVal != "" {
+		blockElementType = s.typeVal
 	}
 
 	switch blockElementType {
@@ -231,15 +235,15 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 	}
 
 	for _, r := range raw {
-		var obj map[string]interface{}
-		err := json.Unmarshal(r, &obj)
+		s := sumtype{}
+		err := json.Unmarshal(r, &s)
 		if err != nil {
 			return err
 		}
 
-		contextElementType := ""
-		if t, ok := obj["type"].(string); ok {
-			contextElementType = t
+		var contextElementType string
+		if s.typeVal != "" {
+			contextElementType = s.typeVal
 		}
 
 		switch contextElementType {
