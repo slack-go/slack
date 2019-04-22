@@ -152,9 +152,7 @@ func exampleThree() {
 
 	conflictSection := slack.NewContextBlock(
 		"",
-		slack.NewContextElements(
-			[]slack.MixedElement{conflictImage, conflictText},
-		),
+		[]slack.MixedElement{conflictImage, conflictText}...,
 	)
 
 	// Proposese Text
@@ -223,10 +221,7 @@ func exampleFour() {
 
 	// Option One Votes
 	optOneVoteText := slack.NewTextBlockObject("plain_text", "3 votes", true, false)
-	contextElements := slack.NewContextElements(
-		[]slack.MixedElement{profileOne, profileTwo, profileThree, optOneVoteText},
-	)
-	optOneContext := slack.NewContextBlock("", contextElements)
+	optOneContext := slack.NewContextBlock("", []slack.MixedElement{profileOne, profileTwo, profileThree, optOneVoteText}...)
 
 	// Option Two Info
 	optTwoText := slack.NewTextBlockObject("mrkdwn", ":hamburger: *Super Hungryman Hamburgers*\nOnly for the hungriest of the hungry.", false, false)
@@ -234,10 +229,7 @@ func exampleFour() {
 
 	// Option Two Votes
 	optTwoVoteText := slack.NewTextBlockObject("plain_text", "2 votes", true, false)
-	contextElements = slack.NewContextElements(
-		[]slack.MixedElement{profileFour, profileTwo, optTwoVoteText},
-	)
-	optTwoContext := slack.NewContextBlock("", contextElements)
+	optTwoContext := slack.NewContextBlock("", []slack.MixedElement{profileFour, profileTwo, optTwoVoteText}...)
 
 	// Option Three Info
 	optThreeText := slack.NewTextBlockObject("mrkdwn", ":ramen: *Kagawa-Ya Udon Noodle Shop*\nDo you like to shop for noodles? We have noodles.", false, false)
@@ -245,8 +237,7 @@ func exampleFour() {
 
 	// Option Three Votes
 	optThreeVoteText := slack.NewTextBlockObject("plain_text", "No votes", true, false)
-	contextElements = slack.NewContextElements([]slack.MixedElement{optThreeVoteText})
-	optThreeContext := slack.NewContextBlock("", contextElements)
+	optThreeContext := slack.NewContextBlock("", []slack.MixedElement{optThreeVoteText}...)
 
 	// Suggestions Action
 	btnTxt := slack.NewTextBlockObject("plain_text", "Add a suggestion", false, false)
@@ -310,38 +301,26 @@ func exampleFive() {
 	hotelOneImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_1.png", "Windsor Court Hotel thumbnail")
 	hotelOneLoc := slack.NewTextBlockObject("plain_text", "Location: Central Business District", true, false)
 
-	contextElements := slack.NewContextElements(
-		[]slack.MixedElement{locationPinImage, hotelOneLoc},
-	)
-
 	hotelOneSection := slack.NewSectionBlock(hotelOneInfo, nil, slack.NewAccessory(hotelOneImage))
-	hotelOneContext := slack.NewContextBlock("", contextElements)
+	hotelOneContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelOneLoc}...)
 
 	// Second Hotel Listing
 	hotelTwoInfo := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toHotelPage.com|The Ritz-Carlton New Orleans>*\n★★★★★\n$340 per night\nRated: 9.1 - Excellent", false, false)
 	hotelTwoImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_2.png", "Ritz-Carlton New Orleans thumbnail")
 	hotelTwoLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
-	contextElements = slack.NewContextElements(
-		[]slack.MixedElement{locationPinImage, hotelTwoLoc},
-	)
-
 	hotelTwoSection := slack.NewSectionBlock(hotelTwoInfo, nil, slack.NewAccessory(hotelTwoImage))
-	hotelTwoContext := slack.NewContextBlock("", contextElements)
+	hotelTwoContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelTwoLoc}...)
 
 	// Third Hotel Listing
 	hotelThreeInfo := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toHotelPage.com|Omni Royal Orleans Hotel>*\n★★★★★\n$419 per night\nRated: 8.8 - Excellent", false, false)
 	hotelThreeImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_3.png", "https://api.slack.com/img/blocks/bkb_template_images/tripAgent_3.png")
 	hotelThreeLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
-	contextElements = slack.NewContextElements(
-		[]slack.MixedElement{locationPinImage, hotelThreeLoc},
-	)
 	hotelThreeSection := slack.NewSectionBlock(hotelThreeInfo, nil, slack.NewAccessory(hotelThreeImage))
-	hotelThreeContext := slack.NewContextBlock("", contextElements)
+	hotelThreeContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelThreeLoc}...)
 
 	// Action button
-
 	btnTxt := slack.NewTextBlockObject("plain_text", "Next 2 Results", false, false)
 	nextBtn := slack.NewButtonBlockElement("", "click_me_123", btnTxt)
 	actionBlock := slack.NewActionBlock("", nextBtn)
