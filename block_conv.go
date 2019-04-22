@@ -65,6 +65,17 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
+func (b *BlockElements) MarshalJSON() ([]byte, error) {
+	bytes, err := json.Marshal(b.ElementSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
 // UnmarshalJSON implements the Unmarshaller interface for BlockElements, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *BlockElements) UnmarshalJSON(data []byte) error {
@@ -218,6 +229,17 @@ func toBlockElement(element *Accessory) BlockElement {
 	}
 
 	return nil
+}
+
+// MarshalJSON implements the Marshaller interface for ContextElements so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
+func (e *ContextElements) MarshalJSON() ([]byte, error) {
+	bytes, err := json.Marshal(e.Elements)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }
 
 // UnmarshalJSON implements the Unmarshaller interface for ContextElements, so that any JSON
