@@ -10,6 +10,17 @@ type sumtype struct {
 	TypeVal string `json:"type"`
 }
 
+// MarshalJSON implements the Marshaller interface for Blocks so that any JSON
+// marshalling is delegated and proper type determination can be made before marshal
+func (b *Blocks) MarshalJSON() ([]byte, error) {
+	bytes, err := json.Marshal(b.BlockSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
 // UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
 func (b *Blocks) UnmarshalJSON(data []byte) error {
