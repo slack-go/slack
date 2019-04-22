@@ -59,7 +59,7 @@ func NewAccessory(element BlockElement) *Accessory {
 // BlockElements is a convenience struct defined to allow dynamic unmarshalling of
 // the "elements" value in Slack's JSON response, which varies depending on BlockElement type
 type BlockElements struct {
-	BlockElementSet []BlockElement `json:"elements"`
+	ElementSet []BlockElement `json:"elements"`
 }
 
 // ImageBlockElement An element to insert an image - this element can be used
@@ -85,7 +85,7 @@ func (s ImageBlockElement) MixedElementType() MixedElementType {
 // NewImageBlockElement returns a new instance of an image block element
 func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	return &ImageBlockElement{
-		Type:     MetImage,
+		Type:     METImage,
 		ImageURL: imageURL,
 		AltText:  altText,
 	}
@@ -113,7 +113,7 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
 func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *ButtonBlockElement {
 	return &ButtonBlockElement{
-		Type:     MetButton,
+		Type:     METButton,
 		ActionID: actionID,
 		Text:     text,
 		Value:    value,
@@ -187,7 +187,7 @@ func (s OverflowBlockElement) ElementType() MessageElementType {
 // NewOverflowBlockElement returns an instance of a new Overflow Block Element
 func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *OverflowBlockElement {
 	return &OverflowBlockElement{
-		Type:     MetOverflow,
+		Type:     METOverflow,
 		ActionID: actionID,
 		Options:  options,
 	}
@@ -214,7 +214,7 @@ func (s DatePickerBlockElement) ElementType() MessageElementType {
 // NewDatePickerBlockElement returns an instance of a date picker element
 func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 	return &DatePickerBlockElement{
-		Type:     MetDatepicker,
+		Type:     METDatepicker,
 		ActionID: actionID,
 	}
 }

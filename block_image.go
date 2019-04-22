@@ -19,7 +19,7 @@ func (s ImageBlock) BlockType() MessageBlockType {
 // NewImageBlock returns an instance of a new Image Block type
 func NewImageBlock(imageURL, altText, blockID string, title *TextBlockObject) *ImageBlock {
 	return &ImageBlock{
-		Type:     MbtImage,
+		Type:     MBTImage,
 		ImageURL: imageURL,
 		AltText:  altText,
 		BlockID:  blockID,

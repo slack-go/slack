@@ -115,21 +115,6 @@ func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, e
 	return object, nil
 }
 
-func (o *BlockObjects) appendToBlockObjects(appendObjects []blockObject) {
-	for _, object := range appendObjects {
-		switch object.(type) {
-		case *TextBlockObject:
-			o.TextObjects = append(o.TextObjects, object.(*TextBlockObject))
-		case *ConfirmationBlockObject:
-			o.ConfirmationObjects = append(o.ConfirmationObjects, object.(*ConfirmationBlockObject))
-		case *OptionBlockObject:
-			o.OptionObjects = append(o.OptionObjects, object.(*OptionBlockObject))
-		case *OptionGroupBlockObject:
-			o.OptionGroupObjects = append(o.OptionGroupObjects, object.(*OptionGroupBlockObject))
-		}
-	}
-}
-
 // TextBlockObject defines a text element object to be used with blocks
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#text

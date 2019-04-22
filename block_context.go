@@ -19,18 +19,14 @@ type ContextElements struct {
 	Elements []MixedElement
 }
 
-// NewContextElements is a convenience method for generating ContextElements
-func NewContextElements(elements []MixedElement) ContextElements {
-	return ContextElements{
-		Elements: elements,
-	}
-}
-
 // NewContextBlock returns a new instance of a context block
-func NewContextBlock(blockID string, elements ContextElements) *ContextBlock {
+func NewContextBlock(blockID string, mixedElements ...MixedElement) *ContextBlock {
+	elements := ContextElements{
+		Elements: mixedElements,
+	}
 	return &ContextBlock{
-		Type:     MbtContext,
-		BlockID:  blockID,
-		Elements: elements,
+		Type:            MBTContext,
+		BlockID:         blockID,
+		ContextElements: elements,
 	}
 }
