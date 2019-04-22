@@ -249,14 +249,14 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 				return err
 			}
 
-			e.ContextElementSet = append(e.ContextElementSet, elem.(*TextBlockObject))
+			e.Elements = append(e.Elements, elem.(*TextBlockObject))
 		case "image":
 			elem, err := unmarshalBlockElement(r, &ImageBlockElement{})
 			if err != nil {
 				return err
 			}
 
-			e.ContextElementSet = append(e.ContextElementSet, elem.(*ImageBlockElement))
+			e.Elements = append(e.Elements, elem.(*ImageBlockElement))
 		default:
 			return errors.New("unsupported context element type")
 		}
