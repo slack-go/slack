@@ -3,10 +3,10 @@ package slack
 // https://api.slack.com/reference/messaging/block-elements
 
 const (
-	MetImage      MessageElementType = "image"
-	MetButton     MessageElementType = "button"
-	MetOverflow   MessageElementType = "overflow"
-	MetDatepicker MessageElementType = "datepicker"
+	METImage      MessageElementType = "image"
+	METButton     MessageElementType = "button"
+	METOverflow   MessageElementType = "overflow"
+	METDatepicker MessageElementType = "datepicker"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
