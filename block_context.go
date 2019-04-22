@@ -5,9 +5,9 @@ package slack
 //
 // More Information: https://api.slack.com/reference/messaging/blocks#actions
 type ContextBlock struct {
-	Type     MessageBlockType `json:"type"`
-	BlockID  string           `json:"block_id,omitempty"`
-	Elements ContextElements  `json:"elements"`
+	Type            MessageBlockType `json:"type"`
+	BlockID         string           `json:"block_id,omitempty"`
+	ContextElements ContextElements  `json:"elements"`
 }
 
 // BlockType returns the type of the block
@@ -16,13 +16,13 @@ func (s ContextBlock) BlockType() MessageBlockType {
 }
 
 type ContextElements struct {
-	ContextElementSet []MixedElement
+	Elements []MixedElement
 }
 
 // NewContextElements is a convenience method for generating ContextElements
-func NewContextElements(contextElements []MixedElement) ContextElements {
+func NewContextElements(elements []MixedElement) ContextElements {
 	return ContextElements{
-		ContextElementSet: contextElements,
+		Elements: elements,
 	}
 }
 
