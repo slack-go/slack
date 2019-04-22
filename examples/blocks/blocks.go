@@ -420,3 +420,114 @@ func exampleSix() {
 	fmt.Println(string(b))
 
 }
+
+func unmarshalExample() {
+	var msgBlocks []slack.Block
+
+	// Append ActionBlock for marshalling
+	btnTxt := slack.NewTextBlockObject("plain_text", "Add a suggestion", false, false)
+	nextBtn := slack.NewButtonBlockElement("", "click_me_123", btnTxt)
+	approveBtnTxt := slack.NewTextBlockObject("plain_text", "Approve", false, false)
+	approveBtn := slack.NewButtonBlockElement("", "click_me_123", approveBtnTxt)
+	msgBlocks = append(msgBlocks, slack.NewActionBlock("", nextBtn, approveBtn))
+
+	// Append ContextBlock for marshalling
+	profileOne := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/profile_1.png", "Michael Scott")
+	profileTwo := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/profile_2.png", "Dwight Schrute")
+	textBlockObj := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toHotelPage.com|Omni Royal Orleans Hotel>*\n★★★★★\n$419 per night\nRated: 8.8 - Excellent", false, false)
+	msgBlocks = append(msgBlocks, slack.NewContextBlock("", []slack.MixedElement{profileOne, profileTwo, textBlockObj}...))
+
+	// Append ImageBlock for marshalling
+	msgBlocks = append(msgBlocks, slack.NewImageBlock("https://api.slack.com/img/blocks/bkb_template_images/profile_2.png", "some profile", "image-block", textBlockObj))
+
+	// Append DividerBlock for marshalling
+	msgBlocks = append(msgBlocks, slack.NewDividerBlock())
+
+	// Append SectionBlock for marshalling
+	approvalText := slack.NewTextBlockObject("mrkdwn", "*Type:*\nPaid time off\n*When:*\nAug 10-Aug 13\n*Hours:* 16.0 (2 days)\n*Remaining balance:* 32.0 hours (4 days)\n*Comments:* \"Family in town, going camping!\"", false, false)
+	approvalImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png", "computer thumbnail")
+	msgBlocks = append(msgBlocks, slack.NewSectionBlock(approvalText, nil, slack.NewAccessory(approvalImage)))
+
+	// Build Message with blocks created above
+	msg := slack.NewBlockMessage(msgBlocks...)
+
+	b, err := json.Marshal(&msg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(string(b))
+
+	// Unmarshal message
+	m := slack.Message{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var respBlocks []slack.Block
+	for _, block := range m.Blocks.BlockSet {
+		// Need to implement a type switch to determine Block type since the
+		// response from Slack could include any/all types under "blocks" key
+		switch block.BlockType() {
+		case slack.MBTContext:
+			var respMixedElements []slack.MixedElement
+			contextElements := block.(*slack.ContextBlock).ContextElements.Elements
+			// Need to implement a type switch for ContextElements for same reason as Blocks
+			for _, elem := range contextElements {
+				switch elem.MixedElementType() {
+				case slack.MixedElementImage:
+					// Assert the block's type to manipulate/extract values
+					imageBlockElem := elem.(*slack.ImageBlockElement)
+					imageBlockElem.ImageURL = "https://api.slack.com/img/blocks/bkb_template_images/profile_1.png"
+					imageBlockElem.AltText = "MichaelScott"
+					respMixedElements = append(respMixedElements, imageBlockElem)
+				case slack.MixedElementText:
+					textBlockElem := elem.(*slack.TextBlockObject)
+					textBlockElem.Text = "go go go go go"
+					respMixedElements = append(respMixedElements, textBlockElem)
+				}
+			}
+			respBlocks = append(respBlocks, slack.NewContextBlock("new block", respMixedElements...))
+		case slack.MBTAction:
+			actionBlock := block.(*slack.ActionBlock)
+			// Need to implement a type switch for BlockElements for same reason as Blocks
+			for _, elem := range actionBlock.Elements.ElementSet {
+				switch elem.ElementType() {
+				case slack.METImage:
+					imageElem := elem.(*slack.ImageBlockElement)
+					fmt.Printf("do something with image block element: %v\n", imageElem)
+				case slack.METButton:
+					buttonElem := elem.(*slack.ButtonBlockElement)
+					fmt.Printf("do something with button block element: %v\n", buttonElem)
+				case slack.METOverflow:
+					overflowElem := elem.(*slack.OverflowBlockElement)
+					fmt.Printf("do something with overflow block element: %v\n", overflowElem)
+				case slack.METDatepicker:
+					datepickerElem := elem.(*slack.DatePickerBlockElement)
+					fmt.Printf("do something with datepicker block element: %v\n", datepickerElem)
+				}
+			}
+			respBlocks = append(respBlocks, block)
+		case slack.MBTImage:
+			// Simply re-append the block if you want to include it in the response
+			respBlocks = append(respBlocks, block)
+		case slack.MBTSection:
+			respBlocks = append(respBlocks, block)
+		case slack.MBTDivider:
+			respBlocks = append(respBlocks, block)
+		}
+	}
+
+	// Build new Message with Blocks obtained/edited from callback
+	respMsg := slack.NewBlockMessage(respBlocks...)
+
+	b, err = json.Marshal(&respMsg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(string(b))
+}
