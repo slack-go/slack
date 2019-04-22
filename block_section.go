@@ -19,7 +19,7 @@ func (s SectionBlock) BlockType() MessageBlockType {
 // NewSectionBlock returns a new instance of a section block to be rendered
 func NewSectionBlock(textObj *TextBlockObject, fields []*TextBlockObject, accessory *Accessory) *SectionBlock {
 	return &SectionBlock{
-		Type:      MbtSection,
+		Type:      MBTSection,
 		Text:      textObj,
 		Fields:    fields,
 		Accessory: accessory,
