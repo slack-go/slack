@@ -7,7 +7,7 @@ import (
 )
 
 type sumtype struct {
-	typeVal string `json:"type"`
+	TypeVal string `json:"type"`
 }
 
 // UnmarshalJSON implements the Unmarshaller interface for Blocks, so that any JSON
@@ -33,8 +33,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 		}
 
 		var blockType string
-		if s.typeVal != "" {
-			blockType = s.typeVal
+		if s.TypeVal != "" {
+			blockType = s.TypeVal
 		}
 
 		var block Block
@@ -88,8 +88,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 		}
 
 		var blockElementType string
-		if s.typeVal != "" {
-			blockElementType = s.typeVal
+		if s.TypeVal != "" {
+			blockElementType = s.TypeVal
 		}
 
 		var blockElement BlockElement
@@ -152,8 +152,8 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 	}
 
 	var blockElementType string
-	if s.typeVal != "" {
-		blockElementType = s.typeVal
+	if s.TypeVal != "" {
+		blockElementType = s.TypeVal
 	}
 
 	switch blockElementType {
@@ -242,8 +242,8 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 		}
 
 		var contextElementType string
-		if s.typeVal != "" {
-			contextElementType = s.typeVal
+		if s.TypeVal != "" {
+			contextElementType = s.TypeVal
 		}
 
 		switch contextElementType {
