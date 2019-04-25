@@ -293,12 +293,20 @@ func (api *Client) GetChannelsContext(ctx context.Context, excludeArchived bool,
 			return nil, err
 		}
 	}
-
-	response, err := api.channelRequest(ctx, "channels.list", config.values)
-	if err != nil {
-		return nil, err
+	var channels []Channel
+	for {
+		response, err := api.channelRequest(ctx, "channels.list", config.values)
+		if err != nil {
+			return nil, err
+		}
+		channels = append(channels, response.Channels...)
+		if response.SlackResponse.Metadata.NextCursor == "" {
+			break
+		}
+		config.values.Add("cursor", response.SlackResponse.Metadata.NextCursor)
 	}
-	return response.Channels, nil
+
+	return channels, nil
 }
 
 // SetChannelReadMark sets the read mark of a given channel to a specific point

@@ -21,8 +21,13 @@ import (
 
 // SlackResponse handles parsing out errors from the web api.
 type SlackResponse struct {
-	Ok    bool   `json:"ok"`
-	Error string `json:"error"`
+	Ok       bool                  `json:"ok"`
+	Error    string                `json:"error"`
+	Metadata SlackResponseMetatada `json:"response_metadata"`
+}
+
+type SlackResponseMetatada struct {
+	NextCursor string `json:"next_cursor"`
 }
 
 func (t SlackResponse) Err() error {
