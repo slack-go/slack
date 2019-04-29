@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/MattDavisRV/slack"
+	"github.com/nlopes/slack"
 )
 
 func scheduleMessageExample() {
@@ -13,15 +13,6 @@ func scheduleMessageExample() {
 	attachment := slack.Attachment{
 		Pretext: "some pretext",
 		Text:    "some text",
-		// Uncomment the following part to send a field too
-		/*
-			Fields: []slack.AttachmentField{
-				slack.AttachmentField{
-					Title: "a",
-					Value: "no",
-				},
-			},
-		*/
 	}
 
 	// Schedule message for 15 minutes from now

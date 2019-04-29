@@ -179,7 +179,7 @@ func (api *Client) PostScheduledMessage(channelID string, timestamp string, opti
 		context.Background(),
 		channelID,
 		timestamp,
-		MsgOptionCompose(options...),
+		options...,
 	)
 	return respChannel, respTimestamp, err
 }
