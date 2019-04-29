@@ -180,6 +180,7 @@ func assertSimpleIM(t *testing.T, im *IM) {
 	assert.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
 	assert.Equal(t, true, im.IsIM)
+	assert.Equal(t, "U024BE7LH", im.User)
 	assert.Equal(t, JSONTime(1360782804), im.Created)
 	assert.Equal(t, false, im.IsUserDeleted)
 	assert.Equal(t, true, im.IsOpen)
@@ -192,6 +193,7 @@ func TestCreateSimpleIM(t *testing.T) {
 	im := &IM{}
 	im.ID = "D024BFF1M"
 	im.IsIM = true
+	im.User = "U024BE7LH"
 	im.Created = JSONTime(1360782804)
 	im.IsUserDeleted = false
 	im.IsOpen = true
@@ -222,8 +224,7 @@ func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
 func TestGetUsersInConversation(t *testing.T) {
 	http.HandleFunc("/conversations.members", getUsersInConversation)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetUsersInConversationParameters{
 		ChannelID: "CXXXXXXXX",
 	}
@@ -243,8 +244,7 @@ func TestGetUsersInConversation(t *testing.T) {
 func TestArchiveConversation(t *testing.T) {
 	http.HandleFunc("/conversations.archive", okJSONHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.ArchiveConversation("CXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -255,8 +255,7 @@ func TestArchiveConversation(t *testing.T) {
 func TestUnArchiveConversation(t *testing.T) {
 	http.HandleFunc("/conversations.unarchive", okJSONHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.UnArchiveConversation("CXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -266,7 +265,7 @@ func TestUnArchiveConversation(t *testing.T) {
 
 func getTestChannel() *Channel {
 	return &Channel{
-		groupConversation: groupConversation{
+		GroupConversation: GroupConversation{
 			Topic: Topic{
 				Value: "response topic",
 			},
@@ -291,8 +290,7 @@ func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
 func TestSetTopicOfConversation(t *testing.T) {
 	http.HandleFunc("/conversations.setTopic", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	inputChannel := getTestChannel()
 	channel, err := api.SetTopicOfConversation("CXXXXXXXX", inputChannel.Topic.Value)
 	if err != nil {
@@ -307,8 +305,7 @@ func TestSetTopicOfConversation(t *testing.T) {
 func TestSetPurposeOfConversation(t *testing.T) {
 	http.HandleFunc("/conversations.setPurpose", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	inputChannel := getTestChannel()
 	channel, err := api.SetPurposeOfConversation("CXXXXXXXX", inputChannel.Purpose.Value)
 	if err != nil {
@@ -323,8 +320,7 @@ func TestSetPurposeOfConversation(t *testing.T) {
 func TestRenameConversation(t *testing.T) {
 	http.HandleFunc("/conversations.rename", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	inputChannel := getTestChannel()
 	channel, err := api.RenameConversation("CXXXXXXXX", inputChannel.Name)
 	if err != nil {
@@ -339,8 +335,7 @@ func TestRenameConversation(t *testing.T) {
 func TestInviteUsersToConversation(t *testing.T) {
 	http.HandleFunc("/conversations.invite", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	users := []string{"UXXXXXXX1", "UXXXXXXX2"}
 	channel, err := api.InviteUsersToConversation("CXXXXXXXX", users...)
 	if err != nil {
@@ -356,8 +351,7 @@ func TestInviteUsersToConversation(t *testing.T) {
 func TestKickUserFromConversation(t *testing.T) {
 	http.HandleFunc("/conversations.kick", okJSONHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.KickUserFromConversation("CXXXXXXXX", "UXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -379,8 +373,7 @@ func closeConversationHandler(rw http.ResponseWriter, r *http.Request) {
 func TestCloseConversation(t *testing.T) {
 	http.HandleFunc("/conversations.close", closeConversationHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, _, err := api.CloseConversation("CXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -391,8 +384,7 @@ func TestCloseConversation(t *testing.T) {
 func TestCreateConversation(t *testing.T) {
 	http.HandleFunc("/conversations.create", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	channel, err := api.CreateConversation("CXXXXXXXX", false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -407,8 +399,7 @@ func TestCreateConversation(t *testing.T) {
 func TestGetConversationInfo(t *testing.T) {
 	http.HandleFunc("/conversations.info", okChannelJsonHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	channel, err := api.GetConversationInfo("CXXXXXXXX", false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -433,8 +424,7 @@ func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {
 func TestLeaveConversation(t *testing.T) {
 	http.HandleFunc("/conversations.leave", leaveConversationHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, err := api.LeaveConversation("CXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -460,8 +450,7 @@ func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
 func TestGetConversationReplies(t *testing.T) {
 	http.HandleFunc("/conversations.replies", getConversationRepliesHander)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetConversationRepliesParameters{
 		ChannelID: "CXXXXXXXX",
 		Timestamp: "1234567890.123456",
@@ -490,8 +479,7 @@ func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
 func TestGetConversations(t *testing.T) {
 	http.HandleFunc("/conversations.list", getConversationsHander)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetConversationsParameters{}
 	_, _, err := api.GetConversations(&params)
 	if err != nil {
@@ -515,8 +503,7 @@ func openConversationHandler(rw http.ResponseWriter, r *http.Request) {
 func TestOpenConversation(t *testing.T) {
 	http.HandleFunc("/conversations.open", openConversationHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := OpenConversationParameters{ChannelID: "CXXXXXXXX"}
 	_, _, _, err := api.OpenConversation(&params)
 	if err != nil {
@@ -542,8 +529,7 @@ func joinConversationHandler(rw http.ResponseWriter, r *http.Request) {
 func TestJoinConversation(t *testing.T) {
 	http.HandleFunc("/conversations.join", joinConversationHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, _, _, err := api.JoinConversation("CXXXXXXXX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -561,8 +547,7 @@ func getConversationHistoryHandler(rw http.ResponseWriter, r *http.Request) {
 func TestGetConversationHistory(t *testing.T) {
 	http.HandleFunc("/conversations.history", getConversationHistoryHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetConversationHistoryParameters{ChannelID: "CXXXXXXXX"}
 	_, err := api.GetConversationHistory(&params)
 	if err != nil {

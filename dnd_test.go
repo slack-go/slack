@@ -12,8 +12,7 @@ func TestSlack_EndDND(t *testing.T) {
 		w.Write([]byte(`{ "ok": true }`))
 	})
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.EndDND()
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -36,8 +35,7 @@ func TestSlack_EndSnooze(t *testing.T) {
 		SnoozeInfo:         SnoozeInfo{SnoozeEnabled: false},
 	}
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	snoozeState, err := api.EndSnooze()
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -72,8 +70,7 @@ func TestSlack_GetDNDInfo(t *testing.T) {
 		},
 	}
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	userDNDInfoResponse, err := api.GetDNDInfo(nil)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -116,8 +113,7 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
 		},
 	}
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	usersDNDInfoResponse, err := api.GetDNDTeamInfo(nil)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
@@ -146,8 +142,7 @@ func TestSlack_SetSnooze(t *testing.T) {
 		},
 	}
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	snoozeResponse, err := api.SetSnooze(60)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)

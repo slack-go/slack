@@ -67,6 +67,7 @@ func getTestUser() User {
 		IsPrimaryOwner:    false,
 		IsRestricted:      false,
 		IsUltraRestricted: false,
+		Updated:           1555425715,
 		Has2FA:            false,
 	}
 }
@@ -182,8 +183,7 @@ func TestGetUserIdentity(t *testing.T) {
 	http.HandleFunc("/users.identity", getUserIdentity)
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	identity, err := api.GetUserIdentity()
 	if err != nil {
@@ -223,8 +223,7 @@ func TestGetUserInfo(t *testing.T) {
 	expectedUser := getTestUser()
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	user, err := api.GetUserInfo("UXXXXXXXX")
 	if err != nil {
@@ -241,8 +240,7 @@ func TestGetUserByEmail(t *testing.T) {
 	expectedUser := getTestUser()
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	user, err := api.GetUserByEmail("test@test.com")
 	if err != nil {
@@ -262,8 +260,7 @@ func TestUserCustomStatus(t *testing.T) {
 	http.HandleFunc("/users.profile.set", setUserProfile)
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	testSetUserCustomStatus(api, up, t)
 	testUnsetUserCustomStatus(api, up, t)
@@ -310,8 +307,7 @@ func TestGetUsers(t *testing.T) {
 	expectedUser := getTestUser()
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	users, err := api.GetUsers()
 	if err != nil {
@@ -362,8 +358,7 @@ func TestSetUserPhoto(t *testing.T) {
 	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
 
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New(validToken)
+	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	err := api.SetUserPhoto(file.Name(), params)
 	if err != nil {
@@ -469,8 +464,7 @@ func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
 func TestGetUserProfile(t *testing.T) {
 	http.HandleFunc("/users.profile.get", getUserProfileHandler)
 	once.Do(startServer)
-	APIURL = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	profile, err := api.GetUserProfile("UXXXXXXXX", false)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)

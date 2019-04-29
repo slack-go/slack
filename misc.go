@@ -48,21 +48,31 @@ type statusCodeError struct {
 }
 
 func (t statusCodeError) Error() string {
-	// TODO: this is a bad error string, should clean it up with a breaking changes
-	// merger.
-	return fmt.Sprintf("Slack server error: %s.", t.Status)
+	return fmt.Sprintf("slack server error: %s", t.Status)
 }
 
 func (t statusCodeError) HTTPStatusCode() int {
 	return t.Code
 }
 
+func (t statusCodeError) Retryable() bool {
+	if t.Code >= 500 || t.Code == http.StatusTooManyRequests {
+		return true
+	}
+	return false
+}
+
+// RateLimitedError represents the rate limit respond from slack
 type RateLimitedError struct {
 	RetryAfter time.Duration
 }
 
 func (e *RateLimitedError) Error() string {
-	return fmt.Sprintf("Slack rate limit exceeded, retry after %s", e.RetryAfter)
+	return fmt.Sprintf("slack rate limit exceeded, retry after %s", e.RetryAfter)
+}
+
+func (e *RateLimitedError) Retryable() bool {
+	return true
 }
 
 func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Reader) (*http.Request, error) {
@@ -154,7 +164,7 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 			return
 		}
 	}()
-	req, err := fileUploadReq(ctx, APIURL+path, values, pipeReader)
+	req, err := fileUploadReq(ctx, path, values, pipeReader)
 	if err != nil {
 		return err
 	}
@@ -219,16 +229,6 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 	return doPost(ctx, client, req, intf, d)
 }
 
-// post to a slack web method.
-func postSlackMethod(ctx context.Context, client httpClient, path string, values url.Values, intf interface{}, d debug) error {
-	return postForm(ctx, client, APIURL+path, values, intf, d)
-}
-
-// get a slack web method.
-func getSlackMethod(ctx context.Context, client httpClient, path string, values url.Values, intf interface{}, d debug) error {
-	return getResource(ctx, client, APIURL+path, values, intf, d)
-}
-
 func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
@@ -263,12 +263,6 @@ func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 		Ok: true,
 	})
 	rw.Write(response)
-}
-
-type errorString string
-
-func (t errorString) Error() string {
-	return string(t)
 }
 
 // timerReset safely reset a timer, see time.Timer.Reset for details.
