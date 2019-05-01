@@ -32,6 +32,14 @@ func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	}
 }
 
+type Style string
+
+const (
+	StyleDefault Style = "default"
+	StylePrimary Style = "primary"
+	StyleDanger  Style = "danger"
+)
+
 // ButtonBlockElement defines an interactive element that inserts a button. The
 // button can be a trigger for anything from opening a simple link to starting
 // a complex workflow.
@@ -44,11 +52,17 @@ type ButtonBlockElement struct {
 	URL      string                   `json:"url,omitempty"`
 	Value    string                   `json:"value,omitempty"`
 	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
+	Style    Style                    `json:"style,omitempty"`
 }
 
 // validateType enforces block objects for block parameters
 func (s ButtonBlockElement) blockType() MessageElementType {
 	return s.Type
+}
+
+// add styling to button object
+func (s ButtonBlockElement) WithStyle(style Style) {
+	s.Style = style
 }
 
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
