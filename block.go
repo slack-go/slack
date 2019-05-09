@@ -25,7 +25,7 @@ type Block interface {
 // Blocks is a convenience struct defined to allow dynamic unmarshalling of
 // the "blocks" value in Slack's JSON response, which varies depending on block type
 type Blocks struct {
-	BlockSet []Block `json:"blocks"`
+	BlockSet []Block `json:"blocks,omitempty"`
 }
 
 // BlockAction is the action callback sent when a block is interacted with
