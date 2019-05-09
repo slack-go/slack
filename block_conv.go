@@ -26,7 +26,7 @@ func (b *Blocks) MarshalJSON() ([]byte, error) {
 func (b *Blocks) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 
-	if string(data) == "{\"blocks\":null}" {
+	if string(data) == "{}" {
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func (b *BlockElements) MarshalJSON() ([]byte, error) {
 func (b *BlockElements) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 
-	if string(data) == "{\"elements\":null}" {
+	if string(data) == "{}" {
 		return nil
 	}
 
