@@ -120,7 +120,7 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 }
 
 // add styling to button object
-func (s ButtonBlockElement) WithStyle(style Style) {
+func (s *ButtonBlockElement) WithStyle(style Style) {
 	s.Style = style
 }
 
