@@ -12,7 +12,7 @@ type sumtype struct {
 
 // MarshalJSON implements the Marshaller interface for Blocks so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
-func (b *Blocks) MarshalJSON() ([]byte, error) {
+func (b Blocks) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(b.BlockSet)
 	if err != nil {
 		return nil, err

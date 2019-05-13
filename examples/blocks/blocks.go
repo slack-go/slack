@@ -37,6 +37,9 @@ func main() {
 	exampleSix()
 	fmt.Println("--- End Example Six ---")
 
+	fmt.Println("--- Begin Example Unmarshalling ---")
+	unmarshalExample()
+	fmt.Println("--- End Example Unmarshalling ---")
 }
 
 // approvalRequest mocks the simple "Approval" template located on block kit builder website
