@@ -17,10 +17,11 @@ func (s SectionBlock) BlockType() MessageBlockType {
 }
 
 // NewSectionBlock returns a new instance of a section block to be rendered
-func NewSectionBlock(textObj *TextBlockObject, fields []*TextBlockObject, accessory *Accessory) *SectionBlock {
+func NewSectionBlock(blockID string, textObj *TextBlockObject, fields []*TextBlockObject, accessory *Accessory) *SectionBlock {
 	return &SectionBlock{
 		Type:      MBTSection,
 		Text:      textObj,
+		BlockID:   blockID,
 		Fields:    fields,
 		Accessory: accessory,
 	}
