@@ -197,7 +197,7 @@ func (s OptionBlockObject) validateType() MessageObjectType {
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#option-group
 type OptionGroupBlockObject struct {
-	Label   *TextBlockObject     `json:"label"`
+	Label   *TextBlockObject     `json:"label,omitempty"`
 	Options []*OptionBlockObject `json:"options"`
 }
 
