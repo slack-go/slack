@@ -113,6 +113,17 @@ type PinAddedEvent pinEvent
 // PinRemovedEvent An item was unpinned from a channel - https://api.slack.com/events/pin_removed
 type PinRemovedEvent pinEvent
 
+type tokens struct {
+	Oauth []string `json:"oauth"`
+	Bot   []string `json:"bot"`
+}
+
+// TokensRevokedEvent APP's API tokes are revoked - https://api.slack.com/events/tokens_revoked
+type TokensRevokedEvent struct {
+	Type   string `json:"type"`
+	Tokens tokens `json:"tokens"`
+}
+
 // JSONTime exists so that we can have a String method converting the date
 type JSONTime int64
 
@@ -233,6 +244,8 @@ const (
 	PinAdded = "pin_added"
 	// PinRemoved An item was unpinned from a channel
 	PinRemoved = "pin_removed"
+	// TokensRevoked APP's API tokes are revoked
+	TokensRevoked = "tokens_revoked"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -248,4 +261,5 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	MemberJoinedChannel:   MemberJoinedChannelEvent{},
 	PinAdded:              PinAddedEvent{},
 	PinRemoved:            PinRemovedEvent{},
+	TokensRevoked:         TokensRevokedEvent{},
 }

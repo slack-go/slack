@@ -200,3 +200,36 @@ func TestPinRemoved(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTokensRevoked(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type": "tokens_revoked",
+		"tokens": {
+				"oauth": [
+						"OUXXXXXXXX"
+				],
+				"bot": [
+						"BUXXXXXXXX"
+				]
+		}
+	}
+`)
+	tre := TokensRevokedEvent{}
+	err := json.Unmarshal(rawE, &tre)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if tre.Type != "tokens_revoked" {
+		t.Fail()
+	}
+
+	if len(tre.Tokens.Bot) != 1 || tre.Tokens.Bot[0] != "BUXXXXXXXX" {
+		t.Fail()
+	}
+
+	if len(tre.Tokens.Oauth) != 1 || tre.Tokens.Oauth[0] != "OUXXXXXXXX" {
+		t.Fail()
+	}
+}
