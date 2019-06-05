@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -11,20 +13,28 @@ import (
 
 func main() {
 	var (
-		verificationToken string
+		signingSecret string
 	)
 
-	flag.StringVar(&verificationToken, "token", "YOUR_VERIFICATION_TOKEN_HERE", "Your Slash Verification Token")
+	flag.StringVar(&signingSecret, "secret", "YOUR_SIGNING_SECRET_HERE", "Your Slack app's signing secret")
 	flag.Parse()
 
 	http.HandleFunc("/slash", func(w http.ResponseWriter, r *http.Request) {
+
+		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &verifier))
 		s, err := slack.SlashCommandParse(r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		if !s.ValidateToken(verificationToken) {
+		if err = verifier.Ensure(); err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
