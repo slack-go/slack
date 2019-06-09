@@ -148,7 +148,7 @@ type SelectBlockElement struct {
 	InitialUser         string                    `json:"initial_user,omitempty"`
 	InitialConversation string                    `json:"initial_conversation,omitempty"`
 	InitialChannel      string                    `json:"initial_channel,omitempty"`
-	MinQueryLength      string                    `json:"min_query_length,omitempty"`
+	MinQueryLength      int                       `json:"min_query_length,omitempty"`
 	Confirm             *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
