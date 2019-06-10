@@ -3,8 +3,8 @@ package slack
 // TextInputSubtype Accepts email, number, tel, or url. In some form factors, optimized input is provided for this subtype.
 type TextInputSubtype string
 
-// TextInputOption hndle to optional inputs
-type TextInputOption func(*TextInputOption)
+// TextInputOption handle to extra inputs options.
+type TextInputOption func(*TextInputElement)
 
 const (
 	// InputSubtypeEmail email keyboard
@@ -40,7 +40,7 @@ func NewTextInput(name, label, text string, options ...TextInputOption) *TextInp
 	}
 
 	for _, opt := range options {
-		opt(&t)
+		opt(t)
 	}
 
 	return t
