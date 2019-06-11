@@ -176,8 +176,8 @@ type StarredItemPagination struct {
 // ListStarsOption options for the GetUsers method call.
 type ListStarsOption func(*StarredItemPagination)
 
-// ListStarredAll returns the complete list of starred items
-func (api *Client) ListStarredAll() ([]Item, error) {
+// ListAllStars returns the complete list of starred items
+func (api *Client) ListAllStars() ([]Item, error) {
 	return api.ListStarsPaginatedContext(context.Background())
 }
 
