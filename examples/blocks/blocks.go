@@ -47,7 +47,7 @@ func exampleOne() {
 
 	// Header Section
 	headerText := slack.NewTextBlockObject("mrkdwn", "You have a new request:\n*<fakeLink.toEmployeeProfile.com|Fred Enriquez - New device request>*", false, false)
-	headerSection := slack.NewSectionBlock("", headerText, nil, nil)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil, nil)
 
 	// Fields
 	typeField := slack.NewTextBlockObject("mrkdwn", "*Type:*\nComputer (laptop)", false, false)
@@ -63,7 +63,7 @@ func exampleOne() {
 	fieldSlice = append(fieldSlice, reasonField)
 	fieldSlice = append(fieldSlice, specsField)
 
-	fieldsSection := slack.NewSectionBlock("", nil, fieldSlice, nil)
+	fieldsSection := slack.NewSectionBlock(nil, fieldSlice, nil, nil)
 
 	// Approve and Deny Buttons
 	approveBtnTxt := slack.NewTextBlockObject("plain_text", "Approve", false, false)
@@ -98,12 +98,12 @@ func exampleTwo() {
 
 	// Header Section
 	headerText := slack.NewTextBlockObject("mrkdwn", "You have a new request:\n*<google.com|Fred Enriquez - Time Off request>*", false, false)
-	headerSection := slack.NewSectionBlock("", headerText, nil, nil)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil, nil)
 
 	approvalText := slack.NewTextBlockObject("mrkdwn", "*Type:*\nPaid time off\n*When:*\nAug 10-Aug 13\n*Hours:* 16.0 (2 days)\n*Remaining balance:* 32.0 hours (4 days)\n*Comments:* \"Family in town, going camping!\"", false, false)
 	approvalImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png", "computer thumbnail")
 
-	fieldsSection := slack.NewSectionBlock("", approvalText, nil, slack.NewAccessory(approvalImage))
+	fieldsSection := slack.NewSectionBlock(approvalText, nil, slack.NewAccessory(approvalImage), nil)
 
 	// Approve and Deny Buttons
 	approveBtnTxt := slack.NewTextBlockObject("plain_text", "Approve", false, false)
@@ -142,12 +142,12 @@ func exampleThree() {
 
 	// Header Section
 	headerText := slack.NewTextBlockObject("plain_text", "Looks like you have a scheduling conflict with this event:", false, false)
-	headerSection := slack.NewSectionBlock("", headerText, nil, nil)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil, nil)
 
 	// Schedule Info Section
 	scheduleText := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toUserProfiles.com|Iris / Zelda 1-1>*\nTuesday, January 21 4:00-4:30pm\nBuilding 2 - Havarti Cheese (3)\n2 guests", false, false)
 	scheduleAccessory := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/notifications.png", "calendar thumbnail")
-	schedeuleSection := slack.NewSectionBlock("", scheduleText, nil, slack.NewAccessory(scheduleAccessory))
+	schedeuleSection := slack.NewSectionBlock(scheduleText, nil, slack.NewAccessory(scheduleAccessory), nil)
 
 	// Conflict Section
 	conflictImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png", "notifications warning icon")
@@ -160,23 +160,23 @@ func exampleThree() {
 
 	// Proposese Text
 	proposeText := slack.NewTextBlockObject("mrkdwn", "*Propose a new time:*", false, false)
-	proposeSection := slack.NewSectionBlock("", proposeText, nil, nil)
+	proposeSection := slack.NewSectionBlock(proposeText, nil, nil, nil)
 
 	// Option 1
 	optionOneText := slack.NewTextBlockObject("mrkdwn", "*Today - 4:30-5pm*\nEveryone is available: @iris, @zelda", false, false)
-	optionOneSection := slack.NewSectionBlock("", optionOneText, nil, slack.NewAccessory(chooseBtnEle))
+	optionOneSection := slack.NewSectionBlock(optionOneText, nil, slack.NewAccessory(chooseBtnEle), nil)
 
 	// Option 2
 	optionTwoText := slack.NewTextBlockObject("mrkdwn", "*Tomorrow - 4-4:30pm*\nEveryone is available: @iris, @zelda", false, false)
-	optionTwoSection := slack.NewSectionBlock("", optionTwoText, nil, slack.NewAccessory(chooseBtnEle))
+	optionTwoSection := slack.NewSectionBlock(optionTwoText, nil, slack.NewAccessory(chooseBtnEle), nil)
 
 	// Option 3
 	optionThreeText := slack.NewTextBlockObject("mrkdwn", "*Tomorrow - 6-6:30pm*\nSome people aren't available: @iris, ~@zelda~", false, false)
-	optionThreeSection := slack.NewSectionBlock("", optionThreeText, nil, slack.NewAccessory(chooseBtnEle))
+	optionThreeSection := slack.NewSectionBlock(optionThreeText, nil, slack.NewAccessory(chooseBtnEle), nil)
 
 	// Show More Times Link
 	showMoreText := slack.NewTextBlockObject("mrkdwn", "*<fakelink.ToMoreTimes.com|Show more times>*", false, false)
-	showMoreSection := slack.NewSectionBlock("", showMoreText, nil, nil)
+	showMoreSection := slack.NewSectionBlock(showMoreText, nil, nil, nil)
 
 	// Build Message with blocks created above
 	msg := slack.NewBlockMessage(
@@ -216,11 +216,11 @@ func exampleFour() {
 
 	// Header Section
 	headerText := slack.NewTextBlockObject("mrkdwn", "*Where should we order lunch from?* Poll by <fakeLink.toUser.com|Mark>", false, false)
-	headerSection := slack.NewSectionBlock("", headerText, nil, nil)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil, nil)
 
 	// Option One Info
 	optOneText := slack.NewTextBlockObject("mrkdwn", ":sushi: *Ace Wasabi Rock-n-Roll Sushi Bar*\nThe best landlocked sushi restaurant.", false, false)
-	optOneSection := slack.NewSectionBlock("", optOneText, nil, slack.NewAccessory(voteBtnEle))
+	optOneSection := slack.NewSectionBlock(optOneText, nil, slack.NewAccessory(voteBtnEle), nil)
 
 	// Option One Votes
 	optOneVoteText := slack.NewTextBlockObject("plain_text", "3 votes", true, false)
@@ -228,7 +228,7 @@ func exampleFour() {
 
 	// Option Two Info
 	optTwoText := slack.NewTextBlockObject("mrkdwn", ":hamburger: *Super Hungryman Hamburgers*\nOnly for the hungriest of the hungry.", false, false)
-	optTwoSection := slack.NewSectionBlock("", optTwoText, nil, slack.NewAccessory(voteBtnEle))
+	optTwoSection := slack.NewSectionBlock(optTwoText, nil, slack.NewAccessory(voteBtnEle), nil)
 
 	// Option Two Votes
 	optTwoVoteText := slack.NewTextBlockObject("plain_text", "2 votes", true, false)
@@ -236,7 +236,7 @@ func exampleFour() {
 
 	// Option Three Info
 	optThreeText := slack.NewTextBlockObject("mrkdwn", ":ramen: *Kagawa-Ya Udon Noodle Shop*\nDo you like to shop for noodles? We have noodles.", false, false)
-	optThreeSection := slack.NewSectionBlock("", optThreeText, nil, slack.NewAccessory(voteBtnEle))
+	optThreeSection := slack.NewSectionBlock(optThreeText, nil, slack.NewAccessory(voteBtnEle), nil)
 
 	// Option Three Votes
 	optThreeVoteText := slack.NewTextBlockObject("plain_text", "No votes", true, false)
@@ -291,7 +291,7 @@ func exampleFive() {
 	overflow := slack.NewOverflowBlockElement("", overflowOptionOne, overflowOptionTwo, overflowOptionThree)
 
 	// Create the header section
-	headerSection := slack.NewSectionBlock("", headerText, nil, slack.NewAccessory(overflow))
+	headerSection := slack.NewSectionBlock(headerText, nil, slack.NewAccessory(overflow), nil)
 
 	// Shared Divider
 	divSection := slack.NewDividerBlock()
@@ -304,7 +304,7 @@ func exampleFive() {
 	hotelOneImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_1.png", "Windsor Court Hotel thumbnail")
 	hotelOneLoc := slack.NewTextBlockObject("plain_text", "Location: Central Business District", true, false)
 
-	hotelOneSection := slack.NewSectionBlock("", hotelOneInfo, nil, slack.NewAccessory(hotelOneImage))
+	hotelOneSection := slack.NewSectionBlock(hotelOneInfo, nil, slack.NewAccessory(hotelOneImage), nil)
 	hotelOneContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelOneLoc}...)
 
 	// Second Hotel Listing
@@ -312,7 +312,7 @@ func exampleFive() {
 	hotelTwoImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_2.png", "Ritz-Carlton New Orleans thumbnail")
 	hotelTwoLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
-	hotelTwoSection := slack.NewSectionBlock("", hotelTwoInfo, nil, slack.NewAccessory(hotelTwoImage))
+	hotelTwoSection := slack.NewSectionBlock(hotelTwoInfo, nil, slack.NewAccessory(hotelTwoImage), nil)
 	hotelTwoContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelTwoLoc}...)
 
 	// Third Hotel Listing
@@ -320,7 +320,7 @@ func exampleFive() {
 	hotelThreeImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgent_3.png", "https://api.slack.com/img/blocks/bkb_template_images/tripAgent_3.png")
 	hotelThreeLoc := slack.NewTextBlockObject("plain_text", "Location: French Quarter", true, false)
 
-	hotelThreeSection := slack.NewSectionBlock("", hotelThreeInfo, nil, slack.NewAccessory(hotelThreeImage))
+	hotelThreeSection := slack.NewSectionBlock(hotelThreeInfo, nil, slack.NewAccessory(hotelThreeImage), nil)
 	hotelThreeContext := slack.NewContextBlock("", []slack.MixedElement{locationPinImage, hotelThreeLoc}...)
 
 	// Action button
@@ -373,27 +373,27 @@ func exampleSix() {
 
 	// Header Section
 	headerText := slack.NewTextBlockObject("mrkdwn", ":mag: Search results for *Cata*", false, false)
-	headerSection := slack.NewSectionBlock("", headerText, nil, nil)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil, nil)
 
 	// Result One
 	resultOneTxt := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toYourApp.com|Use Case Catalogue>*\nUse Case Catalogue for the following departments/roles...", false, false)
-	resultOneSection := slack.NewSectionBlock("", resultOneTxt, nil, slack.NewAccessory(availableOption))
+	resultOneSection := slack.NewSectionBlock(resultOneTxt, nil, slack.NewAccessory(availableOption), nil)
 
 	// Result Two
 	resultTwoTxt := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toYourApp.com|Customer Support - Workflow Diagram Catalogue>*\nThis resource was put together by members of...", false, false)
-	resultTwoSection := slack.NewSectionBlock("", resultTwoTxt, nil, slack.NewAccessory(availableOption))
+	resultTwoSection := slack.NewSectionBlock(resultTwoTxt, nil, slack.NewAccessory(availableOption), nil)
 
 	// Result Three
 	resultThreeTxt := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toYourApp.com|Self-Serve Learning Options Catalogue>*\nSee the learning and development options we...", false, false)
-	resultThreeSection := slack.NewSectionBlock("", resultThreeTxt, nil, slack.NewAccessory(availableOption))
+	resultThreeSection := slack.NewSectionBlock(resultThreeTxt, nil, slack.NewAccessory(availableOption), nil)
 
 	// Result Four
 	resultFourTxt := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toYourApp.com|Use Case Catalogue - CF Presentation - [June 12, 2018]>*\nThis is presentation will continue to be updated as...", false, false)
-	resultFourSection := slack.NewSectionBlock("", resultFourTxt, nil, slack.NewAccessory(availableOption))
+	resultFourSection := slack.NewSectionBlock(resultFourTxt, nil, slack.NewAccessory(availableOption), nil)
 
 	// Result Five
 	resultFiveTxt := slack.NewTextBlockObject("mrkdwn", "*<fakeLink.toYourApp.com|Comprehensive Benefits Catalogue - 2019>*\nInformation about all the benfits we offer is...", false, false)
-	resultFiveSection := slack.NewSectionBlock("", resultFiveTxt, nil, slack.NewAccessory(availableOption))
+	resultFiveSection := slack.NewSectionBlock(resultFiveTxt, nil, slack.NewAccessory(availableOption), nil)
 
 	// Next Results Button
 	// Suggestions Action
@@ -449,7 +449,7 @@ func unmarshalExample() {
 	// Append SectionBlock for marshalling
 	approvalText := slack.NewTextBlockObject("mrkdwn", "*Type:*\nPaid time off\n*When:*\nAug 10-Aug 13\n*Hours:* 16.0 (2 days)\n*Remaining balance:* 32.0 hours (4 days)\n*Comments:* \"Family in town, going camping!\"", false, false)
 	approvalImage := slack.NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/approvalsNewDevice.png", "computer thumbnail")
-	msgBlocks = append(msgBlocks, slack.NewSectionBlock("", approvalText, nil, slack.NewAccessory(approvalImage)))
+	msgBlocks = append(msgBlocks, slack.NewSectionBlock(approvalText, nil, slack.NewAccessory(approvalImage)), nil)
 
 	// Build Message with blocks created above
 	msg := slack.NewBlockMessage(msgBlocks...)
