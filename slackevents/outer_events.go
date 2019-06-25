@@ -35,6 +35,7 @@ type EventsAPICallbackEvent struct {
 	APIAppID    string           `json:"api_app_id"`
 	InnerEvent  *json.RawMessage `json:"event"`
 	AuthedUsers []string         `json:"authed_users"`
+	AuthedTeams []string         `json:"authed_teams"`
 	EventID     string           `json:"event_id"`
 	EventTime   int              `json:"event_time"`
 }
