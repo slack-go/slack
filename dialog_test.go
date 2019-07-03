@@ -39,7 +39,7 @@ var simpleSelectElement = `{
 	"optional": true,
 	"value": "testing value",
 	"data_source": "users",
-	"selected_options": "",
+	"selected_options": [],
 	"options": [{"label": "option 1", "value": "1"}],
 	"option_groups": []
 }`
@@ -104,7 +104,7 @@ func TestCreateSimpleDialog(t *testing.T) {
 	selectElement.Optional = true
 	selectElement.Value = "testing value"
 	selectElement.DataSource = "users"
-	selectElement.SelectedOptions = ""
+	selectElement.SelectedOptions = []DialogSelectOption{}
 	selectElement.Options = []DialogSelectOption{
 		{Label: "option 1", Value: "1"},
 	}
@@ -149,7 +149,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.Equal(t, true, selectElement.Optional)
 	assert.Equal(t, "testing value", selectElement.Value)
 	assert.Equal(t, DialogDataSourceUsers, selectElement.DataSource)
-	assert.Equal(t, "", selectElement.SelectedOptions)
+	assert.Equal(t, []DialogSelectOption{}, selectElement.SelectedOptions)
 	assert.Equal(t, "option 1", selectElement.Options[0].Label)
 	assert.Equal(t, "1", selectElement.Options[0].Value)
 	assert.Equal(t, 0, len(selectElement.OptionGroups))
@@ -159,26 +159,26 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 var simpleCallback = `{
     "type": "dialog_submission",
     "submission": {
-        "name": "Sigourney Dreamweaver",
-        "email": "sigdre@example.com",
-        "phone": "+1 800-555-1212",
-        "meal": "burrito",
-        "comment": "No sour cream please",
-        "team_channel": "C0LFFBKPB",
-        "who_should_sing": "U0MJRG1AL"
+	"name": "Sigourney Dreamweaver",
+	"email": "sigdre@example.com",
+	"phone": "+1 800-555-1212",
+	"meal": "burrito",
+	"comment": "No sour cream please",
+	"team_channel": "C0LFFBKPB",
+	"who_should_sing": "U0MJRG1AL"
     },
     "callback_id": "employee_offsite_1138b",
     "team": {
-        "id": "T1ABCD2E12",
-        "domain": "coverbands"
+	"id": "T1ABCD2E12",
+	"domain": "coverbands"
     },
     "user": {
-        "id": "W12A3BCDEF",
-        "name": "dreamweaver"
+	"id": "W12A3BCDEF",
+	"name": "dreamweaver"
     },
     "channel": {
-        "id": "C1AB2C3DE",
-        "name": "coverthon-1999"
+	"id": "C1AB2C3DE",
+	"name": "coverthon-1999"
     },
     "action_ts": "936893340.702759",
     "token": "M1AqUUw3FqayAbqNtsGMch72",
