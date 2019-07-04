@@ -13,7 +13,7 @@ const (
 	// APIURL of the slack api.
 	APIURL = "https://slack.com/api/"
 	// WEBAPIURLFormat ...
-	WEBAPIURLFormat = "https://%s.slack.com/api/users.admin.%s?t=%d"
+	WEBAPIURLFormat = "%sapi/"
 )
 
 // httpClient defines the minimal interface needed for an http.Client to be implemented.
@@ -52,11 +52,12 @@ type authTestResponseFull struct {
 
 // Client for the slack api.
 type Client struct {
-	token      string
-	endpoint   string
-	debug      bool
-	log        ilogger
-	httpclient httpClient
+	token             string
+	endpoint          string
+	webendpointformat string
+	debug             bool
+	log               ilogger
+	httpclient        httpClient
 }
 
 // Option defines an option for a Client
@@ -91,10 +92,11 @@ func OptionAPIURL(u string) func(*Client) {
 // New builds a slack client from the provided token and options.
 func New(token string, options ...Option) *Client {
 	s := &Client{
-		token:      token,
-		endpoint:   APIURL,
-		httpclient: &http.Client{},
-		log:        log.New(os.Stderr, "nlopes/slack", log.LstdFlags|log.Lshortfile),
+		token:             token,
+		endpoint:          APIURL,
+		webendpointformat: WEBAPIURLFormat,
+		httpclient:        &http.Client{},
+		log:               log.New(os.Stderr, "nlopes/slack", log.LstdFlags|log.Lshortfile),
 	}
 
 	for _, opt := range options {
@@ -140,12 +142,46 @@ func (api *Client) Debug() bool {
 	return api.debug
 }
 
+// check that APIURL is WEBAPIURL
+func isWEBAPI(APIURL string) bool {
+	WEBAPIs := []string{
+		"emoji.add",
+	}
+
+	for _, v := range WEBAPIs {
+		if APIURL == v {
+			return true
+		}
+	}
+	return false
+}
+
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	if isWEBAPI(path) {
+		workspace, err := api.AuthTest()
+		if err != nil {
+			return err
+		}
+		endpoint := fmt.Sprintf(api.webendpointformat, workspace.URL)
+
+		return postForm(ctx, api.httpclient, endpoint+path, values, intf, api)
+	} else {
+		return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	}
 }
 
 // get a slack web method.
 func (api *Client) getMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	if isWEBAPI(path) {
+		workspace, err := api.AuthTest()
+		if err != nil {
+			return err
+		}
+		endpoint := fmt.Sprintf(api.webendpointformat, workspace.URL)
+
+		return postForm(ctx, api.httpclient, endpoint+path, values, intf, api)
+	} else {
+		return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	}
 }
