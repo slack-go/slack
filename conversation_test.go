@@ -432,7 +432,7 @@ func TestLeaveConversation(t *testing.T) {
 	}
 }
 
-func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
+func getConversationRepliesHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
@@ -448,7 +448,7 @@ func getConversationRepliesHander(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetConversationReplies(t *testing.T) {
-	http.HandleFunc("/conversations.replies", getConversationRepliesHander)
+	http.HandleFunc("/conversations.replies", getConversationRepliesHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetConversationRepliesParameters{
@@ -462,7 +462,7 @@ func TestGetConversationReplies(t *testing.T) {
 	}
 }
 
-func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
+func getConversationsHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
@@ -477,7 +477,7 @@ func getConversationsHander(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetConversations(t *testing.T) {
-	http.HandleFunc("/conversations.list", getConversationsHander)
+	http.HandleFunc("/conversations.list", getConversationsHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := GetConversationsParameters{}
