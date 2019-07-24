@@ -12,6 +12,7 @@ type channelResponseFull struct {
 	Purpose      string    `json:"purpose"`
 	Topic        string    `json:"topic"`
 	NotInChannel bool      `json:"not_in_channel"`
+	Ok           bool      `json:"ok"`
 	History
 	SlackResponse
 }

@@ -28,6 +28,9 @@ type chatResponseFull struct {
 	Timestamp        string `json:"ts"`         //Regualr message timestamp
 	MessageTimeStamp string `json:"message_ts"` //Ephemeral message timestamp
 	Text             string `json:"text"`
+	Message          struct {
+		Text string `json:"text"`
+	} `json:"message"`
 	SlackResponse
 }
 
@@ -170,7 +173,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	return response.Channel, response.getMessageTimestamp(), response.Message.Text, response.Err()
 }
 
 // UnsafeApplyMsgOptions utility function for debugging/testing chat requests.
