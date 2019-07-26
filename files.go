@@ -90,7 +90,8 @@ type File struct {
 }
 
 type Share struct {
-	Public map[string][]ShareFileInfo `json:"public"`
+	Public  map[string][]ShareFileInfo `json:"public"`
+	Private map[string][]ShareFileInfo `json:"private"`
 }
 
 type ShareFileInfo struct {
