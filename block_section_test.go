@@ -19,3 +19,18 @@ func TestNewSectionBlock(t *testing.T) {
 	assert.Contains(t, sectionBlock.Text.Text, "New Orleans")
 
 }
+
+func TestNewBlockSectionContainsAddedTextBlockAndAccessory(t *testing.T) {
+	textBlockObject := NewTextBlockObject("mrkdwn", "You have a new test: *Hi there* :wave:", true, false)
+	conflictImage := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png", "notifications warning icon")
+	sectionBlock := NewSectionBlock(textBlockObject, nil, NewAccessory(conflictImage))
+
+	assert.Equal(t, sectionBlock.BlockType(), MBTSection)
+	assert.Equal(t, len(sectionBlock.BlockID), 0)
+	textBlockInSection := sectionBlock.Text
+	assert.Equal(t, textBlockInSection.Text, textBlockObject.Text)
+	assert.Equal(t, textBlockInSection.Type, textBlockObject.Type)
+	assert.True(t, textBlockInSection.Emoji)
+	assert.False(t, textBlockInSection.Verbatim)
+	assert.Equal(t, sectionBlock.Accessory.ImageElement, conflictImage)
+}
