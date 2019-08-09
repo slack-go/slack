@@ -355,7 +355,7 @@ func (api *Client) GetUsersContext(ctx context.Context) (results []User, err err
 		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
 			select {
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				err = ctx.Err()
 			case <-time.After(rateLimitedError.RetryAfter):
 				err = nil
 			}
