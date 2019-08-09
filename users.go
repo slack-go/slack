@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 const (
@@ -346,12 +347,19 @@ func (api *Client) GetUsers() ([]User, error) {
 
 // GetUsersContext returns the list of users (with their detailed information) with a custom context
 func (api *Client) GetUsersContext(ctx context.Context) (results []User, err error) {
-	var (
-		p UserPagination
-	)
-
-	for p = api.GetUsersPaginated(); !p.Done(err); p, err = p.Next(ctx) {
-		results = append(results, p.Users...)
+	p := api.GetUsersPaginated()
+	for err == nil {
+		p, err = p.Next(ctx)
+		if err == nil {
+			results = append(results, p.Users...)
+		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(rateLimitedError.RetryAfter):
+				err = nil
+			}
+		}
 	}
 
 	return results, p.Failure(err)
