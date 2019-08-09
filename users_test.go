@@ -50,9 +50,9 @@ func getTestUserProfile() UserProfile {
 	}
 }
 
-func getTestUser() User {
+func getTestUserWithId(id string) User {
 	return User{
-		ID:                "UXXXXXXXX",
+		ID:                id,
 		Name:              "Test User",
 		Deleted:           false,
 		Color:             "9f69e7",
@@ -70,6 +70,10 @@ func getTestUser() User {
 		Updated:           1555425715,
 		Has2FA:            false,
 	}
+}
+
+func getTestUser() User {
+	return getTestUserWithId("UXXXXXXXX")
 }
 
 func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
@@ -303,8 +307,8 @@ func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 }
 
 func TestGetUsers(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/users.list", getUserPage(4))
-	expectedUser := getTestUser()
 
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
@@ -315,7 +319,12 @@ func TestGetUsers(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual([]User{expectedUser, expectedUser, expectedUser, expectedUser}, users) {
+	if !reflect.DeepEqual([]User{
+		getTestUserWithId("U000"),
+		getTestUserWithId("U001"),
+		getTestUserWithId("U002"),
+		getTestUserWithId("U003"),
+	}, users) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
@@ -329,7 +338,45 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 			Ok: true,
 		}
 		members := []User{
-			getTestUser(),
+			getTestUserWithId(fmt.Sprintf("U%03d", n)),
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+			response, _ := json.Marshal(userResponseFull{
+				SlackResponse: sresp,
+				Members:       members,
+			})
+			rw.Write(response)
+			return
+		}
+		response, _ := json.Marshal(userResponseFull{
+			SlackResponse: sresp,
+			Members:       members,
+			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
+		})
+		rw.Write(response)
+	}
+}
+
+// returns n pages of users and sends rate limited errors in between successful pages.
+func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *http.Request) {
+	var n int64
+	doRateLimit := false
+	return func(rw http.ResponseWriter, r *http.Request) {
+		defer func() {
+			doRateLimit = !doRateLimit
+		}()
+		if doRateLimit {
+			rw.Header().Set("Retry-After", "1")
+			rw.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		var cpage int64
+		sresp := SlackResponse{
+			Ok: true,
+		}
+		members := []User{
+			getTestUserWithId(fmt.Sprintf("U%03d", n)),
 		}
 		rw.Header().Set("Content-Type", "application/json")
 		if cpage = atomic.AddInt64(&n, 1); cpage == max {
@@ -551,5 +598,50 @@ func TestUserProfileCustomFieldsSetMap(t *testing.T) {
 	fields.SetMap(m)
 	if !reflect.DeepEqual(fields.fields, m) {
 		t.Fatalf(`fields.fields = %v, wanted %v`, fields.fields, m)
+	}
+}
+
+func TestGetUsersHandlesRateLimit(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/users.list", getUserPagesWithRateLimitErrors(4))
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	users, err := api.GetUsers()
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual([]User{
+		getTestUserWithId("U000"),
+		getTestUserWithId("U001"),
+		getTestUserWithId("U002"),
+		getTestUserWithId("U003"),
+	}, users) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUsersReturnsServerError(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	_, err := api.GetUsers()
+
+	if err == nil {
+		t.Errorf("Expected error but got nil")
+		return
+	}
+
+	expectedErr := "slack server error: 500 Internal Server Error"
+	if err.Error() != expectedErr {
+		t.Errorf("Expected: %s. Got: %s", expectedErr, err.Error())
 	}
 }
