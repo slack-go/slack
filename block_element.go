@@ -148,7 +148,7 @@ type SelectBlockElement struct {
 	InitialUser         string                    `json:"initial_user,omitempty"`
 	InitialConversation string                    `json:"initial_conversation,omitempty"`
 	InitialChannel      string                    `json:"initial_channel,omitempty"`
-	MinQueryLength      int                       `json:"min_query_length,omitempty"`
+	MinQueryLength      int                       `json:"min_query_length"` // Slack defaults to 3.
 	Confirm             *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
@@ -165,6 +165,8 @@ func NewOptionsSelectBlockElement(optType string, placeholder *TextBlockObject, 
 		Placeholder: placeholder,
 		ActionID:    actionID,
 		Options:     options,
+
+		MinQueryLength: 3, // Slack default value
 	}
 }
 
@@ -181,6 +183,8 @@ func NewOptionsGroupSelectBlockElement(
 		Placeholder:  placeholder,
 		ActionID:     actionID,
 		OptionGroups: optGroups,
+
+		MinQueryLength: 3, // Slack default value
 	}
 }
 

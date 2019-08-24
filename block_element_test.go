@@ -36,6 +36,7 @@ func TestNewOptionsSelectBlockElement(t *testing.T) {
 	option := NewOptionsSelectBlockElement("static_select", nil, "test", testOption)
 	assert.Equal(t, option.Type, "static_select")
 	assert.Equal(t, len(option.Options), 1)
+	assert.Equal(t, option.MinQueryLength, 3)
 	assert.Nil(t, option.OptionGroups)
 
 }
@@ -52,6 +53,7 @@ func TestNewOptionsGroupSelectBlockElement(t *testing.T) {
 	assert.Equal(t, string(optGroup.Type), "static_select")
 	assert.Equal(t, optGroup.ActionID, "test")
 	assert.Equal(t, len(optGroup.OptionGroups), 1)
+	assert.Equal(t, optGroup.MinQueryLength, 3)
 
 }
 
