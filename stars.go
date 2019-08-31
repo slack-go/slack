@@ -178,11 +178,11 @@ type ListStarsOption func(*StarredItemPagination)
 
 // ListAllStars returns the complete list of starred items
 func (api *Client) ListAllStars() ([]Item, error) {
-	return api.ListStarsPaginatedContext(context.Background())
+	return api.ListAllStarsContext(context.Background())
 }
 
-// ListStarsPaginatedContext returns the list of users (with their detailed information) with a custom context
-func (api *Client) ListStarsPaginatedContext(ctx context.Context) (results []Item, err error) {
+// ListAllStarsContext returns the list of users (with their detailed information) with a custom context
+func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err error) {
 	var p StarredItemPagination
 
 	for p = api.ListStarsPaginated(); !p.done(err); p, err = p.next(ctx) {
