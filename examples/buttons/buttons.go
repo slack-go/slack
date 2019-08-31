@@ -42,7 +42,7 @@ func main() {
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
-	var payload slack.AttachmentActionCallback
+	var payload slack.InteractionCallback
 	err := json.Unmarshal([]byte(r.FormValue("payload")), &payload)
 	if err != nil {
 		fmt.Printf("Could not parse action response JSON: %v", err)
