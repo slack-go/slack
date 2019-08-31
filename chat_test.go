@@ -2,7 +2,9 @@ package slack
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"testing"
 )
 
@@ -15,6 +17,7 @@ func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestPostMessageInvalidChannel(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/chat.postMessage", postMessageInvalidChannelHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
@@ -65,4 +68,33 @@ func TestGetPermalink(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected error returned: %v", err)
 	}
+}
+
+func TestPostMessageWithBlocks(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/chat.postMessage", func(rw http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		form, err := url.ParseQuery(string(body))
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		actualBlocks := form.Get("blocks")
+		expectedBlocks := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
+		if expectedBlocks != actualBlocks {
+			t.Errorf("expected: %s, got: %s", expectedBlocks, actualBlocks)
+			return
+		}
+	})
+
+	once.Do(startServer)
+	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
+
+	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+
+	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(blocks...), MsgOptionText("text", false))
 }
