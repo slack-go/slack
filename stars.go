@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 const (
@@ -183,10 +184,24 @@ func (api *Client) ListAllStars() ([]Item, error) {
 
 // ListAllStarsContext returns the list of users (with their detailed information) with a custom context
 func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err error) {
-	var p StarredItemPagination
+	// var p StarredItemPagination
 
-	for p = api.ListStarsPaginated(); !p.done(err); p, err = p.next(ctx) {
-		results = append(results, p.Items...)
+	// for p = api.ListStarsPaginated(); !p.done(err); p, err = p.next(ctx) {
+	// 	results = append(results, p.Items...)
+	// }
+	p := api.ListStarsPaginated()
+	for err == nil {
+		p, err = p.next(ctx)
+		if err == nil {
+			results = append(results, p.Items...)
+		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case <-time.After(rateLimitedError.RetryAfter):
+				err = nil
+			}
+		}
 	}
 
 	return results, p.failure(err)
