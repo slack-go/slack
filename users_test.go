@@ -40,13 +40,13 @@ func getTestUserProfile() UserProfile {
 		RealNameNormalized:    "Test Real Name Normalized",
 		DisplayName:           "Test Display Name",
 		DisplayNameNormalized: "Test Display Name Normalized",
-		Email:                 "test@test.com",
-		Image24:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
-		Image32:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
-		Image48:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
-		Image72:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
-		Image192:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
-		Fields:                getTestUserProfileCustomFields(),
+		Email:    "test@test.com",
+		Image24:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
+		Image32:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
+		Image48:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
+		Image72:  "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
+		Image192: "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Fields:   getTestUserProfileCustomFields(),
 	}
 }
 
@@ -162,6 +162,15 @@ func newProfileHandler(up *UserProfile) (setter func(http.ResponseWriter, *http.
 
 		values := r.Form
 
+		if len(values["user"]) == 0 {
+			httpTestErrReply(w, true, `POST data must include a "user" field`)
+			return
+		}
+		if up.RealName != "" && values["user"][0] != up.RealName {
+			httpTestErrReply(w, true, fmt.Sprintf(`POST data field "user" expected to be %q but got %q`, up.RealName, values["user"][0]))
+			return
+		}
+
 		if len(values["profile"]) == 0 {
 			httpTestErrReply(w, true, `POST data must include a "profile" field`)
 			return
@@ -268,6 +277,9 @@ func TestUserCustomStatus(t *testing.T) {
 
 	testSetUserCustomStatus(api, up, t)
 	testUnsetUserCustomStatus(api, up, t)
+
+	up.RealName = "Test User"
+	testSetUserCustomStatusWithUser(api, "Test User", up, t)
 }
 
 func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
@@ -278,6 +290,28 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 	)
 	if err := api.SetUserCustomStatus(statusText, statusEmoji, statusExpiration); err != nil {
 		t.Fatalf(`SetUserCustomStatus(%q, %q, %q) = %#v, want <nil>`, statusText, statusEmoji, statusExpiration, err)
+	}
+
+	if up.StatusText != statusText {
+		t.Fatalf(`UserProfile.StatusText = %q, want %q`, up.StatusText, statusText)
+	}
+
+	if up.StatusEmoji != statusEmoji {
+		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, statusEmoji)
+	}
+	if up.StatusExpiration != statusExpiration {
+		t.Fatalf(`UserProfile.StatusExpiration = %q, want %q`, up.StatusExpiration, statusExpiration)
+	}
+}
+
+func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, t *testing.T) {
+	const (
+		statusText       = "testStatus"
+		statusEmoji      = ":construction:"
+		statusExpiration = 1551619082
+	)
+	if err := api.SetUserCustomStatusWithUser(user, statusText, statusEmoji, statusExpiration); err != nil {
+		t.Fatalf(`SetUserCustomStatusWithUser(%q, %q, %q, %q) = %#v, want <nil>`, user, statusText, statusEmoji, statusExpiration, err)
 	}
 
 	if up.StatusText != statusText {
