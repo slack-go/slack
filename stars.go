@@ -184,11 +184,6 @@ func (api *Client) ListAllStars() ([]Item, error) {
 
 // ListAllStarsContext returns the list of users (with their detailed information) with a custom context
 func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err error) {
-	// var p StarredItemPagination
-
-	// for p = api.ListStarsPaginated(); !p.done(err); p, err = p.next(ctx) {
-	// 	results = append(results, p.Items...)
-	// }
 	p := api.ListStarsPaginated()
 	for err == nil {
 		p, err = p.next(ctx)
