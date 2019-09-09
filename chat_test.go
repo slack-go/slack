@@ -71,33 +71,70 @@ func TestGetPermalink(t *testing.T) {
 	}
 }
 
-func TestPostMessageWithBlocks(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/chat.postMessage", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			return
-		}
-		form, err := url.ParseQuery(string(body))
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			return
-		}
-		actualBlocks := form.Get("blocks")
-		expectedBlocks := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
-		if expectedBlocks != actualBlocks {
-			t.Errorf("expected: %s, got: %s", expectedBlocks, actualBlocks)
-			return
-		}
-	})
+func TestPostMessage(t *testing.T) {
+	type messageTest struct {
+		opt      []MsgOption
+		expected url.Values
+	}
+
+	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
+
+	tests := map[string]messageTest{
+		"Blocks": {
+			opt: []MsgOption{
+				MsgOptionBlocks(blocks...),
+				MsgOptionText("text", false),
+			},
+			expected: url.Values{
+				"blocks":  []string{blockStr},
+				"channel": []string{"CXXX"},
+				"text":    []string{"text"},
+				"token":   []string{"testing-token"},
+			},
+		},
+		"Attachment": {
+			opt: []MsgOption{
+				MsgOptionAttachments(
+					Attachment{
+						Text:   "text",
+						Blocks: blocks,
+					}),
+			},
+			expected: url.Values{
+				"attachments": []string{`[{"fallback":"","text":"text","blocks":` + blockStr + `}]`},
+				"channel":     []string{"CXXX"},
+				"token":       []string{"testing-token"},
+			},
+		},
+	}
 
 	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
-	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			http.DefaultServeMux = new(http.ServeMux)
+			http.HandleFunc("/chat.postMessage", func(rw http.ResponseWriter, r *http.Request) {
+				body, err := ioutil.ReadAll(r.Body)
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+				actual, err := url.ParseQuery(string(body))
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+				if !reflect.DeepEqual(actual, test.expected) {
+					t.Errorf("\nexpected: %s\n  actual: %s", test.expected, actual)
+					return
+				}
+			})
 
-	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(blocks...), MsgOptionText("text", false))
+			_, _, _ = api.PostMessage("CXXX", test.opt...)
+		})
+	}
 }
 
 func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
