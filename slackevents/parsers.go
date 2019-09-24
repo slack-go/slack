@@ -212,12 +212,12 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 	}, nil
 }
 
-func ParseActionEvent(payloadString string, opts ...Option) (MessageAction, error) {
+func ParseActionEvent(payloadString string, opts ...Option) (slack.InteractionCallback, error) {
 	byteString := []byte(payloadString)
-	action := MessageAction{}
+	action := slack.InteractionCallback{}
 	err := json.Unmarshal(byteString, &action)
 	if err != nil {
-		return MessageAction{}, errors.New("MessageAction unmarshalling failed")
+		return slack.InteractionCallback{}, errors.New("InteractionCallback unmarshalling failed")
 	}
 
 	cfg := &Config{}
@@ -227,7 +227,7 @@ func ParseActionEvent(payloadString string, opts ...Option) (MessageAction, erro
 	}
 
 	if !cfg.TokenVerified {
-		return MessageAction{}, errors.New("invalid verification token")
+		return slack.InteractionCallback{}, errors.New("invalid verification token")
 	} else {
 		return action, nil
 	}
