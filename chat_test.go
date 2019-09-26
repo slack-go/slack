@@ -97,12 +97,11 @@ func TestPostMessage(t *testing.T) {
 			opt: []MsgOption{
 				MsgOptionAttachments(
 					Attachment{
-						Text:   "text",
 						Blocks: blocks,
 					}),
 			},
 			expected: url.Values{
-				"attachments": []string{`[{"fallback":"","text":"text","blocks":` + blockStr + `}]`},
+				"attachments": []string{`[{"blocks":` + blockStr + `}]`},
 				"channel":     []string{"CXXX"},
 				"token":       []string{"testing-token"},
 			},
