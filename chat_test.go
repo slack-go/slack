@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -97,4 +98,34 @@ func TestPostMessageWithBlocks(t *testing.T) {
 	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
 
 	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(blocks...), MsgOptionText("text", false))
+}
+
+func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
+	expectedBlocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		var msg Msg
+		if err := json.Unmarshal(body, &msg); err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		actualBlocks := msg.Blocks.BlockSet
+		if !reflect.DeepEqual(expectedBlocks, actualBlocks) {
+			t.Errorf("expected: %#v, got: %#v", expectedBlocks, actualBlocks)
+			return
+		}
+	})
+
+	once.Do(startServer)
+	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
+
+	responseURL := api.endpoint + "response-url"
+
+	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(expectedBlocks...), MsgOptionText("text", false), MsgOptionResponseURL(responseURL, ResponseTypeInChannel))
 }
