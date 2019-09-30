@@ -570,14 +570,16 @@ type GetConversationHistoryParameters struct {
 	Latest    string
 	Limit     int
 	Oldest    string
+	Unreads   bool
 }
 
 type GetConversationHistoryResponse struct {
 	SlackResponse
-	HasMore          bool   `json:"has_more"`
-	PinCount         int    `json:"pin_count"`
-	Latest           string `json:"latest"`
-	ResponseMetaData struct {
+	HasMore            bool   `json:"has_more"`
+	PinCount           int    `json:"pin_count"`
+	Latest             string `json:"latest"`
+	UnreadCountDisplay int    `json:"unread_count_display"`
+	ResponseMetaData   struct {
 		NextCursor string `json:"next_cursor"`
 	} `json:"response_metadata"`
 	Messages []Message `json:"messages"`
@@ -607,6 +609,9 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 	}
 	if params.Oldest != "" {
 		values.Add("oldest", params.Oldest)
+	}
+	if params.Unreads {
+		values.Add("unreads", "1")
 	}
 
 	response := GetConversationHistoryResponse{}
