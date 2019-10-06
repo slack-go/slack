@@ -19,9 +19,10 @@ type HistoryParameters struct {
 
 // History contains message history information needed to navigate a Channel / Group / DM history
 type History struct {
-	Latest   string    `json:"latest"`
-	Messages []Message `json:"messages"`
-	HasMore  bool      `json:"has_more"`
+	Latest             string    `json:"latest"`
+	Messages           []Message `json:"messages"`
+	HasMore            bool      `json:"has_more"`
+	UnreadCountDisplay int       `json:"unread_count_display"`
 }
 
 // NewHistoryParameters provides an instance of HistoryParameters with all the sane default values set
