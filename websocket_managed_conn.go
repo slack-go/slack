@@ -59,10 +59,14 @@ func (rtm *RTM) ManageConnection() {
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
 		// we're now connected so we can set up listeners
-		go rtm.handleIncomingEvents()
+		shutdown := make(chan interface{})
+		go rtm.handleIncomingEvents(shutdown)
 
 		// this should be a blocking call until the connection has ended
 		rtm.handleEvents()
+
+		// signal listeners to teardown
+		close(shutdown)
 
 		select {
 		case <-rtm.disconnected:
@@ -272,9 +276,9 @@ func (rtm *RTM) handleEvents() {
 //
 // This will stop executing once the RTM's keepRunning channel has been closed
 // or has anything sent to it.
-func (rtm *RTM) handleIncomingEvents() {
+func (rtm *RTM) handleIncomingEvents(shutdown <-chan interface{}) {
 	for {
-		if err := rtm.receiveIncomingEvent(); err != nil {
+		if err := rtm.receiveIncomingEvent(shutdown); err != nil {
 			return
 		}
 	}
@@ -335,8 +339,14 @@ func (rtm *RTM) ping() error {
 
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
 // This will block until a frame is available from the websocket.
-// If the read from the websocket results in a fatal error, this function will return non-nil.
-func (rtm *RTM) receiveIncomingEvent() error {
+// If the read from the websocket results in a fatal error, this function
+// will return non-nil.
+//
+// If `shutdown` is closed, we will break out of the read loop as soon as
+// able, and eat any event or error; since the incoming events channel is shared
+// between connection attempts, this prevents any lingering events or errors
+// from being processed by the following attempted connection.
+func (rtm *RTM) receiveIncomingEvent(shutdown <-chan interface{}) error {
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 	switch {
@@ -349,6 +359,9 @@ func (rtm *RTM) receiveIncomingEvent() error {
 		select {
 		case rtm.forcePing <- true:
 		case <-rtm.disconnected:
+			return err
+		case <-shutdown:
+			return err
 		}
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
@@ -360,6 +373,7 @@ func (rtm *RTM) receiveIncomingEvent() error {
 		select {
 		case rtm.killChannel <- false:
 		case <-rtm.disconnected:
+		case <-shutdown:
 		}
 
 		return err
@@ -370,7 +384,10 @@ func (rtm *RTM) receiveIncomingEvent() error {
 		select {
 		case rtm.rawEvents <- event:
 		case <-rtm.disconnected:
-			rtm.Debugln("disonnected while attempting to send raw event")
+			rtm.Debugln("disconnected while attempting to send raw event")
+			return errorsx.String("disconnected")
+		case <-shutdown:
+			return errorsx.String("shutdown")
 		}
 	}
 	return nil
