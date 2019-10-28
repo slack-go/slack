@@ -67,6 +67,8 @@ func (rtm *RTM) ManageConnection() {
 		select {
 		case <-rtm.disconnected:
 			// after handle events returns we need to check if we're disconnected
+			// when this happens we need to cleanup the newly created connection.
+			rtm.killConnection(true, ErrRTMDisconnected)
 			return
 		default:
 			// otherwise continue and run the loop again to reconnect
