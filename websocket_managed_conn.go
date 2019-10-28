@@ -338,7 +338,7 @@ func (rtm *RTM) ping() error {
 // If the read from the websocket results in a fatal error, this function will return non-nil.
 func (rtm *RTM) receiveIncomingEvent() error {
 	event := json.RawMessage{}
-	err := rtm.conn.ReadJSON(&event)
+	err := rtm.readJSONSafe(&event)
 	switch {
 	case err == io.ErrUnexpectedEOF:
 		// EOF's don't seem to signify a failed connection so instead we ignore
@@ -374,6 +374,19 @@ func (rtm *RTM) receiveIncomingEvent() error {
 		}
 	}
 	return nil
+}
+
+// readJSONSafe will catch any panics received when talking to the websocket
+// It will return an io.ErrUnexpectedEOF when it encounters a panic.
+func (rtm *RTM) readJSONSafe(event interface{}) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("RECOVERED ERROR %v", r)
+			err = io.ErrUnexpectedEOF
+		}
+	}()
+	err = rtm.conn.ReadJSON(event)
+	return
 }
 
 // handleRawEvent takes a raw JSON message received from the slack websocket
