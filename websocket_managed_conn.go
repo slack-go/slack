@@ -381,7 +381,7 @@ func (rtm *RTM) receiveIncomingEvent() error {
 func (rtm *RTM) readJSONSafe(event interface{}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("RECOVERED ERROR %v", r)
+			rtm.Debugf("RECOVERED SLACK ERROR %v\n", r)
 			err = io.ErrUnexpectedEOF
 		}
 	}()
