@@ -16,6 +16,35 @@ const (
 	testToken   = "TEST_TOKEN"
 )
 
+func TestRTMBeforeEvents(t *testing.T) {
+	// Set up the test server.
+	testServer := slacktest.NewTestServer()
+	go testServer.Start()
+
+	for i := 0; i < 1000; i++ {
+		// Setup and start the RTM.
+		api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
+		rtm := api.NewRTM()
+		go func() {
+			for _ = range rtm.IncomingEvents {
+			}
+		}()
+		done := make(chan struct{})
+		go func() {
+			rtm.Disconnect()
+			close(done)
+		}()
+		go rtm.ManageConnection()
+
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			t.Error("timed out waiting for disconnect")
+			t.Fail()
+		}
+	}
+}
+
 func TestRTMDisconnect(t *testing.T) {
 	// actually connect to slack here w/ an invalid token
 	api := slack.New(testToken)
