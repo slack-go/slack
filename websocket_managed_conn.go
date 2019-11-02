@@ -212,7 +212,7 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 // This should not be called directly! Instead a boolean value (true for
 // intentional, false otherwise) should be sent to the killChannel on the RTM.
 func (rtm *RTM) killConnection(intentional bool, cause error) (err error) {
-	rtm.Debugln("killing connection")
+	rtm.Debugln("killing connection", cause)
 
 	if rtm.conn != nil {
 		err = rtm.conn.Close()
@@ -243,7 +243,7 @@ func (rtm *RTM) handleEvents(events chan json.RawMessage) {
 			return
 		// detect when the connection is dead.
 		case <-rtm.pingDeadman.C:
-			_ = rtm.killConnection(false, errorsx.String("deadman switch triggered"))
+			_ = rtm.killConnection(false, ErrRTMDeadman)
 			return
 		// send pings on ticker interval
 		case <-ticker.C:
@@ -259,12 +259,17 @@ func (rtm *RTM) handleEvents(events chan json.RawMessage) {
 		// listen for messages that need to be sent
 		case msg := <-rtm.outgoingMessages:
 			rtm.sendOutgoingMessage(msg)
-		// listen for incoming messages that need to be parsed
+			// listen for incoming messages that need to be parsed
 		case rawEvent := <-events:
 			switch rtm.handleRawEvent(rawEvent) {
 			case rtmEventTypeGoodbye:
-				_ = rtm.killConnection(false, errorsx.String("goodbye detected"))
-				return
+				// kill the connection, but DO NOT RETURN, a follow up kill signal will
+				// be sent that still needs to be processed. this duplication is because
+				// the event reader restarts once it emits the goodbye event.
+				// unlike the other cases in this function a final read will be triggered
+				// against the connection which will emit a kill signal. if we return early
+				// this kill signal will be processed by the next connection.
+				_ = rtm.killConnection(false, ErrRTMGoodbye)
 			default:
 			}
 		}
@@ -279,6 +284,10 @@ func (rtm *RTM) handleEvents(events chan json.RawMessage) {
 func (rtm *RTM) handleIncomingEvents(events chan json.RawMessage) {
 	for {
 		if err := rtm.receiveIncomingEvent(events); err != nil {
+			select {
+			case rtm.killChannel <- false:
+			case <-rtm.disconnected:
+			}
 			return
 		}
 	}
@@ -341,20 +350,12 @@ func (rtm *RTM) ping() error {
 // This will block until a frame is available from the websocket.
 // If the read from the websocket results in a fatal error, this function will return non-nil.
 func (rtm *RTM) receiveIncomingEvent(events chan json.RawMessage) error {
-	fatal := func(cause error) error { // helper method for cleaning up on fatal errors.
-		select {
-		case rtm.killChannel <- false:
-		case <-rtm.disconnected:
-		}
-		return cause
-	}
-
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
 
 	// check if the connection was closed.
 	if websocket.IsUnexpectedCloseError(err) {
-		return fatal(err)
+		return err
 	}
 
 	switch {
@@ -375,7 +376,7 @@ func (rtm *RTM) receiveIncomingEvent(events chan json.RawMessage) error {
 			ErrorObj: err,
 		}}
 
-		return fatal(err)
+		return err
 	case len(event) == 0:
 		rtm.Debugln("Received empty event")
 	default:
