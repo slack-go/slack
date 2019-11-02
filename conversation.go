@@ -578,7 +578,7 @@ type GetConversationHistoryResponse struct {
 	HasMore            bool   `json:"has_more"`
 	PinCount           int    `json:"pin_count"`
 	Latest             string `json:"latest"`
-	UnreadCountDisplay int    `json:"unread_count_display"`
+	Unread int    `json:"unread_count_display"`
 	ResponseMetaData   struct {
 		NextCursor string `json:"next_cursor"`
 	} `json:"response_metadata"`
