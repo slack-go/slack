@@ -191,6 +191,10 @@ func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	go handlePendingMessages(c, serverAddr)
 	for {
 		mt, messageBytes, err := c.ReadMessage()
+		if websocket.IsUnexpectedCloseError(err) {
+			return
+		}
+
 		if err != nil {
 			log.Printf("read error: %s", err.Error())
 			continue

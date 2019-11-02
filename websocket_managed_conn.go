@@ -58,10 +58,11 @@ func (rtm *RTM) ManageConnection() {
 
 		rtm.Debugf("RTM connection succeeded on try %d", connectionCount)
 
+		rawEvents := make(chan json.RawMessage)
 		// we're now connected so we can set up listeners
-		go rtm.handleIncomingEvents()
+		go rtm.handleIncomingEvents(rawEvents)
 		// this should be a blocking call until the connection has ended
-		rtm.handleEvents()
+		rtm.handleEvents(rawEvents)
 
 		select {
 		case <-rtm.disconnected:
@@ -231,7 +232,7 @@ func (rtm *RTM) killConnection(intentional bool, cause error) (err error) {
 // interval. This also sends outgoing messages that are received from the RTM's
 // outgoingMessages channel. This also handles incoming raw events from the RTM
 // rawEvents channel.
-func (rtm *RTM) handleEvents() {
+func (rtm *RTM) handleEvents(events chan json.RawMessage) {
 	ticker := time.NewTicker(rtm.pingInterval)
 	defer ticker.Stop()
 	for {
@@ -259,7 +260,7 @@ func (rtm *RTM) handleEvents() {
 		case msg := <-rtm.outgoingMessages:
 			rtm.sendOutgoingMessage(msg)
 		// listen for incoming messages that need to be parsed
-		case rawEvent := <-rtm.rawEvents:
+		case rawEvent := <-events:
 			switch rtm.handleRawEvent(rawEvent) {
 			case rtmEventTypeGoodbye:
 				_ = rtm.killConnection(false, errorsx.String("goodbye detected"))
@@ -271,13 +272,13 @@ func (rtm *RTM) handleEvents() {
 }
 
 // handleIncomingEvents monitors the RTM's opened websocket for any incoming
-// events. It pushes the raw events onto the RTM channel rawEvents.
+// events. It pushes the raw events into the channel.
 //
-// This will stop executing once the RTM's keepRunning channel has been closed
-// or has anything sent to it.
-func (rtm *RTM) handleIncomingEvents() {
+// This will stop executing once the RTM's when a fatal error is detected, or
+// a disconnect occurs.
+func (rtm *RTM) handleIncomingEvents(events chan json.RawMessage) {
 	for {
-		if err := rtm.receiveIncomingEvent(); err != nil {
+		if err := rtm.receiveIncomingEvent(events); err != nil {
 			return
 		}
 	}
@@ -339,9 +340,23 @@ func (rtm *RTM) ping() error {
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
 // This will block until a frame is available from the websocket.
 // If the read from the websocket results in a fatal error, this function will return non-nil.
-func (rtm *RTM) receiveIncomingEvent() error {
+func (rtm *RTM) receiveIncomingEvent(events chan json.RawMessage) error {
+	fatal := func(cause error) error { // helper method for cleaning up on fatal errors.
+		select {
+		case rtm.killChannel <- false:
+		case <-rtm.disconnected:
+		}
+		return cause
+	}
+
 	event := json.RawMessage{}
 	err := rtm.conn.ReadJSON(&event)
+
+	// check if the connection was closed.
+	if websocket.IsUnexpectedCloseError(err) {
+		return fatal(err)
+	}
+
 	switch {
 	case err == io.ErrUnexpectedEOF:
 		// EOF's don't seem to signify a failed connection so instead we ignore
@@ -360,22 +375,18 @@ func (rtm *RTM) receiveIncomingEvent() error {
 			ErrorObj: err,
 		}}
 
-		select {
-		case rtm.killChannel <- false:
-		case <-rtm.disconnected:
-		}
-
-		return err
+		return fatal(err)
 	case len(event) == 0:
 		rtm.Debugln("Received empty event")
 	default:
 		rtm.Debugln("Incoming Event:", string(event))
 		select {
-		case rtm.rawEvents <- event:
+		case events <- event:
 		case <-rtm.disconnected:
 			rtm.Debugln("disonnected while attempting to send raw event")
 		}
 	}
+
 	return nil
 }
 
