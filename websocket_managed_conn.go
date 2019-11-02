@@ -60,7 +60,6 @@ func (rtm *RTM) ManageConnection() {
 
 		// we're now connected so we can set up listeners
 		go rtm.handleIncomingEvents()
-
 		// this should be a blocking call until the connection has ended
 		rtm.handleEvents()
 
@@ -68,7 +67,9 @@ func (rtm *RTM) ManageConnection() {
 		case <-rtm.disconnected:
 			// after handle events returns we need to check if we're disconnected
 			// when this happens we need to cleanup the newly created connection.
-			rtm.killConnection(true, ErrRTMDisconnected)
+			if err = conn.Close(); err != nil {
+				rtm.Debugln("failed to close conn on disconnected RTM", err)
+			}
 			return
 		default:
 			// otherwise continue and run the loop again to reconnect
