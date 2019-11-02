@@ -1,6 +1,6 @@
 package slack
 
-import "github.com/acaloiaro/slack/internal/errorsx"
+import "github.com/nlopes/slack/internal/errorsx"
 
 // Errors returned by various methods.
 const (
