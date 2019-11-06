@@ -4,6 +4,8 @@ package slackevents
 
 import (
 	"encoding/json"
+
+	"github.com/slack-go/slack"
 )
 
 // EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.
@@ -29,6 +31,8 @@ type AppHomeOpenedEvent struct {
 	User           string      `json:"user"`
 	Channel        string      `json:"channel"`
 	EventTimeStamp json.Number `json:"event_ts"`
+	Tab            string      `json:"tab"`
+	View           slack.View  `json:"view"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.
