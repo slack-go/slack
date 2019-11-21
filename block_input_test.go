@@ -7,11 +7,11 @@ import (
 )
 
 func TestNewInputBlock(t *testing.T) {
-	label := NewTextBlockObject("plain_text", "Input", false, false)
-	inputElement := NewPlainTextInputBlockElement(nil, "input_123")
-
-	inputBlock := NewInputBlock("test", label, inputElement)
+	label := NewTextBlockObject("plain_text", "label", false, false)
+	element := &SingularBlockElement{NewDatePickerBlockElement("action_id")}
+	inputBlock := NewInputBlock("test", label, element)
 	assert.Equal(t, string(inputBlock.Type), "input")
 	assert.Equal(t, inputBlock.BlockID, "test")
-	assert.Equal(t, string(inputBlock.Element.ElementType()), "plain_text_input")
+	assert.Equal(t, inputBlock.Label, label)
+	assert.Equal(t, inputBlock.Element, element)
 }

@@ -1,10 +1,12 @@
 package slack
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 
-	"github.com/slack-go/slack/internal/errorsx"
+	"github.com/nlopes/slack/internal/errorsx"
+	"github.com/stretchr/testify/assert"
 )
 
 var dummySlackErr = errorsx.String("dummy_error_from_slack")
@@ -94,7 +96,7 @@ func TestSlack_OpenView(t *testing.T) {
 					"callback_id": "identify_your_modals",
 					"external_id": "",
 					"state": {
-						"values": []
+						"values": {}
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -211,7 +213,7 @@ func TestSlack_View_PublishView(t *testing.T) {
 					"private_metadata": "Shh it is a secret",
 					"callback_id": "identify_your_home_tab",
 					"state": {
-						"values": []
+						"values": {}
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -342,7 +344,7 @@ func TestSlack_PushView(t *testing.T) {
 					"callback_id": "identify_your_modals",
 					"external_id": "",
 					"state": {
-						"values": []
+						"values": {}
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -475,7 +477,7 @@ func TestSlack_UpdateView(t *testing.T) {
 					"callback_id": "identify_your_modals",
 					"external_id": "",
 					"state": {
-						"values": []
+						"values": {}
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -526,4 +528,108 @@ func TestSlack_UpdateView(t *testing.T) {
 			}
 		})
 	}
+}
+
+func assertViewSubmissionResponse(t *testing.T, resp *ViewSubmissionResponse, encoded string) {
+	var decoded *ViewSubmissionResponse
+	assert.Nil(t, json.Unmarshal([]byte(encoded), &decoded))
+	assert.Equal(t, decoded, resp)
+}
+
+func TestSlack_ClearViewSubmissionResponse(t *testing.T) {
+	resp := NewClearViewSubmissionResponse()
+	rawResp := `{
+		"response_action": "clear"
+	}`
+
+	assertViewSubmissionResponse(t, resp, rawResp)
+}
+
+func TestSlack_UpdateViewSubmissionResponse(t *testing.T) {
+	resp := NewUpdateViewSubmissionResponse(&ModalViewRequest{
+		Type:   VTModal,
+		Title:  NewTextBlockObject("plain_text", "Test update view submission response", false, false),
+		Blocks: Blocks{BlockSet: []Block{NewFileBlock("file_block_id", "external_string", "source_string")}},
+	})
+	rawResp := `{
+		"response_action": "update",
+		"view": {
+			"type": "modal",
+			"title": {
+				"type": "plain_text",
+				"text": "Test update view submission response"
+			},
+			"blocks": [
+				{
+					"type": "file",
+					"block_id": "file_block_id",
+					"external_id": "external_string",
+					"source": "source_string"
+				}
+			]
+		}
+	}`
+
+	assertViewSubmissionResponse(t, resp, rawResp)
+}
+
+func TestSlack_PushViewSubmissionResponse(t *testing.T) {
+	resp := NewPushViewSubmissionResponse(&ModalViewRequest{
+		Type:  VTModal,
+		Title: NewTextBlockObject("plain_text", "Test update view submission response", false, false),
+		Blocks: Blocks{
+			BlockSet: []Block{
+				NewContextBlock(
+					"context_block_id",
+					NewTextBlockObject("plain_text", "Context text", false, false),
+					NewImageBlockElement("image_url", "alt_text"),
+				),
+			},
+		},
+	})
+	rawResp := `{
+		"response_action": "push",
+		"view": {
+			"type": "modal",
+			"title": {
+				"type": "plain_text",
+				"text": "Test update view submission response"
+			},
+			"blocks": [
+				{
+					"type": "context",
+					"block_id": "context_block_id",
+					"elements": [
+						{
+							"type": "plain_text",
+							"text": "Context text"
+						},
+						{
+							"type": "image",
+							"image_url": "image_url",
+							"alt_text": "alt_text"
+						}
+					]
+				}
+			]
+		}
+	}`
+
+	assertViewSubmissionResponse(t, resp, rawResp)
+}
+
+func TestSlack_ErrorsViewSubmissionResponse(t *testing.T) {
+	resp := NewErrorsViewSubmissionResponse(map[string]string{
+		"input_text_action_id": "Please input a name that's at least 6 characters long",
+		"file_action_id":       "File exceeded size limit of 5 KB",
+	})
+	rawResp := `{
+		"response_action": "errors",
+		"errors": {
+			"input_text_action_id": "Please input a name that's at least 6 characters long",
+			"file_action_id": "File exceeded size limit of 5 KB"
+		}
+	}`
+
+	assertViewSubmissionResponse(t, resp, rawResp)
 }
