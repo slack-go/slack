@@ -424,8 +424,6 @@ func (rtm *RTM) handleRawEvent(rawEvent json.RawMessage) string {
 		rtm.handlePong(rawEvent)
 	case rtmEventTypeGoodbye:
 		// just return the event type up for goodbye, will be handled by caller.
-	case rtmEventTypeDesktopNotification:
-		rtm.Debugln("Received desktop notification, ignoring")
 	default:
 		rtm.handleEvent(event.Type, rawEvent)
 	}
@@ -591,4 +589,6 @@ var EventMapping = map[string]interface{}{
 	"subteam_self_added":   SubteamSelfAddedEvent{},
 	"subteam_self_removed": SubteamSelfRemovedEvent{},
 	"subteam_updated":      SubteamUpdatedEvent{},
+
+	"desktop_notification": DesktopNotificationEvent{},
 }
