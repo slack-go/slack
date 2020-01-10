@@ -41,8 +41,7 @@ func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 func TestSlack_AddReaction(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		name       string
 		ref        ItemRef
@@ -90,8 +89,7 @@ func TestSlack_AddReaction(t *testing.T) {
 
 func TestSlack_RemoveReaction(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		name       string
 		ref        ItemRef
@@ -139,8 +137,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 
 func TestSlack_GetReactions(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		ref           ItemRef
 		params        GetReactionsParameters
@@ -172,8 +169,8 @@ func TestSlack_GetReactions(t *testing.T) {
         ]
     }}`,
 			[]ItemReaction{
-				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 			},
 		},
 		{
@@ -200,8 +197,8 @@ func TestSlack_GetReactions(t *testing.T) {
         ]
     }}`,
 			[]ItemReaction{
-				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 			},
 		},
 		{
@@ -229,8 +226,8 @@ func TestSlack_GetReactions(t *testing.T) {
         ]
     }}`,
 			[]ItemReaction{
-				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 			},
 		},
 	}
@@ -254,8 +251,7 @@ func TestSlack_GetReactions(t *testing.T) {
 
 func TestSlack_ListReactions(t *testing.T) {
 	once.Do(startServer)
-	SLACK_API = "http://" + serverAddr + "/"
-	api := New("testing-token")
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	rh := newReactionsHandler()
 	http.HandleFunc("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,
@@ -316,29 +312,29 @@ func TestSlack_ListReactions(t *testing.T) {
         "pages": 1
     }}`
 	want := []ReactedItem{
-		ReactedItem{
+		{
 			Item: NewMessageItem("C1", &Message{Msg: Msg{
 				Text: "hello",
 				Reactions: []ItemReaction{
-					ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-					ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+					{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+					{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 				},
 			}}),
 			Reactions: []ItemReaction{
-				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
-				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 			},
 		},
-		ReactedItem{
+		{
 			Item: NewFileItem(&File{Name: "toy"}),
 			Reactions: []ItemReaction{
-				ItemReaction{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
+				{Name: "clock1", Count: 3, Users: []string{"U1", "U2"}},
 			},
 		},
-		ReactedItem{
+		{
 			Item: NewFileCommentItem(&File{Name: "toy"}, &Comment{Comment: "cool toy"}),
 			Reactions: []ItemReaction{
-				ItemReaction{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
+				{Name: "astonished", Count: 3, Users: []string{"U1", "U2", "U3"}},
 			},
 		},
 	}

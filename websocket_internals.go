@@ -18,6 +18,7 @@ type ConnectedEvent struct {
 // ConnectionErrorEvent contains information about a connection error
 type ConnectionErrorEvent struct {
 	Attempt  int
+	Backoff  time.Duration // how long we'll wait before the next attempt
 	ErrorObj error
 }
 
@@ -34,6 +35,7 @@ type ConnectingEvent struct {
 // DisconnectedEvent contains information about how we disconnected
 type DisconnectedEvent struct {
 	Intentional bool
+	Cause       error
 }
 
 // LatencyReport contains information about connection latency
@@ -61,6 +63,13 @@ type MessageTooLongEvent struct {
 
 func (m *MessageTooLongEvent) Error() string {
 	return fmt.Sprintf("Message too long (max %d characters)", m.MaxLength)
+}
+
+// RateLimitEvent is used when Slack warns that rate-limits are being hit.
+type RateLimitEvent struct{}
+
+func (e *RateLimitEvent) Error() string {
+	return "Messages are being sent too fast."
 }
 
 // OutgoingErrorEvent contains information in case there were errors sending messages

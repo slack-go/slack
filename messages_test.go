@@ -84,7 +84,7 @@ var uploadedFile = `{
     "type": "message",
     "subtype": "file_share",
     "text": "<@U2147483697|tester> uploaded a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test.txt|test.txt> and commented: test comment here",
-    "file": {
+    "files": [{
         "id": "abc",
         "created": 1433314757,
         "timestamp": 1433314757,
@@ -125,7 +125,7 @@ var uploadedFile = `{
             "user": "U2147483697",
             "comment": "test comment here"
         }
-    },
+    }],
     "user": "U2147483697",
     "upload": true,
     "ts": "1433314757.000006"
@@ -148,7 +148,7 @@ var testPost = `{
     "type": "message",
     "subtype": "file_share",
     "text": "<@U2147483697|tester> shared a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>",
-    "file": {
+    "files": [{
         "id": "abc",
         "created": 1433315398,
         "timestamp": 1433315398,
@@ -179,7 +179,7 @@ var testPost = `{
         "groups": [],
         "ims": [],
         "comments_count": 1
-    },
+    }],
     "user": "U2147483697",
     "upload": false,
     "ts": "1433315416.000008"
@@ -202,7 +202,7 @@ var testComment = `{
     "type": "message",
     "subtype": "file_comment",
     "text": "<@U2147483697|tester> commented on <@U2147483697|tester>'s file <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>: another comment",
-    "file": {
+    "files": [{
         "id": "abc",
         "created": 1433315398,
         "timestamp": 1433315398,
@@ -233,7 +233,7 @@ var testComment = `{
         "groups": [],
         "ims": [],
         "comments_count": 2
-    },
+    }],
     "comment": {
         "id": "xyz",
         "created": 1433316360,
@@ -755,7 +755,7 @@ var fileShareMessage = `{
     "subtype": "file_share",
     "ts": "1358877455.000010",
     "text": "<@cal> uploaded a file: <https:...7.png|7.png>",
-    "file": {
+    "files": [{
         "id" : "F2147483862",
         "created" : 1356032811,
         "timestamp" : 1356032811,
@@ -794,7 +794,7 @@ var fileShareMessage = `{
         "initial_comment": {},
         "num_stars": 7,
         "is_starred": true
-    },
+    }],
     "user": "U2147483697",
     "upload": true
 }`
@@ -810,5 +810,5 @@ func TestFileShareMessage(t *testing.T) {
 	assert.Equal(t, "<@cal> uploaded a file: <https:...7.png|7.png>", message.Text)
 	assert.Equal(t, "U2147483697", message.User)
 	assert.True(t, message.Upload)
-	assert.NotNil(t, message.File)
+	assert.NotNil(t, message.Files[0])
 }

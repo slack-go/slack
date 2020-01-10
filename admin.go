@@ -2,28 +2,19 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
-type adminResponse struct {
-	OK    bool   `json:"ok"`
-	Error string `json:"error"`
-}
-
-func adminRequest(ctx context.Context, method string, teamName string, values url.Values, debug bool) (*adminResponse, error) {
-	adminResponse := &adminResponse{}
-	err := parseAdminResponse(ctx, method, teamName, values, adminResponse, debug)
+func (api *Client) adminRequest(ctx context.Context, method string, teamName string, values url.Values) error {
+	resp := &SlackResponse{}
+	err := parseAdminResponse(ctx, api.httpclient, method, teamName, values, resp, api)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if !adminResponse.OK {
-		return nil, errors.New(adminResponse.Error)
-	}
-
-	return adminResponse, nil
+	return resp.Err()
 }
 
 // DisableUser disabled a user account, given a user ID
@@ -35,14 +26,13 @@ func (api *Client) DisableUser(teamName string, uid string) error {
 func (api *Client) DisableUserContext(ctx context.Context, teamName string, uid string) error {
 	values := url.Values{
 		"user":       {uid},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "setInactive", teamName, values, api.debug)
-	if err != nil {
-		return fmt.Errorf("Failed to disable user with id '%s': %s", uid, err)
+	if err := api.adminRequest(ctx, "setInactive", teamName, values); err != nil {
+		return fmt.Errorf("failed to disable user with id '%s': %s", uid, err)
 	}
 
 	return nil
@@ -61,12 +51,13 @@ func (api *Client) InviteGuestContext(ctx context.Context, teamName, channel, fi
 		"first_name":       {firstName},
 		"last_name":        {lastName},
 		"ultra_restricted": {"1"},
-		"token":            {api.config.token},
+		"token":            {api.token},
+		"resend":           {"true"},
 		"set_active":       {"true"},
 		"_attempts":        {"1"},
 	}
 
-	_, err := adminRequest(ctx, "invite", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to invite single-channel guest: %s", err)
 	}
@@ -87,12 +78,13 @@ func (api *Client) InviteRestrictedContext(ctx context.Context, teamName, channe
 		"first_name": {firstName},
 		"last_name":  {lastName},
 		"restricted": {"1"},
-		"token":      {api.config.token},
+		"token":      {api.token},
+		"resend":     {"true"},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "invite", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to restricted account: %s", err)
 	}
@@ -111,12 +103,12 @@ func (api *Client) InviteToTeamContext(ctx context.Context, teamName, firstName,
 		"email":      {emailAddress},
 		"first_name": {firstName},
 		"last_name":  {lastName},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "invite", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to invite to team: %s", err)
 	}
@@ -133,12 +125,12 @@ func (api *Client) SetRegular(teamName, user string) error {
 func (api *Client) SetRegularContext(ctx context.Context, teamName, user string) error {
 	values := url.Values{
 		"user":       {user},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "setRegular", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "setRegular", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to change the user (%s) to a regular user: %s", user, err)
 	}
@@ -155,12 +147,12 @@ func (api *Client) SendSSOBindingEmail(teamName, user string) error {
 func (api *Client) SendSSOBindingEmailContext(ctx context.Context, teamName, user string) error {
 	values := url.Values{
 		"user":       {user},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "sendSSOBind", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "sendSSOBind", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to send SSO binding email for user (%s): %s", user, err)
 	}
@@ -178,12 +170,12 @@ func (api *Client) SetUltraRestrictedContext(ctx context.Context, teamName, uid,
 	values := url.Values{
 		"user":       {uid},
 		"channel":    {channel},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
 	}
 
-	_, err := adminRequest(ctx, "setUltraRestricted", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "setUltraRestricted", teamName, values)
 	if err != nil {
 		return fmt.Errorf("Failed to ultra-restrict account: %s", err)
 	}
@@ -192,22 +184,23 @@ func (api *Client) SetUltraRestrictedContext(ctx context.Context, teamName, uid,
 }
 
 // SetRestricted converts a user into a restricted account
-func (api *Client) SetRestricted(teamName, uid string) error {
-	return api.SetRestrictedContext(context.Background(), teamName, uid)
+func (api *Client) SetRestricted(teamName, uid string, channelIds ...string) error {
+	return api.SetRestrictedContext(context.Background(), teamName, uid, channelIds...)
 }
 
 // SetRestrictedContext converts a user into a restricted account with a custom context
-func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid string) error {
+func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid string, channelIds ...string) error {
 	values := url.Values{
 		"user":       {uid},
-		"token":      {api.config.token},
+		"token":      {api.token},
 		"set_active": {"true"},
 		"_attempts":  {"1"},
+		"channels":   {strings.Join(channelIds, ",")},
 	}
 
-	_, err := adminRequest(ctx, "setRestricted", teamName, values, api.debug)
+	err := api.adminRequest(ctx, "setRestricted", teamName, values)
 	if err != nil {
-		return fmt.Errorf("Failed to restrict account: %s", err)
+		return fmt.Errorf("failed to restrict account: %s", err)
 	}
 
 	return nil

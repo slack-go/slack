@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -36,16 +35,14 @@ type dndTeamInfoResponse struct {
 	SlackResponse
 }
 
-func dndRequest(ctx context.Context, path string, values url.Values, debug bool) (*dndResponseFull, error) {
+func (api *Client) dndRequest(ctx context.Context, path string, values url.Values) (*dndResponseFull, error) {
 	response := &dndResponseFull{}
-	err := post(ctx, path, values, response, debug)
+	err := api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-	return response, nil
+
+	return response, response.Err()
 }
 
 // EndDND ends the user's scheduled Do Not Disturb session
@@ -56,17 +53,16 @@ func (api *Client) EndDND() error {
 // EndDNDContext ends the user's scheduled Do Not Disturb session with a custom context
 func (api *Client) EndDNDContext(ctx context.Context) error {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 
 	response := &SlackResponse{}
-	if err := post(ctx, "dnd.endDnd", values, response, api.debug); err != nil {
+
+	if err := api.postMethod(ctx, "dnd.endDnd", values, response); err != nil {
 		return err
 	}
-	if !response.Ok {
-		return errors.New(response.Error)
-	}
-	return nil
+
+	return response.Err()
 }
 
 // EndSnooze ends the current user's snooze mode
@@ -77,10 +73,10 @@ func (api *Client) EndSnooze() (*DNDStatus, error) {
 // EndSnoozeContext ends the current user's snooze mode with a custom context
 func (api *Client) EndSnoozeContext(ctx context.Context) (*DNDStatus, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 
-	response, err := dndRequest(ctx, "dnd.endSnooze", values, api.debug)
+	response, err := api.dndRequest(ctx, "dnd.endSnooze", values)
 	if err != nil {
 		return nil, err
 	}
@@ -95,12 +91,13 @@ func (api *Client) GetDNDInfo(user *string) (*DNDStatus, error) {
 // GetDNDInfoContext provides information about a user's current Do Not Disturb settings with a custom context.
 func (api *Client) GetDNDInfoContext(ctx context.Context, user *string) (*DNDStatus, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 	if user != nil {
 		values.Set("user", *user)
 	}
-	response, err := dndRequest(ctx, "dnd.info", values, api.debug)
+
+	response, err := api.dndRequest(ctx, "dnd.info", values)
 	if err != nil {
 		return nil, err
 	}
@@ -115,16 +112,19 @@ func (api *Client) GetDNDTeamInfo(users []string) (map[string]DNDStatus, error) 
 // GetDNDTeamInfoContext provides information about a user's current Do Not Disturb settings with a custom context.
 func (api *Client) GetDNDTeamInfoContext(ctx context.Context, users []string) (map[string]DNDStatus, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 		"users": {strings.Join(users, ",")},
 	}
 	response := &dndTeamInfoResponse{}
-	if err := post(ctx, "dnd.teamInfo", values, response, api.debug); err != nil {
+
+	if err := api.postMethod(ctx, "dnd.teamInfo", values, response); err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
+
+	if response.Err() != nil {
+		return nil, response.Err()
 	}
+
 	return response.Users, nil
 }
 
@@ -135,14 +135,15 @@ func (api *Client) SetSnooze(minutes int) (*DNDStatus, error) {
 	return api.SetSnoozeContext(context.Background(), minutes)
 }
 
-// SetSnooze adjusts the snooze duration for a user's Do Not Disturb settings with a custom context.
+// SetSnoozeContext adjusts the snooze duration for a user's Do Not Disturb settings with a custom context.
 // For more information see the SetSnooze docs
 func (api *Client) SetSnoozeContext(ctx context.Context, minutes int) (*DNDStatus, error) {
 	values := url.Values{
-		"token":       {api.config.token},
+		"token":       {api.token},
 		"num_minutes": {strconv.Itoa(minutes)},
 	}
-	response, err := dndRequest(ctx, "dnd.setSnooze", values, api.debug)
+
+	response, err := api.dndRequest(ctx, "dnd.setSnooze", values)
 	if err != nil {
 		return nil, err
 	}

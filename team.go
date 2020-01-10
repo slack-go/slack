@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"errors"
 	"net/url"
 	"strconv"
 )
@@ -67,44 +66,33 @@ func NewAccessLogParameters() AccessLogParameters {
 	}
 }
 
-func teamRequest(ctx context.Context, path string, values url.Values, debug bool) (*TeamResponse, error) {
+func (api *Client) teamRequest(ctx context.Context, path string, values url.Values) (*TeamResponse, error) {
 	response := &TeamResponse{}
-	err := post(ctx, path, values, response, debug)
+	err := api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
 	}
 
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-
-	return response, nil
+	return response, response.Err()
 }
 
-func billableInfoRequest(ctx context.Context, path string, values url.Values, debug bool) (map[string]BillingActive, error) {
+func (api *Client) billableInfoRequest(ctx context.Context, path string, values url.Values) (map[string]BillingActive, error) {
 	response := &BillableInfoResponse{}
-	err := post(ctx, path, values, response, debug)
+	err := api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
 	}
 
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-
-	return response.BillableInfo, nil
+	return response.BillableInfo, response.Err()
 }
 
-func accessLogsRequest(ctx context.Context, path string, values url.Values, debug bool) (*LoginResponse, error) {
+func (api *Client) accessLogsRequest(ctx context.Context, path string, values url.Values) (*LoginResponse, error) {
 	response := &LoginResponse{}
-	err := post(ctx, path, values, response, debug)
+	err := api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
 	}
-	if !response.Ok {
-		return nil, errors.New(response.Error)
-	}
-	return response, nil
+	return response, response.Err()
 }
 
 // GetTeamInfo gets the Team Information of the user
@@ -115,10 +103,10 @@ func (api *Client) GetTeamInfo() (*TeamInfo, error) {
 // GetTeamInfoContext gets the Team Information of the user with a custom context
 func (api *Client) GetTeamInfoContext(ctx context.Context) (*TeamInfo, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 
-	response, err := teamRequest(ctx, "team.info", values, api.debug)
+	response, err := api.teamRequest(ctx, "team.info", values)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +121,7 @@ func (api *Client) GetAccessLogs(params AccessLogParameters) ([]Login, *Paging, 
 // GetAccessLogsContext retrieves a page of logins according to the parameters given with a custom context
 func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogParameters) ([]Login, *Paging, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 	if params.Count != DEFAULT_LOGINS_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))
@@ -141,24 +129,27 @@ func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogPar
 	if params.Page != DEFAULT_LOGINS_PAGE {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
-	response, err := accessLogsRequest(ctx, "team.accessLogs", values, api.debug)
+
+	response, err := api.accessLogsRequest(ctx, "team.accessLogs", values)
 	if err != nil {
 		return nil, nil, err
 	}
 	return response.Logins, &response.Paging, nil
 }
 
+// GetBillableInfo ...
 func (api *Client) GetBillableInfo(user string) (map[string]BillingActive, error) {
 	return api.GetBillableInfoContext(context.Background(), user)
 }
 
+// GetBillableInfoContext ...
 func (api *Client) GetBillableInfoContext(ctx context.Context, user string) (map[string]BillingActive, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 		"user":  {user},
 	}
 
-	return billableInfoRequest(ctx, "team.billableInfo", values, api.debug)
+	return api.billableInfoRequest(ctx, "team.billableInfo", values)
 }
 
 // GetBillableInfoForTeam returns the billing_active status of all users on the team.
@@ -169,8 +160,8 @@ func (api *Client) GetBillableInfoForTeam() (map[string]BillingActive, error) {
 // GetBillableInfoForTeamContext returns the billing_active status of all users on the team with a custom context
 func (api *Client) GetBillableInfoForTeamContext(ctx context.Context) (map[string]BillingActive, error) {
 	values := url.Values{
-		"token": {api.config.token},
+		"token": {api.token},
 	}
 
-	return billableInfoRequest(ctx, "team.billableInfo", values, api.debug)
+	return api.billableInfoRequest(ctx, "team.billableInfo", values)
 }

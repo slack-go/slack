@@ -2,17 +2,34 @@ package slack
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"net/url"
+	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
+)
+
+const (
+	websocketDefaultTimeout = 10 * time.Second
+	defaultPingInterval     = 30 * time.Second
+)
+
+const (
+	rtmEventTypeAck                 = ""
+	rtmEventTypeHello               = "hello"
+	rtmEventTypeGoodbye             = "goodbye"
+	rtmEventTypePong                = "pong"
+	rtmEventTypeDesktopNotification = "desktop_notification"
 )
 
 // StartRTM calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
-	return api.StartRTMContext(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
+	defer cancel()
+
+	return api.StartRTMContext(ctx)
 }
 
 // StartRTMContext calls the "rtm.start" endpoint and returns the provided URL and the full Info block with a custom context.
@@ -20,85 +37,94 @@ func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) StartRTMContext(ctx context.Context) (info *Info, websocketURL string, err error) {
 	response := &infoResponseFull{}
-	err = post(ctx, "rtm.start", url.Values{"token": {api.config.token}}, response, api.debug)
+	err = api.postMethod(ctx, "rtm.start", url.Values{"token": {api.token}}, response)
 	if err != nil {
-		return nil, "", fmt.Errorf("post: %s", err)
-	}
-	if !response.Ok {
-		return nil, "", response.Error
+		return nil, "", err
 	}
 
-	// websocket.Dial does not accept url without the port (yet)
-	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
-	// but slack returns the address with no port, so we have to fix it
 	api.Debugln("Using URL:", response.Info.URL)
-	websocketURL, err = websocketizeURLPort(response.Info.URL)
-	if err != nil {
-		return nil, "", fmt.Errorf("parsing response URL: %s", err)
-	}
-
-	return &response.Info, websocketURL, nil
+	return &response.Info, response.Info.URL, response.Err()
 }
 
 // ConnectRTM calls the "rtm.connect" endpoint and returns the provided URL and the compact Info block.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) ConnectRTM() (info *Info, websocketURL string, err error) {
-	return api.ConnectRTMContext(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
+	defer cancel()
+
+	return api.ConnectRTMContext(ctx)
 }
 
-// ConnectRTM calls the "rtm.connect" endpoint and returns the provided URL and the compact Info block with a custom context.
+// ConnectRTMContext calls the "rtm.connect" endpoint and returns the
+// provided URL and the compact Info block with a custom context.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 func (api *Client) ConnectRTMContext(ctx context.Context) (info *Info, websocketURL string, err error) {
 	response := &infoResponseFull{}
-	err = post(ctx, "rtm.connect", url.Values{"token": {api.config.token}}, response, api.debug)
+	err = api.postMethod(ctx, "rtm.connect", url.Values{"token": {api.token}}, response)
 	if err != nil {
-		return nil, "", fmt.Errorf("post: %s", err)
-	}
-	if !response.Ok {
-		return nil, "", response.Error
+		api.Debugf("Failed to connect to RTM: %s", err)
+		return nil, "", err
 	}
 
-	// websocket.Dial does not accept url without the port (yet)
-	// Fixed by: https://github.com/golang/net/commit/5058c78c3627b31e484a81463acd51c7cecc06f3
-	// but slack returns the address with no port, so we have to fix it
 	api.Debugln("Using URL:", response.Info.URL)
-	websocketURL, err = websocketizeURLPort(response.Info.URL)
-	if err != nil {
-		return nil, "", fmt.Errorf("parsing response URL: %s", err)
-	}
+	return &response.Info, response.Info.URL, response.Err()
+}
 
-	return &response.Info, websocketURL, nil
+// RTMOption options for the managed RTM.
+type RTMOption func(*RTM)
+
+// RTMOptionUseStart as of 11th July 2017 you should prefer setting this to false, see:
+// https://api.slack.com/changelog/2017-04-start-using-rtm-connect-and-stop-using-rtm-start
+func RTMOptionUseStart(b bool) RTMOption {
+	return func(rtm *RTM) {
+		rtm.useRTMStart = b
+	}
+}
+
+// RTMOptionDialer takes a gorilla websocket Dialer and uses it as the
+// Dialer when opening the websocket for the RTM connection.
+func RTMOptionDialer(d *websocket.Dialer) RTMOption {
+	return func(rtm *RTM) {
+		rtm.dialer = d
+	}
+}
+
+// RTMOptionPingInterval determines how often to deliver a ping message to slack.
+func RTMOptionPingInterval(d time.Duration) RTMOption {
+	return func(rtm *RTM) {
+		rtm.pingInterval = d
+		rtm.resetDeadman()
+	}
+}
+
+// RTMOptionConnParams installs parameters to embed into the connection URL.
+func RTMOptionConnParams(connParams url.Values) RTMOption {
+	return func(rtm *RTM) {
+		rtm.connParams = connParams
+	}
 }
 
 // NewRTM returns a RTM, which provides a fully managed connection to
 // Slack's websocket-based Real-Time Messaging protocol.
-func (api *Client) NewRTM() *RTM {
-	return api.NewRTMWithOptions(nil)
-}
-
-// NewRTMWithOptions returns a RTM, which provides a fully managed connection to
-// Slack's websocket-based Real-Time Messaging protocol.
-// This also allows to configure various options available for RTM API.
-func (api *Client) NewRTMWithOptions(options *RTMOptions) *RTM {
+func (api *Client) NewRTM(options ...RTMOption) *RTM {
 	result := &RTM{
 		Client:           *api,
 		IncomingEvents:   make(chan RTMEvent, 50),
 		outgoingMessages: make(chan OutgoingMessage, 20),
-		pings:            make(map[int]time.Time),
-		isConnected:      false,
-		wasIntentional:   true,
+		pingInterval:     defaultPingInterval,
+		pingDeadman:      time.NewTimer(deadmanDuration(defaultPingInterval)),
 		killChannel:      make(chan bool),
+		disconnected:     make(chan struct{}),
+		disconnectedm:    &sync.Once{},
 		forcePing:        make(chan bool),
-		rawEvents:        make(chan json.RawMessage),
 		idGen:            NewSafeID(1),
+		mu:               &sync.Mutex{},
 	}
 
-	if options != nil {
-		result.useRTMStart = options.UseRTMStart
-	} else {
-		result.useRTMStart = true
+	for _, opt := range options {
+		opt(result)
 	}
 
 	return result
