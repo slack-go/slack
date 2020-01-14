@@ -79,6 +79,9 @@ type MessageEvent struct {
 	ChannelType     string      `json:"channel_type"`
 	EventTimeStamp  json.Number `json:"event_ts"`
 
+	// Additional message fields
+	Attachments []Attachment `json:"attachments,omitempty"`
+
 	// Edited Message
 	Message         *MessageEvent `json:"message,omitempty"`
 	PreviousMessage *MessageEvent `json:"previous_message,omitempty"`
