@@ -145,6 +145,45 @@ func TestBotMessageEvent(t *testing.T) {
 	}
 }
 
+func TestMessageWithAttachmentsEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "message",
+			"channel": "G024BE91L",
+			"user": "U2147483697",
+			"text": "Live long and prospect.",
+			"ts": "1355517523.000005",
+			"event_ts": "1355517523.000005",
+			"channel_type": "channel",
+			"message": {
+				"text": "To infinity and beyond.",
+				"edited": {
+					"user": "U2147483697",
+					"ts": "1355517524.000000"
+				},
+				"attachments": [
+					{
+						"text": "sometext",
+						"title": "*sometitle*",
+						"color": "267EE0",
+						"mrkdwn_in": [
+							"text",
+							"title"
+						]
+					}
+				]
+			},
+			"previous_message": {
+				"text": "Live long and prospect."
+			}
+		}
+	`)
+	err := json.Unmarshal(rawE, &MessageEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestPinAdded(t *testing.T) {
 	rawE := []byte(`
 			{
