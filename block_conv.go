@@ -58,6 +58,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &DividerBlock{}
 		case "image":
 			block = &ImageBlock{}
+		case "input":
+			block = &InputBlock{}
 		case "section":
 			block = &SectionBlock{}
 		case "rich_text":
