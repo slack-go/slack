@@ -81,6 +81,46 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON implements the Unmarshaller interface for InputBlock, so that any JSON
+// unmarshalling is delegated and proper type determination can be made before unmarshal
+func (b *InputBlock) UnmarshalJSON(data []byte) error {
+	type alias InputBlock
+	a := struct {
+		Element json.RawMessage `json:"element"`
+		*alias
+	}{
+		alias: (*alias)(b),
+	}
+
+	if err := json.Unmarshal(data, &a); err != nil {
+		return err
+	}
+
+	s := sumtype{}
+	if err := json.Unmarshal(a.Element, &s); err != nil {
+		return nil
+	}
+
+	var e BlockElement
+	switch s.TypeVal {
+	case "datepicker":
+		e = &DatePickerBlockElement{}
+	case "plain_text_input":
+		e = &PlainTextInputBlockElement{}
+	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
+		e = &SelectBlockElement{}
+	default:
+		return errors.New("unsupported block element type")
+	}
+
+	if err := json.Unmarshal(a.Element, e); err != nil {
+		return err
+	}
+	b.Element = e
+
+	return nil
+}
+
 // MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
 func (b *BlockElements) MarshalJSON() ([]byte, error) {
