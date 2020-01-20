@@ -127,6 +127,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &OverflowBlockElement{}
 		case "datepicker":
 			blockElement = &DatePickerBlockElement{}
+		case "plain_text_input":
+			blockElement = &PlainTextInputBlockElement{}
 		case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
 			blockElement = &SelectBlockElement{}
 		default:
