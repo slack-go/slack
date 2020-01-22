@@ -97,7 +97,7 @@ func TestPostMessage(t *testing.T) {
 			opt: []MsgOption{
 				MsgOptionAttachments(
 					Attachment{
-						Blocks: blocks,
+						Blocks: Blocks{BlockSet: blocks},
 					}),
 			},
 			expected: url.Values{
