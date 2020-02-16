@@ -2,7 +2,9 @@
 
 package slackevents
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.
 type EventsAPIInnerEvent struct {
