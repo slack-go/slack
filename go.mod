@@ -2,6 +2,8 @@ module github.com/slack-go/slack
 
 go 1.13
 
+go 1.13
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-test/deep v1.0.4
