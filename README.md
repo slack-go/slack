@@ -1,4 +1,4 @@
-Slack API in Go [![GoDoc](https://godoc.org/github.com/slack-go/slack?status.svg)](https://godoc.org/github.com/slack-go/slack) <!-- [![Build Status](https://travis-ci.org/slack-go/slack.svg)](https://travis-ci.org/slack-go/slack) -->
+Slack API in Go [![GoDoc](https://godoc.org/github.com/slack-go/slack?status.svg)](https://godoc.org/github.com/slack-go/slack) [![Build Status](https://travis-ci.org/slack-go/slack.svg)](https://travis-ci.org/slack-go/slack)
 ===============
 This is a new fork of the Slack library created by Norberto Lopez, moved to a Github organization.
 
