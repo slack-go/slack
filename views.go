@@ -38,13 +38,13 @@ type ModalViewRequest struct {
 	Type            ViewType         `json:"type"`
 	Title           *TextBlockObject `json:"title"`
 	Blocks          Blocks           `json:"blocks"`
-	Close           *TextBlockObject `json:"close,omitempty"`
-	Submit          *TextBlockObject `json:"submit,omitempty"`
-	PrivateMetadata string           `json:"private_metadata,omitempty"`
-	CallbackID      string           `json:"callback_id,omitempty"`
-	ClearOnClose    bool             `json:"clear_on_close,omitempty"`
-	NotifyOnClose   bool             `json:"notify_on_close,omitempty"`
-	ExternalID      string           `json:"external_id,omitempty"`
+	Close           *TextBlockObject `json:"close"`
+	Submit          *TextBlockObject `json:"submit"`
+	PrivateMetadata string           `json:"private_metadata"`
+	CallbackID      string           `json:"callback_id"`
+	ClearOnClose    bool             `json:"clear_on_close"`
+	NotifyOnClose   bool             `json:"notify_on_close"`
+	ExternalID      string           `json:"external_id"`
 }
 
 func (v *ModalViewRequest) ViewType() ViewType {
@@ -54,9 +54,9 @@ func (v *ModalViewRequest) ViewType() ViewType {
 type HomeTabViewRequest struct {
 	Type            ViewType `json:"type"`
 	Blocks          Blocks   `json:"blocks"`
-	PrivateMetadata string   `json:"private_metadata,omitempty"`
-	CallbackID      string   `json:"callback_id,omitempty"`
-	ExternalID      string   `json:"external_id,omitempty"`
+	PrivateMetadata string   `json:"private_metadata"`
+	CallbackID      string   `json:"callback_id"`
+	ExternalID      string   `json:"external_id"`
 }
 
 func (v *HomeTabViewRequest) ViewType() ViewType {
@@ -71,7 +71,7 @@ type openViewRequest struct {
 type publishViewRequest struct {
 	UserID string             `json:"user_id"`
 	View   HomeTabViewRequest `json:"view"`
-	Hash   string             `json:"hash,omitempty"`
+	Hash   string             `json:"hash"`
 }
 
 type pushViewRequest struct {
@@ -81,9 +81,9 @@ type pushViewRequest struct {
 
 type updateViewRequest struct {
 	View       ModalViewRequest `json:"view"`
-	ExternalID string           `json:"external_id,omitempty"`
-	Hash       string           `json:"hash,omitempty"`
-	ViewID     string           `json:"view_id,omitempty"`
+	ExternalID string           `json:"external_id"`
+	Hash       string           `json:"hash"`
+	ViewID     string           `json:"view_id"`
 }
 
 type ViewResponse struct {
