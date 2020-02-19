@@ -1,87 +1,12 @@
-Slack API in Go [![GoDoc](https://godoc.org/github.com/nlopes/slack?status.svg)](https://godoc.org/github.com/nlopes/slack) [![Build Status](https://travis-ci.org/nlopes/slack.svg)](https://travis-ci.org/nlopes/slack)
-===============
+# `nlopes/slack` has moved!
 
-[![Join the chat at https://gitter.im/go-slack/Lobby](https://badges.gitter.im/go-slack/Lobby.svg)](https://gitter.im/go-slack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+It is being actively maintained at [slack-go/slack](https://github.com/slack-go/slack).
 
-This library supports most if not all of the `api.slack.com` REST
-calls, as well as the Real-Time Messaging protocol over websocket, in
-a fully managed way.
+This fork was created when the project was moved, and is provided
+for backwards compatibility for old projects, but no guarantees are
+made on how up to date it will be.
 
+You're encouraged to update your import statements to use the official `slack-go/slack`
+version above.
 
-
-
-## Changelog
-
-[CHANGELOG.md](https://github.com/nlopes/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
-
-## Installing
-
-### *go get*
-
-    $ go get -u github.com/nlopes/slack
-
-## Example
-
-### Getting all groups
-
-```golang
-import (
-	"fmt"
-
-	"github.com/nlopes/slack"
-)
-
-func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
-	// If you set debugging, it will log all requests to the console
-	// Useful when encountering issues
-	// slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
-	groups, err := api.GetGroups(false)
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-	for _, group := range groups {
-		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
-	}
-}
-```
-
-### Getting User Information
-
-```golang
-import (
-    "fmt"
-
-    "github.com/nlopes/slack"
-)
-
-func main() {
-    api := slack.New("YOUR_TOKEN_HERE")
-    user, err := api.GetUserInfo("U023BECGF")
-    if err != nil {
-	    fmt.Printf("%s\n", err)
-	    return
-    }
-    fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
-}
-```
-
-## Minimal RTM usage:
-
-See https://github.com/nlopes/slack/blob/master/examples/websocket/websocket.go
-
-
-## Minimal EventsAPI usage:
-
-See https://github.com/nlopes/slack/blob/master/examples/eventsapi/events.go
-
-
-## Contributing
-
-You are more than welcome to contribute to this project.  Fork and
-make a Pull Request, or create an Issue if you see any problem.
-
-## License
-
-BSD 2 Clause license
+Apologies for the fuss, the new place has amazing people maintaining the community alive.
