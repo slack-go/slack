@@ -56,14 +56,14 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &ContextBlock{}
 		case "divider":
 			block = &DividerBlock{}
-		case "image":
-			block = &ImageBlock{}
-		case "section":
-			block = &SectionBlock{}
 		case "file":
 			block = &FileBlock{}
+		case "image":
+			block = &ImageBlock{}
 		case "input":
 			block = &InputBlock{}
+		case "section":
+			block = &SectionBlock{}
 		case "rich_text":
 			// for now ignore the (complex) content of rich_text blocks until we can fully support it
 			continue
@@ -150,7 +150,36 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 
 	var blockElements BlockElements
 	for _, r := range raw {
-		blockElement, err := unmarshalAnyBlockElement(r)
+		s := sumtype{}
+		err := json.Unmarshal(r, &s)
+		if err != nil {
+			return err
+		}
+
+		var blockElementType string
+		if s.TypeVal != "" {
+			blockElementType = s.TypeVal
+		}
+
+		var blockElement BlockElement
+		switch blockElementType {
+		case "image":
+			blockElement = &ImageBlockElement{}
+		case "button":
+			blockElement = &ButtonBlockElement{}
+		case "overflow":
+			blockElement = &OverflowBlockElement{}
+		case "datepicker":
+			blockElement = &DatePickerBlockElement{}
+		case "plain_text_input":
+			blockElement = &PlainTextInputBlockElement{}
+		case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
+			blockElement = &SelectBlockElement{}
+		default:
+			return errors.New("unsupported block element type")
+		}
+
+		err = json.Unmarshal(r, blockElement)
 		if err != nil {
 			return err
 		}
@@ -160,48 +189,6 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 
 	*b = blockElements
 	return nil
-}
-
-func unmarshalAnyBlockElement(raw json.RawMessage) (BlockElement, error) {
-	var blockElement BlockElement
-	s := sumtype{}
-	err := json.Unmarshal(raw, &s)
-	if err != nil {
-		return nil, err
-	}
-
-	var blockElementType string
-	if s.TypeVal != "" {
-		blockElementType = s.TypeVal
-	}
-
-	switch blockElementType {
-	case "image":
-		blockElement = &ImageBlockElement{}
-	case "button":
-		blockElement = &ButtonBlockElement{}
-	case "overflow":
-		blockElement = &OverflowBlockElement{}
-	case "datepicker":
-		blockElement = &DatePickerBlockElement{}
-	case "plain_text_input":
-		blockElement = &PlainTextInputBlockElement{}
-	case "radio_buttons":
-		blockElement = &RadioButtonsBlockElement{}
-	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
-		blockElement = &SelectBlockElement{}
-	case "multi_static_select", "multi_external_select", "multi_users_select", "multi_conversations_select", "multi_channels_select":
-		blockElement = &MultiSelectBlockElement{}
-	default:
-		blockElement = &UnknownBlockElement{}
-	}
-
-	err = json.Unmarshal(raw, blockElement)
-	if err != nil {
-		return nil, err
-	}
-
-	return blockElement, nil
 }
 
 // MarshalJSON implements the Marshaller interface for Accessory so that any JSON
