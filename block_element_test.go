@@ -113,7 +113,7 @@ func TestNewDatePickerBlockElement(t *testing.T) {
 
 func TestNewPlainTextInputBlockElement(t *testing.T) {
 
-	plainTextInputElemnet := NewPlainTextInputBlockElement("test")
+	plainTextInputElemnet := NewPlainTextInputBlockElement(nil, "test")
 
 	assert.Equal(t, string(plainTextInputElemnet.Type), "plain_text_input")
 	assert.Equal(t, plainTextInputElemnet.ActionID, "test")

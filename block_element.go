@@ -80,13 +80,6 @@ type BlockElements struct {
 	ElementSet []BlockElement `json:"elements,omitempty"`
 }
 
-// SingularBlockElement is a convenience struct defined to allow dynamic
-// unmarshalling of the "element" value in Slack's JSON response, which varies depending on
-// BlockElement type
-type SingularBlockElement struct {
-	Element BlockElement `json:"element"`
-}
-
 // UnknownBlockElement any block element that this library does not directly support.
 // See the "Rich Elements" section at the following URL:
 // https://api.slack.com/changelog/2019-09-what-they-see-is-what-you-get-and-more-and-less
@@ -340,8 +333,9 @@ func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 	}
 }
 
-// PlainTextInputBlockElement defines an element which lets users input plain
-// text
+// PlainTextInputBlockElement creates a field where a user can enter freeform
+// data.
+// Plain-text input elements are currently only available in modals.
 //
 // More Information: https://api.slack.com/reference/block-kit/block-elements#input
 type PlainTextInputBlockElement struct {
@@ -350,8 +344,8 @@ type PlainTextInputBlockElement struct {
 	Placeholder  *TextBlockObject   `json:"placeholder,omitempty"`
 	InitialValue string             `json:"initial_value,omitempty"`
 	Multiline    bool               `json:"multiline,omitempty"`
-	MinLength    uint32             `json:"min_length,omitempty"`
-	MaxLength    uint32             `json:"max_length,omitempty"`
+	MinLength    int                `json:"min_length,omitempty"`
+	MaxLength    int                `json:"max_length,omitempty"`
 }
 
 // ElementType returns the type of the Element
@@ -359,12 +353,13 @@ func (s PlainTextInputBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-// NewPlainTextInputBlockElement returns an instance of a plain text input
-// element.
-func NewPlainTextInputBlockElement(actionID string) *PlainTextInputBlockElement {
+// NewPlainTextInputBlockElement returns an instance of a plain-text input
+// element
+func NewPlainTextInputBlockElement(placeholder *TextBlockObject, actionID string) *PlainTextInputBlockElement {
 	return &PlainTextInputBlockElement{
-		Type:     METPlainTextInput,
-		ActionID: actionID,
+		Type:        METPlainTextInput,
+		ActionID:    actionID,
+		Placeholder: placeholder,
 	}
 }
 

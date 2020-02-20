@@ -225,11 +225,11 @@ func TestViewSubmissionCallback(t *testing.T) {
 							false,
 							false,
 						),
-						&SingularBlockElement{&PlainTextInputBlockElement{
+						&PlainTextInputBlockElement{
 							Type:      "plain_text_input",
 							ActionID:  "ml-value",
 							Multiline: true,
-						}},
+						},
 					),
 				},
 			},
