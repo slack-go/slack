@@ -5,7 +5,7 @@ help:
 	@echo "Welcome to slack-go/slack make."
 	@echo "The following commands are available:"
 	@echo ""
-	@echo "    make deps              : Fetch all depdnencies"
+	@echo "    make deps              : Fetch all dependencies"
 	@echo "    make fmt               : Run go fmt to fix any formatting issues"
 	@echo "    make lint              : Use go vet to check for linting issues"
 	@echo "    make test              : Run all short tests"
