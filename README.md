@@ -83,6 +83,14 @@ See https://github.com/slack-go/slack/blob/master/examples/eventsapi/events.go
 You are more than welcome to contribute to this project.  Fork and
 make a Pull Request, or create an Issue if you see any problem.
 
+Before making any Pull Request please run the following:
+
+```
+make pr-prep
+```
+
+This will check/update code formatting, linting and then run all tests
+
 ## License
 
 BSD 2 Clause license
