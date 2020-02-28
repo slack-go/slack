@@ -38,8 +38,8 @@ type ModalViewRequest struct {
 	Type            ViewType         `json:"type"`
 	Title           *TextBlockObject `json:"title"`
 	Blocks          Blocks           `json:"blocks"`
-	Close           *TextBlockObject `json:"close"`
-	Submit          *TextBlockObject `json:"submit"`
+	Close           *TextBlockObject `json:"close,omitempty"`
+	Submit          *TextBlockObject `json:"submit,omitempty"`
 	PrivateMetadata string           `json:"private_metadata"`
 	CallbackID      string           `json:"callback_id"`
 	ClearOnClose    bool             `json:"clear_on_close"`
