@@ -81,9 +81,9 @@ type pushViewRequest struct {
 
 type updateViewRequest struct {
 	View       ModalViewRequest `json:"view"`
-	ExternalID string           `json:"external_id"`
-	Hash       string           `json:"hash"`
-	ViewID     string           `json:"view_id"`
+	ExternalID string           `json:"external_id,omitempty"`
+	Hash       string           `json:"hash,omitempty"`
+	ViewID     string           `json:"view_id,omitempty"`
 }
 
 type ViewResponse struct {
