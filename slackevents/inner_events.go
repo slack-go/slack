@@ -121,6 +121,21 @@ type pinEvent struct {
 	HasPins        bool   `json:"has_pins,omitempty"`
 }
 
+type reactionEvent struct {
+	Type           string `json:"type"`
+	User           string `json:"user"`
+	Reaction       string `json:"reaction"`
+	ItemUser       string `json:"item_user"`
+	Item           Item   `json:"item"`
+	EventTimestamp string `json:"event_ts"`
+}
+
+// ReactionAddedEvent An reaction was added to a message - https://api.slack.com/events/reaction_added
+type ReactionAddedEvent reactionEvent
+
+// ReactionRemovedEvent An reaction was removed from a message - https://api.slack.com/events/reaction_removed
+type ReactionRemovedEvent reactionEvent
+
 // PinAddedEvent An item was pinned to a channel - https://api.slack.com/events/pin_added
 type PinAddedEvent pinEvent
 
@@ -260,6 +275,10 @@ const (
 	PinAdded = "pin_added"
 	// PinRemoved An item was unpinned from a channel
 	PinRemoved = "pin_removed"
+	// ReactionAdded An reaction was added to a message
+	ReactionAdded = "reaction_added"
+	// ReactionRemoved An reaction was removed from a message
+	ReactionRemoved = "reaction_removed"
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = "tokens_revoked"
 )
@@ -278,5 +297,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	MemberJoinedChannel:   MemberJoinedChannelEvent{},
 	PinAdded:              PinAddedEvent{},
 	PinRemoved:            PinRemovedEvent{},
+	ReactionAdded:         ReactionAddedEvent{},
+	ReactionRemoved:       ReactionRemovedEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
 }
