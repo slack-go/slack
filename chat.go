@@ -692,7 +692,7 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 	values := url.Values{
 		"token": {api.token},
 	}
-	if params.Cursor != "" {
+	if params.Channel != "" {
 		values.Add("channel", params.Channel)
 	}
 	if params.Cursor != "" {
