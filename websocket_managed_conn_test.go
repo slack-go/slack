@@ -2,12 +2,14 @@ package slack_test
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/nlopes/slack"
-	"github.com/nlopes/slack/slacktest"
+	websocket "github.com/gorilla/websocket"
+	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slacktest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,6 +17,155 @@ const (
 	testMessage = "test message"
 	testToken   = "TEST_TOKEN"
 )
+
+func TestRTMBeforeEvents(t *testing.T) {
+	// Set up the test server.
+	testServer := slacktest.NewTestServer()
+	go testServer.Start()
+
+	// Setup and start the RTM.
+	api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
+	rtm := api.NewRTM()
+
+	done := make(chan struct{})
+	go func() {
+		for msg := range rtm.IncomingEvents {
+			switch ev := msg.Data.(type) {
+			case *slack.DisconnectedEvent:
+				if ev.Intentional {
+					close(done)
+					return
+				}
+			default:
+				// t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+			}
+		}
+	}()
+	go rtm.Disconnect()
+	go rtm.ManageConnection()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Error("timed out waiting for disconnect")
+		t.Fail()
+	}
+}
+
+func TestRTMGoodbye(t *testing.T) {
+	// Set up the test server.
+	testServer := slacktest.NewTestServer(
+		func(c slacktest.Customize) {
+			c.Handle("/ws", slacktest.Websocket(func(conn *websocket.Conn) {
+				if err := slacktest.RTMServerSendGoodbye(conn); err != nil {
+					log.Println("failed to send goodbye", err)
+				}
+			}))
+		},
+	)
+	go testServer.Start()
+
+	// Setup and start the RTM.
+	api := slack.New(
+		testToken,
+		slack.OptionAPIURL(testServer.GetAPIURL()),
+	)
+
+	rtm := api.NewRTM(
+		slack.RTMOptionPingInterval(100 * time.Millisecond),
+	)
+
+	done := make(chan struct{})
+	go rtm.ManageConnection()
+	connected := 0
+	disconnected := 0
+	func() {
+		for msg := range rtm.IncomingEvents {
+			switch ev := msg.Data.(type) {
+			case *slack.ConnectedEvent:
+				connected += 1
+				if connected > 5 {
+					rtm.Disconnect()
+				}
+			case *slack.DisconnectedEvent:
+				// t.Log("disconnect event received", ev.Intentional, ev.Cause)
+				if ev.Intentional {
+					close(done)
+					return
+				}
+				disconnected += 1
+			default:
+				// t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+			}
+		}
+	}()
+
+	select {
+	case <-done:
+		// magic numbers from emperical testing.
+		assert.Equal(t, connected <= 7, true)
+		assert.Equal(t, disconnected <= 12, true)
+	case <-time.After(5 * time.Second):
+		t.Error("timed out waiting for disconnect")
+		t.Fail()
+	}
+}
+
+func TestRTMDeadConnection(t *testing.T) {
+	// Set up the test server.
+	testServer := slacktest.NewTestServer(
+		func(c slacktest.Customize) {
+			c.Handle("/ws", slacktest.Websocket(func(conn *websocket.Conn) {
+				// closes immediately
+			}))
+		},
+	)
+	go testServer.Start()
+
+	// Setup and start the RTM.
+	api := slack.New(
+		testToken,
+		slack.OptionAPIURL(testServer.GetAPIURL()),
+	)
+
+	rtm := api.NewRTM(
+		slack.RTMOptionPingInterval(100 * time.Millisecond),
+	)
+
+	go rtm.ManageConnection()
+	done := make(chan struct{})
+	connected := 0
+	disconnected := 0
+	func() {
+		for msg := range rtm.IncomingEvents {
+			switch ev := msg.Data.(type) {
+			case *slack.ConnectedEvent:
+				connected += 1
+				if connected > 5 {
+					rtm.Disconnect()
+				}
+			case *slack.DisconnectedEvent:
+				// t.Log("disconnect event received", ev.Intentional, ev.Cause)
+				if ev.Intentional {
+					close(done)
+					return
+				}
+				disconnected += 1
+			default:
+				// t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+			}
+		}
+	}()
+
+	select {
+	case <-done:
+		// magic numbers from emperical testing.
+		assert.Equal(t, connected <= 7, true)
+		assert.Equal(t, disconnected <= 7, true)
+	case <-time.After(5 * time.Second):
+		t.Error("timed out waiting for disconnect")
+		t.Fail()
+	}
+}
 
 func TestRTMDisconnect(t *testing.T) {
 	// actually connect to slack here w/ an invalid token

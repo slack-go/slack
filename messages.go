@@ -15,13 +15,14 @@ type OutgoingMessage struct {
 // Message is an auxiliary type to allow us to have a message containing sub messages
 type Message struct {
 	Msg
-	SubMessage *Msg `json:"message,omitempty"`
+	SubMessage      *Msg `json:"message,omitempty"`
 	PreviousMessage *Msg `json:"previous_message,omitempty"`
 }
 
 // Msg contains information about a slack message
 type Msg struct {
 	// Basic Message
+	ClientMsgID     string       `json:"client_msg_id"`
 	Type            string       `json:"type,omitempty"`
 	Channel         string       `json:"channel,omitempty"`
 	User            string       `json:"user,omitempty"`
@@ -101,7 +102,7 @@ type Msg struct {
 const (
 	// ResponseTypeInChannel in channel response for slash commands.
 	ResponseTypeInChannel = "in_channel"
-	// ResponseTypeEphemeral ephemeral respone for slash commands.
+	// ResponseTypeEphemeral ephemeral response for slash commands.
 	ResponseTypeEphemeral = "ephemeral"
 )
 

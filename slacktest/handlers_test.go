@@ -3,7 +3,7 @@ package slacktest
 import (
 	"testing"
 
-	slack "github.com/nlopes/slack"
+	slack "github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 )
 

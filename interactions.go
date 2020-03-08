@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"bytes"
 	"encoding/json"
 )
 
@@ -23,6 +24,9 @@ const (
 	InteractionTypeInteractionMessage = InteractionType("interactive_message")
 	InteractionTypeMessageAction      = InteractionType("message_action")
 	InteractionTypeBlockActions       = InteractionType("block_actions")
+	InteractionTypeBlockSuggestion    = InteractionType("block_suggestion")
+	InteractionTypeViewSubmission     = InteractionType("view_submission")
+	InteractionTypeViewClosed         = InteractionType("view_closed")
 )
 
 // InteractionCallback is sent from slack when a user interactions with a button or dialog.
@@ -43,7 +47,19 @@ type InteractionCallback struct {
 	MessageTs       string          `json:"message_ts"`
 	AttachmentID    string          `json:"attachment_id"`
 	ActionCallback  ActionCallbacks `json:"actions"`
+	View            View            `json:"view"`
+	ActionID        string          `json:"action_id"`
+	APIAppID        string          `json:"api_app_id"`
+	BlockID         string          `json:"block_id"`
+	Container       Container       `json:"container"`
 	DialogSubmissionCallback
+	ViewSubmissionCallback
+	ViewClosedCallback
+}
+
+type Container struct {
+	Type   string `json:"type"`
+	ViewID string `json:"view_id"`
 }
 
 // ActionCallback is a convenience struct defined to allow dynamic unmarshalling of
@@ -51,6 +67,48 @@ type InteractionCallback struct {
 type ActionCallbacks struct {
 	AttachmentActions []*AttachmentAction
 	BlockActions      []*BlockAction
+}
+
+// MarshalJSON implements the Marshaller interface in order to combine both
+// action callback types back into a single array, like how the api responds.
+// This makes Marshaling and Unmarshaling an InteractionCallback symmetrical
+func (a ActionCallbacks) MarshalJSON() ([]byte, error) {
+	count := 0
+	length := len(a.AttachmentActions) + len(a.BlockActions)
+	buffer := bytes.NewBufferString("[")
+
+	f := func(obj interface{}) error {
+		js, err := json.Marshal(obj)
+		if err != nil {
+			return err
+		}
+		_, err = buffer.Write(js)
+		if err != nil {
+			return err
+		}
+
+		count++
+		if count < length {
+			_, err = buffer.WriteString(",")
+			return err
+		}
+		return nil
+	}
+
+	for _, act := range a.AttachmentActions {
+		err := f(act)
+		if err != nil {
+			return nil, err
+		}
+	}
+	for _, blk := range a.BlockActions {
+		err := f(blk)
+		if err != nil {
+			return nil, err
+		}
+	}
+	buffer.WriteString("]")
+	return buffer.Bytes(), nil
 }
 
 // UnmarshalJSON implements the Marshaller interface in order to delegate

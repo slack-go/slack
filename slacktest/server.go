@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 func newMessageChannels() *messageChannels {
@@ -47,7 +47,7 @@ func NewTestServer(custom ...binder) *Server {
 
 	s.Handle("/ws", s.wsHandler)
 	s.Handle("/rtm.start", rtmStartHandler)
-	s.Handle("/rtm.connect", rtmConnectHandler)
+	s.Handle("/rtm.connect", RTMConnectHandler)
 	s.Handle("/chat.postMessage", s.postMessageHandler)
 	s.Handle("/channels.list", listChannelsHandler)
 	s.Handle("/groups.list", listGroupsHandler)
@@ -77,7 +77,7 @@ func NewTestServer(custom ...binder) *Server {
 // Handle allow for customizing endpoints
 func (sts *Server) Handle(pattern string, handler http.HandlerFunc) {
 	if _, found := sts.registered[pattern]; found {
-		log.Printf("route already registered: %s\n", pattern)
+		// log.Printf("route already registered: %s\n", pattern)
 		return
 	}
 
@@ -166,7 +166,6 @@ func (sts *Server) Stop() {
 
 // Start starts the test server
 func (sts *Server) Start() {
-	log.Print("starting server")
 	sts.server.Start()
 }
 
