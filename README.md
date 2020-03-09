@@ -29,7 +29,7 @@ a fully managed way.
 import (
 	"fmt"
 
-	"github.com/slack-go/slack"
+	"github.com/raidboss-io/slack"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func main() {
 import (
     "fmt"
 
-    "github.com/slack-go/slack"
+    "github.com/raidboss-io/slack"
 )
 
 func main() {

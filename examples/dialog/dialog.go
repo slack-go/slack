@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/slack-go/slack"
+	"github.com/raidboss-io/slack"
 )
 
 var api = slack.New("YOUR_TOKEN")
