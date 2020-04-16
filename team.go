@@ -31,16 +31,17 @@ type LoginResponse struct {
 }
 
 type Login struct {
-	UserID    string `json:"user_id"`
-	Username  string `json:"username"`
-	DateFirst int    `json:"date_first"`
-	DateLast  int    `json:"date_last"`
-	Count     int    `json:"count"`
-	IP        string `json:"ip"`
-	UserAgent string `json:"user_agent"`
-	ISP       string `json:"isp"`
-	Country   string `json:"country"`
-	Region    string `json:"region"`
+	UserID    string      `json:"user_id"`
+	Username  string      `json:"username"`
+	DateFirst int         `json:"date_first"`
+	DateLast  int         `json:"date_last"`
+	Count     int         `json:"count"`
+	IP        interface{} `json:"ip"`
+	UserAgent string      `json:"user_agent"`
+	ISP       string      `json:"isp"`
+	Country   string      `json:"country"`
+	Region    string      `json:"region"`
+	RealIP    string
 }
 
 type BillableInfoResponse struct {
@@ -133,6 +134,15 @@ func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogPar
 	response, err := api.accessLogsRequest(ctx, "team.accessLogs", values)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	for _, login := range response.Logins {
+		switch vv := login.IP.(type) {
+		case string:
+			login.RealIP = vv
+		default:
+			login.RealIP = "0.0.0.0"
+		}
 	}
 	return response.Logins, &response.Paging, nil
 }
