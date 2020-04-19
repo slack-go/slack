@@ -23,6 +23,10 @@ type AppMentionEvent struct {
 	ThreadTimeStamp string      `json:"thread_ts"`
 	Channel         string      `json:"channel"`
 	EventTimeStamp  json.Number `json:"event_ts"`
+
+	// When Message comes from a channel that is shared between workspaces
+	UserTeam   string `json:"user_team,omitempty"`
+	SourceTeam string `json:"source_team,omitempty"`
 }
 
 // AppHomeOpenedEvent Your Slack app home was opened.
@@ -84,6 +88,10 @@ type MessageEvent struct {
 	Channel         string      `json:"channel"`
 	ChannelType     string      `json:"channel_type"`
 	EventTimeStamp  json.Number `json:"event_ts"`
+
+	// When Message comes from a channel that is shared between workspaces
+	UserTeam   string `json:"user_team,omitempty"`
+	SourceTeam string `json:"source_team,omitempty"`
 
 	// Edited Message
 	Message         *MessageEvent `json:"message,omitempty"`

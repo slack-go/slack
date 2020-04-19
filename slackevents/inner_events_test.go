@@ -14,7 +14,10 @@ func TestAppMention(t *testing.T) {
 				"ts": "1515449522.000016",
 				"thread_ts": "1515449522.000016",
 				"channel": "C0LAN2Q65",
-				"event_ts": "1515449522000016"
+				"event_ts": "1515449522000016",
+				"source_team": "T3MQV36V7",
+				"user_team": "T3MQV36V7",
+				"blah": "test"
 		}
 	`)
 	err := json.Unmarshal(rawE, &AppMentionEvent{})
@@ -109,6 +112,8 @@ func TestMessageEvent(t *testing.T) {
 				"ts": "1355517523.000005",
 				"event_ts": "1355517523.000005",
 				"channel_type": "channel",
+				"source_team": "T3MQV36V7",
+				"user_team": "T3MQV36V7",
 				"message": {
 					"text": "To infinity and beyond.",
 					"edited": {
