@@ -261,14 +261,15 @@ const (
 )
 
 type sendConfig struct {
-	apiurl       string
-	options      []MsgOption
-	mode         sendMode
-	endpoint     string
-	values       url.Values
-	attachments  []Attachment
-	blocks       Blocks
-	responseType string
+	apiurl         string
+	options        []MsgOption
+	mode           sendMode
+	endpoint       string
+	values         url.Values
+	attachments    []Attachment
+	blocks         Blocks
+	responseType   string
+	deleteOriginal bool
 }
 
 func (t sendConfig) BuildRequest(token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
@@ -279,11 +280,12 @@ func (t sendConfig) BuildRequest(token, channelID string) (req *http.Request, _ 
 	switch t.mode {
 	case chatResponse:
 		return responseURLSender{
-			endpoint:     t.endpoint,
-			values:       t.values,
-			attachments:  t.attachments,
-			blocks:       t.blocks,
-			responseType: t.responseType,
+			endpoint:       t.endpoint,
+			values:         t.values,
+			attachments:    t.attachments,
+			blocks:         t.blocks,
+			responseType:   t.responseType,
+			deleteOriginal: t.deleteOriginal,
 		}.BuildRequest()
 	default:
 		return formSender{endpoint: t.endpoint, values: t.values}.BuildRequest()
@@ -303,20 +305,22 @@ func (t formSender) BuildRequest() (*http.Request, func(*chatResponseFull) respo
 }
 
 type responseURLSender struct {
-	endpoint     string
-	values       url.Values
-	attachments  []Attachment
-	blocks       Blocks
-	responseType string
+	endpoint       string
+	values         url.Values
+	attachments    []Attachment
+	blocks         Blocks
+	responseType   string
+	deleteOriginal bool
 }
 
 func (t responseURLSender) BuildRequest() (*http.Request, func(*chatResponseFull) responseParser, error) {
 	req, err := jsonReq(t.endpoint, Msg{
-		Text:         t.values.Get("text"),
-		Timestamp:    t.values.Get("ts"),
-		Attachments:  t.attachments,
-		Blocks:       t.blocks,
-		ResponseType: t.responseType,
+		Text:           t.values.Get("text"),
+		Timestamp:      t.values.Get("ts"),
+		Attachments:    t.attachments,
+		Blocks:         t.blocks,
+		ResponseType:   t.responseType,
+		DeleteOriginal: t.deleteOriginal,
 	})
 	return req, func(resp *chatResponseFull) responseParser {
 		return newContentTypeParser(resp)
@@ -400,6 +404,17 @@ func MsgOptionResponseURL(url string, responseType string) MsgOption {
 		config.mode = chatResponse
 		config.endpoint = url
 		config.responseType = responseType
+		config.values.Del("ts")
+		return nil
+	}
+}
+
+// MsgOptionDeleteOriginal deletes the original message using response URL.
+func MsgOptionDeleteOriginal(url string) MsgOption {
+	return func(config *sendConfig) error {
+		config.mode = chatResponse
+		config.endpoint = url
+		config.deleteOriginal = true
 		config.values.Del("ts")
 		return nil
 	}
