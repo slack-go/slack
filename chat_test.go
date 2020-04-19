@@ -165,3 +165,27 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 
 	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(expectedBlocks...), MsgOptionText("text", false), MsgOptionResponseURL(responseURL, ResponseTypeInChannel))
 }
+
+func TestPostMessageWithDeleteOriginalMessageOption(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		var msg Msg
+		if err := json.Unmarshal(body, &msg); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !msg.DeleteOriginal {
+			t.Fatalf("expected delete_originall to be true")
+		}
+	})
+
+	once.Do(startServer)
+	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
+
+	responseURL := api.endpoint + "response-url"
+
+	_, _, _ = api.PostMessage("CXXX", MsgOptionDeleteOriginal(responseURL))
+}
