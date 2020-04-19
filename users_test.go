@@ -76,6 +76,13 @@ func getTestUser() User {
 	return getTestUserWithId("UXXXXXXXX")
 }
 
+func getTestUsers() []User {
+	return []User{
+		getTestUserWithId("UYYYYYYYY"),
+		getTestUserWithId("UZZZZZZZZ"),
+	}
+}
+
 func getUserIdentity(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
@@ -116,6 +123,18 @@ func getUserInfo(rw http.ResponseWriter, r *http.Request) {
 	}{
 		Ok:   true,
 		User: getTestUser(),
+	})
+	rw.Write(response)
+}
+
+func getUsersInfo(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		Ok    bool   `json:"ok"`
+		Users []User `json:"users"`
+	}{
+		Ok:    true,
+		Users: getTestUsers(),
 	})
 	rw.Write(response)
 }
@@ -244,6 +263,24 @@ func TestGetUserInfo(t *testing.T) {
 		return
 	}
 	if !reflect.DeepEqual(expectedUser, *user) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUsersInfo(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/users.info", getUsersInfo)
+	expectedUsers := getTestUsers()
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	user, err := api.GetUsersInfo("UYYYYYYYY", "UZZZZZZZZ")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if !reflect.DeepEqual(expectedUsers, *user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
