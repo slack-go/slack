@@ -152,9 +152,10 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-// add styling to button object
-func (s *ButtonBlockElement) WithStyle(style Style) {
+// WithStyling adds styling to the button object and returns the modified ButtonBlockElement
+func (s *ButtonBlockElement) WithStyle(style Style) *ButtonBlockElement {
 	s.Style = style
+	return s
 }
 
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
