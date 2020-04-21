@@ -79,14 +79,26 @@ func getTeamAccessLogs(rw http.ResponseWriter, r *http.Request) {
 			"isp": null,
                         "country": null,
                         "region": null
-                        }],
+												},
+                        {
+                        "user_id": "BUMEV0F",
+			"username": "judge",
+			"date_first": 1447495893,
+			"date_last": 1447495965,
+			"count": 9,
+			"ip": 0,
+			"user_agent": "com.tinyspeck.chatlyio/2.60 (iPhone; iOS 9.1; Scale/3.00)",
+			"isp": null,
+                        "country": null,
+                        "region": null
+												}],
                         "paging": {
-    			"count": 2,
-    			"total": 2,
+    			"count": 3,
+    			"total": 3,
     			"page": 1,
     			"pages": 1
     			}
-  }`)
+	}`)
 	rw.Write(response)
 }
 
@@ -102,13 +114,14 @@ func TestGetAccessLogs(t *testing.T) {
 		return
 	}
 
-	if len(logins) != 2 {
-		t.Fatal("Should have been 2 logins")
+	if len(logins) != 3 {
+		t.Fatal("Should have been 3 logins")
 	}
 
 	// test the first login
 	login1 := logins[0]
 	login2 := logins[1]
+	login3 := logins[2]
 
 	if login1.UserID != "F0UWHUX" {
 		t.Fatal(ErrIncorrectResponse)
@@ -126,6 +139,12 @@ func TestGetAccessLogs(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if login1.IP != "127.0.0.1" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if login1.RealIP != "127.0.0.1" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if login1.IP != login1.RealIP {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if !strings.HasPrefix(login1.UserAgent, "SlackWeb") {
@@ -152,11 +171,22 @@ func TestGetAccessLogs(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 
-	// test the paging
-	if paging.Count != 2 {
+	// test that sometimes sdk can handle 0 ip from login3 without any panic
+	if login3.IP == 0 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if paging.Total != 2 {
+	if login3.RealIP != "0.0.0.0" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if login3.IP == login3.RealIP {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
+	// test the paging
+	if paging.Count != 3 {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if paging.Total != 3 {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if paging.Page != 1 {
