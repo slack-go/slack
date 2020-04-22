@@ -70,8 +70,8 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	textBlockObject := NewTextBlockObject("plain_text", "text", false, false)
 	sectionBlock := NewSectionBlock(textBlockObject, nil, nil)
 
-	singleBlock := Blocks{BlockSet: []Block{sectionBlock}}
-	twoBlocks := Blocks{BlockSet: []Block{sectionBlock, sectionBlock}}
+	singleBlock := &Blocks{BlockSet: []Block{sectionBlock}}
+	twoBlocks := &Blocks{BlockSet: []Block{sectionBlock, sectionBlock}}
 
 	msgSingleBlock := WebhookMessage{Blocks: singleBlock}
 	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
@@ -87,5 +87,5 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 
 	msgNoBlocks := WebhookMessage{Text: "foo"}
 	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)
-	assert.Equal(t, `{"text":"foo","blocks":null}`, string(msgJsonNoBlocks))
+	assert.Equal(t, `{"text":"foo"}`, string(msgJsonNoBlocks))
 }
