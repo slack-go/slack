@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"strconv"
 )
@@ -144,10 +143,6 @@ func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogPar
 		default:
 			response.Logins[i].RealIP = "0.0.0.0"
 		}
-	}
-
-	for _, login := range response.Logins {
-		fmt.Println("real ip is:", login.RealIP)
 	}
 
 	return response.Logins, &response.Paging, nil
