@@ -64,6 +64,8 @@ type Container struct {
 	MessageTs    string      `json:"message_ts"`
 	AttachmentID json.Number `json:"attachment_id"`
 	ChannelID    string      `json:"channel_id"`
+	IsEphemeral  bool        `json:"is_ephemeral"`
+	IsAppUnfurl  bool        `json:"is_app_unfurl"`
 }
 
 // ActionCallback is a convenience struct defined to allow dynamic unmarshalling of
