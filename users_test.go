@@ -432,7 +432,7 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 // returns n pages of users and sends rate limited errors in between successful pages.
 func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *http.Request) {
 	var n int64
-	doRateLimit := false
+	doRateLimit := true
 	return func(rw http.ResponseWriter, r *http.Request) {
 		defer func() {
 			doRateLimit = !doRateLimit

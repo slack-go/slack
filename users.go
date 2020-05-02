@@ -329,20 +329,23 @@ func (t UserPagination) Failure(err error) error {
 
 func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) {
 	var (
-		resp *userResponseFull
+		resp   *userResponseFull
+		cursor string
 	)
 
 	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
 		return t, errPaginationComplete
 	}
 
-	t.previousResp = t.previousResp.initialize()
+	if t.previousResp != nil {
+		cursor = t.previousResp.Cursor
+	}
 
 	values := url.Values{
 		"limit":          {strconv.Itoa(t.limit)},
 		"presence":       {strconv.FormatBool(t.presence)},
 		"token":          {t.c.token},
-		"cursor":         {t.previousResp.Cursor},
+		"cursor":         {cursor},
 		"include_locale": {strconv.FormatBool(true)},
 	}
 
