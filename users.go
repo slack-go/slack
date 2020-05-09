@@ -255,12 +255,12 @@ func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, 
 }
 
 // GetUsersInfo will retrieve the complete multi-users information
-func (api *Client) GetUsersInfo(users ...string) (*[]User, error) {
+func (api *Client) GetUsersInfo(users ...string) ([]User, error) {
 	return api.GetUsersInfoContext(context.Background(), users...)
 }
 
 // GetUsersInfoContext will retrieve the complete multi-users information with a custom context
-func (api *Client) GetUsersInfoContext(ctx context.Context, users ...string) (*[]User, error) {
+func (api *Client) GetUsersInfoContext(ctx context.Context, users ...string) ([]User, error) {
 	values := url.Values{
 		"token":          {api.token},
 		"users":          {strings.Join(users, ",")},
@@ -271,7 +271,7 @@ func (api *Client) GetUsersInfoContext(ctx context.Context, users ...string) (*[
 	if err != nil {
 		return nil, err
 	}
-	return &response.Users, nil
+	return response.Users, nil
 }
 
 // GetUsersOption options for the GetUsers method call.

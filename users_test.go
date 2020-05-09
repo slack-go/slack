@@ -280,7 +280,7 @@ func TestGetUsersInfo(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-	if !reflect.DeepEqual(expectedUsers, *user) {
+	if !reflect.DeepEqual(expectedUsers, user) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
