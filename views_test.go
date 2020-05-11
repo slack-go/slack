@@ -25,18 +25,39 @@ func TestSlack_OpenView(t *testing.T) {
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	cases := []struct {
-		caseName     string
-		triggerID    string
-		rawResp      string
-		expectedResp *ViewResponse
-		expectedErr  error
+		caseName         string
+		triggerID        string
+		modalViewRequest ModalViewRequest
+		rawResp          string
+		expectedResp     *ViewResponse
+		expectedErr      error
 	}{
 		{
-			caseName:     "pass empty trigger_id",
-			triggerID:    "",
+			caseName:         "pass empty trigger_id",
+			triggerID:        "",
+			modalViewRequest: ModalViewRequest{},
+			rawResp:          "",
+			expectedResp:     nil,
+			expectedErr:      ErrParametersMissing,
+		},
+		{
+			caseName:  "raise an error for not having a unique block id",
+			triggerID: "dummy_trigger_id",
+			modalViewRequest: ModalViewRequest{
+				Blocks: Blocks{
+					BlockSet: []Block{
+						&InputBlock{
+							BlockID: "example",
+						},
+						&InputBlock{
+							BlockID: "example",
+						},
+					},
+				},
+			},
 			rawResp:      "",
 			expectedResp: nil,
-			expectedErr:  ErrParametersMissing,
+			expectedErr:  ErrBlockIDNotUnique,
 		},
 		{
 			caseName:  "raise an error from Slack API",
@@ -60,8 +81,9 @@ func TestSlack_OpenView(t *testing.T) {
 			expectedErr: dummySlackErr,
 		},
 		{
-			caseName:  "success",
-			triggerID: "dummy_trigger_id",
+			caseName:         "success",
+			triggerID:        "dummy_trigger_id",
+			modalViewRequest: ModalViewRequest{},
 			rawResp: `{
 				"ok": true,
 				"view": {
@@ -126,7 +148,7 @@ func TestSlack_OpenView(t *testing.T) {
 		t.Run(c.caseName, func(t *testing.T) {
 			h.rawResponse = c.rawResp
 
-			resp, err := api.OpenView(c.triggerID, ModalViewRequest{})
+			resp, err := api.OpenView(c.triggerID, c.modalViewRequest)
 			if c.expectedErr == nil && err != nil {
 				t.Errorf("unexpected error: %s\n", err)
 				return
