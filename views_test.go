@@ -60,8 +60,9 @@ func TestSlack_OpenView(t *testing.T) {
 			expectedErr:  ErrBlockIDNotUnique,
 		},
 		{
-			caseName:  "raise an error from Slack API",
-			triggerID: "dummy_trigger_id",
+			caseName:         "raise an error from Slack API",
+			triggerID:        "dummy_trigger_id",
+			modalViewRequest: ModalViewRequest{},
 			rawResp: `{
 				"ok": false,
 				"error": "dummy_error_from_slack",
