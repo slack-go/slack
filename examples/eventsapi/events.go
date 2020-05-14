@@ -21,6 +21,7 @@ func main() {
 		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: "TOKEN"}))
 		if e != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		if eventsAPIEvent.Type == slackevents.URLVerification {
