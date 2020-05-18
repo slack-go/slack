@@ -79,6 +79,7 @@ func TestLinkSharedEvent(t *testing.T) {
 				"channel": "Cxxxxxx",
 				"user": "Uxxxxxxx",
 				"message_ts": "123456789.9875",
+				"thread_ts": "123456789.9876",
 				"links":
 						[
 								{
