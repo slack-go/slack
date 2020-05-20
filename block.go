@@ -45,7 +45,7 @@ type BlockAction struct {
 	SelectedChannel       string              `json:"selected_channel"`
 	SelectedChannels      []string            `json:"selected_channels"`
 	SelectedConversation  string              `json:"selected_conversation"`
-	SelectedConversations []string            `json:"selected_conversation"`
+	SelectedConversations []string            `json:"selected_conversations"`
 	SelectedDate          string              `json:"selected_date"`
 	InitialOption         OptionBlockObject   `json:"initial_option"`
 	InitialUser           string              `json:"initial_user"`
