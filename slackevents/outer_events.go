@@ -12,9 +12,9 @@ type EventsAPIEvent struct {
 	TeamID       string `json:"team_id"`
 	Type         string `json:"type"`
 	APIAppID     string `json:"api_app_id"`
-	EnterpriseID string `json:"enterprise_id"`
 	Data         interface{}
 	InnerEvent   EventsAPIInnerEvent
+	EnterpriseID string `json:"enterprise_id"`
 }
 
 // EventsAPIURLVerificationEvent received when configuring a EventsAPI driven app
