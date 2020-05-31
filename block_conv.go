@@ -275,6 +275,12 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.MultiSelectElement = element.(*MultiSelectBlockElement)
+	case "checkboxes":
+		element, err := unmarshalBlockElement(r, &CheckboxGroupsBlockElement{})
+		if err != nil {
+			return err
+		}
+		a.CheckboxGroupsBlockElement = element.(*CheckboxGroupsBlockElement)
 	default:
 		element, err := unmarshalBlockElement(r, &UnknownBlockElement{})
 		if err != nil {
@@ -312,6 +318,9 @@ func toBlockElement(element *Accessory) BlockElement {
 	}
 	if element.RadioButtonsElement != nil {
 		return element.RadioButtonsElement
+	}
+	if element.CheckboxGroupsBlockElement != nil {
+		return element.CheckboxGroupsBlockElement
 	}
 	if element.SelectElement != nil {
 		return element.SelectElement

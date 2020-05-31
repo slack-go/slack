@@ -40,15 +40,16 @@ type MixedElement interface {
 }
 
 type Accessory struct {
-	ImageElement          *ImageBlockElement
-	ButtonElement         *ButtonBlockElement
-	OverflowElement       *OverflowBlockElement
-	DatePickerElement     *DatePickerBlockElement
-	PlainTextInputElement *PlainTextInputBlockElement
-	RadioButtonsElement   *RadioButtonsBlockElement
-	SelectElement         *SelectBlockElement
-	MultiSelectElement    *MultiSelectBlockElement
-	UnknownElement        *UnknownBlockElement
+	ImageElement               *ImageBlockElement
+	ButtonElement              *ButtonBlockElement
+	OverflowElement            *OverflowBlockElement
+	DatePickerElement          *DatePickerBlockElement
+	PlainTextInputElement      *PlainTextInputBlockElement
+	RadioButtonsElement        *RadioButtonsBlockElement
+	SelectElement              *SelectBlockElement
+	MultiSelectElement         *MultiSelectBlockElement
+	CheckboxGroupsBlockElement *CheckboxGroupsBlockElement
+	UnknownElement             *UnknownBlockElement
 }
 
 // NewAccessory returns a new Accessory for a given block element
@@ -70,6 +71,8 @@ func NewAccessory(element BlockElement) *Accessory {
 		return &Accessory{SelectElement: element.(*SelectBlockElement)}
 	case *MultiSelectBlockElement:
 		return &Accessory{MultiSelectElement: element.(*MultiSelectBlockElement)}
+	case *CheckboxGroupsBlockElement:
+		return &Accessory{CheckboxGroupsBlockElement: element.(*CheckboxGroupsBlockElement)}
 	default:
 		return &Accessory{UnknownElement: element.(*UnknownBlockElement)}
 	}
