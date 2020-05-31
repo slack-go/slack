@@ -151,6 +151,39 @@ func TestBotMessageEvent(t *testing.T) {
 	}
 }
 
+func TestMemberJoinedChannelEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "member_joined_channel",
+				"user": "W06GH7XHN",
+				"channel": "C0698JE0H",
+				"channel_type": "C",
+				"team": "T024BE7LD",
+				"inviter": "U123456789"
+		}
+	`)
+	err := json.Unmarshal(rawE, &MemberJoinedChannelEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMemberLeftChannelEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "member_left_channel",
+				"user": "W06GH7XHN",
+				"channel": "C0698JE0H",
+				"channel_type": "C",
+				"team": "T024BE7LD"
+		}
+	`)
+	err := json.Unmarshal(rawE, &MemberLeftChannelEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestPinAdded(t *testing.T) {
 	rawE := []byte(`
 			{
