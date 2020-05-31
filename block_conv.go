@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -172,10 +173,12 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &DatePickerBlockElement{}
 		case "plain_text_input":
 			blockElement = &PlainTextInputBlockElement{}
+		case "checkboxes":
+			blockElement = &CheckboxGroupsBlockElement{}
 		case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
 			blockElement = &SelectBlockElement{}
 		default:
-			return errors.New("unsupported block element type")
+			return fmt.Errorf("unsupported block element type %v", blockElementType)
 		}
 
 		err = json.Unmarshal(r, blockElement)
