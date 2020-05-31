@@ -114,7 +114,7 @@ type MessageEvent struct {
 	Files  []File `json:"files"`
 }
 
-// MemberJoinedChannelEvent A member join a channel
+// MemberJoinedChannelEvent A member joined a public or private channel
 type MemberJoinedChannelEvent struct {
 	Type        string `json:"type"`
 	User        string `json:"user"`
@@ -122,6 +122,15 @@ type MemberJoinedChannelEvent struct {
 	ChannelType string `json:"channel_type"`
 	Team        string `json:"team"`
 	Inviter     string `json:"inviter"`
+}
+
+// MemberLeftChannelEvent A member left a public or private channel
+type MemberLeftChannelEvent struct {
+	Type        string `json:"type"`
+	User        string `json:"user"`
+	Channel     string `json:"channel"`
+	ChannelType string `json:"channel_type"`
+	Team        string `json:"team"`
 }
 
 type pinEvent struct {
@@ -283,6 +292,8 @@ const (
 	Message = "message"
 	// Member Joined Channel
 	MemberJoinedChannel = "member_joined_channel"
+	// Member Left Channel
+	MemberLeftChannel = "member_left_channel"
 	// PinAdded An item was pinned to a channel
 	PinAdded = "pin_added"
 	// PinRemoved An item was unpinned from a channel
@@ -307,6 +318,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	LinkShared:            LinkSharedEvent{},
 	Message:               MessageEvent{},
 	MemberJoinedChannel:   MemberJoinedChannelEvent{},
+	MemberLeftChannel:     MemberLeftChannelEvent{},
 	PinAdded:              PinAddedEvent{},
 	PinRemoved:            PinRemovedEvent{},
 	ReactionAdded:         ReactionAddedEvent{},
