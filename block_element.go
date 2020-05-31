@@ -321,7 +321,7 @@ func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *Ov
 // More Information: https://api.slack.com/reference/messaging/block-elements#datepicker
 type DatePickerBlockElement struct {
 	Type        MessageElementType       `json:"type"`
-	ActionID    string                   `json:"action_id"`
+	ActionID    string                   `json:"action_id,omitempty"`
 	Placeholder *TextBlockObject         `json:"placeholder,omitempty"`
 	InitialDate string                   `json:"initial_date,omitempty"`
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
@@ -347,7 +347,7 @@ func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 // More Information: https://api.slack.com/reference/block-kit/block-elements#input
 type PlainTextInputBlockElement struct {
 	Type         MessageElementType `json:"type"`
-	ActionID     string             `json:"action_id"`
+	ActionID     string             `json:"action_id,omitempty"`
 	Placeholder  *TextBlockObject   `json:"placeholder,omitempty"`
 	InitialValue string             `json:"initial_value,omitempty"`
 	Multiline    bool               `json:"multiline,omitempty"`
@@ -376,7 +376,7 @@ func NewPlainTextInputBlockElement(placeholder *TextBlockObject, actionID string
 // More Information: https://api.slack.com/reference/block-kit/block-elements#checkboxes
 type CheckboxGroupsBlockElement struct {
 	Type           MessageElementType       `json:"type"`
-	ActionID       string                   `json:"action_id"`
+	ActionID       string                   `json:"action_id,omitempty"`
 	Options        []*OptionBlockObject     `json:"options"`
 	InitialOptions []*OptionBlockObject     `json:"initial_options,omitempty"`
 	Confirm        *ConfirmationBlockObject `json:"confirm,omitempty"`
@@ -387,7 +387,7 @@ func (c CheckboxGroupsBlockElement) ElementType() MessageElementType {
 	return c.Type
 }
 
-// NewRadioButtonsBlockElement returns an instance of a radio block element
+// NewCheckboxGroupsBlockElement returns an instance of a radio block element
 func NewCheckboxGroupsBlockElement(actionID string, options ...*OptionBlockObject) *CheckboxGroupsBlockElement {
 	return &CheckboxGroupsBlockElement{
 		Type:     METCheckboxGroups,
@@ -402,7 +402,7 @@ func NewCheckboxGroupsBlockElement(actionID string, options ...*OptionBlockObjec
 // More Information: https://api.slack.com/reference/block-kit/block-elements#radio
 type RadioButtonsBlockElement struct {
 	Type          MessageElementType       `json:"type"`
-	ActionID      string                   `json:"action_id"`
+	ActionID      string                   `json:"action_id,omitempty"`
 	Options       []*OptionBlockObject     `json:"options"`
 	InitialOption *OptionBlockObject       `json:"initial_option,omitempty"`
 	Confirm       *ConfirmationBlockObject `json:"confirm,omitempty"`
