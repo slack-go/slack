@@ -140,7 +140,7 @@ func (a *ActionCallbacks) UnmarshalJSON(data []byte) error {
 			}
 
 			a.BlockActions = append(a.BlockActions, action.(*BlockAction))
-			return nil
+			continue
 		}
 
 		action, err := unmarshalAction(r, &AttachmentAction{})
