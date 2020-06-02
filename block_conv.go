@@ -111,6 +111,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &SelectBlockElement{}
 	case "multi_static_select", "multi_external_select", "multi_users_select", "multi_conversations_select", "multi_channels_select":
 		e = &MultiSelectBlockElement{}
+	case "checkboxes":
+		e = &CheckboxGroupsBlockElement{}
 	default:
 		return errors.New("unsupported block element type")
 	}
