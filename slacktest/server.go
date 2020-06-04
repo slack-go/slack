@@ -45,6 +45,7 @@ func NewTestServer(custom ...binder) *Server {
 		c(s)
 	}
 
+	s.Handle("/conversations.info", s.conversationsInfoHandler)
 	s.Handle("/ws", s.wsHandler)
 	s.Handle("/rtm.start", rtmStartHandler)
 	s.Handle("/rtm.connect", RTMConnectHandler)
