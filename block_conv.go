@@ -113,6 +113,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &MultiSelectBlockElement{}
 	case "checkboxes":
 		e = &CheckboxGroupsBlockElement{}
+	case "overflow":
+		e = &OverflowBlockElement{}
 	case "radio_buttons":
 		e = &RadioButtonsBlockElement{}
 	default:
