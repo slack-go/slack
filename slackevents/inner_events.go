@@ -84,6 +84,7 @@ type sharedLinks struct {
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
 	// Basic Message Event - https://api.slack.com/events/message
+	ClientMsgID     string      `json:"client_msg_id"`
 	Type            string      `json:"type"`
 	User            string      `json:"user"`
 	Text            string      `json:"text"`
