@@ -238,7 +238,7 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	return doPost(ctx, client, req, newJSONParser(intf), d)
