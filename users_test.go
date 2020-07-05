@@ -302,7 +302,7 @@ func TestGetUserByEmail(t *testing.T) {
 	}
 }
 
-func TestUserCustomStatus(t *testing.T) {
+func TestUserProfileSet(t *testing.T) {
 	up := &UserProfile{}
 
 	setUserProfile := newProfileHandler(up)
@@ -317,6 +317,22 @@ func TestUserCustomStatus(t *testing.T) {
 
 	up.RealName = "Test User"
 	testSetUserCustomStatusWithUser(api, "Test User", up, t)
+
+	up.RealName = "Real Name Test"
+	testSetUserRealName(api, up, t)
+}
+
+func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
+	const (
+		realName = "Real Name Test"
+	)
+	if err := api.SetUserRealName(realName); err != nil {
+		t.Fatalf(`SetUserRealName(%q) = %#v, want <nil>`, realName, err)
+	}
+
+	if up.RealName != realName {
+		t.Fatalf(`UserProfile.RealName = %q, want %q`, up.RealName, realName)
+	}
 }
 
 func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
