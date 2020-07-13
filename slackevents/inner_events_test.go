@@ -106,6 +106,7 @@ func TestLinkSharedEvent(t *testing.T) {
 func TestMessageEvent(t *testing.T) {
 	rawE := []byte(`
 			{
+				"client_msg_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 				"type": "message",
 				"channel": "G024BE91L",
 				"user": "U2147483697",
