@@ -635,9 +635,7 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 		"ts":      {ts},
 	}
 
-	response := struct {
-		SlackResponse
-	}{}
+	response := &SlackResponse{}
 
 	err := api.postMethod(ctx, "conversations.mark", values, response)
 	if err != nil {
