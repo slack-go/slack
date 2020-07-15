@@ -14,8 +14,8 @@ import (
 
 // blockObject object types
 const (
-	MarkdownType  = "mrkdwn"
-	PlainTextType = "plain_text"
+	MBTMarkdown  MessageBlockType = "mrkdwn"
+	MBTPlainText MessageBlockType = "plain_text"
 	// The following objects don't actually have types and their corresponding
 	// const values are just for internal use
 	motConfirmation = "confirm"
@@ -55,7 +55,7 @@ func (b *BlockObjects) UnmarshalJSON(data []byte) error {
 		blockObjectType := getBlockObjectType(obj)
 
 		switch blockObjectType {
-		case PlainTextType, MarkdownType:
+		case string(MBTPlainText), string(MBTMarkdown):
 			object, err := unmarshalBlockObject(r, &TextBlockObject{})
 			if err != nil {
 				return err
@@ -119,10 +119,10 @@ func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, e
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#text
 type TextBlockObject struct {
-	Type     string `json:"type"`
-	Text     string `json:"text"`
-	Emoji    bool   `json:"emoji,omitempty"`
-	Verbatim bool   `json:"verbatim,omitempty"`
+	Type     MessageBlockType `json:"type"`
+	Text     string           `json:"text"`
+	Emoji    bool             `json:"emoji,omitempty"`
+	Verbatim bool             `json:"verbatim,omitempty"`
 }
 
 // validateType enforces block objects for element and block parameters
@@ -136,7 +136,7 @@ func (s TextBlockObject) MixedElementType() MixedElementType {
 }
 
 // NewTextBlockObject returns an instance of a new Text Block Object
-func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlockObject {
+func NewTextBlockObject(elementType MessageBlockType, text string, emoji, verbatim bool) *TextBlockObject {
 	return &TextBlockObject{
 		Type:     elementType,
 		Text:     text,
@@ -147,10 +147,7 @@ func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlo
 
 // BlockType returns the type of the block
 func (t TextBlockObject) BlockType() MessageBlockType {
-	if t.Type == "mrkdwn" {
-		return MarkdownType
-	}
-	return PlainTextType
+	return t.Type
 }
 
 // ConfirmationBlockObject defines a dialog that provides a confirmation step to
