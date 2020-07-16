@@ -25,13 +25,23 @@ func SectionBlockOptionBlockID(blockID string) SectionBlockOption {
 	}
 }
 
+func SectionBlockOptionAccesory(accessory *Accessory) SectionBlockOption {
+	return func(block *SectionBlock) {
+		block.Accessory = aceessory
+	}
+}
+
+func SectionBlockOptionFields(fields []*TextBlockObject) SectionBlockOption {
+	return func(block *SectionBlock) {
+		block.Fields = fields
+	}
+}
+
 // NewSectionBlock returns a new instance of a section block to be rendered
-func NewSectionBlock(textObj *TextBlockObject, fields []*TextBlockObject, accessory *Accessory, options ...SectionBlockOption) *SectionBlock {
+func NewSectionBlock(textObj *TextBlockObject, options ...SectionBlockOption) *SectionBlock {
 	block := SectionBlock{
 		Type:      MBTSection,
 		Text:      textObj,
-		Fields:    fields,
-		Accessory: accessory,
 	}
 
 	for _, option := range options {
