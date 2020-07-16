@@ -27,7 +27,7 @@ func SectionBlockOptionBlockID(blockID string) SectionBlockOption {
 
 func SectionBlockOptionAccesory(accessory *Accessory) SectionBlockOption {
 	return func(block *SectionBlock) {
-		block.Accessory = aceessory
+		block.Accessory = accessory
 	}
 }
 
