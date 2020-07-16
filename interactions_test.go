@@ -180,13 +180,12 @@ func TestViewClosedck(t *testing.T) {
 				BlockSet: []Block{
 					NewSectionBlock(
 						NewTextBlockObject("mrkdwn", "*Sally* has requested you set the deadline for the Nano launch project", false, false),
-						nil,
-						NewAccessory(&DatePickerBlockElement{
+						SectionBlockOptionAccessory(NewAccessory(&DatePickerBlockElement{
 							Type:        METDatepicker,
 							ActionID:    "datepicker123",
 							InitialDate: "1990-04-28",
 							Placeholder: NewTextBlockObject("plain_text", "Select a date", false, false),
-						}),
+						})),
 					),
 				},
 			},

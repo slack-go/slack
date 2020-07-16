@@ -10,7 +10,7 @@ func TestNewSectionBlock(t *testing.T) {
 
 	textInfo := NewTextBlockObject("mrkdwn", "*<fakeLink.toHotelPage.com|The Ritz-Carlton New Orleans>*\n★★★★★\n$340 per night\nRated: 9.1 - Excellent", false, false)
 
-	sectionBlock := NewSectionBlock(textInfo, nil, nil, SectionBlockOptionBlockID("test_block"))
+	sectionBlock := NewSectionBlock(textInfo, SectionBlockOptionBlockID("test_block"))
 	assert.Equal(t, string(sectionBlock.Type), "section")
 	assert.Equal(t, string(sectionBlock.BlockID), "test_block")
 	assert.Equal(t, len(sectionBlock.Fields), 0)
@@ -23,7 +23,7 @@ func TestNewSectionBlock(t *testing.T) {
 func TestNewBlockSectionContainsAddedTextBlockAndAccessory(t *testing.T) {
 	textBlockObject := NewTextBlockObject("mrkdwn", "You have a new test: *Hi there* :wave:", true, false)
 	conflictImage := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/notificationsWarningIcon.png", "notifications warning icon")
-	sectionBlock := NewSectionBlock(textBlockObject, nil, NewAccessory(conflictImage))
+	sectionBlock := NewSectionBlock(textBlockObject, SectionBlockOptionAccessory(NewAccessory(conflictImage)))
 
 	assert.Equal(t, sectionBlock.BlockType(), MBTSection)
 	assert.Equal(t, len(sectionBlock.BlockID), 0)
