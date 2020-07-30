@@ -29,7 +29,7 @@ type AppMentionEvent struct {
 	SourceTeam string `json:"source_team,omitempty"`
 
 	// BotID is filled out when a bot triggers the app_mention event
-	BotID    string `json:"bot_id,omitempty"`
+	BotID string `json:"bot_id,omitempty"`
 }
 
 // AppHomeOpenedEvent Your Slack app home was opened.
@@ -113,6 +113,8 @@ type MessageEvent struct {
 
 	Upload bool   `json:"upload"`
 	Files  []File `json:"files"`
+
+	Attachments []slack.Attachment `json:"attachments,omitempty"`
 }
 
 // MemberJoinedChannelEvent A member joined a public or private channel
