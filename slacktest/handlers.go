@@ -44,6 +44,31 @@ func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultChannelsListJSON))
 }
 
+// handle conversations.create
+func createConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(defaultConversationJSON))
+}
+
+// handle conversations.setTopic
+func setConversationTopicHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(conversionPurposeTopicJSON))
+}
+
+// handle conversations.setPurpose
+func setConversationPurposeHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(conversionPurposeTopicJSON))
+}
+
+// handle conversations.rename
+func renameConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(renameConversationJSON))
+}
+
+// handle conversations.invite
+func inviteConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(inviteConversationJSON))
+}
+
 // handle groups.list
 func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultGroupsListJSON))
