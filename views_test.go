@@ -55,8 +55,8 @@ func TestSlack_OpenView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string][]string{
-						"messages": {"dummy error response"},
+					ResponseMetadata: map[string]interface{}{
+						"messages": []string{"dummy error response"},
 					},
 				},
 				View{},
@@ -220,8 +220,8 @@ func TestSlack_View_PublishView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string][]string{
-						"messages": {"dummy error response"},
+					ResponseMetadata: map[string]interface{}{
+						"messages": []string{"dummy error response"},
 					},
 				},
 				View{},
@@ -372,8 +372,8 @@ func TestSlack_PushView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string][]string{
-						"messages": {"dummy error response"},
+					ResponseMetadata: map[string]interface{}{
+						"messages": []string{"dummy error response"},
 					},
 				},
 				View{},
@@ -540,8 +540,8 @@ func TestSlack_UpdateView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string][]string{
-						"messages": {"dummy error response"},
+					ResponseMetadata: map[string]interface{}{
+						"messages": []string{"dummy error response"},
 					},
 				},
 				View{},
