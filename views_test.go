@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/slack-go/slack/internal/errorsx"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,6 +55,9 @@ func TestSlack_OpenView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
+					ResponseMetadata: map[string][]string{
+						"messages": {"dummy error response"},
+					},
 				},
 				View{},
 			},
@@ -78,16 +82,19 @@ func TestSlack_OpenView(t *testing.T) {
 					},
 					"blocks": [
 						{
-							"type": "rich_text",
+							"type": "input",
 							"block_id": "a_block_id",
 							"label": {
 								"type": "plain_text",
-								"text": "A simple label",
-								"emoji": true
+								"text": "A simple label"
 							},
 							"optional": false,
 							"element": {
 								"type": "plain_text_input",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Placeholder text"
+						 		},
 								"action_id": "an_action_id"
 							}
 						}
@@ -112,8 +119,41 @@ func TestSlack_OpenView(t *testing.T) {
 					Error: "",
 				},
 				View{
-					ID:   "VMHU10V25",
-					Type: VTModal,
+					ID:     "VMHU10V25",
+					Type:   VTModal,
+					TeamID: "T8N4K1JN",
+					Title: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Quite a plain modal",
+					},
+					Submit: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Create",
+					},
+					CallbackID:      "identify_your_modals",
+					PrivateMetadata: "Shh it is a secret",
+					State:           &ViewState{},
+					Hash:            "156772938.1827394",
+					RootViewID:      "VMHU10V25",
+					AppID:           "AA4928AQ",
+					BotID:           "BA13894H",
+					Blocks: Blocks{
+						BlockSet: []Block{
+							NewInputBlock(
+								"a_block_id",
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple label",
+								},
+								NewPlainTextInputBlockElement(
+									&TextBlockObject{
+										Type: PlainTextType,
+										Text: "Placeholder text",
+									},
+									"an_action_id",
+								)),
+						},
+					},
 				},
 			},
 			expectedErr: nil,
@@ -128,22 +168,19 @@ func TestSlack_OpenView(t *testing.T) {
 
 			resp, err := api.OpenView(c.triggerID, ModalViewRequest{})
 			if c.expectedErr == nil && err != nil {
-				t.Errorf("unexpected error: %s\n", err)
-				return
+				t.Fatalf("unexpected error: %s\n", err)
 			}
 			if c.expectedErr != nil && err == nil {
-				t.Errorf("expected %s, but did not raise an error", c.expectedErr)
-				return
+				t.Fatalf("expected %s, but did not raise an error", c.expectedErr)
 			}
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
-				t.Errorf("expected %s as error but got %s\n", c.expectedErr, err)
-				return
+				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if c.expectedResp.ID != resp.ID || c.expectedResp.Type != resp.Type {
-				t.Errorf("expected:\n\t%v\nas response but got:\n\t%v\n", c.expectedResp, resp)
+			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
+				t.Fatalf("(-got +want)\n%s", diff)
 			}
 		})
 	}
@@ -183,6 +220,9 @@ func TestSlack_View_PublishView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
+					ResponseMetadata: map[string][]string{
+						"messages": {"dummy error response"},
+					},
 				},
 				View{},
 			},
@@ -201,12 +241,20 @@ func TestSlack_View_PublishView(t *testing.T) {
 					"submit": null,
 					"blocks": [
 						{
-							"type": "section",
-							"block_id": "2WGp9",
-							"text": {
-								"type": "mrkdwn",
-								"text": "A simple section with some sample sentence.",
-								"verbatim": false
+							"type": "input",
+							"block_id": "a_block_id",
+							"label": {
+								"type": "plain_text",
+								"text": "A simple label"
+							},
+							"optional": false,
+							"element": {
+								"type": "plain_text_input",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Placeholder text"
+						 		},
+								"action_id": "an_action_id"
 							}
 						}
 					],
@@ -231,8 +279,33 @@ func TestSlack_View_PublishView(t *testing.T) {
 					Error: "",
 				},
 				View{
-					ID:   "VMHU10V25",
-					Type: VTHomeTab,
+					ID:              "VMHU10V25",
+					Type:            VTHomeTab,
+					TeamID:          "T8N4K1JN",
+					CallbackID:      "identify_your_home_tab",
+					PrivateMetadata: "Shh it is a secret",
+					State:           &ViewState{},
+					Hash:            "156772938.1827394",
+					RootViewID:      "VMHU10V25",
+					AppID:           "AA4928AQ",
+					BotID:           "BA13894H",
+					Blocks: Blocks{
+						BlockSet: []Block{
+							NewInputBlock(
+								"a_block_id",
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple label",
+								},
+								NewPlainTextInputBlockElement(
+									&TextBlockObject{
+										Type: PlainTextType,
+										Text: "Placeholder text",
+									},
+									"an_action_id",
+								)),
+						},
+					},
 				},
 			},
 			expectedErr: nil,
@@ -247,22 +320,19 @@ func TestSlack_View_PublishView(t *testing.T) {
 
 			resp, err := api.PublishView(c.userID, HomeTabViewRequest{}, "dummy_hash")
 			if c.expectedErr == nil && err != nil {
-				t.Errorf("unexpected error: %s\n", err)
-				return
+				t.Fatalf("unexpected error: %s\n", err)
 			}
 			if c.expectedErr != nil && err == nil {
-				t.Errorf("expected %s, but did not raise an error", c.expectedErr)
-				return
+				t.Fatalf("expected %s, but did not raise an error", c.expectedErr)
 			}
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
-				t.Errorf("expected %s as error but got %s\n", c.expectedErr, err)
-				return
+				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if c.expectedResp.ID != resp.ID || c.expectedResp.Type != resp.Type {
-				t.Errorf("expected:\n\t%v\nas response but got:\n\t%v\n", c.expectedResp, resp)
+			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
+				t.Fatalf("(-got +want)\n%s", diff)
 			}
 		})
 	}
@@ -302,6 +372,9 @@ func TestSlack_PushView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
+					ResponseMetadata: map[string][]string{
+						"messages": {"dummy error response"},
+					},
 				},
 				View{},
 			},
@@ -326,16 +399,19 @@ func TestSlack_PushView(t *testing.T) {
 					},
 					"blocks": [
 						{
-							"type": "rich_text",
+							"type": "input",
 							"block_id": "a_block_id",
 							"label": {
 								"type": "plain_text",
-								"text": "A simple label",
-								"emoji": true
+								"text": "A simple label"
 							},
 							"optional": false,
 							"element": {
 								"type": "plain_text_input",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Placeholder text"
+						 		},
 								"action_id": "an_action_id"
 							}
 						}
@@ -360,8 +436,41 @@ func TestSlack_PushView(t *testing.T) {
 					Error: "",
 				},
 				View{
-					ID:   "VMHU10V25",
-					Type: VTModal,
+					ID:     "VMHU10V25",
+					Type:   VTModal,
+					TeamID: "T8N4K1JN",
+					Title: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Quite a plain modal",
+					},
+					Submit: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Create",
+					},
+					CallbackID:      "identify_your_modals",
+					PrivateMetadata: "Shh it is a secret",
+					State:           &ViewState{},
+					Hash:            "156772938.1827394",
+					RootViewID:      "VMHU10V25",
+					AppID:           "AA4928AQ",
+					BotID:           "BA13894H",
+					Blocks: Blocks{
+						BlockSet: []Block{
+							NewInputBlock(
+								"a_block_id",
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple label",
+								},
+								NewPlainTextInputBlockElement(
+									&TextBlockObject{
+										Type: PlainTextType,
+										Text: "Placeholder text",
+									},
+									"an_action_id",
+								)),
+						},
+					},
 				},
 			},
 			expectedErr: nil,
@@ -376,22 +485,19 @@ func TestSlack_PushView(t *testing.T) {
 
 			resp, err := api.PushView(c.triggerID, ModalViewRequest{})
 			if c.expectedErr == nil && err != nil {
-				t.Errorf("unexpected error: %s\n", err)
-				return
+				t.Fatalf("unexpected error: %s\n", err)
 			}
 			if c.expectedErr != nil && err == nil {
-				t.Errorf("expected %s, but did not raise an error", c.expectedErr)
-				return
+				t.Fatalf("expected %s, but did not raise an error", c.expectedErr)
 			}
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
-				t.Errorf("expected %s as error but got %s\n", c.expectedErr, err)
-				return
+				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if c.expectedResp.ID != resp.ID || c.expectedResp.Type != resp.Type {
-				t.Errorf("expected:\n\t%v\nas response but got:\n\t%v\n", c.expectedResp, resp)
+			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
+				t.Fatalf("(-got +want)\n%s", diff)
 			}
 		})
 	}
@@ -434,6 +540,9 @@ func TestSlack_UpdateView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
+					ResponseMetadata: map[string][]string{
+						"messages": {"dummy error response"},
+					},
 				},
 				View{},
 			},
@@ -459,16 +568,19 @@ func TestSlack_UpdateView(t *testing.T) {
 					},
 					"blocks": [
 						{
-							"type": "rich_text",
+							"type": "input",
 							"block_id": "a_block_id",
 							"label": {
 								"type": "plain_text",
-								"text": "A simple label",
-								"emoji": true
+								"text": "A simple label"
 							},
 							"optional": false,
 							"element": {
 								"type": "plain_text_input",
+								"placeholder": {
+									"type": "plain_text",
+									"text": "Placeholder text"
+						 		},
 								"action_id": "an_action_id"
 							}
 						}
@@ -493,8 +605,41 @@ func TestSlack_UpdateView(t *testing.T) {
 					Error: "",
 				},
 				View{
-					ID:   "VMHU10V25",
-					Type: VTModal,
+					ID:     "VMHU10V25",
+					Type:   VTModal,
+					TeamID: "T8N4K1JN",
+					Title: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Quite a plain modal",
+					},
+					Submit: &TextBlockObject{
+						Type: PlainTextType,
+						Text: "Create",
+					},
+					CallbackID:      "identify_your_modals",
+					PrivateMetadata: "Shh it is a secret",
+					State:           &ViewState{},
+					Hash:            "156772938.1827394",
+					RootViewID:      "VMHU10V25",
+					AppID:           "AA4928AQ",
+					BotID:           "BA13894H",
+					Blocks: Blocks{
+						BlockSet: []Block{
+							NewInputBlock(
+								"a_block_id",
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple label",
+								},
+								NewPlainTextInputBlockElement(
+									&TextBlockObject{
+										Type: PlainTextType,
+										Text: "Placeholder text",
+									},
+									"an_action_id",
+								)),
+						},
+					},
 				},
 			},
 			expectedErr: nil,
@@ -509,22 +654,19 @@ func TestSlack_UpdateView(t *testing.T) {
 
 			resp, err := api.UpdateView(ModalViewRequest{}, c.externalID, "dummy_hash", c.viewID)
 			if c.expectedErr == nil && err != nil {
-				t.Errorf("unexpected error: %s\n", err)
-				return
+				t.Fatalf("unexpected error: %s\n", err)
 			}
 			if c.expectedErr != nil && err == nil {
-				t.Errorf("expected %s, but did not raise an error", c.expectedErr)
-				return
+				t.Fatalf("expected %s, but did not raise an error", c.expectedErr)
 			}
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
-				t.Errorf("expected %s as error but got %s\n", c.expectedErr, err)
-				return
+				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if c.expectedResp.ID != resp.ID || c.expectedResp.Type != resp.Type {
-				t.Errorf("expected:\n\t%v\nas response but got:\n\t%v\n", c.expectedResp, resp)
+			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
+				t.Fatalf("(-got +want)\n%s", diff)
 			}
 		})
 	}
