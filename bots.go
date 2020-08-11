@@ -56,3 +56,35 @@ func (api *Client) GetBotInfoContext(ctx context.Context, bot string) (*Bot, err
 	}
 	return &response.Bot, nil
 }
+
+func (api *Client) botSelfRequest(ctx context.Context, path string, values url.Values) (*Info, error) {
+	response := &infoResponseFull{}
+	err := api.postMethod(ctx, path, values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := response.Err(); err != nil {
+		return nil, err
+	}
+
+	return &response.Info, nil
+}
+
+// GetBotInfoSelf will retrieve the complete bot information
+func (api *Client) GetBotInfoSelf() (*Info, error) {
+	return api.GetBotInfoSelfContext(context.Background())
+}
+
+// GetBotInfoSelfContext will retrieve the complete bot information using a custom context
+func (api *Client) GetBotInfoSelfContext(ctx context.Context) (*Info, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	response, err := api.botSelfRequest(ctx, "bots.info", values)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
