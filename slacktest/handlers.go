@@ -39,6 +39,49 @@ func botsInfoHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(defaultBotInfoJSON(r.Context())))
 }
 
+type GroupConversationResponse struct {
+	Ok      bool                    `json:"ok"`
+	Channel slack.GroupConversation `json:"channel"`
+}
+
+func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		msg := fmt.Sprintf("error reading body: %s", err.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	values, vErr := url.ParseQuery(string(data))
+	if vErr != nil {
+		msg := fmt.Sprintf("Unable to decode query params: %s", vErr.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	ch := values.Get("channel")
+
+	response := GroupConversationResponse{
+		Ok:      true,
+		Channel: slack.GroupConversation{
+			Conversation: slack.Conversation{
+				ID: ch,
+			},
+			// Since we don't join channels by name, only ID, let's strip the C prefix and use that as the name.
+			Name: ch[1:],
+		},
+	}
+	encoded, err := json.Marshal(&response)
+	if vErr != nil {
+		msg := fmt.Sprintf("Unable to encode response: %s", vErr.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(encoded)
+}
+
 // handle channels.list
 func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultChannelsListJSON))
