@@ -29,6 +29,7 @@ func main() {
 			err := json.Unmarshal([]byte(body), &r)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 			w.Header().Set("Content-Type", "text")
 			w.Write([]byte(r.Challenge))
