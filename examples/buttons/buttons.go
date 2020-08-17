@@ -39,6 +39,7 @@ func main() {
 	}
 	fmt.Printf("Message with buttons sucessfully sent to channel %s at %s", channelID, timestamp)
 	http.HandleFunc("/actions", actionHandler)
+	http.ListenAndServe(":3000", nil)
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
