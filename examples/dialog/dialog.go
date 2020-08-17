@@ -52,7 +52,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	str = strings.Replace(str, "payload=", "", 1)
 	var message slack.InteractionCallback
 	if err := json.Unmarshal([]byte(str), &message); err != nil {
-		log.Printf("[ERROR] Fail to unmarchal json: %v", err)
+		log.Printf("[ERROR] Fail to unmarshal json: %v", err)
 		return
 	}
 
