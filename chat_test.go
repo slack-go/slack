@@ -77,7 +77,7 @@ func TestPostMessage(t *testing.T) {
 		expected url.Values
 	}
 
-	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+	blocks := []Block{NewContextBlock("context", NewTextBlockObject(MBTPlainText, "hello", false, false))}
 	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
 
 	tests := map[string]messageTest{
@@ -137,7 +137,7 @@ func TestPostMessage(t *testing.T) {
 }
 
 func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
-	expectedBlocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
+	expectedBlocks := []Block{NewContextBlock("context", NewTextBlockObject(MBTPlainText, "hello", false, false))}
 
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
