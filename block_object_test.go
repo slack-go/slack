@@ -20,7 +20,7 @@ func TestNewTextBlockObject(t *testing.T) {
 
 	textObject := NewTextBlockObject("plain_text", "test", true, false)
 
-	assert.Equal(t, string(textObject.Type), "plain_text")
+	assert.Equal(t, textObject.Type, "plain_text")
 	assert.Equal(t, textObject.Text, "test")
 	assert.True(t, textObject.Emoji, "Emoji property should be true")
 	assert.False(t, textObject.Verbatim, "Verbatim should be false")

@@ -381,7 +381,7 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 		}
 
 		switch contextElementType {
-		case string(MBTPlainText), string(MBTMarkdown):
+		case PlainTextType, MarkdownType:
 			elem, err := unmarshalBlockObject(r, &TextBlockObject{})
 			if err != nil {
 				return err

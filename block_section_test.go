@@ -15,7 +15,7 @@ func TestNewSectionBlock(t *testing.T) {
 	assert.Equal(t, string(sectionBlock.BlockID), "test_block")
 	assert.Equal(t, len(sectionBlock.Fields), 0)
 	assert.Nil(t, sectionBlock.Accessory)
-	assert.Equal(t, string(sectionBlock.Text.Type), "mrkdwn")
+	assert.Equal(t, sectionBlock.Text.Type, "mrkdwn")
 	assert.Contains(t, sectionBlock.Text.Text, "New Orleans")
 
 }
