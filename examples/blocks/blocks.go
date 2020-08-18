@@ -283,9 +283,9 @@ func exampleFive() {
 	overflowOptionTextThree := slack.NewTextBlockObject("plain_text", "Option Three", false, false)
 
 	// Build each option, providing a value for the option
-	overflowOptionOne := slack.NewOptionBlockObject("value-0", overflowOptionTextOne)
-	overflowOptionTwo := slack.NewOptionBlockObject("value-1", overflowOptionTextTwo)
-	overflowOptionThree := slack.NewOptionBlockObject("value-2", overflowOptionTextThree)
+	overflowOptionOne := slack.NewOptionBlockObject("value-0", overflowOptionTextOne, nil)
+	overflowOptionTwo := slack.NewOptionBlockObject("value-1", overflowOptionTextTwo, nil)
+	overflowOptionThree := slack.NewOptionBlockObject("value-2", overflowOptionTextThree, nil)
 
 	// Build overflow section
 	overflow := slack.NewOverflowBlockElement("", overflowOptionOne, overflowOptionTwo, overflowOptionThree)
@@ -365,9 +365,9 @@ func exampleSix() {
 	readTxt := slack.NewTextBlockObject("plain_text", "Read it", false, false)
 	saveTxt := slack.NewTextBlockObject("plain_text", "Save it", false, false)
 
-	editOpt := slack.NewOptionBlockObject("value-0", editTxt)
-	readOpt := slack.NewOptionBlockObject("value-1", readTxt)
-	saveOpt := slack.NewOptionBlockObject("value-2", saveTxt)
+	editOpt := slack.NewOptionBlockObject("value-0", editTxt, nil)
+	readOpt := slack.NewOptionBlockObject("value-1", readTxt, nil)
+	saveOpt := slack.NewOptionBlockObject("value-2", saveTxt, nil)
 
 	availableOption := slack.NewOptionsSelectBlockElement("static_select", manageTxt, "", editOpt, readOpt, saveOpt)
 

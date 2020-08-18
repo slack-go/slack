@@ -45,9 +45,11 @@ func TestNewConfirmationBlockObject(t *testing.T) {
 func TestNewOptionBlockObject(t *testing.T) {
 
 	valTextObj := NewTextBlockObject("plain_text", "testText", false, false)
-	optObj := NewOptionBlockObject("testOpt", valTextObj)
+	valDescriptionObj := NewTextBlockObject("plain_text", "testDescription", false, false)
+	optObj := NewOptionBlockObject("testOpt", valTextObj, valDescriptionObj)
 
 	assert.Equal(t, optObj.Text.Text, "testText")
+	assert.Equal(t, optObj.Description.Text, "testDescription")
 	assert.Equal(t, optObj.Value, "testOpt")
 
 }
@@ -56,7 +58,7 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 
 	labelObj := NewTextBlockObject("plain_text", "testLabel", false, false)
 	valTextObj := NewTextBlockObject("plain_text", "testText", false, false)
-	optObj := NewOptionBlockObject("testOpt", valTextObj)
+	optObj := NewOptionBlockObject("testOpt", valTextObj, nil)
 
 	optGroup := NewOptionGroupBlockElement(labelObj, optObj)
 
