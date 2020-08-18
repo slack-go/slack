@@ -147,7 +147,7 @@ func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlo
 
 // BlockType returns the type of the block
 func (t TextBlockObject) BlockType() MessageBlockType {
-	if t.Type == "mrkdown" {
+	if t.Type == "mrkdwn" {
 		return MarkdownType
 	}
 	return PlainTextType
