@@ -93,7 +93,7 @@ func createOptionBlockObjects(options []string, users bool) []*slack.OptionBlock
 			text = o
 		}
 		optionText := slack.NewTextBlockObject(slack.PlainTextType, text, false, false)
-		optionBlockObjects = append(optionBlockObjects, slack.NewOptionBlockObject(o, optionText))
+		optionBlockObjects = append(optionBlockObjects, slack.NewOptionBlockObject(o, optionText, nil))
 	}
 	return optionBlockObjects
 }
