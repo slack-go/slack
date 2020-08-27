@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostWebhook_OK(t *testing.T) {
@@ -62,4 +64,28 @@ func TestPostWebhook_NotOK(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected to receive error")
 	}
+}
+
+func TestWebhookMessage_WithBlocks(t *testing.T) {
+	textBlockObject := NewTextBlockObject("plain_text", "text", false, false)
+	sectionBlock := NewSectionBlock(textBlockObject, nil, nil)
+
+	singleBlock := &Blocks{BlockSet: []Block{sectionBlock}}
+	twoBlocks := &Blocks{BlockSet: []Block{sectionBlock, sectionBlock}}
+
+	msgSingleBlock := WebhookMessage{Blocks: singleBlock}
+	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
+
+	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}}]}`, string(msgJsonSingleBlock))
+
+	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
+	assert.Equal(t, 2, len(msgTwoBlocks.Blocks.BlockSet))
+
+	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}},{"type":"section","text":{"type":"plain_text","text":"text"}}]}`, string(msgJsonTwoBlocks))
+
+	msgNoBlocks := WebhookMessage{Text: "foo"}
+	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)
+	assert.Equal(t, `{"text":"foo"}`, string(msgJsonNoBlocks))
 }

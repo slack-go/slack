@@ -39,9 +39,77 @@ func botsInfoHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(defaultBotInfoJSON(r.Context())))
 }
 
+type GroupConversationResponse struct {
+	Ok      bool                    `json:"ok"`
+	Channel slack.GroupConversation `json:"channel"`
+}
+
+func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		msg := fmt.Sprintf("error reading body: %s", err.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	values, vErr := url.ParseQuery(string(data))
+	if vErr != nil {
+		msg := fmt.Sprintf("Unable to decode query params: %s", vErr.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	ch := values.Get("channel")
+
+	response := GroupConversationResponse{
+		Ok: true,
+		Channel: slack.GroupConversation{
+			Conversation: slack.Conversation{
+				ID: ch,
+			},
+			// Since we don't join channels by name, only ID, let's strip the C prefix and use that as the name.
+			Name: ch[1:],
+		},
+	}
+	encoded, err := json.Marshal(&response)
+	if vErr != nil {
+		msg := fmt.Sprintf("Unable to encode response: %s", vErr.Error())
+		log.Printf(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write(encoded)
+}
+
 // handle channels.list
 func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultChannelsListJSON))
+}
+
+// handle conversations.create
+func createConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(defaultConversationJSON))
+}
+
+// handle conversations.setTopic
+func setConversationTopicHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(conversionPurposeTopicJSON))
+}
+
+// handle conversations.setPurpose
+func setConversationPurposeHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(conversionPurposeTopicJSON))
+}
+
+// handle conversations.rename
+func renameConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(renameConversationJSON))
+}
+
+// handle conversations.invite
+func inviteConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(inviteConversationJSON))
 }
 
 // handle groups.list
@@ -99,6 +167,25 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		m.Attachments = attaches
+	}
+	blocks := values.Get("blocks")
+	if blocks != "" {
+		decoded, err := url.QueryUnescape(blocks)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to decode blocks: %s", err.Error())
+			log.Printf(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		var decodedBlocks slack.Blocks
+		dbJErr := json.Unmarshal([]byte(decoded), &decodedBlocks)
+		if dbJErr != nil {
+			msg := fmt.Sprintf("Unable to decode blocks string to json: %s", dbJErr.Error())
+			log.Printf(msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		m.Blocks = decodedBlocks
 	}
 	jsonMessage, jsonErr := json.Marshal(m)
 	if jsonErr != nil {

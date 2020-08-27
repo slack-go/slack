@@ -288,8 +288,14 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 		MessageTs:    "messageTs",
 		AttachmentID: "attachmentID",
 		ActionCallback: ActionCallbacks{
-			AttachmentActions: []*AttachmentAction{{Value: "value"}},
-			BlockActions:      []*BlockAction{{ActionID: "id123"}},
+			AttachmentActions: []*AttachmentAction{
+				{Value: "value"},
+				{Value: "value2"},
+			},
+			BlockActions: []*BlockAction{
+				{ActionID: "id123"},
+				{ActionID: "id456"},
+			},
 		},
 		View: View{
 			Type:  VTModal,

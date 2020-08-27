@@ -79,6 +79,7 @@ func TestLinkSharedEvent(t *testing.T) {
 				"channel": "Cxxxxxx",
 				"user": "Uxxxxxxx",
 				"message_ts": "123456789.9875",
+				"thread_ts": "123456789.9876",
 				"links":
 						[
 								{
@@ -105,6 +106,7 @@ func TestLinkSharedEvent(t *testing.T) {
 func TestMessageEvent(t *testing.T) {
 	rawE := []byte(`
 			{
+				"client_msg_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 				"type": "message",
 				"channel": "G024BE91L",
 				"user": "U2147483697",
@@ -145,6 +147,39 @@ func TestBotMessageEvent(t *testing.T) {
 		}
 	`)
 	err := json.Unmarshal(rawE, &MessageEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMemberJoinedChannelEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "member_joined_channel",
+				"user": "W06GH7XHN",
+				"channel": "C0698JE0H",
+				"channel_type": "C",
+				"team": "T024BE7LD",
+				"inviter": "U123456789"
+		}
+	`)
+	err := json.Unmarshal(rawE, &MemberJoinedChannelEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMemberLeftChannelEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "member_left_channel",
+				"user": "W06GH7XHN",
+				"channel": "C0698JE0H",
+				"channel_type": "C",
+				"team": "T024BE7LD"
+		}
+	`)
+	err := json.Unmarshal(rawE, &MemberLeftChannelEvent{})
 	if err != nil {
 		t.Error(err)
 	}

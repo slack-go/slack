@@ -18,9 +18,10 @@ func main() {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(r.Body)
 		body := buf.String()
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: "TOKEN"}))
+		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: "VERIFICATION_TOKEN"}))
 		if e != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		if eventsAPIEvent.Type == slackevents.URLVerification {
@@ -28,6 +29,7 @@ func main() {
 			err := json.Unmarshal([]byte(body), &r)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 			w.Header().Set("Content-Type", "text")
 			w.Write([]byte(r.Challenge))

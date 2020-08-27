@@ -45,13 +45,20 @@ func NewTestServer(custom ...binder) *Server {
 		c(s)
 	}
 
+	s.Handle("/conversations.info", s.conversationsInfoHandler)
 	s.Handle("/ws", s.wsHandler)
 	s.Handle("/rtm.start", rtmStartHandler)
 	s.Handle("/rtm.connect", RTMConnectHandler)
 	s.Handle("/chat.postMessage", s.postMessageHandler)
 	s.Handle("/channels.list", listChannelsHandler)
+	s.Handle("/conversations.create", createConversationHandler)
+	s.Handle("/conversations.setTopic", setConversationTopicHandler)
+	s.Handle("/conversations.setPurpose", setConversationPurposeHandler)
+	s.Handle("/conversations.rename", renameConversationHandler)
+	s.Handle("/conversations.invite", inviteConversationHandler)
 	s.Handle("/groups.list", listGroupsHandler)
 	s.Handle("/users.info", usersInfoHandler)
+	s.Handle("/users.lookupByEmail", usersInfoHandler)
 	s.Handle("/bots.info", botsInfoHandler)
 	s.Handle("/auth.test", authTestHandler)
 

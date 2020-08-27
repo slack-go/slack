@@ -13,6 +13,7 @@ const defaultNonBotUserID = "W012A3CDE"
 const defaultNonBotUserName = "Egon Spengler"
 const defaultTeamName = "SlackTest Team"
 const defaultTeamDomain = "testdomain"
+const defaultConversationName = "endeavor"
 
 var defaultCreatedTs = nowAsJSONTime()
 
@@ -187,3 +188,59 @@ var defaultNonBotUser = fmt.Sprintf(`
 			"locale": "en-US"
 		}
 	`, defaultNonBotUserID, defaultTeamID, defaultNonBotUserName, defaultNonBotUserName, defaultNonBotUserName, defaultTeamID)
+
+var templateConversationJSON = `
+{
+	"ok": true,
+	"channel": {
+		"id": "C0EAQDV4Z",
+		"name": "%s",
+		"is_channel": true,
+		"is_group": false,
+		"is_im": false,
+		"created": %d,
+		"creator": "%s",
+		"is_archived": false,
+		"is_general": false,
+		"unlinked": 0,
+		"name_normalized": "%s",
+		"is_shared": false,
+		"is_ext_shared": false,
+		"is_org_shared": false,
+		"pending_shared": [],
+		"is_pending_ext_shared": false,
+		"is_member": true,
+		"is_private": false,
+		"is_mpim": false,
+		"last_read": "0000000000.000000",
+		"latest": null,
+		"unread_count": 0,
+		"unread_count_display": 0,
+		"topic": {
+			"value": "%s",
+			"creator": "%s",
+			"last_set": %d
+		},
+		"purpose": {
+			"value": "%s",
+			"creator": "%s",
+			"last_set": %d
+		},
+        "num_members": %d,
+		"previous_names": [],
+		"priority": 0
+	}
+}`
+
+var defaultConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
+	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 0)
+
+var conversionPurposeTopicJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
+	nowAsJSONTime(), defaultBotID, defaultConversationName, "Apply topically for best effects", defaultBotID,
+	nowAsJSONTime(), "I didn't set this purpose on purpose!", defaultBotID, nowAsJSONTime(), 0)
+
+var renameConversationJSON = fmt.Sprintf(templateConversationJSON, "newName",
+	nowAsJSONTime, defaultBotID, "newName", "", "", 0, "", "", 0, 0)
+
+var inviteConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
+	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1)
