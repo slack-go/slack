@@ -201,8 +201,18 @@ type SelectBlockElement struct {
 	InitialChannel               string                    `json:"initial_channel,omitempty"`
 	DefaultToCurrentConversation bool                      `json:"default_to_current_conversation,omitempty"`
 	ResponseURLEnabled           bool                      `json:"response_url_enabled,omitempty"`
+	Filter                       *SelectBlockElementFilter `json:"filter,omitempty"`
 	MinQueryLength               *int                      `json:"min_query_length,omitempty"`
 	Confirm                      *ConfirmationBlockObject  `json:"confirm,omitempty"`
+}
+
+// SelectBlockElementFilter allows to filter select element conversation options by type.
+//
+// More Information: https://api.slack.com/reference/block-kit/composition-objects#filter_conversations
+type SelectBlockElementFilter struct {
+	Include                       []string `json:"include,omitempty"`
+	ExcludeExternalSharedChannels bool     `json:"exclude_external_shared_channels,omitempty"`
+	ExcludeBotUsers               bool     `json:"exclude_bot_users,omitempty"`
 }
 
 // ElementType returns the type of the Element
