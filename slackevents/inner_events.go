@@ -115,6 +115,11 @@ type MessageEvent struct {
 	Files  []File `json:"files"`
 
 	Attachments []slack.Attachment `json:"attachments,omitempty"`
+
+	// Root is the message that was broadcast to the channel when the SubType is
+	// thread_broadcast. If this is not a thread_broadcast message event, this
+	// value is nil.
+	Root *MessageEvent `json:"root"`
 }
 
 // MemberJoinedChannelEvent A member joined a public or private channel
