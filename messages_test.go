@@ -260,11 +260,29 @@ func TestComment(t *testing.T) {
 var botMessage = `{
     "type": "message",
     "subtype": "bot_message",
-    "ts": "1358877455.000010",
     "text": "Pushing is the answer",
+    "suppress_notification": false,
     "bot_id": "BB12033",
     "username": "github",
-    "icons": {}
+    "icons": {},
+    "team": "T01A9CUMPQA",
+    "bot_profile": {
+        "id": "BB12033",
+        "deleted": false,
+        "name": "github",
+        "updated": 1599574335,
+        "app_id": "A6DB2SWUW",
+        "icons": {
+            "image_36": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_36.png",
+            "image_48": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_48.png",
+            "image_72": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_72.png"
+        },
+        "team_id": "T01A9CUMPQA"
+    },
+    "blocks": [],
+    "channel": "C01AZ844Z32",
+    "event_ts": "1358877455.000010",
+    "ts": "1358877455.000010"
 }`
 
 func TestBotMessage(t *testing.T) {
@@ -280,6 +298,17 @@ func TestBotMessage(t *testing.T) {
 	assert.NotNil(t, message.Icons)
 	assert.Empty(t, message.Icons.IconURL)
 	assert.Empty(t, message.Icons.IconEmoji)
+	assert.Equal(t, "github", message.BotProfile.Name)
+	assert.Equal(t, "BB12033", message.BotProfile.ID)
+	assert.Equal(t, false, message.BotProfile.Deleted)
+	assert.Equal(t, int64(1599574335), message.BotProfile.Updated)
+	assert.Equal(t, "A6DB2SWUW", message.BotProfile.AppID)
+	assert.Equal(t, "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_36.png", message.BotProfile.Icons.Image36)
+	assert.Equal(t, "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_48.png", message.BotProfile.Icons.Image48)
+	assert.Equal(t, "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_72.png", message.BotProfile.Icons.Image72)
+	assert.Equal(t, "T01A9CUMPQA", message.BotProfile.TeamID)
+	assert.Equal(t, "C01AZ844Z32", message.Channel)
+	assert.Equal(t, "1358877455.000010", message.EventTimestamp)
 }
 
 var meMessage = `{
