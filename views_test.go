@@ -3,9 +3,9 @@ package slack
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"testing"
 
-	"github.com/kylelemons/godebug/pretty"
 	"github.com/slack-go/slack/internal/errorsx"
 	"github.com/stretchr/testify/assert"
 )
@@ -179,8 +179,8 @@ func TestSlack_OpenView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
-				t.Fatalf("(-got +want)\n%s", diff)
+			if !reflect.DeepEqual(resp, c.expectedResp) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
 			}
 		})
 	}
@@ -331,8 +331,8 @@ func TestSlack_View_PublishView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
-				t.Fatalf("(-got +want)\n%s", diff)
+			if !reflect.DeepEqual(resp, c.expectedResp) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
 			}
 		})
 	}
@@ -496,8 +496,8 @@ func TestSlack_PushView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
-				t.Fatalf("(-got +want)\n%s", diff)
+			if !reflect.DeepEqual(resp, c.expectedResp) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
 			}
 		})
 	}
@@ -665,8 +665,8 @@ func TestSlack_UpdateView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if diff := pretty.Compare(resp, c.expectedResp); diff != "" {
-				t.Fatalf("(-got +want)\n%s", diff)
+			if !reflect.DeepEqual(resp, c.expectedResp) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
 			}
 		})
 	}
