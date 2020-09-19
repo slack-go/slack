@@ -46,8 +46,11 @@ func TestSlack_OpenView(t *testing.T) {
 				"ok": false,
 				"error": "dummy_error_from_slack",
 				"response_metadata": {
+					"warnings": [
+						"missing_charset"
+					],
 					"messages": [
-						"dummy error response"
+						"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"
 					]
 				}
 			}`,
@@ -55,8 +58,9 @@ func TestSlack_OpenView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string]interface{}{
-						"messages": []string{"dummy error response"},
+					ResponseMetadata: ResponseMetadata{
+						Messages: []string{"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"},
+						Warnings: []string{"missing_charset"},
 					},
 				},
 				View{},
@@ -179,8 +183,11 @@ func TestSlack_OpenView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
+			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
+			}
+			if !reflect.DeepEqual(resp.ResponseMetadata.Warnings, c.expectedResp.ResponseMetadata.Warnings) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Warnings, resp.ResponseMetadata.Warnings)
 			}
 		})
 	}
@@ -211,8 +218,11 @@ func TestSlack_View_PublishView(t *testing.T) {
 				"ok": false,
 				"error": "dummy_error_from_slack",
 				"response_metadata": {
+					"warnings": [
+						"missing_charset"
+					],
 					"messages": [
-						"dummy error response"
+						"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"
 					]
 				}
 			}`,
@@ -220,8 +230,9 @@ func TestSlack_View_PublishView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string]interface{}{
-						"messages": []string{"dummy error response"},
+					ResponseMetadata: ResponseMetadata{
+						Messages: []string{"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"},
+						Warnings: []string{"missing_charset"},
 					},
 				},
 				View{},
@@ -331,8 +342,11 @@ func TestSlack_View_PublishView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
+			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
+			}
+			if !reflect.DeepEqual(resp.ResponseMetadata.Warnings, c.expectedResp.ResponseMetadata.Warnings) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Warnings, resp.ResponseMetadata.Warnings)
 			}
 		})
 	}
@@ -363,8 +377,11 @@ func TestSlack_PushView(t *testing.T) {
 				"ok": false,
 				"error": "dummy_error_from_slack",
 				"response_metadata": {
+					"warnings": [
+						"missing_charset"
+					],
 					"messages": [
-						"dummy error response"
+						"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"
 					]
 				}
 			}`,
@@ -372,8 +389,9 @@ func TestSlack_PushView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string]interface{}{
-						"messages": []string{"dummy error response"},
+					ResponseMetadata: ResponseMetadata{
+						Messages: []string{"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"},
+						Warnings: []string{"missing_charset"},
 					},
 				},
 				View{},
@@ -496,8 +514,11 @@ func TestSlack_PushView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
+			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
+			}
+			if !reflect.DeepEqual(resp.ResponseMetadata.Warnings, c.expectedResp.ResponseMetadata.Warnings) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Warnings, resp.ResponseMetadata.Warnings)
 			}
 		})
 	}
@@ -531,8 +552,11 @@ func TestSlack_UpdateView(t *testing.T) {
 				"ok": false,
 				"error": "dummy_error_from_slack",
 				"response_metadata": {
+					"warnings": [
+						"missing_charset"
+					],
 					"messages": [
-						"dummy error response"
+						"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"
 					]
 				}
 			}`,
@@ -540,8 +564,9 @@ func TestSlack_UpdateView(t *testing.T) {
 				SlackResponse{
 					Ok:    false,
 					Error: dummySlackErr.Error(),
-					ResponseMetadata: map[string]interface{}{
-						"messages": []string{"dummy error response"},
+					ResponseMetadata: ResponseMetadata{
+						Messages: []string{"[WARN] A Content-Type HTTP header was presented but did not declare a charset, such as a 'utf-8'"},
+						Warnings: []string{"missing_charset"},
 					},
 				},
 				View{},
@@ -665,8 +690,11 @@ func TestSlack_UpdateView(t *testing.T) {
 			if resp == nil || c.expectedResp == nil {
 				return
 			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t:%v\n", c.expectedResp, resp)
+			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
+			}
+			if !reflect.DeepEqual(resp.ResponseMetadata.Warnings, c.expectedResp.ResponseMetadata.Warnings) {
+				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Warnings, resp.ResponseMetadata.Warnings)
 			}
 		})
 	}
