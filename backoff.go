@@ -36,13 +36,13 @@ func (b *backoff) Duration() (dur time.Duration) {
 
 	// calculate this duration
 	if dur = time.Duration(1 << uint(b.attempts)); dur > 0 {
-		dur = dur * b.Initial
+        dur *= b.Initial
 	} else {
 		dur = b.Max
 	}
 
 	if b.Jitter > 0 {
-		dur = dur + time.Duration(rand.Intn(int(b.Jitter)))
+        dur += time.Duration(rand.Intn(int(b.Jitter)))
 	}
 
 	// bump attempts count
