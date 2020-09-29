@@ -571,9 +571,9 @@ func MsgOptionBroadcast() MsgOption {
 
 // MsgOptionCompose combines multiple options into a single option.
 func MsgOptionCompose(options ...MsgOption) MsgOption {
-	return func(c *sendConfig) error {
+	return func(config *sendConfig) error {
 		for _, opt := range options {
-			if err := opt(c); err != nil {
+			if err := opt(config); err != nil {
 				return err
 			}
 		}
@@ -583,30 +583,30 @@ func MsgOptionCompose(options ...MsgOption) MsgOption {
 
 // MsgOptionParse set parse option.
 func MsgOptionParse(b bool) MsgOption {
-	return func(c *sendConfig) error {
+	return func(config *sendConfig) error {
 		var v string
 		if b {
 			v = "full"
 		} else {
 			v = "none"
 		}
-		c.values.Set("parse", v)
+		config.values.Set("parse", v)
 		return nil
 	}
 }
 
 // MsgOptionIconURL sets an icon URL
 func MsgOptionIconURL(iconURL string) MsgOption {
-	return func(c *sendConfig) error {
-		c.values.Set("icon_url", iconURL)
+	return func(config *sendConfig) error {
+		config.values.Set("icon_url", iconURL)
 		return nil
 	}
 }
 
 // MsgOptionIconEmoji sets an icon emoji
 func MsgOptionIconEmoji(iconEmoji string) MsgOption {
-	return func(c *sendConfig) error {
-		c.values.Set("icon_emoji", iconEmoji)
+	return func(config *sendConfig) error {
+		config.values.Set("icon_emoji", iconEmoji)
 		return nil
 	}
 }
