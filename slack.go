@@ -23,7 +23,9 @@ type httpClient interface {
 
 // ResponseMetadata holds pagination metadata
 type ResponseMetadata struct {
-	Cursor string `json:"next_cursor"`
+	Cursor   string   `json:"next_cursor"`
+	Messages []string `json:"messages"`
+	Warnings []string `json:"warnings"`
 }
 
 func (t *ResponseMetadata) initialize() *ResponseMetadata {
