@@ -246,13 +246,16 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 }
 
 // post a url encoded form.
-func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug) error {
+func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d debug, token ...string) error {
 	reqBody := strings.NewReader(values.Encode())
 	req, err := http.NewRequest("POST", endpoint, reqBody)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if len(token) > 0 {
+		req.Header.Set("Authorization", "Bearer "+token[0])
+	}
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
