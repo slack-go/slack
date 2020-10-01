@@ -7,7 +7,6 @@ import (
 )
 
 func TestListEventAuthorizations(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/apps.event.authorizations.list", testListEventAuthorizationsHandler)
 	once.Do(startServer)
 
