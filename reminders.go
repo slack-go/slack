@@ -21,12 +21,35 @@ type reminderResp struct {
 	Reminder Reminder `json:"reminder"`
 }
 
+type remindersResp struct {
+	SlackResponse
+	Reminders []Reminder `json:"reminders"`
+}
+
 func (api *Client) doReminder(ctx context.Context, path string, values url.Values) (*Reminder, error) {
 	response := &reminderResp{}
 	if err := api.postMethod(ctx, path, values, response); err != nil {
 		return nil, err
 	}
 	return &response.Reminder, response.Err()
+}
+
+func (api *Client) doReminders(ctx context.Context, path string, values url.Values) (*[]Reminder, error) {
+	response := &remindersResp{}
+	if err := api.postMethod(ctx, path, values, response); err != nil {
+		return nil, err
+	}
+	return &response.Reminders, response.Err()
+}
+
+// ListReminders lists all the reminders created by or for the authenticated user
+//
+// See https://api.slack.com/methods/reminders.list
+func (api *Client) ListReminders() (*[]Reminder, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	return api.doReminders(context.Background(), "reminders.list", values)
 }
 
 // AddChannelReminder adds a reminder for a channel.
