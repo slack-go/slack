@@ -158,6 +158,8 @@ func TestSlack_DeleteReminder(t *testing.T) {
 }
 
 func TestSlack_ListReminders(t *testing.T) {
+	// as the ListReminders takes only token parameter
+	// we just test if the call doesn't return an error
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	var rh *remindersHandler
