@@ -39,13 +39,20 @@ func (api *Client) doReminders(ctx context.Context, path string, values url.Valu
 	if err := api.postMethod(ctx, path, values, response); err != nil {
 		return nil, err
 	}
-	return &response.Reminders, response.Err()
+
+	// create an array of pointers to reminders
+	var reminders = make([]*Reminder, 0)
+	for _, reminder := range response.Reminders {
+		reminders = append(reminders, &reminder)
+	}
+
+	return reminders, response.Err()
 }
 
 // ListReminders lists all the reminders created by or for the authenticated user
 //
 // See https://api.slack.com/methods/reminders.list
-func (api *Client) ListReminders() (*[]Reminder, error) {
+func (api *Client) ListReminders() ([]*Reminder, error) {
 	values := url.Values{
 		"token": {api.token},
 	}
