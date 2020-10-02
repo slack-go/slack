@@ -397,7 +397,7 @@ func (c CheckboxGroupsBlockElement) ElementType() MessageElementType {
 	return c.Type
 }
 
-// NewCheckboxGroupsBlockElement returns an instance of a radio block element
+// NewCheckboxGroupsBlockElement returns an instance of a checkbox-group block element
 func NewCheckboxGroupsBlockElement(actionID string, options ...*OptionBlockObject) *CheckboxGroupsBlockElement {
 	return &CheckboxGroupsBlockElement{
 		Type:     METCheckboxGroups,
