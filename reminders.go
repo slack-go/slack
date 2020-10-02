@@ -34,7 +34,7 @@ func (api *Client) doReminder(ctx context.Context, path string, values url.Value
 	return &response.Reminder, response.Err()
 }
 
-func (api *Client) doReminders(ctx context.Context, path string, values url.Values) (*[]Reminder, error) {
+func (api *Client) doReminders(ctx context.Context, path string, values url.Values) ([]*Reminder, error) {
 	response := &remindersResp{}
 	if err := api.postMethod(ctx, path, values, response); err != nil {
 		return nil, err
