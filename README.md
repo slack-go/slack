@@ -10,12 +10,11 @@ This library supports most if not all of the `api.slack.com` REST
 calls, as well as the Real-Time Messaging protocol over websocket, in
 a fully managed way.
 
+## Project Status
+There is currently no major version released.
+Therefore, minor version releases may include backward incompatible changes.
 
-
-
-## Changelog
-
-[CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) is available. Please visit it for updates.
+See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) for more information about the changes.
 
 ## Installing
 
