@@ -107,6 +107,15 @@ const (
 	ResponseTypeEphemeral = "ephemeral"
 )
 
+// ScheduledMessage contains information about a slack scheduled message
+type ScheduledMessage struct {
+	ID          string `json:"id"`
+	Channel     string `json:"channel_id"`
+	PostAt      int    `json:"post_at"`
+	DateCreated int    `json:"date_created"`
+	Text        string `json:"text"`
+}
+
 // Icon is used for bot messages
 type Icon struct {
 	IconURL   string `json:"icon_url,omitempty"`

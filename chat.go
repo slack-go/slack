@@ -722,12 +722,12 @@ type GetScheduledMessagesParameters struct {
 }
 
 // GetScheduledMessages returns the list of scheduled messages based on params
-func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) (channels []Message, nextCursor string, err error) {
+func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
 	return api.GetScheduledMessagesContext(context.Background(), params)
 }
 
 // GetScheduledMessagesContext returns the list of scheduled messages in a Slack team with a custom context
-func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []Message, nextCursor string, err error) {
+func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -747,8 +747,8 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 		values.Add("oldest", params.Oldest)
 	}
 	response := struct {
-		Messages         []Message        `json:"scheduled_messages"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Messages         []ScheduledMessage `json:"scheduled_messages"`
+		ResponseMetaData responseMetaData   `json:"response_metadata"`
 		SlackResponse
 	}{}
 
