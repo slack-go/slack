@@ -156,11 +156,6 @@ func (api *Client) postMethod(ctx context.Context, path string, values url.Value
 	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
 }
 
-// post to a slack web method with a bearer token
-func (api *Client) postMethodWithBearerToken(ctx context.Context, path string, values url.Values, intf interface{}, token string) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api, token)
-}
-
 // get a slack web method.
 func (api *Client) getMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
 	return getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
