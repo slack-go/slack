@@ -23,7 +23,7 @@ func (api *Client) ListEventAuthorizations(eventContext string) ([]EventAuthoriz
 	resp := &listEventAuthorizationsResponse{}
 
 	err := api.postMethodWithBearerToken(context.Background(), "apps.event.authorizations.list", url.Values{
-		"event_context": {event_context},
+		"event_context": {eventContext},
 	}, &resp, api.appLevelToken)
 
 	if err != nil {
