@@ -101,7 +101,7 @@ func TestPostMessage(t *testing.T) {
 					}),
 			},
 			expected: url.Values{
-				"attachments": []string{`[{"text":"","blocks":` + blockStr + `}]`},
+				"attachments": []string{`[{"blocks":` + blockStr + `}]`},
 				"channel":     []string{"CXXX"},
 				"token":       []string{"testing-token"},
 			},
