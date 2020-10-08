@@ -432,9 +432,15 @@ type Icons struct {
 // Info contains various details about the authenticated user and team.
 // It is returned by StartRTM or included in the "ConnectedEvent" RTM event.
 type Info struct {
-	URL  string       `json:"url,omitempty"`
-	User *UserDetails `json:"self,omitempty"`
-	Team *Team        `json:"team,omitempty"`
+	URL      string       `json:"url,omitempty"`
+	User     *UserDetails `json:"self,omitempty"`
+	Team     *Team        `json:"team,omitempty"`
+	Channels []*Channel   `json:"channels",omitempty`
+	Groups   []*Channel   `json:"groups",omitempty`
+	MPIMs    []*Channel   `json:"mpims",omitempty`
+	IMs      []*Channel   `json:"ims",omitempty`
+	Users    []*User      `json:"users,omitempty"`
+	Bots     []*User      `json:"bots,omitempty"`
 }
 
 type infoResponseFull struct {
