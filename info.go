@@ -337,14 +337,19 @@ func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
 	if err != nil {
 		return nil, err
 	}
-	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	for _, chn := range chnls {
-		if chn == channelID {
+
+	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
+	for _, mc := range mutedChannels {
+		if mc == channelID {
 			return nil, nil // noop
 		}
 	}
-	newChnls := prefs.UserPrefs.MutedChannels + "," + channelID
-	values := url.Values{"token": {api.token}, "muted_channels": {newChnls}, "reason": {"update-muted-channels"}}
+
+	values := url.Values{
+		"token":  {api.token},
+		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s,%s\"}", prefs.UserPrefs.MutedChannels, channelID)},
+		"reason": {"update-muted-channels"},
+	}
 	response := UserPrefsCarrier{}
 
 	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
@@ -360,15 +365,28 @@ func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
 	if err != nil {
 		return nil, err
 	}
-	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	newChnls := make([]string, len(chnls)-1)
-	for i, chn := range chnls {
-		if chn == channelID {
-			return nil, nil // noop
+
+	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
+	update := []string{}
+	isMuted := false
+	for _, mc := range mutedChannels {
+		if mc == channelID {
+			isMuted = true
+			continue
 		}
-		newChnls[i] = chn
+
+		update = append(update, mc)
 	}
-	values := url.Values{"token": {api.token}, "muted_channels": {strings.Join(newChnls, ",")}, "reason": {"update-muted-channels"}}
+
+	if !isMuted {
+		return nil, nil // noop
+	}
+
+	values := url.Values{
+		"token":  {api.token},
+		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s\"}", strings.Join(update, ","))},
+		"reason": {"update-muted-channels"},
+	}
 	response := UserPrefsCarrier{}
 
 	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
