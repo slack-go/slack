@@ -304,7 +304,8 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 				BlockSet: []Block{NewDividerBlock()},
 			},
 		},
-		DialogSubmissionCallback: DialogSubmissionCallback{State: "dsstate"},
+		DialogSubmissionCallback: DialogSubmissionCallback{State: ""},
+		RawState:                 json.RawMessage(`{}`),
 	}
 
 	cbJSONBytes, err := json.Marshal(cb)
@@ -346,4 +347,47 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 	assert.Equal(t, cb.View.Blocks, jsonCB.View.Blocks)
 	assert.Equal(t, cb.DialogSubmissionCallback.State,
 		jsonCB.DialogSubmissionCallback.State)
+}
+
+func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T) {
+	raw := []byte(`{
+		"type": "block_actions",
+		"actions": [
+			{
+				"type": "multi_conversations_select",
+				"action_id": "multi_convos",
+				"block_id": "test123",
+				"selected_conversations": ["G12345"]
+			}
+		],
+		"container": {
+			"type": "view",
+			"view_id": "V12345"
+		},
+		"state": {
+			"values": {
+				"section_block_id": {
+					"multi_convos": {
+						"type": "multi_conversations_select",
+						"selected_conversations": ["G12345"]
+					}
+				},
+				"other_block_id": {
+					"other_action_id": {
+						"type": "plain_text_input",
+						"value": "test123"
+					}
+				}
+			}
+		}
+	}`)
+	var cb InteractionCallback
+	assert.NoError(t, json.Unmarshal(raw, &cb))
+	assert.Equal(t, cb.State, "")
+	assert.Equal(t,
+		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
+		actionType(MultiOptTypeConversations))
+	assert.Equal(t,
+		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
+		[]string{"G12345"})
 }
