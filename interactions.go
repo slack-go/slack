@@ -87,7 +87,8 @@ func (ic *InteractionCallback) MarshalJSON() ([]byte, error) {
 	} else if ic.Type == InteractionTypeDialogSubmission {
 		tmp.RawState = []byte(tmp.State)
 	}
-	return json.Marshal(tmp)
+	// Use pointer for go1.7
+	return json.Marshal(&tmp)
 }
 
 func (ic *InteractionCallback) UnmarshalJSON(b []byte) error {
