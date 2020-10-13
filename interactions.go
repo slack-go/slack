@@ -105,9 +105,11 @@ func (ic *InteractionCallback) UnmarshalJSON(b []byte) error {
 	*ic = InteractionCallback(*tmp.alias)
 	ic.Type = tmp.Type
 	if ic.Type == InteractionTypeBlockActions {
-		err := json.Unmarshal(ic.RawState, &ic.BlockActionState)
-		if err != nil {
-			return err
+		if len(ic.RawState) > 0 {
+			err := json.Unmarshal(ic.RawState, &ic.BlockActionState)
+			if err != nil {
+				return err
+			}
 		}
 	} else if ic.Type == InteractionTypeDialogSubmission {
 		ic.State = string(ic.RawState)
