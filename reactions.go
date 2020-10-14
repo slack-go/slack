@@ -59,28 +59,24 @@ func (res getReactionsResponseFull) extractReactions() []ItemReaction {
 }
 
 const (
-	DEFAULT_REACTIONS_USER  = ""
-	DEFAULT_REACTIONS_COUNT = 100
-	DEFAULT_REACTIONS_PAGE  = 1
-	DEFAULT_REACTIONS_FULL  = false
+	DEFAULT_REACTIONS_USER = ""
+	DEFAULT_REACTIONS_FULL = false
 )
 
 // ListReactionsParameters is the inputs to find all reactions by a user.
 type ListReactionsParameters struct {
-	User  string
-	Count int
-	Page  int
-	Full  bool
+	User   string
+	Cursor string
+	Limit  int
+	Full   bool
 }
 
 // NewListReactionsParameters initializes the inputs to find all reactions
 // performed by a user.
 func NewListReactionsParameters() ListReactionsParameters {
 	return ListReactionsParameters{
-		User:  DEFAULT_REACTIONS_USER,
-		Count: DEFAULT_REACTIONS_COUNT,
-		Page:  DEFAULT_REACTIONS_PAGE,
-		Full:  DEFAULT_REACTIONS_FULL,
+		User: DEFAULT_REACTIONS_USER,
+		Full: DEFAULT_REACTIONS_FULL,
 	}
 }
 
@@ -100,7 +96,6 @@ type listReactionsResponseFull struct {
 			Reactions []ItemReaction
 		} `json:"comment"`
 	}
-	Paging `json:"paging"`
 	SlackResponse
 }
 
@@ -234,23 +229,23 @@ func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params
 }
 
 // ListReactions returns information about the items a user reacted to.
-func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
+func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem, string, error) {
 	return api.ListReactionsContext(context.Background(), params)
 }
 
 // ListReactionsContext returns information about the items a user reacted to with a custom context.
-func (api *Client) ListReactionsContext(ctx context.Context, params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
+func (api *Client) ListReactionsContext(ctx context.Context, params ListReactionsParameters) ([]ReactedItem, string, error) {
 	values := url.Values{
 		"token": {api.token},
 	}
 	if params.User != DEFAULT_REACTIONS_USER {
 		values.Add("user", params.User)
 	}
-	if params.Count != DEFAULT_REACTIONS_COUNT {
-		values.Add("count", strconv.Itoa(params.Count))
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
 	}
-	if params.Page != DEFAULT_REACTIONS_PAGE {
-		values.Add("page", strconv.Itoa(params.Page))
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Full != DEFAULT_REACTIONS_FULL {
 		values.Add("full", strconv.FormatBool(params.Full))
@@ -259,12 +254,12 @@ func (api *Client) ListReactionsContext(ctx context.Context, params ListReaction
 	response := &listReactionsResponseFull{}
 	err := api.postMethod(ctx, "reactions.list", values, response)
 	if err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
 	if err := response.Err(); err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
-	return response.extractReactedItems(), &response.Paging, nil
+	return response.extractReactedItems(), response.ResponseMetadata.Cursor, nil
 }
