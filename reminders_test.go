@@ -156,3 +156,18 @@ func TestSlack_DeleteReminder(t *testing.T) {
 		}
 	}
 }
+
+func TestSlack_ListReminders(t *testing.T) {
+	// as the ListReminders takes only token parameter
+	// we just test if the call doesn't return an error
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	var rh *remindersHandler
+	http.HandleFunc("/reminders.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	rh = newRemindersHandler()
+
+	_, err := api.ListReminders()
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+}
