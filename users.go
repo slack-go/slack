@@ -557,7 +557,7 @@ func (api *Client) SetUserCustomStatus(statusText, statusEmoji string, statusExp
 //
 // For more information see SetUserCustomStatus
 func (api *Client) SetUserCustomStatusContext(ctx context.Context, statusText, statusEmoji string, statusExpiration int64) error {
-	return api.SetUserCustomStatusContextWithUser(context.Background(), "", statusText, statusEmoji, statusExpiration)
+	return api.SetUserCustomStatusContextWithUser(ctx, "", statusText, statusEmoji, statusExpiration)
 }
 
 // SetUserCustomStatusWithUser will set a custom status and emoji for the provided user.
