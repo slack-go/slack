@@ -17,3 +17,14 @@ func TestDetectChannelType(t *testing.T) {
 	test("", CTypeUnknown)
 	test("X11111111", CTypeUnknown)
 }
+
+func TestEscapeMessage(t *testing.T) {
+	test := func(message string, expected string) {
+		if computed := EscapeMessage(message); computed != expected {
+			t.Errorf("expected message %s to be converted to %s, got: %s", message, expected, computed)
+		}
+	}
+	test("A & B", "A &amp; B")
+	test("A < B", "A &lt; B")
+	test("A > B", "A &gt; B")
+}
