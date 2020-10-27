@@ -41,6 +41,9 @@ func TestGetBotInfo(t *testing.T) {
 	if bot.Name != "github" {
 		t.Fatal("Incorrect Name")
 	}
+	if bot.Deleted {
+		t.Fatal("Incorrect Deleted flag")
+	}
 	if bot.AppID != "A161CLERW" {
 		t.Fatal("Incorrect App ID")
 	}
