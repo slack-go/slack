@@ -8,7 +8,6 @@ import (
 
 type remindersHandler struct {
 	gotParams map[string]string
-	response  string
 }
 
 func newRemindersHandler() *remindersHandler {

@@ -11,5 +11,4 @@ linters:
     - structcheck
     - unconvert
 issues:
-  # TODO(kanata2): fix existing issues
   new: true

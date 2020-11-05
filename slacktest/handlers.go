@@ -62,7 +62,7 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 	ch := values.Get("channel")
 
 	response := GroupConversationResponse{
-		Ok:      true,
+		Ok: true,
 		Channel: slack.GroupConversation{
 			Conversation: slack.Conversation{
 				ID: ch,
