@@ -272,6 +272,18 @@ type ItemMessage struct {
 	DeleteOriginal  bool     `json:"delete_original"`
 }
 
+// TeamJoinEvent represents the Team join event
+type TeamJoinEvent struct {
+	Type string     `json:"type"`
+	User slack.User `json:"user"`
+}
+
+// UserChangeEvent represents the user change event
+type UserChangeEvent struct {
+	Type string     `json:"type"`
+	User slack.User `json:"user"`
+}
+
 // IsEdited checks if the MessageEvent is caused by an edit
 func (e MessageEvent) IsEdited() bool {
 	return e.Message != nil &&
@@ -307,6 +319,10 @@ const (
 	ReactionRemoved = "reaction_removed"
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = "tokens_revoked"
+	// New member joined the team
+	TeamJoin = "team_join"
+	// User changed profile data
+	UserChange = "user_change"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -327,4 +343,6 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	ReactionAdded:         ReactionAddedEvent{},
 	ReactionRemoved:       ReactionRemovedEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
+	TeamJoin:              TeamJoinEvent{},
+	UserChange:            UserChangeEvent{},
 }
