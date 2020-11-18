@@ -85,20 +85,20 @@ func NewPostMessageParameters() PostMessageParameters {
 }
 
 // DeleteMessage deletes a message in a channel
-func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
+func (api *Client) DeleteMessage(channelID, messageTimestamp string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		context.Background(),
-		channel,
+		channelID,
 		MsgOptionDelete(messageTimestamp),
 	)
 	return respChannel, respTimestamp, err
 }
 
 // DeleteMessageContext deletes a message in a channel with a custom context
-func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTimestamp string) (string, string, error) {
+func (api *Client) DeleteMessageContext(ctx context.Context, channelID, messageTimestamp string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		ctx,
-		channel,
+		channelID,
 		MsgOptionDelete(messageTimestamp),
 	)
 	return respChannel, respTimestamp, err
