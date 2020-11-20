@@ -207,7 +207,7 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroup UserGro
 		values["description"] = []string{userGroup.Description}
 	}
 
-	if len(userGroup.Prefs.Channels) > 0 {
+	if len(userGroup.Prefs.Channels) > 0 || len(userGroup.Prefs.Groups) > 0 {
 		values["channels"] = []string{strings.Join(append(userGroup.Prefs.Channels, userGroup.Prefs.Groups...), ",")}
 	}
 
