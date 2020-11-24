@@ -72,8 +72,8 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 		},
 	}
 	encoded, err := json.Marshal(&response)
-	if vErr != nil {
-		msg := fmt.Sprintf("Unable to encode response: %s", vErr.Error())
+	if err != nil {
+		msg := fmt.Sprintf("Unable to encode response: %s", err.Error())
 		log.Printf(msg)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
@@ -82,7 +82,7 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 	_, _ = w.Write(encoded)
 }
 
-// handle channels.list
+// handle channels.list and conversations.list
 func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultChannelsListJSON))
 }

@@ -51,6 +51,7 @@ func NewTestServer(custom ...binder) *Server {
 	s.Handle("/rtm.connect", RTMConnectHandler)
 	s.Handle("/chat.postMessage", s.postMessageHandler)
 	s.Handle("/channels.list", listChannelsHandler)
+	s.Handle("/conversations.list", listChannelsHandler)
 	s.Handle("/conversations.create", createConversationHandler)
 	s.Handle("/conversations.setTopic", setConversationTopicHandler)
 	s.Handle("/conversations.setPurpose", setConversationPurposeHandler)
