@@ -12,7 +12,7 @@ func TestNewHeaderBlock(t *testing.T) {
 
 	headerBlock := NewHeaderBlock(textInfo, HeaderBlockOptionBlockID("test_block"))
 	assert.Equal(t, string(headerBlock.Type), "header")
-	assert.Equal(t, string(headerBlock.BlockID), "test_block")
+	assert.Equal(t, headerBlock.BlockID, "test_block")
 	assert.Equal(t, headerBlock.Text.Type, "plain_text")
 	assert.Contains(t, headerBlock.Text.Text, "quite the header")
 }
