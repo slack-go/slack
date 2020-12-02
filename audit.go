@@ -36,7 +36,7 @@ type AuditEntry struct {
 			Name   string `json:"name"`
 			Domain string `json:"domain"`
 		} `json:"location"`
-		Ua        string `json:"ua"`
+		UA        string `json:"ua"`
 		IPAddress string `json:"ip_address"`
 	} `json:"context"`
 }
