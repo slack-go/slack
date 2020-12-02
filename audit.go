@@ -21,7 +21,7 @@ type AuditEntry struct {
 	} `json:"actor"`
 	Entity struct {
 		Type string `json:"type"`
-		// Only one of the below will be completed, based on the value of Type a user (W123AB456), a channel (C987XYZ654), a file (F42424242), an app (A27182818), a workspace (T31415926), or an enterprise (E1701NCCA)
+		// Only one of the below will be completed, based on the value of Type a user, a channel, a file, an app, a workspace, or an enterprise
 		User       AuditUser       `json:"user"`
 		Channel    AuditChannel    `json:"channel"`
 		File       AuditFile       `json:"file"`
