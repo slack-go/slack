@@ -132,21 +132,21 @@ func (api *Client) AuthTestContext(ctx context.Context) (response *AuthTestRespo
 	return &responseFull.AuthTestResponse, responseFull.Err()
 }
 
-// Debugf print a formatted Debug line.
+// Debugf print a formatted debug line.
 func (api *Client) Debugf(format string, v ...interface{}) {
 	if api.debug {
 		api.log.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
-// Debugln print a Debug line.
+// Debugln print a debug line.
 func (api *Client) Debugln(v ...interface{}) {
 	if api.debug {
 		api.log.Output(2, fmt.Sprintln(v...))
 	}
 }
 
-// Debug returns if Debug is enabled.
+// Debug returns if debug is enabled.
 func (api *Client) Debug() bool {
 	return api.debug
 }
