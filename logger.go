@@ -21,9 +21,9 @@ type ilogger interface {
 type Debug interface {
 	Debug() bool
 
-	// Debugf print a formatted Debug line.
+	// Debugf print a formatted debug line.
 	Debugf(format string, v ...interface{})
-	// Debugln print a Debug line.
+	// Debugln print a debug line.
 	Debugln(v ...interface{})
 }
 
@@ -53,8 +53,8 @@ func (t discard) Debug() bool {
 	return false
 }
 
-// Debugf print a formatted Debug line.
+// Debugf print a formatted debug line.
 func (t discard) Debugf(format string, v ...interface{}) {}
 
-// Debugln print a Debug line.
+// Debugln print a debug line.
 func (t discard) Debugln(v ...interface{}) {}
