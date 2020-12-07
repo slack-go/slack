@@ -12,7 +12,6 @@ func TestAttachment_UnmarshalMarshalJSON_WithBlocks(t *testing.T) {
 
 	originalAttachmentJson := `{
     "id": 1,
-    "text":"",
     "blocks": [
       {
         "type": "section",
