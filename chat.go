@@ -84,6 +84,10 @@ func NewPostMessageParameters() PostMessageParameters {
 	}
 }
 
+type Unfurl struct {
+	Blocks Blocks `json:"blocks,omitempty"`
+}
+
 // DeleteMessage deletes a message in a channel
 func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
@@ -187,7 +191,7 @@ func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestam
 }
 
 // UnfurlMessage unfurls a message in a channel
-func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Unfurl, options ...MsgOption) (string, string, string, error) {
 	return api.SendMessageContext(context.Background(), channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
 }
 
@@ -401,7 +405,7 @@ func MsgOptionDelete(timestamp string) MsgOption {
 }
 
 // MsgOptionUnfurl unfurls a message based on the timestamp.
-func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption {
+func MsgOptionUnfurl(timestamp string, unfurls map[string]Unfurl) MsgOption {
 	return func(config *sendConfig) error {
 		config.endpoint = config.apiurl + string(chatUnfurl)
 		config.values.Add("ts", timestamp)
