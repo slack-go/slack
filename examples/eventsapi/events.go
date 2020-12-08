@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -14,12 +15,29 @@ import (
 var api = slack.New("TOKEN")
 
 func main() {
+	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
+
 	http.HandleFunc("/events-endpoint", func(w http.ResponseWriter, r *http.Request) {
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(r.Body)
-		body := buf.String()
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: "VERIFICATION_TOKEN"}))
-		if e != nil {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		sv, err := slack.NewSecretsVerifier(r.Header, signingSecret)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if _, err := sv.Write(body); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		if err := sv.Ensure(); err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionNoVerifyToken())
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
