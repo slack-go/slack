@@ -555,3 +555,13 @@ func TestGetConversationHistory(t *testing.T) {
 		return
 	}
 }
+
+func TestMarkConversation(t *testing.T) {
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	err := api.MarkConversation("CXXXXXXXX", "1401383885.000061")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
