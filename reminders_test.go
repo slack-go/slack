@@ -187,7 +187,7 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(responseString))}, nil
 }
 
-/*func TestSlack_ListReminders(t *testing.T) {
+func TestSlack_ListReminders(t *testing.T) {
 	expectedIDs := []string{"Rm12345678", "Gm12345678"}
 
 	once.Do(startServer)
@@ -207,4 +207,4 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 			t.Fatalf("List Reminders data wasn't correctly populated: wanted %v, got %v", expectedIDs[i], reminders[i].ID)
 		}
 	}
-}*/
+}
