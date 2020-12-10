@@ -556,7 +556,15 @@ func TestGetConversationHistory(t *testing.T) {
 	}
 }
 
+func markConversationHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(GetConversationHistoryResponse{
+		SlackResponse: SlackResponse{Ok: true}})
+	w.Write(response)
+}
+
 func TestMarkConversation(t *testing.T) {
+	http.HandleFunc("/conversations.mark", markConversationHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.MarkConversation("CXXXXXXXX", "1401383885.000061")
