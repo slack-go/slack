@@ -181,13 +181,11 @@ func newProfileHandler(up *UserProfile) (setter func(http.ResponseWriter, *http.
 
 		values := r.Form
 
-		if len(values["user"]) == 0 {
-			httpTestErrReply(w, true, `POST data must include a "user" field`)
-			return
-		}
-		if up.RealName != "" && values["user"][0] != up.RealName {
-			httpTestErrReply(w, true, fmt.Sprintf(`POST data field "user" expected to be %q but got %q`, up.RealName, values["user"][0]))
-			return
+		if v, ok := values["user"]; ok {
+			if len(v) == 0 || v[0] == "" {
+				httpTestErrReply(w, true, `POST data must not include an empty in a "user" field`)
+				return
+			}
 		}
 
 		if len(values["profile"]) == 0 {
