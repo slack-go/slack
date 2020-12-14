@@ -363,7 +363,7 @@ type TimePickerBlockElement struct {
 	Type        MessageElementType       `json:"type"`
 	ActionID    string                   `json:"action_id,omitempty"`
 	Placeholder *TextBlockObject         `json:"placeholder,omitempty"`
-	InitialDate string                   `json:"initial_date,omitempty"`
+	InitialTime string                   `json:"initial_time,omitempty"`
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
 
