@@ -105,6 +105,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 	switch s.TypeVal {
 	case "datepicker":
 		e = &DatePickerBlockElement{}
+	case "timepicker":
+		e = &TimePickerBlockElement{}
 	case "plain_text_input":
 		e = &PlainTextInputBlockElement{}
 	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
@@ -262,6 +264,12 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.DatePickerElement = element.(*DatePickerBlockElement)
+	case "timepicker":
+		element, err := unmarshalBlockElement(r, &TimePickerBlockElement{})
+		if err != nil {
+			return err
+		}
+		a.TimePickerElement = element.(*TimePickerBlockElement)
 	case "plain_text_input":
 		element, err := unmarshalBlockElement(r, &PlainTextInputBlockElement{})
 		if err != nil {
@@ -323,6 +331,9 @@ func toBlockElement(element *Accessory) BlockElement {
 	}
 	if element.DatePickerElement != nil {
 		return element.DatePickerElement
+	}
+	if element.TimePickerElement != nil {
+		return element.TimePickerElement
 	}
 	if element.PlainTextInputElement != nil {
 		return element.PlainTextInputElement

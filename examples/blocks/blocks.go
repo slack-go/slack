@@ -510,6 +510,9 @@ func unmarshalExample() {
 				case slack.METDatepicker:
 					datepickerElem := elem.(*slack.DatePickerBlockElement)
 					fmt.Printf("do something with datepicker block element: %v\n", datepickerElem)
+				case slack.METTimepicker:
+					timepickerElem := elem.(*slack.TimePickerBlockElement)
+					fmt.Printf("do something with timepicker block element: %v\n", timepickerElem)
 				}
 			}
 			respBlocks = append(respBlocks, block)

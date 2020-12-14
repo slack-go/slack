@@ -112,6 +112,12 @@ func TestNewDatePickerBlockElement(t *testing.T) {
 
 }
 
+func TestNewTimePickerBlockElement(t *testing.T) {
+	timepickerElement := NewTimePickerBlockElement("test")
+	assert.Equal(t, string(timepickerElement.Type), "timepicker")
+	assert.Equal(t, timepickerElement.ActionID, "test")
+}
+
 func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 	plainTextInputElement := NewPlainTextInputBlockElement(nil, "test")
