@@ -358,7 +358,7 @@ func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 // time from nice UI. Time picker elements can be used inside of
 // section and actions blocks.
 //
-// More Information: https://api.slack.com/reference/messaging/block-elements#datepicker
+// More Information: https://api.slack.com/reference/messaging/block-elements#timepicker
 type TimePickerBlockElement struct {
 	Type        MessageElementType       `json:"type"`
 	ActionID    string                   `json:"action_id,omitempty"`
