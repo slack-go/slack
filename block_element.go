@@ -127,10 +127,12 @@ func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	}
 }
 
+// Style is a style of Button element
+// https://api.slack.com/reference/block-kit/block-elements#button__fields
 type Style string
 
 const (
-	StyleDefault Style = "default"
+	StyleDefault Style = ""
 	StylePrimary Style = "primary"
 	StyleDanger  Style = "danger"
 )
@@ -155,7 +157,7 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-// WithStyling adds styling to the button object and returns the modified ButtonBlockElement
+// WithStyle adds styling to the button object and returns the modified ButtonBlockElement
 func (s *ButtonBlockElement) WithStyle(style Style) *ButtonBlockElement {
 	s.Style = style
 	return s

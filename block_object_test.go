@@ -42,6 +42,23 @@ func TestNewConfirmationBlockObject(t *testing.T) {
 
 }
 
+func TestWithStyleForConfirmation(t *testing.T) {
+
+	// these values are irrelevant in this test
+	titleObj := NewTextBlockObject("plain_text", "testTitle", false, false)
+	textObj := NewTextBlockObject("plain_text", "testText", false, false)
+	confirmObj := NewTextBlockObject("plain_text", "testConfirm", false, false)
+	confirmation := NewConfirmationBlockObject(titleObj, textObj, confirmObj, nil)
+
+	confirmation.WithStyle(StyleDefault)
+	assert.Equal(t, confirmation.Style, Style(""))
+	confirmation.WithStyle(StylePrimary)
+	assert.Equal(t, confirmation.Style, Style("primary"))
+	confirmation.WithStyle(StyleDanger)
+	assert.Equal(t, confirmation.Style, Style("danger"))
+
+}
+
 func TestNewOptionBlockObject(t *testing.T) {
 
 	valTextObj := NewTextBlockObject("plain_text", "testText", false, false)
