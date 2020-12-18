@@ -16,7 +16,7 @@ func main() {
 		signingSecret string
 	)
 
-	flag.StringVar(&signingSecret, "secret", "YOUR_SIGNING_SECRET_HERE", "Your Slack app's signing secret")
+	flag.StringVar(&signingSecret, "secret", "YOUR_SIGNING_SECRET_HERE", "Your Slack app's client signing secret")
 	flag.Parse()
 
 	http.HandleFunc("/slash", func(w http.ResponseWriter, r *http.Request) {
