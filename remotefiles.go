@@ -69,8 +69,7 @@ type ListRemoteFilesParameters struct {
 type remoteFileResponseFull struct {
 	RemoteFile `json:"file"`
 	Paging     `json:"paging"`
-	Files      []RemoteFile     `json:"files"`
-	Metadata   ResponseMetadata `json:"response_metadata"`
+	Files      []RemoteFile `json:"files"`
 	SlackResponse
 }
 
@@ -156,7 +155,7 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 		return nil, nil, err
 	}
 
-	params.Cursor = response.Metadata.Cursor
+	params.Cursor = response.SlackResponse.ResponseMetadata.Cursor
 
 	return response.Files, &params, nil
 }
