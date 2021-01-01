@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"strconv"
@@ -90,11 +91,8 @@ func (api *Client) AddRemoteFile(params RemoteFileParameters) (remotefile *Remot
 
 // AddRemoteFileContext adds a remote file and setting a custom context
 func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
-	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
-	// investigation needed, but for now this will do.
-	_, err = api.AuthTest()
-	if err != nil {
-		return nil, err
+	if params.ExternalID == "" || params.ExternalURL == "" || params.Title == "" {
+		return nil, ErrParametersMissing
 	}
 	response := &remoteFileResponseFull{}
 	values := url.Values{
@@ -167,6 +165,12 @@ func (api *Client) GetRemoteFileInfo(externalID, fileID string) (remotefile *Rem
 
 // GetRemoteFileInfoContext retrieves the complete remote file information given with a custom context.
 func (api *Client) GetRemoteFileInfoContext(ctx context.Context, externalID, fileID string) (remotefile *RemoteFile, err error) {
+	if fileID == "" && externalID == "" {
+		return nil, fmt.Errorf("either externalID or fileID is required")
+	}
+	if fileID != "" && externalID != "" {
+		return nil, fmt.Errorf("don't provide both externalID and fileID")
+	}
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -190,6 +194,12 @@ func (api *Client) ShareRemoteFile(channels []string, externalID, fileID string)
 
 // ShareRemoteFileContext shares a remote file to channels with a custom context
 func (api *Client) ShareRemoteFileContext(ctx context.Context, channels []string, externalID, fileID string) (file *RemoteFile, err error) {
+	if channels == nil || len(channels) == 0 {
+		return nil, ErrParametersMissing
+	}
+	if fileID == "" && externalID == "" {
+		return nil, fmt.Errorf("either externalID or fileID is required")
+	}
 	values := url.Values{
 		"token":    {api.token},
 		"channels": {strings.Join(channels, ",")},
@@ -214,12 +224,6 @@ func (api *Client) UpdateRemoteFile(fileID string, params RemoteFileParameters) 
 
 // UpdateRemoteFileContext updates a remote file with a custom context
 func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
-	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
-	// investigation needed, but for now this will do.
-	_, err = api.AuthTest()
-	if err != nil {
-		return nil, err
-	}
 	response := &remoteFileResponseFull{}
 	values := url.Values{
 		"token": {api.token},
@@ -243,9 +247,9 @@ func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, p
 		values.Add("indexable_file_contents", params.IndexableFileContents)
 	}
 	if params.PreviewImageReader != nil {
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", "preview.png", "preview_image", values, params.PreviewImageReader, response, api)
+		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", "preview.png", "preview_image", values, params.PreviewImageReader, response, api)
 	} else {
-		response, err = api.remoteFileRequest(ctx, "files.remote.add", values)
+		response, err = api.remoteFileRequest(ctx, "files.remote.update", values)
 	}
 
 	if err != nil {
@@ -262,6 +266,12 @@ func (api *Client) RemoveRemoteFile(externalID, fileID string) (err error) {
 
 // RemoveRemoteFileContext removes a remote file with a custom context
 func (api *Client) RemoveRemoteFileContext(ctx context.Context, externalID, fileID string) (err error) {
+	if fileID == "" && externalID == "" {
+		return fmt.Errorf("either externalID or fileID is required")
+	}
+	if fileID != "" && externalID != "" {
+		return fmt.Errorf("don't provide both externalID and fileID")
+	}
 	values := url.Values{
 		"token": {api.token},
 	}
