@@ -73,6 +73,7 @@ func TestGetPermalink(t *testing.T) {
 
 func TestPostMessage(t *testing.T) {
 	type messageTest struct {
+		endpoint string
 		opt      []MsgOption
 		expected url.Values
 	}
@@ -82,6 +83,7 @@ func TestPostMessage(t *testing.T) {
 
 	tests := map[string]messageTest{
 		"Blocks": {
+			endpoint: "/chat.postMessage",
 			opt: []MsgOption{
 				MsgOptionBlocks(blocks...),
 				MsgOptionText("text", false),
@@ -94,6 +96,7 @@ func TestPostMessage(t *testing.T) {
 			},
 		},
 		"Attachment": {
+			endpoint: "/chat.postMessage",
 			opt: []MsgOption{
 				MsgOptionAttachments(
 					Attachment{
@@ -106,6 +109,30 @@ func TestPostMessage(t *testing.T) {
 				"token":       []string{"testing-token"},
 			},
 		},
+		"Unfurl": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurl("123", map[string]Attachment{"something": {Text: "attachment-test"}}),
+			},
+			expected: url.Values{
+				"channel": []string{"CXXX"},
+				"token":   []string{"testing-token"},
+				"ts":      []string{"123"},
+				"unfurls": []string{`{"something":{"text":"attachment-test","blocks":null}}`},
+			},
+		},
+		"UnfurlAuthURL": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlAuthURL("123", "https://auth-url.com"),
+			},
+			expected: url.Values{
+				"channel":       []string{"CXXX"},
+				"token":         []string{"testing-token"},
+				"ts":            []string{"123"},
+				"user_auth_url": []string{"https://auth-url.com"},
+			},
+		},
 	}
 
 	once.Do(startServer)
@@ -114,7 +141,7 @@ func TestPostMessage(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			http.DefaultServeMux = new(http.ServeMux)
-			http.HandleFunc("/chat.postMessage", func(rw http.ResponseWriter, r *http.Request) {
+			http.HandleFunc(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
 				body, err := ioutil.ReadAll(r.Body)
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
