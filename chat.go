@@ -192,11 +192,19 @@ func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string
 }
 
 // UnfurlMessageWithAuthURL sends an unfurl request containing an
-// authentication url.
-// For mor detail, see:
+// authentication URL.
+// For more details see:
 // https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
 func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
-	return api.SendMessageContext(context.Background(), channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
+	return api.UnfurlMessageWithAuthURLContext(context.Background(), channelID, timestamp, userAuthURL, options...)
+}
+
+// UnfurlMessageWithAuthURLContext sends an unfurl request containing an
+// authentication URL.
+// For more details see:
+// https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
+func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
 }
 
 // SendMessage more flexible method for configuring messages.
