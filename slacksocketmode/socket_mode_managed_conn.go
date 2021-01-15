@@ -325,18 +325,13 @@ func (rtm *SocketModeClient) sendOutgoingMessage(msg slack.OutgoingMessage) {
 	}
 }
 
-// ping sends a 'PING' message to the RTM's websocket. If the 'PING' message
-// fails to send then this returns an error signifying that the connection
-// should be considered disconnected.
-//
-// This does not handle incoming 'PONG' responses but does store the time of
-// each successful 'PING' send so latency can be detected upon a 'PONG'
-// response.
+// ack tells Slack that the we have received the SocketModeRequest denoted by the envelope ID,
+// by sending back the envelope ID over the WebSocket connection.
 func (rtm *SocketModeClient) ack(envelopeID string) error {
 	rtm.Debugln("Sending ACK ", envelopeID)
 
 	// See https://github.com/slackapi/node-slack-sdk/blob/c3f4d7109062a0356fb765d53794b7b5f6b3b5ae/packages/socket-mode/src/SocketModeClient.ts#L417
-	msg := map[string]interface{}{"envelope_id": envelopeID,}
+	msg := map[string]interface{}{"envelope_id": envelopeID}
 
 	if err := rtm.sendWithDeadline(msg); err != nil {
 		rtm.Debugf("RTM Error sending 'ACK %s': %s", envelopeID, err.Error())
