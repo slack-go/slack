@@ -84,8 +84,6 @@ func (rtm *SocketModeClient) ManageConnection() {
 // connect attempts to connect to the slack websocket API. It handles any
 // errors that occur while connecting and will return once a connection
 // has been successfully opened.
-// If useRTMStart is false then it uses rtm.connect to create the connection,
-// otherwise it uses rtm.start.
 func (rtm *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConnection, *websocket.Conn, error) {
 	const (
 		errInvalidAuth      = "invalid_auth"
