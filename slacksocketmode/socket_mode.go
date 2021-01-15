@@ -12,53 +12,58 @@ import (
 
 const (
 	socketModeEventTypeHello      = "hello"
+
+	websocketDefaultTimeout = 10 * time.Second
+	defaultMaxPingInterval  = 30 * time.Second
 )
 
-// StartSocketMode calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
+// Open calls the "apps.connection.open" endpoint and returns the provided URL and the full Info block.
 //
-// To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
-func (smc *SocketModeClient) StartSocketMode() (info *slack.SocketModeConnection, websocketURL string, err error) {
+// To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
+func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), slack.websocketDefaultTimeout)
 	defer cancel()
 
 	return smc.StartSocketModeContext(ctx)
 }
 
-// SocketModeOption options for the managed SocketModeClient.
-type SocketModeOption func(client *SocketModeClient)
+// Option options for the managed Client.
+type Option func(client *Client)
 
-// SocketModeOptionDialer takes a gorilla websocket Dialer and uses it as the
+// OptionDialer takes a gorilla websocket Dialer and uses it as the
 // Dialer when opening the websocket for the RTM connection.
-func SocketModeOptionDialer(d *websocket.Dialer) SocketModeOption {
-	return func(rtm *SocketModeClient) {
-		rtm.dialer = d
+func OptionDialer(d *websocket.Dialer) Option {
+	return func(smc *Client) {
+		smc.dialer = d
 	}
 }
 
-// SocketModeOptionPingInterval determines how often to deliver a ping message to slack.
-func SocketModeOptionPingInterval(d time.Duration) SocketModeOption {
-	return func(rtm *SocketModeClient) {
+// OptionPingInterval determines how often we expect Slack to deliver WebSocket ping to us.
+// If no ping is delivered to us within this interval after the last ping, we assumes the WebSocket connection
+// is dead and needs to be reconnected.
+func OptionPingInterval(d time.Duration) Option {
+	return func(rtm *Client) {
 		rtm.pingInterval = d
 		rtm.resetDeadman()
 	}
 }
 
-// SocketModeOptionConnParams installs parameters to embed into the connection URL.
-func SocketModeOptionConnParams(connParams url.Values) SocketModeOption {
-	return func(rtm *SocketModeClient) {
-		rtm.connParams = connParams
+// OptionConnParams installs parameters to embed into the connection URL.
+func OptionConnParams(connParams url.Values) Option {
+	return func(smc *Client) {
+		smc.connParams = connParams
 	}
 }
 
 // NewRTM returns a RTM, which provides a fully managed connection to
 // Slack's websocket-based Real-Time Messaging protocol.
-func NewSocketModeClient(api *slack.Client, options ...SocketModeOption) *SocketModeClient {
-	result := &SocketModeClient{
+func New(api *slack.Client, options ...Option) *Client {
+	result := &Client{
 		Client:           *api,
 		IncomingEvents:   make(chan SocketModeEvent, 50),
 		outgoingMessages: make(chan slack.OutgoingMessage, 20),
-		pingInterval:     slack.defaultPingInterval,
-		pingDeadman:      time.NewTimer(slack.deadmanDuration(slack.defaultPingInterval)),
+		pingInterval:     defaultMaxPingInterval,
+		pingDeadman:      time.NewTimer(slack.deadmanDuration(defaultMaxPingInterval)),
 		killChannel:      make(chan bool),
 		disconnected:     make(chan struct{}),
 		disconnectedm:    &sync.Once{},

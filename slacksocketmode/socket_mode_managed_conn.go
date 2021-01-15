@@ -17,7 +17,7 @@ import (
 	"github.com/slack-go/slack/internal/timex"
 )
 
-// ManageConnection can be called on a Slack RTM instance returned by the
+// Run can be called on a Slack RTM instance returned by the
 // NewRTM method. It will connect to the slack RTM API and handle all incoming
 // and outgoing events. If a connection fails then it will attempt to reconnect
 // and will notify any listeners through an error event on the IncomingEvents
@@ -30,7 +30,7 @@ import (
 // behavior.
 //
 // The defined error events are located in websocket_internals.go.
-func (smc *SocketModeClient) ManageConnection() {
+func (smc *Client) Run() {
 	var (
 		err  error
 		info *slack.SocketModeConnection
@@ -84,7 +84,7 @@ func (smc *SocketModeClient) ManageConnection() {
 // connect attempts to connect to the slack websocket API. It handles any
 // errors that occur while connecting and will return once a connection
 // has been successfully opened.
-func (smc *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConnection, *websocket.Conn, error) {
+func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *websocket.Conn, error) {
 	const (
 		errInvalidAuth      = "invalid_auth"
 		errInactiveAccount  = "account_inactive"
@@ -109,7 +109,7 @@ func (smc *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConn
 		})
 
 		// attempt to start the connection
-		info, conn, err := smc.startSocketModeAndDial()
+		info, conn, err := smc.openAndDial()
 		if err == nil {
 			return info, conn, nil
 		}
@@ -162,16 +162,16 @@ func (smc *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConn
 	}
 }
 
-// startSocketModeAndDial attempts to connect to the slack websocket.
+// openAndDial attempts to open a Socket Mode connection and dial to the connection endpoint using WebSocket.
 // It returns the  full information returned by the "apps.connections.open" method on the
-// slack API.
-func (smc *SocketModeClient) startSocketModeAndDial() (info *slack.SocketModeConnection, _ *websocket.Conn, err error) {
+// Slack API.
+func (smc *Client) openAndDial() (info *slack.SocketModeConnection, _ *websocket.Conn, err error) {
 	var (
 		url string
 	)
 
 	smc.Debugf("Starting SocketMode")
-	info, url, err = smc.StartSocketMode()
+	info, url, err = smc.Open()
 
 	if err != nil {
 		smc.Debugf("Failed to start or connect with SocketMode: %s", err)
@@ -220,7 +220,7 @@ func (smc *SocketModeClient) startSocketModeAndDial() (info *slack.SocketModeCon
 //
 // This should not be called directly! Instead a boolean value (true for
 // intentional, false otherwise) should be sent to the killChannel on the RTM.
-func (smc *SocketModeClient) killConnection(intentional bool, cause error) (err error) {
+func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 	smc.Debugln("killing connection", cause)
 
 	if smc.conn != nil {
@@ -241,7 +241,7 @@ func (smc *SocketModeClient) killConnection(intentional bool, cause error) (err 
 // interval. This also sends outgoing messages that are received from the RTM's
 // outgoingMessages channel. This also handles incoming raw events from the RTM
 // rawEvents channel.
-func (smc *SocketModeClient) handleEvents(events chan json.RawMessage) {
+func (smc *Client) handleEvents(events chan json.RawMessage) {
 	ticker := time.NewTicker(smc.pingInterval)
 	defer ticker.Stop()
 	for {
@@ -269,7 +269,7 @@ func (smc *SocketModeClient) handleEvents(events chan json.RawMessage) {
 //
 // This will stop executing once the RTM's when a fatal error is detected, or
 // a disconnect occurs.
-func (smc *SocketModeClient) handleIncomingEvents(events chan json.RawMessage) {
+func (smc *Client) handleIncomingEvents(events chan json.RawMessage) {
 	for {
 		if err := smc.receiveIncomingEvent(events); err != nil {
 			select {
@@ -281,7 +281,7 @@ func (smc *SocketModeClient) handleIncomingEvents(events chan json.RawMessage) {
 	}
 }
 
-func (smc *SocketModeClient) sendWithDeadline(msg interface{}) error {
+func (smc *Client) sendWithDeadline(msg interface{}) error {
 	// set a write deadline on the connection
 	if err := smc.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return err
@@ -293,11 +293,11 @@ func (smc *SocketModeClient) sendWithDeadline(msg interface{}) error {
 	return smc.conn.SetWriteDeadline(time.Time{})
 }
 
-func (smc *SocketModeClient) internalEvent(tpe string, data interface{}) SocketModeEvent {
+func (smc *Client) internalEvent(tpe string, data interface{}) SocketModeEvent {
 	return SocketModeEvent{Type: tpe, Data: data}
 }
 
-func (smc *SocketModeClient) externalEvent(tpe string, data interface{}) SocketModeEvent {
+func (smc *Client) externalEvent(tpe string, data interface{}) SocketModeEvent {
 	return SocketModeEvent{Type: tpe, Data: data}
 }
 
@@ -305,7 +305,7 @@ func (smc *SocketModeClient) externalEvent(tpe string, data interface{}) SocketM
 //
 // It does not currently detect if a outgoing message fails due to a disconnect
 // and instead lets a future failed 'PING' detect the failed connection.
-func (smc *SocketModeClient) sendOutgoingMessage(msg slack.OutgoingMessage) {
+func (smc *Client) sendOutgoingMessage(msg slack.OutgoingMessage) {
 	smc.Debugln("Sending message:", msg)
 	if len([]rune(msg.Text)) > slack.MaxMessageTextLength {
 		smc.IncomingEvents <- smc.internalEvent("outgoing_error", &slack.MessageTooLongEvent{
@@ -325,7 +325,7 @@ func (smc *SocketModeClient) sendOutgoingMessage(msg slack.OutgoingMessage) {
 
 // ack tells Slack that the we have received the SocketModeRequest denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
-func (smc *SocketModeClient) ack(envelopeID string) error {
+func (smc *Client) ack(envelopeID string) error {
 	smc.Debugln("Sending ACK ", envelopeID)
 
 	// See https://github.com/slackapi/node-slack-sdk/blob/c3f4d7109062a0356fb765d53794b7b5f6b3b5ae/packages/socket-mode/src/SocketModeClient.ts#L417
@@ -341,7 +341,7 @@ func (smc *SocketModeClient) ack(envelopeID string) error {
 // receiveIncomingEvent attempts to receive an event from the RTM's websocket.
 // This will block until a frame is available from the websocket.
 // If the read from the websocket results in a fatal error, this function will return non-nil.
-func (smc *SocketModeClient) receiveIncomingEvent(events chan json.RawMessage) error {
+func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 	event := json.RawMessage{}
 	err := smc.conn.ReadJSON(&event)
 
@@ -384,7 +384,7 @@ func (smc *SocketModeClient) receiveIncomingEvent(events chan json.RawMessage) e
 // handleRawEvent takes a raw JSON message received from the slack websocket
 // and handles the encoded event.
 // returns the event type of the message.
-func (smc *SocketModeClient) handleRawEvent(rawEvent json.RawMessage) string {
+func (smc *Client) handleRawEvent(rawEvent json.RawMessage) string {
 	event := &SocketModeMessage{}
 	err := json.Unmarshal(rawEvent, event)
 	if err != nil {
@@ -409,7 +409,7 @@ func (smc *SocketModeClient) handleRawEvent(rawEvent json.RawMessage) string {
 }
 
 // handleAck handles an incoming 'ACK' message.
-func (smc *SocketModeClient) handleAck(event json.RawMessage) {
+func (smc *Client) handleAck(event json.RawMessage) {
 	ack := &slack.AckMessage{}
 	if err := json.Unmarshal(event, ack); err != nil {
 		smc.Debugln("RTM Error unmarshalling 'ack' event:", err)
@@ -435,7 +435,7 @@ func (smc *SocketModeClient) handleAck(event json.RawMessage) {
 // handlePing handles an incoming 'PONG' message which should be in response to
 // a previously sent 'PING' message. This is then used to compute the
 // connection's latency.
-func (smc *SocketModeClient) handlePing(event json.RawMessage) {
+func (smc *Client) handlePing(event json.RawMessage) {
 	smc.resetDeadman()
 
 	p := map[string]interface{}{}
@@ -451,7 +451,7 @@ func (smc *SocketModeClient) handlePing(event json.RawMessage) {
 	//smc.IncomingEvents <- smc.internalEvent("latency_report", &LatencyReport{Value: latency})
 }
 
-func (smc *SocketModeClient) handleClose(code int, text string) {
+func (smc *Client) handleClose(code int, text string) {
 	smc.killConnection(code == 200, errors.New(text))
 }
 
@@ -461,7 +461,7 @@ func (smc *SocketModeClient) handleClose(code int, text string) {
 // If the event type is not found or the event cannot be unmarshalled into the
 // correct struct then this sends an UnmarshallingErrorEvent to the
 // IncomingEvents channel.
-func (smc *SocketModeClient) handleEventsAPIEvent(event json.RawMessage) {
+func (smc *Client) handleEventsAPIEvent(event json.RawMessage) {
 	eventsAPIEvent, err := slackevents.ParseEvent(event, slackevents.OptionNoVerifyToken())
 	if err != nil {
 		return

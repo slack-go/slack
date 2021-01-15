@@ -45,30 +45,33 @@ func main() {
 		slack.OptionAppLevelToken(appToken),
 	)
 
-	client := slacksocketmode.NewSocketModeClient(appAPI)
-	go client.ManageConnection()
+	client := slacksocketmode.New(appAPI)
 
-	for evt := range client.IncomingEvents {
-		eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
-		if !ok {
-			fmt.Printf("Ignored %v\n")
+	go func() {
+		for evt := range client.IncomingEvents {
+			eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+			if !ok {
+				fmt.Printf("Ignored %v\n")
 
-			continue
-		}
-
-		fmt.Printf("Event Received: %+v", eventsAPIEvent)
-
-		switch evt.Type {
-		case slackevents.CallbackEvent:
-			innerEvent := eventsAPIEvent.InnerEvent
-			switch ev := innerEvent.Data.(type) {
-			case *slackevents.AppMentionEvent:
-				botAPI.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+				continue
 			}
-		case slackevents.MemberJoinedChannel:
-			ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
 
-			fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
+			fmt.Printf("Event Received: %+v", eventsAPIEvent)
+
+			switch evt.Type {
+			case slackevents.CallbackEvent:
+				innerEvent := eventsAPIEvent.InnerEvent
+				switch ev := innerEvent.Data.(type) {
+				case *slackevents.AppMentionEvent:
+					botAPI.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+				}
+			case slackevents.MemberJoinedChannel:
+				ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
+
+				fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
+			}
 		}
-	}
+	}()
+
+	client.Run()
 }

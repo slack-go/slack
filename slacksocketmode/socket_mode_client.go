@@ -27,7 +27,7 @@ type SocketModeMessagePayload struct {
 	Event json.RawMessage `json:"´event"`
 }
 
-// SocketModeEvent is the event sent to the consumer of SocketModeClient
+// SocketModeEvent is the event sent to the consumer of Client
 type SocketModeEvent struct {
 	Type string
 	Data interface{}
@@ -37,7 +37,7 @@ type SocketModeEvent struct {
 	Message *SocketModeMessage
 }
 
-// SocketModeClient allows allows programs to communicate with the
+// Client allows allows programs to communicate with the
 // [Events API](https://api.slack.com/events-api) over WebSocket.
 //
 // The implementation is highly inspired by https://www.npmjs.com/package/@slack/socket-mode,
@@ -45,8 +45,8 @@ type SocketModeEvent struct {
 // within the library.
 //
 // You can instantiate the socket mode client with
-// Client's NewSocketModeClient() or NewSocketModeClientWithOptions(*SocketModeClientOptions)
-type SocketModeClient struct {
+// Client's New() or NewSocketModeClientWithOptions(*SocketModeClientOptions)
+type Client struct {
 	// Client is the main API, embedded
 	slack.Client
 
@@ -78,14 +78,14 @@ type SocketModeClient struct {
 
 // signal that we are disconnected by closing the channel.
 // protect it with a mutex to ensure it only happens once.
-func (smc *SocketModeClient) disconnect() {
+func (smc *Client) disconnect() {
 	smc.disconnectedm.Do(func() {
 		close(smc.disconnected)
 	})
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
-func (smc *SocketModeClient) Disconnect() error {
+func (smc *Client) Disconnect() error {
 	// always push into the kill channel when invoked,
 	// this lets the ManagedConnection() function properly clean up.
 	// if the buffer is full then just continue on.
@@ -100,10 +100,10 @@ func (smc *SocketModeClient) Disconnect() error {
 // GetInfo returns the info structure received when calling
 // "startrtm", holding metadata needed to implement a full
 // chat client. It will be non-nil after a call to StartRTM().
-func (smc *SocketModeClient) GetInfo() *slack.SocketModeConnection {
+func (smc *Client) GetInfo() *slack.SocketModeConnection {
 	return smc.info
 }
 
-func (smc *SocketModeClient) resetDeadman() {
+func (smc *Client) resetDeadman() {
 	smc.pingDeadman.Reset(slack.deadmanDuration(smc.pingInterval))
 }
