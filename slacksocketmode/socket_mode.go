@@ -17,11 +17,11 @@ const (
 // StartSocketMode calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
-func (rtm *SocketModeClient) StartSocketMode() (info *slack.SocketModeConnection, websocketURL string, err error) {
+func (smc *SocketModeClient) StartSocketMode() (info *slack.SocketModeConnection, websocketURL string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), slack.websocketDefaultTimeout)
 	defer cancel()
 
-	return rtm.StartSocketModeContext(ctx)
+	return smc.StartSocketModeContext(ctx)
 }
 
 // SocketModeOption options for the managed SocketModeClient.

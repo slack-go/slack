@@ -78,21 +78,21 @@ type SocketModeClient struct {
 
 // signal that we are disconnected by closing the channel.
 // protect it with a mutex to ensure it only happens once.
-func (c *SocketModeClient) disconnect() {
-	c.disconnectedm.Do(func() {
-		close(c.disconnected)
+func (smc *SocketModeClient) disconnect() {
+	smc.disconnectedm.Do(func() {
+		close(smc.disconnected)
 	})
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
-func (c *SocketModeClient) Disconnect() error {
+func (smc *SocketModeClient) Disconnect() error {
 	// always push into the kill channel when invoked,
 	// this lets the ManagedConnection() function properly clean up.
 	// if the buffer is full then just continue on.
 	select {
-	case c.killChannel <- true:
+	case smc.killChannel <- true:
 		return nil
-	case <-c.disconnected:
+	case <-smc.disconnected:
 		return slack.ErrAlreadyDisconnected
 	}
 }
@@ -100,10 +100,10 @@ func (c *SocketModeClient) Disconnect() error {
 // GetInfo returns the info structure received when calling
 // "startrtm", holding metadata needed to implement a full
 // chat client. It will be non-nil after a call to StartRTM().
-func (c *SocketModeClient) GetInfo() *slack.SocketModeConnection {
-	return c.info
+func (smc *SocketModeClient) GetInfo() *slack.SocketModeConnection {
+	return smc.info
 }
 
-func (c *SocketModeClient) resetDeadman() {
-	c.pingDeadman.Reset(slack.deadmanDuration(c.pingInterval))
+func (smc *SocketModeClient) resetDeadman() {
+	smc.pingDeadman.Reset(slack.deadmanDuration(smc.pingInterval))
 }
