@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/internal/backoff"
 	"github.com/slack-go/slack/slackevents"
 	"io"
 	"net/http"
@@ -94,7 +95,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConn
 
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
-	boff := &slack.backoff{
+	boff := &backoff.Backoff{
 		Max: 5 * time.Minute,
 	}
 
@@ -105,7 +106,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConn
 
 		// send connecting event
 		rtm.IncomingEvents <- rtm.internalEvent("connecting", &slack.ConnectingEvent{
-			Attempt:         boff.attempts + 1,
+			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
 		})
 
@@ -139,13 +140,13 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConn
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
 		rtm.IncomingEvents <- rtm.internalEvent("connection_error", &slack.ConnectionErrorEvent{
-			Attempt:  boff.attempts,
+			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
 		})
 
 		// get time we should wait before attempting to connect again
-		rtm.Debugf("reconnection %d failed: %s reconnecting in %v\n", boff.attempts, err, backoff)
+		rtm.Debugf("reconnection %d failed: %s reconnecting in %v\n", boff.Attempts(), err, backoff)
 
 		// wait for one of the following to occur,
 		// backoff duration has elapsed, killChannel is signalled, or

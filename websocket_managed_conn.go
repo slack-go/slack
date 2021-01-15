@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/slack-go/slack/internal/backoff"
 	"io"
 	"net/http"
 	stdurl "net/url"
@@ -92,7 +93,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
-	boff := &backoff{
+	boff := &backoff.Backoff{
 		Max: 5 * time.Minute,
 	}
 
