@@ -1,7 +1,8 @@
-package slack
+package slacksocketmode
 
 import (
 	"encoding/json"
+	"github.com/slack-go/slack"
 	"net/url"
 	"sync"
 	"time"
@@ -11,14 +12,7 @@ import (
 
 type SocketModeConnectedEvent struct {
 	ConnectionCount int // 1 = first time, 2 = second time
-	Info            *SocketModeConnection
-}
-
-// SocketModeConnection contains various details about the SocketMode connection.
-// It is returned by an "apps.connections.open" API call.
-type SocketModeConnection struct {
-	URL  string                 `json:"url,omitempty"`
-	Data map[string]interface{} `json:"-"`
+	Info            *slack.SocketModeConnection
 }
 
 // SocketModeMessage maps to each message received via the WebSocket connection of SocketMode
@@ -54,16 +48,16 @@ type SocketModeEvent struct {
 // Client's NewSocketModeClient() or NewSocketModeClientWithOptions(*SocketModeClientOptions)
 type SocketModeClient struct {
 	// Client is the main API, embedded
-	Client
+	slack.Client
 
-	idGen        IDGenerator
+	idGen        slack.IDGenerator
 	pingInterval time.Duration
 	pingDeadman  *time.Timer
 
 	// Connection life-cycle
 	conn             *websocket.Conn
 	IncomingEvents   chan SocketModeEvent
-	outgoingMessages chan OutgoingMessage
+	outgoingMessages chan slack.OutgoingMessage
 	killChannel      chan bool
 	disconnected     chan struct{}
 	disconnectedm    *sync.Once
@@ -99,17 +93,17 @@ func (c *SocketModeClient) Disconnect() error {
 	case c.killChannel <- true:
 		return nil
 	case <-c.disconnected:
-		return ErrAlreadyDisconnected
+		return slack.ErrAlreadyDisconnected
 	}
 }
 
 // GetInfo returns the info structure received when calling
 // "startrtm", holding metadata needed to implement a full
 // chat client. It will be non-nil after a call to StartRTM().
-func (c *SocketModeClient) GetInfo() *SocketModeConnection {
+func (c *SocketModeClient) GetInfo() *slack.SocketModeConnection {
 	return c.info
 }
 
 func (c *SocketModeClient) resetDeadman() {
-	c.pingDeadman.Reset(deadmanDuration(c.pingInterval))
+	c.pingDeadman.Reset(slack.deadmanDuration(c.pingInterval))
 }

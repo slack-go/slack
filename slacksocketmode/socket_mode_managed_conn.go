@@ -1,9 +1,10 @@
-package slack
+package slacksocketmode
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"io"
 	"net/http"
@@ -31,7 +32,7 @@ import (
 func (rtm *SocketModeClient) ManageConnection() {
 	var (
 		err  error
-		info *SocketModeConnection
+		info *slack.SocketModeConnection
 		conn *websocket.Conn
 	)
 
@@ -84,7 +85,7 @@ func (rtm *SocketModeClient) ManageConnection() {
 // has been successfully opened.
 // If useRTMStart is false then it uses rtm.connect to create the connection,
 // otherwise it uses rtm.start.
-func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection, *websocket.Conn, error) {
+func (rtm *SocketModeClient) connect(connectionCount int) (*slack.SocketModeConnection, *websocket.Conn, error) {
 	const (
 		errInvalidAuth      = "invalid_auth"
 		errInactiveAccount  = "account_inactive"
@@ -93,7 +94,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 
 	// used to provide exponential backoff wait time with jitter before trying
 	// to connect to slack again
-	boff := &backoff{
+	boff := &slack.backoff{
 		Max: 5 * time.Minute,
 	}
 
@@ -103,7 +104,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 		)
 
 		// send connecting event
-		rtm.IncomingEvents <- rtm.internalEvent("connecting", &ConnectingEvent{
+		rtm.IncomingEvents <- rtm.internalEvent("connecting", &slack.ConnectingEvent{
 			Attempt:         boff.attempts + 1,
 			ConnectionCount: connectionCount,
 		})
@@ -123,13 +124,13 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 		}
 
 		switch actual := err.(type) {
-		case statusCodeError:
+		case slack.statusCodeError:
 			if actual.Code == http.StatusNotFound {
 				rtm.Debugf("invalid auth when connecting with RTM: %s", err)
-				rtm.IncomingEvents <- rtm.internalEvent("invalid_auth", &InvalidAuthEvent{})
+				rtm.IncomingEvents <- rtm.internalEvent("invalid_auth", &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
-		case *RateLimitedError:
+		case *slack.RateLimitedError:
 			backoff = actual.RetryAfter
 		default:
 		}
@@ -137,7 +138,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
-		rtm.IncomingEvents <- rtm.internalEvent("connection_error", &ConnectionErrorEvent{
+		rtm.IncomingEvents <- rtm.internalEvent("connection_error", &slack.ConnectionErrorEvent{
 			Attempt:  boff.attempts,
 			Backoff:  backoff,
 			ErrorObj: err,
@@ -153,11 +154,11 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 		case <-time.After(backoff): // retry after the backoff.
 		case intentional := <-rtm.killChannel:
 			if intentional {
-				rtm.killConnection(intentional, ErrRTMDisconnected)
-				return nil, nil, ErrRTMDisconnected
+				rtm.killConnection(intentional, slack.ErrRTMDisconnected)
+				return nil, nil, slack.ErrRTMDisconnected
 			}
 		case <-rtm.disconnected:
-			return nil, nil, ErrRTMDisconnected
+			return nil, nil, slack.ErrRTMDisconnected
 		}
 	}
 }
@@ -165,7 +166,7 @@ func (rtm *SocketModeClient) connect(connectionCount int) (*SocketModeConnection
 // startSocketModeAndDial attempts to connect to the slack websocket.
 // It returns the  full information returned by the "apps.connections.open" method on the
 // slack API.
-func (rtm *SocketModeClient) startSocketModeAndDial() (info *SocketModeConnection, _ *websocket.Conn, err error) {
+func (rtm *SocketModeClient) startSocketModeAndDial() (info *slack.SocketModeConnection, _ *websocket.Conn, err error) {
 	var (
 		url string
 	)
@@ -227,7 +228,7 @@ func (rtm *SocketModeClient) killConnection(intentional bool, cause error) (err 
 		err = rtm.conn.Close()
 	}
 
-	rtm.IncomingEvents <- rtm.internalEvent("disconnected", &DisconnectedEvent{Intentional: intentional, Cause: cause})
+	rtm.IncomingEvents <- rtm.internalEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
 
 	if intentional {
 		rtm.disconnect()
@@ -252,7 +253,7 @@ func (rtm *SocketModeClient) handleEvents(events chan json.RawMessage) {
 			return
 		// detect when the connection is dead.
 		case <-rtm.pingDeadman.C:
-			_ = rtm.killConnection(false, ErrRTMDeadman)
+			_ = rtm.killConnection(false, slack.ErrRTMDeadman)
 			return
 		// listen for messages that need to be sent
 		case msg := <-rtm.outgoingMessages:
@@ -305,18 +306,18 @@ func (rtm *SocketModeClient) externalEvent(tpe string, data interface{}) SocketM
 //
 // It does not currently detect if a outgoing message fails due to a disconnect
 // and instead lets a future failed 'PING' detect the failed connection.
-func (rtm *SocketModeClient) sendOutgoingMessage(msg OutgoingMessage) {
+func (rtm *SocketModeClient) sendOutgoingMessage(msg slack.OutgoingMessage) {
 	rtm.Debugln("Sending message:", msg)
-	if len([]rune(msg.Text)) > MaxMessageTextLength {
-		rtm.IncomingEvents <- rtm.internalEvent("outgoing_error", &MessageTooLongEvent{
+	if len([]rune(msg.Text)) > slack.MaxMessageTextLength {
+		rtm.IncomingEvents <- rtm.internalEvent("outgoing_error", &slack.MessageTooLongEvent{
 			Message:   msg,
-			MaxLength: MaxMessageTextLength,
+			MaxLength: slack.MaxMessageTextLength,
 		})
 		return
 	}
 
 	if err := rtm.sendWithDeadline(msg); err != nil {
-		rtm.IncomingEvents <- rtm.internalEvent("outgoing_error", &OutgoingErrorEvent{
+		rtm.IncomingEvents <- rtm.internalEvent("outgoing_error", &slack.OutgoingErrorEvent{
 			Message:  msg,
 			ErrorObj: err,
 		})
@@ -367,7 +368,7 @@ func (rtm *SocketModeClient) receiveIncomingEvent(events chan json.RawMessage) e
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		rtm.IncomingEvents <- rtm.internalEvent("incoming_error", &IncomingEventError{
+		rtm.IncomingEvents <- rtm.internalEvent("incoming_error", &slack.IncomingEventError{
 			ErrorObj: err,
 		})
 
@@ -393,7 +394,7 @@ func (rtm *SocketModeClient) handleRawEvent(rawEvent json.RawMessage) string {
 	event := &SocketModeMessage{}
 	err := json.Unmarshal(rawEvent, event)
 	if err != nil {
-		rtm.IncomingEvents <- rtm.internalEvent("unmarshalling_error", &UnmarshallingErrorEvent{err})
+		rtm.IncomingEvents <- rtm.internalEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
 		return ""
 	}
 
@@ -401,7 +402,7 @@ func (rtm *SocketModeClient) handleRawEvent(rawEvent json.RawMessage) string {
 	// for all the available event types.
 	switch event.Type {
 	case socketModeEventTypeHello:
-		rtm.IncomingEvents <- rtm.externalEvent("hello", &HelloEvent{})
+		rtm.IncomingEvents <- rtm.externalEvent("hello", &slack.HelloEvent{})
 	default:
 		rtm.handleEventsAPIEvent(event.Payload.Event)
 	}
@@ -415,7 +416,7 @@ func (rtm *SocketModeClient) handleRawEvent(rawEvent json.RawMessage) string {
 
 // handleAck handles an incoming 'ACK' message.
 func (rtm *SocketModeClient) handleAck(event json.RawMessage) {
-	ack := &AckMessage{}
+	ack := &slack.AckMessage{}
 	if err := json.Unmarshal(event, ack); err != nil {
 		rtm.Debugln("RTM Error unmarshalling 'ack' event:", err)
 		rtm.Debugln(" -> Erroneous 'ack' event:", string(event))
@@ -428,12 +429,12 @@ func (rtm *SocketModeClient) handleAck(event json.RawMessage) {
 		// As there is no documentation for RTM error-codes, this
 		// identification of a rate-limit warning is very brittle.
 		if ack.RTMResponse.Error.Code == -1 && ack.RTMResponse.Error.Msg == "slow down, too many messages..." {
-			rtm.IncomingEvents <- rtm.internalEvent("ack_error", &RateLimitEvent{})
+			rtm.IncomingEvents <- rtm.internalEvent("ack_error", &slack.RateLimitEvent{})
 		} else {
-			rtm.IncomingEvents <- rtm.internalEvent("ack_error", &AckErrorEvent{ack.Error})
+			rtm.IncomingEvents <- rtm.internalEvent("ack_error", &slack.AckErrorEvent{ack.Error})
 		}
 	} else {
-		rtm.IncomingEvents <- rtm.internalEvent("ack_error", &AckErrorEvent{fmt.Errorf("ack decode failure")})
+		rtm.IncomingEvents <- rtm.internalEvent("ack_error", &slack.AckErrorEvent{fmt.Errorf("ack decode failure")})
 	}
 }
 
