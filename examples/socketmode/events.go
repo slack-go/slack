@@ -4,22 +4,47 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
-// You more than likely want your "Bot User OAuth Access Token" which starts with "xoxb-"
-var api = slack.New("TOKEN")
-
 func main() {
-	api := slack.New(
-		"YOUR TOKEN HERE",
+	appToken := os.Getenv("SLACK_APP_TOKEN")
+	if appToken == "" {
+
+	}
+
+	if !strings.HasPrefix(appToken, "xapp-") {
+		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must have the prefix \"xapp-\".")
+	}
+
+	botToken := os.Getenv("SLACK_BOT_TOKEN")
+	if botToken == "" {
+		fmt.Fprintf(os.Stderr, "SLACK_BOT_TOKEN must be set.\n")
+		os.Exit(1)
+	}
+
+	if !strings.HasPrefix(botToken, "xoxb-") {
+		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must have the prefix \"xoxb-\".")
+	}
+
+	botAPI := slack.New(
+		botToken,
 		slack.OptionDebug(true),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
+		slack.OptionAppLevelToken(appToken),
 	)
 
-	client := api.NewSocketModeClient()
+	appAPI := slack.New(
+		appToken,
+		slack.OptionDebug(true),
+		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
+		slack.OptionAppLevelToken(appToken),
+	)
+
+	client := slack.NewSocketModeClient(appAPI)
 	go client.ManageConnection()
 
 	for evt := range client.IncomingEvents {
@@ -37,7 +62,7 @@ func main() {
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch ev := innerEvent.Data.(type) {
 			case *slackevents.AppMentionEvent:
-				api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+				botAPI.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
 			}
 		case slackevents.MemberJoinedChannel:
 			ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)

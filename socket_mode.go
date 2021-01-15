@@ -70,7 +70,7 @@ func SocketModeOptionConnParams(connParams url.Values) SocketModeOption {
 
 // NewRTM returns a RTM, which provides a fully managed connection to
 // Slack's websocket-based Real-Time Messaging protocol.
-func (api *Client) NewSocketModeClient(options ...SocketModeOption) *SocketModeClient {
+func NewSocketModeClient(api *Client, options ...SocketModeOption) *SocketModeClient {
 	result := &SocketModeClient{
 		Client:           *api,
 		IncomingEvents:   make(chan SocketModeEvent, 50),
