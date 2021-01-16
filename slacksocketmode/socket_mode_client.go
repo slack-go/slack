@@ -15,8 +15,17 @@ type SocketModeConnectedEvent struct {
 	Info            *slack.SocketModeConnection
 }
 
-// Message maps to each message received via the WebSocket connection of SocketMode
-type Message struct {
+// Request maps to the content of each WebSocket message received via a Socket Mode WebSocket connection
+//
+// We call this a "request" rather than e.g. a WebSocket message or an Socket Mode "event" following python-slack-sdk:
+//
+//   https://github.com/slackapi/python-slack-sdk/blob/3f1c4c6e27bf7ee8af57699b2543e6eb7848bcf9/slack_sdk/socket_mode/request.py#L6
+//
+// We know that node-slack-sdk calls it an "event", that makes it hard for us to distinguish our client's own event
+// that wraps both internal events and Socket Mode "events", vs node-slack-sdk's is for the latter only.
+//
+// https://github.com/slackapi/node-slack-sdk/blob/main/packages/socket-mode/src/SocketModeClient.ts#L537
+type Request struct {
 	Type string `json:"type"`
 
 	// `hello` type only
@@ -56,14 +65,14 @@ type SocketModeMessagePayload struct {
 	Event json.RawMessage `json:"´event"`
 }
 
-// SocketModeEvent is the event sent to the consumer of Client
-type SocketModeEvent struct {
+// ClientEvent is the event sent to the consumer of Client
+type ClientEvent struct {
 	Type string
 	Data interface{}
 
-	// Message is the json-decoded raw WebSocket message that is received over the Slack SocketMode
+	// Request is the json-decoded raw WebSocket message that is received via the Slack Socket Mode
 	// WebSocket connection.
-	Message *Message
+	Request *Request
 }
 
 // Client allows allows programs to communicate with the
@@ -85,7 +94,7 @@ type Client struct {
 
 	// Connection life-cycle
 	conn             *websocket.Conn
-	IncomingEvents   chan SocketModeEvent
+	IncomingEvents   chan ClientEvent
 	outgoingMessages chan slack.OutgoingMessage
 	killChannel      chan bool
 	disconnected     chan struct{}

@@ -49,7 +49,7 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("Event Received: %+v\n", eventsAPIEvent)
+			fmt.Printf("Event received: %+v\n", eventsAPIEvent)
 
 			switch evt.Type {
 			case slackevents.CallbackEvent:

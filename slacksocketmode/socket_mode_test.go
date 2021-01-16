@@ -33,7 +33,7 @@ const (
 )
 
 func TestEventParsing(t *testing.T) {
-	testParsing(t, EventHello, &SocketModeEvent{Type: "hello", Data: &slack.HelloEvent{}})
+	testParsing(t, EventHello, &ClientEvent{Type: "hello", Data: &slack.HelloEvent{}})
 }
 
 func testParsing(t *testing.T, raw string, want interface{}) {
@@ -49,12 +49,12 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 	}
 }
 
-func parse(raw string) (*SocketModeEvent, error) {
+func parse(raw string) (*ClientEvent, error) {
 	c := &Client{
-		IncomingEvents: make(chan SocketModeEvent, 1),
+		IncomingEvents: make(chan ClientEvent, 1),
 	}
 
-	tpe := c.handleRawEvent(json.RawMessage([]byte(raw)))
+	tpe := c.handleWebSocketMessage(json.RawMessage([]byte(raw)))
 
 	if tpe == "" {
 		return nil, errors.New("failed handling raw event: type was empty")

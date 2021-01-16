@@ -60,7 +60,7 @@ func OptionConnParams(connParams url.Values) Option {
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
 		Client:           *api,
-		IncomingEvents:   make(chan SocketModeEvent, 50),
+		IncomingEvents:   make(chan ClientEvent, 50),
 		outgoingMessages: make(chan slack.OutgoingMessage, 20),
 		pingInterval:     defaultMaxPingInterval,
 		pingDeadman:      time.NewTimer(deadmanDuration(defaultMaxPingInterval)),

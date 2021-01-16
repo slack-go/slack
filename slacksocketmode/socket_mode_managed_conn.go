@@ -64,9 +64,9 @@ func (smc *Client) Run() {
 
 		rawEvents := make(chan json.RawMessage)
 		// we're now connected so we can set up listeners
-		go smc.handleIncomingEvents(rawEvents)
+		go smc.runMessageReceiver(rawEvents)
 		// this should be a blocking call until the connection has ended
-		smc.handleEvents(rawEvents)
+		smc.runMessageHandler(rawEvents)
 
 		select {
 		case <-smc.disconnected:
@@ -229,42 +229,45 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 	return err
 }
 
-// handleEvents is a blocking function that handles all events. This sends
-// pings when asked to (on rtm.forcePing) and upon every given elapsed
-// interval. This also sends outgoing messages that are received from the RTM's
-// outgoingMessages channel. This also handles incoming raw events from the RTM
-// rawEvents channel.
-func (smc *Client) handleEvents(events chan json.RawMessage) {
+// runMessageHandler is a blocking function that handles all WebSocket messages.
+//
+// How it works:
+//
+// 1. The handler stops if there is any "signal" sent from within this Client
+// 2. The handler stops if Slack stopped sending ping in a timely manner
+// 3. Sends outgoing messages that are received from the Client's outgoingMessages channel
+// 4. Handles incoming raw events from the webSocketMessages channel.
+func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 	ticker := time.NewTicker(smc.pingInterval)
 	defer ticker.Stop()
 	for {
 		select {
-		// catch "stop" signal on channel close
+		// 1. catch "stop" signal on channel close
 		case intentional := <-smc.killChannel:
 			_ = smc.killConnection(intentional, errorsx.String("signaled"))
 			return
-		// detect when the connection is dead.
+		// 2. detect when the connection is dead.
 		case <-smc.pingDeadman.C:
 			_ = smc.killConnection(false, slack.ErrRTMDeadman)
 			return
-		// listen for messages that need to be sent
+		// 3. listen for messages that need to be sent
 		case msg := <-smc.outgoingMessages:
 			smc.sendOutgoingMessage(msg)
 			// listen for incoming messages that need to be parsed
-		case rawEvent := <-events:
-			_ = smc.handleRawEvent(rawEvent)
+		case wsMsg := <-webSocketMessages:
+			_ = smc.handleWebSocketMessage(wsMsg)
 		}
 	}
 }
 
-// handleIncomingEvents monitors the RTM's opened websocket for any incoming
-// events. It pushes the raw events into the channel.
+// runMessageReceiver monitors the Socket Mode opened WebSocket connection for any incoming
+// messages. It pushes the raw events into the channel.
 //
 // This will stop executing once the RTM's when a fatal error is detected, or
 // a disconnect occurs.
-func (smc *Client) handleIncomingEvents(events chan json.RawMessage) {
+func (smc *Client) runMessageReceiver(sink chan json.RawMessage) {
 	for {
-		if err := smc.receiveIncomingEvent(events); err != nil {
+		if err := smc.receiveMessagesInto(sink); err != nil {
 			select {
 			case smc.killChannel <- false:
 			case <-smc.disconnected:
@@ -286,12 +289,12 @@ func (smc *Client) sendWithDeadline(msg interface{}) error {
 	return smc.conn.SetWriteDeadline(time.Time{})
 }
 
-func (smc *Client) internalEvent(tpe string, data interface{}) SocketModeEvent {
-	return SocketModeEvent{Type: tpe, Data: data}
+func (smc *Client) internalEvent(tpe string, data interface{}) ClientEvent {
+	return ClientEvent{Type: tpe, Data: data}
 }
 
-func (smc *Client) externalEvent(tpe string, data interface{}) SocketModeEvent {
-	return SocketModeEvent{Type: tpe, Data: data}
+func (smc *Client) externalEvent(tpe string, data interface{}) ClientEvent {
+	return ClientEvent{Type: tpe, Data: data}
 }
 
 // sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
@@ -331,10 +334,10 @@ func (smc *Client) ack(envelopeID string) error {
 	return nil
 }
 
-// receiveIncomingEvent attempts to receive an event from the RTM's websocket.
-// This will block until a frame is available from the websocket.
-// If the read from the websocket results in a fatal error, this function will return non-nil.
-func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
+// receiveMessagesInto attempts to receive an event from the WebSocket connection for Socket Mode.
+// This will block until a frame is available from the WebSocket.
+// If the read from the WebSocket results in a fatal error, this function will return non-nil.
+func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 	event := json.RawMessage{}
 	err := smc.conn.ReadJSON(&event)
 
@@ -373,9 +376,9 @@ func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 		}
 		reencoded := buf.String()
 
-		smc.Debugln("Incoming Event:", reencoded)
+		smc.Debugln("Incoming WebSocket message:", reencoded)
 		select {
-		case events <- event:
+		case sink <- event:
 		case <-smc.disconnected:
 			smc.Debugln("disonnected while attempting to send raw event")
 		}
@@ -384,27 +387,27 @@ func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 	return nil
 }
 
-// handleRawEvent takes a raw JSON message received from the slack websocket
+// handleWebSocketMessage takes a raw JSON message received from the slack websocket
 // and handles the encoded event.
 // returns the event type of the message.
-func (smc *Client) handleRawEvent(rawEvent json.RawMessage) string {
-	event := &Message{}
-	err := json.Unmarshal(rawEvent, event)
+func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
+	smMsg := &Request{}
+	err := json.Unmarshal(wsMsg, smMsg)
 	if err != nil {
 		smc.IncomingEvents <- smc.internalEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
 		return ""
 	}
 
-	str := string(rawEvent)
+	str := string(wsMsg)
 	println(str)
 
 	// See https://github.com/slackapi/node-slack-sdk/blob/main/packages/socket-mode/src/SocketModeClient.ts#L533
-	// for all the available event types.
-	switch event.Type {
+	// for all the available message types.
+	switch smMsg.Type {
 	case socketModeEventTypeHello:
 		smc.IncomingEvents <- smc.externalEvent("hello", &slack.HelloEvent{})
 	case "events_api":
-		payloadEvent := event.Payload
+		payloadEvent := smMsg.Payload
 
 		eventsAPIEvent, err := slackevents.ParseEvent(payloadEvent, slackevents.OptionNoVerifyToken())
 		if err != nil {
@@ -415,14 +418,14 @@ func (smc *Client) handleRawEvent(rawEvent json.RawMessage) string {
 
 		// We automatically ack the message.
 		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
-		smc.ack(event.EnvelopeID)
+		smc.ack(smMsg.EnvelopeID)
 	case "disconnect":
 
 	default:
-		panic(fmt.Errorf("unexpected type %q: %v", event.Type, event))
+		panic(fmt.Errorf("unexpected type %q: %v", smMsg.Type, smMsg))
 	}
 
-	return event.Type
+	return smMsg.Type
 }
 
 // handleAck handles an incoming 'ACK' message.
