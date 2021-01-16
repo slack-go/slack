@@ -427,30 +427,6 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	return req.Type
 }
 
-// handleAck handles an incoming 'ACK' message.
-func (smc *Client) handleAck(event json.RawMessage) {
-	ack := &slack.AckMessage{}
-	if err := json.Unmarshal(event, ack); err != nil {
-		smc.Debugln("RTM Error unmarshalling 'ack' event:", err)
-		smc.Debugln(" -> Erroneous 'ack' event:", string(event))
-		return
-	}
-
-	if ack.Ok {
-		smc.IncomingEvents <- smc.externalEvent("ack", ack)
-	} else if ack.RTMResponse.Error != nil {
-		// As there is no documentation for RTM error-codes, this
-		// identification of a rate-limit warning is very brittle.
-		if ack.RTMResponse.Error.Code == -1 && ack.RTMResponse.Error.Msg == "slow down, too many messages..." {
-			smc.IncomingEvents <- smc.internalEvent("ack_error", &slack.RateLimitEvent{})
-		} else {
-			smc.IncomingEvents <- smc.internalEvent("ack_error", &slack.AckErrorEvent{ack.Error})
-		}
-	} else {
-		smc.IncomingEvents <- smc.internalEvent("ack_error", &slack.AckErrorEvent{fmt.Errorf("ack decode failure")})
-	}
-}
-
 // handlePing handles an incoming 'PONG' message which should be in response to
 // a previously sent 'PING' message. This is then used to compute the
 // connection's latency.
