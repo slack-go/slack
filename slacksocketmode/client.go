@@ -57,7 +57,9 @@ type Client struct {
 
 	idGen        slack.IDGenerator
 	pingInterval time.Duration
-	pingDeadman  *time.Timer
+
+	// pingDeadman must be intiailized in New()
+	pingDeadman *time.Timer
 
 	// Connection life-cycle
 	conn             *websocket.Conn

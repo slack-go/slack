@@ -44,7 +44,6 @@ func OptionDialer(d *websocket.Dialer) Option {
 func OptionPingInterval(d time.Duration) Option {
 	return func(rtm *Client) {
 		rtm.pingInterval = d
-		rtm.resetDeadman()
 	}
 }
 
@@ -63,7 +62,6 @@ func New(api *slack.Client, options ...Option) *Client {
 		IncomingEvents:   make(chan ClientEvent, 50),
 		outgoingMessages: make(chan slack.OutgoingMessage, 20),
 		pingInterval:     defaultMaxPingInterval,
-		pingDeadman:      time.NewTimer(deadmanDuration(defaultMaxPingInterval)),
 		killChannel:      make(chan bool),
 		disconnected:     make(chan struct{}),
 		disconnectedm:    &sync.Once{},
@@ -75,6 +73,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		opt(result)
 	}
 
+	result.pingDeadman = time.NewTimer(deadmanDuration(result.pingInterval))
+
 	return result
 }
-
