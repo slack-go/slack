@@ -62,12 +62,12 @@ type Client struct {
 	pingDeadman *time.Timer
 
 	// Connection life-cycle
-	conn             *websocket.Conn
-	IncomingEvents   chan ClientEvent
-	outgoingMessages chan slack.OutgoingMessage
-	killChannel      chan bool
-	disconnected     chan struct{}
-	disconnectedm    *sync.Once
+	conn                *websocket.Conn
+	IncomingEvents      chan ClientEvent
+	socketModeResponses chan *Response
+	killChannel         chan bool
+	disconnected        chan struct{}
+	disconnectedm       *sync.Once
 
 	// UserDetails upon connection
 	info *slack.SocketModeConnection
@@ -78,6 +78,8 @@ type Client struct {
 
 	// mu is mutex used to prevent RTM connection race conditions
 	mu *sync.Mutex
+
+	wsWriteMu *sync.Mutex
 
 	// connParams is a map of flags for connection parameters.
 	connParams url.Values

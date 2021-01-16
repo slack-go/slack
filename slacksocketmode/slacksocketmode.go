@@ -15,7 +15,8 @@ const (
 	RequestTypeEventsAPI  = "events_api"
 	RequestTypeDisconnect = "disconnect"
 
-	EventTypeConnected = "connected"
+	EventTypeConnected        = "connected"
+	EventTypeErrorWriteFailed = "write_error"
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
@@ -62,15 +63,16 @@ func OptionConnParams(connParams url.Values) Option {
 // Slack's websocket-based Real-Time Messaging protocol.
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
-		Client:           *api,
-		IncomingEvents:   make(chan ClientEvent, 50),
-		outgoingMessages: make(chan slack.OutgoingMessage, 20),
-		pingInterval:     defaultMaxPingInterval,
-		killChannel:      make(chan bool),
-		disconnected:     make(chan struct{}),
-		disconnectedm:    &sync.Once{},
-		idGen:            slack.NewSafeID(1),
-		mu:               &sync.Mutex{},
+		Client:              *api,
+		IncomingEvents:      make(chan ClientEvent, 50),
+		socketModeResponses: make(chan *Response, 20),
+		pingInterval:        defaultMaxPingInterval,
+		killChannel:         make(chan bool),
+		disconnected:        make(chan struct{}),
+		disconnectedm:       &sync.Once{},
+		idGen:               slack.NewSafeID(1),
+		mu:                  &sync.Mutex{},
+		wsWriteMu:           &sync.Mutex{},
 	}
 
 	for _, opt := range options {

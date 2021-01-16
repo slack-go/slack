@@ -235,7 +235,7 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 //
 // 1. The handler stops if there is any "signal" sent from within this Client
 // 2. The handler stops if Slack stopped sending ping in a timely manner
-// 3. Sends outgoing messages that are received from the Client's outgoingMessages channel
+// 3. Sends outgoing messages that are received from the Client's socketModeResponses channel
 // 4. Handles incoming raw events from the webSocketMessages channel.
 func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 	ticker := time.NewTicker(smc.pingInterval)
@@ -251,8 +251,13 @@ func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 			_ = smc.killConnection(false, slack.ErrRTMDeadman)
 			return
 		// 3. listen for messages that need to be sent
-		case msg := <-smc.outgoingMessages:
-			smc.sendOutgoingMessage(msg)
+		case res := <-smc.socketModeResponses:
+			if err := smc.unsafeWriteSocketModeResponse(res); err != nil {
+				smc.IncomingEvents <- smc.internalEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
+					Cause:    err,
+					Response: res,
+				})
+			}
 			// listen for incoming messages that need to be parsed
 		case wsMsg := <-webSocketMessages:
 			_ = smc.handleWebSocketMessage(wsMsg)
@@ -277,16 +282,34 @@ func (smc *Client) runMessageReceiver(sink chan json.RawMessage) {
 	}
 }
 
-func (smc *Client) sendWithDeadline(msg interface{}) error {
+type Response struct {
+	EnvelopeID string `json:"envelope_id"`
+}
+
+// unsafeWriteSocketModeResponse sends a WebSocket message back to Slack.
+// WARNING: Call to this function must be serialized!
+//
+// Here's why - Gorilla WebSocket's Writes functions are not concurrency-safe.
+// That is, we must serialize all the writes to it with e.g. a goroutine or mutex.
+// We intentionally chose to use goroutine, which makes it harder to propagate write errors to the caller,
+// but is more computationally efficient.
+//
+// See the below for more information on this topic:
+// https://stackoverflow.com/questions/43225340/how-to-ensure-concurrency-in-golang-gorilla-websocket-package
+func (smc *Client) unsafeWriteSocketModeResponse(msg *Response) error {
 	// set a write deadline on the connection
 	if err := smc.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return err
 	}
+
+	// Remove write deadline regardless of WriteJSON succeeds or not
+	defer smc.conn.SetWriteDeadline(time.Time{})
+
 	if err := smc.conn.WriteJSON(msg); err != nil {
 		return err
 	}
-	// remove write deadline
-	return smc.conn.SetWriteDeadline(time.Time{})
+
+	return nil
 }
 
 func (smc *Client) internalEvent(tpe string, data interface{}) ClientEvent {
@@ -297,40 +320,16 @@ func (smc *Client) externalEvent(tpe string, data interface{}) ClientEvent {
 	return ClientEvent{Type: tpe, Data: data}
 }
 
-// sendOutgoingMessage sends the given OutgoingMessage to the slack websocket.
-//
-// It does not currently detect if a outgoing message fails due to a disconnect
-// and instead lets a future failed 'PING' detect the failed connection.
-func (smc *Client) sendOutgoingMessage(msg slack.OutgoingMessage) {
-	smc.Debugln("Sending message:", msg)
-	if len([]rune(msg.Text)) > slack.MaxMessageTextLength {
-		smc.IncomingEvents <- smc.internalEvent("outgoing_error", &slack.MessageTooLongEvent{
-			Message:   msg,
-			MaxLength: slack.MaxMessageTextLength,
-		})
-		return
-	}
-
-	if err := smc.sendWithDeadline(msg); err != nil {
-		smc.IncomingEvents <- smc.internalEvent("outgoing_error", &slack.OutgoingErrorEvent{
-			Message:  msg,
-			ErrorObj: err,
-		})
-	}
-}
-
 // ack tells Slack that the we have received the SocketModeRequest denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
 func (smc *Client) ack(envelopeID string) error {
-	smc.Debugln("Sending ACK ", envelopeID)
+	smc.Debugf("Scheduling ACK response for Envelope IP %s", envelopeID)
 
 	// See https://github.com/slackapi/node-slack-sdk/blob/c3f4d7109062a0356fb765d53794b7b5f6b3b5ae/packages/socket-mode/src/SocketModeClient.ts#L417
-	msg := map[string]interface{}{"envelope_id": envelopeID}
+	res := &Response{EnvelopeID: envelopeID}
 
-	if err := smc.sendWithDeadline(msg); err != nil {
-		smc.Debugf("RTM Error sending 'ACK %s': %s", envelopeID, err.Error())
-		return err
-	}
+	smc.socketModeResponses <- res
+
 	return nil
 }
 
