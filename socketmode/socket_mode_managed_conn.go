@@ -386,7 +386,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	req := &Request{}
 	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
-		smc.IncomingEvents <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
+		smc.IncomingEvents <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{ErrorObj: err})
 		return ""
 	}
 
