@@ -283,10 +283,6 @@ func (smc *Client) runMessageReceiver(sink chan json.RawMessage) {
 	}
 }
 
-type Response struct {
-	EnvelopeID string `json:"envelope_id"`
-}
-
 // unsafeWriteSocketModeResponse sends a WebSocket message back to Slack.
 // WARNING: Call to this function must be serialized!
 //
