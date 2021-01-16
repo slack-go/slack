@@ -60,7 +60,7 @@ func (smc *Client) Run() {
 			Info:            info,
 		})
 
-		smc.Debugf("RTM connection succeeded on try %d", connectionCount)
+		smc.Debugf("WebSocket connection succeeded on try %d", connectionCount)
 
 		rawEvents := make(chan json.RawMessage)
 		// we're now connected so we can set up listeners
