@@ -54,7 +54,7 @@ func (smc *Client) Run() {
 		smc.info = info
 		smc.mu.Unlock()
 
-		smc.IncomingEvents <- smc.internalEvent(EventTypeConnected, &ConnectedEvent{
+		smc.IncomingEvents <- smc.newEvent(EventTypeConnected, &ConnectedEvent{
 			ConnectionCount: connectionCount,
 			Info:            info,
 		})
@@ -103,7 +103,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		)
 
 		// send connecting event
-		smc.IncomingEvents <- smc.internalEvent("connecting", &slack.ConnectingEvent{
+		smc.IncomingEvents <- smc.newEvent("connecting", &slack.ConnectingEvent{
 			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
 		})
@@ -126,7 +126,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with RTM: %s", err)
-				smc.IncomingEvents <- smc.internalEvent("invalid_auth", &slack.InvalidAuthEvent{})
+				smc.IncomingEvents <- smc.newEvent("invalid_auth", &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
@@ -137,7 +137,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
-		smc.IncomingEvents <- smc.internalEvent("connection_error", &slack.ConnectionErrorEvent{
+		smc.IncomingEvents <- smc.newEvent("connection_error", &slack.ConnectionErrorEvent{
 			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
@@ -220,7 +220,7 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 		err = smc.conn.Close()
 	}
 
-	smc.IncomingEvents <- smc.internalEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
+	smc.IncomingEvents <- smc.newEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
 
 	if intentional {
 		smc.disconnect()
@@ -253,7 +253,7 @@ func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 		// 3. listen for messages that need to be sent
 		case res := <-smc.socketModeResponses:
 			if err := smc.unsafeWriteSocketModeResponse(res); err != nil {
-				smc.IncomingEvents <- smc.internalEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
+				smc.IncomingEvents <- smc.newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
 					Cause:    err,
 					Response: res,
 				})
@@ -312,11 +312,7 @@ func (smc *Client) unsafeWriteSocketModeResponse(msg *Response) error {
 	return nil
 }
 
-func (smc *Client) internalEvent(tpe string, data interface{}) ClientEvent {
-	return ClientEvent{Type: tpe, Data: data}
-}
-
-func (smc *Client) externalEvent(tpe string, data interface{}) ClientEvent {
+func (smc *Client) newEvent(tpe string, data interface{}) ClientEvent {
 	return ClientEvent{Type: tpe, Data: data}
 }
 
@@ -359,7 +355,7 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		smc.IncomingEvents <- smc.internalEvent("incoming_error", &slack.IncomingEventError{
+		smc.IncomingEvents <- smc.newEvent("incoming_error", &slack.IncomingEventError{
 			ErrorObj: err,
 		})
 
@@ -393,7 +389,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	req := &Request{}
 	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
-		smc.IncomingEvents <- smc.internalEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
+		smc.IncomingEvents <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
 		return ""
 	}
 
@@ -403,7 +399,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	// for all the available message types.
 	switch req.Type {
 	case RequestTypeHello:
-		smc.IncomingEvents <- smc.externalEvent("hello", &slack.HelloEvent{})
+		smc.IncomingEvents <- smc.newEvent("hello", &slack.HelloEvent{})
 	case RequestTypeEventsAPI:
 		payloadEvent := req.Payload
 
@@ -412,7 +408,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 			return ""
 		}
 
-		smc.IncomingEvents <- smc.externalEvent(eventsAPIEvent.Type, eventsAPIEvent)
+		smc.IncomingEvents <- smc.newEvent(eventsAPIEvent.Type, eventsAPIEvent)
 
 		// We automatically ack the message.
 		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
