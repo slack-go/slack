@@ -1,4 +1,4 @@
-package slacksocketmode
+package socketmode
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package slacksocketmode
+package socketmode
 
 type ErrorWriteFailed struct {
 	Cause    error

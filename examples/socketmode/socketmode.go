@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/slack-go/slack/slacksocketmode"
+	"github.com/slack-go/slack/socketmode"
 	"log"
 	"os"
 	"strings"
@@ -38,7 +38,7 @@ func main() {
 		slack.OptionAppLevelToken(appToken),
 	)
 
-	client := slacksocketmode.New(api)
+	client := socketmode.New(api)
 
 	go func() {
 		for evt := range client.IncomingEvents {
