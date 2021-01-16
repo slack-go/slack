@@ -15,12 +15,41 @@ type SocketModeConnectedEvent struct {
 	Info            *slack.SocketModeConnection
 }
 
-// SocketModeMessage maps to each message received via the WebSocket connection of SocketMode
-type SocketModeMessage struct {
-	Type       string                   `json:"type"`
-	Reason     string                   `json:"reason"`
-	Payload    SocketModeMessagePayload `json:"payload"`
-	EnvelopeID string                   `json:"envelope_id"`
+// Message maps to each message received via the WebSocket connection of SocketMode
+type Message struct {
+	Type string `json:"type"`
+
+	// `hello` type only
+	NumConnections int            `json:"num_connections"`
+	ConnectionInfo ConnectionInfo `json:"connection_info"`
+
+	// `disconnect` type only
+
+	// Reason can be "warning" or else
+	Reason string `json:"reason"`
+
+	// `hello` and `disconnect` types only
+	DebugInfo DebugInfo `json:"debug_info"`
+
+	// `events_api` type only
+	EnvelopeID             string          `json:"envelope_id"`
+	Payload                json.RawMessage `json:"payload"`
+	AcceptsResponsePayload bool            `json:"accepts_response_payload"`
+	RetryAttempt           int             `json:"retry_attempt"`
+	RetryReason            string          `json:"retry_reason"`
+}
+
+type DebugInfo struct {
+	// Host is the name of the host name on the Slack end, that can be something like `applink-7fc4fdbb64-4x5xq`
+	Host string `json:"host"`
+
+	// `hello` type only
+	BuildNumber               int `json:"build_number"`
+	ApproximateConnectionTime int `json:"approximate_connection_time"`
+}
+
+type ConnectionInfo struct {
+	AppID string `json:"app_id"`
 }
 
 type SocketModeMessagePayload struct {
@@ -34,7 +63,7 @@ type SocketModeEvent struct {
 
 	// Message is the json-decoded raw WebSocket message that is received over the Slack SocketMode
 	// WebSocket connection.
-	Message *SocketModeMessage
+	Message *Message
 }
 
 // Client allows allows programs to communicate with the
@@ -63,7 +92,7 @@ type Client struct {
 	disconnectedm    *sync.Once
 
 	// UserDetails upon connection
-	info *SocketModeConnection
+	info *slack.SocketModeConnection
 
 	// dialer is a gorilla/websocket Dialer. If nil, use the default
 	// Dialer.
@@ -105,5 +134,5 @@ func (smc *Client) GetInfo() *slack.SocketModeConnection {
 }
 
 func (smc *Client) resetDeadman() {
-	smc.pingDeadman.Reset(slack.deadmanDuration(smc.pingInterval))
+	smc.pingDeadman.Reset(deadmanDuration(smc.pingInterval))
 }

@@ -31,44 +31,47 @@ func main() {
 		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must have the prefix \"xoxb-\".")
 	}
 
-	botAPI := slack.New(
+	api := slack.New(
 		botToken,
 		slack.OptionDebug(true),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
 		slack.OptionAppLevelToken(appToken),
 	)
 
-	appAPI := slack.New(
-		appToken,
-		slack.OptionDebug(true),
-		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
-		slack.OptionAppLevelToken(appToken),
-	)
-
-	client := slacksocketmode.New(appAPI)
+	client := slacksocketmode.New(api)
 
 	go func() {
 		for evt := range client.IncomingEvents {
 			eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 			if !ok {
-				fmt.Printf("Ignored %v\n")
+				fmt.Printf("Ignored %+v\n", evt)
 
 				continue
 			}
 
-			fmt.Printf("Event Received: %+v", eventsAPIEvent)
+			fmt.Printf("Event Received: %+v\n", eventsAPIEvent)
 
 			switch evt.Type {
 			case slackevents.CallbackEvent:
 				innerEvent := eventsAPIEvent.InnerEvent
 				switch ev := innerEvent.Data.(type) {
 				case *slackevents.AppMentionEvent:
-					botAPI.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+					_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+					if err != nil {
+						fmt.Printf("failed posting message: %v", err)
+					}
 				}
 			case slackevents.MemberJoinedChannel:
 				ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
 
 				fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
+			case slackevents.AppMention:
+				ev := eventsAPIEvent.Data.(*slackevents.AppMentionEvent)
+
+				_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("hey yo!", false))
+				if err != nil {
+					fmt.Printf("failed posting message: %v", err)
+				}
 			}
 		}
 	}()

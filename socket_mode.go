@@ -21,11 +21,15 @@ type openResponseFull struct {
 // To have a fully managed Websocket connection, use `NewRTM`, and call `Run()` on it.
 func (api *Client) StartSocketModeContext(ctx context.Context) (info *SocketModeConnection, websocketURL string, err error) {
 	response := &openResponseFull{}
-	err = api.postMethod(ctx, "apps.connections.open", url.Values{"token": {api.token}}, response)
+	err = postJSON(ctx, api.httpclient, api.endpoint+"apps.connections.open", api.appLevelToken, nil, response, api)
+	//err = api.postMethod(ctx, "apps.connections.open", url.Values{"token": {api.appLevelToken}}, response)
 	if err != nil {
 		return nil, "", err
 	}
 
-	api.Debugln("Using URL:", response.SocketModeConnection.URL)
+	if response.Err() == nil {
+		api.Debugln("Using URL:", response.SocketModeConnection.URL)
+	}
+
 	return &response.SocketModeConnection, response.SocketModeConnection.URL, response.Err()
 }

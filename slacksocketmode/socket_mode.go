@@ -21,7 +21,7 @@ const (
 //
 // To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
 func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), slack.websocketDefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
 	defer cancel()
 
 	return smc.StartSocketModeContext(ctx)
@@ -63,7 +63,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		IncomingEvents:   make(chan SocketModeEvent, 50),
 		outgoingMessages: make(chan slack.OutgoingMessage, 20),
 		pingInterval:     defaultMaxPingInterval,
-		pingDeadman:      time.NewTimer(slack.deadmanDuration(defaultMaxPingInterval)),
+		pingDeadman:      time.NewTimer(deadmanDuration(defaultMaxPingInterval)),
 		killChannel:      make(chan bool),
 		disconnected:     make(chan struct{}),
 		disconnectedm:    &sync.Once{},
@@ -76,4 +76,8 @@ func New(api *slack.Client, options ...Option) *Client {
 	}
 
 	return result
+}
+
+func deadmanDuration(d time.Duration) time.Duration {
+	return d * 4
 }

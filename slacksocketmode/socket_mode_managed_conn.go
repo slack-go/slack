@@ -352,6 +352,8 @@ func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 		// Unlike RTM, we don't ping from the our end as there seem to have no client ping.
 		// We just continue to the next loop so that we `smc.disconnected` should be received if
 		// this EOF error was actually due to disconnection.
+
+		return nil
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
@@ -378,25 +380,39 @@ func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 // and handles the encoded event.
 // returns the event type of the message.
 func (smc *Client) handleRawEvent(rawEvent json.RawMessage) string {
-	event := &SocketModeMessage{}
+	event := &Message{}
 	err := json.Unmarshal(rawEvent, event)
 	if err != nil {
 		smc.IncomingEvents <- smc.internalEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
 		return ""
 	}
 
+	str := string(rawEvent)
+	println(str)
+
 	// See https://github.com/slackapi/node-slack-sdk/blob/main/packages/socket-mode/src/SocketModeClient.ts#L533
 	// for all the available event types.
 	switch event.Type {
 	case socketModeEventTypeHello:
 		smc.IncomingEvents <- smc.externalEvent("hello", &slack.HelloEvent{})
-	default:
-		smc.handleEventsAPIEvent(event.Payload.Event)
-	}
+	case "events_api":
+		payloadEvent := event.Payload
 
-	// We automatically ack the message.
-	// TODO Should there be any way to manually ack the msg, like the official nodejs client?
-	smc.ack(event.EnvelopeID)
+		eventsAPIEvent, err := slackevents.ParseEvent(payloadEvent, slackevents.OptionNoVerifyToken())
+		if err != nil {
+			return ""
+		}
+
+		smc.IncomingEvents <- smc.externalEvent(eventsAPIEvent.Type, eventsAPIEvent)
+
+		// We automatically ack the message.
+		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
+		smc.ack(event.EnvelopeID)
+	case "disconnect":
+
+	default:
+		panic(fmt.Errorf("unexpected type %q: %v", event.Type, event))
+	}
 
 	return event.Type
 }
@@ -431,14 +447,10 @@ func (smc *Client) handleAck(event json.RawMessage) {
 func (smc *Client) handlePing(event json.RawMessage) {
 	smc.resetDeadman()
 
-	p := map[string]interface{}{}
+	s := string(event)
 
-	if err := json.Unmarshal(event, &p); err != nil {
-		smc.Client.log.Println("RTM Error unmarshalling 'pong' event:", err)
-		return
-	}
+	println("WebSocket ping message received:", s)
 
-	smc.Client.log.Println("Ping received: ", p)
 	//
 	//latency := time.Since(time.Unix(p.Timestamp, 0))
 	//smc.IncomingEvents <- smc.internalEvent("latency_report", &LatencyReport{Value: latency})
@@ -446,19 +458,4 @@ func (smc *Client) handlePing(event json.RawMessage) {
 
 func (smc *Client) handleClose(code int, text string) {
 	smc.killConnection(code == 200, errors.New(text))
-}
-
-// handleEventsAPIEvent is the "default" response to an event that does not have a
-// special case. It matches the command's name to a mapping of defined events
-// and then sends the corresponding event struct to the IncomingEvents channel.
-// If the event type is not found or the event cannot be unmarshalled into the
-// correct struct then this sends an UnmarshallingErrorEvent to the
-// IncomingEvents channel.
-func (smc *Client) handleEventsAPIEvent(event json.RawMessage) {
-	eventsAPIEvent, err := slackevents.ParseEvent(event, slackevents.OptionNoVerifyToken())
-	if err != nil {
-		return
-	}
-
-	smc.IncomingEvents <- smc.externalEvent(eventsAPIEvent.Type, eventsAPIEvent)
 }
