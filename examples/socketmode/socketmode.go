@@ -29,7 +29,7 @@ func main() {
 	}
 
 	if !strings.HasPrefix(botToken, "xoxb-") {
-		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must have the prefix \"xoxb-\".")
+		fmt.Fprintf(os.Stderr, "SLACK_BOT_TOKEN must have the prefix \"xoxb-\".")
 	}
 
 	api := slack.New(
