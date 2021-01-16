@@ -43,7 +43,7 @@ func (smc *Client) Run() {
 		// the returned err is already passed onto the IncomingEvents channel
 		if info, conn, err = smc.connect(connectionCount); err != nil {
 			// when the connection is unsuccessful its fatal, and we need to bail out.
-			smc.Debugf("Failed to connect with RTM on try %d: %s", connectionCount, err)
+			smc.Debugf("Failed to connect with Socket Mode on try %d: %s", connectionCount, err)
 			smc.disconnect()
 			return
 		}
