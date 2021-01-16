@@ -392,8 +392,9 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 
 	smc.Debugf("Handling WebSocket message: %s", wsMsg)
 
-	// See https://github.com/slackapi/node-slack-sdk/blob/main/packages/socket-mode/src/SocketModeClient.ts#L533
-	// for all the available message types.
+	// See below two links for all the available message types.
+	// - https://github.com/slackapi/node-slack-sdk/blob/c3f4d7109062a0356fb765d53794b7b5f6b3b5ae/packages/socket-mode/src/SocketModeClient.ts#L533
+	// - https://api.slack.com/apis/connections/socket-implement
 	switch req.Type {
 	case RequestTypeHello:
 		smc.IncomingEvents <- smc.newEvent("hello", &slack.HelloEvent{})
@@ -412,6 +413,16 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 		smc.ack(req.EnvelopeID)
 	case RequestTypeDisconnect:
 		// TODO
+		// https://api.slack.com/apis/connections/socket-implement#disconnect
+	case RequestTypeSlashCommands:
+		// See https://api.slack.com/apis/connections/socket-implement#command
+
+	case RequestTypeInteractive:
+		// See belows:
+		// - https://api.slack.com/apis/connections/socket-implement#button
+		// - https://api.slack.com/apis/connections/socket-implement#home
+		// - https://api.slack.com/apis/connections/socket-implement#modal
+		// - https://api.slack.com/apis/connections/socket-implement#menu
 	default:
 		panic(fmt.Errorf("unexpected type %q: %v", req.Type, req))
 	}

@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	RequestTypeHello      = "hello"
-	RequestTypeEventsAPI  = "events_api"
-	RequestTypeDisconnect = "disconnect"
+	RequestTypeHello         = "hello"
+	RequestTypeEventsAPI     = "events_api"
+	RequestTypeDisconnect    = "disconnect"
+	RequestTypeSlashCommands = "slash_commands"
+	RequestTypeInteractive   = "interactive"
 
 	EventTypeConnected        = "connected"
 	EventTypeErrorWriteFailed = "write_error"
