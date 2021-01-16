@@ -18,11 +18,11 @@ import (
 	"github.com/slack-go/slack/internal/timex"
 )
 
-// Run can be called on a Slack RTM instance returned by the
-// NewRTM method. It will connect to the slack RTM API and handle all incoming
-// and outgoing events. If a connection fails then it will attempt to reconnect
-// and will notify any listeners through an error event on the IncomingEvents
-// channel.
+// Run is a blocking function that connects the Slack Socket Mode API and handles all incoming
+// and outgoing events.
+//
+// If a connection fails then it will attempt to reconnect
+// and will notify any consumers through an error Event on Client's IncomingEvents channel.
 //
 // If the connection ends and the disconnect was unintentional then this will
 // attempt to reconnect.

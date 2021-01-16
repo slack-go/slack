@@ -78,6 +78,3 @@ func New(api *slack.Client, options ...Option) *Client {
 	return result
 }
 
-func deadmanDuration(d time.Duration) time.Duration {
-	return d * 4
-}
