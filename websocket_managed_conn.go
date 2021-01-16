@@ -3,13 +3,14 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/slack-go/slack/internal/backoff"
-	"github.com/slack-go/slack/internal/misc"
 	"io"
 	"net/http"
 	stdurl "net/url"
 	"reflect"
 	"time"
+
+	"github.com/slack-go/slack/internal/backoff"
+	"github.com/slack-go/slack/internal/misc"
 
 	"github.com/gorilla/websocket"
 	"github.com/slack-go/slack/internal/errorsx"

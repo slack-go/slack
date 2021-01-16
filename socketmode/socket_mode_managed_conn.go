@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"time"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
 	"github.com/slack-go/slack/internal/misc"
 	"github.com/slack-go/slack/slackevents"
-	"io"
-	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/slack-go/slack/internal/errorsx"

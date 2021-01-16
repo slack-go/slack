@@ -26,4 +26,3 @@ func (t StatusCodeError) Retryable() bool {
 	}
 	return false
 }
-

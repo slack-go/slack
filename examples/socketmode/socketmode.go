@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/slack-go/slack/socketmode"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/slack-go/slack/socketmode"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"

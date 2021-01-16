@@ -2,12 +2,13 @@ package slack
 
 import (
 	"context"
-	"github.com/slack-go/slack/internal/misc"
 	"log"
 	"net/http"
 	"net/url"
 	"sync"
 	"testing"
+
+	"github.com/slack-go/slack/internal/misc"
 
 	"github.com/slack-go/slack/slackutilsx"
 )

@@ -2,10 +2,11 @@ package socketmode
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/slack-go/slack"
 	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
 )
 
 const (

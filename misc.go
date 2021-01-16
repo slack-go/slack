@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/slack-go/slack/internal/misc"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -19,6 +18,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/slack-go/slack/internal/misc"
 )
 
 // SlackResponse handles parsing out errors from the web api.

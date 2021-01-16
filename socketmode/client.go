@@ -2,10 +2,11 @@ package socketmode
 
 import (
 	"encoding/json"
-	"github.com/slack-go/slack"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/slack-go/slack"
 
 	"github.com/gorilla/websocket"
 )
