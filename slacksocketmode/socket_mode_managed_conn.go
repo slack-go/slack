@@ -365,7 +365,15 @@ func (smc *Client) receiveIncomingEvent(events chan json.RawMessage) error {
 	case len(event) == 0:
 		smc.Debugln("Received empty event")
 	default:
-		smc.Debugln("Incoming Event:", string(event))
+		buf := &bytes.Buffer{}
+		d := json.NewEncoder(buf)
+		d.SetIndent("", "  ")
+		if err := d.Encode(event); err != nil {
+			smc.Debugln("Failed encoding decoded json:", err)
+		}
+		reencoded := buf.String()
+
+		smc.Debugln("Incoming Event:", reencoded)
 		select {
 		case events <- event:
 		case <-smc.disconnected:
