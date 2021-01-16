@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type SocketModeConnectedEvent struct {
+type ConnectedEvent struct {
 	ConnectionCount int // 1 = first time, 2 = second time
 	Info            *slack.SocketModeConnection
 }

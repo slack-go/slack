@@ -55,7 +55,7 @@ func (smc *Client) Run() {
 		smc.info = info
 		smc.mu.Unlock()
 
-		smc.IncomingEvents <- smc.internalEvent("connected", &SocketModeConnectedEvent{
+		smc.IncomingEvents <- smc.internalEvent(EventTypeConnected, &ConnectedEvent{
 			ConnectionCount: connectionCount,
 			Info:            info,
 		})
@@ -391,23 +391,22 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 // and handles the encoded event.
 // returns the event type of the message.
 func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
-	smMsg := &Request{}
-	err := json.Unmarshal(wsMsg, smMsg)
+	req := &Request{}
+	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
 		smc.IncomingEvents <- smc.internalEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{err})
 		return ""
 	}
 
-	str := string(wsMsg)
-	println(str)
+	smc.Debugf("Handling WebSocket message: %s", wsMsg)
 
 	// See https://github.com/slackapi/node-slack-sdk/blob/main/packages/socket-mode/src/SocketModeClient.ts#L533
 	// for all the available message types.
-	switch smMsg.Type {
-	case socketModeEventTypeHello:
+	switch req.Type {
+	case RequestTypeHello:
 		smc.IncomingEvents <- smc.externalEvent("hello", &slack.HelloEvent{})
-	case "events_api":
-		payloadEvent := smMsg.Payload
+	case RequestTypeEventsAPI:
+		payloadEvent := req.Payload
 
 		eventsAPIEvent, err := slackevents.ParseEvent(payloadEvent, slackevents.OptionNoVerifyToken())
 		if err != nil {
@@ -418,14 +417,14 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 
 		// We automatically ack the message.
 		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
-		smc.ack(smMsg.EnvelopeID)
-	case "disconnect":
-
+		smc.ack(req.EnvelopeID)
+	case RequestTypeDisconnect:
+		// TODO
 	default:
-		panic(fmt.Errorf("unexpected type %q: %v", smMsg.Type, smMsg))
+		panic(fmt.Errorf("unexpected type %q: %v", req.Type, req))
 	}
 
-	return smMsg.Type
+	return req.Type
 }
 
 // handleAck handles an incoming 'ACK' message.

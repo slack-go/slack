@@ -11,7 +11,11 @@ import (
 )
 
 const (
-	socketModeEventTypeHello      = "hello"
+	RequestTypeHello      = "hello"
+	RequestTypeEventsAPI  = "events_api"
+	RequestTypeDisconnect = "disconnect"
+
+	EventTypeConnected = "connected"
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
