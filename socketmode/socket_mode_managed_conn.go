@@ -293,7 +293,7 @@ func (smc *Client) runMessageReceiver(sink chan json.RawMessage) {
 //
 // See the below for more information on this topic:
 // https://stackoverflow.com/questions/43225340/how-to-ensure-concurrency-in-golang-gorilla-websocket-package
-func (smc *Client) unsafeWriteSocketModeResponse(msg *Response) error {
+func (smc *Client) unsafeWriteSocketModeResponse(res *Response) error {
 	// set a write deadline on the connection
 	if err := smc.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return err
@@ -302,28 +302,58 @@ func (smc *Client) unsafeWriteSocketModeResponse(msg *Response) error {
 	// Remove write deadline regardless of WriteJSON succeeds or not
 	defer smc.conn.SetWriteDeadline(time.Time{})
 
-	if err := smc.conn.WriteJSON(msg); err != nil {
+	if err := smc.conn.WriteJSON(res); err != nil {
 		return err
 	}
+
+	smc.Debugf("Sent %+v", *res)
 
 	return nil
 }
 
-func (smc *Client) newEvent(tpe string, data interface{}) ClientEvent {
-	return ClientEvent{Type: tpe, Data: data}
+func (smc *Client) newEvent(tpe string, data interface{}, req ...*Request) ClientEvent {
+	evt := ClientEvent{Type: tpe, Data: data}
+
+	if len(req) > 0 {
+		evt.Request = req[0]
+	}
+
+	return evt
 }
 
 // ack tells Slack that the we have received the SocketModeRequest denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
 func (smc *Client) ack(envelopeID string) error {
-	smc.Debugf("Scheduling ACK response for Envelope IP %s", envelopeID)
+	res := Response{EnvelopeID: envelopeID}
 
-	// See https://github.com/slackapi/node-slack-sdk/blob/c3f4d7109062a0356fb765d53794b7b5f6b3b5ae/packages/socket-mode/src/SocketModeClient.ts#L417
-	res := &Response{EnvelopeID: envelopeID}
-
-	smc.socketModeResponses <- res
+	smc.Send(res)
 
 	return nil
+}
+
+func (smc *Client) Ack(req Request, payload ...interface{}) {
+	res := Response{
+		EnvelopeID: req.EnvelopeID,
+	}
+
+	if len(payload) > 0 {
+		res.Payload = payload[0]
+	}
+
+	smc.Send(res)
+}
+
+func (smc *Client) Send(res Response) {
+	smc.Debugf("Scheduling Socket Mode response for envelope ID %s", res.EnvelopeID)
+
+	js, err := json.Marshal(res)
+	if err != nil {
+		panic(err)
+	}
+
+	smc.Debugf("%s", js)
+
+	smc.socketModeResponses <- &res
 }
 
 // receiveMessagesInto attempts to receive an event from the WebSocket connection for Socket Mode.
@@ -406,11 +436,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 			return ""
 		}
 
-		smc.Events <- smc.newEvent(EventTypeEventsAPI, eventsAPIEvent)
-
-		// We automatically ack the message.
-		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
-		smc.ack(req.EnvelopeID)
+		smc.Events <- smc.newEvent(EventTypeEventsAPI, eventsAPIEvent, req)
 	case RequestTypeDisconnect:
 		// TODO
 		// https://api.slack.com/apis/connections/socket-implement#disconnect
@@ -422,7 +448,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 			panic(fmt.Errorf("uanble to parse slash command: %v", err))
 		}
 
-		smc.Events <- smc.newEvent(EventTypeSlashCommand, cmd)
+		smc.Events <- smc.newEvent(EventTypeSlashCommand, cmd, req)
 	case RequestTypeInteractive:
 		// See belows:
 		// - https://api.slack.com/apis/connections/socket-implement#button
@@ -436,7 +462,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 			panic(fmt.Errorf("unable to parse interaction callback: %v", err))
 		}
 
-		smc.Events <- smc.newEvent(EventTypeInteractive, callback)
+		smc.Events <- smc.newEvent(EventTypeInteractive, callback, req)
 	default:
 		panic(fmt.Errorf("unexpected type %q: %v", req.Type, req))
 	}
