@@ -457,15 +457,10 @@ func (smc *Client) handleAck(event json.RawMessage) {
 func (smc *Client) handlePing(event json.RawMessage) {
 	smc.resetDeadman()
 
-	s := string(event)
+	smc.Debugf("WebSocket ping message received: %s", event)
 
-	println("WebSocket ping message received:", s)
-
-	//
-	//latency := time.Since(time.Unix(p.Timestamp, 0))
-	//smc.IncomingEvents <- smc.internalEvent("latency_report", &LatencyReport{Value: latency})
-}
-
-func (smc *Client) handleClose(code int, text string) {
-	smc.killConnection(code == 200, errors.New(text))
+	// In WebSocket, we need to respond a PING from the server with a PONG with the same payload as the PING.
+	if err := smc.conn.WriteControl(websocket.PongMessage, []byte(event), time.Now().Add(10*time.Second)); err != nil {
+		smc.Debugf("Failed writing WebSocket PONG message: %v", err)
+	}
 }
