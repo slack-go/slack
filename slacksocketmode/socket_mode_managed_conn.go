@@ -3,7 +3,6 @@ package slacksocketmode
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
@@ -199,11 +198,12 @@ func (smc *Client) openAndDial() (info *slack.SocketModeConnection, _ *websocket
 		return nil
 	})
 
-	conn.SetCloseHandler(func(code int, text string) error {
-		smc.handleClose(code, text)
-
-		return nil
-	})
+	// We don't need to conn.SetCloseHandler because the default handler is effective enough that
+	// it sends back the CLOSE message to the server and let conn.ReadJSON() fail with CloseError.
+	// The CloseError must be handled normally in our receiveMessagesInto function.
+	//conn.SetCloseHandler(func(code int, text string) error {
+	//  ...
+	// })
 
 	return info, conn, err
 }
