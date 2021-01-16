@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/slack-go/slack/internal/backoff"
+	"github.com/slack-go/slack/internal/misc"
 	"io"
 	"net/http"
 	stdurl "net/url"
@@ -124,7 +125,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		}
 
 		switch actual := err.(type) {
-		case statusCodeError:
+		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				rtm.Debugf("invalid auth when connecting with RTM: %s", err)
 				rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}

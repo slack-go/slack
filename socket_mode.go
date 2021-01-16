@@ -2,7 +2,6 @@ package slack
 
 import (
 	"context"
-	"net/url"
 )
 
 // SocketModeConnection contains various details about the SocketMode connection.

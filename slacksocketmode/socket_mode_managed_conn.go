@@ -1,15 +1,16 @@
 package slacksocketmode
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
+	"github.com/slack-go/slack/internal/misc"
 	"github.com/slack-go/slack/slackevents"
 	"io"
 	"net/http"
-	stdurl "net/url"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -123,7 +124,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		}
 
 		switch actual := err.(type) {
-		case slack.statusCodeError:
+		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with RTM: %s", err)
 				smc.IncomingEvents <- smc.internalEvent("invalid_auth", &slack.InvalidAuthEvent{})
@@ -177,14 +178,6 @@ func (smc *Client) openAndDial() (info *slack.SocketModeConnection, _ *websocket
 		smc.Debugf("Failed to start or connect with SocketMode: %s", err)
 		return nil, nil, err
 	}
-
-	// install connection parameters
-	u, err := stdurl.Parse(url)
-	if err != nil {
-		return nil, nil, err
-	}
-	u.RawQuery = smc.connParams.Encode()
-	url = u.String()
 
 	smc.Debugf("Dialing to websocket on url %s", url)
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.

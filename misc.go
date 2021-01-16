@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/slack-go/slack/internal/misc"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -40,28 +41,6 @@ func (t SlackResponse) Err() error {
 	}
 
 	return errors.New(t.Error)
-}
-
-// StatusCodeError represents an http response error.
-// type httpStatusCode interface { HTTPStatusCode() int } to handle it.
-type statusCodeError struct {
-	Code   int
-	Status string
-}
-
-func (t statusCodeError) Error() string {
-	return fmt.Sprintf("slack server error: %s", t.Status)
-}
-
-func (t statusCodeError) HTTPStatusCode() int {
-	return t.Code
-}
-
-func (t statusCodeError) Retryable() bool {
-	if t.Code >= 500 || t.Code == http.StatusTooManyRequests {
-		return true
-	}
-	return false
 }
 
 // RateLimitedError represents the rate limit respond from slack
@@ -312,7 +291,7 @@ func checkStatusCode(resp *http.Response, d Debug) error {
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
 		logResponse(resp, d)
-		return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
+		return misc.StatusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 
 	return nil
