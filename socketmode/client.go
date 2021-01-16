@@ -64,7 +64,7 @@ type Client struct {
 
 	// Connection life-cycle
 	conn                *websocket.Conn
-	IncomingEvents      chan ClientEvent
+	Events              chan ClientEvent
 	socketModeResponses chan *Response
 	killChannel         chan bool
 	disconnected        chan struct{}

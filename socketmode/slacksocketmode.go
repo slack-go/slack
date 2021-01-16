@@ -12,14 +12,24 @@ import (
 )
 
 const (
+	// The following request types are the types of requests sent from Slack via Socket Mode WebSocket connection
+	// and handled internally by the socketmode.Client.
+	// The consumer of socketmode.Client will never see it.
+
 	RequestTypeHello         = "hello"
 	RequestTypeEventsAPI     = "events_api"
 	RequestTypeDisconnect    = "disconnect"
 	RequestTypeSlashCommands = "slash_commands"
 	RequestTypeInteractive   = "interactive"
 
+	// The following EventTypes are the types of events that are emitted by socketmode.Client.
+	// You receive and handle those events from a socketmode.Client.Events channel.
+
 	EventTypeConnected        = "connected"
 	EventTypeErrorWriteFailed = "write_error"
+	EventTypeEventsAPI        = "events_api"
+	EventTypeInteractive      = "interactive"
+	EventTypeSlashCommand     = "slash_command"
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
@@ -67,7 +77,7 @@ func OptionConnParams(connParams url.Values) Option {
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
 		Client:              *api,
-		IncomingEvents:      make(chan ClientEvent, 50),
+		Events:              make(chan ClientEvent, 50),
 		socketModeResponses: make(chan *Response, 20),
 		pingInterval:        defaultMaxPingInterval,
 		killChannel:         make(chan bool),

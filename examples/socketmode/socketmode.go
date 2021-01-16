@@ -42,37 +42,60 @@ func main() {
 	client := socketmode.New(api)
 
 	go func() {
-		for evt := range client.IncomingEvents {
-			eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
-			if !ok {
-				fmt.Printf("Ignored %+v\n", evt)
-
-				continue
-			}
-
-			fmt.Printf("Event received: %+v\n", eventsAPIEvent)
-
+		for evt := range client.Events {
 			switch evt.Type {
-			case slackevents.CallbackEvent:
-				innerEvent := eventsAPIEvent.InnerEvent
-				switch ev := innerEvent.Data.(type) {
-				case *slackevents.AppMentionEvent:
-					_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+			case socketmode.EventTypeEventsAPI:
+				eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+				if !ok {
+					fmt.Printf("Ignored %+v\n", evt)
+
+					continue
+				}
+
+				fmt.Printf("Event received: %+v\n", eventsAPIEvent)
+
+				switch eventsAPIEvent.Type {
+				case slackevents.CallbackEvent:
+					innerEvent := eventsAPIEvent.InnerEvent
+					switch ev := innerEvent.Data.(type) {
+					case *slackevents.AppMentionEvent:
+						_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+						if err != nil {
+							fmt.Printf("failed posting message: %v", err)
+						}
+					}
+				case slackevents.MemberJoinedChannel:
+					ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
+
+					fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
+				case slackevents.AppMention:
+					ev := eventsAPIEvent.Data.(*slackevents.AppMentionEvent)
+
+					_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("hey yo!", false))
 					if err != nil {
 						fmt.Printf("failed posting message: %v", err)
 					}
 				}
-			case slackevents.MemberJoinedChannel:
-				ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
+			case socketmode.EventTypeInteractive:
+				callback, ok := evt.Data.(slack.InteractionCallback)
+				if !ok {
+					fmt.Printf("Ignored %+v\n", evt)
 
-				fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
-			case slackevents.AppMention:
-				ev := eventsAPIEvent.Data.(*slackevents.AppMentionEvent)
-
-				_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("hey yo!", false))
-				if err != nil {
-					fmt.Printf("failed posting message: %v", err)
+					continue
 				}
+
+				fmt.Printf("Interaction received: %+v\n", callback)
+			case socketmode.EventTypeSlashCommand:
+				cmd, ok := evt.Data.(slack.SlashCommand)
+				if !ok {
+					fmt.Printf("Ignored %+v\n", evt)
+
+					continue
+				}
+
+				fmt.Printf("Slash command received: %+v\n", cmd)
+			default:
+				fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
 			}
 		}
 	}()

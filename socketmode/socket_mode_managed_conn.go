@@ -22,7 +22,7 @@ import (
 // and outgoing events.
 //
 // If a connection fails then it will attempt to reconnect
-// and will notify any consumers through an error Event on Client's IncomingEvents channel.
+// and will notify any consumers through an error Event on Client's Events channel.
 //
 // If the connection ends and the disconnect was unintentional then this will
 // attempt to reconnect.
@@ -40,7 +40,7 @@ func (smc *Client) Run() {
 
 	for connectionCount := 0; ; connectionCount++ {
 		// start trying to connect
-		// the returned err is already passed onto the IncomingEvents channel
+		// the returned err is already passed onto the Events channel
 		if info, conn, err = smc.connect(connectionCount); err != nil {
 			// when the connection is unsuccessful its fatal, and we need to bail out.
 			smc.Debugf("Failed to connect with Socket Mode on try %d: %s", connectionCount, err)
@@ -55,7 +55,7 @@ func (smc *Client) Run() {
 		smc.info = info
 		smc.mu.Unlock()
 
-		smc.IncomingEvents <- smc.newEvent(EventTypeConnected, &ConnectedEvent{
+		smc.Events <- smc.newEvent(EventTypeConnected, &ConnectedEvent{
 			ConnectionCount: connectionCount,
 			Info:            info,
 		})
@@ -104,7 +104,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		)
 
 		// send connecting event
-		smc.IncomingEvents <- smc.newEvent("connecting", &slack.ConnectingEvent{
+		smc.Events <- smc.newEvent("connecting", &slack.ConnectingEvent{
 			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
 		})
@@ -127,7 +127,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with RTM: %s", err)
-				smc.IncomingEvents <- smc.newEvent("invalid_auth", &slack.InvalidAuthEvent{})
+				smc.Events <- smc.newEvent("invalid_auth", &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
@@ -137,8 +137,8 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
-		// sending the event along the IncomingEvents channel
-		smc.IncomingEvents <- smc.newEvent("connection_error", &slack.ConnectionErrorEvent{
+		// sending the event along the Events channel
+		smc.Events <- smc.newEvent("connection_error", &slack.ConnectionErrorEvent{
 			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
@@ -221,7 +221,7 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 		err = smc.conn.Close()
 	}
 
-	smc.IncomingEvents <- smc.newEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
+	smc.Events <- smc.newEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
 
 	if intentional {
 		smc.disconnect()
@@ -254,7 +254,7 @@ func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 		// 3. listen for messages that need to be sent
 		case res := <-smc.socketModeResponses:
 			if err := smc.unsafeWriteSocketModeResponse(res); err != nil {
-				smc.IncomingEvents <- smc.newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
+				smc.Events <- smc.newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
 					Cause:    err,
 					Response: res,
 				})
@@ -352,7 +352,7 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		smc.IncomingEvents <- smc.newEvent("incoming_error", &slack.IncomingEventError{
+		smc.Events <- smc.newEvent("incoming_error", &slack.IncomingEventError{
 			ErrorObj: err,
 		})
 
@@ -386,7 +386,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	req := &Request{}
 	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
-		smc.IncomingEvents <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{ErrorObj: err})
+		smc.Events <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{ErrorObj: err})
 		return ""
 	}
 
@@ -397,7 +397,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	// - https://api.slack.com/apis/connections/socket-implement
 	switch req.Type {
 	case RequestTypeHello:
-		smc.IncomingEvents <- smc.newEvent("hello", &slack.HelloEvent{})
+		smc.Events <- smc.newEvent("hello", &slack.HelloEvent{})
 	case RequestTypeEventsAPI:
 		payloadEvent := req.Payload
 
@@ -406,7 +406,7 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 			return ""
 		}
 
-		smc.IncomingEvents <- smc.newEvent(eventsAPIEvent.Type, eventsAPIEvent)
+		smc.Events <- smc.newEvent(EventTypeEventsAPI, eventsAPIEvent)
 
 		// We automatically ack the message.
 		// TODO Should there be any way to manually ack the msg, like the official nodejs client?
@@ -416,13 +416,27 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 		// https://api.slack.com/apis/connections/socket-implement#disconnect
 	case RequestTypeSlashCommands:
 		// See https://api.slack.com/apis/connections/socket-implement#command
+		var cmd slack.SlashCommand
 
+		if err := json.Unmarshal(req.Payload, &cmd); err != nil {
+			panic(fmt.Errorf("uanble to parse slash command: %v", err))
+		}
+
+		smc.Events <- smc.newEvent(EventTypeSlashCommand, cmd)
 	case RequestTypeInteractive:
 		// See belows:
 		// - https://api.slack.com/apis/connections/socket-implement#button
 		// - https://api.slack.com/apis/connections/socket-implement#home
 		// - https://api.slack.com/apis/connections/socket-implement#modal
 		// - https://api.slack.com/apis/connections/socket-implement#menu
+
+		var callback slack.InteractionCallback
+
+		if err := json.Unmarshal(req.Payload, &callback); err != nil {
+			panic(fmt.Errorf("unable to parse interaction callback: %v", err))
+		}
+
+		smc.Events <- smc.newEvent(EventTypeInteractive, callback)
 	default:
 		panic(fmt.Errorf("unexpected type %q: %v", req.Type, req))
 	}

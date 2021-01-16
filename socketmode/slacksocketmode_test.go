@@ -52,7 +52,7 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 
 func parse(raw string) (*ClientEvent, error) {
 	c := &Client{
-		IncomingEvents: make(chan ClientEvent, 1),
+		Events: make(chan ClientEvent, 1),
 	}
 
 	tpe := c.handleWebSocketMessage(json.RawMessage([]byte(raw)))
@@ -62,7 +62,7 @@ func parse(raw string) (*ClientEvent, error) {
 	}
 
 	select {
-	case evt := <-c.IncomingEvents:
+	case evt := <-c.Events:
 		return &evt, nil
 	default:
 		return nil, errors.New("no expected event emitted")
