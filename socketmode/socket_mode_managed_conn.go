@@ -239,8 +239,6 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 // 3. Sends outgoing messages that are received from the Client's socketModeResponses channel
 // 4. Handles incoming raw events from the webSocketMessages channel.
 func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
-	ticker := time.NewTicker(smc.maxPingInterval)
-	defer ticker.Stop()
 	for {
 		select {
 		// 1. catch "stop" signal on channel close
