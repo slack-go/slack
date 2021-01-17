@@ -482,7 +482,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 	req := &Request{}
 	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
-		return nil, fmt.Errorf("unmarshalling WebSocket message: %w", err)
+		return nil, fmt.Errorf("unmarshalling WebSocket message: %v", err)
 	}
 
 	var evt Event
@@ -498,7 +498,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 
 		eventsAPIEvent, err := slackevents.ParseEvent(payloadEvent, slackevents.OptionNoVerifyToken())
 		if err != nil {
-			return nil, fmt.Errorf("parsing Events API event: %w", err)
+			return nil, fmt.Errorf("parsing Events API event: %v", err)
 		}
 
 		evt = newEvent(EventTypeEventsAPI, eventsAPIEvent, req)
@@ -511,7 +511,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 		var cmd slack.SlashCommand
 
 		if err := json.Unmarshal(req.Payload, &cmd); err != nil {
-			return nil, fmt.Errorf("parsing slash command: %w", err)
+			return nil, fmt.Errorf("parsing slash command: %v", err)
 		}
 
 		evt = newEvent(EventTypeSlashCommand, cmd, req)
@@ -525,7 +525,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 		var callback slack.InteractionCallback
 
 		if err := json.Unmarshal(req.Payload, &callback); err != nil {
-			return nil, fmt.Errorf("parsing interaction callback: %w", err)
+			return nil, fmt.Errorf("parsing interaction callback: %v", err)
 		}
 
 		evt = newEvent(EventTypeInteractive, callback, req)
