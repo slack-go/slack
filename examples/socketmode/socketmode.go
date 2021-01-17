@@ -65,11 +65,9 @@ func main() {
 						if err != nil {
 							fmt.Printf("failed posting message: %v", err)
 						}
+					case *slackevents.MemberJoinedChannelEvent:
+						fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
 					}
-				case slackevents.MemberJoinedChannel:
-					ev := eventsAPIEvent.Data.(*slackevents.MemberJoinedChannelEvent)
-
-					fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
 				default:
 					client.Debugf("unsupported Events API event received")
 				}
