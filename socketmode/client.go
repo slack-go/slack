@@ -59,9 +59,11 @@ type Client struct {
 	conn                *websocket.Conn
 	Events              chan ClientEvent
 	socketModeResponses chan *Response
-	killChannel         chan bool
-	disconnected        chan struct{}
-	disconnectedm       *sync.Once
+	disconnectCh        chan bool
+
+	// done is closed when this Client is being stopped after Run()
+	done     chan struct{}
+	doneOnce *sync.Once
 
 	// UserDetails upon connection
 	info *slack.SocketModeConnection
@@ -82,20 +84,33 @@ type Client struct {
 // signal that we are disconnected by closing the channel.
 // protect it with a mutex to ensure it only happens once.
 func (smc *Client) disconnect() {
-	smc.disconnectedm.Do(func() {
-		close(smc.disconnected)
+	smc.doneOnce.Do(func() {
+		close(smc.done)
 	})
 }
 
 // Disconnect and wait, blocking until a successful disconnection.
 func (smc *Client) Disconnect() error {
-	// always push into the kill channel when invoked,
+	// Always push into the kill channel when invoked,
 	// this lets the ManagedConnection() function properly clean up.
 	// if the buffer is full then just continue on.
 	select {
-	case smc.killChannel <- true:
+	case smc.disconnectCh <- true:
 		return nil
-	case <-smc.disconnected:
+	case <-smc.done:
+		return slack.ErrAlreadyDisconnected
+	}
+}
+
+// Reconnect instructs the client to disconnect and automatically reconnect with Socket Mode.
+func (smc *Client) Reconnect() error {
+	// Always push into the kill channel when invoked,
+	// this lets the ManagedConnection() function properly clean up.
+	// if the buffer is full then just continue on.
+	select {
+	case smc.disconnectCh <- false:
+		return nil
+	case <-smc.done:
 		return slack.ErrAlreadyDisconnected
 	}
 }

@@ -69,7 +69,7 @@ func (smc *Client) Run() {
 		smc.runMessageHandler(rawEvents)
 
 		select {
-		case <-smc.disconnected:
+		case <-smc.done:
 			// after handle events returns we need to check if we're disconnected
 			// when this happens we need to cleanup the newly created connection.
 			if err = conn.Close(); err != nil {
@@ -148,16 +148,16 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		smc.Debugf("reconnection %d failed: %s reconnecting in %v\n", boff.Attempts(), err, backoff)
 
 		// wait for one of the following to occur,
-		// backoff duration has elapsed, killChannel is signalled, or
+		// backoff duration has elapsed, disconnectCh is signalled, or
 		// the smc finishes disconnecting.
 		select {
 		case <-time.After(backoff): // retry after the backoff.
-		case intentional := <-smc.killChannel:
+		case intentional := <-smc.disconnectCh:
 			if intentional {
 				smc.killConnection(intentional, slack.ErrRTMDisconnected)
 				return nil, nil, slack.ErrRTMDisconnected
 			}
-		case <-smc.disconnected:
+		case <-smc.done:
 			return nil, nil, slack.ErrRTMDisconnected
 		}
 	}
@@ -213,7 +213,7 @@ func (smc *Client) openAndDial() (info *slack.SocketModeConnection, _ *websocket
 // that they should cease listening to the connection for events.
 //
 // This should not be called directly! Instead a boolean value (true for
-// intentional, false otherwise) should be sent to the killChannel on the RTM.
+// intentional, false otherwise) should be sent to the disconnectCh on the Client.
 func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 	smc.Debugln("killing connection", cause)
 
@@ -242,7 +242,7 @@ func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 	for {
 		select {
 		// 1. catch "stop" signal on channel close
-		case intentional := <-smc.killChannel:
+		case intentional := <-smc.disconnectCh:
 			_ = smc.killConnection(intentional, errorsx.String("signaled"))
 			return
 		// 2. detect when the connection is dead.
@@ -281,8 +281,8 @@ func (smc *Client) runMessageReceiver(sink chan json.RawMessage) {
 	for {
 		if err := smc.receiveMessagesInto(sink); err != nil {
 			select {
-			case smc.killChannel <- false:
-			case <-smc.disconnected:
+			case smc.disconnectCh <- false:
+			case <-smc.done:
 			}
 			return
 		}
@@ -404,7 +404,7 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 		smc.Debugln("Incoming WebSocket message:", reencoded)
 		select {
 		case sink <- event:
-		case <-smc.disconnected:
+		case <-smc.done:
 			smc.Debugln("disonnected while attempting to send raw event")
 		}
 	}
@@ -442,8 +442,9 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) (*ClientEvent, 
 
 		evt = newEvent(EventTypeEventsAPI, eventsAPIEvent, req)
 	case RequestTypeDisconnect:
-		// TODO
-		// https://api.slack.com/apis/connections/socket-implement#disconnect
+		// See https://api.slack.com/apis/connections/socket-implement#disconnect
+
+		smc.disconnectCh <- false
 
 		return nil, nil
 	case RequestTypeSlashCommands:
