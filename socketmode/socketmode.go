@@ -11,6 +11,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// EventType is the type of events that are emitted by scoketmode.Client.
+// You receive and handle those events from a socketmode.Client.Events channel.
+// Those event types does not necessarily match 1:1 to those of Slack Events API events.
+type EventType string
+
 const (
 	// The following request types are the types of requests sent from Slack via Socket Mode WebSocket connection
 	// and handled internally by the socketmode.Client.
@@ -22,14 +27,18 @@ const (
 	RequestTypeSlashCommands = "slash_commands"
 	RequestTypeInteractive   = "interactive"
 
-	// The following EventTypes are the types of events that are emitted by socketmode.Client.
-	// You receive and handle those events from a socketmode.Client.Events channel.
+	// The following event types are for events emitted by socketmode.Client itself and
+	// does not originate from Slack.
+	EventTypeConnected        = EventType("connected")
+	EventTypeErrorWriteFailed = EventType("write_error")
 
-	EventTypeConnected        = "connected"
-	EventTypeErrorWriteFailed = "write_error"
-	EventTypeEventsAPI        = "events_api"
-	EventTypeInteractive      = "interactive"
-	EventTypeSlashCommand     = "slash_command"
+	//
+	// The following event types are guaranteed to not change unless Slack changes
+	//
+
+	EventTypeEventsAPI    = EventType("events_api")
+	EventTypeInteractive  = EventType("interactive")
+	EventTypeSlashCommand = EventType("slash_command")
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
@@ -42,14 +51,14 @@ func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string
 	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
 	defer cancel()
 
-	return smc.StartSocketModeContext(ctx)
+	return smc.apiClient.StartSocketModeContext(ctx)
 }
 
 // Option options for the managed Client.
 type Option func(client *Client)
 
 // OptionDialer takes a gorilla websocket Dialer and uses it as the
-// Dialer when opening the websocket for the RTM connection.
+// Dialer when opening the websocket for the Socket Mode connection.
 func OptionDialer(d *websocket.Dialer) Option {
 	return func(smc *Client) {
 		smc.dialer = d
@@ -72,11 +81,11 @@ func OptionConnParams(connParams url.Values) Option {
 	}
 }
 
-// NewRTM returns a RTM, which provides a fully managed connection to
-// Slack's websocket-based Real-Time Messaging protocol.
+// New returns a Socket Mode client which provides a fully managed connection to
+// Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
-		Client:              *api,
+		apiClient:           *api,
 		Events:              make(chan ClientEvent, 50),
 		socketModeResponses: make(chan *Response, 20),
 		pingInterval:        defaultMaxPingInterval,

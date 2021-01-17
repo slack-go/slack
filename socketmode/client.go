@@ -33,16 +33,6 @@ type SocketModeMessagePayload struct {
 	Event json.RawMessage `json:"´event"`
 }
 
-// ClientEvent is the event sent to the consumer of Client
-type ClientEvent struct {
-	Type string
-	Data interface{}
-
-	// Request is the json-decoded raw WebSocket message that is received via the Slack Socket Mode
-	// WebSocket connection.
-	Request *Request
-}
-
 // Client allows allows programs to communicate with the
 // [Events API](https://api.slack.com/events-api) over WebSocket.
 //
@@ -54,7 +44,7 @@ type ClientEvent struct {
 // Client's New() or NewSocketModeClientWithOptions(*SocketModeClientOptions)
 type Client struct {
 	// Client is the main API, embedded
-	slack.Client
+	apiClient slack.Client
 
 	idGen        slack.IDGenerator
 	pingInterval time.Duration
