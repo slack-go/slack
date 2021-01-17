@@ -21,138 +21,137 @@ import (
 )
 
 // Run is a blocking function that connects the Slack Socket Mode API and handles all incoming
-// and outgoing events.
+// requests and outgoing responses.
 //
-// If a connection fails then it will attempt to reconnect
-// and will notify any consumers through an error Event on Client's Events channel.
+// The consumer of the Client and this function should read the Client.Events channel to receive
+// `socketmode.Event`s that includes the client-specific events that may or may not wrap Socket Mode requests.
 //
-// If the connection ends and the disconnect was unintentional then this will
-// attempt to reconnect.
-//
-// This should only be called once per slack API! Otherwise expect undefined
-// behavior.
-//
-// The defined error events are located in websocket_internals.go.
+// Note that this function automatically reconnect on requested by Slack through a `disconnect` message.
+// This function exists with an error only when a reconnection is failued due to some reason.
+// If you want to retry even on reconnection failure, you'd need to write your own wrapper for this function
+// to do so.
 func (smc *Client) Run() error {
-	var (
-		err  error
-		info *slack.SocketModeConnection
-		conn *websocket.Conn
-	)
-
 	ctx := context.TODO()
 
-	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
-
 	for connectionCount := 0; ; connectionCount++ {
-		messages := make(chan json.RawMessage)
-
-		deadmanTimer.Reset()
-
-		pingHandler := func(_ string) error {
-			deadmanTimer.Reset()
-
-			return nil
-		}
-
-		// Start trying to connect
-		// the returned err is already passed onto the Events channel
-		//
-		// We also configures an additional ping handler for the deadmanTimer that triggers a timeout when
-		// Slack did not send us WebSocket PING for more than Client.maxPingInterval.
-		// We can use `<-smc.pingTimeout.C` to wait for the timeout.
-		if info, conn, err = smc.connect(ctx, connectionCount, pingHandler); err != nil {
-			// when the connection is unsuccessful its fatal, and we need to bail out.
-			smc.Debugf("Failed to connect with Socket Mode on try %d: %s", connectionCount, err)
-
+		if err := smc.run(ctx, connectionCount); err != nil {
 			return err
-		}
-
-		ctx, cancel := context.WithCancel(ctx)
-		defer cancel()
-
-		smc.Events <- newEvent(EventTypeConnected, &ConnectedEvent{
-			ConnectionCount: connectionCount,
-			Info:            info,
-		})
-
-		smc.Debugf("WebSocket connection succeeded on try %d", connectionCount)
-
-		// we're now connected so we can set up listeners
-
-		var (
-			wg           sync.WaitGroup
-			firstErr     error
-			firstErrOnce sync.Once
-		)
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			defer cancel()
-
-			if err := smc.runResponseSender(ctx, conn); err != nil {
-				firstErrOnce.Do(func() {
-					firstErr = err
-				})
-			}
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			defer cancel()
-
-			// The handler reads messages and writes responses to the WebSocket conn
-			if err := smc.runRequestHandler(ctx, messages); err != nil {
-				firstErrOnce.Do(func() {
-					firstErr = err
-				})
-			}
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			defer cancel()
-
-			// The receiver reads messages from the WebSocket conn and writes decoded Socket Mode messages into the
-			// message channel
-			if err := smc.runMessageReceiver(ctx, conn, messages); err != nil {
-				firstErrOnce.Do(func() {
-					firstErr = err
-				})
-
-				cancel()
-			}
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
-			select {
-			case <-ctx.Done():
-			// Detect when the connection is dead.
-			case <-deadmanTimer.Elapsed():
-				firstErrOnce.Do(func() {
-					firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
-				})
-
-				cancel()
-			}
-		}()
-
-		wg.Wait()
-
-		smc.Debugf("Reconnecting due to %v", firstErr)
-
-		if err = conn.Close(); err != nil {
-			smc.Debugln("failed to close conn on disconnected RTM", err)
 		}
 
 		// Continue and run the loop again to reconnect
 	}
+}
+
+func (smc *Client) run(ctx context.Context, connectionCount int) error {
+	messages := make(chan json.RawMessage)
+
+	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
+
+	pingHandler := func(_ string) error {
+		deadmanTimer.Reset()
+
+		return nil
+	}
+
+	// Start trying to connect
+	// the returned err is already passed onto the Events channel
+	//
+	// We also configures an additional ping handler for the deadmanTimer that triggers a timeout when
+	// Slack did not send us WebSocket PING for more than Client.maxPingInterval.
+	// We can use `<-smc.pingTimeout.C` to wait for the timeout.
+	info, conn, err := smc.connect(ctx, connectionCount, pingHandler)
+	if err != nil {
+		// when the connection is unsuccessful its fatal, and we need to bail out.
+		smc.Debugf("Failed to connect with Socket Mode on try %d: %s", connectionCount, err)
+
+		return err
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	smc.Events <- newEvent(EventTypeConnected, &ConnectedEvent{
+		ConnectionCount: connectionCount,
+		Info:            info,
+	})
+
+	smc.Debugf("WebSocket connection succeeded on try %d", connectionCount)
+
+	// We're now connected so we can set up listeners
+
+	var (
+		wg           sync.WaitGroup
+		firstErr     error
+		firstErrOnce sync.Once
+	)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer cancel()
+
+		// The response sender sends Socket Mode responses over the WebSocket conn
+		if err := smc.runResponseSender(ctx, conn); err != nil {
+			firstErrOnce.Do(func() {
+				firstErr = err
+			})
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer cancel()
+
+		// The handler reads Socket Mode requests, and enqueues responses for sending by the response sender
+		if err := smc.runRequestHandler(ctx, messages); err != nil {
+			firstErrOnce.Do(func() {
+				firstErr = err
+			})
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer cancel()
+
+		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
+		// the request handler
+		if err := smc.runMessageReceiver(ctx, conn, messages); err != nil {
+			firstErrOnce.Do(func() {
+				firstErr = err
+			})
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		select {
+		case <-ctx.Done():
+		// Detect when the connection is dead.
+		case <-deadmanTimer.Elapsed():
+			firstErrOnce.Do(func() {
+				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
+			})
+
+			cancel()
+		}
+	}()
+
+	wg.Wait()
+
+	// wg.Wait() finishes only after any of the above go routines finishes.
+	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
+	smc.Debugf("Reconnecting due to %v", firstErr)
+
+	if err = conn.Close(); err != nil {
+		smc.Debugln("failed to close conn on disconnected RTM", err)
+	}
+
+	return nil
 }
 
 // connect attempts to connect to the slack websocket API. It handles any
