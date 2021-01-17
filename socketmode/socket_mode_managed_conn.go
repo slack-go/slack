@@ -321,16 +321,10 @@ func (smc *Client) newEvent(tpe EventType, data interface{}, req ...*Request) Cl
 	return evt
 }
 
-// ack tells Slack that the we have received the SocketModeRequest denoted by the envelope ID,
+// Ack acknowledges the Socket Mode request with the payload.
+//
+// This tells Slack that the we have received the request denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
-func (smc *Client) ack(envelopeID string) error {
-	res := Response{EnvelopeID: envelopeID}
-
-	smc.Send(res)
-
-	return nil
-}
-
 func (smc *Client) Ack(req Request, payload ...interface{}) {
 	res := Response{
 		EnvelopeID: req.EnvelopeID,
@@ -343,6 +337,9 @@ func (smc *Client) Ack(req Request, payload ...interface{}) {
 	smc.Send(res)
 }
 
+// Send sends the Socket Mode response over a WebSocket connection.
+// This is usually used for acknowledging requests, but if you need more control over Client.Ack().
+// It's normally recommended to use Client.Ack() instead of this.
 func (smc *Client) Send(res Response) {
 	smc.Debugf("Scheduling Socket Mode response for envelope ID %s", res.EnvelopeID)
 
