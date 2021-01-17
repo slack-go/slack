@@ -38,7 +38,7 @@ const (
 
 	EventTypeEventsAPI    = EventType("events_api")
 	EventTypeInteractive  = EventType("interactive")
-	EventTypeSlashCommand = EventType("slash_command")
+	EventTypeSlashCommand = EventType("slash_commands")
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
