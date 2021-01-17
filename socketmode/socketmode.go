@@ -31,6 +31,7 @@ const (
 	// does not originate from Slack.
 	EventTypeConnected        = EventType("connected")
 	EventTypeErrorWriteFailed = EventType("write_error")
+	EventTypeErrorBadMessage  = EventType("error_bad_message")
 
 	//
 	// The following event types are guaranteed to not change unless Slack changes

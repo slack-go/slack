@@ -55,7 +55,7 @@ func (smc *Client) Run() {
 		smc.info = info
 		smc.mu.Unlock()
 
-		smc.Events <- smc.newEvent(EventTypeConnected, &ConnectedEvent{
+		smc.Events <- newEvent(EventTypeConnected, &ConnectedEvent{
 			ConnectionCount: connectionCount,
 			Info:            info,
 		})
@@ -104,7 +104,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		)
 
 		// send connecting event
-		smc.Events <- smc.newEvent("connecting", &slack.ConnectingEvent{
+		smc.Events <- newEvent("connecting", &slack.ConnectingEvent{
 			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
 		})
@@ -127,7 +127,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with RTM: %s", err)
-				smc.Events <- smc.newEvent("invalid_auth", &slack.InvalidAuthEvent{})
+				smc.Events <- newEvent("invalid_auth", &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
@@ -138,7 +138,7 @@ func (smc *Client) connect(connectionCount int) (*slack.SocketModeConnection, *w
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the Events channel
-		smc.Events <- smc.newEvent("connection_error", &slack.ConnectionErrorEvent{
+		smc.Events <- newEvent("connection_error", &slack.ConnectionErrorEvent{
 			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
@@ -221,7 +221,7 @@ func (smc *Client) killConnection(intentional bool, cause error) (err error) {
 		err = smc.conn.Close()
 	}
 
-	smc.Events <- smc.newEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
+	smc.Events <- newEvent("disconnected", &slack.DisconnectedEvent{Intentional: intentional, Cause: cause})
 
 	if intentional {
 		smc.disconnect()
@@ -252,14 +252,22 @@ func (smc *Client) runMessageHandler(webSocketMessages chan json.RawMessage) {
 		// 3. listen for messages that need to be sent
 		case res := <-smc.socketModeResponses:
 			if err := smc.unsafeWriteSocketModeResponse(res); err != nil {
-				smc.Events <- smc.newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
+				smc.Events <- newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
 					Cause:    err,
 					Response: res,
 				})
 			}
 			// listen for incoming messages that need to be parsed
 		case wsMsg := <-webSocketMessages:
-			_ = smc.handleWebSocketMessage(wsMsg)
+			evt, err := smc.handleWebSocketMessage(wsMsg)
+			if err != nil {
+				smc.Events <- newEvent(EventTypeErrorBadMessage, &ErrorBadMessage{
+					Cause:   err,
+					Message: wsMsg,
+				})
+			} else if evt != nil {
+				smc.Events <- *evt
+			}
 		}
 	}
 }
@@ -309,7 +317,7 @@ func (smc *Client) unsafeWriteSocketModeResponse(res *Response) error {
 	return nil
 }
 
-func (smc *Client) newEvent(tpe EventType, data interface{}, req ...*Request) ClientEvent {
+func newEvent(tpe EventType, data interface{}, req ...*Request) ClientEvent {
 	evt := ClientEvent{Type: tpe, Data: data}
 
 	if len(req) > 0 {
@@ -377,7 +385,7 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		smc.Events <- smc.newEvent("incoming_error", &slack.IncomingEventError{
+		smc.Events <- newEvent("incoming_error", &slack.IncomingEventError{
 			ErrorObj: err,
 		})
 
@@ -407,13 +415,14 @@ func (smc *Client) receiveMessagesInto(sink chan json.RawMessage) error {
 // handleWebSocketMessage takes a raw JSON message received from the slack websocket
 // and handles the encoded event.
 // returns the event type of the message.
-func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
+func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) (*ClientEvent, error) {
 	req := &Request{}
 	err := json.Unmarshal(wsMsg, req)
 	if err != nil {
-		smc.Events <- smc.newEvent("unmarshalling_error", &slack.UnmarshallingErrorEvent{ErrorObj: err})
-		return ""
+		return nil, fmt.Errorf("unmarshalling WebSocket message: %w", err)
 	}
+
+	var evt ClientEvent
 
 	smc.Debugf("Handling WebSocket message: %s", wsMsg)
 
@@ -422,28 +431,30 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 	// - https://api.slack.com/apis/connections/socket-implement
 	switch req.Type {
 	case RequestTypeHello:
-		smc.Events <- smc.newEvent("hello", &slack.HelloEvent{})
+		evt = newEvent("hello", &slack.HelloEvent{})
 	case RequestTypeEventsAPI:
 		payloadEvent := req.Payload
 
 		eventsAPIEvent, err := slackevents.ParseEvent(payloadEvent, slackevents.OptionNoVerifyToken())
 		if err != nil {
-			return ""
+			return nil, fmt.Errorf("parsing Events API event: %w", err)
 		}
 
-		smc.Events <- smc.newEvent(EventTypeEventsAPI, eventsAPIEvent, req)
+		evt = newEvent(EventTypeEventsAPI, eventsAPIEvent, req)
 	case RequestTypeDisconnect:
 		// TODO
 		// https://api.slack.com/apis/connections/socket-implement#disconnect
+
+		return nil, nil
 	case RequestTypeSlashCommands:
 		// See https://api.slack.com/apis/connections/socket-implement#command
 		var cmd slack.SlashCommand
 
 		if err := json.Unmarshal(req.Payload, &cmd); err != nil {
-			panic(fmt.Errorf("uanble to parse slash command: %v", err))
+			return nil, fmt.Errorf("parsing slash command: %w", err)
 		}
 
-		smc.Events <- smc.newEvent(EventTypeSlashCommand, cmd, req)
+		evt = newEvent(EventTypeSlashCommand, cmd, req)
 	case RequestTypeInteractive:
 		// See belows:
 		// - https://api.slack.com/apis/connections/socket-implement#button
@@ -454,15 +465,15 @@ func (smc *Client) handleWebSocketMessage(wsMsg json.RawMessage) string {
 		var callback slack.InteractionCallback
 
 		if err := json.Unmarshal(req.Payload, &callback); err != nil {
-			panic(fmt.Errorf("unable to parse interaction callback: %v", err))
+			return nil, fmt.Errorf("parsing interaction callback: %w", err)
 		}
 
-		smc.Events <- smc.newEvent(EventTypeInteractive, callback, req)
+		evt = newEvent(EventTypeInteractive, callback, req)
 	default:
-		panic(fmt.Errorf("unexpected type %q: %v", req.Type, req))
+		return nil, fmt.Errorf("processing WebSocket message: encountered unsupported type %q", req.Type)
 	}
 
-	return req.Type
+	return &evt, nil
 }
 
 // handlePing handles an incoming 'PONG' message which should be in response to

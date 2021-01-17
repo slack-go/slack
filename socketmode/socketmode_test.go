@@ -51,20 +51,13 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 }
 
 func parse(raw string) (*ClientEvent, error) {
-	c := &Client{
-		Events: make(chan ClientEvent, 1),
+	c := &Client{}
+
+	evt, err := c.handleWebSocketMessage(json.RawMessage([]byte(raw)))
+
+	if evt == nil {
+		return nil, errors.New("failed handling raw event: event was empty")
 	}
 
-	tpe := c.handleWebSocketMessage(json.RawMessage([]byte(raw)))
-
-	if tpe == "" {
-		return nil, errors.New("failed handling raw event: type was empty")
-	}
-
-	select {
-	case evt := <-c.Events:
-		return &evt, nil
-	default:
-		return nil, errors.New("no expected event emitted")
-	}
+	return evt, err
 }
