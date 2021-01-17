@@ -70,7 +70,7 @@ func OptionDialer(d *websocket.Dialer) Option {
 // is dead and needs to be reconnected.
 func OptionPingInterval(d time.Duration) Option {
 	return func(rtm *Client) {
-		rtm.pingInterval = d
+		rtm.maxPingInterval = d
 	}
 }
 
@@ -88,7 +88,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		apiClient:           *api,
 		Events:              make(chan ClientEvent, 50),
 		socketModeResponses: make(chan *Response, 20),
-		pingInterval:        defaultMaxPingInterval,
+		maxPingInterval:     defaultMaxPingInterval,
 		killChannel:         make(chan bool),
 		disconnected:        make(chan struct{}),
 		disconnectedm:       &sync.Once{},
@@ -101,7 +101,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		opt(result)
 	}
 
-	result.pingDeadman = time.NewTimer(deadmanDuration(result.pingInterval))
+	result.pingDeadman = time.NewTimer(deadmanDuration(result.maxPingInterval))
 
 	return result
 }

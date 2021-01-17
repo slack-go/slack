@@ -46,8 +46,11 @@ type Client struct {
 	// Client is the main API, embedded
 	apiClient slack.Client
 
-	idGen        slack.IDGenerator
-	pingInterval time.Duration
+	idGen slack.IDGenerator
+
+	// maxPingInterval is the maximum duration elapsed after the last WebSocket PING sent from Slack
+	// until Client considers the WebSocket connection is dead and needs to be reopened.
+	maxPingInterval time.Duration
 
 	// pingDeadman must be intiailized in New()
 	pingDeadman *time.Timer
@@ -105,5 +108,5 @@ func (smc *Client) GetInfo() *slack.SocketModeConnection {
 }
 
 func (smc *Client) resetDeadman() {
-	smc.pingDeadman.Reset(deadmanDuration(smc.pingInterval))
+	smc.pingDeadman.Reset(deadmanDuration(smc.maxPingInterval))
 }
