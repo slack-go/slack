@@ -391,3 +391,76 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
 		[]string{"G12345"})
 }
+
+func TestInteractionCallback_ValidateToken(t *testing.T) {
+	verificationTokens := []string{"valid", "valid2"}
+	tests := []struct {
+		name    string
+		args    InteractionCallback
+		wantErr bool
+	}{
+		{
+			name: "InteractionTypeDialogSubmission",
+			args: InteractionCallback{
+				Type:  InteractionTypeDialogSubmission,
+				Token: "valid",
+				User: User{
+					ID:   "testid",
+					Name: "testuser",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InteractionTypeViewClosed",
+			args: InteractionCallback{
+				Type:  InteractionTypeViewClosed,
+				Token: "valid",
+				User: User{
+					ID:   "testid",
+					Name: "testuser",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InteractionTypeViewSubmission",
+			args: InteractionCallback{
+				Type:  InteractionTypeViewSubmission,
+				Token: "valid",
+				User: User{
+					ID:   "testid",
+					Name: "testuser",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "InteractionTypeBlockActions",
+			args: InteractionCallback{
+				Type:  InteractionTypeBlockActions,
+				Token: "valid",
+				User: User{
+					ID:   "testid",
+					Name: "testuser",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid token",
+			args: InteractionCallback{
+				Token: "invalid",
+			},
+			wantErr: false,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.args.ValidateToken(verificationTokens...)
+			if got != tt.wantErr {
+				t.Errorf("%d: Got params %#v, want %#v", i, verificationTokens, tt.args.Token)
+			}
+		})
+	}
+}

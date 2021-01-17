@@ -117,6 +117,16 @@ func (ic *InteractionCallback) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+// ValidateToken validates verificationTokens
+func (ic InteractionCallback) ValidateToken(verificationTokens ...string) bool {
+	for _, token := range verificationTokens {
+		if ic.Token == token {
+			return true
+		}
+	}
+	return false
+}
+
 type Container struct {
 	Type         string      `json:"type"`
 	ViewID       string      `json:"view_id"`
