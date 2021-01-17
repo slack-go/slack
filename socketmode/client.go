@@ -2,8 +2,6 @@ package socketmode
 
 import (
 	"encoding/json"
-	"net/url"
-	"sync"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -52,76 +50,11 @@ type Client struct {
 	// until Client considers the WebSocket connection is dead and needs to be reopened.
 	maxPingInterval time.Duration
 
-	// pingDeadman must be intiailized in New()
-	pingDeadman *time.Timer
-
 	// Connection life-cycle
-	conn                *websocket.Conn
-	Events              chan ClientEvent
+	Events              chan Event
 	socketModeResponses chan *Response
-	disconnectCh        chan bool
-
-	// done is closed when this Client is being stopped after Run()
-	done     chan struct{}
-	doneOnce *sync.Once
-
-	// UserDetails upon connection
-	info *slack.SocketModeConnection
 
 	// dialer is a gorilla/websocket Dialer. If nil, use the default
 	// Dialer.
 	dialer *websocket.Dialer
-
-	// mu is mutex used to prevent RTM connection race conditions
-	mu *sync.Mutex
-
-	wsWriteMu *sync.Mutex
-
-	// connParams is a map of flags for connection parameters.
-	connParams url.Values
-}
-
-// signal that we are disconnected by closing the channel.
-// protect it with a mutex to ensure it only happens once.
-func (smc *Client) disconnect() {
-	smc.doneOnce.Do(func() {
-		close(smc.done)
-	})
-}
-
-// Disconnect and wait, blocking until a successful disconnection.
-func (smc *Client) Disconnect() error {
-	// Always push into the kill channel when invoked,
-	// this lets the ManagedConnection() function properly clean up.
-	// if the buffer is full then just continue on.
-	select {
-	case smc.disconnectCh <- true:
-		return nil
-	case <-smc.done:
-		return slack.ErrAlreadyDisconnected
-	}
-}
-
-// Reconnect instructs the client to disconnect and automatically reconnect with Socket Mode.
-func (smc *Client) Reconnect() error {
-	// Always push into the kill channel when invoked,
-	// this lets the ManagedConnection() function properly clean up.
-	// if the buffer is full then just continue on.
-	select {
-	case smc.disconnectCh <- false:
-		return nil
-	case <-smc.done:
-		return slack.ErrAlreadyDisconnected
-	}
-}
-
-// GetInfo returns the info structure received when calling
-// "startrtm", holding metadata needed to implement a full
-// chat client. It will be non-nil after a call to StartRTM().
-func (smc *Client) GetInfo() *slack.SocketModeConnection {
-	return smc.info
-}
-
-func (smc *Client) resetDeadman() {
-	smc.pingDeadman.Reset(deadmanDuration(smc.maxPingInterval))
 }

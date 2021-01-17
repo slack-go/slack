@@ -2,8 +2,6 @@ package socketmode
 
 import (
 	"context"
-	"net/url"
-	"sync"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -32,6 +30,7 @@ const (
 	EventTypeConnected        = EventType("connected")
 	EventTypeErrorWriteFailed = EventType("write_error")
 	EventTypeErrorBadMessage  = EventType("error_bad_message")
+	EventTypeDisconnect       = EventType("disconnect")
 
 	//
 	// The following event types are guaranteed to not change unless Slack changes
@@ -75,34 +74,20 @@ func OptionPingInterval(d time.Duration) Option {
 	}
 }
 
-// OptionConnParams installs parameters to embed into the connection URL.
-func OptionConnParams(connParams url.Values) Option {
-	return func(smc *Client) {
-		smc.connParams = connParams
-	}
-}
-
 // New returns a Socket Mode client which provides a fully managed connection to
 // Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
 		apiClient:           *api,
-		Events:              make(chan ClientEvent, 50),
+		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
-		disconnectCh:        make(chan bool),
-		done:                make(chan struct{}),
-		doneOnce:            &sync.Once{},
 		idGen:               slack.NewSafeID(1),
-		mu:                  &sync.Mutex{},
-		wsWriteMu:           &sync.Mutex{},
 	}
 
 	for _, opt := range options {
 		opt(result)
 	}
-
-	result.pingDeadman = time.NewTimer(deadmanDuration(result.maxPingInterval))
 
 	return result
 }

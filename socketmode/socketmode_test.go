@@ -34,7 +34,7 @@ const (
 )
 
 func TestEventParsing(t *testing.T) {
-	testParsing(t, EventHello, &ClientEvent{Type: "hello", Data: &slack.HelloEvent{}})
+	testParsing(t, EventHello, &Event{Type: "hello", Data: &slack.HelloEvent{}})
 }
 
 func testParsing(t *testing.T, raw string, want interface{}) {
@@ -50,10 +50,10 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 	}
 }
 
-func parse(raw string) (*ClientEvent, error) {
+func parse(raw string) (*Event, error) {
 	c := &Client{}
 
-	evt, err := c.handleWebSocketMessage(json.RawMessage([]byte(raw)))
+	evt, err := c.parseEvent(json.RawMessage([]byte(raw)))
 
 	if evt == nil {
 		return nil, errors.New("failed handling raw event: event was empty")

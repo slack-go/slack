@@ -2,8 +2,8 @@ package socketmode
 
 import "encoding/json"
 
-// ClientEvent is the event sent to the consumer of Client
-type ClientEvent struct {
+// Event is the event sent to the consumer of Client
+type Event struct {
 	Type EventType
 	Data interface{}
 
@@ -20,4 +20,11 @@ type ErrorBadMessage struct {
 type ErrorWriteFailed struct {
 	Cause    error
 	Response *Response
+}
+
+type ErrorRequestedDisconnect struct {
+}
+
+func (e ErrorRequestedDisconnect) Error() string {
+	return "disconnection requested: Slack requested us to disconnect"
 }
