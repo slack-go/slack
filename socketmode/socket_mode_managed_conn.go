@@ -311,7 +311,7 @@ func (smc *Client) unsafeWriteSocketModeResponse(res *Response) error {
 	return nil
 }
 
-func (smc *Client) newEvent(tpe string, data interface{}, req ...*Request) ClientEvent {
+func (smc *Client) newEvent(tpe EventType, data interface{}, req ...*Request) ClientEvent {
 	evt := ClientEvent{Type: tpe, Data: data}
 
 	if len(req) > 0 {
