@@ -18,7 +18,7 @@ type openResponseFull struct {
 
 // StartSocketModeContext calls the "apps.connections.open" endpoint and returns the provided URL and the full Info block with a custom context.
 //
-// To have a fully managed Websocket connection, use `NewRTM`, and call `Run()` on it.
+// To have a fully managed Socket Mode connection, use `socketmode.New()`, and call `Run()` on it.
 func (api *Client) StartSocketModeContext(ctx context.Context) (info *SocketModeConnection, websocketURL string, err error) {
 	response := &openResponseFull{}
 	err = postJSON(ctx, api.httpclient, api.endpoint+"apps.connections.open", api.appLevelToken, nil, response, api)
