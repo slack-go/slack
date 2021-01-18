@@ -29,7 +29,11 @@ const (
 
 	// The following event types are for events emitted by socketmode.Client itself and
 	// does not originate from Slack.
+	EventTypeConnecting       = EventType("connecting")
+	EventTypeInvalidAuth      = EventType("invalid_auth")
+	EventTypeConnectionError  = EventType("connection_error")
 	EventTypeConnected        = EventType("connected")
+	EventTypeIncomingError    = EventType("incoming_error")
 	EventTypeErrorWriteFailed = EventType("write_error")
 	EventTypeErrorBadMessage  = EventType("error_bad_message")
 

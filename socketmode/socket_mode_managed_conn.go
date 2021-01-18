@@ -176,7 +176,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		)
 
 		// send connecting event
-		smc.Events <- newEvent("connecting", &slack.ConnectingEvent{
+		smc.Events <- newEvent(EventTypeConnecting, &slack.ConnectingEvent{
 			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
 		})
@@ -199,7 +199,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
-				smc.Events <- newEvent("invalid_auth", &slack.InvalidAuthEvent{})
+				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
@@ -210,7 +210,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the Events channel
-		smc.Events <- newEvent("connection_error", &slack.ConnectionErrorEvent{
+		smc.Events <- newEvent(EventTypeConnectionError, &slack.ConnectionErrorEvent{
 			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
@@ -444,7 +444,7 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		smc.Events <- newEvent("incoming_error", &slack.IncomingEventError{
+		smc.Events <- newEvent(EventTypeIncomingError, &slack.IncomingEventError{
 			ErrorObj: err,
 		})
 
@@ -490,7 +490,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 	// - https://api.slack.com/apis/connections/socket-implement
 	switch req.Type {
 	case RequestTypeHello:
-		evt = newEvent("hello", nil, req)
+		evt = newEvent(EventTypeHello, nil, req)
 	case RequestTypeEventsAPI:
 		payloadEvent := req.Payload
 
