@@ -99,7 +99,6 @@ func New(api *slack.Client, options ...Option) *Client {
 		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
-		idGen:               slack.NewSafeID(1),
 		log:                 log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
 	}
 
