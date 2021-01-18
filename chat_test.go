@@ -145,6 +145,18 @@ func TestPostMessage(t *testing.T) {
 				"user_auth_required": []string{"true"},
 			},
 		},
+		"UnfurlAuthMessage": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlAuthMessage("123", "Please!"),
+			},
+			expected: url.Values{
+				"channel":           []string{"CXXX"},
+				"token":             []string{"testing-token"},
+				"ts":                []string{"123"},
+				"user_auth_message": []string{"Please!"},
+			},
+		},
 	}
 
 	once.Do(startServer)

@@ -450,6 +450,17 @@ func MsgOptionUnfurlAuthRequired(timestamp string) MsgOption {
 	}
 }
 
+// MsgOptionUnfurlAuthMessage attaches a message inviting the user to
+// authenticate.
+func MsgOptionUnfurlAuthMessage(timestamp string, msg string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		config.values.Add("user_auth_message", msg)
+		return nil
+	}
+}
+
 // MsgOptionResponseURL supplies a url to use as the endpoint.
 func MsgOptionResponseURL(url string, responseType string) MsgOption {
 	return func(config *sendConfig) error {
