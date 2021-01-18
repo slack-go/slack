@@ -492,7 +492,7 @@ func (smc *Client) parseEvent(wsMsg json.RawMessage) (*Event, error) {
 	// - https://api.slack.com/apis/connections/socket-implement
 	switch req.Type {
 	case RequestTypeHello:
-		evt = newEvent("hello", &slack.HelloEvent{})
+		evt = newEvent("hello", nil, req)
 	case RequestTypeEventsAPI:
 		payloadEvent := req.Payload
 

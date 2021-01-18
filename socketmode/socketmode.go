@@ -30,12 +30,13 @@ const (
 	EventTypeConnected        = EventType("connected")
 	EventTypeErrorWriteFailed = EventType("write_error")
 	EventTypeErrorBadMessage  = EventType("error_bad_message")
-	EventTypeDisconnect       = EventType("disconnect")
 
 	//
 	// The following event types are guaranteed to not change unless Slack changes
 	//
 
+	EventTypeHello        = EventType("hello")
+	EventTypeDisconnect   = EventType("disconnect")
 	EventTypeEventsAPI    = EventType("events_api")
 	EventTypeInteractive  = EventType("interactive")
 	EventTypeSlashCommand = EventType("slash_commands")
