@@ -133,6 +133,18 @@ func TestPostMessage(t *testing.T) {
 				"user_auth_url": []string{"https://auth-url.com"},
 			},
 		},
+		"UnfurlAuthRequired": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlAuthRequired("123"),
+			},
+			expected: url.Values{
+				"channel":            []string{"CXXX"},
+				"token":              []string{"testing-token"},
+				"ts":                 []string{"123"},
+				"user_auth_required": []string{"true"},
+			},
+		},
 	}
 
 	once.Do(startServer)

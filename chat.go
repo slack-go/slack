@@ -439,6 +439,17 @@ func MsgOptionUnfurlAuthURL(timestamp string, userAuthURL string) MsgOption {
 	}
 }
 
+// MsgOptionUnfurlAuthRequired requests that the user installs the
+// Slack app for unfurling.
+func MsgOptionUnfurlAuthRequired(timestamp string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		config.values.Add("user_auth_required", "true")
+		return nil
+	}
+}
+
 // MsgOptionResponseURL supplies a url to use as the endpoint.
 func MsgOptionResponseURL(url string, responseType string) MsgOption {
 	return func(config *sendConfig) error {
