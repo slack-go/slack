@@ -2,6 +2,8 @@ package socketmode
 
 import (
 	"context"
+	"log"
+	"os"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -75,6 +77,20 @@ func OptionPingInterval(d time.Duration) Option {
 	}
 }
 
+// OptionDebug enable debugging for the client
+func OptionDebug(b bool) func(*Client) {
+	return func(c *Client) {
+		c.debug = b
+	}
+}
+
+// OptionLog set logging for client.
+func OptionLog(l logger) func(*Client) {
+	return func(c *Client) {
+		c.log = internalLog{logger: l}
+	}
+}
+
 // New returns a Socket Mode client which provides a fully managed connection to
 // Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
@@ -84,6 +100,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
 		idGen:               slack.NewSafeID(1),
+		log:                 log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
 	}
 
 	for _, opt := range options {

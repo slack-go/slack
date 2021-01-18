@@ -57,4 +57,7 @@ type Client struct {
 	// dialer is a gorilla/websocket Dialer. If nil, use the default
 	// Dialer.
 	dialer *websocket.Dialer
+
+	debug bool
+	log   ilogger
 }
