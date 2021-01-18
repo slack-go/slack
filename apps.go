@@ -43,7 +43,7 @@ func (api *Client) ListEventAuthorizationsContext(ctx context.Context, eventCont
 	return resp.Authorizations, nil
 }
 
-func (api *Client) UninstallApp(clientID string, clientSecret string) error {
+func (api *Client) UninstallApp(clientID, clientSecret string) error {
 	values := url.Values{
 		"token":         {api.token},
 		"client_id":     {clientID},
