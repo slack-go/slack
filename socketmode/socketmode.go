@@ -72,8 +72,8 @@ func OptionDialer(d *websocket.Dialer) Option {
 // If no ping is delivered to us within this interval after the last ping, we assumes the WebSocket connection
 // is dead and needs to be reconnected.
 func OptionPingInterval(d time.Duration) Option {
-	return func(rtm *Client) {
-		rtm.maxPingInterval = d
+	return func(smc *Client) {
+		smc.maxPingInterval = d
 	}
 }
 
