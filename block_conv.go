@@ -59,6 +59,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &DividerBlock{}
 		case "file":
 			block = &FileBlock{}
+		case "header":
+			block = &HeaderBlock{}
 		case "image":
 			block = &ImageBlock{}
 		case "input":
