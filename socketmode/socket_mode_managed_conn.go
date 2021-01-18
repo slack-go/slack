@@ -148,7 +148,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	smc.Debugf("Reconnecting due to %v", firstErr)
 
 	if err = conn.Close(); err != nil {
-		smc.Debugln("failed to close conn on disconnected RTM", err)
+		smc.Debugf("Failed to close connection: %v", err)
 	}
 
 	return nil
@@ -198,7 +198,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		switch actual := err.(type) {
 		case misc.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
-				smc.Debugf("invalid auth when connecting with RTM: %s", err)
+				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 				smc.Events <- newEvent("invalid_auth", &slack.InvalidAuthEvent{})
 				return nil, nil, err
 			}
@@ -340,9 +340,7 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 
 // runMessageReceiver monitors the Socket Mode opened WebSocket connection for any incoming
 // messages. It pushes the raw events into the channel.
-//
-// This will stop executing once the RTM's when a fatal error is detected, or
-// a disconnect occurs.
+// The receiver runs until the context is closed.
 func (smc *Client) runMessageReceiver(ctx context.Context, conn *websocket.Conn, sink chan json.RawMessage) error {
 	for {
 		if err := smc.receiveMessagesInto(ctx, conn, sink); err != nil {
