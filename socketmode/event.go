@@ -22,9 +22,9 @@ type ErrorWriteFailed struct {
 	Response *Response
 }
 
-type ErrorRequestedDisconnect struct {
+type errorRequestedDisconnect struct {
 }
 
-func (e ErrorRequestedDisconnect) Error() string {
+func (e errorRequestedDisconnect) Error() string {
 	return "disconnection requested: Slack requested us to disconnect"
 }

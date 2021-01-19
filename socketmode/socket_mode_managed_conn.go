@@ -329,7 +329,7 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 				if evt.Type == EventTypeDisconnect {
 					// We treat the `disconnect` request from Slack as an error internally,
 					// so that we can tell the consumer of this function to reopen the connection on it.
-					return ErrorRequestedDisconnect{}
+					return errorRequestedDisconnect{}
 				}
 
 				smc.Events <- *evt
