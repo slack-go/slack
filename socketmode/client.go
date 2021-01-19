@@ -31,15 +31,17 @@ type SocketModeMessagePayload struct {
 	Event json.RawMessage `json:"´event"`
 }
 
-// Client allows allows programs to communicate with the
-// [Events API](https://api.slack.com/events-api) over WebSocket.
+// Client is a Socket Mode client that allows programs to use [Events API](https://api.slack.com/events-api)
+// and [interactive components](https://api.slack.com/interactivity) over WebSocket.
+// Please see [Intro to Socket Mode](https://api.slack.com/apis/connections/socket) for more information
+// on Socket Mode.
 //
 // The implementation is highly inspired by https://www.npmjs.com/package/@slack/socket-mode,
 // but the structure and the design has been adapted as much as possible to that of our RTM client for consistency
 // within the library.
 //
 // You can instantiate the socket mode client with
-// Client's New() or NewSocketModeClientWithOptions(*SocketModeClientOptions)
+// Client's New() and call Run() to start it. Please see examples/socketmode for the usage.
 type Client struct {
 	// Client is the main API, embedded
 	apiClient slack.Client
