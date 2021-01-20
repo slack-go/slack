@@ -161,29 +161,30 @@ func TestSlack_DeleteReminder(t *testing.T) {
 type mockRemindersListHTTPClient struct{}
 
 func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) {
-	responseString := "{\n" +
-		"\"ok\": true,\n" +
-		"\"reminders\": [\n" +
-		"{\n" +
-		"\"id\": \"Rm12345678\",\n" +
-		"\"creator\": \"U18888888\",\n" +
-		"\"user\": \"U18888888\",\n" +
-		"\"text\": \"eat a banana\",\n" +
-		"\"recurring\": false,\n" +
-		"\"time\": 1458678068,\n" +
-		"\"complete_ts\": 0\n" +
-		"},\n" +
-		"{\n" +
-		"\"id\": \"Gm12345678\",\n" +
-		"\"creator\": \"U18888888\",\n" +
-		"\"user\": \"U18888888\",\n" +
-		"\"text\": \"drink some water\",\n" +
-		"\"recurring\": false,\n" +
-		"\"time\": 1458678090,\n" +
-		"\"complete_ts\": 0\n" +
-		"}\n" +
-		"]\n" +
-		"}"
+	responseString := `{
+		"ok": true,
+		"reminders": [
+	        {
+				"id": "Rm12345678",
+				"creator": "U18888888",
+				"user": "U18888888",
+				"text": "eat a banana",
+				"recurring": false,
+				"time": 1458678068,
+				"complete_ts": 0,
+			},
+			{
+				"id": "Gm12345678",
+				"creator": "U18888888",
+				"user": "U18888888",
+				"text": "drink some water",
+				"recurring": false,
+				"time": 1458678090,
+				"complete_ts": 0,
+			},
+		],
+	}`
+
 	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(responseString))}, nil
 }
 
