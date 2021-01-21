@@ -391,3 +391,87 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
 		[]string{"G12345"})
 }
+
+func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
+	// Contrived - you generally won't see all of the fields set in a single message
+	raw := []byte(
+		`
+		{
+			"container": {
+				"type": "message",
+				"view_id": "viewID",
+				"message_ts": "messageTS",
+				"attachment_id": "123",
+				"channel_id": "channelID",
+				"is_ephemeral": false,
+				"is_app_unfurl": false
+			}
+		}
+		`)
+
+	expected := &InteractionCallback{
+		Container: Container{
+			Type:         "message",
+			ViewID:       "viewID",
+			MessageTs:    "messageTS",
+			AttachmentID: "123",
+			ChannelID:    "channelID",
+			IsEphemeral:  false,
+			IsAppUnfurl:  false,
+		},
+		RawState: json.RawMessage(`{}`),
+	}
+
+	actual := new(InteractionCallback)
+	err := json.Unmarshal(raw, actual)
+	assert.NoError(t, err)
+	assert.Equal(t, expected.Container, actual.Container)
+
+	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
+	actualJSON, err := json.Marshal(actual.Container)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedJSON, actualJSON)
+}
+
+func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testing.T) {
+	// Contrived - you generally won't see all of the fields set in a single message
+	raw := []byte(
+		`
+		{
+			"container": {
+				"type": "message",
+				"view_id": "viewID",
+				"message_ts": "messageTS",
+				"thread_ts": "threadTS",
+				"attachment_id": "123",
+				"channel_id": "channelID",
+				"is_ephemeral": false,
+				"is_app_unfurl": false
+			}
+		}
+		`)
+
+	expected := &InteractionCallback{
+		Container: Container{
+			Type:         "message",
+			ViewID:       "viewID",
+			MessageTs:    "messageTS",
+			ThreadTs:     "threadTS",
+			AttachmentID: "123",
+			ChannelID:    "channelID",
+			IsEphemeral:  false,
+			IsAppUnfurl:  false,
+		},
+		RawState: json.RawMessage(`{}`),
+	}
+
+	actual := new(InteractionCallback)
+	err := json.Unmarshal(raw, actual)
+	assert.NoError(t, err)
+	assert.Equal(t, expected.Container, actual.Container)
+
+	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","thread_ts":"threadTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
+	actualJSON, err := json.Marshal(actual.Container)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedJSON, actualJSON)
+}
