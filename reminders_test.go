@@ -171,7 +171,7 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 				"text": "eat a banana",
 				"recurring": false,
 				"time": 1458678068,
-				"complete_ts": 0,
+				"complete_ts": 0
 			},
 			{
 				"id": "Gm12345678",
@@ -180,9 +180,9 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 				"text": "drink some water",
 				"recurring": false,
 				"time": 1458678090,
-				"complete_ts": 0,
-			},
-		],
+				"complete_ts": 0
+			}
+		]
 	}`
 
 	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(responseString))}, nil
