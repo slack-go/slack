@@ -11,7 +11,7 @@ type ContextBlock struct {
 }
 
 // BlockType returns the type of the block
-func (s ContextBlock) BlockType() MessageBlockType {
+func (s *ContextBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 
