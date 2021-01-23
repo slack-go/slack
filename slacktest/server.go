@@ -62,6 +62,7 @@ func NewTestServer(custom ...binder) *Server {
 	s.Handle("/users.lookupByEmail", usersInfoHandler)
 	s.Handle("/bots.info", botsInfoHandler)
 	s.Handle("/auth.test", authTestHandler)
+	s.Handle("/reactions.add", reactionAddHandler)
 
 	httpserver := httptest.NewUnstartedServer(s.mux)
 	addr := httpserver.Listener.Addr().String()

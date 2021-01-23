@@ -117,6 +117,11 @@ func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultGroupsListJSON))
 }
 
+// handle reaction.Add
+func reactionAddHandler(w http.ResponseWriter, _ *http.Request) {
+	_, _ = w.Write([]byte(defaultOkJSON))
+}
+
 // handle chat.postMessage
 func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
