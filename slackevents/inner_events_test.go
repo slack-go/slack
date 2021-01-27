@@ -322,7 +322,7 @@ func TestTokensRevoked(t *testing.T) {
 	}
 }
 
-func TestEmojiChangedAdd(t *testing.T) {
+func TestEmojiChanged(t *testing.T) {
 	var (
 		ece EmojiChangedEvent
 		err error
