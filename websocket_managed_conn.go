@@ -91,6 +91,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		errInvalidAuth      = "invalid_auth"
 		errInactiveAccount  = "account_inactive"
 		errMissingAuthToken = "not_authed"
+		errTokenRevoked     = "token_revoked"
 	)
 
 	// used to provide exponential backoff wait time with jitter before trying
@@ -118,7 +119,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 
 		// check for fatal errors
 		switch err.Error() {
-		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
+		case errInvalidAuth, errInactiveAccount, errMissingAuthToken, errTokenRevoked:
 			rtm.Debugf("invalid auth when connecting with RTM: %s", err)
 			rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 			return nil, nil, err
