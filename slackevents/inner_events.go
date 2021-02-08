@@ -186,7 +186,6 @@ type TokensRevokedEvent struct {
 type EmojiChangedEvent struct {
 	Type           string      `json:"type"`
 	Subtype        string      `json:"subtype"`
-	Value          string      `json:"value"`
 	EventTimeStamp json.Number `json:"event_ts"`
 
 	// filled out when custom emoji added
@@ -198,6 +197,9 @@ type EmojiChangedEvent struct {
 	// filled out when custom emoji renamed
 	OldName string `json:"old_name,omitempty"`
 	NewName string `json:"new_name,omitempty"`
+
+	// filled out when custom emoji added or renamed
+	Value string `json:"value,omitempty"`
 }
 
 // JSONTime exists so that we can have a String method converting the date
