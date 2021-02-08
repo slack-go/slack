@@ -182,6 +182,26 @@ type TokensRevokedEvent struct {
 	Tokens tokens `json:"tokens"`
 }
 
+// EmojiChangedEvent is the event of custom emoji has been added or changed
+type EmojiChangedEvent struct {
+	Type           string      `json:"type"`
+	Subtype        string      `json:"subtype"`
+	EventTimeStamp json.Number `json:"event_ts"`
+
+	// filled out when custom emoji added
+	Name string `json:"name,omitempty"`
+
+	// filled out when custom emoji removed
+	Names []string `json:"names,omitempty"`
+
+	// filled out when custom emoji renamed
+	OldName string `json:"old_name,omitempty"`
+	NewName string `json:"new_name,omitempty"`
+
+	// filled out when custom emoji added or renamed
+	Value string `json:"value,omitempty"`
+}
+
 // JSONTime exists so that we can have a String method converting the date
 type JSONTime int64
 
@@ -312,6 +332,8 @@ const (
 	ReactionRemoved = "reaction_removed"
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = "tokens_revoked"
+	// EmojiChanged A custom emoji has been added or changed
+	EmojiChanged = "emoji_changed"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -332,4 +354,5 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	ReactionAdded:         ReactionAddedEvent{},
 	ReactionRemoved:       ReactionRemovedEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
+	EmojiChanged:          EmojiChangedEvent{},
 }

@@ -321,3 +321,82 @@ func TestTokensRevoked(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestEmojiChanged(t *testing.T) {
+	var (
+		ece EmojiChangedEvent
+		err error
+	)
+
+	// custom emoji added event
+	rawAddE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "add",
+		"name": "picard_facepalm",
+		"value": "https://my.slack.com/emoji/picard_facepalm/db8e287430eaa459.gif",
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawAddE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "add" {
+		t.Fail()
+	}
+	if ece.Name != "picard_facepalm" {
+		t.Fail()
+	}
+
+	// emoji removed event
+	rawRemoveE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "remove",
+		"names": ["picard_facepalm"],
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawRemoveE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "remove" {
+		t.Fail()
+	}
+	if len(ece.Names) != 1 {
+		t.Fail()
+	}
+	if ece.Names[0] != "picard_facepalm" {
+		t.Fail()
+	}
+
+	// custom emoji rename event
+	rawRenameE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "rename",
+		"old_name": "grin",
+		"new_name": "cheese-grin",
+		"value": "https://my.slack.com/emoji/picard_facepalm/db8e287430eaa459.gif",
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawRenameE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "rename" {
+		t.Fail()
+	}
+	if ece.OldName != "grin" {
+		t.Fail()
+	}
+	if ece.NewName != "cheese-grin" {
+		t.Fail()
+	}
+}
