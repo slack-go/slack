@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -320,76 +319,17 @@ type UserPrefs struct {
 	TZ                                     string `json:"tz,omitempty"`
 }
 
+// GetUserPrefs gets the user's preferences.
 func (api *Client) GetUserPrefs() (*UserPrefsCarrier, error) {
+	return api.GetUserPrefsContext(context.Background())
+}
+
+// GetUserPrefsContext gets the user's preferences with a custom context.
+func (api *Client) GetUserPrefsContext(ctx context.Context) (*UserPrefsCarrier, error) {
 	values := url.Values{"token": {api.token}}
 	response := UserPrefsCarrier{}
 
-	err := api.getMethod(context.Background(), "users.prefs.get", values, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, response.Err()
-}
-
-func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
-	prefs, err := api.GetUserPrefs()
-	if err != nil {
-		return nil, err
-	}
-
-	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	for _, mc := range mutedChannels {
-		if mc == channelID {
-			return nil, nil // noop
-		}
-	}
-
-	values := url.Values{
-		"token":  {api.token},
-		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s,%s\"}", prefs.UserPrefs.MutedChannels, channelID)},
-		"reason": {"update-muted-channels"},
-	}
-	response := UserPrefsCarrier{}
-
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, response.Err()
-}
-
-func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
-	prefs, err := api.GetUserPrefs()
-	if err != nil {
-		return nil, err
-	}
-
-	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	update := []string{}
-	isMuted := false
-	for _, mc := range mutedChannels {
-		if mc == channelID {
-			isMuted = true
-			continue
-		}
-
-		update = append(update, mc)
-	}
-
-	if !isMuted {
-		return nil, nil // noop
-	}
-
-	values := url.Values{
-		"token":  {api.token},
-		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s\"}", strings.Join(update, ","))},
-		"reason": {"update-muted-channels"},
-	}
-	response := UserPrefsCarrier{}
-
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
+	err := api.getMethod(ctx, "users.prefs.get", values, &response)
 	if err != nil {
 		return nil, err
 	}

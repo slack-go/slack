@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -189,6 +190,97 @@ func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID s
 	}
 
 	return response.Err()
+}
+
+// MuteConversation updates the user's preference as to adds a channel id to the
+// list of muted channel. This method returns the updated list of muted channels.
+func (api *Client) MuteConversation(channelID string) ([]string, error) {
+	return api.MuteConversationContext(context.Background(), channelID)
+}
+
+// MuteConversationContext adds a channel id to the list of muted channel with a custom context.
+func (api *Client) MuteConversationContext(ctx context.Context, channelID string) ([]string, error) {
+	prefs, err := api.GetUserPrefsContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
+	for _, mc := range mutedChannels {
+		if mc == channelID {
+			return mutedChannels, nil // noop
+		}
+	}
+
+	values := url.Values{
+		"token":  {api.token},
+		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s,%s\"}", prefs.UserPrefs.MutedChannels, channelID)},
+		"reason": {"update-muted-channels"},
+	}
+	response := UserPrefsCarrier{}
+
+	err = api.postMethod(ctx, "users.prefs.set", values, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Err() != nil {
+		return nil, response.Err()
+	}
+	if response.UserPrefs == nil {
+		return nil, nil
+	}
+	return strings.Split(response.UserPrefs.MutedChannels, ","), nil
+}
+
+// UnMuteConversation updates the user's preference as to remove a channel id from
+// the list of muted channel. This method returns the updated list of muted channels.
+func (api *Client) UnMuteConversation(channelID string) ([]string, error) {
+	return api.UnMuteConversationContext(context.Background(), channelID)
+}
+
+// UnMuteConversationContext removes a channel id from the list of muted channel with a custom context.
+func (api *Client) UnMuteConversationContext(ctx context.Context, channelID string) ([]string, error) {
+	prefs, err := api.GetUserPrefsContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	mutedChannels := strings.Split(prefs.UserPrefs.MutedChannels, ",")
+	update := []string{}
+	isMuted := false
+	for _, mc := range mutedChannels {
+		if mc == channelID {
+			isMuted = true
+			continue
+		}
+
+		update = append(update, mc)
+	}
+
+	if !isMuted {
+		return nil, nil // noop
+	}
+
+	values := url.Values{
+		"token":  {api.token},
+		"prefs":  {fmt.Sprintf("{\"muted_channels\": \"%s\"}", strings.Join(update, ","))},
+		"reason": {"update-muted-channels"},
+	}
+	response := UserPrefsCarrier{}
+
+	err = api.postMethod(ctx, "users.prefs.set", values, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Err() != nil {
+		return nil, response.Err()
+	}
+	if response.UserPrefs == nil {
+		return nil, nil
+	}
+	return strings.Split(response.UserPrefs.MutedChannels, ","), nil
 }
 
 // SetTopicOfConversation sets the topic for a conversation
