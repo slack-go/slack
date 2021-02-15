@@ -259,7 +259,7 @@ func (api *Client) UnMuteConversationContext(ctx context.Context, channelID stri
 	}
 
 	if !isMuted {
-		return nil, nil // noop
+		return mutedChannels, nil // noop
 	}
 
 	values := url.Values{
