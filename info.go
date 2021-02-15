@@ -444,10 +444,10 @@ type Info struct {
 	URL      string       `json:"url,omitempty"`
 	User     *UserDetails `json:"self,omitempty"`
 	Team     *Team        `json:"team,omitempty"`
-	Channels []*Channel   `json:"channels",omitempty`
-	Groups   []*Channel   `json:"groups",omitempty`
-	MPIMs    []*Channel   `json:"mpims",omitempty`
-	IMs      []*Channel   `json:"ims",omitempty`
+	Channels []*Channel   `json:"channels,omitempty"`
+	Groups   []*Channel   `json:"groups,omitempty"`
+	MPIMs    []*Channel   `json:"mpims,omitempty"`
+	IMs      []*Channel   `json:"ims,omitempty"`
 	Users    []*User      `json:"users,omitempty"`
 	Bots     []*User      `json:"bots,omitempty"`
 }
