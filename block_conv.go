@@ -67,6 +67,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &InputBlock{}
 		case "section":
 			block = &SectionBlock{}
+		case "call":
+			block = &CallBlock{}
 		default:
 			block = &UnknownBlock{}
 		}
