@@ -431,6 +431,15 @@ type Icons struct {
 
 // Info contains various details about the authenticated user and team.
 // It is returned by StartRTM or included in the "ConnectedEvent" RTM event.
+// It should be noted that in order to optimise the sync speed, RTMConnect
+// (which uses "rtm.connect") does not get all the account information. Namely,
+// channels, groups, mpims, ims, users and bots are left empty.
+// If you want to have access these fields populated, you should use "rtm.start"
+// instead. Sample code bellow:
+// ```
+//    rtm := slack.NewRTM(slack.RTMOptionUseStart(true))
+//    go rtm.ManageConnection()
+// ```
 type Info struct {
 	URL      string       `json:"url,omitempty"`
 	User     *UserDetails `json:"self,omitempty"`
