@@ -57,9 +57,13 @@ func main() {
 	// Handle a specific event from EventsAPI
 	// socketmodeHandler.HandleEventsAPI(socketmode.EventTypeAppMention, middlewareAppMentionEvent)
 
+	// Handle the Interactive Events
 	socketmodeHandler.Handle(socketmode.EventTypeInteractive, middlewareInteractive)
 
-	// Handle the EventsAPI
+	// Handle a specific Interaction
+	socketmodeHandler.HandleInteraction(slack.InteractionTypeBlockActions, middlewareInteractionTypeBlockActions)
+
+	// Handle the SlashCommand
 	socketmodeHandler.Handle(socketmode.EventTypeSlashCommand, middlewareSlashCommand)
 
 	// socketmodeHandler.HandleDefault(middlewareDefault)
@@ -123,7 +127,6 @@ func middlewareInteractive(evt *socketmode.Event, client *socketmode.Client) {
 	switch callback.Type {
 	case slack.InteractionTypeBlockActions:
 		// See https://api.slack.com/apis/connections/socket-implement#button
-
 		client.Debugf("button clicked!")
 	case slack.InteractionTypeShortcut:
 	case slack.InteractionTypeViewSubmission:
@@ -134,6 +137,10 @@ func middlewareInteractive(evt *socketmode.Event, client *socketmode.Client) {
 	}
 
 	client.Ack(*evt.Request, payload)
+}
+
+func middlewareInteractionTypeBlockActions(evt *socketmode.Event, client *socketmode.Client) {
+	client.Debugf("button clicked!")
 }
 
 func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
@@ -165,7 +172,6 @@ func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
 				),
 			),
 		}}
-
 	client.Ack(*evt.Request, payload)
 }
 
