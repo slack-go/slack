@@ -51,19 +51,21 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeConnectionError, middlewareConnectionError)
 	socketmodeHandler.Handle(socketmode.EventTypeConnected, middlewareConnected)
 
-	// Handle the EventsAPI
-	socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
+	//\\ EventTypeEventsAPI //\\
+	// Handle all EventsAPI
+	// socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
 
 	// Handle a specific event from EventsAPI
-	// socketmodeHandler.HandleEventsAPI(socketmode.EventTypeAppMention, middlewareAppMentionEvent)
+	socketmodeHandler.HandleEventsAPI(slackevents.AppMention, middlewareAppMentionEvent)
 
-	// Handle the Interactive Events
+	//\\ EventTypeInteractive //\\
+	// Handle all Interactive Events
 	socketmodeHandler.Handle(socketmode.EventTypeInteractive, middlewareInteractive)
 
 	// Handle a specific Interaction
 	socketmodeHandler.HandleInteraction(slack.InteractionTypeBlockActions, middlewareInteractionTypeBlockActions)
 
-	// Handle the SlashCommand
+	// Handle all SlashCommand
 	socketmodeHandler.Handle(socketmode.EventTypeSlashCommand, middlewareSlashCommand)
 
 	// socketmodeHandler.HandleDefault(middlewareDefault)
@@ -84,6 +86,7 @@ func middlewareConnected(evt *socketmode.Event, client *socketmode.Client) {
 }
 
 func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
+	fmt.Println("middlewareEventsAPI")
 	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 	if !ok {
 		fmt.Printf("Ignored %+v\n", evt)
@@ -112,11 +115,35 @@ func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
 	}
 }
 
+func middlewareAppMentionEvent(evt *socketmode.Event, client *socketmode.Client) {
+	fmt.Printf("middlewareAppMentionEvent: %+v\n", evt)
+	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+	if !ok {
+		fmt.Printf("Ignored %+v\n", evt)
+		return
+	}
+
+	fmt.Printf("middlewareAppMentionEvent: %+v\n", eventsAPIEvent.InnerEvent.Data)
+
+	client.Ack(*evt.Request)
+
+	ev, ok := eventsAPIEvent.InnerEvent.Data.(*slackevents.AppMentionEvent)
+	if !ok {
+		fmt.Printf("Ignored %+v\n", ev)
+		return
+	}
+
+	fmt.Printf("We have been mentionned in %v\n", ev.Channel)
+	_, _, err := client.GetApiClient().PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+	if err != nil {
+		fmt.Printf("failed posting message: %v", err)
+	}
+}
+
 func middlewareInteractive(evt *socketmode.Event, client *socketmode.Client) {
 	callback, ok := evt.Data.(slack.InteractionCallback)
 	if !ok {
 		fmt.Printf("Ignored %+v\n", evt)
-
 		return
 	}
 

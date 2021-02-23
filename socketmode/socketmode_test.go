@@ -229,9 +229,9 @@ func TestEventParsing(t *testing.T) {
 					EventContext: "1-app_mention-redacted-redacted",
 				},
 				InnerEvent: slackevents.EventsAPIInnerEvent{
-					Type: slackevents.AppMention,
+					Type: string(slackevents.AppMention),
 					Data: &slackevents.AppMentionEvent{
-						Type:            slackevents.AppMention,
+						Type:            string(slackevents.AppMention),
 						User:            "redacted",
 						Text:            "<@U01JKSB8T7Y> test",
 						TimeStamp:       "1610927831.000200",
