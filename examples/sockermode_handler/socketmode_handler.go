@@ -53,7 +53,7 @@ func main() {
 
 	//\\ EventTypeEventsAPI //\\
 	// Handle all EventsAPI
-	// socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
+	socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
 
 	// Handle a specific event from EventsAPI
 	socketmodeHandler.HandleEventsAPI(slackevents.AppMention, middlewareAppMentionEvent)
