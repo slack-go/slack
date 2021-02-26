@@ -26,6 +26,7 @@ import (
 type SlackResponse struct {
 	Ok               bool             `json:"ok"`
 	Error            string           `json:"error"`
+	Warning          string           `json:"warning"`
 	ResponseMetadata ResponseMetadata `json:"response_metadata"`
 }
 
@@ -42,6 +43,27 @@ func (t SlackResponse) Err() error {
 	}
 
 	return errors.New(t.Error)
+}
+
+type warner interface {
+	Warn() *Warning
+}
+
+// Warning provides warning from the web api.
+// https://api.slack.com/web#slack-web-api__evaluating-responses
+type Warning struct {
+	Codes    []string
+	Warnings []string
+}
+
+func (t SlackResponse) Warn() *Warning {
+	if t.Warning == "" && len(t.ResponseMetadata.Warnings) == 0 {
+		return nil
+	}
+	return &Warning{
+		Codes:    strings.Split(t.Warning, ","),
+		Warnings: t.ResponseMetadata.Warnings,
+	}
 }
 
 // RateLimitedError represents the rate limit respond from slack
