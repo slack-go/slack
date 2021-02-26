@@ -18,7 +18,11 @@ type SocketmodeHandler struct {
 	Default SocketmodeHandlerFunc
 }
 
+// Handler have access to the event and socketmode client
 type SocketmodeHandlerFunc func(*Event, *Client)
+
+// Middleware accept SocketmodeHandlerFunc, and return SocketmodeHandlerFunc
+type SocketmodeMiddlewareFunc func(SocketmodeHandlerFunc) SocketmodeHandlerFunc
 
 func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
