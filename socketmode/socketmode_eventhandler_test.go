@@ -22,10 +22,6 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 	}
 }
 
-type testProbe struct {
-	called bool
-}
-
 func testing_wrapper(ch chan<- string, f SocketmodeHandlerFunc) SocketmodeHandlerFunc {
 	return SocketmodeHandlerFunc(func(e *Event, c *Client) {
 		f(e, c)
@@ -73,7 +69,7 @@ func TestSocketmodeHandler_Handle(t *testing.T) {
 		want string //what is the name of the function we want to be called
 	}{
 		{
-			name: "Event Match registed function",
+			name: "Event Match registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeConnecting,
@@ -82,7 +78,7 @@ func TestSocketmodeHandler_Handle(t *testing.T) {
 			},
 			want: "github.com/slack-go/slack/socketmode.middleware",
 		}, {
-			name: "Event do not registed function",
+			name: "Event do not registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeConnected,
@@ -123,7 +119,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 		want string //what is the name of the function we want to be called
 	}{
 		{
-			name: "Event Match registed function",
+			name: "Event Match registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeInteractive,
@@ -138,7 +134,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 			},
 			want: "github.com/slack-go/slack/socketmode.middleware_interaction",
 		}, {
-			name: "Event do not Match any registed function",
+			name: "Event do not Match any registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeInteractive,
@@ -212,7 +208,7 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 		want string //what is the name of the function we want to be called
 	}{
 		{
-			name: "Event Match registed function",
+			name: "Event Match registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeEventsAPI,
@@ -230,7 +226,7 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 			},
 			want: "github.com/slack-go/slack/socketmode.middleware_eventapi",
 		}, {
-			name: "Event do not Match any registed function",
+			name: "Event do not Match any registered function",
 			args: args{
 				evt: Event{
 					Type: EventTypeEventsAPI,
