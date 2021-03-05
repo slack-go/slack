@@ -63,7 +63,7 @@ type Client struct {
 	debug         bool
 	log           ilogger
 	httpclient    httpClient
-	onWarning     func(*Warning)
+	onWarning     func(w *Warning, path string, values url.Values)
 }
 
 // Option defines an option for a Client
@@ -91,7 +91,7 @@ func OptionLog(l logger) func(*Client) {
 }
 
 // OptionOnWarning set callback for response warnings.
-func OptionOnWarning(fn func(*Warning)) func(*Client) {
+func OptionOnWarning(fn func(w *Warning, path string, values url.Values)) func(*Client) {
 	return func(c *Client) {
 		c.onWarning = fn
 	}
@@ -164,7 +164,7 @@ func (api *Client) postMethod(ctx context.Context, path string, values url.Value
 	err := postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
 	if w, ok := intf.(warner); ok {
 		if warning := w.Warn(); warning != nil && api.onWarning != nil {
-			api.onWarning(warning)
+			api.onWarning(warning, path, values)
 		}
 	}
 	return err
@@ -175,7 +175,7 @@ func (api *Client) getMethod(ctx context.Context, path string, values url.Values
 	err := getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
 	if w, ok := intf.(warner); ok {
 		if warning := w.Warn(); warning != nil && api.onWarning != nil {
-			api.onWarning(warning)
+			api.onWarning(warning, path, values)
 		}
 	}
 	return err
