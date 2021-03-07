@@ -103,6 +103,24 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "invalid",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: errors.New("type must be either of plain_text or mrkdwn"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
 				Emoji:    true,
 				Verbatim: false,
 			},
