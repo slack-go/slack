@@ -116,14 +116,12 @@ func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
 }
 
 func middlewareAppMentionEvent(evt *socketmode.Event, client *socketmode.Client) {
-	fmt.Printf("middlewareAppMentionEvent: %+v\n", evt)
+
 	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 	if !ok {
 		fmt.Printf("Ignored %+v\n", evt)
 		return
 	}
-
-	fmt.Printf("middlewareAppMentionEvent: %+v\n", eventsAPIEvent.InnerEvent.Data)
 
 	client.Ack(*evt.Request)
 
