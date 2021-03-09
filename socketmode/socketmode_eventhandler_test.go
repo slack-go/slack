@@ -136,7 +136,6 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 					},
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
-					r.Handle(EventTypeInteractive, testing_wrapper(c, middleware))
 					r.HandleInteraction(slack.InteractionTypeBlockActions, testing_wrapper(c, middleware_interaction))
 				},
 			},
@@ -228,7 +227,6 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 					},
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
-					r.Handle(EventTypeEventsAPI, testing_wrapper(c, middleware))
 					r.HandleEventsAPI(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
