@@ -482,7 +482,7 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		values.Add("crop_w", strconv.Itoa(params.CropW))
 	}
 
-	err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", values, response, api)
+	err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", api.token, values, response, api)
 	if err != nil {
 		return err
 	}
