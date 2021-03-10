@@ -295,9 +295,7 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 		return nil, err
 	}
 	response := &fileResponseFull{}
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.Filetype != "" {
 		values.Add("filetype", params.Filetype)
 	}
