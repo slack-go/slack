@@ -26,5 +26,5 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("File %s deleted successfully.\n", file.Name)
+	fmt.Printf("File %s uploaded successfully.\n", file.Name)
 }
