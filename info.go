@@ -449,7 +449,7 @@ type Info struct {
 	MPIMs    []*Channel   `json:"mpims,omitempty"`
 	IMs      []*Channel   `json:"ims,omitempty"`
 	Users    []*User      `json:"users,omitempty"`
-	Bots     []*User      `json:"bots,omitempty"`
+	Bots     []*Bot       `json:"bots,omitempty"`
 }
 
 type infoResponseFull struct {
