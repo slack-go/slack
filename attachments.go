@@ -77,8 +77,11 @@ type Attachment struct {
 	Pretext   string `json:"pretext,omitempty"`
 	Text      string `json:"text,omitempty"`
 
-	ImageURL string `json:"image_url,omitempty"`
-	ThumbURL string `json:"thumb_url,omitempty"`
+	ImageURL    string `json:"image_url,omitempty"`
+	ImageSize   int    `json:"image_bytes,omitempty"`
+	ImageHeight int    `json:"image_height,omitempty"`
+	ImageWidth  int    `json:"image_width,omitempty"`
+	ThumbURL    string `json:"thumb_url,omitempty"`
 
 	Fields     []AttachmentField  `json:"fields,omitempty"`
 	Actions    []AttachmentAction `json:"actions,omitempty"`
