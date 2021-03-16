@@ -82,11 +82,6 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 	_, _ = w.Write(encoded)
 }
 
-// handle channels.list and conversations.list
-func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write([]byte(defaultChannelsListJSON))
-}
-
 // handle conversations.create
 func createConversationHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(defaultConversationJSON))
@@ -110,11 +105,6 @@ func renameConversationHandler(w http.ResponseWriter, r *http.Request) {
 // handle conversations.invite
 func inviteConversationHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(inviteConversationJSON))
-}
-
-// handle groups.list
-func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write([]byte(defaultGroupsListJSON))
 }
 
 // handle chat.postMessage
