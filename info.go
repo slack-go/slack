@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -320,58 +319,17 @@ type UserPrefs struct {
 	TZ                                     string `json:"tz,omitempty"`
 }
 
+// GetUserPrefs gets the user's preferences.
 func (api *Client) GetUserPrefs() (*UserPrefsCarrier, error) {
+	return api.GetUserPrefsContext(context.Background())
+}
+
+// GetUserPrefsContext gets the user's preferences with a custom context.
+func (api *Client) GetUserPrefsContext(ctx context.Context) (*UserPrefsCarrier, error) {
 	values := url.Values{"token": {api.token}}
 	response := UserPrefsCarrier{}
 
-	err := api.getMethod(context.Background(), "users.prefs.get", values, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, response.Err()
-}
-
-func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
-	prefs, err := api.GetUserPrefs()
-	if err != nil {
-		return nil, err
-	}
-	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	for _, chn := range chnls {
-		if chn == channelID {
-			return nil, nil // noop
-		}
-	}
-	newChnls := prefs.UserPrefs.MutedChannels + "," + channelID
-	values := url.Values{"token": {api.token}, "muted_channels": {newChnls}, "reason": {"update-muted-channels"}}
-	response := UserPrefsCarrier{}
-
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response, response.Err()
-}
-
-func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
-	prefs, err := api.GetUserPrefs()
-	if err != nil {
-		return nil, err
-	}
-	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	newChnls := make([]string, len(chnls)-1)
-	for i, chn := range chnls {
-		if chn == channelID {
-			return nil, nil // noop
-		}
-		newChnls[i] = chn
-	}
-	values := url.Values{"token": {api.token}, "muted_channels": {strings.Join(newChnls, ",")}, "reason": {"update-muted-channels"}}
-	response := UserPrefsCarrier{}
-
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
+	err := api.getMethod(ctx, "users.prefs.get", values, &response)
 	if err != nil {
 		return nil, err
 	}

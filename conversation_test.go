@@ -263,6 +263,42 @@ func TestUnArchiveConversation(t *testing.T) {
 	}
 }
 
+func getUsersPrefs(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(UserPrefsCarrier{
+		SlackResponse: SlackResponse{Ok: true},
+		UserPrefs: &UserPrefs{
+			MutedChannels: "CYYYYYYYY",
+		},
+	})
+	rw.Write(response)
+}
+
+func TestMuteConversation(t *testing.T) {
+	http.HandleFunc("/users.prefs.get", getUsersPrefs)
+	http.HandleFunc("/users.prefs.set", getUsersPrefs)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err := api.MuteConversation("CXXXXXXXX")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestUnMuteConversation(t *testing.T) {
+	// Handlers are commented out to avoid double declaration.
+	// http.HandleFunc("/users.prefs.get", getUsersPrefs)
+	// http.HandleFunc("/users.prefs.set", okJSONHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err := api.UnMuteConversation("CYYYYYYYY")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
 func getTestChannel() *Channel {
 	return &Channel{
 		GroupConversation: GroupConversation{
