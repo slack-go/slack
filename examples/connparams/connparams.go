@@ -10,8 +10,13 @@ import (
 )
 
 func main() {
+	token, ok := os.LookupEnv("SLACK_TOKEN")
+	if !ok {
+		fmt.Println("Missing SLACK_TOKEN in environment")
+		os.Exit(1)
+	}
 	api := slack.New(
-		"YOUR TOKEN HERE",
+		token,
 		slack.OptionDebug(true),
 		slack.OptionLog(log.New(os.Stdout, "slack-bot: ", log.Lshortfile|log.LstdFlags)),
 	)
