@@ -306,7 +306,7 @@ const (
 	AppHomeOpened = "app_home_opened"
 	// AppUninstalled Your Slack app was uninstalled.
 	AppUninstalled = "app_uninstalled"
-	// ChannelCreated
+	// ChannelCreated is sent when a new channel is created.
 	ChannelCreated = "channel_created"
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = "grid_migration_finished"
