@@ -438,10 +438,10 @@ func (rtm *RTM) handleAck(event json.RawMessage) {
 		if ack.RTMResponse.Error.Code == -1 && ack.RTMResponse.Error.Msg == "slow down, too many messages..." {
 			rtm.IncomingEvents <- RTMEvent{"ack_error", &RateLimitEvent{}}
 		} else {
-			rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ack.Error}}
+			rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ack.Error, ack.ReplyTo}}
 		}
 	} else {
-		rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{fmt.Errorf("ack decode failure")}}
+		rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ErrorObj: fmt.Errorf("ack decode failure")}}
 	}
 }
 
