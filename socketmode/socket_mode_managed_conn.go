@@ -162,6 +162,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		errInvalidAuth      = "invalid_auth"
 		errInactiveAccount  = "account_inactive"
 		errMissingAuthToken = "not_authed"
+		errTokenRevoked     = "token_revoked"
 	)
 
 	// used to provide exponential backoff wait time with jitter before trying
@@ -189,7 +190,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 
 		// check for fatal errors
 		switch err.Error() {
-		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
+		case errInvalidAuth, errInactiveAccount, errMissingAuthToken, errTokenRevoked:
 			smc.Debugf("invalid auth when connecting with SocketMode: %s", err)
 			return nil, nil, err
 		default:
