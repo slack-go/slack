@@ -38,6 +38,21 @@ func TestAppUninstalled(t *testing.T) {
 	}
 }
 
+func TestChannelIDChanged(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "channel_id_changed",
+			"old_channel_id": "G012Y48650T",
+			"new_channel_id": "C012Y48650T",
+			"event_ts": "1612206778.000000"
+		}
+	`)
+	err := json.Unmarshal(rawE, &ChannelIDChangedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestGridMigrationFinishedEvent(t *testing.T) {
 	rawE := []byte(`
 			{
