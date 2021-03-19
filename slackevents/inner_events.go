@@ -47,6 +47,14 @@ type AppUninstalledEvent struct {
 	Type string `json:"type"`
 }
 
+// ChannelIDChangedEvent A channel ID has changed after being shared externally.
+type ChannelIDChangedEvent struct {
+	Type           string      `json:"type"`
+	OldChannelID   string      `json:"old_channel_id"`
+	NewChannelID   string      `json:"new_channel_id"`
+	EventTimeStamp json.Number `json:"event_ts"`
+}
+
 // GridMigrationFinishedEvent An enterprise grid migration has finished on this workspace.
 type GridMigrationFinishedEvent struct {
 	Type         string `json:"type"`
@@ -310,6 +318,8 @@ const (
 	AppHomeOpened = "app_home_opened"
 	// AppUninstalled Your Slack app was uninstalled.
 	AppUninstalled = "app_uninstalled"
+	// ChannelIDChangedEvent A channel ID has changed after being shared externally.
+	ChannelIDChanged = "channel_id_changed"
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = "grid_migration_finished"
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -343,6 +353,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	AppMention:            AppMentionEvent{},
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
+	ChannelIDChanged:      ChannelIDChangedEvent{},
 	GridMigrationFinished: GridMigrationFinishedEvent{},
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
