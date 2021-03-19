@@ -63,6 +63,7 @@ type Client struct {
 	debug         bool
 	log           ilogger
 	httpclient    httpClient
+	onWarning     func(w *Warning, path string, values url.Values)
 }
 
 // Option defines an option for a Client
@@ -86,6 +87,13 @@ func OptionDebug(b bool) func(*Client) {
 func OptionLog(l logger) func(*Client) {
 	return func(c *Client) {
 		c.log = internalLog{logger: l}
+	}
+}
+
+// OptionOnWarning set callback for response warnings.
+func OptionOnWarning(fn func(w *Warning, path string, values url.Values)) func(*Client) {
+	return func(c *Client) {
+		c.onWarning = fn
 	}
 }
 
@@ -153,10 +161,22 @@ func (api *Client) Debug() bool {
 
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	err := postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	if w, ok := intf.(warner); ok {
+		if warning := w.Warn(); warning != nil && api.onWarning != nil {
+			api.onWarning(warning, path, values)
+		}
+	}
+	return err
 }
 
 // get a slack web method.
 func (api *Client) getMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	err := getResource(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	if w, ok := intf.(warner); ok {
+		if warning := w.Warn(); warning != nil && api.onWarning != nil {
+			api.onWarning(warning, path, values)
+		}
+	}
+	return err
 }
