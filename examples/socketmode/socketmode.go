@@ -71,9 +71,41 @@ func main() {
 					innerEvent := eventsAPIEvent.InnerEvent
 					switch ev := innerEvent.Data.(type) {
 					case *slackevents.AppMentionEvent:
-						_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
-						if err != nil {
-							fmt.Printf("failed posting message: %v", err)
+						if strings.Index(ev.Text, " ") != -1 {
+							request := strings.Split(ev.Text, " ")
+
+							// Display a pull-down menu when calling a bot with "menu".
+							switch request[1] {
+							case "menu":
+								text := slack.NewTextBlockObject(slack.MarkdownType, "Please select *menu*.", false, false)
+								textSection := slack.NewSectionBlock(text, nil, nil)
+
+								// List of menus to be displayed
+								menus := []string{"caseA", "caseB", "caseC"}
+								options := make([]*slack.OptionBlockObject, 0, len(menus))
+								for _, v := range menus {
+									optionText := slack.NewTextBlockObject(slack.PlainTextType, v, false, false)
+									options = append(options, slack.NewOptionBlockObject(v, optionText, nil))
+								}
+
+								placeholder := slack.NewTextBlockObject(slack.PlainTextType, "Select Menu", false, false)
+								selectMenu := slack.NewOptionsSelectBlockElement(slack.OptTypeStatic, placeholder, "", options...)
+
+								actionBlock := slack.NewActionBlock("menus", selectMenu)
+
+								fallbackText := slack.MsgOptionText("This client is not supported.", false)
+								blocks := slack.MsgOptionBlocks(textSection, actionBlock)
+
+								if _, err := api.PostEphemeral(ev.Channel, ev.User, fallbackText, blocks); err != nil {
+									fmt.Printf("failed posting message: %v", err)
+								}
+							// For other messages, return as is.
+							default:
+								_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("PONG your "+request[1], false))
+								if err != nil {
+									fmt.Printf("failed posting message: %v", err)
+								}
+							}
 						}
 					case *slackevents.MemberJoinedChannelEvent:
 						fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
@@ -98,6 +130,9 @@ func main() {
 					// See https://api.slack.com/apis/connections/socket-implement#button
 
 					client.Debugf("button clicked!")
+					
+					// Receive what you have selected in the menu
+					client.Debugf(string(callback.RawState))
 				case slack.InteractionTypeShortcut:
 				case slack.InteractionTypeViewSubmission:
 					// See https://api.slack.com/apis/connections/socket-implement#modal
