@@ -9,6 +9,8 @@ import (
 const (
 	DEFAULT_LOGINS_COUNT = 100
 	DEFAULT_LOGINS_PAGE  = 1
+	DEFAULT_LOGS_COUNT   = 100
+	DEFAULT_LOGS_PAGE    = 1
 )
 
 type TeamResponse struct {
@@ -43,6 +45,25 @@ type Login struct {
 	Region    string `json:"region"`
 }
 
+type LogResponse struct {
+	Logs   []Log `json:"logs"`
+	Paging `json:"paging"`
+	SlackResponse
+}
+
+type Log struct {
+	ServiceID   string `json:"service_id"`
+	ServiceType string `json:"service_type"`
+	AppID       string `json:"app_id"`
+	AppType     string `json:"app_type"`
+	UserID      string `json:"user_id"`
+	UserName    string `json:"user_name"`
+	Date        string `json:"date"`
+	ChangeType  string `json:"change_type"`
+	Reason      string `json:"reason"`
+	Scope       string `json:"scope"`
+}
+
 type BillableInfoResponse struct {
 	BillableInfo map[string]BillingActive `json:"billable_info"`
 	SlackResponse
@@ -58,11 +79,30 @@ type AccessLogParameters struct {
 	Page  int
 }
 
+// IntegrationLogParameters contains all the parameters necessary (including the optional ones) for a GetIntegrationLogs() request
+type IntegrationLogParameters struct {
+	AppID      string
+	ChangeType string
+	ServiceID  string
+	TeamID     string
+	User       string
+	Count      int
+	Page       int
+}
+
 // NewAccessLogParameters provides an instance of AccessLogParameters with all the sane default values set
 func NewAccessLogParameters() AccessLogParameters {
 	return AccessLogParameters{
 		Count: DEFAULT_LOGINS_COUNT,
 		Page:  DEFAULT_LOGINS_PAGE,
+	}
+}
+
+// NewIntegrationLogParameters provides an instance of IntegrationLogParameters with all the sane default values set
+func NewIntegrationLogParameters() IntegrationLogParameters {
+	return IntegrationLogParameters{
+		Count: DEFAULT_LOGS_COUNT,
+		Page:  DEFAULT_LOGS_PAGE,
 	}
 }
 
@@ -88,6 +128,15 @@ func (api *Client) billableInfoRequest(ctx context.Context, path string, values 
 
 func (api *Client) accessLogsRequest(ctx context.Context, path string, values url.Values) (*LoginResponse, error) {
 	response := &LoginResponse{}
+	err := api.postMethod(ctx, path, values, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
+func (api *Client) integrationLogsRequest(ctx context.Context, path string, values url.Values) (*LogResponse, error) {
+	response := &LogResponse{}
 	err := api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
@@ -135,6 +184,45 @@ func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogPar
 		return nil, nil, err
 	}
 	return response.Logins, &response.Paging, nil
+}
+
+// GetIntegrationLogs retrieves a page of activity logs according to the parameters given
+func (api *Client) GetIntegrationLogs(params IntegrationLogParameters) ([]Log, *Paging, error) {
+	return api.GetIntegrationLogsContext(context.Background(), params)
+}
+
+// GetIntegrationLogsContext retrieves a page of activity logs according to the parameters given with a custom context
+func (api *Client) GetIntegrationLogsContext(ctx context.Context, params IntegrationLogParameters) ([]Log, *Paging, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	if params.AppID != "" {
+		values.Add("app_id", params.AppID)
+	}
+	if params.ChangeType != "" {
+		values.Add("change_type", params.ChangeType)
+	}
+	if params.ServiceID != "" {
+		values.Add("service_id", params.ServiceID)
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
+	if params.User != "" {
+		values.Add("user", params.User)
+	}
+	if params.Count != DEFAULT_LOGINS_COUNT {
+		values.Add("count", strconv.Itoa(params.Count))
+	}
+	if params.Page != DEFAULT_LOGINS_PAGE {
+		values.Add("page", strconv.Itoa(params.Page))
+	}
+
+	response, err := api.integrationLogsRequest(ctx, "team.integrationLogs", values)
+	if err != nil {
+		return nil, nil, err
+	}
+	return response.Logs, &response.Paging, nil
 }
 
 // GetBillableInfo ...

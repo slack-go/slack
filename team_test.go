@@ -166,3 +166,111 @@ func TestGetAccessLogs(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
+
+func getTeamIntegrationLogs(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response := []byte(`{"ok": true, "logs": [{
+			"app_id": "2345678901",
+			"app_type": "Johnny App",
+			"user_id": "U2345BCDE",
+			"user_name": "Billy",
+			"date": "1392163201",
+			"change_type": "added",
+			"scope": "chat:write:user,channels:read"
+		},
+		{
+			"service_id": "3456789012",
+			"service_type": "Airbrake",
+			"user_id": "U3456CDEF",
+			"user_name": "Joey",
+			"channel": "C1234567890",
+			"date": "1392163202",
+			"change_type": "disabled",
+			"reason": "user",
+			"scope": "incoming-webhook"
+		}],
+		"paging": {
+			"count": 2,
+			"total": 2,
+			"page": 1,
+			"pages": 1
+		}
+	}`)
+	rw.Write(response)
+}
+
+func TestGetIntegrationLogs(t *testing.T) {
+	http.HandleFunc("/team.integrationLogs", getTeamIntegrationLogs)
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	logs, paging, err := api.GetIntegrationLogs(NewIntegrationLogParameters())
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if len(logs) != 2 {
+		t.Fatal("Should have been 2 logs")
+	}
+
+	// test the first log
+	log1 := logs[0]
+	log2 := logs[1]
+
+	if log1.AppID != "2345678901" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.AppType != "Johnny App" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.UserID != "U2345BCDE" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.UserName != "Billy" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.Date != "1392163201" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.ChangeType != "added" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log1.Scope != "chat:write:user,channels:read" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
+	// test the second log new fields
+	if log2.ServiceID != "3456789012" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log2.ServiceType != "Airbrake" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log2.Reason != "user" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
+	// test that the null values of log2 are coming across correctly
+	if log2.AppID != "" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if log2.AppType != "" {
+		t.Fatal(ErrIncorrectResponse)
+	}
+
+	// test the paging
+	if paging.Count != 2 {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if paging.Total != 2 {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if paging.Page != 1 {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if paging.Pages != 1 {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
