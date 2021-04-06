@@ -236,12 +236,14 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
-func getResource(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d Debug) error {
+func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf interface{}, d Debug) error {
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
 	req.URL.RawQuery = values.Encode()
 
 	return doPost(ctx, client, req, newJSONParser(intf), d)
