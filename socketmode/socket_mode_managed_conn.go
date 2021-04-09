@@ -56,6 +56,7 @@ func (smc *Client) RunContext(ctx context.Context) error {
 
 func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	messages := make(chan json.RawMessage)
+	defer close(messages)
 
 	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
 
@@ -143,7 +144,10 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 		select {
 		case <-ctx.Done():
-		// Detect when the connection is dead.
+			// Detect when the connection is dead and try close connection.
+			if err = conn.Close(); err != nil {
+				smc.Debugf("Failed to close connection: %v", err)
+			}
 		case <-deadmanTimer.Elapsed():
 			firstErrOnce.Do(func() {
 				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
@@ -155,13 +159,13 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 	wg.Wait()
 
+	if firstErr == context.Canceled {
+		return firstErr
+	}
+
 	// wg.Wait() finishes only after any of the above go routines finishes.
 	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
 	smc.Debugf("Reconnecting due to %v", firstErr)
-
-	if err = conn.Close(); err != nil {
-		smc.Debugf("Failed to close connection: %v", err)
-	}
 
 	return nil
 }
