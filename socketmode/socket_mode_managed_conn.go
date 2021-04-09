@@ -267,7 +267,7 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 	if smc.dialer != nil {
 		dialer = smc.dialer
 	}
-	conn, _, err := dialer.Dial(url, upgradeHeader)
+	conn, _, err := dialer.DialContext(ctx, url, upgradeHeader)
 	if err != nil {
 		smc.Debugf("Failed to dial to the websocket: %s", err)
 		return nil, nil, err
