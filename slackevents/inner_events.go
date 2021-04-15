@@ -47,6 +47,22 @@ type AppUninstalledEvent struct {
 	Type string `json:"type"`
 }
 
+// ChannelCreatedEvent represents the Channel created event
+type ChannelCreatedEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
+// ChannelCreatedInfo represents the information associated with the Channel created event
+type ChannelCreatedInfo struct {
+	ID        string `json:"id"`
+	IsChannel bool   `json:"is_channel"`
+	Name      string `json:"name"`
+	Created   int    `json:"created"`
+	Creator   string `json:"creator"`
+}
+
 // GridMigrationFinishedEvent An enterprise grid migration has finished on this workspace.
 type GridMigrationFinishedEvent struct {
 	Type         string `json:"type"`
@@ -311,7 +327,9 @@ const (
 	// AppHomeOpened Your Slack app home was opened
 	AppHomeOpened = EventAPIType("app_home_opened")
 	// AppUninstalled Your Slack app was uninstalled.
-	AppUninstalled = EventAPIType("app_uninstalled")
+  AppUninstalled = EventAPIType("app_uninstalled")
+	// ChannelCreated is sent when a new channel is created.
+  ChannelCreated = EventAPIType("channel_created")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = EventAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -345,6 +363,7 @@ var EventsAPIInnerEventMapping = map[EventAPIType]interface{}{
 	AppMention:            AppMentionEvent{},
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
+	ChannelCreated:        ChannelCreatedEvent{},
 	GridMigrationFinished: GridMigrationFinishedEvent{},
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
