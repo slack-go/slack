@@ -142,6 +142,7 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	m.Channel = values.Get("channel")
 	m.Timestamp = fmt.Sprintf("%d", ts)
 	m.Text = values.Get("text")
+	m.ThreadTimestamp = values.Get("thread_ts")
 	if values.Get("as_user") != "true" {
 		m.User = defaultNonBotUserID
 		m.Username = defaultNonBotUserName
