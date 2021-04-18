@@ -2,12 +2,18 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	token, ok := os.LookupEnv("SLACK_TOKEN")
+	if !ok {
+		fmt.Println("Missing SLACK_TOKEN in environment")
+		os.Exit(1)
+	}
+	api := slack.New(token)
 	channels, err := api.GetChannels(false)
 	if err != nil {
 		fmt.Printf("%s\n", err)
