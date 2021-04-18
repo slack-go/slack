@@ -386,7 +386,7 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 	assert.Equal(t, cb.State, "")
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
-		actionType(MultiOptTypeConversations))
+		ActionType(MultiOptTypeConversations))
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
 		[]string{"G12345"})
