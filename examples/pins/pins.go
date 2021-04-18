@@ -49,7 +49,7 @@ func main() {
 		// If the channel exists, that means we just need to unarchive it
 		if err.Error() == "name_taken" {
 			err = nil
-			params := &slack.GetConversationsParameters{ExcludeArchived: "false"}
+			params := &slack.GetConversationsParameters{ExcludeArchived: false}
 			if channels, _, err = api.GetConversations(params); err != nil {
 				fmt.Println("Could not retrieve channels")
 				return
