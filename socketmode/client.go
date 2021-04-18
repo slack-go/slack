@@ -28,7 +28,7 @@ type ConnectionInfo struct {
 }
 
 type SocketModeMessagePayload struct {
-	Event json.RawMessage `json:"´event"`
+	Event json.RawMessage `json:"event"`
 }
 
 // Client is a Socket Mode client that allows programs to use [Events API](https://api.slack.com/events-api)
