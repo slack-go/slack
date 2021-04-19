@@ -248,6 +248,9 @@ func TestGetIntegrationLogs(t *testing.T) {
 	if log2.ServiceType != "Airbrake" {
 		t.Fatal(ErrIncorrectResponse)
 	}
+	if log2.Channel != "C1234567890" {
+		t.Fatal(ErrIncorrectResponse)
+	}
 	if log2.Reason != "user" {
 		t.Fatal(ErrIncorrectResponse)
 	}

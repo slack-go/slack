@@ -58,6 +58,7 @@ type Log struct {
 	AppType     string `json:"app_type"`
 	UserID      string `json:"user_id"`
 	UserName    string `json:"user_name"`
+	Channel     string `json:"channel"`
 	Date        string `json:"date"`
 	ChangeType  string `json:"change_type"`
 	Reason      string `json:"reason"`
