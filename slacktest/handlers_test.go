@@ -3,7 +3,7 @@ package slacktest
 import (
 	"testing"
 
-	slack "github.com/slack-go/slack"
+	slack "github.com/melisa92/slack"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestPostMessageHandler(t *testing.T) {
 	go s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	channel, tstamp, err := client.PostMessage("foo", slack.MsgOptionText("some text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
+	channel, tstamp, err := client.PostMessage("foo", "", slack.MsgOptionText("some text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
 	assert.NoError(t, err, "should not error out")
 	assert.Equal(t, "foo", channel, "channel should be correct")
 	assert.NotEmpty(t, tstamp, "timestamp should not be empty")

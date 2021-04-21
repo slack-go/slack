@@ -9,12 +9,12 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/slack-go/slack/internal/backoff"
-	"github.com/slack-go/slack/internal/misc"
+	"github.com/melisa92/slack/internal/backoff"
+	"github.com/melisa92/slack/internal/misc"
 
 	"github.com/gorilla/websocket"
-	"github.com/slack-go/slack/internal/errorsx"
-	"github.com/slack-go/slack/internal/timex"
+	"github.com/melisa92/slack/internal/errorsx"
+	"github.com/melisa92/slack/internal/timex"
 )
 
 // ManageConnection can be called on a Slack RTM instance returned by the
