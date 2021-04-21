@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/slack-go/slack"
+	"github.com/melisa92/slack"
 
 	"github.com/gorilla/websocket"
 )
@@ -110,7 +110,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
-		log:                 log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
+		log:                 log.New(os.Stderr, "melisa92/slack/socketmode", log.LstdFlags|log.Lshortfile),
 	}
 
 	for _, opt := range options {

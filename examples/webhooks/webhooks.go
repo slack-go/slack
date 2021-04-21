@@ -6,16 +6,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/slack-go/slack"
+	"github.com/melisa92/slack"
 )
 
 func main() {
 	attachment := slack.Attachment{
 		Color:         "good",
 		Fallback:      "You successfully posted by Incoming Webhook URL!",
-		AuthorName:    "slack-go/slack",
+		AuthorName:    "melisa92/slack",
 		AuthorSubname: "github.com",
-		AuthorLink:    "https://github.com/slack-go/slack",
+		AuthorLink:    "https://github.com/melisa92/slack",
 		AuthorIcon:    "https://avatars2.githubusercontent.com/u/652790",
 		Text:          "<!channel> All text in Slack uses the same system of escaping: chat messages, direct messages, file comments, etc. :smile:\nSee <https://api.slack.com/docs/message-formatting#linking_to_channels_and_users>",
 		Footer:        "slack api",
