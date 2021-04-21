@@ -22,7 +22,7 @@ func TestPostMessageInvalidChannel(t *testing.T) {
 	http.HandleFunc("/chat.postMessage", postMessageInvalidChannelHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	_, _, err := api.PostMessage("CXXXXXXXX", MsgOptionText("hello", false))
+	_, _, err := api.PostMessage("CXXXXXXXX", "", MsgOptionText("hello", false))
 	if err == nil {
 		t.Errorf("Expected error: channel_not_found; instead succeeded")
 		return
@@ -182,7 +182,7 @@ func TestPostMessage(t *testing.T) {
 				}
 			})
 
-			_, _, _ = api.PostMessage("CXXX", test.opt...)
+			_, _, _ = api.PostMessage("CXXX", "", test.opt...)
 		})
 	}
 }
@@ -214,7 +214,7 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 
 	responseURL := api.endpoint + "response-url"
 
-	_, _, _ = api.PostMessage("CXXX", MsgOptionBlocks(expectedBlocks...), MsgOptionText("text", false), MsgOptionResponseURL(responseURL, ResponseTypeInChannel))
+	_, _, _ = api.PostMessage("CXXX", "", MsgOptionBlocks(expectedBlocks...), MsgOptionText("text", false), MsgOptionResponseURL(responseURL, ResponseTypeInChannel))
 }
 
 func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
@@ -241,7 +241,7 @@ func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 
 	responseURL := api.endpoint + "response-url"
 
-	_, _, _ = api.PostMessage("CXXX", MsgOptionText("text", false), MsgOptionReplaceOriginal(responseURL))
+	_, _, _ = api.PostMessage("CXXX", "", MsgOptionText("text", false), MsgOptionReplaceOriginal(responseURL))
 }
 
 func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
@@ -268,5 +268,5 @@ func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 
 	responseURL := api.endpoint + "response-url"
 
-	_, _, _ = api.PostMessage("CXXX", MsgOptionDeleteOriginal(responseURL))
+	_, _, _ = api.PostMessage("CXXX", "", MsgOptionDeleteOriginal(responseURL))
 }

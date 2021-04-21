@@ -85,20 +85,22 @@ func NewPostMessageParameters() PostMessageParameters {
 }
 
 // DeleteMessage deletes a message in a channel
-func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, string, error) {
+func (api *Client) DeleteMessage(channel, messageTimestamp, notificatinStr string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		context.Background(),
 		channel,
+		notificatinStr,
 		MsgOptionDelete(messageTimestamp),
 	)
 	return respChannel, respTimestamp, err
 }
 
 // DeleteMessageContext deletes a message in a channel with a custom context
-func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTimestamp string) (string, string, error) {
+func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTimestamp, notificatinStr string) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		ctx,
 		channel,
+		notificatinStr,
 		MsgOptionDelete(messageTimestamp),
 	)
 	return respChannel, respTimestamp, err
@@ -107,10 +109,11 @@ func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTim
 // ScheduleMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOption) (string, string, error) {
+func (api *Client) ScheduleMessage(channelID, postAt, notificatinStr string, options ...MsgOption) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		context.Background(),
 		channelID,
+		notificatinStr,
 		MsgOptionSchedule(postAt),
 		MsgOptionCompose(options...),
 	)
@@ -120,10 +123,11 @@ func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOptio
 // PostMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Client) PostMessage(channelID string, options ...MsgOption) (string, string, error) {
+func (api *Client) PostMessage(channelID, notificatinStr string, options ...MsgOption) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		context.Background(),
 		channelID,
+		notificatinStr,
 		MsgOptionPost(),
 		MsgOptionCompose(options...),
 	)
@@ -132,10 +136,11 @@ func (api *Client) PostMessage(channelID string, options ...MsgOption) (string, 
 
 // PostMessageContext sends a message to a channel with a custom context
 // For more details, see PostMessage documentation.
-func (api *Client) PostMessageContext(ctx context.Context, channelID string, options ...MsgOption) (string, string, error) {
+func (api *Client) PostMessageContext(ctx context.Context, channelID, notificatinStr string, options ...MsgOption) (string, string, error) {
 	respChannel, respTimestamp, _, err := api.SendMessageContext(
 		ctx,
 		channelID,
+		notificatinStr,
 		MsgOptionPost(),
 		MsgOptionCompose(options...),
 	)
@@ -145,21 +150,23 @@ func (api *Client) PostMessageContext(ctx context.Context, channelID string, opt
 // PostEphemeral sends an ephemeral message to a user in a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Client) PostEphemeral(channelID, userID string, options ...MsgOption) (string, error) {
+func (api *Client) PostEphemeral(channelID, userID, notificatinStr string, options ...MsgOption) (string, error) {
 	return api.PostEphemeralContext(
 		context.Background(),
 		channelID,
 		userID,
+		notificatinStr,
 		options...,
 	)
 }
 
 // PostEphemeralContext sends an ephemeal message to a user in a channel with a custom context
 // For more details, see PostEphemeral documentation
-func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID string, options ...MsgOption) (timestamp string, err error) {
+func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID, notificatinStr string, options ...MsgOption) (timestamp string, err error) {
 	_, timestamp, _, err = api.SendMessageContext(
 		ctx,
 		channelID,
+		notificatinStr,
 		MsgOptionPostEphemeral(userID),
 		MsgOptionCompose(options...),
 	)
@@ -167,60 +174,62 @@ func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID s
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channelID, timestamp string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UpdateMessage(channelID, timestamp, notificatinStr string, options ...MsgOption) (string, string, string, error) {
 	return api.SendMessageContext(
 		context.Background(),
 		channelID,
+		notificatinStr,
 		MsgOptionUpdate(timestamp),
 		MsgOptionCompose(options...),
 	)
 }
 
 // UpdateMessageContext updates a message in a channel
-func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp, notificatinStr string, options ...MsgOption) (string, string, string, error) {
 	return api.SendMessageContext(
 		ctx,
 		channelID,
+		notificatinStr,
 		MsgOptionUpdate(timestamp),
 		MsgOptionCompose(options...),
 	)
 }
 
 // UnfurlMessage unfurls a message in a channel
-func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
-	return api.SendMessageContext(context.Background(), channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
+func (api *Client) UnfurlMessage(channelID, timestamp, notificatinStr string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(context.Background(), channelID, notificatinStr, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
 }
 
 // UnfurlMessageWithAuthURL sends an unfurl request containing an
 // authentication URL.
 // For more details see:
 // https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
-func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
-	return api.UnfurlMessageWithAuthURLContext(context.Background(), channelID, timestamp, userAuthURL, options...)
+func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp, notificatinStr string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+	return api.UnfurlMessageWithAuthURLContext(context.Background(), channelID, timestamp, notificatinStr, userAuthURL, options...)
 }
 
 // UnfurlMessageWithAuthURLContext sends an unfurl request containing an
 // authentication URL.
 // For more details see:
 // https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
-func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
-	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
+func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp, notificatinStr string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channelID, notificatinStr, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
 }
 
 // SendMessage more flexible method for configuring messages.
-func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, error) {
-	return api.SendMessageContext(context.Background(), channel, options...)
+func (api *Client) SendMessage(channel, notificatinStr string, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(context.Background(), channel, notificatinStr, options...)
 }
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
-func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestamp string, _text string, err error) {
+func (api *Client) SendMessageContext(ctx context.Context, channelID, notificatinStr string, options ...MsgOption) (_channel string, _timestamp string, _text string, err error) {
 	var (
 		req      *http.Request
 		parser   func(*chatResponseFull) responseParser
 		response chatResponseFull
 	)
 
-	if req, parser, err = buildSender(api.endpoint, options...).BuildRequest(api.token, channelID); err != nil {
+	if req, parser, err = buildSender(api.endpoint, options...).BuildRequest(api.token, channelID, notificatinStr); err != nil {
 		return "", "", "", err
 	}
 
@@ -243,12 +252,12 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 // UnsafeApplyMsgOptions utility function for debugging/testing chat requests.
 // NOTE: USE AT YOUR OWN RISK: No issues relating to the use of this function
 // will be supported by the library.
-func UnsafeApplyMsgOptions(token, channel, apiurl string, options ...MsgOption) (string, url.Values, error) {
-	config, err := applyMsgOptions(token, channel, apiurl, options...)
+func UnsafeApplyMsgOptions(token, channel, apiurl, notificatinStr string, options ...MsgOption) (string, url.Values, error) {
+	config, err := applyMsgOptions(token, channel, apiurl, notificatinStr, options...)
 	return config.endpoint, config.values, err
 }
 
-func applyMsgOptions(token, channel, apiurl string, options ...MsgOption) (sendConfig, error) {
+func applyMsgOptions(token, channel, apiurl, notificationStr string, options ...MsgOption) (sendConfig, error) {
 	config := sendConfig{
 		apiurl:   apiurl,
 		endpoint: apiurl + string(chatPostMessage),
@@ -256,6 +265,10 @@ func applyMsgOptions(token, channel, apiurl string, options ...MsgOption) (sendC
 			"token":   {token},
 			"channel": {channel},
 		},
+	}
+
+	if notificationStr != "" {
+		config.values.Add("text", notificationStr)
 	}
 
 	for _, opt := range options {
@@ -300,8 +313,8 @@ type sendConfig struct {
 	deleteOriginal  bool
 }
 
-func (t sendConfig) BuildRequest(token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
-	if t, err = applyMsgOptions(token, channelID, t.apiurl, t.options...); err != nil {
+func (t sendConfig) BuildRequest(token, channelID, notificatinStr string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
+	if t, err = applyMsgOptions(token, channelID, t.apiurl, notificatinStr, t.options...); err != nil {
 		return nil, nil, err
 	}
 
