@@ -598,7 +598,7 @@ func TestGetUserProfile(t *testing.T) {
 	http.HandleFunc("/users.profile.get", getUserProfileHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	profile, err := api.GetUserProfile(&GetUserProfileParameters{UserID: "UXXXXXXXX"})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}

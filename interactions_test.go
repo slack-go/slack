@@ -93,19 +93,35 @@ const (
 				"type": "plain_text",
 				"text": "meal choice"
 			},
-			"blocks": [{
-				"type": "input",
-				"block_id": "multi-line",
-				"label": {
-					"type": "plain_text",
-					"text": "dietary restrictions"
+			"blocks": [
+				{
+					"type": "input",
+					"block_id": "multi-line",
+					"label": {
+						"type": "plain_text",
+						"text": "dietary restrictions"
+					},
+					"element": {
+						"type": "plain_text_input",
+						"multiline": true,
+						"action_id": "ml-value"
+					}
 				},
-				"element": {
-					"type": "plain_text_input",
-					"multiline": true,
-					"action_id": "ml-value"
+				{
+					"type": "input",
+					"block_id": "target_channel",
+					"label": {
+						"type": "plain_text",
+						"text": "Select a channel to post the result on"
+					},
+					"element": {
+						"type": "conversations_select",
+						"action_id": "target_select",
+						"default_to_current_conversation": true,
+						"response_url_enabled": true
+					}
 				}
-			}],
+			],
 			"state": {
 				"values": {
 					"multi-line": {
@@ -113,10 +129,25 @@ const (
 							"type": "plain_text_input",
 							"value": "No onions"
 						}
+					},
+					"target_channel": {
+						"target_select": {
+							"type": "conversations_select",
+							"value": "C1AB2C3DE"
+						}
 					}
 				}
 			}
-		}
+		},
+		"hash": "156663117.cd33ad1f",
+		"response_urls": [
+			{
+				"block_id": "target_channel",
+				"action_id": "target_select",
+				"channel_id": "C1AB2C3DE",
+				"response_url": "https:\/\/hooks.slack.com\/app\/ABC12312\/1234567890\/A100B100C100d100"
+			}
+		]
 	}`
 )
 
@@ -231,6 +262,21 @@ func TestViewSubmissionCallback(t *testing.T) {
 							Multiline: true,
 						},
 					),
+					NewInputBlock(
+						"target_channel",
+						NewTextBlockObject(
+							"plain_text",
+							"Select a channel to post the result on",
+							false,
+							false,
+						),
+						&SelectBlockElement{
+							Type:                         "conversations_select",
+							ActionID:                     "target_select",
+							DefaultToCurrentConversation: true,
+							ResponseURLEnabled:           true,
+						},
+					),
 				},
 			},
 			State: &ViewState{
@@ -241,6 +287,23 @@ func TestViewSubmissionCallback(t *testing.T) {
 							Value: "No onions",
 						},
 					},
+					"target_channel": map[string]BlockAction{
+						"target_select": BlockAction{
+							Type:  "conversations_select",
+							Value: "C1AB2C3DE",
+						},
+					},
+				},
+			},
+		},
+		ViewSubmissionCallback: ViewSubmissionCallback{
+			Hash: "156663117.cd33ad1f",
+			ResponseURLs: []ViewSubmissionCallbackResponseURL{
+				{
+					BlockID:     "target_channel",
+					ActionID:    "target_select",
+					ChannelID:   "C1AB2C3DE",
+					ResponseURL: "https://hooks.slack.com/app/ABC12312/1234567890/A100B100C100d100",
 				},
 			},
 		},
@@ -386,7 +449,7 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 	assert.Equal(t, cb.State, "")
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
-		actionType(MultiOptTypeConversations))
+		ActionType(MultiOptTypeConversations))
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
 		[]string{"G12345"})

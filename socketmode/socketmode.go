@@ -61,6 +61,13 @@ func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string
 	return smc.apiClient.StartSocketModeContext(ctx)
 }
 
+// OpenContext calls the "apps.connections.open" endpoint and returns the provided URL and the full Info block.
+//
+// To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
+func (smc *Client) OpenContext(ctx context.Context) (info *slack.SocketModeConnection, websocketURL string, err error) {
+	return smc.apiClient.StartSocketModeContext(ctx)
+}
+
 // Option options for the managed Client.
 type Option func(client *Client)
 
