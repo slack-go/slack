@@ -327,9 +327,9 @@ const (
 	// AppHomeOpened Your Slack app home was opened
 	AppHomeOpened = EventAPIType("app_home_opened")
 	// AppUninstalled Your Slack app was uninstalled.
-  AppUninstalled = EventAPIType("app_uninstalled")
+	AppUninstalled = EventAPIType("app_uninstalled")
 	// ChannelCreated is sent when a new channel is created.
-  ChannelCreated = EventAPIType("channel_created")
+	ChannelCreated = EventAPIType("channel_created")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = EventAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
