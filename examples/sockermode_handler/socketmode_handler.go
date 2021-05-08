@@ -67,7 +67,7 @@ func main() {
 
 	// Handle all SlashCommand
 	socketmodeHandler.Handle(socketmode.EventTypeSlashCommand, middlewareSlashCommand)
-	socketmodeHandler.HandleSlashCommand(socketmode.EventTypeSlashCommand, middlewareSlashCommand)
+	socketmodeHandler.HandleSlashCommand("/rocket", middlewareSlashCommand)
 
 	// socketmodeHandler.HandleDefault(middlewareDefault)
 
