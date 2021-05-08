@@ -31,6 +31,7 @@ func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
 	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
 	eventApiMap := make(map[slackevents.EventAPIType][]SocketmodeHandlerFunc)
+	slackCommandMap := make(map[string][]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
 		Client:                         client,
@@ -38,6 +39,7 @@ func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 		EventApiMap:                    eventApiMap,
 		InteractionEventMap:            interactionEventMap,
 		InteractionBlockActionEventMap: interactionBlockActionEventMap,
+		SlashCommandMap:                slackCommandMap,
 		Default: func(e *Event, c *Client) {
 			log.Printf("Unexpected event type received: %v\n", e.Type)
 		},
