@@ -15,6 +15,7 @@ type SocketmodeHandler struct {
 	InteractionEventMap            map[slack.InteractionType][]SocketmodeHandlerFunc
 	InteractionBlockActionEventMap map[string][]SocketmodeHandlerFunc
 	EventApiMap                    map[slackevents.EventAPIType][]SocketmodeHandlerFunc
+	SlashCommandMap                map[string][]SocketmodeHandlerFunc
 
 	Default SocketmodeHandlerFunc
 }
@@ -63,6 +64,10 @@ func (r *SocketmodeHandler) HandleEventsAPI(et slackevents.EventAPIType, f Socke
 	r.EventApiMap[et] = append(r.EventApiMap[et], f)
 }
 
+func (r *SocketmodeHandler) HandleSlashCommand(command string, f SocketmodeHandlerFunc) {
+	r.SlashCommandMap[command] = append(r.SlashCommandMap[command], f)
+}
+
 // Register a middleare function to use as a last resort
 func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 	r.Default = f
@@ -91,6 +96,8 @@ func (r *SocketmodeHandler) dispatcher(evt Event) {
 		ishandled = r.interactionDispatcher(&evt)
 	case EventTypeEventsAPI:
 		ishandled = r.eventAPIDispatcher(&evt)
+	case EventTypeSlashCommand:
+		ishandled = r.slashCommandDispatcher(&evt)
 	default:
 		ishandled = r.socketmodeDispatcher(&evt)
 	}
@@ -125,14 +132,7 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 	}
 
 	// Level 1 - socketmode EventType
-	if handlers, ok := r.EventMap[evt.Type]; ok {
-
-		for _, f := range handlers {
-			go f(evt, r.Client)
-		}
-
-		ishandled = true
-	}
+	ishandled = r.socketmodeDispatcher(evt)
 
 	// Level 2 - interaction EventType
 	if handlers, ok := r.InteractionEventMap[interaction.Type]; ok {
@@ -174,14 +174,7 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 	innerEventType := slackevents.EventAPIType(eventsAPIEvent.InnerEvent.Type)
 
 	// Level 1 - socketmode EventType
-	if handlers, ok := r.EventMap[evt.Type]; ok {
-		// fallback it this event is not handle by a more specific handler
-		for _, f := range handlers {
-			go f(evt, r.Client)
-		}
-
-		ishandled = true
-	}
+	ishandled = r.socketmodeDispatcher(evt)
 
 	// Level 2 - EventAPI EventType
 	if handlers, ok := r.EventApiMap[innerEventType]; ok {
@@ -194,4 +187,30 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 	}
 
 	return ishandled
+}
+
+// Dispatch SlashCommands events to the registered middleware
+func (r *SocketmodeHandler) slashCommandDispatcher(evt *Event) bool {
+	var ishandled bool = false
+	slashCommandEvent, ok := evt.Data.(slack.SlashCommand)
+	if !ok {
+		fmt.Printf("Ignored %+v\n", evt)
+		return false
+	}
+
+	// Level 1 - socketmode EventType
+	ishandled = r.socketmodeDispatcher(evt)
+
+	// Level 2 - SlackCommand by name
+	if handlers, ok := r.SlashCommandMap[slashCommandEvent.Command]; ok {
+		// If we registered an event
+		for _, f := range handlers {
+			go f(evt, r.Client)
+		}
+
+		ishandled = true
+	}
+
+	return ishandled
+
 }

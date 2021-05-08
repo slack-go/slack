@@ -14,6 +14,7 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 	interactioneventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
 	eventApiMap := make(map[slackevents.EventAPIType][]SocketmodeHandlerFunc)
 	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
+	slashCommandMap := make(map[string][]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
 		Client:                         &Client{},
@@ -21,6 +22,7 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 		EventApiMap:                    eventApiMap,
 		InteractionEventMap:            interactioneventMap,
 		InteractionBlockActionEventMap: interactionBlockActionEventMap,
+		SlashCommandMap:                slashCommandMap,
 	}
 }
 
@@ -63,6 +65,10 @@ func middleware(evt *Event, client *Client) {
 }
 
 func defaultmiddleware(evt *Event, client *Client) {
+	//do nothing
+}
+
+func middleware_slach_command(evt *Event, client *Client) {
 	//do nothing
 }
 
@@ -347,6 +353,68 @@ func TestSocketmodeHandler_HandleInteractionBlockAction(t *testing.T) {
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
 					r.HandleInteractionBlockAction("add_note", testing_wrapper(c, middleware_interaction_block_action))
+				},
+			},
+			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := init_SocketmodeHandler()
+
+			c := make(chan string)
+
+			tt.args.register(r, c)
+			r.HandleDefault(testing_wrapper(c, defaultmiddleware))
+
+			r.dispatcher(tt.args.evt)
+
+			got := <-c
+
+			if got != tt.want {
+				t.Fatalf("%s was not called for EventTy(\"%v\"), got %v", tt.want, tt.args.evt.Type, got)
+			}
+		})
+	}
+}
+
+func TestSocketmodeHandler_HandleSlashCommand(t *testing.T) {
+	type args struct {
+		evt      Event
+		register func(*SocketmodeHandler, chan<- string)
+	}
+	tests := []struct {
+		name string
+		args args
+		want string //what is the name of the function we want to be called
+	}{
+		{
+			name: "Event Match registered function",
+			args: args{
+				evt: Event{
+					Type: EventTypeSlashCommand,
+					Data: slack.SlashCommand{
+						Command: "/rocket",
+						Text:    "key=value",
+					},
+				},
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleSlashCommand("/rocket", testing_wrapper(c, middleware_slach_command))
+				},
+			},
+			want: "github.com/slack-go/slack/socketmode.middleware_slach_command",
+		}, {
+			name: "Event do not Match any registered function",
+			args: args{
+				evt: Event{
+					Type: EventTypeSlashCommand,
+					Data: slack.SlashCommand{
+						Command: "/broken_rocket",
+						Text:    "key=value",
+					},
+				},
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleSlashCommand("/rocket", testing_wrapper(c, middleware_slach_command))
 				},
 			},
 			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
