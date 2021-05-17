@@ -2,6 +2,8 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 )
@@ -51,18 +53,40 @@ type LogResponse struct {
 	SlackResponse
 }
 
+// IntAsString exists so we can unmarshal both string and int as string due to apperant bug in slack
+// https://github.com/slack-go/slack/pull/920#issuecomment-823655954
+type IntAsString string
+
+// UnmarshalJSON will unmarshal both string and int JSON values
+func (i *IntAsString) UnmarshalJSON(buf []byte) error {
+	var v interface{}
+	if err := json.Unmarshal(buf, &v); err != nil {
+		return err
+	}
+	switch v := v.(type) {
+	case string:
+		*i = IntAsString(v)
+	case float64:
+		*i = IntAsString(strconv.FormatInt(int64(v), 10))
+	default:
+		return fmt.Errorf("slack: unknown IntAsString type: %+v", v)
+	}
+	return nil
+}
+
 type Log struct {
-	ServiceID   string `json:"service_id"`
-	ServiceType string `json:"service_type"`
-	AppID       string `json:"app_id"`
-	AppType     string `json:"app_type"`
-	UserID      string `json:"user_id"`
-	UserName    string `json:"user_name"`
-	Channel     string `json:"channel"`
-	Date        string `json:"date"`
-	ChangeType  string `json:"change_type"`
-	Reason      string `json:"reason"`
-	Scope       string `json:"scope"`
+	// according to example in https://api.slack.com/methods/team.integrationLogs `service_id` can be both int or string
+	ServiceID   IntAsString `json:"service_id"`
+	ServiceType string      `json:"service_type"`
+	AppID       string      `json:"app_id"`
+	AppType     string      `json:"app_type"`
+	UserID      string      `json:"user_id"`
+	UserName    string      `json:"user_name"`
+	Channel     string      `json:"channel"`
+	Date        string      `json:"date"`
+	ChangeType  string      `json:"change_type"`
+	Reason      string      `json:"reason"`
+	Scope       string      `json:"scope"`
 }
 
 type BillableInfoResponse struct {
