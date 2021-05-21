@@ -170,16 +170,6 @@ func TestGetAccessLogs(t *testing.T) {
 func getTeamIntegrationLogs(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{"ok": true, "logs": [{
-			"service_id": 1234567890,
-			"service_type": "Google Calendar",
-			"user_id": "U1234ABCD",
-			"user_name": "Johnny",
-			"channel": "C1234567890",
-			"date": "1392163200",
-			"change_type": "enabled",
-			"scope": "incoming-webhook"
-		},
-		{
 			"app_id": "2345678901",
 			"app_type": "Johnny App",
 			"user_id": "U2345BCDE",
@@ -189,7 +179,7 @@ func getTeamIntegrationLogs(rw http.ResponseWriter, r *http.Request) {
 			"scope": "chat:write:user,channels:read"
 		},
 		{
-			"service_id": "3456789012",
+			"service_id": 3456789012,
 			"service_type": "Airbrake",
 			"user_id": "U3456CDEF",
 			"user_name": "Joey",
@@ -200,8 +190,8 @@ func getTeamIntegrationLogs(rw http.ResponseWriter, r *http.Request) {
 			"scope": "incoming-webhook"
 		}],
 		"paging": {
-			"count": 3,
-			"total": 3,
+			"count": 2,
+			"total": 2,
 			"page": 1,
 			"pages": 1
 		}
@@ -221,12 +211,12 @@ func TestGetIntegrationLogs(t *testing.T) {
 		return
 	}
 
-	if len(logs) != 3 {
+	if len(logs) != 2 {
 		t.Fatal("Should have been 2 logs")
 	}
 
-	log1 := logs[1]
-	log2 := logs[2]
+	log1 := logs[0]
+	log2 := logs[1]
 
 	if log1.AppID != "2345678901" {
 		t.Fatal(ErrIncorrectResponse)
@@ -251,7 +241,7 @@ func TestGetIntegrationLogs(t *testing.T) {
 	}
 
 	// test the second log new fields
-	if log2.ServiceID != "3456789012" {
+	if log2.ServiceID != 3456789012 {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if log2.ServiceType != "Airbrake" {
@@ -272,17 +262,11 @@ func TestGetIntegrationLogs(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 
-	// test service id is read as string correctly
-	log3 := logs[0]
-	if log3.ServiceID != "1234567890" {
-		t.Fatal(ErrIncorrectResponse)
-	}
-
 	// test the paging
-	if paging.Count != 3 {
+	if paging.Count != 2 {
 		t.Fatal(ErrIncorrectResponse)
 	}
-	if paging.Total != 3 {
+	if paging.Total != 2 {
 		t.Fatal(ErrIncorrectResponse)
 	}
 	if paging.Page != 1 {
