@@ -54,8 +54,8 @@ func NewStaticSelectDialogInput(name, label string, options []DialogSelectOption
 	}
 }
 
-// NewDynamicSelectDialogInput constructor for a `external` datasource menu input
-func NewDynamicSelectDialogInput(name, label string, options []DialogSelectOption) *DialogInputSelect {
+// NewExternalSelectDialogInput constructor for a `external` datasource menu input
+func NewExternalSelectDialogInput(name, label string, options []DialogSelectOption) *DialogInputSelect {
 	return &DialogInputSelect{
 		DialogInput: DialogInput{
 			Type:     InputTypeSelect,
