@@ -2,7 +2,6 @@ package socketmode
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -41,7 +40,7 @@ func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 		InteractionBlockActionEventMap: interactionBlockActionEventMap,
 		SlashCommandMap:                slackCommandMap,
 		Default: func(e *Event, c *Client) {
-			log.Printf("Unexpected event type received: %v\n", e.Type)
+			c.log.Printf("Unexpected event type received: %v\n", e.Type)
 		},
 	}
 }
