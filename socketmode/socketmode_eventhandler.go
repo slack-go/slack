@@ -57,8 +57,8 @@ func (r *SocketmodeHandler) HandleInteraction(et slack.InteractionType, f Socket
 }
 
 // Register a middleare function to use to handle an Interaction Block Action referenced by its ActionID
-func (r *SocketmodeHandler) HandleInteractionBlockAction(action_id string, f SocketmodeHandlerFunc) {
-	r.InteractionBlockActionEventMap[action_id] = append(r.InteractionBlockActionEventMap[action_id], f)
+func (r *SocketmodeHandler) HandleInteractionBlockAction(actionID string, f SocketmodeHandlerFunc) {
+	r.InteractionBlockActionEventMap[actionID] = append(r.InteractionBlockActionEventMap[actionID], f)
 }
 
 // Register a middleare function to use to handle an Event (from slackevents)
