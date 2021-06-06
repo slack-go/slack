@@ -25,6 +25,7 @@ type SocketmodeHandlerFunc func(*Event, *Client)
 // Middleware accept SocketmodeHandlerFunc, and return SocketmodeHandlerFunc
 type SocketmodeMiddlewareFunc func(SocketmodeHandlerFunc) SocketmodeHandlerFunc
 
+// Initialization constructor for SocketmodeHandler
 func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
@@ -61,7 +62,7 @@ func (r *SocketmodeHandler) HandleInteractionBlockAction(action_id string, f Soc
 }
 
 // Register a middleare function to use to handle an Event (from slackevents)
-func (r *SocketmodeHandler) HandleEventsAPI(et slackevents.EventAPIType, f SocketmodeHandlerFunc) {
+func (r *SocketmodeHandler) HandleEvents(et slackevents.EventAPIType, f SocketmodeHandlerFunc) {
 	r.EventApiMap[et] = append(r.EventApiMap[et], f)
 }
 

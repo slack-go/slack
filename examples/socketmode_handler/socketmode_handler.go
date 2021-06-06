@@ -55,7 +55,7 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
 
 	// Handle a specific event from EventsAPI
-	socketmodeHandler.HandleEventsAPI(slackevents.AppMention, middlewareAppMentionEvent)
+	socketmodeHandler.HandleEvents(slackevents.AppMention, middlewareAppMentionEvent)
 
 	//\\ EventTypeInteractive //\\
 	// Handle all Interactive Events

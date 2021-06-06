@@ -210,7 +210,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 	}
 }
 
-func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
+func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 	type args struct {
 		evt      Event
 		register func(*SocketmodeHandler, chan<- string)
@@ -233,7 +233,7 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 					},
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
-					r.HandleEventsAPI(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
+					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
 			want: "github.com/slack-go/slack/socketmode.middleware_eventapi",
@@ -250,7 +250,7 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 					},
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
-					r.HandleEventsAPI(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
+					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
 			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
@@ -264,7 +264,7 @@ func TestSocketmodeHandler_HandleEventsAPI(t *testing.T) {
 					},
 				},
 				register: func(r *SocketmodeHandler, c chan<- string) {
-					r.HandleEventsAPI(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
+					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
 			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
