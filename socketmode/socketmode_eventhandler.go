@@ -13,7 +13,7 @@ type SocketmodeHandler struct {
 	EventMap                       map[EventType][]SocketmodeHandlerFunc
 	InteractionEventMap            map[slack.InteractionType][]SocketmodeHandlerFunc
 	InteractionBlockActionEventMap map[string][]SocketmodeHandlerFunc
-	EventApiMap                    map[slackevents.EventAPIType][]SocketmodeHandlerFunc
+	EventApiMap                    map[slackevents.EventsAPIType][]SocketmodeHandlerFunc
 	SlashCommandMap                map[string][]SocketmodeHandlerFunc
 
 	Default SocketmodeHandlerFunc
@@ -30,7 +30,7 @@ func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
 	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
-	eventApiMap := make(map[slackevents.EventAPIType][]SocketmodeHandlerFunc)
+	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)
 	slackCommandMap := make(map[string][]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
@@ -62,7 +62,7 @@ func (r *SocketmodeHandler) HandleInteractionBlockAction(actionID string, f Sock
 }
 
 // Register a middleare function to use to handle an Event (from slackevents)
-func (r *SocketmodeHandler) HandleEvents(et slackevents.EventAPIType, f SocketmodeHandlerFunc) {
+func (r *SocketmodeHandler) HandleEvents(et slackevents.EventsAPIType, f SocketmodeHandlerFunc) {
 	r.EventApiMap[et] = append(r.EventApiMap[et], f)
 }
 
@@ -173,7 +173,7 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 		return false
 	}
 
-	innerEventType := slackevents.EventAPIType(eventsAPIEvent.InnerEvent.Type)
+	innerEventType := slackevents.EventsAPIType(eventsAPIEvent.InnerEvent.Type)
 
 	// Level 1 - socketmode EventType
 	ishandled = r.socketmodeDispatcher(evt)

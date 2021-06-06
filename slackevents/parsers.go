@@ -19,7 +19,7 @@ func eventsMap(t string) (interface{}, bool) {
 	// Must parse EventsAPI FIRST as both RTM and EventsAPI
 	// have a type: "Message" event.
 	// TODO: Handle these cases more explicitly.
-	v, exists := EventsAPIInnerEventMapping[EventAPIType(t)]
+	v, exists := EventsAPIInnerEventMapping[EventsAPIType(t)]
 	if exists {
 		return v, exists
 	}

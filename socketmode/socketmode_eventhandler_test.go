@@ -12,7 +12,7 @@ import (
 func init_SocketmodeHandler() *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactioneventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
-	eventApiMap := make(map[slackevents.EventAPIType][]SocketmodeHandlerFunc)
+	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)
 	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
 	slashCommandMap := make(map[string][]SocketmodeHandlerFunc)
 

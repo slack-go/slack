@@ -319,47 +319,47 @@ func (e MessageEvent) IsEdited() bool {
 		e.Message.Edited != nil
 }
 
-type EventAPIType string
+type EventsAPIType string
 
 const (
 	// AppMention is an Events API subscribable event
-	AppMention = EventAPIType("app_mention")
+	AppMention = EventsAPIType("app_mention")
 	// AppHomeOpened Your Slack app home was opened
-	AppHomeOpened = EventAPIType("app_home_opened")
+	AppHomeOpened = EventsAPIType("app_home_opened")
 	// AppUninstalled Your Slack app was uninstalled.
-	AppUninstalled = EventAPIType("app_uninstalled")
+	AppUninstalled = EventsAPIType("app_uninstalled")
 	// ChannelCreated is sent when a new channel is created.
-	ChannelCreated = EventAPIType("channel_created")
+	ChannelCreated = EventsAPIType("channel_created")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
-	GridMigrationFinished = EventAPIType("grid_migration_finished")
+	GridMigrationFinished = EventsAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
-	GridMigrationStarted = EventAPIType("grid_migration_started")
+	GridMigrationStarted = EventsAPIType("grid_migration_started")
 	// LinkShared A message was posted containing one or more links relevant to your application
-	LinkShared = EventAPIType("link_shared")
+	LinkShared = EventsAPIType("link_shared")
 	// Message A message was posted to a channel, private channel (group), im, or mim
-	Message = EventAPIType("message")
+	Message = EventsAPIType("message")
 	// Member Joined Channel
-	MemberJoinedChannel = EventAPIType("member_joined_channel")
+	MemberJoinedChannel = EventsAPIType("member_joined_channel")
 	// Member Left Channel
-	MemberLeftChannel = EventAPIType("member_left_channel")
+	MemberLeftChannel = EventsAPIType("member_left_channel")
 	// PinAdded An item was pinned to a channel
-	PinAdded = EventAPIType("pin_added")
+	PinAdded = EventsAPIType("pin_added")
 	// PinRemoved An item was unpinned from a channel
-	PinRemoved = EventAPIType("pin_removed")
+	PinRemoved = EventsAPIType("pin_removed")
 	// ReactionAdded An reaction was added to a message
-	ReactionAdded = EventAPIType("reaction_added")
+	ReactionAdded = EventsAPIType("reaction_added")
 	// ReactionRemoved An reaction was removed from a message
-	ReactionRemoved = EventAPIType("reaction_removed")
+	ReactionRemoved = EventsAPIType("reaction_removed")
 	// TokensRevoked APP's API tokes are revoked
-	TokensRevoked = EventAPIType("tokens_revoked")
+	TokensRevoked = EventsAPIType("tokens_revoked")
 	// EmojiChanged A custom emoji has been added or changed
-	EmojiChanged = EventAPIType("emoji_changed")
+	EmojiChanged = EventsAPIType("emoji_changed")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var EventsAPIInnerEventMapping = map[EventAPIType]interface{}{
+var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	AppMention:            AppMentionEvent{},
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
