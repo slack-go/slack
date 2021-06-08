@@ -46,31 +46,38 @@ func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	}
 }
 
-// Register a middleare function to use to handle an Event (from socketmode)
+// Register a middleware or handler for an Event from socketmode
+// This most general entrypoint
 func (r *SocketmodeHandler) Handle(et EventType, f SocketmodeHandlerFunc) {
 	r.EventMap[et] = append(r.EventMap[et], f)
 }
 
-// Register a middleare function to use to handle an Interaction
+// Register a middleware or handler for an Interaction
+// There is several types of interactions, decated functions lets you better handle them
+// See
+// * HandleInteractionBlockAction
+// * (Not Implemented) HandleShortcut
+// * (Not Implemented) HandleView
 func (r *SocketmodeHandler) HandleInteraction(et slack.InteractionType, f SocketmodeHandlerFunc) {
 	r.InteractionEventMap[et] = append(r.InteractionEventMap[et], f)
 }
 
-// Register a middleare function to use to handle an Interaction Block Action referenced by its ActionID
+// Register a middleware or handler for a Block Action referenced by its ActionID
 func (r *SocketmodeHandler) HandleInteractionBlockAction(actionID string, f SocketmodeHandlerFunc) {
 	r.InteractionBlockActionEventMap[actionID] = append(r.InteractionBlockActionEventMap[actionID], f)
 }
 
-// Register a middleare function to use to handle an Event (from slackevents)
+// Register a middleware or handler for an Event (from slackevents)
 func (r *SocketmodeHandler) HandleEvents(et slackevents.EventsAPIType, f SocketmodeHandlerFunc) {
 	r.EventApiMap[et] = append(r.EventApiMap[et], f)
 }
 
+// Register a middleware or handler for a Slash Command
 func (r *SocketmodeHandler) HandleSlashCommand(command string, f SocketmodeHandlerFunc) {
 	r.SlashCommandMap[command] = append(r.SlashCommandMap[command], f)
 }
 
-// Register a middleare function to use as a last resort
+// Register a middleware or handler to use as a last resort
 func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 	r.Default = f
 }
@@ -83,12 +90,14 @@ func (r *SocketmodeHandler) RunEventLoop() {
 	r.Client.Run()
 }
 
+// Call the dispatcher for each incomming event
 func (r *SocketmodeHandler) runEventLoop() {
 	for evt := range r.Client.Events {
 		r.dispatcher(evt)
 	}
 }
 
+// Dispatch events to the specialized dispatcher
 func (r *SocketmodeHandler) dispatcher(evt Event) {
 	var ishandled bool
 
