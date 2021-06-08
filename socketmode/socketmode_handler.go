@@ -1,9 +1,6 @@
 package socketmode
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -139,7 +136,7 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 
 	interaction, ok := evt.Data.(slack.InteractionCallback)
 	if !ok {
-		log.Printf("Ignored %+v\n", evt)
+		r.Client.log.Printf("Ignored %+v\n", evt)
 		return false
 	}
 
@@ -179,7 +176,7 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 	var ishandled bool = false
 	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 	if !ok {
-		log.Printf("Ignored %+v\n", evt)
+		r.Client.log.Printf("Ignored %+v\n", evt)
 		return false
 	}
 
@@ -206,7 +203,7 @@ func (r *SocketmodeHandler) slashCommandDispatcher(evt *Event) bool {
 	var ishandled bool = false
 	slashCommandEvent, ok := evt.Data.(slack.SlashCommand)
 	if !ok {
-		fmt.Printf("Ignored %+v\n", evt)
+		r.Client.log.Printf("Ignored %+v\n", evt)
 		return false
 	}
 

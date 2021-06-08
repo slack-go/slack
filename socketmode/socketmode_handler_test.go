@@ -1,6 +1,8 @@
 package socketmode
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"runtime"
 	"testing"
@@ -17,7 +19,9 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 	slashCommandMap := make(map[string][]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
-		Client:                         &Client{},
+		Client: &Client{
+			log: log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
+		},
 		EventMap:                       eventMap,
 		EventApiMap:                    eventApiMap,
 		InteractionEventMap:            interactioneventMap,
