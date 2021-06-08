@@ -138,7 +138,7 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 
 	interaction, ok := evt.Data.(slack.InteractionCallback)
 	if !ok {
-		fmt.Printf("Ignored %+v\n", evt)
+		r.Client.log.Printf("Ignored %+v\n", evt)
 		return false
 	}
 
@@ -178,7 +178,7 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 	var ishandled bool = false
 	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 	if !ok {
-		fmt.Printf("Ignored %+v\n", evt)
+		r.Client.log.Printf("Ignored %+v\n", evt)
 		return false
 	}
 
