@@ -15,8 +15,8 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactioneventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
 	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)
-	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
-	slashCommandMap := make(map[string][]SocketmodeHandlerFunc)
+	interactionBlockActionEventMap := make(map[string]SocketmodeHandlerFunc)
+	slashCommandMap := make(map[string]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
 		Client: &Client{
@@ -440,6 +440,76 @@ func TestSocketmodeHandler_HandleSlashCommand(t *testing.T) {
 			if got != tt.want {
 				t.Fatalf("%s was not called for EventTy(\"%v\"), got %v", tt.want, tt.args.evt.Type, got)
 			}
+		})
+	}
+}
+
+func TestSocketmodeHandler_Handle_errors(t *testing.T) {
+	type args struct {
+		register func(*SocketmodeHandler, chan<- string)
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "Attempt to register empty command",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleSlashCommand("", testing_wrapper(c, middleware_slach_command))
+				},
+			},
+		}, {
+			name: "Attempt to register nil handler",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleSlashCommand("/command", nil)
+				},
+			},
+		}, {
+			name: "Attempt to register duplicate command",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleSlashCommand("/command", testing_wrapper(c, middleware_slach_command))
+					r.HandleSlashCommand("/command", testing_wrapper(c, middleware_slach_command))
+				},
+			},
+		}, {
+			name: "Attempt to register empty Block ActionID",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleInteractionBlockAction("", testing_wrapper(c, middleware_interaction_block_action))
+				},
+			},
+		}, {
+			name: "Attempt to register nil handler",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleInteractionBlockAction("action_id", nil)
+				},
+			},
+		}, {
+			name: "Attempt to register duplicate Block ActionID",
+			args: args{
+				register: func(r *SocketmodeHandler, c chan<- string) {
+					r.HandleInteractionBlockAction("action_id", testing_wrapper(c, middleware_interaction_block_action))
+					r.HandleInteractionBlockAction("action_id", testing_wrapper(c, middleware_interaction_block_action))
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := init_SocketmodeHandler()
+
+			c := make(chan string)
+
+			defer func() { recover() }()
+
+			tt.args.register(r, c)
+
+			t.Errorf("should have panicked")
+
 		})
 	}
 }

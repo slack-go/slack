@@ -8,11 +8,14 @@ import (
 type SocketmodeHandler struct {
 	Client *Client
 
-	EventMap                       map[EventType][]SocketmodeHandlerFunc
-	InteractionEventMap            map[slack.InteractionType][]SocketmodeHandlerFunc
-	InteractionBlockActionEventMap map[string][]SocketmodeHandlerFunc
-	EventApiMap                    map[slackevents.EventsAPIType][]SocketmodeHandlerFunc
-	SlashCommandMap                map[string][]SocketmodeHandlerFunc
+	//lvl 1 - the most generic type of event
+	EventMap map[EventType][]SocketmodeHandlerFunc
+	//lvl 2 - Manage event by inner type
+	InteractionEventMap map[slack.InteractionType][]SocketmodeHandlerFunc
+	EventApiMap         map[slackevents.EventsAPIType][]SocketmodeHandlerFunc
+	//lvl 3 - the most userfriendly way of managing event
+	InteractionBlockActionEventMap map[string]SocketmodeHandlerFunc
+	SlashCommandMap                map[string]SocketmodeHandlerFunc
 
 	Default SocketmodeHandlerFunc
 }
@@ -27,9 +30,10 @@ type SocketmodeMiddlewareFunc func(SocketmodeHandlerFunc) SocketmodeHandlerFunc
 func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
-	interactionBlockActionEventMap := make(map[string][]SocketmodeHandlerFunc)
 	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)
-	slackCommandMap := make(map[string][]SocketmodeHandlerFunc)
+
+	interactionBlockActionEventMap := make(map[string]SocketmodeHandlerFunc)
+	slackCommandMap := make(map[string]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
 		Client:                         client,
@@ -62,7 +66,16 @@ func (r *SocketmodeHandler) HandleInteraction(et slack.InteractionType, f Socket
 
 // Register a middleware or handler for a Block Action referenced by its ActionID
 func (r *SocketmodeHandler) HandleInteractionBlockAction(actionID string, f SocketmodeHandlerFunc) {
-	r.InteractionBlockActionEventMap[actionID] = append(r.InteractionBlockActionEventMap[actionID], f)
+	if actionID == "" {
+		panic("invalid command cannot be empty")
+	}
+	if f == nil {
+		panic("invalid handler cannot be nil")
+	}
+	if _, exist := r.InteractionBlockActionEventMap[actionID]; exist {
+		panic("multiple registrations for actionID" + actionID)
+	}
+	r.InteractionBlockActionEventMap[actionID] = f
 }
 
 // Register a middleware or handler for an Event (from slackevents)
@@ -72,7 +85,16 @@ func (r *SocketmodeHandler) HandleEvents(et slackevents.EventsAPIType, f Socketm
 
 // Register a middleware or handler for a Slash Command
 func (r *SocketmodeHandler) HandleSlashCommand(command string, f SocketmodeHandlerFunc) {
-	r.SlashCommandMap[command] = append(r.SlashCommandMap[command], f)
+	if command == "" {
+		panic("invalid command cannot be empty")
+	}
+	if f == nil {
+		panic("invalid handler cannot be nil")
+	}
+	if _, exist := r.SlashCommandMap[command]; exist {
+		panic("multiple registrations for command" + command)
+	}
+	r.SlashCommandMap[command] = f
 }
 
 // Register a middleware or handler to use as a last resort
@@ -159,11 +181,9 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 	// attachments_actions := interaction.ActionCallback.AttachmentActions
 
 	for _, action := range blockActions {
-		if handlers, ok := r.InteractionBlockActionEventMap[action.ActionID]; ok {
+		if handler, ok := r.InteractionBlockActionEventMap[action.ActionID]; ok {
 
-			for _, f := range handlers {
-				go f(evt, r.Client)
-			}
+			go handler(evt, r.Client)
 
 			ishandled = true
 		}
@@ -211,11 +231,9 @@ func (r *SocketmodeHandler) slashCommandDispatcher(evt *Event) bool {
 	ishandled = r.socketmodeDispatcher(evt)
 
 	// Level 2 - SlackCommand by name
-	if handlers, ok := r.SlashCommandMap[slashCommandEvent.Command]; ok {
-		// If we registered an event
-		for _, f := range handlers {
-			go f(evt, r.Client)
-		}
+	if handler, ok := r.SlashCommandMap[slashCommandEvent.Command]; ok {
+
+		go handler(evt, r.Client)
 
 		ishandled = true
 	}
