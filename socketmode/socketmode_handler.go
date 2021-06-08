@@ -156,11 +156,11 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 	}
 
 	// Level 3 - interaction with actionID
-	block_actions := interaction.ActionCallback.BlockActions
+	blockActions := interaction.ActionCallback.BlockActions
 	// outmoded approach won`t be implemented
 	// attachments_actions := interaction.ActionCallback.AttachmentActions
 
-	for _, action := range block_actions {
+	for _, action := range blockActions {
 		if handlers, ok := r.InteractionBlockActionEventMap[action.ActionID]; ok {
 
 			for _, f := range handlers {
