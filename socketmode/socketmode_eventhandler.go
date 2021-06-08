@@ -83,11 +83,11 @@ func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 }
 
 // RunSlackEventLoop receives the event via the socket
-func (r *SocketmodeHandler) RunEventLoop() {
+func (r *SocketmodeHandler) RunEventLoop() error {
 
 	go r.runEventLoop()
 
-	r.Client.Run()
+	return r.Client.Run()
 }
 
 // Call the dispatcher for each incomming event
