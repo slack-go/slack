@@ -106,7 +106,7 @@ func OptionLog(l logger) func(*Client) {
 // Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
-		apiClient:           *api,
+		apiClient:           api,
 		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
