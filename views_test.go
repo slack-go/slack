@@ -295,7 +295,7 @@ func TestSlack_View_PublishView(t *testing.T) {
 					"private_metadata": "Shh it is a secret",
 					"callback_id": "identify_your_home_tab",
 					"state": {
-						"values": {}
+						"values": []
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -461,7 +461,7 @@ func TestSlack_PushView(t *testing.T) {
 					"callback_id": "identify_your_modals",
 					"external_id": "",
 					"state": {
-						"values": {}
+						"values": []
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,
@@ -637,7 +637,7 @@ func TestSlack_UpdateView(t *testing.T) {
 					"callback_id": "identify_your_modals",
 					"external_id": "",
 					"state": {
-						"values": {}
+						"values": []
 					},
 					"hash": "156772938.1827394",
 					"clear_on_close": false,

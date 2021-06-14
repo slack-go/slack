@@ -13,7 +13,7 @@ const (
 type ViewType string
 
 type ViewState struct {
-	Values map[string]map[string]BlockAction `json:"values"`
+	Values map[string]map[string]BlockAction `json:"values,omitempty"`
 }
 
 type View struct {
@@ -244,7 +244,7 @@ func (api *Client) PushView(triggerID string, view ModalViewRequest) (*ViewRespo
 	return api.PushViewContext(context.Background(), triggerID, view)
 }
 
-// PublishViewContext pushes a view onto the stack of a root view with a custom context.
+// PushViewContext pushes a view onto the stack of a root view with a custom context.
 func (api *Client) PushViewContext(
 	ctx context.Context,
 	triggerID string,
