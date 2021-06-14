@@ -1,6 +1,7 @@
 package slackevents
 
 import (
+	"bytes"
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
@@ -89,8 +90,22 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 
 func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 	iE := &slack.Event{}
-	rawInnerJSON := e.InnerEvent
-	err := json.Unmarshal(*rawInnerJSON, iE)
+
+	rawBytes, err := e.InnerEvent.MarshalJSON()
+	if err != nil {
+		return EventsAPIEvent{
+			e.Token,
+			e.TeamID,
+			"unmarshalling_error",
+			e.APIAppID,
+			&slack.UnmarshallingErrorEvent{ErrorObj: err},
+			EventsAPIInnerEvent{},
+		}, err
+	}
+	// This line replaces `"state":{"values":[]}` with `"state":{"values":{}}` so that it can parse correctly. It is ugly, but it maintains current behavior without having to override how the response is Unmarshaled
+	rawInnerJSON := bytes.Replace(rawBytes, []byte{34, 115, 116, 97, 116, 101, 34, 58, 123, 34, 118, 97, 108, 117, 101, 115, 34, 58, 91, 93, 125}, []byte{34, 115, 116, 97, 116, 101, 34, 58, 123, 34, 118, 97, 108, 117, 101, 115, 34, 58, 123, 125, 125}, 1)
+
+	err := json.Unmarshal(rawInnerJSON, iE)
 	if err != nil {
 		return EventsAPIEvent{
 			e.Token,
@@ -114,7 +129,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 	}
 	t := reflect.TypeOf(v)
 	recvEvent := reflect.New(t).Interface()
-	err = json.Unmarshal(*rawInnerJSON, recvEvent)
+	err = json.Unmarshal(rawInnerJSON, recvEvent)
 	if err != nil {
 		return EventsAPIEvent{
 			e.Token,
