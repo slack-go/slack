@@ -167,6 +167,12 @@ func (s *ButtonBlockElement) WithStyle(style Style) *ButtonBlockElement {
 	return s
 }
 
+// WithURL adds url to the button object and returns the modified ButtonBlockElement
+func (s *ButtonBlockElement) WithURL(url string) *ButtonBlockElement {
+	s.URL = url
+	return s
+}
+
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
 func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *ButtonBlockElement {
 	return &ButtonBlockElement{
