@@ -27,7 +27,7 @@ type SocketmodeHandlerFunc func(*Event, *Client)
 type SocketmodeMiddlewareFunc func(SocketmodeHandlerFunc) SocketmodeHandlerFunc
 
 // Initialization constructor for SocketmodeHandler
-func NewsSocketmodeHandler(client *Client) *SocketmodeHandler {
+func NewSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
 	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)

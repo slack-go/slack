@@ -44,7 +44,7 @@ func main() {
 		socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
-	socketmodeHandler := socketmode.NewsSocketmodeHandler(client)
+	socketmodeHandler := socketmode.NewSocketmodeHandler(client)
 
 	socketmodeHandler.Handle(socketmode.EventTypeConnecting, middlewareConnecting)
 	socketmodeHandler.Handle(socketmode.EventTypeConnectionError, middlewareConnectionError)
