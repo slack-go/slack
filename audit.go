@@ -97,7 +97,7 @@ type AuditLogParameters struct {
 
 func (api *Client) auditLogsRequest(ctx context.Context, path string, values url.Values) (*AuditLogResponse, error) {
 	response := &AuditLogResponse{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.getMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
