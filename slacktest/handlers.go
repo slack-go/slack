@@ -126,7 +126,18 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ts := time.Now().Unix()
-	resp := fmt.Sprintf(`{"channel":"%s","ts":"%d", "text":"%s", "ok": true}`, values.Get("channel"), ts, values.Get("text"))
+	resp := &struct {
+		Ok      bool   `json:"ok"`
+		Channel string `json:"channel"`
+		Ts      string `json:"ts"`
+		Text    string `json:"text"`
+	}{
+		Ok:      true,
+		Channel: values.Get("channel"),
+		Ts:      fmt.Sprintf("%d", ts),
+		Text:    values.Get("text"),
+	}
+
 	m := slack.Message{}
 	m.Type = "message"
 	m.Channel = values.Get("channel")
@@ -186,7 +197,7 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	go sts.queueForWebsocket(string(jsonMessage), serverAddr)
-	_, _ = w.Write([]byte(resp))
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 // RTMConnectHandler generates a valid connection
