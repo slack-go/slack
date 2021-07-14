@@ -61,5 +61,5 @@ func actionHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("Could not parse action response JSON: %v", err)
 	}
-	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.Value)
+	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.ActionCallback.AttachmentActions[0].Value)
 }
