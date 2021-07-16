@@ -115,7 +115,7 @@ func (api *Client) GetAuditLogsContext(ctx context.Context, params AuditLogParam
 		"token": {api.token},
 	}
 	if params.Limit != 0 {
-		values.Add("count", strconv.Itoa(params.Limit))
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Oldest != 0 {
 		values.Add("oldest", strconv.Itoa(params.Oldest))
