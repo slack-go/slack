@@ -21,8 +21,8 @@ features:
 oauth_config:
   scopes:
     bot:
-      - app_mentions:read *
-      - channels:history *
+      - app_mentions:read
+      - channels:history
 settings:
   allowed_ip_address_ranges:  # <--- Required
     - xxx.xxx.xxx.xxx/32
