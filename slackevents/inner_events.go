@@ -165,7 +165,7 @@ type LinkSharedEvent struct {
 	User             string        `json:"user"`
 	TimeStamp        string        `json:"ts"`
 	Channel          string        `json:"channel"`
-	MessageTimeStamp json.Number   `json:"message_ts"`
+	MessageTimeStamp string        `json:"message_ts"`
 	ThreadTimeStamp  string        `json:"thread_ts"`
 	Links            []sharedLinks `json:"links"`
 }
