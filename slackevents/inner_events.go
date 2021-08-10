@@ -63,6 +63,39 @@ type ChannelCreatedInfo struct {
 	Creator   string `json:"creator"`
 }
 
+// FileChangeEvent represents the information associated with the File change
+// event.
+type FileChangeEvent struct {
+	Type   string        `json:"type"`
+	FileID string        `json:"file_id"`
+	File   FileEventFile `json:"file"`
+}
+
+// FileDeletedEvent represents the information associated with the File deleted
+// event.
+type FileDeletedEvent struct {
+	Type           string `json:"type"`
+	FileID         string `json:"file_id"`
+	EventTimestamp string `json:"event_ts"`
+}
+
+// FileSharedEvent represents the information associated with the File shared
+// event.
+type FileSharedEvent struct {
+	Type           string        `json:"type"`
+	ChannelID      string        `json:"channel_id"`
+	FileID         string        `json:"file_id"`
+	UserID         string        `json:"user_id"`
+	File           FileEventFile `json:"file"`
+	EventTimestamp string        `json:"event_ts"`
+}
+
+// FileEventFile represents information on the specific file being shared in a
+// file-related Slack event.
+type FileEventFile struct {
+	ID string `json:"id"`
+}
+
 // GridMigrationFinishedEvent An enterprise grid migration has finished on this workspace.
 type GridMigrationFinishedEvent struct {
 	Type         string `json:"type"`
@@ -328,6 +361,12 @@ const (
 	AppUninstalled = "app_uninstalled"
 	// ChannelCreated is sent when a new channel is created.
 	ChannelCreated = "channel_created"
+	// FileChange is sent when a file is changed.
+	FileChange = "file_change"
+	// FileDeleted is sent when a file is deleted.
+	FileDeleted = "file_deleted"
+	// FileShared is sent when a file is shared.
+	FileShared = "file_shared"
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = "grid_migration_finished"
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -362,6 +401,9 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
 	ChannelCreated:        ChannelCreatedEvent{},
+	FileChange:            FileChangeEvent{},
+	FileDeleted:           FileDeletedEvent{},
+	FileShared:            FileSharedEvent{},
 	GridMigrationFinished: GridMigrationFinishedEvent{},
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
