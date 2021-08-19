@@ -56,37 +56,35 @@ type ChannelCreatedEvent struct {
 
 // ChannelDeletedEvent represents the Channel deleted event
 type ChannelDeletedEvent struct {
-	Type           string             `json:"type"`
-	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp string             `json:"event_ts"`
+	Type    string `json:"type"`
+	Channel string `json:"channel"`
 }
 
 // ChannelArchiveEvent represents the Channel archive event
 type ChannelArchiveEvent struct {
-	Type           string             `json:"type"`
-	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp string             `json:"event_ts"`
+	Type    string `json:"type"`
+	Channel string `json:"channel"`
+	User    string `json:"user"`
 }
 
 // ChannelLeftEvent represents the Channel left event
 type ChannelLeftEvent struct {
-	Type           string             `json:"type"`
-	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp string             `json:"event_ts"`
+	Type    string `json:"type"`
+	Channel string `json:"channel"`
 }
 
 // ChannelRenameEvent represents the Channel rename event
 type ChannelRenameEvent struct {
-	Type           string             `json:"type"`
-	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp string             `json:"event_ts"`
+	Type    string            `json:"type"`
+	Channel ChannelRenameInfo `json:"channel"`
 }
 
 // ChannelIDChangedEvent represents the Channel identifier changed event
 type ChannelIDChangedEvent struct {
-	Type           string             `json:"type"`
-	Channel        ChannelCreatedInfo `json:"channel"`
-	EventTimestamp string             `json:"event_ts"`
+	Type           string `json:"type"`
+	OldChannelID   string `json:"old_channel_id"`
+	NewChannelID   string `json:"new_channel_id"`
+	EventTimestamp string `json:"event_ts"`
 }
 
 // ChannelCreatedInfo represents the information associated with the Channel created event
@@ -96,6 +94,13 @@ type ChannelCreatedInfo struct {
 	Name      string `json:"name"`
 	Created   int    `json:"created"`
 	Creator   string `json:"creator"`
+}
+
+// ChannelRenameInfo represents the information associated with the Channel rename event
+type ChannelRenameInfo struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Created int    `json:"created"`
 }
 
 // GridMigrationFinishedEvent An enterprise grid migration has finished on this workspace.
