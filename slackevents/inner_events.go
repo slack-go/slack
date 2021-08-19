@@ -67,6 +67,13 @@ type ChannelArchiveEvent struct {
 	User    string `json:"user"`
 }
 
+// ChannelUnarchiveEvent represents the Channel unarchive event
+type ChannelUnarchiveEvent struct {
+	Type    string `json:"type"`
+	Channel string `json:"channel"`
+	User    string `json:"user"`
+}
+
 // ChannelLeftEvent represents the Channel left event
 type ChannelLeftEvent struct {
 	Type    string `json:"type"`
@@ -370,8 +377,10 @@ const (
 	ChannelCreated = "channel_created"
 	// ChannelDeleted is sent when a channel is deleted.
 	ChannelDeleted = "channel_deleted"
-	// ChannelArchive is sent when a channel is archive.
+	// ChannelArchive is sent when a channel is archived.
 	ChannelArchive = "channel_archive"
+	// ChannelUnarchive is sent when a channel is unarchived.
+	ChannelUnarchive = "channel_unarchive"
 	// ChannelLeft is sent when a channel is left.
 	ChannelLeft = "channel_left"
 	// ChannelRename is sent when a channel is rename.
@@ -414,6 +423,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	ChannelCreated:        ChannelCreatedEvent{},
 	ChannelDeleted:        ChannelDeletedEvent{},
 	ChannelArchive:        ChannelArchiveEvent{},
+	ChannelUnarchive:      ChannelUnarchiveEvent{},
 	ChannelLeft:           ChannelLeftEvent{},
 	ChannelRename:         ChannelRenameEvent{},
 	ChannelIDChanged:      ChannelIDChangedEvent{},
