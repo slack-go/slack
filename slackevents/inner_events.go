@@ -328,6 +328,16 @@ const (
 	AppUninstalled = "app_uninstalled"
 	// ChannelCreated is sent when a new channel is created.
 	ChannelCreated = "channel_created"
+	// ChannelDeleted is sent when a channel is deleted.
+	ChannelDeleted = "channel_deleted"
+	// ChannelArchive is sent when a channel is archive.
+	ChannelArchive = "channel_archive"
+	// ChannelLeft is sent when a channel is left.
+	ChannelLeft = "channel_left"
+	// ChannelRename is sent when a channel is rename.
+	ChannelRename = "channel_rename"
+	// ChannelIDChanged is sent when a channel identifier is changed.
+	ChannelIDChanged = "channel_id_changed"
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = "grid_migration_finished"
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -362,6 +372,11 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
 	ChannelCreated:        ChannelCreatedEvent{},
+	ChannelDeleted:        ChannelDeletedEvent{},
+	ChannelArchive:        ChannelArchiveEvent{},
+	ChannelLeft:           ChannelLeftEvent{},
+	ChannelRename:         ChannelRenameEvent{},
+	ChannelIDChanged:      ChannelIDChangedEvent{},
 	GridMigrationFinished: GridMigrationFinishedEvent{},
 	GridMigrationStarted:  GridMigrationStartedEvent{},
 	LinkShared:            LinkSharedEvent{},
