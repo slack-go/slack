@@ -24,23 +24,23 @@ Thank you for many contributions!
 - doc: Add logo to README ([#813])
 - doc: Update current project status and Add changelog for v0.7.0 ([#814])
 
-[#753]: https://github.com/slack-go/slack/pull/753
-[#755]: https://github.com/slack-go/slack/pull/755
-[#772]: https://github.com/slack-go/slack/pull/772
-[#773]: https://github.com/slack-go/slack/pull/773
-[#778]: https://github.com/slack-go/slack/pull/778
-[#779]: https://github.com/slack-go/slack/pull/779
-[#782]: https://github.com/slack-go/slack/pull/782
-[#783]: https://github.com/slack-go/slack/pull/783
-[#787]: https://github.com/slack-go/slack/pull/787
-[#790]: https://github.com/slack-go/slack/pull/790
-[#791]: https://github.com/slack-go/slack/pull/791
-[#793]: https://github.com/slack-go/slack/pull/793
-[#794]: https://github.com/slack-go/slack/pull/794
-[#800]: https://github.com/slack-go/slack/pull/800
-[#810]: https://github.com/slack-go/slack/pull/810
-[#813]: https://github.com/slack-go/slack/pull/813
-[#814]: https://github.com/slack-go/slack/pull/814
+[#753]: https://github.com/crisp-dev/slack/pull/753
+[#755]: https://github.com/crisp-dev/slack/pull/755
+[#772]: https://github.com/crisp-dev/slack/pull/772
+[#773]: https://github.com/crisp-dev/slack/pull/773
+[#778]: https://github.com/crisp-dev/slack/pull/778
+[#779]: https://github.com/crisp-dev/slack/pull/779
+[#782]: https://github.com/crisp-dev/slack/pull/782
+[#783]: https://github.com/crisp-dev/slack/pull/783
+[#787]: https://github.com/crisp-dev/slack/pull/787
+[#790]: https://github.com/crisp-dev/slack/pull/790
+[#791]: https://github.com/crisp-dev/slack/pull/791
+[#793]: https://github.com/crisp-dev/slack/pull/793
+[#794]: https://github.com/crisp-dev/slack/pull/794
+[#800]: https://github.com/crisp-dev/slack/pull/800
+[#810]: https://github.com/crisp-dev/slack/pull/810
+[#813]: https://github.com/crisp-dev/slack/pull/813
+[#814]: https://github.com/crisp-dev/slack/pull/814
 
 ### v0.6.0 - August 31, 2019
 full differences can be viewed using `git log --oneline --decorate --color v0.5.0..v0.6.0`

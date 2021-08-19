@@ -5,7 +5,7 @@ package slackevents
 import (
 	"encoding/json"
 
-	"github.com/slack-go/slack"
+	"github.com/crisp-dev/slack"
 )
 
 // EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.
