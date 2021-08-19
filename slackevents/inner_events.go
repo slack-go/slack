@@ -54,6 +54,41 @@ type ChannelCreatedEvent struct {
 	EventTimestamp string             `json:"event_ts"`
 }
 
+// ChannelDeletedEvent represents the Channel deleted event
+type ChannelDeletedEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
+// ChannelArchiveEvent represents the Channel archive event
+type ChannelArchiveEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
+// ChannelLeftEvent represents the Channel left event
+type ChannelLeftEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
+// ChannelRenameEvent represents the Channel rename event
+type ChannelRenameEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
+// ChannelIDChangedEvent represents the Channel identifier changed event
+type ChannelIDChangedEvent struct {
+	Type           string             `json:"type"`
+	Channel        ChannelCreatedInfo `json:"channel"`
+	EventTimestamp string             `json:"event_ts"`
+}
+
 // ChannelCreatedInfo represents the information associated with the Channel created event
 type ChannelCreatedInfo struct {
 	ID        string `json:"id"`
