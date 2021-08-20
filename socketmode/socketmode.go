@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 
 	"github.com/gorilla/websocket"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 func TestParserOuterCallBackEvent(t *testing.T) {

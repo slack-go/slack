@@ -3,7 +3,7 @@ package slacktest
 import (
 	"fmt"
 
-	slack "github.com/crisp-dev/slack"
+	slack "github.com/slack-go/slack"
 )
 
 const defaultBotName = "TestSlackBot"

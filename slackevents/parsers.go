@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 // eventsMap checks both slack.EventsMapping and

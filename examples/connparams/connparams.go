@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 func main() {

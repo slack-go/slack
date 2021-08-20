@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 func main() {

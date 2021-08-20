@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/crisp-dev/slack/slackutilsx"
+	"github.com/slack-go/slack/slackutilsx"
 )
 
 const (

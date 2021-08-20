@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 /*

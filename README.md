@@ -1,4 +1,4 @@
-Slack API in Go [![Go Reference](https://pkg.go.dev/badge/github.com/crisp-dev/slack.svg)](https://pkg.go.dev/github.com/crisp-dev/slack)
+Slack API in Go [![Go Reference](https://pkg.go.dev/badge/github.com/slack-go/slack.svg)](https://pkg.go.dev/github.com/slack-go/slack)
 ===============
 
 This is the original Slack library for Go created by Norberto Lopes, transferred to a Github organization.
@@ -15,13 +15,13 @@ a fully managed way.
 There is currently no major version released.
 Therefore, minor version releases may include backward incompatible changes.
 
-See [CHANGELOG.md](https://github.com/crisp-dev/slack/blob/master/CHANGELOG.md) or [Releases](https://github.com/crisp-dev/slack/releases) for more information about the changes.
+See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) or [Releases](https://github.com/slack-go/slack/releases) for more information about the changes.
 
 ## Installing
 
 ### *go get*
 
-    $ go get -u github.com/crisp-dev/slack
+    $ go get -u github.com/slack-go/slack
 
 ## Example
 
@@ -31,7 +31,7 @@ See [CHANGELOG.md](https://github.com/crisp-dev/slack/blob/master/CHANGELOG.md) 
 import (
 	"fmt"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 import (
     "fmt"
 
-    "github.com/crisp-dev/slack"
+    "github.com/slack-go/slack"
 )
 
 func main() {
@@ -72,12 +72,12 @@ func main() {
 
 ## Minimal RTM usage:
 
-See https://github.com/crisp-dev/slack/blob/master/examples/websocket/websocket.go
+See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go
 
 
 ## Minimal EventsAPI usage:
 
-See https://github.com/crisp-dev/slack/blob/master/examples/eventsapi/events.go
+See https://github.com/slack-go/slack/blob/master/examples/eventsapi/events.go
 
 
 ## Contributing

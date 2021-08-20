@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/crisp-dev/slack"
+	"github.com/slack-go/slack"
 )
 
 // The functions below mock the different templates slack has as examples on their website.

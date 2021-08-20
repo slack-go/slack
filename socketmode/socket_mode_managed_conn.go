@@ -11,13 +11,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/crisp-dev/slack"
-	"github.com/crisp-dev/slack/internal/backoff"
-	"github.com/crisp-dev/slack/internal/misc"
-	"github.com/crisp-dev/slack/slackevents"
+	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/internal/backoff"
+	"github.com/slack-go/slack/internal/misc"
+	"github.com/slack-go/slack/slackevents"
 
 	"github.com/gorilla/websocket"
-	"github.com/crisp-dev/slack/internal/timex"
+	"github.com/slack-go/slack/internal/timex"
 )
 
 // Run is a blocking function that connects the Slack Socket Mode API and handles all incoming

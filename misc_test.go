@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/crisp-dev/slack/internal/misc"
+	"github.com/slack-go/slack/internal/misc"
 
-	"github.com/crisp-dev/slack/slackutilsx"
+	"github.com/slack-go/slack/slackutilsx"
 )
 
 var (

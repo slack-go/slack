@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/crisp-dev/slack/internal/errorsx"
+	"github.com/slack-go/slack/internal/errorsx"
 	"github.com/stretchr/testify/assert"
 )
 

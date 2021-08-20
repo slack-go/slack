@@ -1,4 +1,4 @@
-module github.com/crisp-dev/slack
+module github.com/slack-go/slack
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
