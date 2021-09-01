@@ -31,8 +31,20 @@ import (
 // If you want to retry even on reconnection failure, you'd need to write your own wrapper for this function
 // to do so.
 func (smc *Client) Run() error {
-	ctx := context.TODO()
+	return smc.RunContext(context.TODO())
+}
 
+// RunContext is a blocking function that connects the Slack Socket Mode API and handles all incoming
+// requests and outgoing responses.
+//
+// The consumer of the Client and this function should read the Client.Events channel to receive
+// `socketmode.Event`s that includes the client-specific events that may or may not wrap Socket Mode requests.
+//
+// Note that this function automatically reconnect on requested by Slack through a `disconnect` message.
+// This function exists with an error only when a reconnection is failued due to some reason.
+// If you want to retry even on reconnection failure, you'd need to write your own wrapper for this function
+// to do so.
+func (smc *Client) RunContext(ctx context.Context) error {
 	for connectionCount := 0; ; connectionCount++ {
 		if err := smc.run(ctx, connectionCount); err != nil {
 			return err
@@ -44,6 +56,7 @@ func (smc *Client) Run() error {
 
 func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	messages := make(chan json.RawMessage)
+	defer close(messages)
 
 	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
 
@@ -131,7 +144,10 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 		select {
 		case <-ctx.Done():
-		// Detect when the connection is dead.
+			// Detect when the connection is dead and try close connection.
+			if err = conn.Close(); err != nil {
+				smc.Debugf("Failed to close connection: %v", err)
+			}
 		case <-deadmanTimer.Elapsed():
 			firstErrOnce.Do(func() {
 				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
@@ -143,13 +159,13 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 	wg.Wait()
 
+	if firstErr == context.Canceled {
+		return firstErr
+	}
+
 	// wg.Wait() finishes only after any of the above go routines finishes.
 	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
 	smc.Debugf("Reconnecting due to %v", firstErr)
-
-	if err = conn.Close(); err != nil {
-		smc.Debugf("Failed to close connection: %v", err)
-	}
 
 	return nil
 }
@@ -162,6 +178,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		errInvalidAuth      = "invalid_auth"
 		errInactiveAccount  = "account_inactive"
 		errMissingAuthToken = "not_authed"
+		errTokenRevoked     = "token_revoked"
 	)
 
 	// used to provide exponential backoff wait time with jitter before trying
@@ -182,14 +199,14 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		})
 
 		// attempt to start the connection
-		info, conn, err := smc.openAndDial(additionalPingHandler)
+		info, conn, err := smc.openAndDial(ctx, additionalPingHandler)
 		if err == nil {
 			return info, conn, nil
 		}
 
 		// check for fatal errors
 		switch err.Error() {
-		case errInvalidAuth, errInactiveAccount, errMissingAuthToken:
+		case errInvalidAuth, errInactiveAccount, errMissingAuthToken, errTokenRevoked:
 			smc.Debugf("invalid auth when connecting with SocketMode: %s", err)
 			return nil, nil, err
 		default:
@@ -233,13 +250,13 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 // openAndDial attempts to open a Socket Mode connection and dial to the connection endpoint using WebSocket.
 // It returns the  full information returned by the "apps.connections.open" method on the
 // Slack API.
-func (smc *Client) openAndDial(additionalPingHandler func(string) error) (info *slack.SocketModeConnection, _ *websocket.Conn, err error) {
+func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(string) error) (info *slack.SocketModeConnection, _ *websocket.Conn, err error) {
 	var (
 		url string
 	)
 
 	smc.Debugf("Starting SocketMode")
-	info, url, err = smc.Open()
+	info, url, err = smc.OpenContext(ctx)
 
 	if err != nil {
 		smc.Debugf("Failed to start or connect with SocketMode: %s", err)
@@ -254,7 +271,7 @@ func (smc *Client) openAndDial(additionalPingHandler func(string) error) (info *
 	if smc.dialer != nil {
 		dialer = smc.dialer
 	}
-	conn, _, err := dialer.Dial(url, upgradeHeader)
+	conn, _, err := dialer.DialContext(ctx, url, upgradeHeader)
 	if err != nil {
 		smc.Debugf("Failed to dial to the websocket: %s", err)
 		return nil, nil, err

@@ -82,11 +82,6 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 	_, _ = w.Write(encoded)
 }
 
-// handle channels.list and conversations.list
-func listChannelsHandler(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write([]byte(defaultChannelsListJSON))
-}
-
 // handle conversations.create
 func createConversationHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(defaultConversationJSON))
@@ -112,11 +107,6 @@ func inviteConversationHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(inviteConversationJSON))
 }
 
-// handle groups.list
-func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
-	_, _ = w.Write([]byte(defaultGroupsListJSON))
-}
-
 // handle chat.postMessage
 func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
@@ -136,12 +126,24 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ts := time.Now().Unix()
-	resp := fmt.Sprintf(`{"channel":"%s","ts":"%d", "text":"%s", "ok": true}`, values.Get("channel"), ts, values.Get("text"))
+	resp := &struct {
+		Ok      bool   `json:"ok"`
+		Channel string `json:"channel"`
+		Ts      string `json:"ts"`
+		Text    string `json:"text"`
+	}{
+		Ok:      true,
+		Channel: values.Get("channel"),
+		Ts:      fmt.Sprintf("%d", ts),
+		Text:    values.Get("text"),
+	}
+
 	m := slack.Message{}
 	m.Type = "message"
 	m.Channel = values.Get("channel")
 	m.Timestamp = fmt.Sprintf("%d", ts)
 	m.Text = values.Get("text")
+	m.ThreadTimestamp = values.Get("thread_ts")
 	if values.Get("as_user") != "true" {
 		m.User = defaultNonBotUserID
 		m.Username = defaultNonBotUserName
@@ -195,7 +197,7 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	go sts.queueForWebsocket(string(jsonMessage), serverAddr)
-	_, _ = w.Write([]byte(resp))
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 // RTMConnectHandler generates a valid connection

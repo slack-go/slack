@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,4 +83,53 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 	assert.Equal(t, optGroup.Label.Text, "testLabel")
 	assert.Len(t, optGroup.Options, 1, "Options should contain one element")
 
+}
+
+func TestValidateTextBlockObject(t *testing.T) {
+	tests := []struct {
+		input    TextBlockObject
+		expected error
+	}{
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "invalid",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: errors.New("type must be either of plain_text or mrkdwn"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    true,
+				Verbatim: false,
+			},
+			expected: errors.New("emoji cannot be true in mrkdown"),
+		},
+	}
+
+	for _, test := range tests {
+		err := test.input.Validate()
+		assert.Equal(t, err, test.expected)
+	}
 }

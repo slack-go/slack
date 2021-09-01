@@ -43,20 +43,21 @@ func main() {
 	postAsUserID = authTest.UserID
 
 	// Create a temporary channel
-	channel, err := api.CreateChannel(channelName)
+	channel, err := api.CreateConversation(channelName, false)
 
 	if err != nil {
 		// If the channel exists, that means we just need to unarchive it
 		if err.Error() == "name_taken" {
 			err = nil
-			if channels, err = api.GetChannels(false); err != nil {
+			params := &slack.GetConversationsParameters{ExcludeArchived: false}
+			if channels, _, err = api.GetConversations(params); err != nil {
 				fmt.Println("Could not retrieve channels")
 				return
 			}
 			for _, archivedChannel := range channels {
 				if archivedChannel.Name == channelName {
 					if archivedChannel.IsArchived {
-						err = api.UnarchiveChannel(archivedChannel.ID)
+						err = api.UnArchiveConversation(archivedChannel.ID)
 						if err != nil {
 							fmt.Printf("Could not unarchive %s: %s\n", archivedChannel.ID, err)
 							return
@@ -111,7 +112,7 @@ func main() {
 		return
 	}
 
-	if err = api.ArchiveChannel(channelID); err != nil {
+	if err = api.UnArchiveConversation(channelID); err != nil {
 		fmt.Printf("Error archiving channel: %s\n", err)
 		return
 	}
