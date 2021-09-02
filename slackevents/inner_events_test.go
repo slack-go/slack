@@ -126,6 +126,32 @@ func TestFileSharedEvent(t *testing.T) {
 	}
 }
 
+func TestFileUnsharedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_unshared",
+			"file_id": "F1234567890",
+			"file": {
+				"id": "F1234567890"
+			}
+		}
+	`)
+
+	var e FileUnsharedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_unshared" {
+		t.Errorf("type should be file_shared, was %s", e.Type)
+	}
+	if e.FileID != "F1234567890" {
+		t.Errorf("file ID should be F1234567890, was %s", e.FileID)
+	}
+	if e.File.ID != "F1234567890" {
+		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	}
+}
+
 func TestGridMigrationFinishedEvent(t *testing.T) {
 	rawE := []byte(`
 			{
