@@ -182,6 +182,14 @@ type FileSharedEvent struct {
 	EventTimestamp string        `json:"event_ts"`
 }
 
+// FileUnsharedEvent represents the information associated with the File
+// unshared event.
+type FileUnsharedEvent struct {
+	Type   string        `json:"type"`
+	FileID string        `json:"file_id"`
+	File   FileEventFile `json:"file"`
+}
+
 // FileEventFile represents information on the specific file being shared in a
 // file-related Slack event.
 type FileEventFile struct {
@@ -555,6 +563,8 @@ const (
 	FileDeleted = EventsAPIType("file_deleted")
 	// FileShared is sent when a file is shared.
 	FileShared = EventsAPIType("file_shared")
+	// FileUnshared is sent when a file is unshared.
+	FileUnshared = EventsAPIType("file_unshared")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = EventsAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -608,6 +618,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	FileChange:             FileChangeEvent{},
 	FileDeleted:            FileDeletedEvent{},
 	FileShared:             FileSharedEvent{},
+	FileUnshared:           FileUnsharedEvent{},
 	GroupDeleted:           GroupDeletedEvent{},
 	GroupArchive:           GroupArchiveEvent{},
 	GroupUnarchive:         GroupUnarchiveEvent{},
