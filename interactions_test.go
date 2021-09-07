@@ -256,6 +256,7 @@ func TestViewSubmissionCallback(t *testing.T) {
 							false,
 							false,
 						),
+						nil,
 						&PlainTextInputBlockElement{
 							Type:      "plain_text_input",
 							ActionID:  "ml-value",
@@ -270,6 +271,7 @@ func TestViewSubmissionCallback(t *testing.T) {
 							false,
 							false,
 						),
+						nil,
 						&SelectBlockElement{
 							Type:                         "conversations_select",
 							ActionID:                     "target_select",

@@ -172,6 +172,10 @@ func TestSlack_OpenView(t *testing.T) {
 									Type: PlainTextType,
 									Text: "A simple label",
 								},
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple hint",
+								},
 								NewPlainTextInputBlockElement(
 									&TextBlockObject{
 										Type: PlainTextType,
@@ -330,6 +334,10 @@ func TestSlack_View_PublishView(t *testing.T) {
 								&TextBlockObject{
 									Type: PlainTextType,
 									Text: "A simple label",
+								},
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple hint",
 								},
 								NewPlainTextInputBlockElement(
 									&TextBlockObject{
@@ -502,6 +510,10 @@ func TestSlack_PushView(t *testing.T) {
 								&TextBlockObject{
 									Type: PlainTextType,
 									Text: "A simple label",
+								},
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple hint",
 								},
 								NewPlainTextInputBlockElement(
 									&TextBlockObject{
@@ -678,6 +690,10 @@ func TestSlack_UpdateView(t *testing.T) {
 								&TextBlockObject{
 									Type: PlainTextType,
 									Text: "A simple label",
+								},
+								&TextBlockObject{
+									Type: PlainTextType,
+									Text: "A simple hint",
 								},
 								NewPlainTextInputBlockElement(
 									&TextBlockObject{
