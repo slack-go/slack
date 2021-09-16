@@ -39,6 +39,7 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 			"",
 			"unmarshalling_error",
 			"",
+			"",
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -52,6 +53,7 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 				"",
 				"unmarshalling_error",
 				"",
+				"",
 				&slack.UnmarshallingErrorEvent{ErrorObj: err},
 				EventsAPIInnerEvent{},
 			}, err
@@ -61,6 +63,7 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 			e.TeamID,
 			e.Type,
 			e.APIAppID,
+			e.EnterpriseID,
 			cbEvent,
 			EventsAPIInnerEvent{},
 		}, nil
@@ -73,6 +76,7 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 			"",
 			"unmarshalling_error",
 			"",
+			"",
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -82,6 +86,7 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 		e.TeamID,
 		e.Type,
 		e.APIAppID,
+		e.EnterpriseID,
 		urlVE,
 		EventsAPIInnerEvent{},
 	}, nil
@@ -97,6 +102,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
+			"",
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -108,6 +114,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			iE.Type,
 			e.APIAppID,
+			"",
 			nil,
 			EventsAPIInnerEvent{},
 		}, fmt.Errorf("Inner Event does not exist! %s", iE.Type)
@@ -121,6 +128,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
+			"",
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -130,6 +138,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 		e.TeamID,
 		e.Type,
 		e.APIAppID,
+		"",
 		e,
 		EventsAPIInnerEvent{iE.Type, recvEvent},
 	}, nil
@@ -196,6 +205,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 				"",
 				"unmarshalling_error",
 				"",
+				"",
 				&slack.UnmarshallingErrorEvent{ErrorObj: err},
 				EventsAPIInnerEvent{},
 			}, err
@@ -210,6 +220,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 			"",
 			"unmarshalling_error",
 			"",
+			"",
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -219,6 +230,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 		e.TeamID,
 		e.Type,
 		e.APIAppID,
+		e.EnterpriseID,
 		urlVerificationEvent,
 		EventsAPIInnerEvent{},
 	}, nil
