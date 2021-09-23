@@ -152,6 +152,50 @@ func TestFileUnsharedEvent(t *testing.T) {
 	}
 }
 
+func TestChannelDeletedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "channel_deleted",
+			"channel": "C1234567890"
+		}
+	`)
+
+	var e ChannelDeletedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "channel_deleted" {
+		t.Errorf("type should be channel_deleted, was %s", e.Type)
+	}
+	if e.Channel != "C1234567890" {
+		t.Errorf("channel ID should be C1234567890, was %s", e.Channel)
+	}
+}
+
+func TestChannelArchivedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "channel_deleted",
+			"channel": "C1234567890",
+			"user": "U1234567890"
+		}
+	`)
+
+	var e ChannelArchivedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "channel_deleted" {
+		t.Errorf("type should be channel_deleted, was %s", e.Type)
+	}
+	if e.Channel != "C1234567890" {
+		t.Errorf("channel ID should be C1234567890, was %s", e.Channel)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user ID should be U1234567890, was %s", e.Channel)
+	}
+}
+
 func TestGridMigrationFinishedEvent(t *testing.T) {
 	rawE := []byte(`
 			{

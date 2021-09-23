@@ -198,6 +198,19 @@ type MemberLeftChannelEvent struct {
 	Team        string `json:"team"`
 }
 
+// ChannelDeletedEvent indicates that a channel was deleted
+type ChannelDeletedEvent struct {
+	Type    string `json:"type"`
+	Channel string `json:"channel"`
+}
+
+// ChannelArchivedEvent indicates that a channel was archived
+type ChannelArchivedEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
+}
+
 type pinEvent struct {
 	Type           string `json:"type"`
 	User           string `json:"user"`
@@ -369,6 +382,10 @@ const (
 	AppUninstalled = "app_uninstalled"
 	// ChannelCreated is sent when a new channel is created.
 	ChannelCreated = "channel_created"
+	// ChannelDeleted is sent when a new channel is deleted.
+	ChannelDeleted = "channel_deleted"
+	// ChannelArchived is sent when a new channel is archived.
+	ChannelArchived = "channel_archived"
 	// FileChange is sent when a file is changed.
 	FileChange = "file_change"
 	// FileDeleted is sent when a file is deleted.
@@ -410,7 +427,9 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	AppMention:            AppMentionEvent{},
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
+	ChannelArchived:       ChannelArchivedEvent{},
 	ChannelCreated:        ChannelCreatedEvent{},
+	ChannelDeleted:        ChannelDeletedEvent{},
 	FileChange:            FileChangeEvent{},
 	FileDeleted:           FileDeletedEvent{},
 	FileShared:            FileSharedEvent{},
