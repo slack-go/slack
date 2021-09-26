@@ -1,3 +1,6 @@
+### v0.9.6 - 26 Sept 2021
+Update users example with input examples
+
 ### v0.7.0 - October 2, 2020
 full differences can be viewed using `git log --oneline --decorate --color v0.6.6..v0.7.0`
 Thank you for many contributions!
