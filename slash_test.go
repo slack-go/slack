@@ -33,6 +33,7 @@ func TestSlash_ServeHTTP(t *testing.T) {
 				"token":           []string{"valid"},
 				"channel_name":    []string{"channel"},
 				"trigger_id":      []string{"0000000000.1111111111.222222222222aaaaaaaaaaaaaa"},
+				"api_app_id":      []string{"A123456"},
 			},
 			wantParams: SlashCommand{
 				Command:        "/command",
@@ -48,6 +49,7 @@ func TestSlash_ServeHTTP(t *testing.T) {
 				Token:          "valid",
 				ChannelName:    "channel",
 				TriggerID:      "0000000000.1111111111.222222222222aaaaaaaaaaaaaa",
+				APIAppID:       "A123456",
 			},
 			wantStatusCode: http.StatusOK,
 		},

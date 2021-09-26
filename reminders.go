@@ -3,22 +3,26 @@ package slack
 import (
 	"context"
 	"net/url"
-	"time"
 )
 
 type Reminder struct {
-	ID         string    `json:"id"`
-	Creator    string    `json:"creator"`
-	User       string    `json:"user"`
-	Text       string    `json:"text"`
-	Recurring  bool      `json:"recurring"`
-	Time       time.Time `json:"time"`
-	CompleteTS int       `json:"complete_ts"`
+	ID         string `json:"id"`
+	Creator    string `json:"creator"`
+	User       string `json:"user"`
+	Text       string `json:"text"`
+	Recurring  bool   `json:"recurring"`
+	Time       int    `json:"time"`
+	CompleteTS int    `json:"complete_ts"`
 }
 
 type reminderResp struct {
 	SlackResponse
 	Reminder Reminder `json:"reminder"`
+}
+
+type remindersResp struct {
+	SlackResponse
+	Reminders []*Reminder `json:"reminders"`
 }
 
 func (api *Client) doReminder(ctx context.Context, path string, values url.Values) (*Reminder, error) {
@@ -27,6 +31,31 @@ func (api *Client) doReminder(ctx context.Context, path string, values url.Value
 		return nil, err
 	}
 	return &response.Reminder, response.Err()
+}
+
+func (api *Client) doReminders(ctx context.Context, path string, values url.Values) ([]*Reminder, error) {
+	response := &remindersResp{}
+	if err := api.postMethod(ctx, path, values, response); err != nil {
+		return nil, err
+	}
+
+	// create an array of pointers to reminders
+	var reminders = make([]*Reminder, 0, len(response.Reminders))
+	for _, reminder := range response.Reminders {
+		reminders = append(reminders, reminder)
+	}
+
+	return reminders, response.Err()
+}
+
+// ListReminders lists all the reminders created by or for the authenticated user
+//
+// See https://api.slack.com/methods/reminders.list
+func (api *Client) ListReminders() ([]*Reminder, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	return api.doReminders(context.Background(), "reminders.list", values)
 }
 
 // AddChannelReminder adds a reminder for a channel.

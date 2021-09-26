@@ -106,6 +106,7 @@ func TestLinkSharedEvent(t *testing.T) {
 func TestMessageEvent(t *testing.T) {
 	rawE := []byte(`
 			{
+				"client_msg_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 				"type": "message",
 				"channel": "G024BE91L",
 				"user": "U2147483697",
@@ -148,6 +149,54 @@ func TestBotMessageEvent(t *testing.T) {
 	err := json.Unmarshal(rawE, &MessageEvent{})
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestThreadBroadcastEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "message",
+				"subtype": "thread_broadcast",
+				"channel": "G024BE91L",
+				"user": "U2147483697",
+				"text": "Live long and prospect.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "channel",
+				"source_team": "T3MQV36V7",
+				"user_team": "T3MQV36V7",
+				"message": {
+					"text": "To infinity and beyond.",
+					"root": {
+						"text": "To infinity and beyond.",
+						"ts": "1355517523.000005"
+					},
+					"edited": {
+						"user": "U2147483697",
+						"ts": "1355517524.000000"
+					}
+				},
+				"previous_message": {
+					"text": "Live long and prospect."
+				}
+		}
+	`)
+
+	var me MessageEvent
+	if err := json.Unmarshal(rawE, &me); err != nil {
+		t.Error(err)
+	}
+
+	if me.Root != nil {
+		t.Error("me.Root should be nil")
+	}
+
+	if me.Message.Root == nil {
+		t.Fatal("me.Message.Root is nil")
+	}
+
+	if me.Message.Root.TimeStamp != "1355517523.000005" {
+		t.Errorf("me.Message.Root.TimeStamp = %q, want %q", me.Root.TimeStamp, "1355517523.000005")
 	}
 }
 
@@ -269,6 +318,85 @@ func TestTokensRevoked(t *testing.T) {
 	}
 
 	if len(tre.Tokens.Oauth) != 1 || tre.Tokens.Oauth[0] != "OUXXXXXXXX" {
+		t.Fail()
+	}
+}
+
+func TestEmojiChanged(t *testing.T) {
+	var (
+		ece EmojiChangedEvent
+		err error
+	)
+
+	// custom emoji added event
+	rawAddE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "add",
+		"name": "picard_facepalm",
+		"value": "https://my.slack.com/emoji/picard_facepalm/db8e287430eaa459.gif",
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawAddE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "add" {
+		t.Fail()
+	}
+	if ece.Name != "picard_facepalm" {
+		t.Fail()
+	}
+
+	// emoji removed event
+	rawRemoveE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "remove",
+		"names": ["picard_facepalm"],
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawRemoveE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "remove" {
+		t.Fail()
+	}
+	if len(ece.Names) != 1 {
+		t.Fail()
+	}
+	if ece.Names[0] != "picard_facepalm" {
+		t.Fail()
+	}
+
+	// custom emoji rename event
+	rawRenameE := []byte(`
+	{
+		"type": "emoji_changed",
+		"subtype": "rename",
+		"old_name": "grin",
+		"new_name": "cheese-grin",
+		"value": "https://my.slack.com/emoji/picard_facepalm/db8e287430eaa459.gif",
+		"event_ts" : "1361482916.000004"
+	}
+`)
+	ece = EmojiChangedEvent{}
+	err = json.Unmarshal(rawRenameE, &ece)
+	if err != nil {
+		t.Error(err)
+	}
+	if ece.Subtype != "rename" {
+		t.Fail()
+	}
+	if ece.OldName != "grin" {
+		t.Fail()
+	}
+	if ece.NewName != "cheese-grin" {
 		t.Fail()
 	}
 }

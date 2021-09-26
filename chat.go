@@ -188,7 +188,28 @@ func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestam
 
 // UnfurlMessage unfurls a message in a channel
 func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
-	return api.SendMessageContext(context.Background(), channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
+	return api.UnfurlMessageContext(context.Background(), channelID, timestamp, unfurls, options...)
+}
+
+// UnfurlMessageContext unfurls a message in a channel with a custom context
+func (api *Client) UnfurlMessageContext(ctx context.Context, channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
+}
+
+// UnfurlMessageWithAuthURL sends an unfurl request containing an
+// authentication URL.
+// For more details see:
+// https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
+func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+	return api.UnfurlMessageWithAuthURLContext(context.Background(), channelID, timestamp, userAuthURL, options...)
+}
+
+// UnfurlMessageWithAuthURLContext sends an unfurl request containing an
+// authentication URL.
+// For more details see:
+// https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
+func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
 }
 
 // SendMessage more flexible method for configuring messages.
@@ -413,6 +434,38 @@ func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption 
 	}
 }
 
+// MsgOptionUnfurlAuthURL unfurls a message using an auth url based on the timestamp.
+func MsgOptionUnfurlAuthURL(timestamp string, userAuthURL string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		config.values.Add("user_auth_url", userAuthURL)
+		return nil
+	}
+}
+
+// MsgOptionUnfurlAuthRequired requests that the user installs the
+// Slack app for unfurling.
+func MsgOptionUnfurlAuthRequired(timestamp string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		config.values.Add("user_auth_required", "true")
+		return nil
+	}
+}
+
+// MsgOptionUnfurlAuthMessage attaches a message inviting the user to
+// authenticate.
+func MsgOptionUnfurlAuthMessage(timestamp string, msg string) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		config.values.Add("user_auth_message", msg)
+		return nil
+	}
+}
+
 // MsgOptionResponseURL supplies a url to use as the endpoint.
 func MsgOptionResponseURL(url string, responseType string) MsgOption {
 	return func(config *sendConfig) error {
@@ -571,9 +624,9 @@ func MsgOptionBroadcast() MsgOption {
 
 // MsgOptionCompose combines multiple options into a single option.
 func MsgOptionCompose(options ...MsgOption) MsgOption {
-	return func(c *sendConfig) error {
+	return func(config *sendConfig) error {
 		for _, opt := range options {
-			if err := opt(c); err != nil {
+			if err := opt(config); err != nil {
 				return err
 			}
 		}
@@ -583,30 +636,30 @@ func MsgOptionCompose(options ...MsgOption) MsgOption {
 
 // MsgOptionParse set parse option.
 func MsgOptionParse(b bool) MsgOption {
-	return func(c *sendConfig) error {
+	return func(config *sendConfig) error {
 		var v string
 		if b {
 			v = "full"
 		} else {
 			v = "none"
 		}
-		c.values.Set("parse", v)
+		config.values.Set("parse", v)
 		return nil
 	}
 }
 
 // MsgOptionIconURL sets an icon URL
 func MsgOptionIconURL(iconURL string) MsgOption {
-	return func(c *sendConfig) error {
-		c.values.Set("icon_url", iconURL)
+	return func(config *sendConfig) error {
+		config.values.Set("icon_url", iconURL)
 		return nil
 	}
 }
 
 // MsgOptionIconEmoji sets an icon emoji
 func MsgOptionIconEmoji(iconEmoji string) MsgOption {
-	return func(c *sendConfig) error {
-		c.values.Set("icon_emoji", iconEmoji)
+	return func(config *sendConfig) error {
+		config.values.Set("icon_emoji", iconEmoji)
 		return nil
 	}
 }
@@ -696,7 +749,6 @@ func (api *Client) GetPermalink(params *PermalinkParameters) (string, error) {
 // GetPermalinkContext returns the permalink for a message using a custom context.
 func (api *Client) GetPermalinkContext(ctx context.Context, params *PermalinkParameters) (string, error) {
 	values := url.Values{
-		"token":      {api.token},
 		"channel":    {params.Channel},
 		"message_ts": {params.Ts},
 	}
@@ -706,7 +758,7 @@ func (api *Client) GetPermalinkContext(ctx context.Context, params *PermalinkPar
 		Permalink string `json:"permalink"`
 		SlackResponse
 	}{}
-	err := api.getMethod(ctx, "chat.getPermalink", values, &response)
+	err := api.getMethod(ctx, "chat.getPermalink", api.token, values, &response)
 	if err != nil {
 		return "", err
 	}
@@ -722,12 +774,12 @@ type GetScheduledMessagesParameters struct {
 }
 
 // GetScheduledMessages returns the list of scheduled messages based on params
-func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) (channels []Message, nextCursor string, err error) {
+func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
 	return api.GetScheduledMessagesContext(context.Background(), params)
 }
 
 // GetScheduledMessagesContext returns the list of scheduled messages in a Slack team with a custom context
-func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []Message, nextCursor string, err error) {
+func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -747,8 +799,8 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 		values.Add("oldest", params.Oldest)
 	}
 	response := struct {
-		Messages         []Message        `json:"scheduled_messages"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Messages         []ScheduledMessage `json:"scheduled_messages"`
+		ResponseMetaData responseMetaData   `json:"response_metadata"`
 		SlackResponse
 	}{}
 

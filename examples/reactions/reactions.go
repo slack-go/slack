@@ -43,12 +43,12 @@ func main() {
 	postToUserID = authTest.UserID
 
 	// Find the channel.
-	_, _, chanID, err := api.OpenIMChannel(postToUserID)
+	channel, _, _, err := api.OpenConversation(&slack.OpenConversationParameters{ChannelID: postToUserID})
 	if err != nil {
 		fmt.Printf("Error opening IM: %s\n", err)
 		return
 	}
-	postToChannelID = chanID
+	postToChannelID = channel.ID
 
 	fmt.Printf("Posting as %s (%s) in DM with %s (%s), channel %s\n", postAsUserName, postAsUserID, postToUserName, postToUserID, postToChannelID)
 

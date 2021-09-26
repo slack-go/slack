@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 // Block Objects are also known as Composition Objects
@@ -135,6 +136,20 @@ func (s TextBlockObject) MixedElementType() MixedElementType {
 	return MixedElementText
 }
 
+// Validate checks if TextBlockObject has valid values
+func (s TextBlockObject) Validate() error {
+	if s.Type != "plain_text" && s.Type != "mrkdwn" {
+		return errors.New("type must be either of plain_text or mrkdwn")
+	}
+
+	// https://github.com/slack-go/slack/issues/881
+	if s.Type == "mrkdwn" && s.Emoji {
+		return errors.New("emoji cannot be true in mrkdown")
+	}
+
+	return nil
+}
+
 // NewTextBlockObject returns an instance of a new Text Block Object
 func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlockObject {
 	return &TextBlockObject{
@@ -147,7 +162,7 @@ func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlo
 
 // BlockType returns the type of the block
 func (t TextBlockObject) BlockType() MessageBlockType {
-	if t.Type == "mrkdown" {
+	if t.Type == "mrkdwn" {
 		return MarkdownType
 	}
 	return PlainTextType
@@ -171,7 +186,7 @@ func (s ConfirmationBlockObject) validateType() MessageObjectType {
 	return motConfirmation
 }
 
-// add styling to confirmation object
+// WithStyle add styling to confirmation object
 func (s *ConfirmationBlockObject) WithStyle(style Style) {
 	s.Style = style
 }
@@ -190,16 +205,18 @@ func NewConfirmationBlockObject(title, text, confirm, deny *TextBlockObject) *Co
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#option
 type OptionBlockObject struct {
-	Text  *TextBlockObject `json:"text"`
-	Value string           `json:"value"`
-	URL   string           `json:"url,omitempty"`
+	Text        *TextBlockObject `json:"text"`
+	Value       string           `json:"value"`
+	Description *TextBlockObject `json:"description,omitempty"`
+	URL         string           `json:"url,omitempty"`
 }
 
 // NewOptionBlockObject returns an instance of a new Option Block Element
-func NewOptionBlockObject(value string, text *TextBlockObject) *OptionBlockObject {
+func NewOptionBlockObject(value string, text, description *TextBlockObject) *OptionBlockObject {
 	return &OptionBlockObject{
-		Text:  text,
-		Value: value,
+		Text:        text,
+		Value:       value,
+		Description: description,
 	}
 }
 

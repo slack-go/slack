@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,12 +43,31 @@ func TestNewConfirmationBlockObject(t *testing.T) {
 
 }
 
+func TestWithStyleForConfirmation(t *testing.T) {
+
+	// these values are irrelevant in this test
+	titleObj := NewTextBlockObject("plain_text", "testTitle", false, false)
+	textObj := NewTextBlockObject("plain_text", "testText", false, false)
+	confirmObj := NewTextBlockObject("plain_text", "testConfirm", false, false)
+	confirmation := NewConfirmationBlockObject(titleObj, textObj, confirmObj, nil)
+
+	confirmation.WithStyle(StyleDefault)
+	assert.Equal(t, confirmation.Style, Style(""))
+	confirmation.WithStyle(StylePrimary)
+	assert.Equal(t, confirmation.Style, Style("primary"))
+	confirmation.WithStyle(StyleDanger)
+	assert.Equal(t, confirmation.Style, Style("danger"))
+
+}
+
 func TestNewOptionBlockObject(t *testing.T) {
 
 	valTextObj := NewTextBlockObject("plain_text", "testText", false, false)
-	optObj := NewOptionBlockObject("testOpt", valTextObj)
+	valDescriptionObj := NewTextBlockObject("plain_text", "testDescription", false, false)
+	optObj := NewOptionBlockObject("testOpt", valTextObj, valDescriptionObj)
 
 	assert.Equal(t, optObj.Text.Text, "testText")
+	assert.Equal(t, optObj.Description.Text, "testDescription")
 	assert.Equal(t, optObj.Value, "testOpt")
 
 }
@@ -56,11 +76,60 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 
 	labelObj := NewTextBlockObject("plain_text", "testLabel", false, false)
 	valTextObj := NewTextBlockObject("plain_text", "testText", false, false)
-	optObj := NewOptionBlockObject("testOpt", valTextObj)
+	optObj := NewOptionBlockObject("testOpt", valTextObj, nil)
 
 	optGroup := NewOptionGroupBlockElement(labelObj, optObj)
 
 	assert.Equal(t, optGroup.Label.Text, "testLabel")
 	assert.Len(t, optGroup.Options, 1, "Options should contain one element")
 
+}
+
+func TestValidateTextBlockObject(t *testing.T) {
+	tests := []struct {
+		input    TextBlockObject
+		expected error
+	}{
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "invalid",
+				Text:     "testText",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: errors.New("type must be either of plain_text or mrkdwn"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    true,
+				Verbatim: false,
+			},
+			expected: errors.New("emoji cannot be true in mrkdown"),
+		},
+	}
+
+	for _, test := range tests {
+		err := test.input.Validate()
+		assert.Equal(t, err, test.expected)
+	}
 }

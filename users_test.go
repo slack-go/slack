@@ -46,6 +46,7 @@ func getTestUserProfile() UserProfile {
 		Image48:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
 		Image72:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
 		Image192:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Image512:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_512.jpg",
 		Fields:                getTestUserProfileCustomFields(),
 	}
 }
@@ -181,13 +182,11 @@ func newProfileHandler(up *UserProfile) (setter func(http.ResponseWriter, *http.
 
 		values := r.Form
 
-		if len(values["user"]) == 0 {
-			httpTestErrReply(w, true, `POST data must include a "user" field`)
-			return
-		}
-		if up.RealName != "" && values["user"][0] != up.RealName {
-			httpTestErrReply(w, true, fmt.Sprintf(`POST data field "user" expected to be %q but got %q`, up.RealName, values["user"][0]))
-			return
+		if v, ok := values["user"]; ok {
+			if len(v) == 0 || v[0] == "" {
+				httpTestErrReply(w, true, `POST data must not include an empty in a "user" field`)
+				return
+			}
 		}
 
 		if len(values["profile"]) == 0 {
@@ -302,7 +301,7 @@ func TestGetUserByEmail(t *testing.T) {
 	}
 }
 
-func TestUserCustomStatus(t *testing.T) {
+func TestUserProfileSet(t *testing.T) {
 	up := &UserProfile{}
 
 	setUserProfile := newProfileHandler(up)
@@ -317,6 +316,22 @@ func TestUserCustomStatus(t *testing.T) {
 
 	up.RealName = "Test User"
 	testSetUserCustomStatusWithUser(api, "Test User", up, t)
+
+	up.RealName = "Real Name Test"
+	testSetUserRealName(api, up, t)
+}
+
+func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
+	const (
+		realName = "Real Name Test"
+	)
+	if err := api.SetUserRealName(realName); err != nil {
+		t.Fatalf(`SetUserRealName(%q) = %#v, want <nil>`, realName, err)
+	}
+
+	if up.RealName != realName {
+		t.Fatalf(`UserProfile.RealName = %q, want %q`, up.RealName, realName)
+	}
 }
 
 func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
@@ -583,7 +598,7 @@ func TestGetUserProfile(t *testing.T) {
 	http.HandleFunc("/users.profile.get", getUserProfileHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	profile, err := api.GetUserProfile(&GetUserProfileParameters{UserID: "UXXXXXXXX"})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}

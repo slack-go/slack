@@ -1,6 +1,8 @@
 package slack
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"reflect"
 	"testing"
@@ -8,7 +10,6 @@ import (
 
 type remindersHandler struct {
 	gotParams map[string]string
-	response  string
 }
 
 func newRemindersHandler() *remindersHandler {
@@ -153,6 +154,58 @@ func TestSlack_DeleteReminder(t *testing.T) {
 		}
 		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
 			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
+		}
+	}
+}
+
+type mockRemindersListHTTPClient struct{}
+
+func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) {
+	responseString := `{
+		"ok": true,
+		"reminders": [
+	        {
+				"id": "Rm12345678",
+				"creator": "U18888888",
+				"user": "U18888888",
+				"text": "eat a banana",
+				"recurring": false,
+				"time": 1458678068,
+				"complete_ts": 0
+			},
+			{
+				"id": "Gm12345678",
+				"creator": "U18888888",
+				"user": "U18888888",
+				"text": "drink some water",
+				"recurring": false,
+				"time": 1458678090,
+				"complete_ts": 0
+			}
+		]
+	}`
+
+	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(responseString))}, nil
+}
+
+func TestSlack_ListReminders(t *testing.T) {
+	expectedIDs := []string{"Rm12345678", "Gm12345678"}
+
+	once.Do(startServer)
+	api := &Client{
+		endpoint:   "http://" + serverAddr + "/",
+		token:      "testing-token",
+		httpclient: &mockRemindersListHTTPClient{},
+	}
+
+	reminders, err := api.ListReminders()
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	for i := range reminders {
+		if reminders[i].ID != expectedIDs[i] {
+			t.Fatalf("List Reminders data wasn't correctly populated: wanted %v, got %v", expectedIDs[i], reminders[i].ID)
 		}
 	}
 }

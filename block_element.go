@@ -8,6 +8,7 @@ const (
 	METButton         MessageElementType = "button"
 	METOverflow       MessageElementType = "overflow"
 	METDatepicker     MessageElementType = "datepicker"
+	METTimepicker     MessageElementType = "timepicker"
 	METPlainTextInput MessageElementType = "plain_text_input"
 	METRadioButtons   MessageElementType = "radio_buttons"
 
@@ -44,6 +45,7 @@ type Accessory struct {
 	ButtonElement              *ButtonBlockElement
 	OverflowElement            *OverflowBlockElement
 	DatePickerElement          *DatePickerBlockElement
+	TimePickerElement          *TimePickerBlockElement
 	PlainTextInputElement      *PlainTextInputBlockElement
 	RadioButtonsElement        *RadioButtonsBlockElement
 	SelectElement              *SelectBlockElement
@@ -63,6 +65,8 @@ func NewAccessory(element BlockElement) *Accessory {
 		return &Accessory{OverflowElement: element.(*OverflowBlockElement)}
 	case *DatePickerBlockElement:
 		return &Accessory{DatePickerElement: element.(*DatePickerBlockElement)}
+	case *TimePickerBlockElement:
+		return &Accessory{TimePickerElement: element.(*TimePickerBlockElement)}
 	case *PlainTextInputBlockElement:
 		return &Accessory{PlainTextInputElement: element.(*PlainTextInputBlockElement)}
 	case *RadioButtonsBlockElement:
@@ -127,10 +131,12 @@ func NewImageBlockElement(imageURL, altText string) *ImageBlockElement {
 	}
 }
 
+// Style is a style of Button element
+// https://api.slack.com/reference/block-kit/block-elements#button__fields
 type Style string
 
 const (
-	StyleDefault Style = "default"
+	StyleDefault Style = ""
 	StylePrimary Style = "primary"
 	StyleDanger  Style = "danger"
 )
@@ -155,7 +161,7 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-// WithStyling adds styling to the button object and returns the modified ButtonBlockElement
+// WithStyle adds styling to the button object and returns the modified ButtonBlockElement
 func (s *ButtonBlockElement) WithStyle(style Style) *ButtonBlockElement {
 	s.Style = style
 	return s
@@ -201,8 +207,18 @@ type SelectBlockElement struct {
 	InitialChannel               string                    `json:"initial_channel,omitempty"`
 	DefaultToCurrentConversation bool                      `json:"default_to_current_conversation,omitempty"`
 	ResponseURLEnabled           bool                      `json:"response_url_enabled,omitempty"`
+	Filter                       *SelectBlockElementFilter `json:"filter,omitempty"`
 	MinQueryLength               *int                      `json:"min_query_length,omitempty"`
 	Confirm                      *ConfirmationBlockObject  `json:"confirm,omitempty"`
+}
+
+// SelectBlockElementFilter allows to filter select element conversation options by type.
+//
+// More Information: https://api.slack.com/reference/block-kit/composition-objects#filter_conversations
+type SelectBlockElementFilter struct {
+	Include                       []string `json:"include,omitempty"`
+	ExcludeExternalSharedChannels bool     `json:"exclude_external_shared_channels,omitempty"`
+	ExcludeBotUsers               bool     `json:"exclude_bot_users,omitempty"`
 }
 
 // ElementType returns the type of the Element
@@ -252,6 +268,7 @@ type MultiSelectBlockElement struct {
 	InitialConversations []string                  `json:"initial_conversations,omitempty"`
 	InitialChannels      []string                  `json:"initial_channels,omitempty"`
 	MinQueryLength       *int                      `json:"min_query_length,omitempty"`
+	MaxSelectedItems     *int                      `json:"max_selected_items,omitempty"`
 	Confirm              *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
@@ -340,6 +357,32 @@ func NewDatePickerBlockElement(actionID string) *DatePickerBlockElement {
 	}
 }
 
+// TimePickerBlockElement defines an element which lets users easily select a
+// time from nice UI. Time picker elements can be used inside of
+// section and actions blocks.
+//
+// More Information: https://api.slack.com/reference/messaging/block-elements#timepicker
+type TimePickerBlockElement struct {
+	Type        MessageElementType       `json:"type"`
+	ActionID    string                   `json:"action_id,omitempty"`
+	Placeholder *TextBlockObject         `json:"placeholder,omitempty"`
+	InitialTime string                   `json:"initial_time,omitempty"`
+	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s TimePickerBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewTimePickerBlockElement returns an instance of a date picker element
+func NewTimePickerBlockElement(actionID string) *TimePickerBlockElement {
+	return &TimePickerBlockElement{
+		Type:     METTimepicker,
+		ActionID: actionID,
+	}
+}
+
 // PlainTextInputBlockElement creates a field where a user can enter freeform
 // data.
 // Plain-text input elements are currently only available in modals.
@@ -387,7 +430,7 @@ func (c CheckboxGroupsBlockElement) ElementType() MessageElementType {
 	return c.Type
 }
 
-// NewCheckboxGroupsBlockElement returns an instance of a radio block element
+// NewCheckboxGroupsBlockElement returns an instance of a checkbox-group block element
 func NewCheckboxGroupsBlockElement(actionID string, options ...*OptionBlockObject) *CheckboxGroupsBlockElement {
 	return &CheckboxGroupsBlockElement{
 		Type:     METCheckboxGroups,

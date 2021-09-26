@@ -11,13 +11,14 @@ import (
 
 const (
 	// Add here the defaults in the siten
-	DEFAULT_FILES_USER    = ""
-	DEFAULT_FILES_CHANNEL = ""
-	DEFAULT_FILES_TS_FROM = 0
-	DEFAULT_FILES_TS_TO   = -1
-	DEFAULT_FILES_TYPES   = "all"
-	DEFAULT_FILES_COUNT   = 100
-	DEFAULT_FILES_PAGE    = 1
+	DEFAULT_FILES_USER        = ""
+	DEFAULT_FILES_CHANNEL     = ""
+	DEFAULT_FILES_TS_FROM     = 0
+	DEFAULT_FILES_TS_TO       = -1
+	DEFAULT_FILES_TYPES       = "all"
+	DEFAULT_FILES_COUNT       = 100
+	DEFAULT_FILES_PAGE        = 1
+	DEFAULT_FILES_SHOW_HIDDEN = false
 )
 
 // File contains all the information for a file
@@ -132,6 +133,7 @@ type GetFilesParameters struct {
 	Types         string
 	Count         int
 	Page          int
+	ShowHidden    bool
 }
 
 // ListFilesParameters contains all the parameters necessary (including the optional ones) for a ListFiles() request
@@ -163,6 +165,7 @@ func NewGetFilesParameters() GetFilesParameters {
 		Types:         DEFAULT_FILES_TYPES,
 		Count:         DEFAULT_FILES_COUNT,
 		Page:          DEFAULT_FILES_PAGE,
+		ShowHidden:    DEFAULT_FILES_SHOW_HIDDEN,
 	}
 }
 
@@ -267,6 +270,9 @@ func (api *Client) GetFilesContext(ctx context.Context, params GetFilesParameter
 	if params.Page != DEFAULT_FILES_PAGE {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
+	if params.ShowHidden != DEFAULT_FILES_SHOW_HIDDEN {
+		values.Add("show_files_hidden_by_limit", strconv.FormatBool(params.ShowHidden))
+	}
 
 	response, err := api.fileRequest(ctx, "files.list", values)
 	if err != nil {
@@ -289,9 +295,7 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 		return nil, err
 	}
 	response := &fileResponseFull{}
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.Filetype != "" {
 		values.Add("filetype", params.Filetype)
 	}
@@ -312,14 +316,15 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
+		values.Add("token", api.token)
 		err = api.postMethod(ctx, "files.upload", values, response)
 	} else if params.File != "" {
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", values, response, api)
+		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", api.token, values, response, api)
 	} else if params.Reader != nil {
 		if params.Filename == "" {
 			return nil, fmt.Errorf("files.upload: FileUploadParameters.Filename is mandatory when using FileUploadParameters.Reader")
 		}
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", values, params.Reader, response, api)
+		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", api.token, values, params.Reader, response, api)
 	}
 
 	if err != nil {

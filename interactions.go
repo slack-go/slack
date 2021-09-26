@@ -9,11 +9,11 @@ import (
 type InteractionType string
 
 // ActionType type represents the type of action (attachment, block, etc.)
-type actionType string
+type ActionType string
 
 // action is an interface that should be implemented by all callback action types
 type action interface {
-	actionType() actionType
+	actionType() ActionType
 }
 
 // Types of interactions that can be received.
@@ -53,19 +53,85 @@ type InteractionCallback struct {
 	APIAppID        string          `json:"api_app_id"`
 	BlockID         string          `json:"block_id"`
 	Container       Container       `json:"container"`
+	Enterprise      Enterprise      `json:"enterprise"`
 	DialogSubmissionCallback
 	ViewSubmissionCallback
 	ViewClosedCallback
+
+	// FIXME(kanata2): just workaround for backward-compatibility.
+	// See also https://github.com/slack-go/slack/issues/816
+	RawState json.RawMessage `json:"state,omitempty"`
+
+	// BlockActionState stands for the `state` field in block_actions type.
+	// NOTE: InteractionCallback.State has a role for the state of dialog_submission type,
+	// so we cannot use this field for backward-compatibility for now.
+	BlockActionState *BlockActionStates `json:"-"`
+}
+
+type BlockActionStates struct {
+	Values map[string]map[string]BlockAction `json:"values"`
+}
+
+func (ic *InteractionCallback) MarshalJSON() ([]byte, error) {
+	type alias InteractionCallback
+	tmp := alias(*ic)
+	if tmp.Type == InteractionTypeBlockActions {
+		if tmp.BlockActionState == nil {
+			tmp.RawState = []byte(`{}`)
+		} else {
+			state, err := json.Marshal(tmp.BlockActionState.Values)
+			if err != nil {
+				return nil, err
+			}
+			tmp.RawState = []byte(`{"values":` + string(state) + `}`)
+		}
+	} else if ic.Type == InteractionTypeDialogSubmission {
+		tmp.RawState = []byte(tmp.State)
+	}
+	// Use pointer for go1.7
+	return json.Marshal(&tmp)
+}
+
+func (ic *InteractionCallback) UnmarshalJSON(b []byte) error {
+	type alias InteractionCallback
+	tmp := struct {
+		Type InteractionType `json:"type"`
+		*alias
+	}{
+		alias: (*alias)(ic),
+	}
+	if err := json.Unmarshal(b, &tmp); err != nil {
+		return err
+	}
+	*ic = InteractionCallback(*tmp.alias)
+	ic.Type = tmp.Type
+	if ic.Type == InteractionTypeBlockActions {
+		if len(ic.RawState) > 0 {
+			err := json.Unmarshal(ic.RawState, &ic.BlockActionState)
+			if err != nil {
+				return err
+			}
+		}
+	} else if ic.Type == InteractionTypeDialogSubmission {
+		ic.State = string(ic.RawState)
+	}
+	return nil
 }
 
 type Container struct {
 	Type         string      `json:"type"`
 	ViewID       string      `json:"view_id"`
 	MessageTs    string      `json:"message_ts"`
+	ThreadTs     string      `json:"thread_ts,omitempty"`
 	AttachmentID json.Number `json:"attachment_id"`
 	ChannelID    string      `json:"channel_id"`
 	IsEphemeral  bool        `json:"is_ephemeral"`
 	IsAppUnfurl  bool        `json:"is_app_unfurl"`
+}
+
+type Enterprise struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // ActionCallback is a convenience struct defined to allow dynamic unmarshalling of
