@@ -276,6 +276,12 @@ type tokens struct {
 	Bot   []string `json:"bot"`
 }
 
+// TeamJoinEvent A new member joined a workspace -  https://api.slack.com/events/team_join
+type TeamJoinEvent struct {
+	Type string      `json:"type"`
+	User *slack.User `json:"user"`
+}
+
 // TokensRevokedEvent APP's API tokes are revoked - https://api.slack.com/events/tokens_revoked
 type TokensRevokedEvent struct {
 	Type   string `json:"type"`
@@ -454,6 +460,8 @@ const (
 	ReactionAdded = "reaction_added"
 	// ReactionRemoved An reaction was removed from a message
 	ReactionRemoved = "reaction_removed"
+	// TeamJoin A new user joined the workspace
+	TeamJoin = "team_join"
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = "tokens_revoked"
 	// EmojiChanged A custom emoji has been added or changed
@@ -489,6 +497,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	PinRemoved:            PinRemovedEvent{},
 	ReactionAdded:         ReactionAddedEvent{},
 	ReactionRemoved:       ReactionRemovedEvent{},
+	TeamJoin:              TeamJoinEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
 	EmojiChanged:          EmojiChangedEvent{},
 }
