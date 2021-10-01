@@ -33,7 +33,7 @@ func TestGetTeamInfo(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	teamInfo, err := api.GetTeamInfo()
+	teamInfo, err := api.GetTeamInfo("F0UWHUX")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return

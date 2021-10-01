@@ -96,14 +96,21 @@ func (api *Client) accessLogsRequest(ctx context.Context, path string, values ur
 }
 
 // GetTeamInfo gets the Team Information of the user
-func (api *Client) GetTeamInfo() (*TeamInfo, error) {
-	return api.GetTeamInfoContext(context.Background())
+// if the team is empty (""), will return information about the current team.
+// https://api.slack.com/methods/team.info
+func (api *Client) GetTeamInfo(team string) (*TeamInfo, error) {
+	return api.GetTeamInfoContext(context.Background(), team)
 }
 
 // GetTeamInfoContext gets the Team Information of the user with a custom context
-func (api *Client) GetTeamInfoContext(ctx context.Context) (*TeamInfo, error) {
+// if the team is empty (""), will return information about the current team.
+// https://api.slack.com/methods/team.info
+func (api *Client) GetTeamInfoContext(ctx context.Context, team string) (*TeamInfo, error) {
 	values := url.Values{
 		"token": {api.token},
+	}
+	if team != "" {
+		values.Add("team", team)
 	}
 
 	response, err := api.teamRequest(ctx, "team.info", values)
