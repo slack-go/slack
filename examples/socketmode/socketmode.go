@@ -15,7 +15,8 @@ import (
 func main() {
 	appToken := os.Getenv("SLACK_APP_TOKEN")
 	if appToken == "" {
-
+		fmt.Fprintf(os.Stderr, "SLACK_APP_TOKEN must be set.\n")
+		os.Exit(1)
 	}
 
 	if !strings.HasPrefix(appToken, "xapp-") {
