@@ -202,7 +202,7 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 
 // GetFile retreives a given file from its private download URL
 func (api *Client) GetFile(downloadURL string, writer io.Writer) error {
-	return downloadFile(api.httpclient, api.token, downloadURL, writer, api)
+	return downloadFile(api.httpclient, api.token, downloadURL, writer, api, api.cookie)
 }
 
 // GetFiles retrieves all files according to the parameters given

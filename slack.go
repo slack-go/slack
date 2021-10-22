@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
 const (
@@ -57,7 +58,9 @@ type authTestResponseFull struct {
 type ParamOption func(*url.Values)
 
 type Client struct {
-	token         string
+	token  string
+	cookie *http.Cookie
+
 	appLevelToken string
 	endpoint      string
 	debug         bool
@@ -86,6 +89,19 @@ func OptionDebug(b bool) func(*Client) {
 func OptionLog(l logger) func(*Client) {
 	return func(c *Client) {
 		c.log = internalLog{logger: l}
+	}
+}
+
+func OptionCookie(d string) func(*Client) {
+	return func(c *Client) {
+		c.cookie = &http.Cookie{
+			Name:    "d",
+			Value:   d,
+			Path:    "/",
+			Domain:  ".slack.com",
+			Expires: time.Now().AddDate(10, 0, 0),
+			Secure:  true,
+		}
 	}
 }
 
@@ -153,7 +169,7 @@ func (api *Client) Debug() bool {
 
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api, api.cookie)
 }
 
 // get a slack web method.

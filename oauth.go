@@ -107,7 +107,7 @@ func GetOAuthResponseContext(ctx context.Context, client httpClient, clientID, c
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthResponse{}
-	if err = postForm(ctx, client, APIURL+"oauth.access", values, response, discard{}); err != nil {
+	if err = postForm(ctx, client, APIURL+"oauth.access", values, response, discard{}, nil); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
@@ -127,7 +127,7 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthV2Response{}
-	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}, nil); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
