@@ -8,12 +8,13 @@ import (
 
 // EventsAPIEvent is the base EventsAPIEvent
 type EventsAPIEvent struct {
-	Token      string `json:"token"`
-	TeamID     string `json:"team_id"`
-	Type       string `json:"type"`
-	APIAppID   string `json:"api_app_id"`
-	Data       interface{}
-	InnerEvent EventsAPIInnerEvent
+	Token        string `json:"token"`
+	TeamID       string `json:"team_id"`
+	Type         string `json:"type"`
+	APIAppID     string `json:"api_app_id"`
+	EnterpriseID string `json:"enterprise_id"`
+	Data         interface{}
+	InnerEvent   EventsAPIInnerEvent
 }
 
 // EventsAPIURLVerificationEvent received when configuring a EventsAPI driven app
