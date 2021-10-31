@@ -1,0 +1,25 @@
+_metadata:
+  major_version: 1
+  minor_version: 1
+display_information:
+  name: Name
+  description: Description
+  background_color: "<hexcode>"
+features:
+  bot_user:
+    display_name: Name
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - channels:history
+settings:
+  event_subscriptions:
+    request_url: https://example.com/events-endpoint
+    bot_events:
+      - app_mention
+      - message.channels
+  org_deploy_enabled: false
+  socket_mode_enabled: false

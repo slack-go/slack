@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
@@ -12,7 +13,7 @@ import (
 )
 
 // You more than likely want your "Bot User OAuth Access Token" which starts with "xoxb-"
-var api = slack.New("TOKEN")
+var api = slack.New(os.Getenv("SLACK_TOKEN"))
 
 func main() {
 	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
@@ -56,7 +57,10 @@ func main() {
 			innerEvent := eventsAPIEvent.InnerEvent
 			switch ev := innerEvent.Data.(type) {
 			case *slackevents.AppMentionEvent:
-				api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+				_, _, err := api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+				if err != nil {
+					log.Println(err)
+				}
 			}
 		}
 	})
