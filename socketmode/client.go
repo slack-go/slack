@@ -44,7 +44,7 @@ type SocketModeMessagePayload struct {
 // Client's New() and call Run() to start it. Please see examples/socketmode for the usage.
 type Client struct {
 	// Client is the main API, embedded
-	apiClient slack.Client
+	slack.Client
 
 	// maxPingInterval is the maximum duration elapsed after the last WebSocket PING sent from Slack
 	// until Client considers the WebSocket connection is dead and needs to be reopened.
