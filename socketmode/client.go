@@ -61,8 +61,3 @@ type Client struct {
 	debug bool
 	log   ilogger
 }
-
-// return a pointer to the slack API client
-func (c Client) GetApiClient() *slack.Client {
-	return c.apiClient
-}
