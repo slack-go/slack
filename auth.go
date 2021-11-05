@@ -14,7 +14,7 @@ type AuthRevokeResponse struct {
 // authRequest sends the actual request, and unmarshals the response
 func (api *Client) authRequest(ctx context.Context, path string, values url.Values) (*AuthRevokeResponse, error) {
 	response := &AuthRevokeResponse{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}

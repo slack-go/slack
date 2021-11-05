@@ -45,7 +45,6 @@ func (api *Client) AddStar(channel string, item ItemRef) error {
 func (api *Client) AddStarContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
-		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", item.Timestamp)
@@ -58,7 +57,7 @@ func (api *Client) AddStarContext(ctx context.Context, channel string, item Item
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "stars.add", values, response); err != nil {
+	if err := api.postMethod(ctx, "stars.add", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -74,7 +73,6 @@ func (api *Client) RemoveStar(channel string, item ItemRef) error {
 func (api *Client) RemoveStarContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
-		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", item.Timestamp)
@@ -87,7 +85,7 @@ func (api *Client) RemoveStarContext(ctx context.Context, channel string, item I
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "stars.remove", values, response); err != nil {
+	if err := api.postMethod(ctx, "stars.remove", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -101,9 +99,7 @@ func (api *Client) ListStars(params StarsParameters) ([]Item, *Paging, error) {
 
 // ListStarsContext returns information about the stars a user added with a custom context
 func (api *Client) ListStarsContext(ctx context.Context, params StarsParameters) ([]Item, *Paging, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.User != DEFAULT_STARS_USER {
 		values.Add("user", params.User)
 	}
@@ -115,7 +111,7 @@ func (api *Client) ListStarsContext(ctx context.Context, params StarsParameters)
 	}
 
 	response := &listResponseFull{}
-	err := api.postMethod(ctx, "stars.list", values, response)
+	err := api.postMethod(ctx, "stars.list", api.token, values, response)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -248,11 +244,10 @@ func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPaginatio
 
 	values := url.Values{
 		"limit":  {strconv.Itoa(t.limit)},
-		"token":  {t.c.token},
 		"cursor": {t.previousResp.Cursor},
 	}
 
-	if err = t.c.postMethod(ctx, "stars.list", values, &resp); err != nil {
+	if err = t.c.postMethod(ctx, "stars.list", t.c.token, values, &resp); err != nil {
 		return t, err
 	}
 

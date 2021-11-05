@@ -85,7 +85,6 @@ func (api *Client) GetUsersInConversation(params *GetUsersInConversationParamete
 // GetUsersInConversationContext returns the list of users in a conversation with a custom context
 func (api *Client) GetUsersInConversationContext(ctx context.Context, params *GetUsersInConversationParameters) ([]string, string, error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {params.ChannelID},
 	}
 	if params.Cursor != "" {
@@ -100,7 +99,7 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 		SlackResponse
 	}{}
 
-	err := api.postMethod(ctx, "conversations.members", values, &response)
+	err := api.postMethod(ctx, "conversations.members", api.token, values, &response)
 	if err != nil {
 		return nil, "", err
 	}
@@ -119,9 +118,7 @@ func (api *Client) GetConversationsForUser(params *GetConversationsForUserParame
 
 // GetConversationsForUserContext returns the list conversations for a given user with a custom context
 func (api *Client) GetConversationsForUserContext(ctx context.Context, params *GetConversationsForUserParameters) (channels []Channel, nextCursor string, err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.UserID != "" {
 		values.Add("user", params.UserID)
 	}
@@ -142,7 +139,7 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 		ResponseMetaData responseMetaData `json:"response_metadata"`
 		SlackResponse
 	}{}
-	err = api.postMethod(ctx, "users.conversations", values, &response)
+	err = api.postMethod(ctx, "users.conversations", api.token, values, &response)
 	if err != nil {
 		return nil, "", err
 	}
@@ -158,12 +155,11 @@ func (api *Client) ArchiveConversation(channelID string) error {
 // ArchiveConversationContext archives a conversation with a custom context
 func (api *Client) ArchiveConversationContext(ctx context.Context, channelID string) error {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 	}
 
 	response := SlackResponse{}
-	err := api.postMethod(ctx, "conversations.archive", values, &response)
+	err := api.postMethod(ctx, "conversations.archive", api.token, values, &response)
 	if err != nil {
 		return err
 	}
@@ -179,11 +175,10 @@ func (api *Client) UnArchiveConversation(channelID string) error {
 // UnArchiveConversationContext reverses conversation archival with a custom context
 func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID string) error {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 	}
 	response := SlackResponse{}
-	err := api.postMethod(ctx, "conversations.unarchive", values, &response)
+	err := api.postMethod(ctx, "conversations.unarchive", api.token, values, &response)
 	if err != nil {
 		return err
 	}
@@ -199,7 +194,6 @@ func (api *Client) SetTopicOfConversation(channelID, topic string) (*Channel, er
 // SetTopicOfConversationContext sets the topic for a conversation with a custom context
 func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID, topic string) (*Channel, error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 		"topic":   {topic},
 	}
@@ -207,7 +201,7 @@ func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID,
 		SlackResponse
 		Channel *Channel `json:"channel"`
 	}{}
-	err := api.postMethod(ctx, "conversations.setTopic", values, &response)
+	err := api.postMethod(ctx, "conversations.setTopic", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +217,6 @@ func (api *Client) SetPurposeOfConversation(channelID, purpose string) (*Channel
 // SetPurposeOfConversationContext sets the purpose for a conversation with a custom context
 func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelID, purpose string) (*Channel, error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 		"purpose": {purpose},
 	}
@@ -232,7 +225,7 @@ func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelI
 		Channel *Channel `json:"channel"`
 	}{}
 
-	err := api.postMethod(ctx, "conversations.setPurpose", values, &response)
+	err := api.postMethod(ctx, "conversations.setPurpose", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +241,6 @@ func (api *Client) RenameConversation(channelID, channelName string) (*Channel, 
 // RenameConversationContext renames a conversation with a custom context
 func (api *Client) RenameConversationContext(ctx context.Context, channelID, channelName string) (*Channel, error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 		"name":    {channelName},
 	}
@@ -257,7 +249,7 @@ func (api *Client) RenameConversationContext(ctx context.Context, channelID, cha
 		Channel *Channel `json:"channel"`
 	}{}
 
-	err := api.postMethod(ctx, "conversations.rename", values, &response)
+	err := api.postMethod(ctx, "conversations.rename", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +265,6 @@ func (api *Client) InviteUsersToConversation(channelID string, users ...string) 
 // InviteUsersToConversationContext invites users to a channel with a custom context
 func (api *Client) InviteUsersToConversationContext(ctx context.Context, channelID string, users ...string) (*Channel, error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 		"users":   {strings.Join(users, ",")},
 	}
@@ -282,7 +273,7 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 		Channel *Channel `json:"channel"`
 	}{}
 
-	err := api.postMethod(ctx, "conversations.invite", values, &response)
+	err := api.postMethod(ctx, "conversations.invite", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -298,13 +289,12 @@ func (api *Client) KickUserFromConversation(channelID string, user string) error
 // KickUserFromConversationContext removes a user from a conversation with a custom context
 func (api *Client) KickUserFromConversationContext(ctx context.Context, channelID string, user string) error {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 		"user":    {user},
 	}
 
 	response := SlackResponse{}
-	err := api.postMethod(ctx, "conversations.kick", values, &response)
+	err := api.postMethod(ctx, "conversations.kick", api.token, values, &response)
 	if err != nil {
 		return err
 	}
@@ -320,7 +310,6 @@ func (api *Client) CloseConversation(channelID string) (noOp bool, alreadyClosed
 // CloseConversationContext closes a direct message or multi-person direct message with a custom context
 func (api *Client) CloseConversationContext(ctx context.Context, channelID string) (noOp bool, alreadyClosed bool, err error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channelID},
 	}
 	response := struct {
@@ -329,7 +318,7 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 		AlreadyClosed bool `json:"already_closed"`
 	}{}
 
-	err = api.postMethod(ctx, "conversations.close", values, &response)
+	err = api.postMethod(ctx, "conversations.close", api.token, values, &response)
 	if err != nil {
 		return false, false, err
 	}
@@ -415,7 +404,6 @@ func (api *Client) GetConversationReplies(params *GetConversationRepliesParamete
 // GetConversationRepliesContext retrieves a thread of messages posted to a conversation with a custom context
 func (api *Client) GetConversationRepliesContext(ctx context.Context, params *GetConversationRepliesParameters) (msgs []Message, hasMore bool, nextCursor string, err error) {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {params.ChannelID},
 		"ts":      {params.Timestamp},
 	}
@@ -445,7 +433,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		Messages []Message `json:"messages"`
 	}{}
 
-	err = api.postMethod(ctx, "conversations.replies", values, &response)
+	err = api.postMethod(ctx, "conversations.replies", api.token, values, &response)
 	if err != nil {
 		return nil, false, "", err
 	}
@@ -468,9 +456,7 @@ func (api *Client) GetConversations(params *GetConversationsParameters) (channel
 
 // GetConversationsContext returns the list of channels in a Slack team with a custom context
 func (api *Client) GetConversationsContext(ctx context.Context, params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
 	}
@@ -493,7 +479,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 		SlackResponse
 	}{}
 
-	err = api.postMethod(ctx, "conversations.list", values, &response)
+	err = api.postMethod(ctx, "conversations.list", api.token, values, &response)
 	if err != nil {
 		return nil, "", err
 	}
@@ -515,7 +501,6 @@ func (api *Client) OpenConversation(params *OpenConversationParameters) (*Channe
 // OpenConversationContext opens or resumes a direct message or multi-person direct message with a custom context
 func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConversationParameters) (*Channel, bool, bool, error) {
 	values := url.Values{
-		"token":     {api.token},
 		"return_im": {strconv.FormatBool(params.ReturnIM)},
 	}
 	if params.ChannelID != "" {
@@ -531,7 +516,7 @@ func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConv
 		SlackResponse
 	}{}
 
-	err := api.postMethod(ctx, "conversations.open", values, &response)
+	err := api.postMethod(ctx, "conversations.open", api.token, values, &response)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -546,7 +531,7 @@ func (api *Client) JoinConversation(channelID string) (*Channel, string, []strin
 
 // JoinConversationContext joins an existing conversation with a custom context
 func (api *Client) JoinConversationContext(ctx context.Context, channelID string) (*Channel, string, []string, error) {
-	values := url.Values{"token": {api.token}, "channel": {channelID}}
+	values := url.Values{"channel": {channelID}}
 	response := struct {
 		Channel          *Channel `json:"channel"`
 		Warning          string   `json:"warning"`
@@ -556,7 +541,7 @@ func (api *Client) JoinConversationContext(ctx context.Context, channelID string
 		SlackResponse
 	}{}
 
-	err := api.postMethod(ctx, "conversations.join", values, &response)
+	err := api.postMethod(ctx, "conversations.join", api.token, values, &response)
 	if err != nil {
 		return nil, "", nil, err
 	}
@@ -597,7 +582,7 @@ func (api *Client) GetConversationHistory(params *GetConversationHistoryParamete
 
 // GetConversationHistoryContext joins an existing conversation with a custom context
 func (api *Client) GetConversationHistoryContext(ctx context.Context, params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
-	values := url.Values{"token": {api.token}, "channel": {params.ChannelID}}
+	values := url.Values{"channel": {params.ChannelID}}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
 	}
@@ -618,7 +603,7 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 
 	response := GetConversationHistoryResponse{}
 
-	err := api.postMethod(ctx, "conversations.history", values, &response)
+	err := api.postMethod(ctx, "conversations.history", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -634,14 +619,13 @@ func (api *Client) MarkConversation(channel, ts string) (err error) {
 // MarkConversationContext sets the read mark of a conversation to a specific point with a custom context
 func (api *Client) MarkConversationContext(ctx context.Context, channel, ts string) error {
 	values := url.Values{
-		"token":   {api.token},
 		"channel": {channel},
 		"ts":      {ts},
 	}
 
 	response := &SlackResponse{}
 
-	err := api.postMethod(ctx, "conversations.mark", values, response)
+	err := api.postMethod(ctx, "conversations.mark", api.token, values, response)
 	if err != nil {
 		return err
 	}

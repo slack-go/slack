@@ -21,7 +21,6 @@ func (api *Client) AddPin(channel string, item ItemRef) error {
 func (api *Client) AddPinContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
-		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", item.Timestamp)
@@ -34,7 +33,7 @@ func (api *Client) AddPinContext(ctx context.Context, channel string, item ItemR
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "pins.add", values, response); err != nil {
+	if err := api.postMethod(ctx, "pins.add", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -50,7 +49,6 @@ func (api *Client) RemovePin(channel string, item ItemRef) error {
 func (api *Client) RemovePinContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
-		"token":   {api.token},
 	}
 	if item.Timestamp != "" {
 		values.Set("timestamp", item.Timestamp)
@@ -63,7 +61,7 @@ func (api *Client) RemovePinContext(ctx context.Context, channel string, item It
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "pins.remove", values, response); err != nil {
+	if err := api.postMethod(ctx, "pins.remove", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -79,11 +77,10 @@ func (api *Client) ListPins(channel string) ([]Item, *Paging, error) {
 func (api *Client) ListPinsContext(ctx context.Context, channel string) ([]Item, *Paging, error) {
 	values := url.Values{
 		"channel": {channel},
-		"token":   {api.token},
 	}
 
 	response := &listPinsResponseFull{}
-	err := api.postMethod(ctx, "pins.list", values, response)
+	err := api.postMethod(ctx, "pins.list", api.token, values, response)
 	if err != nil {
 		return nil, nil, err
 	}

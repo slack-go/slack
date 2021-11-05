@@ -27,7 +27,7 @@ type Channel struct {
 
 func (api *Client) channelRequest(ctx context.Context, path string, values url.Values) (*channelResponseFull, error) {
 	response := &channelResponseFull{}
-	err := postForm(ctx, api.httpclient, api.endpoint+path, values, response, api)
+	err := postForm(ctx, api.httpclient, api.endpoint+path, api.token, values, response, api)
 	if err != nil {
 		return nil, err
 	}

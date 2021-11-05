@@ -134,9 +134,7 @@ func (api *Client) AddReaction(name string, item ItemRef) error {
 
 // AddReactionContext adds a reaction emoji to a message, file or file comment with a custom context.
 func (api *Client) AddReactionContext(ctx context.Context, name string, item ItemRef) error {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if name != "" {
 		values.Set("name", name)
 	}
@@ -154,7 +152,7 @@ func (api *Client) AddReactionContext(ctx context.Context, name string, item Ite
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "reactions.add", values, response); err != nil {
+	if err := api.postMethod(ctx, "reactions.add", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -168,9 +166,7 @@ func (api *Client) RemoveReaction(name string, item ItemRef) error {
 
 // RemoveReactionContext removes a reaction emoji from a message, file or file comment with a custom context.
 func (api *Client) RemoveReactionContext(ctx context.Context, name string, item ItemRef) error {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if name != "" {
 		values.Set("name", name)
 	}
@@ -188,7 +184,7 @@ func (api *Client) RemoveReactionContext(ctx context.Context, name string, item 
 	}
 
 	response := &SlackResponse{}
-	if err := api.postMethod(ctx, "reactions.remove", values, response); err != nil {
+	if err := api.postMethod(ctx, "reactions.remove", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -202,9 +198,7 @@ func (api *Client) GetReactions(item ItemRef, params GetReactionsParameters) ([]
 
 // GetReactionsContext returns details about the reactions on an item with a custom context
 func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params GetReactionsParameters) ([]ItemReaction, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if item.Channel != "" {
 		values.Set("channel", item.Channel)
 	}
@@ -222,7 +216,7 @@ func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params
 	}
 
 	response := &getReactionsResponseFull{}
-	if err := api.postMethod(ctx, "reactions.get", values, response); err != nil {
+	if err := api.postMethod(ctx, "reactions.get", api.token, values, response); err != nil {
 		return nil, err
 	}
 
@@ -240,9 +234,7 @@ func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem,
 
 // ListReactionsContext returns information about the items a user reacted to with a custom context.
 func (api *Client) ListReactionsContext(ctx context.Context, params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.User != DEFAULT_REACTIONS_USER {
 		values.Add("user", params.User)
 	}
@@ -257,7 +249,7 @@ func (api *Client) ListReactionsContext(ctx context.Context, params ListReaction
 	}
 
 	response := &listReactionsResponseFull{}
-	err := api.postMethod(ctx, "reactions.list", values, response)
+	err := api.postMethod(ctx, "reactions.list", api.token, values, response)
 	if err != nil {
 		return nil, nil, err
 	}

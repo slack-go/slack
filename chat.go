@@ -780,9 +780,7 @@ func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) 
 
 // GetScheduledMessagesContext returns the list of scheduled messages in a Slack team with a custom context
 func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.Channel != "" {
 		values.Add("channel", params.Channel)
 	}
@@ -804,7 +802,7 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 		SlackResponse
 	}{}
 
-	err = api.postMethod(ctx, "chat.scheduledMessages.list", values, &response)
+	err = api.postMethod(ctx, "chat.scheduledMessages.list", api.token, values, &response)
 	if err != nil {
 		return nil, "", err
 	}
@@ -826,7 +824,6 @@ func (api *Client) DeleteScheduledMessage(params *DeleteScheduledMessageParamete
 // DeleteScheduledMessageContext returns the list of scheduled messages in a Slack team with a custom context
 func (api *Client) DeleteScheduledMessageContext(ctx context.Context, params *DeleteScheduledMessageParameters) (bool, error) {
 	values := url.Values{
-		"token":                {api.token},
 		"channel":              {params.Channel},
 		"scheduled_message_id": {params.ScheduledMessageID},
 		"as_user":              {strconv.FormatBool(params.AsUser)},
@@ -835,7 +832,7 @@ func (api *Client) DeleteScheduledMessageContext(ctx context.Context, params *De
 		SlackResponse
 	}{}
 
-	err := api.postMethod(ctx, "chat.deleteScheduledMessage", values, &response)
+	err := api.postMethod(ctx, "chat.deleteScheduledMessage", api.token, values, &response)
 	if err != nil {
 		return false, err
 	}

@@ -21,9 +21,9 @@ type botResponseFull struct {
 	SlackResponse
 }
 
-func (api *Client) botRequest(ctx context.Context, path string, values url.Values) (*botResponseFull, error) {
+func (api *Client) botRequest(ctx context.Context, path, token string, values url.Values) (*botResponseFull, error) {
 	response := &botResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -42,15 +42,13 @@ func (api *Client) GetBotInfo(bot string) (*Bot, error) {
 
 // GetBotInfoContext will retrieve the complete bot information using a custom context
 func (api *Client) GetBotInfoContext(ctx context.Context, bot string) (*Bot, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 
 	if bot != "" {
 		values.Add("bot", bot)
 	}
 
-	response, err := api.botRequest(ctx, "bots.info", values)
+	response, err := api.botRequest(ctx, "bots.info", api.token, values)
 	if err != nil {
 		return nil, err
 	}

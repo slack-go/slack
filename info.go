@@ -343,10 +343,10 @@ func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
 		}
 	}
 	newChnls := prefs.UserPrefs.MutedChannels + "," + channelID
-	values := url.Values{"token": {api.token}, "muted_channels": {newChnls}, "reason": {"update-muted-channels"}}
+	values := url.Values{"muted_channels": {newChnls}, "reason": {"update-muted-channels"}}
 	response := UserPrefsCarrier{}
 
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
+	err = api.postMethod(context.Background(), "users.prefs.set", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -367,10 +367,10 @@ func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
 		}
 		newChnls[i] = chn
 	}
-	values := url.Values{"token": {api.token}, "muted_channels": {strings.Join(newChnls, ",")}, "reason": {"update-muted-channels"}}
+	values := url.Values{"muted_channels": {strings.Join(newChnls, ",")}, "reason": {"update-muted-channels"}}
 	response := UserPrefsCarrier{}
 
-	err = api.postMethod(context.Background(), "users.prefs.set", values, &response)
+	err = api.postMethod(context.Background(), "users.prefs.set", api.token, values, &response)
 	if err != nil {
 		return nil, err
 	}

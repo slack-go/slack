@@ -90,7 +90,6 @@ func NewSearchParameters() SearchParameters {
 
 func (api *Client) _search(ctx context.Context, path, query string, params SearchParameters, files, messages bool) (response *searchResponseFull, error error) {
 	values := url.Values{
-		"token": {api.token},
 		"query": {query},
 	}
 	if params.Sort != DEFAULT_SEARCH_SORT {
@@ -110,7 +109,7 @@ func (api *Client) _search(ctx context.Context, path, query string, params Searc
 	}
 
 	response = &searchResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}

@@ -124,7 +124,7 @@ func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 func (api *Client) AuthTestContext(ctx context.Context) (response *AuthTestResponse, err error) {
 	api.Debugf("Challenging auth...")
 	responseFull := &authTestResponseFull{}
-	err = api.postMethod(ctx, "auth.test", url.Values{"token": {api.token}}, responseFull)
+	err = api.postMethod(ctx, "auth.test", api.token, url.Values{}, responseFull)
 	if err != nil {
 		return nil, err
 	}
@@ -152,11 +152,11 @@ func (api *Client) Debug() bool {
 }
 
 // post to a slack web method.
-func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+func (api *Client) postMethod(ctx context.Context, path, token string, values url.Values, intf interface{}) error {
+	return postForm(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
 }
 
 // get a slack web method.
-func (api *Client) getMethod(ctx context.Context, path string, token string, values url.Values, intf interface{}) error {
+func (api *Client) getMethod(ctx context.Context, path, token string, values url.Values, intf interface{}) error {
 	return getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
 }

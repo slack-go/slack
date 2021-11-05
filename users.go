@@ -208,7 +208,7 @@ func NewUserSetPhotoParams() UserSetPhotoParams {
 
 func (api *Client) userRequest(ctx context.Context, path string, values url.Values) (*userResponseFull, error) {
 	response := &userResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -444,12 +444,11 @@ func (api *Client) GetUserIdentity() (*UserIdentityResponse, error) {
 
 // GetUserIdentityContext will retrieve user info available per identity scopes with a custom context
 func (api *Client) GetUserIdentityContext(ctx context.Context) (response *UserIdentityResponse, err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
+
 	response = &UserIdentityResponse{}
 
-	err = api.postMethod(ctx, "users.identity", values, response)
+	err = api.postMethod(ctx, "users.identity", api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -498,11 +497,9 @@ func (api *Client) DeleteUserPhoto() error {
 // DeleteUserPhotoContext deletes the current authenticated user's profile image with a custom context
 func (api *Client) DeleteUserPhotoContext(ctx context.Context) (err error) {
 	response := &SlackResponse{}
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 
-	err = api.postMethod(ctx, "users.deletePhoto", values, response)
+	err = api.postMethod(ctx, "users.deletePhoto", api.token, values, response)
 	if err != nil {
 		return err
 	}
@@ -532,7 +529,6 @@ func (api *Client) SetUserRealNameContextWithUser(ctx context.Context, user, rea
 	}
 
 	values := url.Values{
-		"token":   {api.token},
 		"profile": {string(profile)},
 	}
 
@@ -542,7 +538,7 @@ func (api *Client) SetUserRealNameContextWithUser(ctx context.Context, user, rea
 	}
 
 	response := &userResponseFull{}
-	if err = api.postMethod(ctx, "users.profile.set", values, response); err != nil {
+	if err = api.postMethod(ctx, "users.profile.set", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -603,7 +599,6 @@ func (api *Client) SetUserCustomStatusContextWithUser(ctx context.Context, user,
 	}
 
 	values := url.Values{
-		"token":   {api.token},
 		"profile": {string(profile)},
 	}
 
@@ -613,7 +608,7 @@ func (api *Client) SetUserCustomStatusContextWithUser(ctx context.Context, user,
 	}
 
 	response := &userResponseFull{}
-	if err = api.postMethod(ctx, "users.profile.set", values, response); err != nil {
+	if err = api.postMethod(ctx, "users.profile.set", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -650,7 +645,7 @@ type getUserProfileResponse struct {
 
 // GetUserProfileContext retrieves a user's profile information with a context.
 func (api *Client) GetUserProfileContext(ctx context.Context, params *GetUserProfileParameters) (*UserProfile, error) {
-	values := url.Values{"token": {api.token}}
+	values := url.Values{}
 
 	if params.UserID != "" {
 		values.Add("user", params.UserID)
@@ -660,7 +655,7 @@ func (api *Client) GetUserProfileContext(ctx context.Context, params *GetUserPro
 	}
 	resp := &getUserProfileResponse{}
 
-	err := api.postMethod(ctx, "users.profile.get", values, &resp)
+	err := api.postMethod(ctx, "users.profile.get", api.token, values, &resp)
 	if err != nil {
 		return nil, err
 	}

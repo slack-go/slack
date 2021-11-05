@@ -171,7 +171,7 @@ func NewGetFilesParameters() GetFilesParameters {
 
 func (api *Client) fileRequest(ctx context.Context, path string, values url.Values) (*fileResponseFull, error) {
 	response := &fileResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -316,8 +316,7 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
-		values.Add("token", api.token)
-		err = api.postMethod(ctx, "files.upload", values, response)
+		err = api.postMethod(ctx, "files.upload", api.token, values, response)
 	} else if params.File != "" {
 		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", api.token, values, response, api)
 	} else if params.Reader != nil {

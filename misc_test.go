@@ -41,12 +41,10 @@ func TestParseResponse(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
 	APIURL := "http://" + serverAddr + "/"
-	values := url.Values{
-		"token": {validToken},
-	}
+	values := url.Values{}
 
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", validToken, values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -59,7 +57,7 @@ func TestParseResponseNoToken(t *testing.T) {
 	values := url.Values{}
 
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", validToken, values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -75,11 +73,10 @@ func TestParseResponseInvalidToken(t *testing.T) {
 	parseResponseOnce.Do(setParseResponseHandler)
 	once.Do(startServer)
 	APIURL := "http://" + serverAddr + "/"
-	values := url.Values{
-		"token": {"whatever"},
-	}
+	values := url.Values{}
+	token := "whatever"
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", token, values, responsePartial, discard{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return

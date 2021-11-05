@@ -9,7 +9,7 @@ import (
 
 func (api *Client) adminRequest(ctx context.Context, method string, teamName string, values url.Values) error {
 	resp := &SlackResponse{}
-	err := parseAdminResponse(ctx, api.httpclient, method, teamName, values, resp, api)
+	err := parseAdminResponse(ctx, api.httpclient, method, teamName, api.token, values, resp, api)
 	if err != nil {
 		return err
 	}

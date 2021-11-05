@@ -17,12 +17,10 @@ func (api *Client) GetEmoji() (map[string]string, error) {
 
 // GetEmojiContext retrieves all the emojis with a custom context
 func (api *Client) GetEmojiContext(ctx context.Context) (map[string]string, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	response := &emojiResponseFull{}
 
-	err := api.postMethod(ctx, "emoji.list", values, response)
+	err := api.postMethod(ctx, "emoji.list", api.token, values, response)
 	if err != nil {
 		return nil, err
 	}

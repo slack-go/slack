@@ -27,7 +27,7 @@ type remindersResp struct {
 
 func (api *Client) doReminder(ctx context.Context, path string, values url.Values) (*Reminder, error) {
 	response := &reminderResp{}
-	if err := api.postMethod(ctx, path, values, response); err != nil {
+	if err := api.postMethod(ctx, path, api.token, values, response); err != nil {
 		return nil, err
 	}
 	return &response.Reminder, response.Err()
@@ -35,7 +35,7 @@ func (api *Client) doReminder(ctx context.Context, path string, values url.Value
 
 func (api *Client) doReminders(ctx context.Context, path string, values url.Values) ([]*Reminder, error) {
 	response := &remindersResp{}
-	if err := api.postMethod(ctx, path, values, response); err != nil {
+	if err := api.postMethod(ctx, path, api.token, values, response); err != nil {
 		return nil, err
 	}
 
@@ -93,11 +93,10 @@ func (api *Client) AddUserReminder(userID, text, time string) (*Reminder, error)
 // See https://api.slack.com/methods/reminders.delete
 func (api *Client) DeleteReminder(id string) error {
 	values := url.Values{
-		"token":    {api.token},
 		"reminder": {id},
 	}
 	response := &SlackResponse{}
-	if err := api.postMethod(context.Background(), "reminders.delete", values, response); err != nil {
+	if err := api.postMethod(context.Background(), "reminders.delete", api.token, values, response); err != nil {
 		return err
 	}
 	return response.Err()

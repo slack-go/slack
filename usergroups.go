@@ -42,7 +42,7 @@ type userGroupResponseFull struct {
 
 func (api *Client) userGroupRequest(ctx context.Context, path string, values url.Values) (*userGroupResponseFull, error) {
 	response := &userGroupResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}

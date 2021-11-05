@@ -68,7 +68,7 @@ func NewAccessLogParameters() AccessLogParameters {
 
 func (api *Client) teamRequest(ctx context.Context, path string, values url.Values) (*TeamResponse, error) {
 	response := &TeamResponse{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (api *Client) teamRequest(ctx context.Context, path string, values url.Valu
 
 func (api *Client) billableInfoRequest(ctx context.Context, path string, values url.Values) (map[string]BillingActive, error) {
 	response := &BillableInfoResponse{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (api *Client) billableInfoRequest(ctx context.Context, path string, values 
 
 func (api *Client) accessLogsRequest(ctx context.Context, path string, values url.Values) (*LoginResponse, error) {
 	response := &LoginResponse{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}

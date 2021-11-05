@@ -37,7 +37,7 @@ type dndTeamInfoResponse struct {
 
 func (api *Client) dndRequest(ctx context.Context, path string, values url.Values) (*dndResponseFull, error) {
 	response := &dndResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err := api.postMethod(ctx, path, api.token, values, response)
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +52,11 @@ func (api *Client) EndDND() error {
 
 // EndDNDContext ends the user's scheduled Do Not Disturb session with a custom context
 func (api *Client) EndDNDContext(ctx context.Context) error {
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 
 	response := &SlackResponse{}
 
-	if err := api.postMethod(ctx, "dnd.endDnd", values, response); err != nil {
+	if err := api.postMethod(ctx, "dnd.endDnd", api.token, values, response); err != nil {
 		return err
 	}
 
@@ -112,12 +110,11 @@ func (api *Client) GetDNDTeamInfo(users []string) (map[string]DNDStatus, error) 
 // GetDNDTeamInfoContext provides information about a user's current Do Not Disturb settings with a custom context.
 func (api *Client) GetDNDTeamInfoContext(ctx context.Context, users []string) (map[string]DNDStatus, error) {
 	values := url.Values{
-		"token": {api.token},
 		"users": {strings.Join(users, ",")},
 	}
 	response := &dndTeamInfoResponse{}
 
-	if err := api.postMethod(ctx, "dnd.teamInfo", values, response); err != nil {
+	if err := api.postMethod(ctx, "dnd.teamInfo", api.token, values, response); err != nil {
 		return nil, err
 	}
 
