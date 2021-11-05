@@ -58,14 +58,14 @@ func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string
 	ctx, cancel := context.WithTimeout(context.Background(), websocketDefaultTimeout)
 	defer cancel()
 
-	return smc.apiClient.StartSocketModeContext(ctx)
+	return smc.StartSocketModeContext(ctx)
 }
 
 // OpenContext calls the "apps.connections.open" endpoint and returns the provided URL and the full Info block.
 //
 // To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
 func (smc *Client) OpenContext(ctx context.Context) (info *slack.SocketModeConnection, websocketURL string, err error) {
-	return smc.apiClient.StartSocketModeContext(ctx)
+	return smc.StartSocketModeContext(ctx)
 }
 
 // Option options for the managed Client.
@@ -106,7 +106,7 @@ func OptionLog(l logger) func(*Client) {
 // Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
 	result := &Client{
-		apiClient:           *api,
+		Client:              *api,
 		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
