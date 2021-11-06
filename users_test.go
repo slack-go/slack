@@ -13,6 +13,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 )
@@ -509,7 +510,8 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 		}
 
 		// Test for expected token
-		if v := r.Form.Get("token"); v != validToken {
+		actualToken := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+		if actualToken != validToken {
 			httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value token=%v", validToken))
 			return
 		}
