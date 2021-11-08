@@ -79,7 +79,13 @@ See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.g
 
 See https://github.com/slack-go/slack/blob/master/examples/eventsapi/events.go
 
+## Socketmode Event Handler (Experimental)
 
+When using socket mode, dealing with an event can be pretty lengthy as it requires you to route the event to the right place.
+
+Instead, you can use `SocketmodeHandler` much like you use an HTTP handler to register which event you would like to listen to and what callback function will process that event when it occurs.
+
+See [./examples/socketmode_handler/socketmode_handler.go](./examples/socketmode_handler/socketmode_handler.go)
 ## Contributing
 
 You are more than welcome to contribute to this project.  Fork and
