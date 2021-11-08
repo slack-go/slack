@@ -63,6 +63,7 @@ type Client struct {
 	debug         bool
 	log           ilogger
 	httpclient    httpClient
+	cookie        string
 }
 
 // Option defines an option for a Client
@@ -115,6 +116,12 @@ func New(token string, options ...Option) *Client {
 	return s
 }
 
+func NewWithCookie(token, cookie string, options ...Option) *Client{
+	s := New(token, options...)
+	s.cookie = cookie
+	return s
+}
+
 // AuthTest tests if the user is able to do authenticated requests or not
 func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
 	return api.AuthTestContext(context.Background())
@@ -153,10 +160,10 @@ func (api *Client) Debug() bool {
 
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api, api.cookie)
 }
 
 // get a slack web method.
 func (api *Client) getMethod(ctx context.Context, path string, token string, values url.Values, intf interface{}) error {
-	return getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
+	return getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api, api.cookie)
 }

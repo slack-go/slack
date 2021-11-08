@@ -31,7 +31,7 @@ func (api *Client) ListEventAuthorizationsContext(ctx context.Context, eventCont
 		"event_context": eventContext,
 	})
 
-	err := postJSON(ctx, api.httpclient, api.endpoint+"apps.event.authorizations.list", api.appLevelToken, request, &resp, api)
+	err := postJSON(ctx, api.httpclient, api.endpoint+"apps.event.authorizations.list", api.appLevelToken, request, &resp, api, api.cookie)
 
 	if err != nil {
 		return nil, err

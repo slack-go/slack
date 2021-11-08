@@ -107,7 +107,7 @@ func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dial
 
 	response := &DialogOpenResponse{}
 	endpoint := api.endpoint + "dialog.open"
-	if err := postJSON(ctx, api.httpclient, endpoint, api.token, encoded, response, api); err != nil {
+	if err := postJSON(ctx, api.httpclient, endpoint, api.token, encoded, response, api, api.cookie); err != nil {
 		return err
 	}
 

@@ -227,6 +227,9 @@ func (api *Client) GetUserPresenceContext(ctx context.Context, user string) (*Us
 		"token": {api.token},
 		"user":  {user},
 	}
+	if user == "" {
+		values.Del("user")
+	}
 
 	response, err := api.userRequest(ctx, "users.getPresence", values)
 	if err != nil {
@@ -480,7 +483,7 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		values.Add("crop_w", strconv.Itoa(params.CropW))
 	}
 
-	err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", api.token, values, response, api)
+	err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"users.setPhoto", image, "image", api.token, values, response, api, api.cookie)
 	if err != nil {
 		return err
 	}
