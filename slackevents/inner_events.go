@@ -419,29 +419,29 @@ const (
 	// AppUninstalled Your Slack app was uninstalled.
 	AppUninstalled = EventsAPIType("app_uninstalled")
 	// ChannelCreated is sent when a new channel is created.
-  ChannelCreated = EventsAPIType("channel_created")
+	ChannelCreated = EventsAPIType("channel_created")
 	// ChannelDeleted is sent when a channel is deleted.
-  ChannelDeleted = EventsAPIType("channel_deleted")
+	ChannelDeleted = EventsAPIType("channel_deleted")
 	// ChannelArchive is sent when a channel is archived.
-  ChannelArchive = EventsAPIType("channel_archive")
+	ChannelArchive = EventsAPIType("channel_archive")
 	// ChannelUnarchive is sent when a channel is unarchived.
-  ChannelUnarchive = EventsAPIType("channel_unarchive")
+	ChannelUnarchive = EventsAPIType("channel_unarchive")
 	// ChannelLeft is sent when a channel is left.
-  ChannelLeft = EventsAPIType("channel_left")
+	ChannelLeft = EventsAPIType("channel_left")
 	// ChannelRename is sent when a channel is rename.
-  ChannelRename = EventsAPIType("channel_rename")
+	ChannelRename = EventsAPIType("channel_rename")
 	// ChannelIDChanged is sent when a channel identifier is changed.
 	ChannelIDChanged = "channel_id_changed"
 	// GroupDeleted is sent when a group is deleted.
-  GroupDeleted = EventsAPIType("group_deleted")
+	GroupDeleted = EventsAPIType("group_deleted")
 	// GroupArchive is sent when a group is archived.
-  GroupArchive = EventsAPIType("group_archive")
+	GroupArchive = EventsAPIType("group_archive")
 	// GroupUnarchive is sent when a group is unarchived.
-  GroupUnarchive = EventsAPIType("group_unarchive")
+	GroupUnarchive = EventsAPIType("group_unarchive")
 	// GroupLeft is sent when a group is left.
-  GroupLeft = EventsAPIType("group_left")
+	GroupLeft = EventsAPIType("group_left")
 	// GroupRename is sent when a group is renamed.
-  GroupRename = EventsAPIType("group_rename")
+	GroupRename = EventsAPIType("group_rename")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = EventsAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -463,7 +463,7 @@ const (
 	// ReactionRemoved An reaction was removed from a message
 	ReactionRemoved = EventsAPIType("reaction_removed")
 	// TeamJoin A new user joined the workspace
-  TeamJoin = EventsAPIType("team_join")
+	TeamJoin = EventsAPIType("team_join")
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = EventsAPIType("tokens_revoked")
 	// EmojiChanged A custom emoji has been added or changed
