@@ -161,11 +161,14 @@ type GridMigrationStartedEvent struct {
 
 // LinkSharedEvent A message was posted containing one or more links relevant to your application
 type LinkSharedEvent struct {
-	Type             string        `json:"type"`
-	User             string        `json:"user"`
-	TimeStamp        string        `json:"ts"`
-	Channel          string        `json:"channel"`
-	MessageTimeStamp json.Number   `json:"message_ts"`
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	TimeStamp string `json:"ts"`
+	Channel   string `json:"channel"`
+	// MessageTimeStamp can be both a numeric timestamp if the LinkSharedEvent corresponds to a sent
+	// message and (contrary to the field name) a uuid if the LinkSharedEvent is generated in the
+	// compose text area.
+	MessageTimeStamp string        `json:"message_ts"`
 	ThreadTimeStamp  string        `json:"thread_ts"`
 	Links            []sharedLinks `json:"links"`
 }

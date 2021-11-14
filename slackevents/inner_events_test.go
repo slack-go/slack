@@ -103,6 +103,38 @@ func TestLinkSharedEvent(t *testing.T) {
 	}
 }
 
+func TestLinkSharedComposerEvent(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "link_shared",
+				"channel": "COMPOSER",
+				"is_bot_user_member": true,
+				"user": "Uxxxxxxx",
+				"message_ts": "Uxxxxxxx-909b5454-75f8-4ac4-b325-1b40e230bbd8-gryl3kb80b3wm49ihzoo35fyqoq08n2y",
+				"unfurl_id": "Uxxxxxxx-909b5454-75f8-4ac4-b325-1b40e230bbd8-gryl3kb80b3wm49ihzoo35fyqoq08n2y",
+				"source": "composer",
+				"links": [
+					{
+						"domain": "example.com",
+						"url": "https://example.com/12345"
+					},
+					{
+						"domain": "example.com",
+						"url": "https://example.com/67890"
+					},
+					{
+						"domain": "another-example.com",
+						"url": "https://yet.another-example.com/v/abcde"
+					}
+				]
+			}
+	`)
+	err := json.Unmarshal(rawE, &LinkSharedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestMessageEvent(t *testing.T) {
 	rawE := []byte(`
 			{
