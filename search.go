@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	DEFAULT_SEARCH_SORT      = "score"
-	DEFAULT_SEARCH_SORT_DIR  = "desc"
-	DEFAULT_SEARCH_HIGHLIGHT = false
-	DEFAULT_SEARCH_COUNT     = 20
-	DEFAULT_SEARCH_PAGE      = 1
+	DEFAULT_SEARCH_SORT    string  = "score"
+	DEFAULT_SEARCH_SORT_DIR  string = "desc"
+	DEFAULT_SEARCH_HIGHLIGHT bool = false
+	DEFAULT_SEARCH_COUNT  int   = 20
+	DEFAULT_SEARCH_PAGE   int   = 1
 )
 
 type SearchParameters struct {
