@@ -161,11 +161,14 @@ type GridMigrationStartedEvent struct {
 
 // LinkSharedEvent A message was posted containing one or more links relevant to your application
 type LinkSharedEvent struct {
-	Type             string        `json:"type"`
-	User             string        `json:"user"`
-	TimeStamp        string        `json:"ts"`
-	Channel          string        `json:"channel"`
-	MessageTimeStamp json.Number   `json:"message_ts"`
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	TimeStamp string `json:"ts"`
+	Channel   string `json:"channel"`
+	// MessageTimeStamp can be both a numeric timestamp if the LinkSharedEvent corresponds to a sent
+	// message and (contrary to the field name) a uuid if the LinkSharedEvent is generated in the
+	// compose text area.
+	MessageTimeStamp string        `json:"message_ts"`
 	ThreadTimeStamp  string        `json:"thread_ts"`
 	Links            []sharedLinks `json:"links"`
 }
@@ -274,6 +277,12 @@ type PinRemovedEvent pinEvent
 type tokens struct {
 	Oauth []string `json:"oauth"`
 	Bot   []string `json:"bot"`
+}
+
+// TeamJoinEvent A new member joined a workspace -  https://api.slack.com/events/team_join
+type TeamJoinEvent struct {
+	Type string      `json:"type"`
+	User *slack.User `json:"user"`
 }
 
 // TokensRevokedEvent APP's API tokes are revoked - https://api.slack.com/events/tokens_revoked
@@ -454,6 +463,8 @@ const (
 	ReactionAdded = "reaction_added"
 	// ReactionRemoved An reaction was removed from a message
 	ReactionRemoved = "reaction_removed"
+	// TeamJoin A new user joined the workspace
+	TeamJoin = "team_join"
 	// TokensRevoked APP's API tokes are revoked
 	TokensRevoked = "tokens_revoked"
 	// EmojiChanged A custom emoji has been added or changed
@@ -489,6 +500,7 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	PinRemoved:            PinRemovedEvent{},
 	ReactionAdded:         ReactionAddedEvent{},
 	ReactionRemoved:       ReactionRemovedEvent{},
+	TeamJoin:              TeamJoinEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
 	EmojiChanged:          EmojiChangedEvent{},
 }

@@ -9,6 +9,10 @@ about: Create a report to help us improve
 
 ### Steps to reproduce
 
+#### reproducible code
+
+#### manifest.yaml
+
 ### Versions
 - Go:
 - slack-go/slack:
