@@ -358,16 +358,17 @@ func (api *Client) CreateConversationContext(ctx context.Context, channelName st
 }
 
 // GetConversationInfo retrieves information about a conversation
-func (api *Client) GetConversationInfo(channelID string, includeLocale bool) (*Channel, error) {
-	return api.GetConversationInfoContext(context.Background(), channelID, includeLocale)
+func (api *Client) GetConversationInfo(channelID string, includeLocale, includeNumMembers bool) (*Channel, error) {
+	return api.GetConversationInfoContext(context.Background(), channelID, includeLocale, includeNumMembers)
 }
 
 // GetConversationInfoContext retrieves information about a conversation with a custom context
-func (api *Client) GetConversationInfoContext(ctx context.Context, channelID string, includeLocale bool) (*Channel, error) {
+func (api *Client) GetConversationInfoContext(ctx context.Context, channelID string, includeLocale, includeNumMembers bool) (*Channel, error) {
 	values := url.Values{
-		"token":          {api.token},
-		"channel":        {channelID},
-		"include_locale": {strconv.FormatBool(includeLocale)},
+		"token":               {api.token},
+		"channel":             {channelID},
+		"include_locale":      {strconv.FormatBool(includeLocale)},
+		"include_num_members": {strconv.FormatBool(includeNumMembers)},
 	}
 	response, err := api.channelRequest(ctx, "conversations.info", values)
 	if err != nil {
