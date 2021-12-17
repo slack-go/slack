@@ -116,12 +116,12 @@ func (api *Client) InviteToTeamContext(ctx context.Context, teamName, firstName,
 	return nil
 }
 
-// SetExpiration enables the specified user
+// SetExpiration sets the specified user expiration timestamp
 func (api *Client) SetExpiration(teamName, user, expiration string) error {
 	return api.SetExpirationContext(context.Background(), teamName, user, expiration)
 }
 
-// SetExpirationContext enables the specified user with a custom context
+// SetExpirationContext sets the specified user expiration timestamp with a custom context
 func (api *Client) SetExpirationContext(ctx context.Context, teamName, user, expiration string) error {
 	values := url.Values{
 		"user_id":       {user},
