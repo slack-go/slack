@@ -116,6 +116,28 @@ func (api *Client) InviteToTeamContext(ctx context.Context, teamName, firstName,
 	return nil
 }
 
+// SetExpiration enables the specified user
+func (api *Client) SetExpiration(teamName, user, expiration string) error {
+	return api.SetExpirationContext(context.Background(), teamName, user, expiration)
+}
+
+// SetExpirationContext enables the specified user with a custom context
+func (api *Client) SetExpirationContext(ctx context.Context, teamName, user, expiration string) error {
+	values := url.Values{
+		"user_id":       {user},
+		"token":         {api.token},
+		"expiration_ts": {expiration},
+		"_attempts":     {"1"},
+	}
+
+	err := api.adminRequest(ctx, "setExpiration", teamName, values)
+	if err != nil {
+		return fmt.Errorf("Failed to set expiration for the user (%s): %s", user, err)
+	}
+
+	return nil
+}
+
 // SetRegular enables the specified user
 func (api *Client) SetRegular(teamName, user string) error {
 	return api.SetRegularContext(context.Background(), teamName, user)
