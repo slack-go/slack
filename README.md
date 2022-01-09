@@ -70,7 +70,13 @@ func main() {
 }
 ```
 
+## Minimal Socket Mode usage:
+
+See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
+
 ## Minimal RTM usage:
+
+(For most applications, Socket Mode is a better way to communicate with Slack)
 
 See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go
 
