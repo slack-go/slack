@@ -74,6 +74,7 @@ func main() {
 
 See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
 
+
 ## Minimal RTM usage:
 
 As mentioned in https://api.slack.com/rtm - for most applications, Socket Mode is a better way to communicate with Slack.
