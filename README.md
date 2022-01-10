@@ -76,7 +76,7 @@ See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode
 
 ## Minimal RTM usage:
 
-(For most applications, Socket Mode is a better way to communicate with Slack)
+As mentioned in https://api.slack.com/rtm - for most applications, Socket Mode is a better way to communicate with Slack.
 
 See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go
 
