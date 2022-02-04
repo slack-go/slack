@@ -50,11 +50,10 @@ settings:
 
 ("Interactivity" and "Enable Events" should be turned on)
 
-4. Slack Workflow (paid plan required!)
+4. Slack Workflow (**paid plan required!**)
    1. Create a new Workflow at app.slack.com/workflow-builder
    2. give it a name
    3. select "Planned date & time"
-   4. add a step
-   5. select "Example Step" from App Workflowstep-Example
-   6. configure your app and hit save
-   7. don't forget to publish your workflow
+   4. add another step and select "Example Step" from App Workflowstep-Example
+   5. configure your app and hit save
+   6. don't forget to publish your workflow
