@@ -61,10 +61,12 @@ type OAuthV2ResponseEnterprise struct {
 
 // OAuthV2ResponseAuthedUser ...
 type OAuthV2ResponseAuthedUser struct {
-	ID          string `json:"id"`
-	Scope       string `json:"scope"`
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
+	ID           string `json:"id"`
+	Scope        string `json:"scope"`
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+	ExpiresIn    int    `json:"expires_in,omitempty"`
 }
 
 // GetOAuthToken retrieves an AccessToken
