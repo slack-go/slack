@@ -359,8 +359,8 @@ func (api *Client) CreateConversationContext(ctx context.Context, channelName st
 
 // GetConversationInfoInput Defines the parameters of a GetConversationInfo and GetConversationInfoContext function
 type GetConversationInfoInput struct {
-	ChannelID string
-	IncludeLocale bool
+	ChannelID         string
+	IncludeLocale     bool
 	IncludeNumMembers bool
 }
 
