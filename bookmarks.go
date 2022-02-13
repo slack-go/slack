@@ -33,6 +33,7 @@ func (api *Client) ListBookmarks(channelID string) ([]Bookmark, error) {
 // ListBookmarksContext returns all the bookmarks in the given channel
 func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) ([]Bookmark, error) {
 	values := url.Values{
+		"token":      {api.token},
 		"channel_id": {channelID},
 	}
 
@@ -68,6 +69,7 @@ func (api *Client) AddBookmark(params AddBookmarkParams) (*Bookmark, error) {
 func (api *Client) AddBookmarkContext(ctx context.Context, params AddBookmarkParams) (*Bookmark, error) {
 	response := &singleBookmarkResponse{}
 	values := url.Values{
+		"token":      {api.token},
 		"channel_id": {params.ChannelID},
 		"title":      {params.Title},
 		"type":       {params.Type},
@@ -119,6 +121,7 @@ func (api *Client) EditBookmark(params EditBookmarkParams) (*Bookmark, error) {
 func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkParams) (*Bookmark, error) {
 	response := &singleBookmarkResponse{}
 	values := url.Values{
+		"token":       {api.token},
 		"channel_id":  {params.ChannelID},
 		"bookmark_id": {params.BookmarkID},
 	}
@@ -156,6 +159,7 @@ func (api *Client) RemoveBookmark(channelID, bookmarkID string) error {
 func (api *Client) RemoveBookmarkContext(ctx context.Context, channelID, bookmarkID string) error {
 	response := &SlackResponse{}
 	values := url.Values{
+		"token":       {api.token},
 		"channel_id":  {channelID},
 		"bookmark_id": {bookmarkID},
 	}
