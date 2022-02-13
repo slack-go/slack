@@ -14,6 +14,7 @@ type Bookmark struct {
 	Link                string  `json:"link"`
 	IconURL             *string `json:"icon_url"`
 	Type                string  `json:"type"`
+	Emoji               string  `json:"emoji,omitempty"`
 	EntityID            *string `json:"entity_id"`
 	DateCreated         uint64  `json:"date_created"`
 	DateUpdated         uint64  `json:"date_updated"`
