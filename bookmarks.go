@@ -2,9 +2,8 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"net/url"
-
-	"github.com/pkg/errors"
 )
 
 type Bookmark struct {
