@@ -31,3 +31,7 @@ func PostWebhookContext(ctx context.Context, url string, msg *WebhookMessage) er
 func PostWebhookCustomHTTP(url string, httpClient *http.Client, msg *WebhookMessage) error {
 	return PostWebhookCustomHTTPContext(context.Background(), url, httpClient, msg)
 }
+
+func PostWebhookContextCustomHTTP(ctx context.Context, url string, httpClient *http.Client, msg *WebhookMessage) error {
+	return PostWebhookCustomHTTPContext(ctx, url, httpClient, msg)
+}

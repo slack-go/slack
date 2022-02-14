@@ -76,7 +76,7 @@ func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Rea
 	return req, nil
 }
 
-func downloadFile(client httpClient, token string, downloadURL string, writer io.Writer, d Debug) error {
+func downloadFile(ctx context.Context, client httpClient, token string, downloadURL string, writer io.Writer, d Debug) error {
 	if downloadURL == "" {
 		return fmt.Errorf("received empty download URL")
 	}
@@ -88,7 +88,7 @@ func downloadFile(client httpClient, token string, downloadURL string, writer io
 
 	var bearer = "Bearer " + token
 	req.Header.Add("Authorization", bearer)
-	req.WithContext(context.Background())
+	req.WithContext(ctx)
 
 	resp, err := client.Do(req)
 	if err != nil {
