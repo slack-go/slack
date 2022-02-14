@@ -66,7 +66,7 @@ func (e *RateLimitedError) Retryable() bool {
 }
 
 func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Reader) (*http.Request, error) {
-	req, err := http.NewRequestWithContext(ctx, "POST", path, r)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, r)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 		return fmt.Errorf("received empty download URL")
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", downloadURL, &bytes.Buffer{})
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, &bytes.Buffer{})
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 }
 
 func formReq(ctx context.Context, endpoint string, values url.Values) (req *http.Request, err error) {
-	if req, err = http.NewRequestWithContext(ctx, "POST", endpoint, strings.NewReader(values.Encode())); err != nil {
+	if req, err = http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(values.Encode())); err != nil {
 		return nil, err
 	}
 
@@ -120,7 +120,7 @@ func jsonReq(ctx context.Context, endpoint string, body interface{}) (req *http.
 		return nil, err
 	}
 
-	if req, err = http.NewRequestWithContext(ctx, "POST", endpoint, buffer); err != nil {
+	if req, err = http.NewRequestWithContext(ctx, http.MethodPost, endpoint, buffer); err != nil {
 		return nil, err
 	}
 
@@ -220,7 +220,7 @@ func doPost(ctx context.Context, client httpClient, req *http.Request, parser re
 // post JSON.
 func postJSON(ctx context.Context, client httpClient, endpoint, token string, json []byte, intf interface{}, d Debug) error {
 	reqBody := bytes.NewBuffer(json)
-	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, reqBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, reqBody)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 // post a url encoded form.
 func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d Debug) error {
 	reqBody := strings.NewReader(values.Encode())
-	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, reqBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, reqBody)
 	if err != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 }
 
 func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf interface{}, d Debug) error {
-	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return err
 	}
