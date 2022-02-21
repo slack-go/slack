@@ -105,6 +105,7 @@ type EditBookmarkParams struct {
 	ChannelID  string `json:"channel_id"`
 	BookmarkID string `json:"bookmark_id"`
 	Type       string `json:"type,omitempty"`
+	Title      string `json:"title,omitempty"`
 	Emoji      string `json:"emoji,omitempty"`
 	Link       string `json:"link,omitempty"`
 }

@@ -117,6 +117,7 @@ func TestEditBookmark(t *testing.T) {
 		ChannelID:  "C12345",
 		BookmarkID: "Bk12345",
 		Emoji:      ":siren:",
+		Title:      "hello2",
 	})
 
 	if err != nil {
