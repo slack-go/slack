@@ -24,6 +24,16 @@ type TeamInfo struct {
 	Icon        map[string]interface{} `json:"icon"`
 }
 
+type TeamInfoShort struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type AuthTeamsResponse struct {
+	Teams []TeamInfoShort `json:"teams"`
+	SlackResponse
+}
+
 type LoginResponse struct {
 	Logins []Login `json:"logins"`
 	Paging `json:"paging"`
@@ -92,6 +102,16 @@ func (api *Client) accessLogsRequest(ctx context.Context, path string, values ur
 	if err != nil {
 		return nil, err
 	}
+	return response, response.Err()
+}
+
+func (api *Client) authTeamsRequest(ctx context.Context, path string, values url.Values) (*AuthTeamsResponse, error) {
+	response := &AuthTeamsResponse{}
+	err := api.postMethod(ctx, path, values, response)
+	if err != nil {
+		return nil, err
+	}
+
 	return response, response.Err()
 }
 
@@ -164,4 +184,22 @@ func (api *Client) GetBillableInfoForTeamContext(ctx context.Context) (map[strin
 	}
 
 	return api.billableInfoRequest(ctx, "team.billableInfo", values)
+}
+
+func (api *Client) GetAuthTeams() ([]TeamInfoShort, error) {
+	return api.GetAuthTeamsContext(context.Background())
+}
+
+func (api *Client) GetAuthTeamsContext(ctx context.Context) ([]TeamInfoShort, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	response, err := api.authTeamsRequest(ctx, "auth.teams.list", values)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Teams, response.Err()
 }
