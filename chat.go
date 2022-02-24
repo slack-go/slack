@@ -211,7 +211,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		response chatResponseFull
 	)
 
-	if req, parser, err = buildSender(api.endpoint, options...).BuildRequest(ctx, api.token, channelID); err != nil {
+	if req, parser, err = buildSender(api.endpoint, options...).BuildRequestContext(ctx, api.token, channelID); err != nil {
 		return "", "", "", err
 	}
 
@@ -291,7 +291,11 @@ type sendConfig struct {
 	deleteOriginal  bool
 }
 
-func (t sendConfig) BuildRequest(ctx context.Context, token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
+func (t sendConfig) BuildRequest(token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
+	return t.BuildRequestContext(context.Background(), token, channelID)
+}
+
+func (t sendConfig) BuildRequestContext(ctx context.Context, token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
 	if t, err = applyMsgOptions(token, channelID, t.apiurl, t.options...); err != nil {
 		return nil, nil, err
 	}
@@ -306,9 +310,9 @@ func (t sendConfig) BuildRequest(ctx context.Context, token, channelID string) (
 			responseType:    t.responseType,
 			replaceOriginal: t.replaceOriginal,
 			deleteOriginal:  t.deleteOriginal,
-		}.BuildRequest(ctx)
+		}.BuildRequestContext(ctx)
 	default:
-		return formSender{endpoint: t.endpoint, values: t.values}.BuildRequest(ctx)
+		return formSender{endpoint: t.endpoint, values: t.values}.BuildRequestContext(ctx)
 	}
 }
 
@@ -317,7 +321,11 @@ type formSender struct {
 	values   url.Values
 }
 
-func (t formSender) BuildRequest(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
+func (t formSender) BuildRequest() (*http.Request, func(*chatResponseFull) responseParser, error) {
+	return t.BuildRequestContext(context.Background())
+}
+
+func (t formSender) BuildRequestContext(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
 	req, err := formReq(ctx, t.endpoint, t.values)
 	return req, func(resp *chatResponseFull) responseParser {
 		return newJSONParser(resp)
@@ -334,7 +342,11 @@ type responseURLSender struct {
 	deleteOriginal  bool
 }
 
-func (t responseURLSender) BuildRequest(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
+func (t responseURLSender) BuildRequest() (*http.Request, func(*chatResponseFull) responseParser, error) {
+	return t.BuildRequestContext(context.Background())
+}
+
+func (t responseURLSender) BuildRequestContext(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
 	req, err := jsonReq(ctx, t.endpoint, Msg{
 		Text:            t.values.Get("text"),
 		Timestamp:       t.values.Get("ts"),
