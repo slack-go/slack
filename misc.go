@@ -76,7 +76,7 @@ func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Rea
 	return req, nil
 }
 
-func downloadFile(client httpClient, token string, downloadURL string, writer io.Writer, d Debug, cookie *http.Cookie) error {
+func downloadFile(client httpClient, token string, downloadURL string, writer io.Writer, d Debug, cookies []*http.Cookie) error {
 	if downloadURL == "" {
 		return fmt.Errorf("received empty download URL")
 	}
@@ -89,8 +89,10 @@ func downloadFile(client httpClient, token string, downloadURL string, writer io
 	var bearer = "Bearer " + token
 	req.Header.Add("Authorization", bearer)
 	req.WithContext(context.Background())
-	if cookie != nil {
-		req.AddCookie(cookie)
+	if cookies != nil {
+		for _, cookie := range cookies {
+			req.AddCookie(cookie)
+		}
 	}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -237,15 +239,17 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 }
 
 // post a url encoded form.
-func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d Debug, cookie *http.Cookie) error {
+func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf interface{}, d Debug, cookies []*http.Cookie) error {
 	reqBody := strings.NewReader(values.Encode())
 	req, err := http.NewRequest("POST", endpoint, reqBody)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	if cookie != nil {
-		req.AddCookie(cookie)
+	if cookies != nil {
+		for _, cookie := range cookies {
+			req.AddCookie(cookie)
+		}
 	}
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
@@ -263,9 +267,9 @@ func getResource(ctx context.Context, client httpClient, endpoint, token string,
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
-func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d Debug, cookie *http.Cookie) error {
+func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d Debug, cookies []*http.Cookie) error {
 	endpoint := fmt.Sprintf(WEBAPIURLFormat, teamName, method, time.Now().Unix())
-	return postForm(ctx, client, endpoint, values, intf, d, cookie)
+	return postForm(ctx, client, endpoint, values, intf, d, cookies)
 }
 
 func logResponse(resp *http.Response, d Debug) error {
