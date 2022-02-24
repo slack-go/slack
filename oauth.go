@@ -149,7 +149,7 @@ func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID
 		"grant_type":    {"refresh_token"},
 	}
 	response := &OAuthV2Response{}
-	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}, nil); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
