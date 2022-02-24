@@ -292,6 +292,12 @@ func GetUsersOptionPresence(n bool) GetUsersOption {
 	}
 }
 
+func GetUsersOptionTeamID(t string) GetUsersOption {
+	return func(p *UserPagination) {
+		p.teamID = t
+	}
+}
+
 func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination) {
 	up = UserPagination{
 		c:     c,
@@ -310,6 +316,7 @@ type UserPagination struct {
 	Users        []User
 	limit        int
 	presence     bool
+	teamID       string
 	previousResp *ResponseMetadata
 	c            *Client
 }
@@ -345,6 +352,7 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 		"token":          {t.c.token},
 		"cursor":         {t.previousResp.Cursor},
 		"include_locale": {strconv.FormatBool(true)},
+		"team_id":        {t.teamID},
 	}
 
 	if resp, err = t.c.userRequest(ctx, "users.list", values); err != nil {
