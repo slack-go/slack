@@ -19,6 +19,10 @@ type safeID struct {
 	nextID int64
 }
 
+// make sure safeID implements the IDGenerator interface.
+var _ IDGenerator = (*safeID)(nil)
+
+// Next implements IDGenerator.Next.
 func (s *safeID) Next() int {
 	id := atomic.AddInt64(&s.nextID, 1)
 
