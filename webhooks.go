@@ -35,10 +35,6 @@ func PostWebhookCustomHTTP(url string, httpClient *http.Client, msg *WebhookMess
 	return PostWebhookCustomHTTPContext(context.Background(), url, httpClient, msg)
 }
 
-func PostWebhookContextCustomHTTP(ctx context.Context, url string, httpClient *http.Client, msg *WebhookMessage) error {
-	return PostWebhookCustomHTTPContext(ctx, url, httpClient, msg)
-}
-
 func PostWebhookCustomHTTPContext(ctx context.Context, url string, httpClient *http.Client, msg *WebhookMessage) error {
 	raw, err := json.Marshal(msg)
 	if err != nil {
