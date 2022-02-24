@@ -19,9 +19,8 @@ type safeID struct {
 	nextID int64
 }
 
-func (s *safeID) Next() (id int) {
-	id = int(atomic.LoadInt64(&s.nextID))
-	atomic.AddInt64(&s.nextID, 1)
+func (s *safeID) Next() int {
+	id := atomic.AddInt64(&s.nextID, 1)
 
-	return id
+	return int(id)
 }
