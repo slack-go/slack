@@ -3,7 +3,6 @@ package slack
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 )
 
 const VTWorkflowStep ViewType = "workflow_step"
@@ -46,6 +45,10 @@ func NewConfigurationModalRequest(blocks Blocks, privateMetaData string, externa
 }
 
 func (api *Client) SaveWorkflowStepConfiguration(workflowStepEditID string, inputs *WorkflowStepInputs, outputs *[]WorkflowStepOutput) error {
+	return api.SaveWorkflowStepConfigurationConetxt(context.Background(), workflowStepEditID, inputs, outputs)
+}
+
+func (api *Client) SaveWorkflowStepConfigurationConetxt(ctx context.Context, workflowStepEditID string, inputs *WorkflowStepInputs, outputs *[]WorkflowStepOutput) error {
 	// More information: https://api.slack.com/methods/workflows.updateStep
 	wscr := WorkflowStepCompleteResponse{
 		WorkflowStepEditID: workflowStepEditID,
@@ -60,12 +63,12 @@ func (api *Client) SaveWorkflowStepConfiguration(workflowStepEditID string, inpu
 	}
 
 	response := &SlackResponse{}
-	if err := postJSON(context.Background(), api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
+	if err := postJSON(ctx, api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
 		return err
 	}
 
 	if !response.Ok {
-		return fmt.Errorf(" %s", response.Error)
+		return response.Err()
 	}
 
 	return nil
