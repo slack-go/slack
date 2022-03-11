@@ -45,10 +45,10 @@ func NewConfigurationModalRequest(blocks Blocks, privateMetaData string, externa
 }
 
 func (api *Client) SaveWorkflowStepConfiguration(workflowStepEditID string, inputs *WorkflowStepInputs, outputs *[]WorkflowStepOutput) error {
-	return api.SaveWorkflowStepConfigurationConetxt(context.Background(), workflowStepEditID, inputs, outputs)
+	return api.SaveWorkflowStepConfigurationContext(context.Background(), workflowStepEditID, inputs, outputs)
 }
 
-func (api *Client) SaveWorkflowStepConfigurationConetxt(ctx context.Context, workflowStepEditID string, inputs *WorkflowStepInputs, outputs *[]WorkflowStepOutput) error {
+func (api *Client) SaveWorkflowStepConfigurationContext(ctx context.Context, workflowStepEditID string, inputs *WorkflowStepInputs, outputs *[]WorkflowStepOutput) error {
 	// More information: https://api.slack.com/methods/workflows.updateStep
 	wscr := WorkflowStepCompleteResponse{
 		WorkflowStepEditID: workflowStepEditID,
