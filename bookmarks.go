@@ -35,9 +35,9 @@ type AddBookmarkParameters struct {
 }
 
 type EditBookmarkParameters struct {
-	Title string
-	Link  string
-	Emoji string
+	Title *string // Change the title. Set to "" to clear
+	Emoji *string // Change the emoji. Set to "" to clear
+	Link  string  // Change the link
 }
 
 type addBookmarkReponse struct {
@@ -143,11 +143,11 @@ func (api *Client) EditBookmarkContext(ctx context.Context, channelID, bookmarkI
 	if params.Link != "" {
 		values.Set("link", params.Link)
 	}
-	if params.Emoji != "" {
-		values.Set("emoji", params.Emoji)
+	if params.Emoji != nil {
+		values.Set("emoji", *params.Emoji)
 	}
-	if params.Title != "" {
-		values.Set("title", params.Title)
+	if params.Title != nil {
+		values.Set("title", *params.Title)
 	}
 
 	response := &editBookmarkReponse{}
