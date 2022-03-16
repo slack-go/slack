@@ -224,7 +224,7 @@ func TestEditBookmark(t *testing.T) {
 		if change.Params.Title != nil && bookmark.Title != *change.Params.Title {
 			t.Fatalf("expected bookmark.Title = %s, got %s", *change.Params.Title, bookmark.Emoji)
 		}
-		if change.Params.Link != "" {
+		if change.Params.Link != "" && change.Params.Link != bookmark.Link {
 			t.Fatalf("expected bookmark.Link = %s, got %s", change.Params.Link, bookmark.Link)
 		}
 	}
