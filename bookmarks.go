@@ -26,10 +26,10 @@ type Bookmark struct {
 }
 
 type AddBookmarkParameters struct {
-	Title    string
-	Type     string
-	Link     string
-	Emoji    string
+	Title    string // A required title for the bookmark
+	Type     string // A required type for the bookmark
+	Link     string // URL required for type:link
+	Emoji    string // An optional emoji
 	EntityID string
 	ParentID string
 }
@@ -38,6 +38,21 @@ type EditBookmarkParameters struct {
 	Title string
 	Link  string
 	Emoji string
+}
+
+type addBookmarkReponse struct {
+	Bookmark Bookmark `json:"bookmark"`
+	SlackResponse
+}
+
+type editBookmarkReponse struct {
+	Bookmark Bookmark `json:"bookmark"`
+	SlackResponse
+}
+
+type listBookmarksReponse struct {
+	Bookmarks []Bookmark `json:"bookmarks"`
+	SlackResponse
 }
 
 // AddBookmark adds a bookmark in a channel
@@ -66,10 +81,7 @@ func (api *Client) AddBookmarkContext(ctx context.Context, channelID string, par
 		values.Set("parent_id", params.ParentID)
 	}
 
-	response := &struct {
-		Bookmark Bookmark `json:"bookmark"`
-		SlackResponse
-	}{}
+	response := &addBookmarkReponse{}
 	if err := api.postMethod(ctx, "bookmarks.add", values, response); err != nil {
 		return Bookmark{}, err
 	}
@@ -110,10 +122,7 @@ func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) (
 		"token":      {api.token},
 	}
 
-	response := &struct {
-		Bookmarks []Bookmark `json:"bookmark"`
-		SlackResponse
-	}{}
+	response := &listBookmarksReponse{}
 	err := api.postMethod(ctx, "bookmarks.list", values, response)
 	if err != nil {
 		return nil, err
@@ -141,10 +150,7 @@ func (api *Client) EditBookmarkContext(ctx context.Context, channelID, bookmarkI
 		values.Set("title", params.Title)
 	}
 
-	response := &struct {
-		Bookmark Bookmark `json:"bookmark"`
-		SlackResponse
-	}{}
+	response := &editBookmarkReponse{}
 	if err := api.postMethod(ctx, "bookmarks.edit", values, response); err != nil {
 		return Bookmark{}, err
 	}
