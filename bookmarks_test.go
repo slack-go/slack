@@ -144,11 +144,11 @@ func editBookmarkHandler(bookmarks []Bookmark) func(rw http.ResponseWriter, r *h
 					bookmark.Link = v
 				}
 				// Emoji and title require special handling since empty string sets to null
-				if v := r.Form.Get("emoji"); r.Form.Has("emoji") {
-					bookmark.Emoji = v
+				if _, ok := r.Form["emoji"]; ok {
+					bookmark.Emoji = r.Form.Get("emoji")
 				}
-				if v := r.Form.Get("title"); r.Form.Has("title") {
-					bookmark.Title = v
+				if _, ok := r.Form["title"]; ok {
+					bookmark.Title = r.Form.Get("title")
 				}
 				resp, _ := json.Marshal(&editBookmarkReponse{
 					SlackResponse: SlackResponse{Ok: true},
