@@ -110,6 +110,15 @@ func OptionCookie(name, value string) func(*Client) {
 	}
 }
 
+// OptionCookie allows to set an arbitrary cookie.
+func OptionCookieRAW(cookies ...*http.Cookie) func(*Client) {
+	return func(c *Client) {
+		for _, cookie := range cookies {
+			c.cookies = append(c.cookies, cookie)
+		}
+	}
+}
+
 // OptionAPIURL set the url for the client. only useful for testing.
 func OptionAPIURL(u string) func(*Client) {
 	return func(c *Client) { c.endpoint = u }
