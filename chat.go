@@ -91,7 +91,7 @@ func (api *Client) DeleteMessage(channel, messageTimestamp string) (string, stri
 
 // DeleteMessageContext deletes a message in a channel with a custom context
 func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTimestamp string) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessageContext(
+	respChannel, respTimestamp, _, _, err := api.SendMessageContext(
 		ctx,
 		channel,
 		MsgOptionDelete(messageTimestamp),
@@ -102,21 +102,21 @@ func (api *Client) DeleteMessageContext(ctx context.Context, channel, messageTim
 // ScheduleMessage sends a message to a channel.
 // Message is escaped by default according to https://api.slack.com/docs/formatting
 // Use http://davestevens.github.io/slack-message-builder/ to help crafting your message.
-func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOption) (string, string, error) {
+func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOption) (string, string, string, error) {
 	return api.ScheduleMessageContext(context.Background(), channelID, postAt, options...)
 }
 
 // ScheduleMessageContext sends a message to a channel with a custom context
 //
 // For more details, see ScheduleMessage documentation.
-func (api *Client) ScheduleMessageContext(ctx context.Context, channelID, postAt string, options ...MsgOption) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessageContext(
+func (api *Client) ScheduleMessageContext(ctx context.Context, channelID, postAt string, options ...MsgOption) (string, string, string, error) {
+	respChannel, respTimestamp, _, respScheduledMessageID, err := api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionSchedule(postAt),
 		MsgOptionCompose(options...),
 	)
-	return respChannel, respTimestamp, err
+	return respChannel, respTimestamp, respScheduledMessageID, err
 }
 
 // PostMessage sends a message to a channel.
@@ -129,7 +129,7 @@ func (api *Client) PostMessage(channelID string, options ...MsgOption) (string, 
 // PostMessageContext sends a message to a channel with a custom context
 // For more details, see PostMessage documentation.
 func (api *Client) PostMessageContext(ctx context.Context, channelID string, options ...MsgOption) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessageContext(
+	respChannel, respTimestamp, _, _, err := api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionPost(),
@@ -148,7 +148,7 @@ func (api *Client) PostEphemeral(channelID, userID string, options ...MsgOption)
 // PostEphemeralContext sends an ephemeal message to a user in a channel with a custom context
 // For more details, see PostEphemeral documentation
 func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID string, options ...MsgOption) (timestamp string, err error) {
-	_, timestamp, _, err = api.SendMessageContext(
+	_, timestamp, _, _, err = api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionPostEphemeral(userID),
@@ -158,12 +158,12 @@ func (api *Client) PostEphemeralContext(ctx context.Context, channelID, userID s
 }
 
 // UpdateMessage updates a message in a channel
-func (api *Client) UpdateMessage(channelID, timestamp string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UpdateMessage(channelID, timestamp string, options ...MsgOption) (string, string, string, string, error) {
 	return api.UpdateMessageContext(context.Background(), channelID, timestamp, options...)
 }
 
 // UpdateMessageContext updates a message in a channel
-func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestamp string, options ...MsgOption) (string, string, string, string, error) {
 	return api.SendMessageContext(
 		ctx,
 		channelID,
@@ -173,12 +173,12 @@ func (api *Client) UpdateMessageContext(ctx context.Context, channelID, timestam
 }
 
 // UnfurlMessage unfurls a message in a channel
-func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UnfurlMessage(channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, string, error) {
 	return api.UnfurlMessageContext(context.Background(), channelID, timestamp, unfurls, options...)
 }
 
 // UnfurlMessageContext unfurls a message in a channel with a custom context
-func (api *Client) UnfurlMessageContext(ctx context.Context, channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UnfurlMessageContext(ctx context.Context, channelID, timestamp string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, string, error) {
 	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurl(timestamp, unfurls), MsgOptionCompose(options...))
 }
 
@@ -186,7 +186,7 @@ func (api *Client) UnfurlMessageContext(ctx context.Context, channelID, timestam
 // authentication URL.
 // For more details see:
 // https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
-func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, string, error) {
 	return api.UnfurlMessageWithAuthURLContext(context.Background(), channelID, timestamp, userAuthURL, options...)
 }
 
@@ -194,17 +194,17 @@ func (api *Client) UnfurlMessageWithAuthURL(channelID, timestamp string, userAut
 // authentication URL.
 // For more details see:
 // https://api.slack.com/reference/messaging/link-unfurling#authenticated_unfurls
-func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelID, timestamp string, userAuthURL string, options ...MsgOption) (string, string, string, string, error) {
 	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
 }
 
 // SendMessage more flexible method for configuring messages.
-func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, error) {
+func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, string, error) {
 	return api.SendMessageContext(context.Background(), channel, options...)
 }
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
-func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestamp string, _text string, err error) {
+func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestamp string, _text string, _scheduledMessageID string, err error) {
 	var (
 		req      *http.Request
 		parser   func(*chatResponseFull) responseParser
@@ -212,23 +212,23 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 	)
 
 	if req, parser, err = buildSender(api.endpoint, options...).BuildRequestContext(ctx, api.token, channelID); err != nil {
-		return "", "", "", err
+		return "", "", "", "", err
 	}
 
 	if api.Debug() {
 		reqBody, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			return "", "", "", err
+			return "", "", "", "", err
 		}
 		req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 		api.Debugf("Sending request: %s", string(reqBody))
 	}
 
 	if err = doPost(ctx, api.httpclient, req, parser(&response), api); err != nil {
-		return "", "", "", err
+		return "", "", "", "", err
 	}
 
-	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	return response.Channel, response.getMessageTimestamp(), response.Text, response.ScheduledMessageID, response.Err()
 }
 
 // UnsafeApplyMsgOptions utility function for debugging/testing chat requests.
