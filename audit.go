@@ -40,19 +40,19 @@ type AuditEntry struct {
 		IPAddress string `json:"ip_address"`
 	} `json:"context"`
 	Details struct {
-		NewValue interface{} `json:"new_value"`
-		PrevValue interface{} `json:"previous_value"`
-		PolicyName string `json:"policy_name"`
-		AuthenticationMode string `json:"authentication_mode"`
-		EntityIds string `json:"entity_ids"`
-		MobileOnly bool `json:"mobile_only"`
-		WebOnly bool `json:"web_only"`
-		NonSSOOnly bool `json:"non_sso_only"`
-		SucceededUsers string `json:"succeeded_users"`
-		FailedUsers string `json:"failed_users"`
-		ExportType string `json:"export_type"`
-		ExportStart string `json:"export_start_ts"`
-		ExportEnd string `json:"export_end_ts"`
+		NewValue           interface{} `json:"new_value"`
+		PrevValue          interface{} `json:"previous_value"`
+		PolicyName         string      `json:"policy_name"`
+		AuthenticationMode string      `json:"authentication_mode"`
+		EntityIds          string      `json:"entity_ids"`
+		MobileOnly         bool        `json:"mobile_only"`
+		WebOnly            bool        `json:"web_only"`
+		NonSSOOnly         bool        `json:"non_sso_only"`
+		SucceededUsers     string      `json:"succeeded_users"`
+		FailedUsers        string      `json:"failed_users"`
+		ExportType         string      `json:"export_type"`
+		ExportStart        string      `json:"export_start_ts"`
+		ExportEnd          string      `json:"export_end_ts"`
 	} `json:"details"`
 }
 
