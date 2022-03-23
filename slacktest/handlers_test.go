@@ -3,8 +3,9 @@ package slacktest
 import (
 	"testing"
 
-	slack "github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
+
+	slack "github.com/slack-go/slack"
 )
 
 func TestAuthTestHandler(t *testing.T) {
