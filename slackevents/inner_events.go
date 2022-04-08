@@ -328,10 +328,10 @@ type EmojiChangedEvent struct {
 
 // WorkflowStepExecuteEvent is fired, if a workflow step of your app is invoked
 type WorkflowStepExecuteEvent struct {
-	Type         string            `json:"type"`
-	CallbackID   string            `json:"callback_id"`
-	WorkflowStep EventWorkflowStep `json:"workflow_step"`
-	EventTS      string            `json:"event_ts"`
+	Type           string            `json:"type"`
+	CallbackID     string            `json:"callback_id"`
+	WorkflowStep   EventWorkflowStep `json:"workflow_step"`
+	EventTimestamp string            `json:"event_ts"`
 }
 
 type EventWorkflowStep struct {
