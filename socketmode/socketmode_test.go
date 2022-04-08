@@ -236,7 +236,7 @@ func TestEventParsing(t *testing.T) {
 						TimeStamp:       "1610927831.000200",
 						ThreadTimeStamp: "",
 						Channel:         "redacted",
-						EventTimeStamp:  json.Number("1610927831.000200"),
+						EventTimeStamp:  "1610927831.000200",
 					},
 				},
 			},
