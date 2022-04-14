@@ -361,7 +361,7 @@ func toBlockElement(element *Accessory) BlockElement {
 
 // MarshalJSON implements the Marshaller interface for ContextElements so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
-func (e *ContextElements) MarshalJSON() ([]byte, error) {
+func (e ContextElements) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(e.Elements)
 	if err != nil {
 		return nil, err
