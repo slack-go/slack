@@ -33,7 +33,7 @@ func addBookmarkLinkHandler(rw http.ResponseWriter, r *http.Request) {
 		bookmark.Type = bookmarkType
 		bookmark.Link = link
 
-		resp, _ := json.Marshal(&addBookmarkReponse{
+		resp, _ := json.Marshal(&addBookmarkResponse{
 			SlackResponse: SlackResponse{Ok: true},
 			Bookmark:      bookmark})
 		rw.Write(resp)
@@ -70,7 +70,7 @@ func listBookmarksHandler(rw http.ResponseWriter, r *http.Request) {
 			getTestBookmark(channelID, "Bk004"),
 		}
 
-		resp, _ := json.Marshal(&listBookmarksReponse{
+		resp, _ := json.Marshal(&listBookmarksResponse{
 			SlackResponse: SlackResponse{Ok: true},
 			Bookmarks:     bookmarks})
 		rw.Write(resp)
@@ -150,7 +150,7 @@ func editBookmarkHandler(bookmarks []Bookmark) func(rw http.ResponseWriter, r *h
 				if _, ok := r.Form["title"]; ok {
 					bookmark.Title = r.Form.Get("title")
 				}
-				resp, _ := json.Marshal(&editBookmarkReponse{
+				resp, _ := json.Marshal(&editBookmarkResponse{
 					SlackResponse: SlackResponse{Ok: true},
 					Bookmark:      bookmark})
 				rw.Write(resp)

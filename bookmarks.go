@@ -40,17 +40,17 @@ type EditBookmarkParameters struct {
 	Link  string  // Change the link
 }
 
-type addBookmarkReponse struct {
+type addBookmarkResponse struct {
 	Bookmark Bookmark `json:"bookmark"`
 	SlackResponse
 }
 
-type editBookmarkReponse struct {
+type editBookmarkResponse struct {
 	Bookmark Bookmark `json:"bookmark"`
 	SlackResponse
 }
 
-type listBookmarksReponse struct {
+type listBookmarksResponse struct {
 	Bookmarks []Bookmark `json:"bookmarks"`
 	SlackResponse
 }
@@ -81,7 +81,7 @@ func (api *Client) AddBookmarkContext(ctx context.Context, channelID string, par
 		values.Set("parent_id", params.ParentID)
 	}
 
-	response := &addBookmarkReponse{}
+	response := &addBookmarkResponse{}
 	if err := api.postMethod(ctx, "bookmarks.add", values, response); err != nil {
 		return Bookmark{}, err
 	}
@@ -122,7 +122,7 @@ func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) (
 		"token":      {api.token},
 	}
 
-	response := &listBookmarksReponse{}
+	response := &listBookmarksResponse{}
 	err := api.postMethod(ctx, "bookmarks.list", values, response)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (api *Client) EditBookmarkContext(ctx context.Context, channelID, bookmarkI
 		values.Set("title", *params.Title)
 	}
 
-	response := &editBookmarkReponse{}
+	response := &editBookmarkResponse{}
 	if err := api.postMethod(ctx, "bookmarks.edit", values, response); err != nil {
 		return Bookmark{}, err
 	}
