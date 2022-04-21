@@ -17,6 +17,7 @@ const (
 )
 
 // RemoteFile contains all the information for a remote file
+// More information can be found here: https://api.slack.com/messaging/files/remote
 type RemoteFile struct {
 	ID              string   `json:"id"`
 	Created         JSONTime `json:"created"`
@@ -49,6 +50,12 @@ type RemoteFile struct {
 	HasRichPreview  bool     `json:"has_rich_preview"`
 }
 
+// RemoteFileParameters contains required and optional parameters for a remote file.
+//
+// ExternalID is a user defined GUID, ExternalURL is where the remote file can be accessed,
+// and Title is the name of the file.
+//
+// More information can be found here: https://api.slack.com/methods/files.remote.add
 type RemoteFileParameters struct {
 	ExternalID            string // required
 	ExternalURL           string // required
@@ -84,8 +91,8 @@ func (api *Client) remoteFileRequest(ctx context.Context, path string, values ur
 	return response, response.Err()
 }
 
-// AddRemoteFile adds a remote file
-func (api *Client) AddRemoteFile(params RemoteFileParameters) (remotefile *RemoteFile, err error) {
+// AddRemoteFile adds a remote file. Unlike regular files, remote files must be explicitly shared.
+func (api *Client) AddRemoteFile(params RemoteFileParameters) (*RemoteFile, error) {
 	return api.AddRemoteFileContext(context.Background(), params)
 }
 
@@ -108,9 +115,9 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 		values.Add("indexable_file_contents", params.IndexableFileContents)
 	}
 	if params.PreviewImage != "" {
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", params.PreviewImage, "preview_image", values, response, api)
+		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", params.PreviewImage, "preview_image", api.token, values, response, api)
 	} else if params.PreviewImageReader != nil {
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", "preview.png", "preview_image", values, params.PreviewImageReader, response, api)
+		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", "preview.png", "preview_image", api.token, values, params.PreviewImageReader, response, api)
 	} else {
 		response, err = api.remoteFileRequest(ctx, "files.remote.add", values)
 	}
@@ -247,7 +254,7 @@ func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, p
 		values.Add("indexable_file_contents", params.IndexableFileContents)
 	}
 	if params.PreviewImageReader != nil {
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", "preview.png", "preview_image", values, params.PreviewImageReader, response, api)
+		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", "preview.png", "preview_image", api.token, values, params.PreviewImageReader, response, api)
 	} else {
 		response, err = api.remoteFileRequest(ctx, "files.remote.update", values)
 	}
