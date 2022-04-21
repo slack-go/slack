@@ -7,6 +7,7 @@ import (
 	"time"
 
 	websocket "github.com/gorilla/websocket"
+
 	slack "github.com/slack-go/slack"
 )
 

@@ -13,6 +13,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync/atomic"
 	"testing"
 )
@@ -509,7 +510,8 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 		}
 
 		// Test for expected token
-		if v := r.Form.Get("token"); v != validToken {
+		actualToken := strings.Split(r.Header.Get("Authorization"), "Bearer ")[1]
+		if actualToken != validToken {
 			httpTestErrReply(w, true, fmt.Sprintf("expected multipart form value token=%v", validToken))
 			return
 		}
@@ -598,7 +600,7 @@ func TestGetUserProfile(t *testing.T) {
 	http.HandleFunc("/users.profile.get", getUserProfileHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	profile, err := api.GetUserProfile("UXXXXXXXX", false)
+	profile, err := api.GetUserProfile(&GetUserProfileParameters{UserID: "UXXXXXXXX"})
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}

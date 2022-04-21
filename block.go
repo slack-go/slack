@@ -9,14 +9,15 @@ package slack
 type MessageBlockType string
 
 const (
-	MBTSection MessageBlockType = "section"
-	MBTDivider MessageBlockType = "divider"
-	MBTImage   MessageBlockType = "image"
-	MBTAction  MessageBlockType = "actions"
-	MBTContext MessageBlockType = "context"
-	MBTFile    MessageBlockType = "file"
-	MBTInput   MessageBlockType = "input"
-	MBTHeader  MessageBlockType = "header"
+	MBTSection  MessageBlockType = "section"
+	MBTDivider  MessageBlockType = "divider"
+	MBTImage    MessageBlockType = "image"
+	MBTAction   MessageBlockType = "actions"
+	MBTContext  MessageBlockType = "context"
+	MBTFile     MessageBlockType = "file"
+	MBTInput    MessageBlockType = "input"
+	MBTHeader   MessageBlockType = "header"
+	MBTRichText MessageBlockType = "rich_text"
 )
 
 // Block defines an interface all block types should implement
@@ -35,7 +36,7 @@ type Blocks struct {
 type BlockAction struct {
 	ActionID              string              `json:"action_id"`
 	BlockID               string              `json:"block_id"`
-	Type                  actionType          `json:"type"`
+	Type                  ActionType          `json:"type"`
 	Text                  TextBlockObject     `json:"text"`
 	Value                 string              `json:"value"`
 	ActionTs              string              `json:"action_ts"`
@@ -48,15 +49,17 @@ type BlockAction struct {
 	SelectedConversation  string              `json:"selected_conversation"`
 	SelectedConversations []string            `json:"selected_conversations"`
 	SelectedDate          string              `json:"selected_date"`
+	SelectedTime          string              `json:"selected_time"`
 	InitialOption         OptionBlockObject   `json:"initial_option"`
 	InitialUser           string              `json:"initial_user"`
 	InitialChannel        string              `json:"initial_channel"`
 	InitialConversation   string              `json:"initial_conversation"`
 	InitialDate           string              `json:"initial_date"`
+	InitialTime           string              `json:"initial_time"`
 }
 
 // actionType returns the type of the action
-func (b BlockAction) actionType() actionType {
+func (b BlockAction) actionType() ActionType {
 	return b.Type
 }
 

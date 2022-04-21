@@ -7,31 +7,30 @@ on:
   pull_request:
 
 jobs:
-  ci:
-    runs-on: ubuntu-latest
-    name: lint
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.32
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         go:
-          - '1.12'
-          - '1.13'
-          - '1.14'
-          - '1.15'
+          - '1.16'
+          - '1.17'
+          - '1.18'
     name: test go-${{ matrix.go }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
       - name: run test
         run: go test -v -race ./...
         env:
           GO111MODULE: on
+  lint:
+    runs-on: ubuntu-20.04
+    name: lint
+    steps:
+      - uses: actions/checkout@v3
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest

@@ -36,3 +36,22 @@ func testListEventAuthorizationsHandler(w http.ResponseWriter, r *http.Request) 
 	})
 	w.Write(response)
 }
+
+func TestUninstallApp(t *testing.T) {
+	http.HandleFunc("/apps.uninstall", testUninstallAppHandler)
+	once.Do(startServer)
+
+	api := New("test-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	err := api.UninstallApp("", "")
+
+	if err != nil {
+		t.Errorf("Failed, but should have succeeded")
+	}
+}
+
+func testUninstallAppHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(SlackResponse{Ok: true})
+	w.Write(response)
+}

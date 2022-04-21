@@ -1,8 +1,9 @@
-Slack API in Go [![GoDoc](https://godoc.org/github.com/slack-go/slack?status.svg)](https://godoc.org/github.com/slack-go/slack) [![Build Status](https://travis-ci.org/slack-go/slack.svg)](https://travis-ci.org/slack-go/slack)
+Slack API in Go [![Go Reference](https://pkg.go.dev/badge/github.com/slack-go/slack.svg)](https://pkg.go.dev/github.com/slack-go/slack)
 ===============
-This is the original Slack library for Go created by Norberto Lopez, transferred to a Github organization.
 
-[![Join the chat at https://gitter.im/go-slack/Lobby](https://badges.gitter.im/go-slack/Lobby.svg)](https://gitter.im/go-slack/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+This is the original Slack library for Go created by Norberto Lopes, transferred to a GitHub organization.
+
+You can also chat with us on the #slack-go, #slack-go-ja Slack channel on the Gophers Slack.
 
 ![logo](logo.png "icon")
 
@@ -14,7 +15,7 @@ a fully managed way.
 There is currently no major version released.
 Therefore, minor version releases may include backward incompatible changes.
 
-See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) for more information about the changes.
+See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) or [Releases](https://github.com/slack-go/slack/releases) for more information about the changes.
 
 ## Installing
 
@@ -38,7 +39,7 @@ func main() {
 	// If you set debugging, it will log all requests to the console
 	// Useful when encountering issues
 	// slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
-	groups, err := api.GetGroups(false)
+	groups, err := api.GetUserGroups(false)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
@@ -69,7 +70,14 @@ func main() {
 }
 ```
 
+## Minimal Socket Mode usage:
+
+See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
+
+
 ## Minimal RTM usage:
+
+As mentioned in https://api.slack.com/rtm - for most applications, Socket Mode is a better way to communicate with Slack.
 
 See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go
 

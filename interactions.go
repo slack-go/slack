@@ -9,11 +9,11 @@ import (
 type InteractionType string
 
 // ActionType type represents the type of action (attachment, block, etc.)
-type actionType string
+type ActionType string
 
 // action is an interface that should be implemented by all callback action types
 type action interface {
-	actionType() actionType
+	actionType() ActionType
 }
 
 // Types of interactions that can be received.
@@ -28,31 +28,34 @@ const (
 	InteractionTypeViewSubmission     = InteractionType("view_submission")
 	InteractionTypeViewClosed         = InteractionType("view_closed")
 	InteractionTypeShortcut           = InteractionType("shortcut")
+	InteractionTypeWorkflowStepEdit   = InteractionType("workflow_step_edit")
 )
 
 // InteractionCallback is sent from slack when a user interactions with a button or dialog.
 type InteractionCallback struct {
-	Type            InteractionType `json:"type"`
-	Token           string          `json:"token"`
-	CallbackID      string          `json:"callback_id"`
-	ResponseURL     string          `json:"response_url"`
-	TriggerID       string          `json:"trigger_id"`
-	ActionTs        string          `json:"action_ts"`
-	Team            Team            `json:"team"`
-	Channel         Channel         `json:"channel"`
-	User            User            `json:"user"`
-	OriginalMessage Message         `json:"original_message"`
-	Message         Message         `json:"message"`
-	Name            string          `json:"name"`
-	Value           string          `json:"value"`
-	MessageTs       string          `json:"message_ts"`
-	AttachmentID    string          `json:"attachment_id"`
-	ActionCallback  ActionCallbacks `json:"actions"`
-	View            View            `json:"view"`
-	ActionID        string          `json:"action_id"`
-	APIAppID        string          `json:"api_app_id"`
-	BlockID         string          `json:"block_id"`
-	Container       Container       `json:"container"`
+	Type            InteractionType         `json:"type"`
+	Token           string                  `json:"token"`
+	CallbackID      string                  `json:"callback_id"`
+	ResponseURL     string                  `json:"response_url"`
+	TriggerID       string                  `json:"trigger_id"`
+	ActionTs        string                  `json:"action_ts"`
+	Team            Team                    `json:"team"`
+	Channel         Channel                 `json:"channel"`
+	User            User                    `json:"user"`
+	OriginalMessage Message                 `json:"original_message"`
+	Message         Message                 `json:"message"`
+	Name            string                  `json:"name"`
+	Value           string                  `json:"value"`
+	MessageTs       string                  `json:"message_ts"`
+	AttachmentID    string                  `json:"attachment_id"`
+	ActionCallback  ActionCallbacks         `json:"actions"`
+	View            View                    `json:"view"`
+	ActionID        string                  `json:"action_id"`
+	APIAppID        string                  `json:"api_app_id"`
+	BlockID         string                  `json:"block_id"`
+	Container       Container               `json:"container"`
+	Enterprise      Enterprise              `json:"enterprise"`
+	WorkflowStep    InteractionWorkflowStep `json:"workflow_step"`
 	DialogSubmissionCallback
 	ViewSubmissionCallback
 	ViewClosedCallback
@@ -121,10 +124,24 @@ type Container struct {
 	Type         string      `json:"type"`
 	ViewID       string      `json:"view_id"`
 	MessageTs    string      `json:"message_ts"`
+	ThreadTs     string      `json:"thread_ts,omitempty"`
 	AttachmentID json.Number `json:"attachment_id"`
 	ChannelID    string      `json:"channel_id"`
 	IsEphemeral  bool        `json:"is_ephemeral"`
 	IsAppUnfurl  bool        `json:"is_app_unfurl"`
+}
+
+type Enterprise struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type InteractionWorkflowStep struct {
+	WorkflowStepEditID string                `json:"workflow_step_edit_id,omitempty"`
+	WorkflowID         string                `json:"workflow_id"`
+	StepID             string                `json:"step_id"`
+	Inputs             *WorkflowStepInputs   `json:"inputs,omitempty"`
+	Outputs            *[]WorkflowStepOutput `json:"outputs,omitempty"`
 }
 
 // ActionCallback is a convenience struct defined to allow dynamic unmarshalling of

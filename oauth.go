@@ -42,6 +42,8 @@ type OAuthV2Response struct {
 	IncomingWebhook OAuthResponseIncomingWebhook `json:"incoming_webhook"`
 	Enterprise      OAuthV2ResponseEnterprise    `json:"enterprise"`
 	AuthedUser      OAuthV2ResponseAuthedUser    `json:"authed_user"`
+	RefreshToken    string                       `json:"refresh_token"`
+	ExpiresIn       int                          `json:"expires_in"`
 	SlackResponse
 }
 
@@ -59,10 +61,12 @@ type OAuthV2ResponseEnterprise struct {
 
 // OAuthV2ResponseAuthedUser ...
 type OAuthV2ResponseAuthedUser struct {
-	ID          string `json:"id"`
-	Scope       string `json:"scope"`
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
+	ID           string `json:"id"`
+	Scope        string `json:"scope"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+	TokenType    string `json:"token_type"`
 }
 
 // GetOAuthToken retrieves an AccessToken
@@ -125,6 +129,26 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 		"client_secret": {clientSecret},
 		"code":          {code},
 		"redirect_uri":  {redirectURI},
+	}
+	response := &OAuthV2Response{}
+	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
+// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+func RefreshOAuthV2Token(client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
+	return RefreshOAuthV2TokenContext(context.Background(), client, clientID, clientSecret, refreshToken)
+}
+
+// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
+	values := url.Values{
+		"client_id":     {clientID},
+		"client_secret": {clientSecret},
+		"refresh_token": {refreshToken},
+		"grant_type":    {"refresh_token"},
 	}
 	response := &OAuthV2Response{}
 	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {

@@ -2,9 +2,8 @@ package slack
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-
-	"github.com/pkg/errors"
 )
 
 type sumtype struct {
@@ -59,10 +58,14 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &DividerBlock{}
 		case "file":
 			block = &FileBlock{}
+		case "header":
+			block = &HeaderBlock{}
 		case "image":
 			block = &ImageBlock{}
 		case "input":
 			block = &InputBlock{}
+		case "rich_text":
+			block = &RichTextBlock{}
 		case "section":
 			block = &SectionBlock{}
 		default:
@@ -105,6 +108,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 	switch s.TypeVal {
 	case "datepicker":
 		e = &DatePickerBlockElement{}
+	case "timepicker":
+		e = &TimePickerBlockElement{}
 	case "plain_text_input":
 		e = &PlainTextInputBlockElement{}
 	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
@@ -177,6 +182,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &OverflowBlockElement{}
 		case "datepicker":
 			blockElement = &DatePickerBlockElement{}
+		case "timepicker":
+			blockElement = &TimePickerBlockElement{}
 		case "plain_text_input":
 			blockElement = &PlainTextInputBlockElement{}
 		case "checkboxes":
@@ -262,6 +269,12 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.DatePickerElement = element.(*DatePickerBlockElement)
+	case "timepicker":
+		element, err := unmarshalBlockElement(r, &TimePickerBlockElement{})
+		if err != nil {
+			return err
+		}
+		a.TimePickerElement = element.(*TimePickerBlockElement)
 	case "plain_text_input":
 		element, err := unmarshalBlockElement(r, &PlainTextInputBlockElement{})
 		if err != nil {
@@ -323,6 +336,9 @@ func toBlockElement(element *Accessory) BlockElement {
 	}
 	if element.DatePickerElement != nil {
 		return element.DatePickerElement
+	}
+	if element.TimePickerElement != nil {
+		return element.TimePickerElement
 	}
 	if element.PlainTextInputElement != nil {
 		return element.PlainTextInputElement

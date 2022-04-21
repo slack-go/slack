@@ -28,6 +28,21 @@ func TestNewButtonBlockElement(t *testing.T) {
 
 }
 
+func TestWithStyleForButtonElement(t *testing.T) {
+
+	// these values are irrelevant in this test
+	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
+	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
+
+	btnElement.WithStyle(StyleDefault)
+	assert.Equal(t, btnElement.Style, Style(""))
+	btnElement.WithStyle(StylePrimary)
+	assert.Equal(t, btnElement.Style, Style("primary"))
+	btnElement.WithStyle(StyleDanger)
+	assert.Equal(t, btnElement.Style, Style("danger"))
+
+}
+
 func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	testOptionText := NewTextBlockObject("plain_text", "Option One", false, false)
@@ -110,6 +125,12 @@ func TestNewDatePickerBlockElement(t *testing.T) {
 	assert.Equal(t, string(datepickerElement.Type), "datepicker")
 	assert.Equal(t, datepickerElement.ActionID, "test")
 
+}
+
+func TestNewTimePickerBlockElement(t *testing.T) {
+	timepickerElement := NewTimePickerBlockElement("test")
+	assert.Equal(t, string(timepickerElement.Type), "timepicker")
+	assert.Equal(t, timepickerElement.ActionID, "test")
 }
 
 func TestNewPlainTextInputBlockElement(t *testing.T) {

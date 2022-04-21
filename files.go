@@ -202,46 +202,19 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 
 // GetFile retreives a given file from its private download URL
 func (api *Client) GetFile(downloadURL string, writer io.Writer) error {
-	return downloadFile(api.httpclient, api.token, downloadURL, writer, api)
+	return api.GetFileContext(context.Background(), downloadURL, writer)
+}
+
+// GetFileContext retreives a given file from its private download URL with a custom context
+//
+// For more details, see GetFile documentation.
+func (api *Client) GetFileContext(ctx context.Context, downloadURL string, writer io.Writer) error {
+	return downloadFile(ctx, api.httpclient, api.token, downloadURL, writer, api)
 }
 
 // GetFiles retrieves all files according to the parameters given
 func (api *Client) GetFiles(params GetFilesParameters) ([]File, *Paging, error) {
 	return api.GetFilesContext(context.Background(), params)
-}
-
-// ListFiles retrieves all files according to the parameters given. Uses cursor based pagination.
-func (api *Client) ListFiles(params ListFilesParameters) ([]File, *ListFilesParameters, error) {
-	return api.ListFilesContext(context.Background(), params)
-}
-
-// ListFilesContext retrieves all files according to the parameters given with a custom context. Uses cursor based pagination.
-func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParameters) ([]File, *ListFilesParameters, error) {
-	values := url.Values{
-		"token": {api.token},
-	}
-
-	if params.User != DEFAULT_FILES_USER {
-		values.Add("user", params.User)
-	}
-	if params.Channel != DEFAULT_FILES_CHANNEL {
-		values.Add("channel", params.Channel)
-	}
-	if params.Limit != DEFAULT_FILES_COUNT {
-		values.Add("limit", strconv.Itoa(params.Limit))
-	}
-	if params.Cursor != "" {
-		values.Add("cursor", params.Cursor)
-	}
-
-	response, err := api.fileRequest(ctx, "files.list", values)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	params.Cursor = response.Metadata.Cursor
-
-	return response.Files, &params, nil
 }
 
 // GetFilesContext retrieves all files according to the parameters given with a custom context
@@ -281,6 +254,42 @@ func (api *Client) GetFilesContext(ctx context.Context, params GetFilesParameter
 	return response.Files, &response.Paging, nil
 }
 
+// ListFiles retrieves all files according to the parameters given. Uses cursor based pagination.
+func (api *Client) ListFiles(params ListFilesParameters) ([]File, *ListFilesParameters, error) {
+	return api.ListFilesContext(context.Background(), params)
+}
+
+// ListFilesContext retrieves all files according to the parameters given with a custom context.
+//
+// For more details, see ListFiles documentation.
+func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParameters) ([]File, *ListFilesParameters, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	if params.User != DEFAULT_FILES_USER {
+		values.Add("user", params.User)
+	}
+	if params.Channel != DEFAULT_FILES_CHANNEL {
+		values.Add("channel", params.Channel)
+	}
+	if params.Limit != DEFAULT_FILES_COUNT {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+
+	response, err := api.fileRequest(ctx, "files.list", values)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	params.Cursor = response.Metadata.Cursor
+
+	return response.Files, &params, nil
+}
+
 // UploadFile uploads a file
 func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	return api.UploadFileContext(context.Background(), params)
@@ -295,9 +304,7 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 		return nil, err
 	}
 	response := &fileResponseFull{}
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if params.Filetype != "" {
 		values.Add("filetype", params.Filetype)
 	}
@@ -318,14 +325,15 @@ func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParam
 	}
 	if params.Content != "" {
 		values.Add("content", params.Content)
+		values.Add("token", api.token)
 		err = api.postMethod(ctx, "files.upload", values, response)
 	} else if params.File != "" {
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", values, response, api)
+		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", api.token, values, response, api)
 	} else if params.Reader != nil {
 		if params.Filename == "" {
 			return nil, fmt.Errorf("files.upload: FileUploadParameters.Filename is mandatory when using FileUploadParameters.Reader")
 		}
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", values, params.Reader, response, api)
+		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", api.token, values, params.Reader, response, api)
 	}
 
 	if err != nil {
