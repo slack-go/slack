@@ -130,12 +130,12 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 }
 
 // ListRemoteFiles retrieves all remote files according to the parameters given. Uses cursor based pagination.
-func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) ([]RemoteFile, *ListRemoteFilesParameters, error) {
+func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	return api.ListRemoteFilesContext(context.Background(), params)
 }
 
 // ListRemoteFilesContext retrieves all remote files according to the parameters given with a custom context. Uses cursor based pagination.
-func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) ([]RemoteFile, *ListRemoteFilesParameters, error) {
+func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -157,12 +157,12 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 
 	response, err := api.remoteFileRequest(ctx, "files.remote.list", values)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	params.Cursor = response.SlackResponse.ResponseMetadata.Cursor
 
-	return response.Files, &params, nil
+	return response.Files, nil
 }
 
 // GetRemoteFileInfo retrieves the complete remote file information.

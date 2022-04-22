@@ -52,7 +52,7 @@ func TestListRemoteFile(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := ListRemoteFilesParameters{}
-	if _, _, err := api.ListRemoteFiles(params); err != nil {
+	if _, err := api.ListRemoteFiles(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 }
