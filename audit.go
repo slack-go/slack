@@ -41,7 +41,7 @@ type AuditEntry struct {
 	} `json:"context"`
 	Details struct {
 		NewValue           interface{} `json:"new_value"`
-		PrevValue          interface{} `json:"previous_value"`
+		PreviousValue          interface{} `json:"previous_value"`
 		PolicyName         string      `json:"policy_name"`
 		AuthenticationMode string      `json:"authentication_mode"`
 		EntityIds          string      `json:"entity_ids"`
