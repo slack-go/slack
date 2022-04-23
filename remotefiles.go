@@ -17,7 +17,8 @@ const (
 )
 
 // RemoteFile contains all the information for a remote file
-// More information can be found here: https://api.slack.com/messaging/files/remote
+// For more details:
+// https://api.slack.com/messaging/files/remote
 type RemoteFile struct {
 	ID              string   `json:"id"`
 	Created         JSONTime `json:"created"`
@@ -55,7 +56,8 @@ type RemoteFile struct {
 // ExternalID is a user defined GUID, ExternalURL is where the remote file can be accessed,
 // and Title is the name of the file.
 //
-// More information can be found here: https://api.slack.com/methods/files.remote.add
+// For more details:
+// https://api.slack.com/methods/files.remote.add
 type RemoteFileParameters struct {
 	ExternalID            string // required
 	ExternalURL           string // required
@@ -66,6 +68,9 @@ type RemoteFileParameters struct {
 	PreviewImageReader    io.Reader
 }
 
+// ListRemoteFilesParameters contains arguments for the ListRemoteFiles method.
+// For more details:
+// https://api.slack.com/methods/files.remote.list
 type ListRemoteFilesParameters struct {
 	Channel       string
 	Cursor        string
@@ -92,11 +97,14 @@ func (api *Client) remoteFileRequest(ctx context.Context, path string, values ur
 }
 
 // AddRemoteFile adds a remote file. Unlike regular files, remote files must be explicitly shared.
+// For more details:
+// https://api.slack.com/methods/files.remote.add
 func (api *Client) AddRemoteFile(params RemoteFileParameters) (*RemoteFile, error) {
 	return api.AddRemoteFileContext(context.Background(), params)
 }
 
 // AddRemoteFileContext adds a remote file and setting a custom context
+// For more details see the AddRemoteFile documentation.
 func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
 	if params.ExternalID == "" || params.ExternalURL == "" || params.Title == "" {
 		return nil, ErrParametersMissing
@@ -130,11 +138,14 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 }
 
 // ListRemoteFiles retrieves all remote files according to the parameters given. Uses cursor based pagination.
+// For more details:
+// https://api.slack.com/methods/files.remote.list
 func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	return api.ListRemoteFilesContext(context.Background(), params)
 }
 
 // ListRemoteFilesContext retrieves all remote files according to the parameters given with a custom context. Uses cursor based pagination.
+// For more details see the ListRemoteFiles documentation.
 func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	values := url.Values{
 		"token": {api.token},
@@ -166,11 +177,14 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 }
 
 // GetRemoteFileInfo retrieves the complete remote file information.
+// For more details:
+// https://api.slack.com/methods/files.remote.info
 func (api *Client) GetRemoteFileInfo(externalID, fileID string) (remotefile *RemoteFile, err error) {
 	return api.GetRemoteFileInfoContext(context.Background(), externalID, fileID)
 }
 
 // GetRemoteFileInfoContext retrieves the complete remote file information given with a custom context.
+// For more details see the GetRemoteFileInfo documentation.
 func (api *Client) GetRemoteFileInfoContext(ctx context.Context, externalID, fileID string) (remotefile *RemoteFile, err error) {
 	if fileID == "" && externalID == "" {
 		return nil, fmt.Errorf("either externalID or fileID is required")
@@ -195,11 +209,14 @@ func (api *Client) GetRemoteFileInfoContext(ctx context.Context, externalID, fil
 }
 
 // ShareRemoteFile shares a remote file to channels
+// For more details:
+// https://api.slack.com/methods/files.remote.share
 func (api *Client) ShareRemoteFile(channels []string, externalID, fileID string) (file *RemoteFile, err error) {
 	return api.ShareRemoteFileContext(context.Background(), channels, externalID, fileID)
 }
 
-// ShareRemoteFileContext shares a remote file to channels with a custom context
+// ShareRemoteFileContext shares a remote file to channels with a custom context.
+// For more details see the ShareRemoteFile documentation.
 func (api *Client) ShareRemoteFileContext(ctx context.Context, channels []string, externalID, fileID string) (file *RemoteFile, err error) {
 	if channels == nil || len(channels) == 0 {
 		return nil, ErrParametersMissing
@@ -225,11 +242,14 @@ func (api *Client) ShareRemoteFileContext(ctx context.Context, channels []string
 }
 
 // UpdateRemoteFile updates a remote file
+// For more details:
+// https://api.slack.com/methods/files.remote.update
 func (api *Client) UpdateRemoteFile(fileID string, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
 	return api.UpdateRemoteFileContext(context.Background(), fileID, params)
 }
 
 // UpdateRemoteFileContext updates a remote file with a custom context
+// For more details see the UpdateRemoteFile documentation.
 func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
 	response := &remoteFileResponseFull{}
 	values := url.Values{
@@ -266,12 +286,15 @@ func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, p
 	return &response.RemoteFile, response.Err()
 }
 
-// RemoveRemoteFile removes a remote file
+// RemoveRemoteFile removes a remote file.
+// For more details:
+// https://api.slack.com/methods/files.remote.remove
 func (api *Client) RemoveRemoteFile(externalID, fileID string) (err error) {
 	return api.RemoveRemoteFileContext(context.Background(), externalID, fileID)
 }
 
 // RemoveRemoteFileContext removes a remote file with a custom context
+// For more information see the RemoveRemoteFiles documentation.
 func (api *Client) RemoveRemoteFileContext(ctx context.Context, externalID, fileID string) (err error) {
 	if fileID == "" && externalID == "" {
 		return fmt.Errorf("either externalID or fileID is required")
