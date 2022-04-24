@@ -161,11 +161,14 @@ type GridMigrationStartedEvent struct {
 
 // LinkSharedEvent A message was posted containing one or more links relevant to your application
 type LinkSharedEvent struct {
-	Type             string        `json:"type"`
-	User             string        `json:"user"`
-	TimeStamp        string        `json:"ts"`
-	Channel          string        `json:"channel"`
-	MessageTimeStamp json.Number   `json:"message_ts"`
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	TimeStamp string `json:"ts"`
+	Channel   string `json:"channel"`
+	// MessageTimeStamp can be both a numeric timestamp if the LinkSharedEvent corresponds to a sent
+	// message and (contrary to the field name) a uuid if the LinkSharedEvent is generated in the
+	// compose text area.
+	MessageTimeStamp string        `json:"message_ts"`
 	ThreadTimeStamp  string        `json:"thread_ts"`
 	Links            []sharedLinks `json:"links"`
 }
@@ -306,6 +309,23 @@ type EmojiChangedEvent struct {
 
 	// filled out when custom emoji added or renamed
 	Value string `json:"value,omitempty"`
+}
+
+// WorkflowStepExecuteEvent is fired, if a workflow step of your app is invoked
+type WorkflowStepExecuteEvent struct {
+	Type         string            `json:"type"`
+	CallbackID   string            `json:"callback_id"`
+	WorkflowStep EventWorkflowStep `json:"workflow_step"`
+	EventTS      string            `json:"event_ts"`
+}
+
+type EventWorkflowStep struct {
+	WorkflowStepExecuteID string                      `json:"workflow_step_execute_id"`
+	WorkflowID            string                      `json:"workflow_id"`
+	WorkflowInstanceID    string                      `json:"workflow_instance_id"`
+	StepID                string                      `json:"step_id"`
+	Inputs                *slack.WorkflowStepInputs   `json:"inputs,omitempty"`
+	Outputs               *[]slack.WorkflowStepOutput `json:"outputs,omitempty"`
 }
 
 // JSONTime exists so that we can have a String method converting the date
@@ -468,6 +488,8 @@ const (
 	TokensRevoked = EventsAPIType("tokens_revoked")
 	// EmojiChanged A custom emoji has been added or changed
 	EmojiChanged = EventsAPIType("emoji_changed")
+	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
+  WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -502,4 +524,5 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamJoin:              TeamJoinEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
 	EmojiChanged:          EmojiChangedEvent{},
+	WorkflowStepExecute:   WorkflowStepExecuteEvent{},
 }
