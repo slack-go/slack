@@ -37,7 +37,7 @@ func main() {
 	}
 	fmt.Printf("share remote file %s successfully.\n", remotefile.Name)
 
-	remotefiles, _, err := api.ListRemoteFiles(slack.ListRemoteFilesParameters{
+	remotefiles, err := api.ListRemoteFiles(slack.ListRemoteFilesParameters{
 		Channel: "YOUR_CHANNEL_HERE",
 	})
 	if err != nil {
