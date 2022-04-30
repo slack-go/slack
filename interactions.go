@@ -74,9 +74,9 @@ type BlockActionStates struct {
 	Values map[string]map[string]BlockAction `json:"values"`
 }
 
-func (ic *InteractionCallback) MarshalJSON() ([]byte, error) {
+func (ic InteractionCallback) MarshalJSON() ([]byte, error) {
 	type alias InteractionCallback
-	tmp := alias(*ic)
+	tmp := alias(ic)
 	if tmp.Type == InteractionTypeBlockActions {
 		if tmp.BlockActionState == nil {
 			tmp.RawState = []byte(`{}`)

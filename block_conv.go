@@ -136,7 +136,7 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements the Marshaller interface for BlockElements so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
-func (b *BlockElements) MarshalJSON() ([]byte, error) {
+func (b BlockElements) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(b.ElementSet)
 	if err != nil {
 		return nil, err
@@ -210,8 +210,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 
 // MarshalJSON implements the Marshaller interface for Accessory so that any JSON
 // marshalling is delegated and proper type determination can be made before marshal
-func (a *Accessory) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(toBlockElement(a))
+func (a Accessory) MarshalJSON() ([]byte, error) {
+	bytes, err := json.Marshal(toBlockElement(&a))
 	if err != nil {
 		return nil, err
 	}
