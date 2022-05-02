@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Conversation is the foundation for IM and BaseGroupConversation
@@ -372,7 +374,11 @@ func (api *Client) GetConversationInfo(input *GetConversationInfoInput) (*Channe
 // GetConversationInfoContext retrieves information about a conversation with a custom context
 func (api *Client) GetConversationInfoContext(ctx context.Context, input *GetConversationInfoInput) (*Channel, error) {
 	if input == nil {
-		input = &GetConversationInfoInput{}
+		return nil, errors.New("GetConversationInfoInput must not be nil")
+	}
+
+	if input.ChannelID == "" {
+		return nil, errors.New("ChannelID must be defined")
 	}
 
 	values := url.Values{
