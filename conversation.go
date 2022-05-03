@@ -2,11 +2,10 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // Conversation is the foundation for IM and BaseGroupConversation
