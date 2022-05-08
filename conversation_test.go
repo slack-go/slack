@@ -411,24 +411,18 @@ func TestGetConversationInfo(t *testing.T) {
 		t.Error("channel should not be nil")
 		return
 	}
-}
 
-func TestGetConversationInfoNilError(t *testing.T) {
-	http.HandleFunc("/conversations.info", okChannelJsonHandler)
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	_, err := api.GetConversationInfo(nil)
+	// Nil Input Error
+	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err = api.GetConversationInfo(nil)
 	if err == nil {
 		t.Errorf("Unexpected pass where there should have been nil input error")
 		return
 	}
-}
 
-func TestGetConversationInfoMissingChannelError(t *testing.T) {
-	http.HandleFunc("/conversations.info", okChannelJsonHandler)
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	_, err := api.GetConversationInfo(&GetConversationInfoInput{})
+	// No Channel Error
+	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err = api.GetConversationInfo(&GetConversationInfoInput{})
 	if err == nil {
 		t.Errorf("Unexpected pass where there should have been missing channel error")
 		return
