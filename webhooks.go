@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -51,7 +53,10 @@ func PostWebhookCustomHTTPContext(ctx context.Context, url string, httpClient *h
 	if err != nil {
 		return fmt.Errorf("failed to post webhook: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		io.Copy(ioutil.Discard, resp.Body)
+		resp.Body.Close()
+	}()
 
 	return checkStatusCode(resp, discard{})
 }
