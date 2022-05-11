@@ -173,15 +173,8 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	blocks := values.Get("blocks")
 	if blocks != "" {
-		decoded, err := url.QueryUnescape(blocks)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to decode blocks: %s", err.Error())
-			log.Printf(msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
 		var decodedBlocks slack.Blocks
-		dbJErr := json.Unmarshal([]byte(decoded), &decodedBlocks)
+		dbJErr := json.Unmarshal([]byte(blocks), &decodedBlocks)
 		if dbJErr != nil {
 			msg := fmt.Sprintf("Unable to decode blocks string to json: %s", dbJErr.Error())
 			log.Printf(msg)
