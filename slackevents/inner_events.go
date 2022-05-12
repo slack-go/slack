@@ -285,6 +285,11 @@ type TeamJoinEvent struct {
 	User *slack.User `json:"user"`
 }
 
+type UserChangeEvent struct {
+	Type string      `json:"type"`
+	User *slack.User `json:"user"`
+}
+
 // TokensRevokedEvent APP's API tokes are revoked - https://api.slack.com/events/tokens_revoked
 type TokensRevokedEvent struct {
 	Type   string `json:"type"`
@@ -469,6 +474,8 @@ const (
 	TokensRevoked = "tokens_revoked"
 	// EmojiChanged A custom emoji has been added or changed
 	EmojiChanged = "emoji_changed"
+	// A user has changed
+	UserChange = "user_change"
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -503,4 +510,5 @@ var EventsAPIInnerEventMapping = map[string]interface{}{
 	TeamJoin:              TeamJoinEvent{},
 	TokensRevoked:         TokensRevokedEvent{},
 	EmojiChanged:          EmojiChangedEvent{},
+	UserChange:            UserChangeEvent{},
 }
