@@ -23,6 +23,7 @@ type WebhookMessage struct {
 	ResponseType    string       `json:"response_type,omitempty"`
 	ReplaceOriginal bool         `json:"replace_original,omitempty"`
 	DeleteOriginal  bool         `json:"delete_original,omitempty"`
+	ReplyBroadcast  bool         `json:"reply_broadcast,omitempty"`
 }
 
 func PostWebhook(url string, msg *WebhookMessage) error {
