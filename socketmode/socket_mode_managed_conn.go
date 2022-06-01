@@ -212,7 +212,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		}
 
 		switch actual := err.(type) {
-		case StatusCodeError:
+		case slack.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})
