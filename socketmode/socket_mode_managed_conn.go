@@ -15,7 +15,6 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
-	"github.com/slack-go/slack/internal/misc"
 	"github.com/slack-go/slack/internal/timex"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -213,7 +212,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		}
 
 		switch actual := err.(type) {
-		case misc.StatusCodeError:
+		case StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})
