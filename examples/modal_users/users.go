@@ -38,12 +38,13 @@ func main() {
 	// Section with users select - this input will not be included in the view_submission's view.state.values,
 	// but instead be sent as a "block_actions" request
 	additionalInviteeText := slack.NewTextBlockObject(slack.PlainTextType, "Invitee from complete list of users", false, false)
+	additionalInviteeHintText := slack.NewTextBlockObject(slack.PlainTextType, "", false, false)
 	additionalInviteeOption := slack.NewOptionsSelectBlockElement(slack.OptTypeUser, additionalInviteeText, "user")
 	additionalInviteeSection := slack.NewSectionBlock(additionalInviteeText, nil, slack.NewAccessory(additionalInviteeOption))
 
 	// Input with users select - this input will be included in the view_submission's view.state.values
 	// It can be fetched as for example "payload.View.State.Values["user"]["user"].SelectedUser"
-	additionalInviteeBlock := slack.NewInputBlock("user", additionalInviteeText, additionalInviteeOption)
+	additionalInviteeBlock := slack.NewInputBlock("user", additionalInviteeText, additionalInviteeHintText, additionalInviteeOption)
 
 	checkboxTxt := slack.NewTextBlockObject(slack.PlainTextType, "Checkbox", false, false)
 	checkboxOptions := createOptionBlockObjects([]string{"option 1", "option 2", "option 3"}, false)
