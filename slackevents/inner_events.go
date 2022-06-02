@@ -502,7 +502,7 @@ const (
 	// EmojiChanged A custom emoji has been added or changed
 	EmojiChanged = EventsAPIType("emoji_changed")
 	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
-  WorkflowStepExecute = EventsAPIType("workflow_step_execute")
+	WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
