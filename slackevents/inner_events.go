@@ -429,71 +429,73 @@ func (e MessageEvent) IsEdited() bool {
 		e.Message.Edited != nil
 }
 
+type EventsAPIType string
+
 const (
 	// AppMention is an Events API subscribable event
-	AppMention = "app_mention"
+	AppMention = EventsAPIType("app_mention")
 	// AppHomeOpened Your Slack app home was opened
-	AppHomeOpened = "app_home_opened"
+	AppHomeOpened = EventsAPIType("app_home_opened")
 	// AppUninstalled Your Slack app was uninstalled.
-	AppUninstalled = "app_uninstalled"
+	AppUninstalled = EventsAPIType("app_uninstalled")
 	// ChannelCreated is sent when a new channel is created.
-	ChannelCreated = "channel_created"
+	ChannelCreated = EventsAPIType("channel_created")
 	// ChannelDeleted is sent when a channel is deleted.
-	ChannelDeleted = "channel_deleted"
+	ChannelDeleted = EventsAPIType("channel_deleted")
 	// ChannelArchive is sent when a channel is archived.
-	ChannelArchive = "channel_archive"
+	ChannelArchive = EventsAPIType("channel_archive")
 	// ChannelUnarchive is sent when a channel is unarchived.
-	ChannelUnarchive = "channel_unarchive"
+	ChannelUnarchive = EventsAPIType("channel_unarchive")
 	// ChannelLeft is sent when a channel is left.
-	ChannelLeft = "channel_left"
+	ChannelLeft = EventsAPIType("channel_left")
 	// ChannelRename is sent when a channel is rename.
-	ChannelRename = "channel_rename"
+	ChannelRename = EventsAPIType("channel_rename")
 	// ChannelIDChanged is sent when a channel identifier is changed.
 	ChannelIDChanged = "channel_id_changed"
 	// GroupDeleted is sent when a group is deleted.
-	GroupDeleted = "group_deleted"
+	GroupDeleted = EventsAPIType("group_deleted")
 	// GroupArchive is sent when a group is archived.
-	GroupArchive = "group_archive"
+	GroupArchive = EventsAPIType("group_archive")
 	// GroupUnarchive is sent when a group is unarchived.
-	GroupUnarchive = "group_unarchive"
+	GroupUnarchive = EventsAPIType("group_unarchive")
 	// GroupLeft is sent when a group is left.
-	GroupLeft = "group_left"
+	GroupLeft = EventsAPIType("group_left")
 	// GroupRename is sent when a group is renamed.
-	GroupRename = "group_rename"
+	GroupRename = EventsAPIType("group_rename")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
-	GridMigrationFinished = "grid_migration_finished"
+	GridMigrationFinished = EventsAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
-	GridMigrationStarted = "grid_migration_started"
+	GridMigrationStarted = EventsAPIType("grid_migration_started")
 	// LinkShared A message was posted containing one or more links relevant to your application
-	LinkShared = "link_shared"
+	LinkShared = EventsAPIType("link_shared")
 	// Message A message was posted to a channel, private channel (group), im, or mim
-	Message = "message"
+	Message = EventsAPIType("message")
 	// Member Joined Channel
-	MemberJoinedChannel = "member_joined_channel"
+	MemberJoinedChannel = EventsAPIType("member_joined_channel")
 	// Member Left Channel
-	MemberLeftChannel = "member_left_channel"
+	MemberLeftChannel = EventsAPIType("member_left_channel")
 	// PinAdded An item was pinned to a channel
-	PinAdded = "pin_added"
+	PinAdded = EventsAPIType("pin_added")
 	// PinRemoved An item was unpinned from a channel
-	PinRemoved = "pin_removed"
+	PinRemoved = EventsAPIType("pin_removed")
 	// ReactionAdded An reaction was added to a message
-	ReactionAdded = "reaction_added"
+	ReactionAdded = EventsAPIType("reaction_added")
 	// ReactionRemoved An reaction was removed from a message
-	ReactionRemoved = "reaction_removed"
+	ReactionRemoved = EventsAPIType("reaction_removed")
 	// TeamJoin A new user joined the workspace
-	TeamJoin = "team_join"
+	TeamJoin = EventsAPIType("team_join")
 	// TokensRevoked APP's API tokes are revoked
-	TokensRevoked = "tokens_revoked"
+	TokensRevoked = EventsAPIType("tokens_revoked")
 	// EmojiChanged A custom emoji has been added or changed
-	EmojiChanged = "emoji_changed"
+	EmojiChanged = EventsAPIType("emoji_changed")
 	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
-	WorkflowStepExecute = "workflow_step_execute"
+  WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var EventsAPIInnerEventMapping = map[string]interface{}{
+var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	AppMention:            AppMentionEvent{},
 	AppHomeOpened:         AppHomeOpenedEvent{},
 	AppUninstalled:        AppUninstalledEvent{},
