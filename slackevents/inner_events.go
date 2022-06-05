@@ -464,7 +464,7 @@ const (
 	// ChannelRename is sent when a channel is rename.
 	ChannelRename = EventsAPIType("channel_rename")
 	// ChannelIDChanged is sent when a channel identifier is changed.
-	ChannelIDChanged = "channel_id_changed"
+	ChannelIDChanged = EventsAPIType("channel_id_changed")
 	// GroupDeleted is sent when a group is deleted.
 	GroupDeleted = EventsAPIType("group_deleted")
 	// GroupArchive is sent when a group is archived.
