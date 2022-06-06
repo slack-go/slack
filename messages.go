@@ -133,7 +133,7 @@ type Msg struct {
 	Blocks Blocks `json:"blocks,omitempty"`
 	
 	// permalink
-	Permalink string `json:"permalink,omitempty"
+	Permalink string `json:"permalink,omitempty"`
 }
 
 const (
