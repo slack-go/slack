@@ -19,14 +19,25 @@ type (
 	}
 )
 
+type WorkflowStepCompletedRequestOption func(opt WorkflowStepCompletedRequest) error
+
+func WorkflowStepCompletedRequestOptionOutput(outputs map[string]string) WorkflowStepCompletedRequestOption {
+	return func(opt WorkflowStepCompletedRequest) error {
+		if len(outputs) > 0 {
+			opt.Outputs = &outputs
+		}
+		return nil
+	}
+}
+
 // WorkflowStepCompleted indicates step is completed
-func (api *Client) WorkflowStepCompleted(workflowStepExecuteID string, outputs *map[string]string) error {
+func (api *Client) WorkflowStepCompleted(workflowStepExecuteID string, options ...WorkflowStepCompletedRequestOption) error {
 	// More information: https://api.slack.com/methods/workflows.stepCompleted
 	r := WorkflowStepCompletedRequest{
 		WorkflowStepExecuteID: workflowStepExecuteID,
 	}
-	if outputs != nil {
-		r.Outputs = outputs
+	for _, option := range options {
+		option(r)
 	}
 
 	endpoint := api.endpoint + "workflows.stepCompleted"

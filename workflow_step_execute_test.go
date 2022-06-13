@@ -19,7 +19,7 @@ func TestWorkflowStepCompleted(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	if err := api.WorkflowStepCompleted("executeID", nil); err != nil {
+	if err := api.WorkflowStepCompleted("executeID"); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 }
