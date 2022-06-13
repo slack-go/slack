@@ -292,10 +292,10 @@ func GetUsersOptionPresence(n bool) GetUsersOption {
 	}
 }
 
-// GetUsersOptionTeamID include team_id
-func GetUsersOptionTeamID(team_id string) GetUsersOption {
+// GetUsersOptionTeamID include team Id
+func GetUsersOptionTeamID(teamId string) GetUsersOption {
 	return func(p *UserPagination) {
-		p.team_id = team_id
+		p.teamId = teamId
 	}
 }
 
@@ -317,7 +317,7 @@ type UserPagination struct {
 	Users        []User
 	limit        int
 	presence     bool
-	team_id      string
+	teamId       string
 	previousResp *ResponseMetadata
 	c            *Client
 }
@@ -352,7 +352,7 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 		"presence":       {strconv.FormatBool(t.presence)},
 		"token":          {t.c.token},
 		"cursor":         {t.previousResp.Cursor},
-		"team_id":        {t.team_id},
+		"team_id":        {t.teamId},
 		"include_locale": {strconv.FormatBool(true)},
 	}
 
