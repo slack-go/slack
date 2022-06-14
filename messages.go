@@ -131,7 +131,6 @@ type Msg struct {
 
 	// Block type Message
 	Blocks Blocks `json:"blocks,omitempty"`
-	
 	// permalink
 	Permalink string `json:"permalink,omitempty"`
 }
