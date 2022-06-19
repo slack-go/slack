@@ -35,6 +35,12 @@ var okWebResponse = slack.SlackResponse{
 	Ok: true,
 }
 
+var defaultOkJSON = fmt.Sprintf(`
+	{
+		"ok": true
+	}
+	`)
+
 var defaultChannelsListJSON = fmt.Sprintf(`
 	{
 		"ok": true,

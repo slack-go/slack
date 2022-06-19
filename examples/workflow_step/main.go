@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/slack-go/slack"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/slack-go/slack"
 )
 
 type (

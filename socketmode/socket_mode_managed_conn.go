@@ -11,13 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
-	"github.com/slack-go/slack/internal/misc"
-	"github.com/slack-go/slack/slackevents"
-
-	"github.com/gorilla/websocket"
 	"github.com/slack-go/slack/internal/timex"
+	"github.com/slack-go/slack/slackevents"
 )
 
 // Run is a blocking function that connects the Slack Socket Mode API and handles all incoming
@@ -213,7 +212,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		}
 
 		switch actual := err.(type) {
-		case misc.StatusCodeError:
+		case slack.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})
