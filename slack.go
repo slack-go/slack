@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
 const (
@@ -57,7 +58,9 @@ type authTestResponseFull struct {
 type ParamOption func(*url.Values)
 
 type Client struct {
-	token         string
+	token   string
+	cookies []*http.Cookie
+
 	appLevelToken string
 	endpoint      string
 	debug         bool
@@ -86,6 +89,33 @@ func OptionDebug(b bool) func(*Client) {
 func OptionLog(l logger) func(*Client) {
 	return func(c *Client) {
 		c.log = internalLog{logger: l}
+	}
+}
+
+// OptionAuthCookie allows to set the auth cookie
+func OptionAuthCookie(d string) func(*Client) {
+	return OptionCookie("d", d)
+}
+
+// OptionCookie allows to set an arbitrary cookie.
+func OptionCookie(name, value string) func(*Client) {
+	return func(c *Client) {
+		c.cookies = append(c.cookies, &http.Cookie{
+			Name:    name,
+			Value:   value,
+			Path:    "/",
+			Domain:  ".slack.com",
+			Expires: time.Now().AddDate(10, 0, 0),
+			Secure:  true})
+	}
+}
+
+// OptionCookie allows to set an arbitrary cookie.
+func OptionCookieRAW(cookies ...*http.Cookie) func(*Client) {
+	return func(c *Client) {
+		for _, cookie := range cookies {
+			c.cookies = append(c.cookies, cookie)
+		}
 	}
 }
 
@@ -153,7 +183,7 @@ func (api *Client) Debug() bool {
 
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api, api.cookies)
 }
 
 // get a slack web method.

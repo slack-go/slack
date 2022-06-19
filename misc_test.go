@@ -44,7 +44,7 @@ func TestParseResponse(t *testing.T) {
 	}
 
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{}, nil)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
@@ -57,7 +57,7 @@ func TestParseResponseNoToken(t *testing.T) {
 	values := url.Values{}
 
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{}, nil)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -77,7 +77,7 @@ func TestParseResponseInvalidToken(t *testing.T) {
 		"token": {"whatever"},
 	}
 	responsePartial := &SlackResponse{}
-	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{})
+	err := postForm(context.Background(), http.DefaultClient, APIURL+"parseResponse", values, responsePartial, discard{}, nil)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return

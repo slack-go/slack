@@ -209,7 +209,7 @@ func (api *Client) GetFile(downloadURL string, writer io.Writer) error {
 //
 // For more details, see GetFile documentation.
 func (api *Client) GetFileContext(ctx context.Context, downloadURL string, writer io.Writer) error {
-	return downloadFile(ctx, api.httpclient, api.token, downloadURL, writer, api)
+	return downloadFile(ctx, api.httpclient, api.token, downloadURL, writer, api, api.cookies)
 }
 
 // GetFiles retrieves all files according to the parameters given
