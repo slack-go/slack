@@ -130,6 +130,9 @@ type Msg struct {
 	DeleteOriginal  bool   `json:"delete_original"`
 
 	// Block type Message
+	Metadata SlackMetadata `json:"metadata,omitempty"`
+
+	// Block type Message
 	Blocks Blocks `json:"blocks,omitempty"`
 	// permalink
 	Permalink string `json:"permalink,omitempty"`
