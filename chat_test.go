@@ -109,6 +109,24 @@ func TestPostMessage(t *testing.T) {
 				"token":       []string{"testing-token"},
 			},
 		},
+		"Metadata": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionMetadata(
+					SlackMetadata{
+						EventType: "testing-event",
+						EventPayload: map[string]interface{}{
+							"id":   13,
+							"name": "testing-name",
+						},
+					}),
+			},
+			expected: url.Values{
+				"metadata": []string{`{"event_type":"testing-event","event_payload":{"id":13,"name":"testing-name"}}`},
+				"channel":  []string{"CXXX"},
+				"token":    []string{"testing-token"},
+			},
+		},
 		"Unfurl": {
 			endpoint: "/chat.unfurl",
 			opt: []MsgOption{

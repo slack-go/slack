@@ -669,7 +669,7 @@ func MsgOptionIconEmoji(iconEmoji string) MsgOption {
 	}
 }
 
-// MsgOptionIconEmoji sets an icon emoji
+// MsgOptionMetadata sets message metadata
 func MsgOptionMetadata(metadata SlackMetadata) MsgOption {
 	return func(config *sendConfig) error {
 		config.metadata = metadata

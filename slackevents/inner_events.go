@@ -234,6 +234,12 @@ type MessageEvent struct {
 	Root *MessageEvent `json:"root"`
 }
 
+type MessageMetadataEvent struct {
+	// TODO: not sure about the actual fields we get here!
+	Type           string `json:"type"`
+	EventTimestamp string `json:"event_ts"`
+}
+
 // MemberJoinedChannelEvent A member joined a public or private channel
 type MemberJoinedChannelEvent struct {
 	Type           string `json:"type"`
@@ -487,6 +493,12 @@ const (
 	MemberJoinedChannel = EventsAPIType("member_joined_channel")
 	// Member Left Channel
 	MemberLeftChannel = EventsAPIType("member_left_channel")
+	// Message metadata was deleted
+	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
+	// Message metadata was posted
+	MessageMetadataPosted = EventsAPIType("message_metadata_posted")
+	// Message metadata was updated
+	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
 	// PinAdded An item was pinned to a channel
 	PinAdded = EventsAPIType("pin_added")
 	// PinRemoved An item was unpinned from a channel
@@ -509,33 +521,36 @@ const (
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
-	AppMention:            AppMentionEvent{},
-	AppHomeOpened:         AppHomeOpenedEvent{},
-	AppUninstalled:        AppUninstalledEvent{},
-	ChannelCreated:        ChannelCreatedEvent{},
-	ChannelDeleted:        ChannelDeletedEvent{},
-	ChannelArchive:        ChannelArchiveEvent{},
-	ChannelUnarchive:      ChannelUnarchiveEvent{},
-	ChannelLeft:           ChannelLeftEvent{},
-	ChannelRename:         ChannelRenameEvent{},
-	ChannelIDChanged:      ChannelIDChangedEvent{},
-	GroupDeleted:          GroupDeletedEvent{},
-	GroupArchive:          GroupArchiveEvent{},
-	GroupUnarchive:        GroupUnarchiveEvent{},
-	GroupLeft:             GroupLeftEvent{},
-	GroupRename:           GroupRenameEvent{},
-	GridMigrationFinished: GridMigrationFinishedEvent{},
-	GridMigrationStarted:  GridMigrationStartedEvent{},
-	LinkShared:            LinkSharedEvent{},
-	Message:               MessageEvent{},
-	MemberJoinedChannel:   MemberJoinedChannelEvent{},
-	MemberLeftChannel:     MemberLeftChannelEvent{},
-	PinAdded:              PinAddedEvent{},
-	PinRemoved:            PinRemovedEvent{},
-	ReactionAdded:         ReactionAddedEvent{},
-	ReactionRemoved:       ReactionRemovedEvent{},
-	TeamJoin:              TeamJoinEvent{},
-	TokensRevoked:         TokensRevokedEvent{},
-	EmojiChanged:          EmojiChangedEvent{},
-	WorkflowStepExecute:   WorkflowStepExecuteEvent{},
+	AppMention:             AppMentionEvent{},
+	AppHomeOpened:          AppHomeOpenedEvent{},
+	AppUninstalled:         AppUninstalledEvent{},
+	ChannelCreated:         ChannelCreatedEvent{},
+	ChannelDeleted:         ChannelDeletedEvent{},
+	ChannelArchive:         ChannelArchiveEvent{},
+	ChannelUnarchive:       ChannelUnarchiveEvent{},
+	ChannelLeft:            ChannelLeftEvent{},
+	ChannelRename:          ChannelRenameEvent{},
+	ChannelIDChanged:       ChannelIDChangedEvent{},
+	GroupDeleted:           GroupDeletedEvent{},
+	GroupArchive:           GroupArchiveEvent{},
+	GroupUnarchive:         GroupUnarchiveEvent{},
+	GroupLeft:              GroupLeftEvent{},
+	GroupRename:            GroupRenameEvent{},
+	GridMigrationFinished:  GridMigrationFinishedEvent{},
+	GridMigrationStarted:   GridMigrationStartedEvent{},
+	LinkShared:             LinkSharedEvent{},
+	Message:                MessageEvent{},
+	MessageMetadataDeleted: MessageMetadataEvent{},
+	MessageMetadataPosted:  MessageMetadataEvent{},
+	MessageMetadataUpdated: MessageMetadataEvent{},
+	MemberJoinedChannel:    MemberJoinedChannelEvent{},
+	MemberLeftChannel:      MemberLeftChannelEvent{},
+	PinAdded:               PinAddedEvent{},
+	PinRemoved:             PinRemovedEvent{},
+	ReactionAdded:          ReactionAddedEvent{},
+	ReactionRemoved:        ReactionRemovedEvent{},
+	TeamJoin:               TeamJoinEvent{},
+	TokensRevoked:          TokensRevokedEvent{},
+	EmojiChanged:           EmojiChangedEvent{},
+	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
 }
