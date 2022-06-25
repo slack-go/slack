@@ -178,11 +178,11 @@ type LinkSharedEvent struct {
 	// compose text area.
 	MessageTimeStamp string        `json:"message_ts"`
 	ThreadTimeStamp  string        `json:"thread_ts"`
-	Links            []sharedLinks `json:"links"`
+	Links            []SharedLinks `json:"links"`
 	EventTimestamp   string        `json:"event_ts"`
 }
 
-type sharedLinks struct {
+type SharedLinks struct {
 	Domain string `json:"domain"`
 	URL    string `json:"url"`
 }
