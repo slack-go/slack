@@ -82,6 +82,14 @@ func TestPostMessage(t *testing.T) {
 	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
 
 	tests := map[string]messageTest{
+		"OnlyBasicProperties": {
+			endpoint: "/chat.postMessage",
+			opt:      []MsgOption{},
+			expected: url.Values{
+				"channel": []string{"CXXX"},
+				"token":   []string{"testing-token"},
+			},
+		},
 		"Blocks": {
 			endpoint: "/chat.postMessage",
 			opt: []MsgOption{

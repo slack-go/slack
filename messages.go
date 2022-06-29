@@ -129,7 +129,7 @@ type Msg struct {
 	ReplaceOriginal bool   `json:"replace_original"`
 	DeleteOriginal  bool   `json:"delete_original"`
 
-	// Block type Message
+	// metadata
 	Metadata SlackMetadata `json:"metadata,omitempty"`
 
 	// Block type Message
