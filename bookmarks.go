@@ -138,6 +138,10 @@ func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkP
 		values["link"] = []string{params.Link}
 	}
 
+	if params.Title != "" {
+		values["title"] = []string{params.Title}
+	}
+
 	err := api.postMethod(ctx, "bookmarks.edit", values, &response)
 
 	if err != nil {
