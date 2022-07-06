@@ -355,7 +355,7 @@ func TestRTMUnmappedError(t *testing.T) {
 	// Verify that we got the expected error with details
 	unmappedErr, ok := gotUnmarshallingError.ErrorObj.(*slack.UnmappedError)
 	require.True(t, ok)
-	assert.Equal(t, unmappedEventName, unmappedErr.EventType())
+	assert.Equal(t, unmappedEventName, unmappedErr.EventType)
 }
 
 func fixSlackMessage(t *testing.T, eType string) string {

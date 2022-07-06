@@ -19,33 +19,26 @@ import (
 // UnmappedError represents error occurred when there is no mapping between given event name
 // and corresponding Go struct.
 type UnmappedError struct {
-	eventType string
-	rawEvent  json.RawMessage
-	ctxMsg    string
+	// EventType returns event type name.
+	EventType string
+	// RawEvent returns raw event body.
+	RawEvent json.RawMessage
+
+	ctxMsg string
 }
 
 // NewUnmappedError returns new UnmappedError instance.
 func NewUnmappedError(ctxMsg, eventType string, raw json.RawMessage) *UnmappedError {
 	return &UnmappedError{
 		ctxMsg:    ctxMsg,
-		eventType: eventType,
-		rawEvent:  raw,
+		EventType: eventType,
+		RawEvent:  raw,
 	}
 }
 
 // Error returns human-readable error message.
 func (u UnmappedError) Error() string {
-	return fmt.Sprintf("%s: Received unmapped event %q", u.ctxMsg, u.eventType)
-}
-
-// EventType returns event type name.
-func (u UnmappedError) EventType() string {
-	return u.eventType
-}
-
-// RawEvent returns raw event body.
-func (u UnmappedError) RawEvent() json.RawMessage {
-	return u.rawEvent
+	return fmt.Sprintf("%s: Received unmapped event %q", u.ctxMsg, u.EventType)
 }
 
 // ManageConnection can be called on a Slack RTM instance returned by the
