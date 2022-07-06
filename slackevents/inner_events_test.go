@@ -1,8 +1,7 @@
-package slackevents_test
+package slackevents
 
 import (
 	"encoding/json"
-	"github.com/slack-go/slack/slackevents"
 	"testing"
 )
 
@@ -21,7 +20,7 @@ func TestAppMention(t *testing.T) {
 				"blah": "test"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.AppMentionEvent{})
+	err := json.Unmarshal(rawE, &AppMentionEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -33,7 +32,7 @@ func TestAppUninstalled(t *testing.T) {
 			"type": "app_uninstalled"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.AppUninstalledEvent{})
+	err := json.Unmarshal(rawE, &AppUninstalledEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -46,7 +45,7 @@ func TestGridMigrationFinishedEvent(t *testing.T) {
 				"enterprise_id": "EXXXXXXXX"
 			}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.GridMigrationFinishedEvent{})
+	err := json.Unmarshal(rawE, &GridMigrationFinishedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -67,7 +66,7 @@ func TestGridMigrationStartedEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.GridMigrationStartedEvent{})
+	err := json.Unmarshal(rawE, &GridMigrationStartedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -98,21 +97,21 @@ func TestLinkSharedEvent(t *testing.T) {
 						]
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.LinkSharedEvent{})
+	err := json.Unmarshal(rawE, &LinkSharedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
 }
 
 func TestLinkSharedEvent_struct(t *testing.T) {
-	e := slackevents.LinkSharedEvent{
+	e := LinkSharedEvent{
 		Type:             "link_shared",
 		User:             "Uxxxxxxx",
 		TimeStamp:        "123456789.9876",
 		Channel:          "Cxxxxxx",
 		MessageTimeStamp: "123456789.9875",
 		ThreadTimeStamp:  "123456789.9876",
-		Links: []slackevents.SharedLinks{
+		Links: []SharedLinks{
 			{Domain: "example.com", URL: "https://example.com/12345"},
 			{Domain: "example.com", URL: "https://example.com/67890"},
 			{Domain: "another-example.com", URL: "https://yet.another-example.com/v/abcde"},
@@ -158,7 +157,7 @@ func TestLinkSharedComposerEvent(t *testing.T) {
 				]
 			}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.LinkSharedEvent{})
+	err := json.Unmarshal(rawE, &LinkSharedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -189,7 +188,7 @@ func TestMessageEvent(t *testing.T) {
 				}
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.MessageEvent{})
+	err := json.Unmarshal(rawE, &MessageEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -207,7 +206,7 @@ func TestBotMessageEvent(t *testing.T) {
 				"icons": {}
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.MessageEvent{})
+	err := json.Unmarshal(rawE, &MessageEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -243,7 +242,7 @@ func TestThreadBroadcastEvent(t *testing.T) {
 		}
 	`)
 
-	var me slackevents.MessageEvent
+	var me MessageEvent
 	if err := json.Unmarshal(rawE, &me); err != nil {
 		t.Error(err)
 	}
@@ -272,7 +271,7 @@ func TestMemberJoinedChannelEvent(t *testing.T) {
 				"inviter": "U123456789"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.MemberJoinedChannelEvent{})
+	err := json.Unmarshal(rawE, &MemberJoinedChannelEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -288,7 +287,7 @@ func TestMemberLeftChannelEvent(t *testing.T) {
 				"team": "T024BE7LD"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.MemberLeftChannelEvent{})
+	err := json.Unmarshal(rawE, &MemberLeftChannelEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -316,7 +315,7 @@ func TestPinAdded(t *testing.T) {
 				"event_ts": "1515449522000016"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.PinAddedEvent{})
+	err := json.Unmarshal(rawE, &PinAddedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -344,7 +343,7 @@ func TestPinRemoved(t *testing.T) {
 				"event_ts": "1515449522000016"
 		}
 	`)
-	err := json.Unmarshal(rawE, &slackevents.PinRemovedEvent{})
+	err := json.Unmarshal(rawE, &PinRemovedEvent{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -364,7 +363,7 @@ func TestTokensRevoked(t *testing.T) {
 		}
 	}
 `)
-	tre := slackevents.TokensRevokedEvent{}
+	tre := TokensRevokedEvent{}
 	err := json.Unmarshal(rawE, &tre)
 	if err != nil {
 		t.Error(err)
@@ -385,7 +384,7 @@ func TestTokensRevoked(t *testing.T) {
 
 func TestEmojiChanged(t *testing.T) {
 	var (
-		ece slackevents.EmojiChangedEvent
+		ece EmojiChangedEvent
 		err error
 	)
 
@@ -399,7 +398,7 @@ func TestEmojiChanged(t *testing.T) {
 		"event_ts" : "1361482916.000004"
 	}
 `)
-	ece = slackevents.EmojiChangedEvent{}
+	ece = EmojiChangedEvent{}
 	err = json.Unmarshal(rawAddE, &ece)
 	if err != nil {
 		t.Error(err)
@@ -420,7 +419,7 @@ func TestEmojiChanged(t *testing.T) {
 		"event_ts" : "1361482916.000004"
 	}
 `)
-	ece = slackevents.EmojiChangedEvent{}
+	ece = EmojiChangedEvent{}
 	err = json.Unmarshal(rawRemoveE, &ece)
 	if err != nil {
 		t.Error(err)
@@ -446,7 +445,7 @@ func TestEmojiChanged(t *testing.T) {
 		"event_ts" : "1361482916.000004"
 	}
 `)
-	ece = slackevents.EmojiChangedEvent{}
+	ece = EmojiChangedEvent{}
 	err = json.Unmarshal(rawRenameE, &ece)
 	if err != nil {
 		t.Error(err)
@@ -486,7 +485,7 @@ func TestWorkflowStepExecute(t *testing.T) {
 	}
 	`)
 
-	wse := slackevents.WorkflowStepExecuteEvent{}
+	wse := WorkflowStepExecuteEvent{}
 	err := json.Unmarshal(rawE, &wse)
 	if err != nil {
 		t.Error(err)
