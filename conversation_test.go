@@ -400,7 +400,7 @@ func TestGetConversationInfo(t *testing.T) {
 	http.HandleFunc("/conversations.info", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.GetConversationInfo("CXXXXXXXX", false)
+	channel, err := api.GetConversationInfo("CXXXXXXXX", false, false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
