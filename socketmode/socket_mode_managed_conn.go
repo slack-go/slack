@@ -219,6 +219,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
+			smc.Debugf("socket mode open and dial: %s", err.(*slack.RateLimitedError).Error())
 			backoff = actual.RetryAfter
 		default:
 		}

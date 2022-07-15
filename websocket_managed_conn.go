@@ -133,6 +133,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 				return nil, nil, err
 			}
 		case *RateLimitedError:
+			rtm.Debugf("websocket start connection: %s", err.(*RateLimitedError).Error())
 			backoff = actual.RetryAfter
 		default:
 		}

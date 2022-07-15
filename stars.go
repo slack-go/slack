@@ -194,6 +194,7 @@ func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err
 			case <-ctx.Done():
 				err = ctx.Err()
 			case <-time.After(rateLimitedError.RetryAfter):
+				api.Debugf("ListAllStarsContext: %s", rateLimitedError.Error())
 				err = nil
 			}
 		}

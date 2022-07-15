@@ -389,6 +389,7 @@ func (api *Client) GetUsersContext(ctx context.Context, options ...GetUsersOptio
 			case <-ctx.Done():
 				err = ctx.Err()
 			case <-time.After(rateLimitedError.RetryAfter):
+				api.Debugf("GetUsersContext: %s", rateLimitedError.Error())
 				err = nil
 			}
 		}
