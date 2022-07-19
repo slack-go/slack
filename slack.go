@@ -92,11 +92,6 @@ func OptionLog(l logger) func(*Client) {
 	}
 }
 
-// OptionAuthCookie allows to set the auth cookie
-func OptionAuthCookie(d string) func(*Client) {
-	return OptionCookie("d", d)
-}
-
 // OptionCookie allows to set an arbitrary cookie.
 func OptionCookie(name, value string) func(*Client) {
 	return func(c *Client) {
@@ -113,9 +108,7 @@ func OptionCookie(name, value string) func(*Client) {
 // OptionCookie allows to set an arbitrary cookie.
 func OptionCookieRAW(cookies ...*http.Cookie) func(*Client) {
 	return func(c *Client) {
-		for _, cookie := range cookies {
-			c.cookies = append(c.cookies, cookie)
-		}
+		c.cookies = append(c.cookies, cookies...)
 	}
 }
 

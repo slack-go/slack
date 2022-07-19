@@ -85,13 +85,8 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 
 	var bearer = "Bearer " + token
 	req.Header.Add("Authorization", bearer)
-	req.WithContext(context.Background())
 
-	if cookies != nil {
-		for _, cookie := range cookies {
-			req.AddCookie(cookie)
-		}
-	}
+	addCookies(req, cookies)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -243,11 +238,7 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	if cookies != nil {
-		for _, cookie := range cookies {
-			req.AddCookie(cookie)
-		}
-	}
+	addCookies(req, cookies)
 	return doPost(ctx, client, req, newJSONParser(intf), d)
 }
 
@@ -354,5 +345,12 @@ func newContentTypeParser(dst interface{}) responseParser {
 		default:
 			return newTextParser(dst)(req)
 		}
+	}
+}
+
+// addCookies adds cookies to request req.
+func addCookies(req *http.Request, cookies []*http.Cookie) {
+	for _, cookie := range cookies {
+		req.AddCookie(cookie)
 	}
 }
