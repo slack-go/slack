@@ -7,8 +7,8 @@ import (
 
 type (
 	WorkflowStepCompletedRequest struct {
-		WorkflowStepExecuteID string             `json:"workflow_step_execute_id"`
-		Outputs               *map[string]string `json:"outputs"`
+		WorkflowStepExecuteID string            `json:"workflow_step_execute_id"`
+		Outputs               map[string]string `json:"outputs"`
 	}
 
 	WorkflowStepFailedRequest struct {
@@ -24,7 +24,7 @@ type WorkflowStepCompletedRequestOption func(opt WorkflowStepCompletedRequest) e
 func WorkflowStepCompletedRequestOptionOutput(outputs map[string]string) WorkflowStepCompletedRequestOption {
 	return func(opt WorkflowStepCompletedRequest) error {
 		if len(outputs) > 0 {
-			opt.Outputs = &outputs
+			opt.Outputs = outputs
 		}
 		return nil
 	}
