@@ -222,9 +222,6 @@ func TestUpdateUserGroup(t *testing.T) {
 	emptyDescription := ""
 	presenceDescription := "Marketing gurus, PR experts and product advocates."
 
-	emptyChannels := []string{}
-	presenceChannels := []string{"channel1", "channel2"}
-
 	tests := []struct {
 		options    []UpdateUserGroupsOption
 		wantParams map[string]string
@@ -244,7 +241,7 @@ func TestUpdateUserGroup(t *testing.T) {
 		{
 			[]UpdateUserGroupsOption{
 				UpdateUserGroupsOptionDescription(&presenceDescription),
-				UpdateUserGroupsOptionChannels(&presenceChannels),
+				UpdateUserGroupsOptionChannels([]string{"channel1", "channel2"}),
 			},
 			map[string]string{
 				"token":       "testing-token",
@@ -256,7 +253,7 @@ func TestUpdateUserGroup(t *testing.T) {
 		{
 			[]UpdateUserGroupsOption{
 				UpdateUserGroupsOptionDescription(&emptyDescription),
-				UpdateUserGroupsOptionChannels(&emptyChannels),
+				UpdateUserGroupsOptionChannels([]string{}),
 			},
 			map[string]string{
 				"token":       "testing-token",

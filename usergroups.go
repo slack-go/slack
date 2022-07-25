@@ -3,7 +3,6 @@ package slack
 import (
 	"context"
 	"net/url"
-	"reflect"
 	"strings"
 )
 
@@ -208,10 +207,10 @@ func UpdateUserGroupsOptionDescription(description *string) UpdateUserGroupsOpti
 	}
 }
 
-// UpdateUserGroupsOptionChannels change the default channels of the User Group. (default: nil, so it's no-op)
-func UpdateUserGroupsOptionChannels(channels *[]string) UpdateUserGroupsOption {
+// UpdateUserGroupsOptionChannels change the default channels of the User Group. (default: unspecified, so it's no-op)
+func UpdateUserGroupsOptionChannels(channels []string) UpdateUserGroupsOption {
 	return func(params *UpdateUserGroupsParams) {
-		params.Channels = channels
+		params.Channels = &channels
 	}
 }
 
@@ -249,11 +248,11 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 		values["handle"] = []string{params.Handle}
 	}
 
-	if !reflect.ValueOf(params.Description).IsNil() {
+	if params.Description != nil {
 		values["description"] = []string{*params.Description}
 	}
 
-	if !reflect.ValueOf(params.Channels).IsNil() {
+	if params.Channels != nil {
 		values["channels"] = []string{strings.Join(*params.Channels, ",")}
 	}
 
