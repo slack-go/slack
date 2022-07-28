@@ -92,14 +92,11 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	// We're now connected so we can set up listeners
 
 	var (
-		wg           sync.WaitGroup
 		firstErr     error
 		firstErrOnce sync.Once
 	)
 
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		defer cancel()
 
 		// The response sender sends Socket Mode responses over the WebSocket conn
@@ -110,9 +107,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		defer cancel()
 
 		// The handler reads Socket Mode requests, and enqueues responses for sending by the response sender
@@ -123,9 +118,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
 		defer cancel()
 
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
@@ -137,26 +130,17 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		select {
-		case <-ctx.Done():
-			// Detect when the connection is dead and try close connection.
-			if err = conn.Close(); err != nil {
-				smc.Debugf("Failed to close connection: %v", err)
-			}
-		case <-deadmanTimer.Elapsed():
-			firstErrOnce.Do(func() {
-				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
-			})
-
-			cancel()
+	select {
+	case <-ctx.Done():
+		// Detect when the connection is dead and try close connection.
+		if err = conn.Close(); err != nil {
+			smc.Debugf("Failed to close connection: %v", err)
 		}
-	}()
-
-	wg.Wait()
+	case <-deadmanTimer.Elapsed():
+		firstErrOnce.Do(func() {
+			firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
+		})
+	}
 
 	if firstErr == context.Canceled {
 		return firstErr
