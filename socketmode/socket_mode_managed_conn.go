@@ -146,7 +146,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		return firstErr
 	}
 
-	// wg.Wait() finishes only after any of the above go routines finishes.
+	// select unblocks on first cancel or timeout.
 	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
 	smc.Debugf("Reconnecting due to %v", firstErr)
 
