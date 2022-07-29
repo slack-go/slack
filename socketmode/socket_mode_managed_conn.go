@@ -92,11 +92,14 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	// We're now connected so we can set up listeners
 
 	var (
+		wg           sync.WaitGroup
 		firstErr     error
 		firstErrOnce sync.Once
 	)
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		defer cancel()
 
 		// The response sender sends Socket Mode responses over the WebSocket conn
@@ -107,7 +110,9 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		defer cancel()
 
 		// The handler reads Socket Mode requests, and enqueues responses for sending by the response sender
@@ -118,6 +123,8 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
+	// We don't wait on runMessageReceiver because it doesn't block on a select with the context,
+	// so we'd have to wait for the ReadJSON to time out, which can take a while.
 	go func() {
 		defer cancel()
 
@@ -130,23 +137,33 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	select {
-	case <-ctx.Done():
-		// Detect when the connection is dead and try close connection.
-		if err = conn.Close(); err != nil {
-			smc.Debugf("Failed to close connection: %v", err)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		select {
+		case <-ctx.Done():
+			// Detect when the connection is dead and try close connection.
+			if err = conn.Close(); err != nil {
+				smc.Debugf("Failed to close connection: %v", err)
+			}
+		case <-deadmanTimer.Elapsed():
+			firstErrOnce.Do(func() {
+				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
+			})
+
+			cancel()
 		}
-	case <-deadmanTimer.Elapsed():
-		firstErrOnce.Do(func() {
-			firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
-		})
-	}
+	}()
+
+	wg.Wait()
 
 	if firstErr == context.Canceled {
 		return firstErr
 	}
 
-	// select unblocks on first cancel or timeout.
+	// wg.Wait() finishes only after any of the above go routines finishes and cancels the
+	// context, allowing the other threads to shut down gracefully.
 	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
 	smc.Debugf("Reconnecting due to %v", firstErr)
 
