@@ -24,6 +24,26 @@ type TeamInfo struct {
 	Icon        map[string]interface{} `json:"icon"`
 }
 
+type TeamProfileResponse struct {
+	Profile TeamProfile `json:"profile"`
+	SlackResponse
+}
+
+type TeamProfile struct {
+	Fields []TeamProfileField `json:"fields"`
+}
+
+type TeamProfileField struct {
+	ID             string          `json:"id"`
+	Ordering       int             `json:"ordering"`
+	Label          string          `json:"label"`
+	Hint           string          `json:"hint"`
+	Type           string          `json:"type"`
+	PossibleValues []string        `json:"possible_values"`
+	IsHidden       bool            `json:"is_hidden"`
+	Options        map[string]bool `json:"options"`
+}
+
 type LoginResponse struct {
 	Logins []Login `json:"logins"`
 	Paging `json:"paging"`
@@ -95,6 +115,15 @@ func (api *Client) accessLogsRequest(ctx context.Context, path string, values ur
 	return response, response.Err()
 }
 
+func (api *Client) teamProfileRequest(ctx context.Context, client httpClient, path string, values url.Values) (*TeamProfileResponse, error) {
+	response := &TeamProfileResponse{}
+	err := api.postMethod(ctx, path, values, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
 // GetTeamInfo gets the Team Information of the user
 func (api *Client) GetTeamInfo() (*TeamInfo, error) {
 	return api.GetTeamInfoContext(context.Background())
@@ -111,6 +140,25 @@ func (api *Client) GetTeamInfoContext(ctx context.Context) (*TeamInfo, error) {
 		return nil, err
 	}
 	return &response.Team, nil
+}
+
+// GetTeamProfile gets the Team Profile settings of the user
+func (api *Client) GetTeamProfile() (*TeamProfile, error) {
+	return api.GetTeamProfileContext(context.Background())
+}
+
+// GetTeamProfileContext gets the Team Profile settings of the user with a custom context
+func (api *Client) GetTeamProfileContext(ctx context.Context) (*TeamProfile, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	response, err := api.teamProfileRequest(ctx, api.httpclient, "team.profile.get", values)
+	if err != nil {
+		return nil, err
+	}
+	return &response.Profile, nil
+
 }
 
 // GetAccessLogs retrieves a page of logins according to the parameters given
