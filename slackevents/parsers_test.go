@@ -95,7 +95,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	switch outterEvent := msg.Data.(type) {
+	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
 			switch innerEvent := msg.InnerEvent.Data.(type) {
@@ -109,7 +109,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 		}
 	default:
 		{
-			fmt.Println(outterEvent)
+			fmt.Println(outerEvent)
 			t.Fail()
 		}
 	}

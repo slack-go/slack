@@ -61,7 +61,7 @@ const (
 	AppRateLimited = "app_rate_limited"
 )
 
-// EventsAPIEventMap maps OUTTER Event API events to their corresponding struct
+// EventsAPIEventMap maps OUTER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIEventMap = map[string]interface{}{
