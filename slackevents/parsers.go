@@ -12,7 +12,7 @@ import (
 
 // eventsMap checks both slack.EventsMapping and
 // and slackevents.EventsAPIInnerEventMapping. If the event
-// exists, returns the the unmarshalled struct instance of
+// exists, returns the unmarshalled struct instance of
 // target for the matching event type.
 // TODO: Consider moving all events into its own package?
 func eventsMap(t string) (interface{}, bool) {
@@ -176,7 +176,7 @@ func (c TokenComparator) Verify(t string) bool {
 	return subtle.ConstantTimeCompare([]byte(c.VerificationToken), []byte(t)) == 1
 }
 
-// ParseEvent parses the outter and inner events (if applicable) of an events
+// ParseEvent parses the outer and inner events (if applicable) of an events
 // api event returning a EventsAPIEvent type. If the event is a url_verification event,
 // the inner event is empty.
 func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error) {
