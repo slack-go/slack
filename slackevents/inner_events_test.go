@@ -493,3 +493,189 @@ func TestWorkflowStepExecute(t *testing.T) {
 		}
 	}
 }
+
+func TestMessageMetadataPosted(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_posted",
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",	
+		"user_id":"USERXXX",	
+		"team_id":"TEAMXXX",	
+		"channel_id":"CHANNELXXX",	
+		"metadata":{
+			"event_type":"type",
+			"event_payload":{"key": "value"}
+		},
+		"message_ts":"1660398079.756349",
+		"event_ts":"1660398079.756349"
+	}
+	`)
+
+	mmp := MessageMetadataPostedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_posted" {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.Metadata.EventType != "type" {
+		t.Fail()
+	}
+	payload := mmp.Metadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+}
+
+func TestMessageMetadataUpdated(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_updated",
+		"channel_id":"CHANNELXXX",	
+		"event_ts":"1660398079.756349",
+		"previous_metadata":{
+			"event_type":"type1",
+			"event_payload":{"key1": "value1"}
+		},
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",	
+		"user_id":"USERXXX",	
+		"team_id":"TEAMXXX",	
+		"message_ts":"1660398079.756349",
+		"metadata":{
+			"event_type":"type2",
+			"event_payload":{"key2": "value2"}
+		}
+	}
+	`)
+
+	mmp := MessageMetadataUpdatedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_updated" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.PreviousMetadata.EventType != "type1" {
+		t.Fail()
+	}
+	payload := mmp.PreviousMetadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.Metadata.EventType != "type2" {
+		t.Fail()
+	}
+	payload = mmp.Metadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+}
+
+func TestMessageMetadataDeleted(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_deleted",
+		"channel_id":"CHANNELXXX",	
+		"event_ts":"1660398079.756349",
+		"previous_metadata":{
+			"event_type":"type",
+			"event_payload":{"key": "value"}
+		},
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",	
+		"user_id":"USERXXX",	
+		"team_id":"TEAMXXX",	
+		"message_ts":"1660398079.756349",
+		"deleted_ts":"1660398079.756349"
+	}
+	`)
+
+	mmp := MessageMetadataDeletedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_deleted" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.PreviousMetadata.EventType != "type" {
+		t.Fail()
+	}
+	payload := mmp.PreviousMetadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.DeletedTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+}

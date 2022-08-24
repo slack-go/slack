@@ -332,6 +332,47 @@ type WorkflowStepExecuteEvent struct {
 	EventTimestamp string            `json:"event_ts"`
 }
 
+// MessageMetadataPostedEvent is sent, if a message with metadata is posted
+type MessageMetadataPostedEvent struct {
+	Type             string               `json:"type"`
+	AppId            string               `json:"app_id"`
+	BotId            string               `json:"bot_id"`
+	UserId           string               `json:"user_id"`
+	TeamId           string               `json:"team_id"`
+	ChannelId        string               `json:"channel_id"`
+	Metadata         *slack.SlackMetadata `json:"metadata"`
+	MessageTimestamp string               `json:"message_ts"`
+	EventTimestamp   string               `json:"event_ts"`
+}
+
+// MessageMetadataUpdatedEvent is sent, if a message with metadata is deleted
+type MessageMetadataUpdatedEvent struct {
+	Type             string               `json:"type"`
+	ChannelId        string               `json:"channel_id"`
+	EventTimestamp   string               `json:"event_ts"`
+	PreviousMetadata *slack.SlackMetadata `json:"previous_metadata"`
+	AppId            string               `json:"app_id"`
+	BotId            string               `json:"bot_id"`
+	UserId           string               `json:"user_id"`
+	TeamId           string               `json:"team_id"`
+	MessageTimestamp string               `json:"message_ts"`
+	Metadata         *slack.SlackMetadata `json:"metadata"`
+}
+
+// MessageMetadataDeletedEvent is sent, if a message with metadata is deleted
+type MessageMetadataDeletedEvent struct {
+	Type             string               `json:"type"`
+	ChannelId        string               `json:"channel_id"`
+	EventTimestamp   string               `json:"event_ts"`
+	PreviousMetadata *slack.SlackMetadata `json:"previous_metadata"`
+	AppId            string               `json:"app_id"`
+	BotId            string               `json:"bot_id"`
+	UserId           string               `json:"user_id"`
+	TeamId           string               `json:"team_id"`
+	MessageTimestamp string               `json:"message_ts"`
+	DeletedTimestamp string               `json:"deleted_ts"`
+}
+
 type EventWorkflowStep struct {
 	WorkflowStepExecuteID string                      `json:"workflow_step_execute_id"`
 	WorkflowID            string                      `json:"workflow_id"`
@@ -503,39 +544,48 @@ const (
 	EmojiChanged = EventsAPIType("emoji_changed")
 	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
 	WorkflowStepExecute = EventsAPIType("workflow_step_execute")
+	// MessageMetadataPosted A message with metadata was posted
+	MessageMetadataPosted = EventsAPIType("message_metadata_posted")
+	// MessageMetadataPosted A message with metadata was updated
+	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
+	// MessageMetadataPosted A message with metadata was deleted
+	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
-	AppMention:            AppMentionEvent{},
-	AppHomeOpened:         AppHomeOpenedEvent{},
-	AppUninstalled:        AppUninstalledEvent{},
-	ChannelCreated:        ChannelCreatedEvent{},
-	ChannelDeleted:        ChannelDeletedEvent{},
-	ChannelArchive:        ChannelArchiveEvent{},
-	ChannelUnarchive:      ChannelUnarchiveEvent{},
-	ChannelLeft:           ChannelLeftEvent{},
-	ChannelRename:         ChannelRenameEvent{},
-	ChannelIDChanged:      ChannelIDChangedEvent{},
-	GroupDeleted:          GroupDeletedEvent{},
-	GroupArchive:          GroupArchiveEvent{},
-	GroupUnarchive:        GroupUnarchiveEvent{},
-	GroupLeft:             GroupLeftEvent{},
-	GroupRename:           GroupRenameEvent{},
-	GridMigrationFinished: GridMigrationFinishedEvent{},
-	GridMigrationStarted:  GridMigrationStartedEvent{},
-	LinkShared:            LinkSharedEvent{},
-	Message:               MessageEvent{},
-	MemberJoinedChannel:   MemberJoinedChannelEvent{},
-	MemberLeftChannel:     MemberLeftChannelEvent{},
-	PinAdded:              PinAddedEvent{},
-	PinRemoved:            PinRemovedEvent{},
-	ReactionAdded:         ReactionAddedEvent{},
-	ReactionRemoved:       ReactionRemovedEvent{},
-	TeamJoin:              TeamJoinEvent{},
-	TokensRevoked:         TokensRevokedEvent{},
-	EmojiChanged:          EmojiChangedEvent{},
-	WorkflowStepExecute:   WorkflowStepExecuteEvent{},
+	AppMention:             AppMentionEvent{},
+	AppHomeOpened:          AppHomeOpenedEvent{},
+	AppUninstalled:         AppUninstalledEvent{},
+	ChannelCreated:         ChannelCreatedEvent{},
+	ChannelDeleted:         ChannelDeletedEvent{},
+	ChannelArchive:         ChannelArchiveEvent{},
+	ChannelUnarchive:       ChannelUnarchiveEvent{},
+	ChannelLeft:            ChannelLeftEvent{},
+	ChannelRename:          ChannelRenameEvent{},
+	ChannelIDChanged:       ChannelIDChangedEvent{},
+	GroupDeleted:           GroupDeletedEvent{},
+	GroupArchive:           GroupArchiveEvent{},
+	GroupUnarchive:         GroupUnarchiveEvent{},
+	GroupLeft:              GroupLeftEvent{},
+	GroupRename:            GroupRenameEvent{},
+	GridMigrationFinished:  GridMigrationFinishedEvent{},
+	GridMigrationStarted:   GridMigrationStartedEvent{},
+	LinkShared:             LinkSharedEvent{},
+	Message:                MessageEvent{},
+	MemberJoinedChannel:    MemberJoinedChannelEvent{},
+	MemberLeftChannel:      MemberLeftChannelEvent{},
+	PinAdded:               PinAddedEvent{},
+	PinRemoved:             PinRemovedEvent{},
+	ReactionAdded:          ReactionAddedEvent{},
+	ReactionRemoved:        ReactionRemovedEvent{},
+	TeamJoin:               TeamJoinEvent{},
+	TokensRevoked:          TokensRevokedEvent{},
+	EmojiChanged:           EmojiChangedEvent{},
+	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
+	MessageMetadataPosted:  MessageMetadataPostedEvent{},
+	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
+	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
 }
