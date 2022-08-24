@@ -87,7 +87,7 @@ func TestPostMessage(t *testing.T) {
 			opt:      []MsgOption{},
 			expected: url.Values{
 				"channel": []string{"CXXX"},
-				"token":   []string{"testing-token"},
+				"token":   []string{"<REDACTED>"},
 			},
 		},
 		"Blocks": {
@@ -100,7 +100,7 @@ func TestPostMessage(t *testing.T) {
 				"blocks":  []string{blockStr},
 				"channel": []string{"CXXX"},
 				"text":    []string{"text"},
-				"token":   []string{"testing-token"},
+				"token":   []string{"<REDACTED>"},
 			},
 		},
 		"Attachment": {
@@ -114,7 +114,7 @@ func TestPostMessage(t *testing.T) {
 			expected: url.Values{
 				"attachments": []string{`[{"blocks":` + blockStr + `}]`},
 				"channel":     []string{"CXXX"},
-				"token":       []string{"testing-token"},
+				"token":       []string{"<REDACTED>"},
 			},
 		},
 		"Metadata": {
@@ -132,7 +132,7 @@ func TestPostMessage(t *testing.T) {
 			expected: url.Values{
 				"metadata": []string{`{"event_type":"testing-event","event_payload":{"id":13,"name":"testing-name"}}`},
 				"channel":  []string{"CXXX"},
-				"token":    []string{"testing-token"},
+				"token":    []string{"<REDACTED>"},
 			},
 		},
 		"Unfurl": {
@@ -142,7 +142,7 @@ func TestPostMessage(t *testing.T) {
 			},
 			expected: url.Values{
 				"channel": []string{"CXXX"},
-				"token":   []string{"testing-token"},
+				"token":   []string{"<REDACTED>"},
 				"ts":      []string{"123"},
 				"unfurls": []string{`{"something":{"text":"attachment-test","blocks":null}}`},
 			},
@@ -154,7 +154,7 @@ func TestPostMessage(t *testing.T) {
 			},
 			expected: url.Values{
 				"channel":       []string{"CXXX"},
-				"token":         []string{"testing-token"},
+				"token":         []string{"<REDACTED>"},
 				"ts":            []string{"123"},
 				"user_auth_url": []string{"https://auth-url.com"},
 			},
@@ -166,7 +166,7 @@ func TestPostMessage(t *testing.T) {
 			},
 			expected: url.Values{
 				"channel":            []string{"CXXX"},
-				"token":              []string{"testing-token"},
+				"token":              []string{"<REDACTED>"},
 				"ts":                 []string{"123"},
 				"user_auth_required": []string{"true"},
 			},
@@ -178,7 +178,7 @@ func TestPostMessage(t *testing.T) {
 			},
 			expected: url.Values{
 				"channel":           []string{"CXXX"},
-				"token":             []string{"testing-token"},
+				"token":             []string{"<REDACTED>"},
 				"ts":                []string{"123"},
 				"user_auth_message": []string{"Please!"},
 			},

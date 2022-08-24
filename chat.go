@@ -243,6 +243,17 @@ func UnsafeApplyMsgOptions(token, channel, apiurl string, options ...MsgOption) 
 }
 
 func applyMsgOptions(token, channel, apiurl string, options ...MsgOption) (sendConfig, error) {
+	// It maybe be useful to know if the token supplied was empty or a token,
+	// however we do not want tokens printed out in messages. If the token is
+	// empty, change the token to a nil string to make it obvious in the message.
+	// If the token is not empty, change the token to a redacted string.
+	switch token {
+	case "":
+		token = "nil"
+	default:
+		token = "<REDACTED>"
+	}
+
 	config := sendConfig{
 		apiurl:   apiurl,
 		endpoint: apiurl + string(chatPostMessage),
