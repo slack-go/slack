@@ -6,7 +6,7 @@ import "encoding/json"
 //
 // We call this a "request" rather than e.g. a WebSocket message or an Socket Mode "event" following python-slack-sdk:
 //
-//   https://github.com/slackapi/python-slack-sdk/blob/3f1c4c6e27bf7ee8af57699b2543e6eb7848bcf9/slack_sdk/socket_mode/request.py#L6
+// https://github.com/slackapi/python-slack-sdk/blob/3f1c4c6e27bf7ee8af57699b2543e6eb7848bcf9/slack_sdk/socket_mode/request.py#L6
 //
 // We know that node-slack-sdk calls it an "event", that makes it hard for us to distinguish our client's own event
 // that wraps both internal events and Socket Mode "events", vs node-slack-sdk's is for the latter only.
