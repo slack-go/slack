@@ -103,6 +103,34 @@ func TestLinkSharedEvent(t *testing.T) {
 	}
 }
 
+func TestLinkSharedEvent_struct(t *testing.T) {
+	e := LinkSharedEvent{
+		Type:             "link_shared",
+		User:             "Uxxxxxxx",
+		TimeStamp:        "123456789.9876",
+		Channel:          "Cxxxxxx",
+		MessageTimeStamp: "123456789.9875",
+		ThreadTimeStamp:  "123456789.9876",
+		Links: []SharedLinks{
+			{Domain: "example.com", URL: "https://example.com/12345"},
+			{Domain: "example.com", URL: "https://example.com/67890"},
+			{Domain: "another-example.com", URL: "https://yet.another-example.com/v/abcde"},
+		},
+		EventTimestamp: "123456789.9876",
+	}
+	rawE, err := json.Marshal(e)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := `{"type":"link_shared","user":"Uxxxxxxx","ts":"123456789.9876","channel":"Cxxxxxx",` +
+		`"message_ts":"123456789.9875","thread_ts":"123456789.9876","links":[{"domain":"example.com",` +
+		`"url":"https://example.com/12345"},{"domain":"example.com","url":"https://example.com/67890"},` +
+		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":"123456789.9876"}`
+	if string(rawE) != expected {
+		t.Errorf("expected %s, but got %s", expected, string(rawE))
+	}
+}
+
 func TestLinkSharedComposerEvent(t *testing.T) {
 	rawE := []byte(`
 			{
