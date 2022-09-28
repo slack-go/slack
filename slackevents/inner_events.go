@@ -218,6 +218,11 @@ type MessageEvent struct {
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
 
+	// Hidden Subtypes
+	Hidden           bool   `json:"hidden,omitempty"`     // message_changed, message_deleted, unpinned_item
+	DeletedTimestamp string `json:"deleted_ts,omitempty"` // message_deleted
+	EventTimestamp   string `json:"event_ts,omitempty"`
+
 	// bot_message (https://api.slack.com/events/message/bot_message)
 	BotID    string `json:"bot_id,omitempty"`
 	Username string `json:"username,omitempty"`
