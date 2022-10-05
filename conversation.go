@@ -26,12 +26,12 @@ type Conversation struct {
 	IsMpIM             bool     `json:"is_mpim"`
 	Unlinked           int      `json:"unlinked"`
 	NameNormalized     string   `json:"name_normalized"`
+	PreviousNames      []string `json:"previous_names"`
 	NumMembers         int      `json:"num_members"`
 	Priority           float64  `json:"priority"`
 	User               string   `json:"user"`
 
 	// TODO support pending_shared
-	// TODO support previous_names
 }
 
 // GroupConversation is the foundation for Group and Channel

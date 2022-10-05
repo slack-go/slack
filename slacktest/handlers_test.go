@@ -75,6 +75,8 @@ func TestServerRenameConversationHandler(t *testing.T) {
 	response, err := client.RenameConversation("ID", "newName")
 	assert.NoError(t, err)
 	assert.Equal(t, "newName", response.Name)
+	assert.Len(t, response.PreviousNames, 1)
+	assert.Equal(t, response.PreviousNames[0], "prevName")
 }
 
 func TestServerInviteConversationHandler(t *testing.T) {

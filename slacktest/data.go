@@ -227,20 +227,20 @@ var templateConversationJSON = `
 			"last_set": %d
 		},
         "num_members": %d,
-		"previous_names": [],
+		"previous_names": [%s],
 		"priority": 0
 	}
 }`
 
 var defaultConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
-	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 0)
+	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 0, "")
 
 var conversionPurposeTopicJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
 	nowAsJSONTime(), defaultBotID, defaultConversationName, "Apply topically for best effects", defaultBotID,
-	nowAsJSONTime(), "I didn't set this purpose on purpose!", defaultBotID, nowAsJSONTime(), 0)
+	nowAsJSONTime(), "I didn't set this purpose on purpose!", defaultBotID, nowAsJSONTime(), 0, "")
 
 var renameConversationJSON = fmt.Sprintf(templateConversationJSON, "newName",
-	nowAsJSONTime, defaultBotID, "newName", "", "", 0, "", "", 0, 0)
+	nowAsJSONTime, defaultBotID, "newName", "", "", 0, "", "", 0, 0, `"prevName"`)
 
 var inviteConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
-	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1)
+	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1, "")
