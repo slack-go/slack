@@ -100,6 +100,22 @@ func (api *Client) GetTeamInfo() (*TeamInfo, error) {
 	return api.GetTeamInfoContext(context.Background())
 }
 
+// GetOtherTeamInfo gets Team information for any team
+func (api *Client) GetOtherTeamInfo(team string) (*TeamInfo, error) {
+	if team == "" {
+		return api.GetTeamInfo()
+	}
+	values := url.Values{
+		"token": {api.token},
+	}
+	values.Add("team", team)
+	response, err := api.teamRequest(context.Background(), "team.info", values)
+	if err != nil {
+		return nil, err
+	}
+	return &response.Team, nil
+}
+
 // GetTeamInfoContext gets the Team Information of the user with a custom context
 func (api *Client) GetTeamInfoContext(ctx context.Context) (*TeamInfo, error) {
 	values := url.Values{
