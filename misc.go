@@ -155,14 +155,16 @@ func postLocalWithMultipartResponse(ctx context.Context, client httpClient, meth
 func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname, token string, values url.Values, r io.Reader, intf interface{}, d Debug) error {
 	pipeReader, pipeWriter := io.Pipe()
 	wr := multipart.NewWriter(pipeWriter)
-	err := createFormFields(wr, values)
-	if err != nil {
-		return err
-	}
 
 	errc := make(chan error)
 	go func() {
 		defer pipeWriter.Close()
+		defer wr.Close()
+		err := createFormFields(wr, values)
+		if err != nil {
+			errc <- err
+			return
+		}
 		ioWriter, err := wr.CreateFormFile(fieldname, name)
 		if err != nil {
 			errc <- err
@@ -183,7 +185,6 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 	if err != nil {
 		return err
 	}
-	wr.Close()
 	req.Header.Add("Content-Type", wr.FormDataContentType())
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	resp, err := client.Do(req)
