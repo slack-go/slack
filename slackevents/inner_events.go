@@ -524,6 +524,18 @@ func (e MessageEvent) IsEdited() bool {
 		e.Message.Edited != nil
 }
 
+// TeamAccessGrantedEvent is sent if access to teams was granted for your org-wide app.
+type TeamAccessGrantedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
+// TeamAccessRevokedEvent is sent if access to teams was revoked for your org-wide app.
+type TeamAccessRevokedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
 type EventsAPIType string
 
 const (
@@ -599,6 +611,10 @@ const (
 	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
 	// MessageMetadataPosted A message with metadata was deleted
 	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
+	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
+	TeamAccessGranted = EventsAPIType("team_access_granted")
+	// TeamAccessrevoked is sent if access to teams was revoked for your org-wide app.
+	TeamAccessrevoked = EventsAPIType("team_access_revoked")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -641,4 +657,6 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	MessageMetadataPosted:  MessageMetadataPostedEvent{},
 	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
 	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
+	TeamAccessGranted:      TeamAccessGrantedEvent{},
+	TeamAccessrevoked:      TeamAccessRevokedEvent{},
 }
