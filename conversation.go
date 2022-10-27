@@ -342,17 +342,26 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 	return response.NoOp, response.AlreadyClosed, response.Err()
 }
 
+type CreateConversationParams struct {
+	ChannelName string
+	IsPrivate   bool
+	TeamID      string
+}
+
 // CreateConversation initiates a public or private channel-based conversation
-func (api *Client) CreateConversation(channelName string, isPrivate bool) (*Channel, error) {
-	return api.CreateConversationContext(context.Background(), channelName, isPrivate)
+func (api *Client) CreateConversation(params CreateConversationParams) (*Channel, error) {
+	return api.CreateConversationContext(context.Background(), params)
 }
 
 // CreateConversationContext initiates a public or private channel-based conversation with a custom context
-func (api *Client) CreateConversationContext(ctx context.Context, channelName string, isPrivate bool) (*Channel, error) {
+func (api *Client) CreateConversationContext(ctx context.Context, params CreateConversationParams) (*Channel, error) {
 	values := url.Values{
 		"token":      {api.token},
-		"name":       {channelName},
-		"is_private": {strconv.FormatBool(isPrivate)},
+		"name":       {params.ChannelName},
+		"is_private": {strconv.FormatBool(params.IsPrivate)},
+	}
+	if params.TeamID != "" {
+		values.Set("team_id", params.TeamID)
 	}
 	response, err := api.channelRequest(ctx, "conversations.create", values)
 	if err != nil {
