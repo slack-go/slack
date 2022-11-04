@@ -155,6 +155,47 @@ type GroupRenameInfo struct {
 	Created int    `json:"created"`
 }
 
+// FileChangeEvent represents the information associated with the File change
+// event.
+type FileChangeEvent struct {
+	Type   string        `json:"type"`
+	FileID string        `json:"file_id"`
+	File   FileEventFile `json:"file"`
+}
+
+// FileDeletedEvent represents the information associated with the File deleted
+// event.
+type FileDeletedEvent struct {
+	Type           string `json:"type"`
+	FileID         string `json:"file_id"`
+	EventTimestamp string `json:"event_ts"`
+}
+
+// FileSharedEvent represents the information associated with the File shared
+// event.
+type FileSharedEvent struct {
+	Type           string        `json:"type"`
+	ChannelID      string        `json:"channel_id"`
+	FileID         string        `json:"file_id"`
+	UserID         string        `json:"user_id"`
+	File           FileEventFile `json:"file"`
+	EventTimestamp string        `json:"event_ts"`
+}
+
+// FileUnsharedEvent represents the information associated with the File
+// unshared event.
+type FileUnsharedEvent struct {
+	Type   string        `json:"type"`
+	FileID string        `json:"file_id"`
+	File   FileEventFile `json:"file"`
+}
+
+// FileEventFile represents information on the specific file being shared in a
+// file-related Slack event.
+type FileEventFile struct {
+	ID string `json:"id"`
+}
+
 // GridMigrationFinishedEvent An enterprise grid migration has finished on this workspace.
 type GridMigrationFinishedEvent struct {
 	Type         string `json:"type"`
@@ -516,6 +557,14 @@ const (
 	GroupLeft = EventsAPIType("group_left")
 	// GroupRename is sent when a group is renamed.
 	GroupRename = EventsAPIType("group_rename")
+	// FileChange is sent when a file is changed.
+	FileChange = EventsAPIType("file_change")
+	// FileDeleted is sent when a file is deleted.
+	FileDeleted = EventsAPIType("file_deleted")
+	// FileShared is sent when a file is shared.
+	FileShared = EventsAPIType("file_shared")
+	// FileUnshared is sent when a file is unshared.
+	FileUnshared = EventsAPIType("file_unshared")
 	// GridMigrationFinished An enterprise grid migration has finished on this workspace.
 	GridMigrationFinished = EventsAPIType("grid_migration_finished")
 	// GridMigrationStarted An enterprise grid migration has started on this workspace.
@@ -566,6 +615,10 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	ChannelLeft:            ChannelLeftEvent{},
 	ChannelRename:          ChannelRenameEvent{},
 	ChannelIDChanged:       ChannelIDChangedEvent{},
+	FileChange:             FileChangeEvent{},
+	FileDeleted:            FileDeletedEvent{},
+	FileShared:             FileSharedEvent{},
+	FileUnshared:           FileUnsharedEvent{},
 	GroupDeleted:           GroupDeletedEvent{},
 	GroupArchive:           GroupArchiveEvent{},
 	GroupUnarchive:         GroupUnarchiveEvent{},
