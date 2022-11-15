@@ -412,6 +412,34 @@ func NewDatetimePickerBlockElement(actionID string) *DatetimePickerBlockElement 
 	}
 }
 
+// EmailInputBlockElement creates a field where a user can enter an email.
+// Email input elements are currently only available in modals.
+//
+// More Information: https://api.slack.com/reference/block-kit/block-elements#email
+type EmailInputBlockElement struct {
+	Type                 MessageElementType    `json:"type"`
+	ActionID             string                `json:"action_id,omitempty"`
+	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
+	InitialValue         string                `json:"initial_value,omitempty"`
+	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s EmailInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewEmailInputBlockElement returns an instance of a plain-text input
+// element that only accepts email addresses.
+func NewEmailInputBlockElement(placeholder *TextBlockObject, actionID string) *EmailInputBlockElement {
+	return &EmailInputBlockElement{
+		Type:        METEmailInput,
+		ActionID:    actionID,
+		Placeholder: placeholder,
+	}
+}
+
 // NumberInputBlockElement defines an element which lets users select a number
 // from a nice UI. This element can only be used inside modals.
 //
