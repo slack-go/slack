@@ -143,3 +143,11 @@ func TestNoTokenVerification(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestNoInnerEvent(t *testing.T) {
+	noInnerEvent := `{"type":"event_callback"}`
+	_, e := ParseEvent(json.RawMessage(noInnerEvent), OptionNoVerifyToken())
+	if e == nil {
+		t.Fail()
+	}
+}
