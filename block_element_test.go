@@ -153,7 +153,7 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 func TestNewEmailInputBlockElement(t *testing.T) {
 
-	emailInputElement := NewNumberInputBlockElement(nil, "test")
+	emailInputElement := NewEmailInputBlockElement(nil, "test")
 
 	assert.Equal(t, string(emailInputElement.Type), "email_text_input")
 	assert.Equal(t, emailInputElement.ActionID, "test")
