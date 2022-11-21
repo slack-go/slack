@@ -456,6 +456,7 @@ func (api *Client) ShareFilePublicURLContext(ctx context.Context, fileID string)
 	return &response.File, response.Comments, &response.Paging, nil
 }
 
+// getUploadURLExternal gets a URL and fileID from slack which can later be used to upload a file
 func (api *Client) getUploadURLExternal(ctx context.Context, fileSize int, fileName, altText, snippetText string) (*getUploadURLExternalResponse, error) {
 	values := url.Values{
 		"token": {api.token},
@@ -477,6 +478,7 @@ func (api *Client) getUploadURLExternal(ctx context.Context, fileSize int, fileN
 	return response, response.Err()
 }
 
+// uploadToURL uploads the file to the provided URL using post method
 func (api *Client) uploadToURL(ctx context.Context, params uploadToExternalParams) (err error) {
 	values := url.Values{}
 	if params.Content != "" {
@@ -488,11 +490,11 @@ func (api *Client) uploadToURL(ctx context.Context, params uploadToExternalParam
 	} else if params.Reader != nil {
 		err = postWithMultipartResponse(ctx, api.httpclient, params.UploadURL, params.Filename, "file", api.token, values, params.Reader, nil, api)
 	}
-	_ = 1
 	return err
 }
 
-func (api *Client) completeUploadExternal(ctx context.Context, fileID string, params FileUploadV2Parameters) (file *FileSummary, err error) {
+// completeUploadExternal once files are uploaded, this completes the upload and shares it to the specified channel
+func (api *Client) completeUploadExternal(ctx context.Context, fileID string, params FileUploadV2Parameters) (file *completeUploadExternalResponse, err error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -519,16 +521,21 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 	if response.Err() != nil {
 		return nil, response.Err()
 	}
-	if len(response.Files) != 1 {
-		return nil, fmt.Errorf("files.completeUploadExternal: something went wrong; recieved %d files instead of 1", len(response.Files))
-	}
-	return &response.Files[0], nil
+	return response, nil
 }
 
+// UploadFileV2 uploads file to a given slack channel using 3 steps - 
+// 	1. Get an upload URL using files.getUploadURLExternal API
+//  2. Send the file as a post to the URL provided by slack
+//  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
 func (api *Client) UploadFileV2(params FileUploadV2Parameters) (*FileSummary, error) {
 	return api.UploadFileV2Context(context.Background(), params)
 }
 
+// UploadFileV2 uploads file to a given slack channel using 3 steps with a custom context - 
+// 	1. Get an upload URL using files.getUploadURLExternal API
+//  2. Send the file as a post to the URL provided by slack
+//  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
 func (api *Client) UploadFileV2Context(ctx context.Context, params FileUploadV2Parameters) (file *FileSummary, err error) {
 	if params.Filename == "" {
 		return nil, fmt.Errorf("file.upload.v2: filename cannot be empty")
@@ -555,9 +562,13 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params FileUploadV2P
 		return nil, err
 	}
 
-	file, err = api.completeUploadExternal(ctx, u.FileID, params)
+	c, err := api.completeUploadExternal(ctx, u.FileID, params)
 	if err != nil {
 		return nil, err
 	}
-	return file, nil
+	if len(c.Files) != 1 {
+		return nil, fmt.Errorf("file.upload.v2: something went wrong; recieved %d files instead of 1", len(c.Files))
+	}
+
+	return &c.Files[0], nil
 }
