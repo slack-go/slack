@@ -185,3 +185,13 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 	assert.Equal(t, len(radioButtonsElement.Options), 3)
 
 }
+
+func TestNewNumberInputBlockElement(t *testing.T) {
+
+	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
+
+	assert.Equal(t, string(numberInputElement.Type), "number_input")
+	assert.Equal(t, numberInputElement.ActionID, "test")
+	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
+
+}

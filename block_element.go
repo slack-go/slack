@@ -11,6 +11,7 @@ const (
 	METTimepicker     MessageElementType = "timepicker"
 	METPlainTextInput MessageElementType = "plain_text_input"
 	METRadioButtons   MessageElementType = "radio_buttons"
+	METNumber         MessageElementType = "number_input"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
@@ -473,5 +474,36 @@ func NewRadioButtonsBlockElement(actionID string, options ...*OptionBlockObject)
 		Type:     METRadioButtons,
 		ActionID: actionID,
 		Options:  options,
+	}
+}
+
+// NumberInputBlockElement creates a field where a user can enter number
+// data.
+// Number input elements are currently only available in modals.
+//
+// More Information: https://api.slack.com/reference/block-kit/block-elements#number
+type NumberInputBlockElement struct {
+	Type                 MessageElementType    `json:"type"`
+	IsDecimalAllowed     bool                  `json:"is_decimal_allowed"`
+	ActionID             string                `json:"action_id,omitempty"`
+	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
+	InitialValue         string                `json:"initial_value,omitempty"`
+	MinValue             string                `json:"min_value,omitempty"`
+	MaxValue             string                `json:"max_value,omitempty"`
+	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s NumberInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewNumberInputBlockElement returns an instance of a number input element
+func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string, isDecimalAllowed bool) *NumberInputBlockElement {
+	return &NumberInputBlockElement{
+		Type:             METNumber,
+		ActionID:         actionID,
+		Placeholder:      placeholder,
+		IsDecimalAllowed: isDecimalAllowed,
 	}
 }
