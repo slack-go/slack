@@ -71,6 +71,7 @@ type GetConversationsForUserParameters struct {
 	Types           []string
 	Limit           int
 	ExcludeArchived bool
+	TeamID          string
 }
 
 type responseMetaData struct {
@@ -137,6 +138,10 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	if params.ExcludeArchived {
 		values.Add("exclude_archived", "true")
 	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
+
 	response := struct {
 		Channels         []Channel        `json:"channels"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
