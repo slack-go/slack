@@ -524,7 +524,7 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 	return response, nil
 }
 
-// UploadFileV2 uploads file to a given slack channel using 3 steps - 
+// UploadFileV2 uploads file to a given slack channel using 3 steps -
 // 	1. Get an upload URL using files.getUploadURLExternal API
 //  2. Send the file as a post to the URL provided by slack
 //  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
@@ -532,7 +532,7 @@ func (api *Client) UploadFileV2(params FileUploadV2Parameters) (*FileSummary, er
 	return api.UploadFileV2Context(context.Background(), params)
 }
 
-// UploadFileV2 uploads file to a given slack channel using 3 steps with a custom context - 
+// UploadFileV2 uploads file to a given slack channel using 3 steps with a custom context -
 // 	1. Get an upload URL using files.getUploadURLExternal API
 //  2. Send the file as a post to the URL provided by slack
 //  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
@@ -567,7 +567,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params FileUploadV2P
 		return nil, err
 	}
 	if len(c.Files) != 1 {
-		return nil, fmt.Errorf("file.upload.v2: something went wrong; recieved %d files instead of 1", len(c.Files))
+		return nil, fmt.Errorf("file.upload.v2: something went wrong; received %d files instead of 1", len(c.Files))
 	}
 
 	return &c.Files[0], nil
