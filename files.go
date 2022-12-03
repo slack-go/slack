@@ -459,10 +459,10 @@ func (api *Client) ShareFilePublicURLContext(ctx context.Context, fileID string)
 // getUploadURLExternal gets a URL and fileID from slack which can later be used to upload a file
 func (api *Client) getUploadURLExternal(ctx context.Context, fileSize int, fileName, altText, snippetText string) (*getUploadURLExternalResponse, error) {
 	values := url.Values{
-		"token": {api.token},
+		"token":    {api.token},
+		"filename": {fileName},
+		"length":   {strconv.Itoa(fileSize)},
 	}
-	values.Add("filename", fileName)
-	values.Add("length", strconv.Itoa(fileSize))
 	if altText != "" {
 		values.Add("initial_comment", altText)
 	}
@@ -495,17 +495,16 @@ func (api *Client) uploadToURL(ctx context.Context, params uploadToExternalParam
 
 // completeUploadExternal once files are uploaded, this completes the upload and shares it to the specified channel
 func (api *Client) completeUploadExternal(ctx context.Context, fileID string, params FileUploadV2Parameters) (file *completeUploadExternalResponse, err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
-
 	request := []FileSummary{{ID: fileID, Title: params.Title}}
 	requestBytes, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
-	values.Add("files", string(requestBytes))
-	values.Add("channel_id", params.Channel)
+	values := url.Values{
+		"token":      {api.token},
+		"files":      {string(requestBytes)},
+		"channel_id": {params.Channel},
+	}
 
 	if params.InitialComment != "" {
 		values.Add("initial_comment", params.InitialComment)
