@@ -122,6 +122,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &OverflowBlockElement{}
 	case "radio_buttons":
 		e = &RadioButtonsBlockElement{}
+	case "number_input":
+		e = &NumberInputBlockElement{}
 	default:
 		return errors.New("unsupported block element type")
 	}
@@ -192,6 +194,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &RadioButtonsBlockElement{}
 		case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
 			blockElement = &SelectBlockElement{}
+		case "number_input":
+			blockElement = &NumberInputBlockElement{}
 		default:
 			return fmt.Errorf("unsupported block element type %v", blockElementType)
 		}
