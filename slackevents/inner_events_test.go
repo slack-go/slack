@@ -239,7 +239,7 @@ func TestLinkSharedEvent_struct(t *testing.T) {
 	expected := `{"type":"link_shared","user":"Uxxxxxxx","ts":"123456789.9876","channel":"Cxxxxxx",` +
 		`"message_ts":"123456789.9875","thread_ts":"123456789.9876","links":[{"domain":"example.com",` +
 		`"url":"https://example.com/12345"},{"domain":"example.com","url":"https://example.com/67890"},` +
-		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":123456789.9876}`
+		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":"123456789.9876"}`
 	if string(rawE) != expected {
 		t.Errorf("expected %s, but got %s", expected, string(rawE))
 	}
