@@ -258,6 +258,10 @@ type MessageEvent struct {
 	PreviousMessage *MessageEvent `json:"previous_message,omitempty"`
 	Edited          *Edited       `json:"edited,omitempty"`
 
+	// DeletedTimestamp is set if the SubType is message_deleted. It is the
+	// timestamp of the message that has been deleted.
+	DeletedTimestamp string `json:"deleted_ts,omitempty"`
+
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
 
