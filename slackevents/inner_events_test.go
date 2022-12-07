@@ -239,7 +239,7 @@ func TestLinkSharedEvent_struct(t *testing.T) {
 	expected := `{"type":"link_shared","user":"Uxxxxxxx","ts":"123456789.9876","channel":"Cxxxxxx",` +
 		`"message_ts":"123456789.9875","thread_ts":"123456789.9876","links":[{"domain":"example.com",` +
 		`"url":"https://example.com/12345"},{"domain":"example.com","url":"https://example.com/67890"},` +
-		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":"123456789.9876"}`
+		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":123456789.9876}`
 	if string(rawE) != expected {
 		t.Errorf("expected %s, but got %s", expected, string(rawE))
 	}
@@ -641,10 +641,10 @@ func TestMessageMetadataPosted(t *testing.T) {
 	{
 		"type":"message_metadata_posted",
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
-		"channel_id":"CHANNELXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
+		"channel_id":"CHANNELXXX",
 		"metadata":{
 			"event_type":"type",
 			"event_payload":{"key": "value"}
@@ -697,16 +697,16 @@ func TestMessageMetadataUpdated(t *testing.T) {
 	rawE := []byte(`
 	{
 		"type":"message_metadata_updated",
-		"channel_id":"CHANNELXXX",	
+		"channel_id":"CHANNELXXX",
 		"event_ts":"1660398079.756349",
 		"previous_metadata":{
 			"event_type":"type1",
 			"event_payload":{"key1": "value1"}
 		},
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
 		"message_ts":"1660398079.756349",
 		"metadata":{
 			"event_type":"type2",
@@ -765,16 +765,16 @@ func TestMessageMetadataDeleted(t *testing.T) {
 	rawE := []byte(`
 	{
 		"type":"message_metadata_deleted",
-		"channel_id":"CHANNELXXX",	
+		"channel_id":"CHANNELXXX",
 		"event_ts":"1660398079.756349",
 		"previous_metadata":{
 			"event_type":"type",
 			"event_payload":{"key": "value"}
 		},
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
 		"message_ts":"1660398079.756349",
 		"deleted_ts":"1660398079.756349"
 	}
