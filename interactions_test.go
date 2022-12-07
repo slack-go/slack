@@ -135,7 +135,13 @@ const (
 							"type": "conversations_select",
 							"value": "C1AB2C3DE"
 						}
-					}
+					},
+          "some_datetime": {
+            "value": {
+              "type": "datetimepicker",
+              "selected_date_time": null
+            }
+          }
 				}
 			}
 		},
@@ -281,16 +287,22 @@ func TestViewSubmissionCallback(t *testing.T) {
 			},
 			State: &ViewState{
 				Values: map[string]map[string]BlockAction{
-					"multi-line": map[string]BlockAction{
+					"multi-line": {
 						"ml-value": BlockAction{
 							Type:  "plain_text_input",
 							Value: "No onions",
 						},
 					},
-					"target_channel": map[string]BlockAction{
+					"target_channel": {
 						"target_select": BlockAction{
 							Type:  "conversations_select",
 							Value: "C1AB2C3DE",
+						},
+					},
+					"some_datetime": {
+						"value": BlockAction{
+							Type: "datetimepicker",
+							// No value!
 						},
 					},
 				},
