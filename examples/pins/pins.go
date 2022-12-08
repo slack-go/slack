@@ -8,7 +8,7 @@ import (
 )
 
 /*
-   WARNING: This example is destructive in the sense that it create a channel called testpinning
+WARNING: This example is destructive in the sense that it create a channel called testpinning
 */
 func main() {
 	var (
