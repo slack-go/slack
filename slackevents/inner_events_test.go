@@ -38,6 +38,120 @@ func TestAppUninstalled(t *testing.T) {
 	}
 }
 
+func TestFileChangeEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_change",
+			"file_id": "F1234567890",
+			"file": {
+				"id": "F1234567890"
+			}
+		}
+	`)
+
+	var e FileChangeEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_change" {
+		t.Errorf("type should be file_change, was %s", e.Type)
+	}
+	if e.FileID != "F1234567890" {
+		t.Errorf("file ID should be F1234567890, was %s", e.FileID)
+	}
+	if e.File.ID != "F1234567890" {
+		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	}
+}
+
+func TestFileDeletedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_deleted",
+			"file_id": "F1234567890",
+			"event_ts": "1234567890.123456"
+		}
+	`)
+
+	var e FileDeletedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_deleted" {
+		t.Errorf("type should be file_deleted, was %s", e.Type)
+	}
+	if e.FileID != "F1234567890" {
+		t.Errorf("file ID should be F1234567890, was %s", e.FileID)
+	}
+	if e.EventTimestamp != "1234567890.123456" {
+		t.Errorf("event timestamp should be 1234567890.123456, was %s", e.EventTimestamp)
+	}
+}
+
+func TestFileSharedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_shared",
+			"channel_id": "C1234567890",
+			"file_id": "F1234567890",
+			"user_id": "U11235813",
+			"file": {
+				"id": "F1234567890"
+			},
+			"event_ts": "1234567890.123456"
+		}
+	`)
+
+	var e FileSharedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_shared" {
+		t.Errorf("type should be file_shared, was %s", e.Type)
+	}
+	if e.ChannelID != "C1234567890" {
+		t.Errorf("channel ID should be C1234567890, was %s", e.ChannelID)
+	}
+	if e.FileID != "F1234567890" {
+		t.Errorf("file ID should be F1234567890, was %s", e.FileID)
+	}
+	if e.UserID != "U11235813" {
+		t.Errorf("user ID should be U11235813, was %s", e.UserID)
+	}
+	if e.File.ID != "F1234567890" {
+		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	}
+	if e.EventTimestamp != "1234567890.123456" {
+		t.Errorf("event timestamp should be 1234567890.123456, was %s", e.EventTimestamp)
+	}
+}
+
+func TestFileUnsharedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_unshared",
+			"file_id": "F1234567890",
+			"file": {
+				"id": "F1234567890"
+			}
+		}
+	`)
+
+	var e FileUnsharedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_unshared" {
+		t.Errorf("type should be file_shared, was %s", e.Type)
+	}
+	if e.FileID != "F1234567890" {
+		t.Errorf("file ID should be F1234567890, was %s", e.FileID)
+	}
+	if e.File.ID != "F1234567890" {
+		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	}
+}
+
 func TestGridMigrationFinishedEvent(t *testing.T) {
 	rawE := []byte(`
 			{
@@ -100,6 +214,34 @@ func TestLinkSharedEvent(t *testing.T) {
 	err := json.Unmarshal(rawE, &LinkSharedEvent{})
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestLinkSharedEvent_struct(t *testing.T) {
+	e := LinkSharedEvent{
+		Type:             "link_shared",
+		User:             "Uxxxxxxx",
+		TimeStamp:        "123456789.9876",
+		Channel:          "Cxxxxxx",
+		MessageTimeStamp: "123456789.9875",
+		ThreadTimeStamp:  "123456789.9876",
+		Links: []SharedLinks{
+			{Domain: "example.com", URL: "https://example.com/12345"},
+			{Domain: "example.com", URL: "https://example.com/67890"},
+			{Domain: "another-example.com", URL: "https://yet.another-example.com/v/abcde"},
+		},
+		EventTimestamp: "123456789.9876",
+	}
+	rawE, err := json.Marshal(e)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := `{"type":"link_shared","user":"Uxxxxxxx","ts":"123456789.9876","channel":"Cxxxxxx",` +
+		`"message_ts":"123456789.9875","thread_ts":"123456789.9876","links":[{"domain":"example.com",` +
+		`"url":"https://example.com/12345"},{"domain":"example.com","url":"https://example.com/67890"},` +
+		`{"domain":"another-example.com","url":"https://yet.another-example.com/v/abcde"}],"event_ts":"123456789.9876"}`
+	if string(rawE) != expected {
+		t.Errorf("expected %s, but got %s", expected, string(rawE))
 	}
 }
 
@@ -429,6 +571,253 @@ func TestEmojiChanged(t *testing.T) {
 		t.Fail()
 	}
 	if ece.NewName != "cheese-grin" {
+		t.Fail()
+	}
+}
+
+func TestWorkflowStepExecute(t *testing.T) {
+	// see: https://api.slack.com/events/workflow_step_execute
+	rawE := []byte(`
+	{
+		"type":"workflow_step_execute",
+		"callback_id":"open_ticket",
+		"workflow_step":{
+			"workflow_step_execute_id":"1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326",
+			"workflow_id":"123456789012345678",
+			"workflow_instance_id":"987654321098765432",
+			"step_id":"12a345bc-1a23-4567-8b90-1234a567b8c9",
+			"inputs":{
+				"example-select-input":{
+					"value": "value-two",
+					"skip_variable_replacement": false
+				}
+			},
+			"outputs":[
+			]
+		},
+		"event_ts":"1643290847.766536"
+	}
+	`)
+
+	wse := WorkflowStepExecuteEvent{}
+	err := json.Unmarshal(rawE, &wse)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if wse.Type != "workflow_step_execute" {
+		t.Fail()
+	}
+	if wse.CallbackID != "open_ticket" {
+		t.Fail()
+	}
+	if wse.WorkflowStep.WorkflowStepExecuteID != "1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326" {
+		t.Fail()
+	}
+	if wse.WorkflowStep.WorkflowID != "123456789012345678" {
+		t.Fail()
+	}
+	if wse.WorkflowStep.WorkflowInstanceID != "987654321098765432" {
+		t.Fail()
+	}
+	if wse.WorkflowStep.StepID != "12a345bc-1a23-4567-8b90-1234a567b8c9" {
+		t.Fail()
+	}
+	if len(*wse.WorkflowStep.Inputs) == 0 {
+		t.Fail()
+	}
+	if inputElement, ok := (*wse.WorkflowStep.Inputs)["example-select-input"]; ok {
+		if inputElement.Value != "value-two" {
+			t.Fail()
+		}
+		if inputElement.SkipVariableReplacement != false {
+			t.Fail()
+		}
+	}
+}
+
+func TestMessageMetadataPosted(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_posted",
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
+		"channel_id":"CHANNELXXX",
+		"metadata":{
+			"event_type":"type",
+			"event_payload":{"key": "value"}
+		},
+		"message_ts":"1660398079.756349",
+		"event_ts":"1660398079.756349"
+	}
+	`)
+
+	mmp := MessageMetadataPostedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_posted" {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.Metadata.EventType != "type" {
+		t.Fail()
+	}
+	payload := mmp.Metadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+}
+
+func TestMessageMetadataUpdated(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_updated",
+		"channel_id":"CHANNELXXX",
+		"event_ts":"1660398079.756349",
+		"previous_metadata":{
+			"event_type":"type1",
+			"event_payload":{"key1": "value1"}
+		},
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
+		"message_ts":"1660398079.756349",
+		"metadata":{
+			"event_type":"type2",
+			"event_payload":{"key2": "value2"}
+		}
+	}
+	`)
+
+	mmp := MessageMetadataUpdatedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_updated" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.PreviousMetadata.EventType != "type1" {
+		t.Fail()
+	}
+	payload := mmp.PreviousMetadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.Metadata.EventType != "type2" {
+		t.Fail()
+	}
+	payload = mmp.Metadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+}
+
+func TestMessageMetadataDeleted(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type":"message_metadata_deleted",
+		"channel_id":"CHANNELXXX",
+		"event_ts":"1660398079.756349",
+		"previous_metadata":{
+			"event_type":"type",
+			"event_payload":{"key": "value"}
+		},
+		"app_id":"APPXXX",
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
+		"message_ts":"1660398079.756349",
+		"deleted_ts":"1660398079.756349"
+	}
+	`)
+
+	mmp := MessageMetadataDeletedEvent{}
+	err := json.Unmarshal(rawE, &mmp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if mmp.Type != "message_metadata_deleted" {
+		t.Fail()
+	}
+	if mmp.ChannelId != "CHANNELXXX" {
+		t.Fail()
+	}
+	if mmp.EventTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.PreviousMetadata.EventType != "type" {
+		t.Fail()
+	}
+	payload := mmp.PreviousMetadata.EventPayload
+	if len(payload) <= 0 {
+		t.Fail()
+	}
+	if mmp.AppId != "APPXXX" {
+		t.Fail()
+	}
+	if mmp.BotId != "BOTXXX" {
+		t.Fail()
+	}
+	if mmp.UserId != "USERXXX" {
+		t.Fail()
+	}
+	if mmp.TeamId != "TEAMXXX" {
+		t.Fail()
+	}
+	if mmp.MessageTimestamp != "1660398079.756349" {
+		t.Fail()
+	}
+	if mmp.DeletedTimestamp != "1660398079.756349" {
 		t.Fail()
 	}
 }
