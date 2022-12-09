@@ -71,6 +71,7 @@ type GetConversationsForUserParameters struct {
 	Types           []string
 	Limit           int
 	ExcludeArchived bool
+	TeamID          string
 }
 
 type responseMetaData struct {
@@ -137,6 +138,10 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	if params.ExcludeArchived {
 		values.Add("exclude_archived", "true")
 	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
+
 	response := struct {
 		Channels         []Channel        `json:"channels"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
@@ -398,13 +403,14 @@ func (api *Client) LeaveConversationContext(ctx context.Context, channelID strin
 }
 
 type GetConversationRepliesParameters struct {
-	ChannelID string
-	Timestamp string
-	Cursor    string
-	Inclusive bool
-	Latest    string
-	Limit     int
-	Oldest    string
+	ChannelID          string
+	Timestamp          string
+	Cursor             string
+	Inclusive          bool
+	Latest             string
+	Limit              int
+	Oldest             string
+	IncludeAllMetadata bool
 }
 
 // GetConversationReplies retrieves a thread of messages posted to a conversation
@@ -435,6 +441,11 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		values.Add("inclusive", "1")
 	} else {
 		values.Add("inclusive", "0")
+	}
+	if params.IncludeAllMetadata {
+		values.Add("include_all_metadata", "1")
+	} else {
+		values.Add("include_all_metadata", "0")
 	}
 	response := struct {
 		SlackResponse
