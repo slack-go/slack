@@ -402,6 +402,7 @@ type EmailTextInputBlockElement struct {
 	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
 	InitialValue         string                `json:"initial_value,omitempty"`
 	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
 }
 
 // ElementType returns the type of the Element
@@ -430,6 +431,7 @@ type URLTextInputBlockElement struct {
 	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
 	InitialValue         string                `json:"initial_value,omitempty"`
 	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
 }
 
 // ElementType returns the type of the Element
