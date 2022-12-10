@@ -11,6 +11,8 @@ const (
 	METTimepicker     MessageElementType = "timepicker"
 	METPlainTextInput MessageElementType = "plain_text_input"
 	METRadioButtons   MessageElementType = "radio_buttons"
+	METEmailTextInput MessageElementType = "email_text_input"
+	METURLTextInput   MessageElementType = "url_text_input"
 	METNumber         MessageElementType = "number_input"
 
 	MixedElementImage MixedElementType = "mixed_image"
@@ -387,6 +389,64 @@ func NewTimePickerBlockElement(actionID string) *TimePickerBlockElement {
 	return &TimePickerBlockElement{
 		Type:     METTimepicker,
 		ActionID: actionID,
+	}
+}
+
+// EmailTextInputBlockElement creates a field where a user can enter email
+// data.
+// email-text-input elements are currently only available in modals.
+//
+// More Information: https://api.slack.com/reference/block-kit/block-elements#email
+type EmailTextInputBlockElement struct {
+	Type                 MessageElementType    `json:"type"`
+	ActionID             string                `json:"action_id,omitempty"`
+	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
+	InitialValue         string                `json:"initial_value,omitempty"`
+	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s EmailTextInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewEmailTextInputBlockElement returns an instance of a plain-text input
+// element
+func NewEmailTextInputBlockElement(placeholder *TextBlockObject, actionID string) *EmailTextInputBlockElement {
+	return &EmailTextInputBlockElement{
+		Type:        METEmailTextInput,
+		ActionID:    actionID,
+		Placeholder: placeholder,
+	}
+}
+
+// URLTextInputBlockElement creates a field where a user can enter url data.
+//
+// url-text-input elements are currently only available in modals.
+//
+// More Information: https://api.slack.com/reference/block-kit/block-elements#url
+type URLTextInputBlockElement struct {
+	Type                 MessageElementType    `json:"type"`
+	ActionID             string                `json:"action_id,omitempty"`
+	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
+	InitialValue         string                `json:"initial_value,omitempty"`
+	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s URLTextInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewURLTextInputBlockElement returns an instance of a plain-text input
+// element
+func NewURLTextInputBlockElement(placeholder *TextBlockObject, actionID string) *URLTextInputBlockElement {
+	return &URLTextInputBlockElement{
+		Type:        METURLTextInput,
+		ActionID:    actionID,
+		Placeholder: placeholder,
 	}
 }
 

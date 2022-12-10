@@ -142,6 +142,20 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 }
 
+func TestNewEmailTextInputBlockElement(t *testing.T) {
+	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
+
+	assert.Equal(t, string(emailTextInputElement.Type), "email_text_input")
+	assert.Equal(t, emailTextInputElement.ActionID, "example@example.com")
+}
+
+func TestNewURLTextInputBlockElement(t *testing.T) {
+	urlTextInputElement := NewURLTextInputBlockElement(nil, "www.example.com")
+
+	assert.Equal(t, string(urlTextInputElement.Type), "url_text_input")
+	assert.Equal(t, urlTextInputElement.ActionID, "www.example.com")
+}
+
 func TestNewCheckboxGroupsBlockElement(t *testing.T) {
 	// Build Text Objects associated with each option
 	checkBoxOptionTextOne := NewTextBlockObject("plain_text", "Check One", false, false)
