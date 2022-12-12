@@ -564,6 +564,55 @@ func (api *Client) SetUserRealNameContextWithUser(ctx context.Context, user, rea
 	return response.Err()
 }
 
+// SetUserCustomFields sets Custom Profile fields on the provided users account.  Due to the non-repeating elements
+// within the request, a map fields is required.  The key in the map signifies the field that will be updated.
+//
+// Note: You may need to change the way the custom field is populated within the Profile section of the Admin Console from
+// SCIM or User Entered to API.
+//
+// See GetTeamProfile for information to retrieve possible fields for your account.
+func (api *Client) SetUserCustomFields(userID string, customFields map[string]UserProfileCustomField) error {
+	return api.SetUserCustomFieldsContext(context.Background(), userID, customFields)
+}
+
+// SetUserCustomFieldsContext will set a users custom profile field with context.
+//
+// For more information see SetUserCustomFields
+func (api *Client) SetUserCustomFieldsContext(ctx context.Context, userID string, customFields map[string]UserProfileCustomField) error {
+
+	// Convert data to data type with custom marshall / unmarshall
+	// For more information, see UserProfileCustomFields definition.
+	updateFields := UserProfileCustomFields{}
+	updateFields.SetMap(customFields)
+
+	// This anonymous struct is needed to set the fields level of the request data.  The base struct for
+	// UserProfileCustomFields has an unexported variable named fields that does not contain a struct tag,
+	// which has resulted in this configuration.
+	profile, err := json.Marshal(&struct {
+		Fields UserProfileCustomFields `json:"fields"`
+	}{
+		Fields: updateFields,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{
+		"token":   {api.token},
+		"user":    {userID},
+		"profile": {string(profile)},
+	}
+
+	response := &userResponseFull{}
+	if err := postForm(ctx, api.httpclient, APIURL+"users.profile.set", values, response, api); err != nil {
+		return err
+	}
+
+	return response.Err()
+
+}
+
 // SetUserCustomStatus will set a custom status and emoji for the currently
 // authenticated user. If statusEmoji is "" and statusText is not, the Slack API
 // will automatically set it to ":speech_balloon:". Otherwise, if both are ""
