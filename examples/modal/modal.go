@@ -60,6 +60,30 @@ func generateModalRequest() slack.ModalViewRequest {
 	return modalRequest
 }
 
+func updateModal() slack.ModalViewRequest {
+	// Create a ModalViewRequest with a header and two inputs
+	titleText := slack.NewTextBlockObject("plain_text", "My App", false, false)
+	closeText := slack.NewTextBlockObject("plain_text", "Close", false, false)
+	submitText := slack.NewTextBlockObject("plain_text", "Submit", false, false)
+
+	headerText := slack.NewTextBlockObject("mrkdwn", "Modal updated!", false, false)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil)
+
+	blocks := slack.Blocks{
+		BlockSet: []slack.Block{
+			headerSection,
+		},
+	}
+
+	var modalRequest slack.ModalViewRequest
+	modalRequest.Type = slack.ViewType("modal")
+	modalRequest.Title = titleText
+	modalRequest.Close = closeText
+	modalRequest.Submit = submitText
+	modalRequest.Blocks = blocks
+	return modalRequest
+}
+
 // This was taken from the slash example
 // https://github.com/slack-go/slack/blob/master/examples/slash/slash.go
 func verifySigningSecret(r *http.Request) error {
@@ -148,6 +172,22 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf(err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
 		return
+	}
+
+	// update modal sample
+	switch i.Type {
+	//update when interaction type is view_submission
+	case slack.InteractionTypeViewSubmission:
+		api := slack.New("YOUR_TOKEN_HERE")
+		//you can use any modal you want to show to users just like creating modal.
+		updateModal := updateModal()
+		//you can use hash and ViewID from payload and externalID if exists
+		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
+		if err != nil {
+			fmt.Printf("Error updating view: %s", err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 	}
 }
 
