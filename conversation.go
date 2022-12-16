@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -362,17 +363,33 @@ func (api *Client) CreateConversationContext(ctx context.Context, channelName st
 	return &response.Channel, nil
 }
 
+// GetConversationInfoInput Defines the parameters of a GetConversationInfo and GetConversationInfoContext function
+type GetConversationInfoInput struct {
+	ChannelID         string
+	IncludeLocale     bool
+	IncludeNumMembers bool
+}
+
 // GetConversationInfo retrieves information about a conversation
-func (api *Client) GetConversationInfo(channelID string, includeLocale bool) (*Channel, error) {
-	return api.GetConversationInfoContext(context.Background(), channelID, includeLocale)
+func (api *Client) GetConversationInfo(input *GetConversationInfoInput) (*Channel, error) {
+	return api.GetConversationInfoContext(context.Background(), input)
 }
 
 // GetConversationInfoContext retrieves information about a conversation with a custom context
-func (api *Client) GetConversationInfoContext(ctx context.Context, channelID string, includeLocale bool) (*Channel, error) {
+func (api *Client) GetConversationInfoContext(ctx context.Context, input *GetConversationInfoInput) (*Channel, error) {
+	if input == nil {
+		return nil, errors.New("GetConversationInfoInput must not be nil")
+	}
+
+	if input.ChannelID == "" {
+		return nil, errors.New("ChannelID must be defined")
+	}
+
 	values := url.Values{
-		"token":          {api.token},
-		"channel":        {channelID},
-		"include_locale": {strconv.FormatBool(includeLocale)},
+		"token":               {api.token},
+		"channel":             {input.ChannelID},
+		"include_locale":      {strconv.FormatBool(input.IncludeLocale)},
+		"include_num_members": {strconv.FormatBool(input.IncludeNumMembers)},
 	}
 	response, err := api.channelRequest(ctx, "conversations.info", values)
 	if err != nil {
