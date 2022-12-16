@@ -385,7 +385,7 @@ func TestCreateConversation(t *testing.T) {
 	http.HandleFunc("/conversations.create", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.CreateConversation("CXXXXXXXX", false)
+	channel, err := api.CreateConversation(CreateConversationParams{ChannelName: "CXXXXXXXX"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
