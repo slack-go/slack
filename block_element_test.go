@@ -142,6 +142,20 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 }
 
+func TestNewEmailTextInputBlockElement(t *testing.T) {
+	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
+
+	assert.Equal(t, string(emailTextInputElement.Type), "email_text_input")
+	assert.Equal(t, emailTextInputElement.ActionID, "example@example.com")
+}
+
+func TestNewURLTextInputBlockElement(t *testing.T) {
+	urlTextInputElement := NewURLTextInputBlockElement(nil, "www.example.com")
+
+	assert.Equal(t, string(urlTextInputElement.Type), "url_text_input")
+	assert.Equal(t, urlTextInputElement.ActionID, "www.example.com")
+}
+
 func TestNewCheckboxGroupsBlockElement(t *testing.T) {
 	// Build Text Objects associated with each option
 	checkBoxOptionTextOne := NewTextBlockObject("plain_text", "Check One", false, false)
@@ -183,5 +197,15 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 	assert.Equal(t, string(radioButtonsElement.Type), "radio_buttons")
 	assert.Equal(t, radioButtonsElement.ActionID, "test")
 	assert.Equal(t, len(radioButtonsElement.Options), 3)
+
+}
+
+func TestNewNumberInputBlockElement(t *testing.T) {
+
+	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
+
+	assert.Equal(t, string(numberInputElement.Type), "number_input")
+	assert.Equal(t, numberInputElement.ActionID, "test")
+	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
 
 }

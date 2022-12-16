@@ -77,15 +77,15 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
 
 	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}}]}`, string(msgJsonSingleBlock))
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
 
 	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
 	assert.Equal(t, 2, len(msgTwoBlocks.Blocks.BlockSet))
 
 	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}},{"type":"section","text":{"type":"plain_text","text":"text"}}]}`, string(msgJsonTwoBlocks))
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}},{"type":"section","text":{"type":"plain_text","text":"text"}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
 
 	msgNoBlocks := WebhookMessage{Text: "foo"}
 	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)
-	assert.Equal(t, `{"text":"foo"}`, string(msgJsonNoBlocks))
+	assert.Equal(t, `{"text":"foo","replace_original":false,"delete_original":false}`, string(msgJsonNoBlocks))
 }

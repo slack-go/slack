@@ -385,7 +385,7 @@ func TestCreateConversation(t *testing.T) {
 	http.HandleFunc("/conversations.create", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.CreateConversation("CXXXXXXXX", false)
+	channel, err := api.CreateConversation(CreateConversationParams{ChannelName: "CXXXXXXXX"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -400,13 +400,31 @@ func TestGetConversationInfo(t *testing.T) {
 	http.HandleFunc("/conversations.info", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.GetConversationInfo("CXXXXXXXX", false)
+	channel, err := api.GetConversationInfo(&GetConversationInfoInput{
+		ChannelID: "CXXXXXXXX",
+	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 	if channel == nil {
 		t.Error("channel should not be nil")
+		return
+	}
+
+	// Nil Input Error
+	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err = api.GetConversationInfo(nil)
+	if err == nil {
+		t.Errorf("Unexpected pass where there should have been nil input error")
+		return
+	}
+
+	// No Channel Error
+	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	_, err = api.GetConversationInfo(&GetConversationInfoInput{})
+	if err == nil {
+		t.Errorf("Unexpected pass where there should have been missing channel error")
 		return
 	}
 }
