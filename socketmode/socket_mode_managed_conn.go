@@ -416,29 +416,54 @@ func newEvent(tpe EventType, data interface{}, req ...*Request) Event {
 // This tells Slack that the we have received the request denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
 func (smc *Client) Ack(req Request, payload ...interface{}) {
-	res := Response{
-		EnvelopeID: req.EnvelopeID,
-	}
-
+	var pld interface{}
 	if len(payload) > 0 {
-		res.Payload = payload[0]
+		pld = payload[0]
 	}
 
-	smc.Send(res)
+	smc.AckCtx(context.TODO(), req.EnvelopeID, pld)
+}
+
+// AckCtx acknowledges the Socket Mode request envelope ID with the payload.
+//
+// This tells Slack that the we have received the request denoted by the request (envelope) ID,
+// by sending back the ID over the WebSocket connection.
+func (smc *Client) AckCtx(ctx context.Context, reqID string, payload interface{}) error {
+	return smc.SendCtx(ctx, Response{
+		EnvelopeID: reqID,
+		Payload:    payload,
+	})
 }
 
 // Send sends the Socket Mode response over a WebSocket connection.
 // This is usually used for acknowledging requests, but if you need more control over Client.Ack().
 // It's normally recommended to use Client.Ack() instead of this.
 func (smc *Client) Send(res Response) {
-	js, err := json.Marshal(res)
-	if err != nil {
-		panic(err)
+	smc.SendCtx(context.TODO(), res)
+}
+
+// SendCtx sends the Socket Mode response over a WebSocket connection.
+// This is usually used for acknowledging requests, but if you need more control
+// it's normally recommended to use Client.AckCtx() instead of this.
+func (smc *Client) SendCtx(ctx context.Context, res Response) error {
+	if smc.debug {
+		js, err := json.Marshal(res)
+
+		// Log the error so users of `Send` don't see it entirely disappear as that method
+		// does not return an error and used to panic on failure (with or without debug)
+		smc.Debugf("Scheduling Socket Mode response (error: %v) for envelope ID %s: %s", err, res.EnvelopeID, js)
+		if err != nil {
+			return err
+		}
 	}
 
-	smc.Debugf("Scheduling Socket Mode response for envelope ID %s: %s", res.EnvelopeID, js)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case smc.socketModeResponses <- &res:
+	}
 
-	smc.socketModeResponses <- &res
+	return nil
 }
 
 // receiveMessagesInto attempts to receive an event from the WebSocket connection for Socket Mode.
