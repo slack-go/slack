@@ -142,11 +142,11 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		select {
 		case <-ctx.Done():
 			// Detect when the connection is dead and try close connection.
-			if err = conn.Close(); err != nil {
+			if err := conn.Close(); err != nil {
 				smc.Debugf("Failed to close connection: %v", err)
 			}
 		case <-deadmanTimer.Elapsed():
-			sendErr(err)
+			sendErr(errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval"))
 
 			cancel()
 		}
@@ -154,7 +154,14 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 	wg.Wait()
 
-	if err = <-errc; errors.Is(err, context.Canceled) {
+	select {
+	case err = <-errc:
+		// Get buffered error
+	default:
+		// Or nothing if they all exited nil
+	}
+
+	if errors.Is(err, context.Canceled) {
 		return err
 	}
 
