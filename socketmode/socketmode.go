@@ -119,3 +119,15 @@ func New(api *slack.Client, options ...Option) *Client {
 
 	return result
 }
+
+// sendEvent safely sends an event into the Clients Events channel
+// and blocks until buffer space is had, or the context is canceled.
+// This prevents deadlocking in the event that Events buffer is full,
+// other goroutines are waiting, and/or timing allows receivers to exit
+// before all senders are finished.
+func (smc *Client) sendEvent(ctx context.Context, event Event) {
+	select {
+	case smc.Events <- event:
+	case <-ctx.Done():
+	}
+}

@@ -80,10 +80,10 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	smc.Events <- newEvent(EventTypeConnected, &ConnectedEvent{
+	smc.sendEvent(ctx, newEvent(EventTypeConnected, &ConnectedEvent{
 		ConnectionCount: connectionCount,
 		Info:            info,
-	})
+	}))
 
 	smc.Debugf("WebSocket connection succeeded on try %d", connectionCount)
 
@@ -189,10 +189,10 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		)
 
 		// send connecting event
-		smc.Events <- newEvent(EventTypeConnecting, &slack.ConnectingEvent{
+		smc.sendEvent(ctx, newEvent(EventTypeConnecting, &slack.ConnectingEvent{
 			Attempt:         boff.Attempts() + 1,
 			ConnectionCount: connectionCount,
-		})
+		}))
 
 		// attempt to start the connection
 		info, conn, err := smc.openAndDial(ctx, additionalPingHandler)
@@ -212,7 +212,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		case slack.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
-				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})
+				smc.sendEvent(ctx, newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{}))
 				return nil, nil, err
 			}
 		case *slack.RateLimitedError:
@@ -223,11 +223,11 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		backoff = timex.Max(backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the Events channel
-		smc.Events <- newEvent(EventTypeConnectionError, &slack.ConnectionErrorEvent{
+		smc.sendEvent(ctx, newEvent(EventTypeConnectionError, &slack.ConnectionErrorEvent{
 			Attempt:  boff.Attempts(),
 			Backoff:  backoff,
 			ErrorObj: err,
-		})
+		}))
 
 		// get time we should wait before attempting to connect again
 		smc.Debugf("reconnection %d failed: %s reconnecting in %v\n", boff.Attempts(), err, backoff)
@@ -308,10 +308,10 @@ func (smc *Client) runResponseSender(ctx context.Context, conn *websocket.Conn) 
 			smc.Debugf("Sending Socket Mode response with envelope ID %q: %v", res.EnvelopeID, res)
 
 			if err := unsafeWriteSocketModeResponse(conn, res); err != nil {
-				smc.Events <- newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
+				smc.sendEvent(ctx, newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
 					Cause:    err,
 					Response: res,
-				})
+				}))
 			}
 
 			smc.Debugf("Finished sending Socket Mode response with envelope ID %q", res.EnvelopeID)
@@ -340,10 +340,10 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 			// listen for incoming messages that need to be parsed
 			evt, err := smc.parseEvent(message)
 			if err != nil {
-				smc.Events <- newEvent(EventTypeErrorBadMessage, &ErrorBadMessage{
+				smc.sendEvent(ctx, newEvent(EventTypeErrorBadMessage, &ErrorBadMessage{
 					Cause:   err,
 					Message: message,
-				})
+				}))
 			} else if evt != nil {
 				if evt.Type == EventTypeDisconnect {
 					// We treat the `disconnect` request from Slack as an error internally,
@@ -351,7 +351,7 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 					return errorRequestedDisconnect{}
 				}
 
-				smc.Events <- *evt
+				smc.sendEvent(ctx, *evt)
 			}
 		}
 	}
@@ -463,9 +463,9 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 	case err != nil:
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
-		smc.Events <- newEvent(EventTypeIncomingError, &slack.IncomingEventError{
+		smc.sendEvent(ctx, newEvent(EventTypeIncomingError, &slack.IncomingEventError{
 			ErrorObj: err,
-		})
+		}))
 
 		return err
 	case len(event) == 0:
