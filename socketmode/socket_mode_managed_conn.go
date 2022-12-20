@@ -89,11 +89,15 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 	// We're now connected so we can set up listeners
 
-	var (
-		wg           sync.WaitGroup
-		firstErr     error
-		firstErrOnce sync.Once
-	)
+	wg := new(sync.WaitGroup)
+	// sendErr relies on the buffer of 1 here
+	errc := make(chan error, 1)
+	sendErr := func(err error) {
+		select {
+		case errc <- err:
+		default:
+		}
+	}
 
 	wg.Add(1)
 	go func() {
@@ -102,9 +106,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 		// The response sender sends Socket Mode responses over the WebSocket conn
 		if err := smc.runResponseSender(ctx, conn); err != nil {
-			firstErrOnce.Do(func() {
-				firstErr = err
-			})
+			sendErr(err)
 		}
 	}()
 
@@ -115,9 +117,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 		// The handler reads Socket Mode requests, and enqueues responses for sending by the response sender
 		if err := smc.runRequestHandler(ctx, messages); err != nil {
-			firstErrOnce.Do(func() {
-				firstErr = err
-			})
+			sendErr(err)
 		}
 	}()
 
@@ -131,9 +131,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
 		// the request handler
 		if err := smc.runMessageReceiver(ctx, conn, messages); err != nil {
-			firstErrOnce.Do(func() {
-				firstErr = err
-			})
+			sendErr(err)
 		}
 	}()
 
@@ -148,9 +146,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 				smc.Debugf("Failed to close connection: %v", err)
 			}
 		case <-deadmanTimer.Elapsed():
-			firstErrOnce.Do(func() {
-				firstErr = errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval")
-			})
+			sendErr(err)
 
 			cancel()
 		}
@@ -158,14 +154,14 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 
 	wg.Wait()
 
-	if firstErr == context.Canceled {
-		return firstErr
+	if err = <-errc; errors.Is(err, context.Canceled) {
+		return err
 	}
 
 	// wg.Wait() finishes only after any of the above go routines finishes and cancels the
 	// context, allowing the other threads to shut down gracefully.
-	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
-	smc.Debugf("Reconnecting due to %v", firstErr)
+	// Also, we can expect our (first)err to be not nil, as goroutines can finish only on error.
+	smc.Debugf("Reconnecting due to %v", err)
 
 	return nil
 }
