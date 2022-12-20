@@ -54,9 +54,7 @@ func (smc *Client) RunContext(ctx context.Context) error {
 }
 
 func (smc *Client) run(ctx context.Context, connectionCount int) error {
-	messages := make(chan json.RawMessage)
-	defer close(messages)
-
+	messages := make(chan json.RawMessage, 1)
 	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
 
 	pingHandler := func(_ string) error {
@@ -127,6 +125,8 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	// so we'd have to wait for the ReadJSON to time out, which can take a while.
 	go func() {
 		defer cancel()
+		// We close messages here as it is the producer for the channel.
+		defer close(messages)
 
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
 		// the request handler
@@ -332,7 +332,13 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case message := <-websocket:
+		case message, ok := <-websocket:
+			if !ok {
+				// The producer closed the channel because it encountered an error (or panic),
+				// we need only return.
+				return nil
+			}
+
 			smc.Debugf("Received WebSocket message: %s", message)
 
 			// listen for incoming messages that need to be parsed
