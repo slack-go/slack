@@ -312,76 +312,64 @@ func NewRichTextSectionTeamElement(teamID string, style *RichTextSectionTextStyl
 type RichTextSectionUserGroupElement struct {
 	Type        RichTextSectionElementType `json:"type"`
 	UsergroupID string                     `json:"usergroup_id"`
-	Style       *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionUserGroupElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
 }
 
-func NewRichTextSectionUserGroupElement(usergroupID string, style *RichTextSectionTextStyle) *RichTextSectionUserGroupElement {
+func NewRichTextSectionUserGroupElement(usergroupID string) *RichTextSectionUserGroupElement {
 	return &RichTextSectionUserGroupElement{
 		Type:        RTSEUserGroup,
 		UsergroupID: usergroupID,
-		Style:       style,
 	}
 }
 
 type RichTextSectionDateElement struct {
 	Type      RichTextSectionElementType `json:"type"`
 	Timestamp JSONTime                   `json:"timestamp"`
-	Format    string                     `json:"format"`
-	Fallback  string                     `json:"fallback,omitempty"`
-	Style     *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionDateElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
 }
 
-func NewRichTextSectionDateElement(timestamp int64, format, fallback string, style *RichTextSectionTextStyle) *RichTextSectionDateElement {
+func NewRichTextSectionDateElement(timestamp int64) *RichTextSectionDateElement {
 	return &RichTextSectionDateElement{
 		Type:      RTSEDate,
 		Timestamp: JSONTime(timestamp),
-		Format:    format,
-		Fallback:  fallback,
-		Style:     style,
 	}
 }
 
 type RichTextSectionBroadcastElement struct {
 	Type  RichTextSectionElementType `json:"type"`
 	Range string                     `json:"range"`
-	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionBroadcastElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
 }
 
-func NewRichTextSectionBroadcastElement(rangeStr string, style *RichTextSectionTextStyle) *RichTextSectionBroadcastElement {
+func NewRichTextSectionBroadcastElement(rangeStr string) *RichTextSectionBroadcastElement {
 	return &RichTextSectionBroadcastElement{
 		Type:  RTSEBroadcast,
 		Range: rangeStr,
-		Style: style,
 	}
 }
 
 type RichTextSectionColorElement struct {
 	Type  RichTextSectionElementType `json:"type"`
 	Value string                     `json:"value"`
-	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionColorElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
 }
 
-func NewRichTextSectionColorElement(value string, style *RichTextSectionTextStyle) *RichTextSectionColorElement {
+func NewRichTextSectionColorElement(value string) *RichTextSectionColorElement {
 	return &RichTextSectionColorElement{
 		Type:  RTSEColor,
 		Value: value,
-		Style: style,
 	}
 }
 
