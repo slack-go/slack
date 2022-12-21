@@ -399,7 +399,6 @@ func NewTimePickerBlockElement(actionID string) *TimePickerBlockElement {
 type DateTimePickerBlockElement struct {
 	Type            MessageElementType       `json:"type"`
 	ActionID        string                   `json:"action_id,omitempty"`
-	Placeholder     *TextBlockObject         `json:"placeholder,omitempty"`
 	InitialDateTime int64                    `json:"initial_date_time,omitempty"`
 	Confirm         *ConfirmationBlockObject `json:"confirm,omitempty"`
 }
