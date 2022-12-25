@@ -185,7 +185,7 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
 		if err != nil {
 			fmt.Printf("Error updating view: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
