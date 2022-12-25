@@ -178,7 +178,6 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 	switch i.Type {
 	//update when interaction type is view_submission
 	case slack.InteractionTypeViewSubmission:
-		api := slack.New("YOUR_TOKEN_HERE")
 		//you can use any modal you want to show to users just like creating modal.
 		updateModal := updateModal()
 		//you can use hash and ViewID from payload and externalID if exists
