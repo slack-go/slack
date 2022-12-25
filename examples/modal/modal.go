@@ -180,7 +180,8 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 	case slack.InteractionTypeViewSubmission:
 		//you can use any modal you want to show to users just like creating modal.
 		updateModal := updateModal()
-		//you can use hash and ViewID from payload and externalID if exists
+		// You must set one of external_id or view_id and you can use hash for avoiding race condition.
+		// More details: https://api.slack.com/surfaces/modals/using#updating_apis
 		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
 		if err != nil {
 			fmt.Printf("Error updating view: %s", err)
