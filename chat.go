@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -113,13 +113,13 @@ func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOptio
 //
 // For more details, see ScheduleMessage documentation.
 func (api *Client) ScheduleMessageContext(ctx context.Context, channelID, postAt string, options ...MsgOption) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessageContext(
+	respChannel, scheduledMessageId, _, err := api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionSchedule(postAt),
 		MsgOptionCompose(options...),
 	)
-	return respChannel, respTimestamp, err
+	return respChannel, scheduledMessageId, err
 }
 
 // PostMessage sends a message to a channel.
@@ -207,7 +207,7 @@ func (api *Client) SendMessage(channel string, options ...MsgOption) (string, st
 }
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
-func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestamp string, _text string, err error) {
+func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestampOrScheduledMessageId string, _text string, err error) {
 	var (
 		req      *http.Request
 		parser   func(*chatResponseFull) responseParser
@@ -219,11 +219,11 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 	}
 
 	if api.Debug() {
-		reqBody, err := ioutil.ReadAll(req.Body)
+		reqBody, err := io.ReadAll(req.Body)
 		if err != nil {
 			return "", "", "", err
 		}
-		req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+		req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 		api.Debugf("Sending request: %s", string(reqBody))
 	}
 
@@ -231,7 +231,11 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	if response.ScheduledMessageID != "" {
+		return response.Channel, response.ScheduledMessageID, response.Text, response.Err()
+	} else {
+		return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	}
 }
 
 // UnsafeApplyMsgOptions utility function for debugging/testing chat requests.
