@@ -1,7 +1,6 @@
 package socketmode
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
