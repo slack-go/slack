@@ -82,6 +82,14 @@ func TestPostMessage(t *testing.T) {
 	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
 
 	tests := map[string]messageTest{
+		"OnlyBasicProperties": {
+			endpoint: "/chat.postMessage",
+			opt:      []MsgOption{},
+			expected: url.Values{
+				"channel": []string{"CXXX"},
+				"token":   []string{"testing-token"},
+			},
+		},
 		"Blocks": {
 			endpoint: "/chat.postMessage",
 			opt: []MsgOption{
@@ -107,6 +115,24 @@ func TestPostMessage(t *testing.T) {
 				"attachments": []string{`[{"blocks":` + blockStr + `}]`},
 				"channel":     []string{"CXXX"},
 				"token":       []string{"testing-token"},
+			},
+		},
+		"Metadata": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionMetadata(
+					SlackMetadata{
+						EventType: "testing-event",
+						EventPayload: map[string]interface{}{
+							"id":   13,
+							"name": "testing-name",
+						},
+					}),
+			},
+			expected: url.Values{
+				"metadata": []string{`{"event_type":"testing-event","event_payload":{"id":13,"name":"testing-name"}}`},
+				"channel":  []string{"CXXX"},
+				"token":    []string{"testing-token"},
 			},
 		},
 		"Unfurl": {

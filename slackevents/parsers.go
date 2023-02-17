@@ -102,7 +102,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -114,7 +114,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			iE.Type,
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			nil,
 			EventsAPIInnerEvent{},
 		}, fmt.Errorf("Inner Event does not exist! %s", iE.Type)
@@ -128,7 +128,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -138,7 +138,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 		e.TeamID,
 		e.Type,
 		e.APIAppID,
-		"",
+		e.EnterpriseID,
 		e,
 		EventsAPIInnerEvent{iE.Type, recvEvent},
 	}, nil

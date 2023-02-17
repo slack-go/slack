@@ -3,8 +3,6 @@
 package slackevents
 
 import (
-	"encoding/json"
-
 	"github.com/slack-go/slack"
 )
 
@@ -16,13 +14,13 @@ type EventsAPIInnerEvent struct {
 
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
-	Type            string      `json:"type"`
-	User            string      `json:"user"`
-	Text            string      `json:"text"`
-	TimeStamp       string      `json:"ts"`
-	ThreadTimeStamp string      `json:"thread_ts"`
-	Channel         string      `json:"channel"`
-	EventTimeStamp  json.Number `json:"event_ts"`
+	Type            string `json:"type"`
+	User            string `json:"user"`
+	Text            string `json:"text"`
+	TimeStamp       string `json:"ts"`
+	ThreadTimeStamp string `json:"thread_ts"`
+	Channel         string `json:"channel"`
+	EventTimeStamp  string `json:"event_ts"`
 
 	// When Message comes from a channel that is shared between workspaces
 	UserTeam   string `json:"user_team,omitempty"`
@@ -34,12 +32,12 @@ type AppMentionEvent struct {
 
 // AppHomeOpenedEvent Your Slack app home was opened.
 type AppHomeOpenedEvent struct {
-	Type           string      `json:"type"`
-	User           string      `json:"user"`
-	Channel        string      `json:"channel"`
-	EventTimeStamp json.Number `json:"event_ts"`
-	Tab            string      `json:"tab"`
-	View           slack.View  `json:"view"`
+	Type           string     `json:"type"`
+	User           string     `json:"user"`
+	Channel        string     `json:"channel"`
+	EventTimeStamp string     `json:"event_ts"`
+	Tab            string     `json:"tab"`
+	View           slack.View `json:"view"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.
@@ -239,15 +237,15 @@ type SharedLinks struct {
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
 	// Basic Message Event - https://api.slack.com/events/message
-	ClientMsgID     string      `json:"client_msg_id"`
-	Type            string      `json:"type"`
-	User            string      `json:"user"`
-	Text            string      `json:"text"`
-	ThreadTimeStamp string      `json:"thread_ts"`
-	TimeStamp       string      `json:"ts"`
-	Channel         string      `json:"channel"`
-	ChannelType     string      `json:"channel_type"`
-	EventTimeStamp  json.Number `json:"event_ts"`
+	ClientMsgID     string `json:"client_msg_id"`
+	Type            string `json:"type"`
+	User            string `json:"user"`
+	Text            string `json:"text"`
+	ThreadTimeStamp string `json:"thread_ts"`
+	TimeStamp       string `json:"ts"`
+	Channel         string `json:"channel"`
+	ChannelType     string `json:"channel_type"`
+	EventTimeStamp  string `json:"event_ts"`
 
 	// When Message comes from a channel that is shared between workspaces
 	UserTeam   string `json:"user_team,omitempty"`
@@ -257,10 +255,6 @@ type MessageEvent struct {
 	Message         *MessageEvent `json:"message,omitempty"`
 	PreviousMessage *MessageEvent `json:"previous_message,omitempty"`
 	Edited          *Edited       `json:"edited,omitempty"`
-
-	// DeletedTimestamp is set if the SubType is message_deleted. It is the
-	// timestamp of the message that has been deleted.
-	DeletedTimestamp string `json:"deleted_ts,omitempty"`
 
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
@@ -344,12 +338,6 @@ type TeamJoinEvent struct {
 	EventTimestamp string      `json:"event_ts"`
 }
 
-// UserChangeEvent happens when a user's profile changes
-type UserChangeEvent struct {
-	Type string      `json:"type"`
-	User *slack.User `json:"user"`
-}
-
 // TokensRevokedEvent APP's API tokens are revoked - https://api.slack.com/events/tokens_revoked
 type TokensRevokedEvent struct {
 	Type           string `json:"type"`
@@ -359,9 +347,9 @@ type TokensRevokedEvent struct {
 
 // EmojiChangedEvent is the event of custom emoji has been added or changed
 type EmojiChangedEvent struct {
-	Type           string      `json:"type"`
-	Subtype        string      `json:"subtype"`
-	EventTimeStamp json.Number `json:"event_ts"`
+	Type           string `json:"type"`
+	Subtype        string `json:"subtype"`
+	EventTimeStamp string `json:"event_ts"`
 
 	// filled out when custom emoji added
 	Name string `json:"name,omitempty"`
@@ -536,6 +524,18 @@ func (e MessageEvent) IsEdited() bool {
 		e.Message.Edited != nil
 }
 
+// TeamAccessGrantedEvent is sent if access to teams was granted for your org-wide app.
+type TeamAccessGrantedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
+// TeamAccessRevokedEvent is sent if access to teams was revoked for your org-wide app.
+type TeamAccessRevokedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
 type EventsAPIType string
 
 const (
@@ -603,8 +603,6 @@ const (
 	TokensRevoked = EventsAPIType("tokens_revoked")
 	// EmojiChanged A custom emoji has been added or changed
 	EmojiChanged = EventsAPIType("emoji_changed")
-	// A user has changed
-	UserChange = EventsAPIType("user_change")
 	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
 	WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 	// MessageMetadataPosted A message with metadata was posted
@@ -613,6 +611,10 @@ const (
 	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
 	// MessageMetadataPosted A message with metadata was deleted
 	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
+	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
+	TeamAccessGranted = EventsAPIType("team_access_granted")
+	// TeamAccessrevoked is sent if access to teams was revoked for your org-wide app.
+	TeamAccessrevoked = EventsAPIType("team_access_revoked")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -629,13 +631,13 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	ChannelLeft:            ChannelLeftEvent{},
 	ChannelRename:          ChannelRenameEvent{},
 	ChannelIDChanged:       ChannelIDChangedEvent{},
-	GroupDeleted:           GroupDeletedEvent{},
-	GroupArchive:           GroupArchiveEvent{},
-	GroupUnarchive:         GroupUnarchiveEvent{},
 	FileChange:             FileChangeEvent{},
 	FileDeleted:            FileDeletedEvent{},
 	FileShared:             FileSharedEvent{},
 	FileUnshared:           FileUnsharedEvent{},
+	GroupDeleted:           GroupDeletedEvent{},
+	GroupArchive:           GroupArchiveEvent{},
+	GroupUnarchive:         GroupUnarchiveEvent{},
 	GroupLeft:              GroupLeftEvent{},
 	GroupRename:            GroupRenameEvent{},
 	GridMigrationFinished:  GridMigrationFinishedEvent{},
@@ -644,9 +646,6 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	Message:                MessageEvent{},
 	MemberJoinedChannel:    MemberJoinedChannelEvent{},
 	MemberLeftChannel:      MemberLeftChannelEvent{},
-	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
-	MessageMetadataPosted:  MessageMetadataPostedEvent{},
-	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
 	PinAdded:               PinAddedEvent{},
 	PinRemoved:             PinRemovedEvent{},
 	ReactionAdded:          ReactionAddedEvent{},
@@ -654,6 +653,10 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamJoin:               TeamJoinEvent{},
 	TokensRevoked:          TokensRevokedEvent{},
 	EmojiChanged:           EmojiChangedEvent{},
-	UserChange:             UserChangeEvent{},
 	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
+	MessageMetadataPosted:  MessageMetadataPostedEvent{},
+	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
+	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
+	TeamAccessGranted:      TeamAccessGrantedEvent{},
+	TeamAccessrevoked:      TeamAccessRevokedEvent{},
 }
