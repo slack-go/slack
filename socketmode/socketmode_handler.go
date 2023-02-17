@@ -121,8 +121,8 @@ func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
 func (r *SocketmodeHandler) runEventLoop(ctx context.Context) {
 	for {
 		select {
-		case evt, closed := <-r.Client.Events:
-			if closed {
+		case evt, ok := <-r.Client.Events:
+			if !ok {
 				return
 			}
 
