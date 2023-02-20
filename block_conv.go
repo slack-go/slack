@@ -68,6 +68,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &RichTextBlock{}
 		case "section":
 			block = &SectionBlock{}
+		case "call":
+			block = &CallBlock{}
 		default:
 			block = &UnknownBlock{}
 		}
@@ -111,13 +113,15 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 	case "timepicker":
 		e = &TimePickerBlockElement{}
 	case "datetimepicker":
-		e = &DateTimePickerBlockElement{}
+		e = &DatetimePickerBlockElement{}
+	case "email_text_input":
+		e = &EmailInputBlockElement{}
+	case "number_input":
+		e = &NumberInputBlockElement{}
 	case "plain_text_input":
 		e = &PlainTextInputBlockElement{}
-	case "email_text_input":
-		e = &EmailTextInputBlockElement{}
 	case "url_text_input":
-		e = &URLTextInputBlockElement{}
+		e = &URLInputBlockElement{}
 	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
 		e = &SelectBlockElement{}
 	case "multi_static_select", "multi_external_select", "multi_users_select", "multi_conversations_select", "multi_channels_select":
@@ -128,8 +132,6 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &OverflowBlockElement{}
 	case "radio_buttons":
 		e = &RadioButtonsBlockElement{}
-	case "number_input":
-		e = &NumberInputBlockElement{}
 	default:
 		return errors.New("unsupported block element type")
 	}
@@ -192,22 +194,14 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &DatePickerBlockElement{}
 		case "timepicker":
 			blockElement = &TimePickerBlockElement{}
-		case "datetimepicker":
-			blockElement = &DateTimePickerBlockElement{}
 		case "plain_text_input":
 			blockElement = &PlainTextInputBlockElement{}
-		case "email_text_input":
-			blockElement = &EmailTextInputBlockElement{}
-		case "url_text_input":
-			blockElement = &URLTextInputBlockElement{}
 		case "checkboxes":
 			blockElement = &CheckboxGroupsBlockElement{}
 		case "radio_buttons":
 			blockElement = &RadioButtonsBlockElement{}
 		case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
 			blockElement = &SelectBlockElement{}
-		case "number_input":
-			blockElement = &NumberInputBlockElement{}
 		default:
 			return fmt.Errorf("unsupported block element type %v", blockElementType)
 		}
@@ -237,7 +231,6 @@ func (a *Accessory) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the Unmarshaller interface for Accessory, so that any JSON
 // unmarshalling is delegated and proper type determination can be made before unmarshal
-// Note: datetimepicker is not supported in Accessory
 func (a *Accessory) UnmarshalJSON(data []byte) error {
 	var r json.RawMessage
 

@@ -13,6 +13,7 @@ import (
 var simpleChannel = `{
     "id": "C024BE91L",
     "name": "fun",
+    "previous_names": ["not-fun"],
     "is_channel": true,
     "created": 1360782804,
     "creator": "U024BE7LH",
@@ -55,6 +56,8 @@ func assertSimpleChannel(t *testing.T, channel *Channel) {
 	assert.NotNil(t, channel)
 	assert.Equal(t, "C024BE91L", channel.ID)
 	assert.Equal(t, "fun", channel.Name)
+	assert.Len(t, channel.PreviousNames, 1)
+	assert.Equal(t, channel.PreviousNames[0], "not-fun")
 	assert.Equal(t, true, channel.IsChannel)
 	assert.Equal(t, JSONTime(1360782804), channel.Created)
 	assert.Equal(t, "U024BE7LH", channel.Creator)
@@ -70,6 +73,7 @@ func TestCreateSimpleChannel(t *testing.T) {
 	channel := &Channel{}
 	channel.ID = "C024BE91L"
 	channel.Name = "fun"
+	channel.PreviousNames = []string{"not-fun"}
 	channel.IsChannel = true
 	channel.Created = JSONTime(1360782804)
 	channel.Creator = "U024BE7LH"
@@ -86,6 +90,7 @@ func TestCreateSimpleChannel(t *testing.T) {
 var simpleGroup = `{
     "id": "G024BE91L",
     "name": "secretplans",
+    "previous_names": [],
     "is_group": true,
     "created": 1360782804,
     "creator": "U024BE7LH",
@@ -126,6 +131,7 @@ func assertSimpleGroup(t *testing.T, group *Group) {
 	assert.NotNil(t, group)
 	assert.Equal(t, "G024BE91L", group.ID)
 	assert.Equal(t, "secretplans", group.Name)
+	assert.Len(t, group.PreviousNames, 0)
 	assert.Equal(t, true, group.IsGroup)
 	assert.Equal(t, JSONTime(1360782804), group.Created)
 	assert.Equal(t, "U024BE7LH", group.Creator)
@@ -385,7 +391,7 @@ func TestCreateConversation(t *testing.T) {
 	http.HandleFunc("/conversations.create", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.CreateConversation(CreateConversationParams{ChannelName: "CXXXXXXXX"})
+	channel, err := api.CreateConversation("CXXXXXXXX", false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -400,31 +406,13 @@ func TestGetConversationInfo(t *testing.T) {
 	http.HandleFunc("/conversations.info", okChannelJsonHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	channel, err := api.GetConversationInfo(&GetConversationInfoInput{
-		ChannelID: "CXXXXXXXX",
-	})
+	channel, err := api.GetConversationInfo("CXXXXXXXX", false, false)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 	if channel == nil {
 		t.Error("channel should not be nil")
-		return
-	}
-
-	// Nil Input Error
-	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	_, err = api.GetConversationInfo(nil)
-	if err == nil {
-		t.Errorf("Unexpected pass where there should have been nil input error")
-		return
-	}
-
-	// No Channel Error
-	api = New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	_, err = api.GetConversationInfo(&GetConversationInfoInput{})
-	if err == nil {
-		t.Errorf("Unexpected pass where there should have been missing channel error")
 		return
 	}
 }
