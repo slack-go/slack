@@ -18,7 +18,6 @@ const (
 	MBTInput    MessageBlockType = "input"
 	MBTHeader   MessageBlockType = "header"
 	MBTRichText MessageBlockType = "rich_text"
-	MBTCall     MessageBlockType = "call"
 )
 
 // Block defines an interface all block types should implement
@@ -51,7 +50,7 @@ type BlockAction struct {
 	SelectedConversations []string            `json:"selected_conversations"`
 	SelectedDate          string              `json:"selected_date"`
 	SelectedTime          string              `json:"selected_time"`
-	SelectedDateTime      JSONTime            `json:"selected_date_time"`
+	SelectedDateTime      int64               `json:"selected_date_time"`
 	InitialOption         OptionBlockObject   `json:"initial_option"`
 	InitialUser           string              `json:"initial_user"`
 	InitialChannel        string              `json:"initial_channel"`

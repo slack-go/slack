@@ -1,6 +1,7 @@
 package slack_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,9 +9,11 @@ import (
 	"time"
 
 	websocket "github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slacktest"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -311,4 +314,62 @@ func TestRTMSingleConnect(t *testing.T) {
 	assert.True(t, connectingReceived, "Should have received a connecting event from the RTM instance.")
 	assert.True(t, connectedReceived, "Should have received a connected event from the RTM instance.")
 	assert.True(t, testMessageReceived, "Should have received a test message from the server.")
+}
+
+func TestRTMUnmappedError(t *testing.T) {
+	const unmappedEventName = "user_status_changed"
+	// Set up the test server.
+	testServer := slacktest.NewTestServer()
+	go testServer.Start()
+
+	// Setup and start the RTM.
+	api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
+	rtm := api.NewRTM()
+	go rtm.ManageConnection()
+
+	// Observe incoming messages.
+	done := make(chan struct{})
+	var gotUnmarshallingError *slack.UnmarshallingErrorEvent
+	go func() {
+		for msg := range rtm.IncomingEvents {
+			switch ev := msg.Data.(type) {
+			case *slack.UnmarshallingErrorEvent:
+				gotUnmarshallingError = ev
+				rtm.Disconnect()
+			case *slack.DisconnectedEvent:
+				if ev.Intentional {
+					done <- struct{}{}
+					return
+				}
+			default:
+				t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+			}
+		}
+	}()
+
+	// Send a message and sleep for some time to make sure the message can be processed client-side.
+	testServer.SendToWebsocket(fixSlackMessage(t, unmappedEventName))
+	<-done
+	testServer.Stop()
+
+	// Verify that we got the expected error with details
+	unmappedErr, ok := gotUnmarshallingError.ErrorObj.(*slack.UnmappedError)
+	require.True(t, ok)
+	assert.Equal(t, unmappedEventName, unmappedErr.EventType)
+}
+
+func fixSlackMessage(t *testing.T, eType string) string {
+	t.Helper()
+
+	m := slack.Message{
+		Msg: slack.Msg{
+			Type:      eType,
+			Text:      "Fixture Slack message",
+			Timestamp: fmt.Sprintf("%d", time.Now().Unix()),
+		},
+	}
+	msg, err := json.Marshal(m)
+	require.NoError(t, err)
+
+	return string(msg)
 }
