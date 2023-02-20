@@ -11,13 +11,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
-	"github.com/slack-go/slack/internal/misc"
-	"github.com/slack-go/slack/slackevents"
-
-	"github.com/gorilla/websocket"
 	"github.com/slack-go/slack/internal/timex"
+	"github.com/slack-go/slack/slackevents"
 )
 
 // Run is a blocking function that connects the Slack Socket Mode API and handles all incoming
@@ -124,9 +123,9 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	wg.Add(1)
+	// We don't wait on runMessageReceiver because it doesn't block on a select with the context,
+	// so we'd have to wait for the ReadJSON to time out, which can take a while.
 	go func() {
-		defer wg.Done()
 		defer cancel()
 
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
@@ -163,7 +162,8 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		return firstErr
 	}
 
-	// wg.Wait() finishes only after any of the above go routines finishes.
+	// wg.Wait() finishes only after any of the above go routines finishes and cancels the
+	// context, allowing the other threads to shut down gracefully.
 	// Also, we can expect firstErr to be not nil, as goroutines can finish only on error.
 	smc.Debugf("Reconnecting due to %v", firstErr)
 
@@ -213,7 +213,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		}
 
 		switch actual := err.(type) {
-		case misc.StatusCodeError:
+		case slack.StatusCodeError:
 			if actual.Code == http.StatusNotFound {
 				smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 				smc.Events <- newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{})

@@ -30,6 +30,11 @@ jobs:
     name: lint
     steps:
       - uses: actions/checkout@v3
+        with:
+          # NOTE: Because we are a fork,
+          # we must fetch all history for all branches
+          # and tags.
+          fetch-depth: '0'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
         with:

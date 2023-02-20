@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -72,6 +73,7 @@ type GetConversationsForUserParameters struct {
 	Types           []string
 	Limit           int
 	ExcludeArchived bool
+	TeamID          string
 }
 
 type responseMetaData struct {
@@ -138,6 +140,10 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	if params.ExcludeArchived {
 		values.Add("exclude_archived", "true")
 	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
+
 	response := struct {
 		Channels         []Channel        `json:"channels"`
 		ResponseMetaData responseMetaData `json:"response_metadata"`
@@ -338,17 +344,26 @@ func (api *Client) CloseConversationContext(ctx context.Context, channelID strin
 	return response.NoOp, response.AlreadyClosed, response.Err()
 }
 
+type CreateConversationParams struct {
+	ChannelName string
+	IsPrivate   bool
+	TeamID      string
+}
+
 // CreateConversation initiates a public or private channel-based conversation
-func (api *Client) CreateConversation(channelName string, isPrivate bool) (*Channel, error) {
-	return api.CreateConversationContext(context.Background(), channelName, isPrivate)
+func (api *Client) CreateConversation(params CreateConversationParams) (*Channel, error) {
+	return api.CreateConversationContext(context.Background(), params)
 }
 
 // CreateConversationContext initiates a public or private channel-based conversation with a custom context
-func (api *Client) CreateConversationContext(ctx context.Context, channelName string, isPrivate bool) (*Channel, error) {
+func (api *Client) CreateConversationContext(ctx context.Context, params CreateConversationParams) (*Channel, error) {
 	values := url.Values{
 		"token":      {api.token},
-		"name":       {channelName},
-		"is_private": {strconv.FormatBool(isPrivate)},
+		"name":       {params.ChannelName},
+		"is_private": {strconv.FormatBool(params.IsPrivate)},
+	}
+	if params.TeamID != "" {
+		values.Set("team_id", params.TeamID)
 	}
 	response, err := api.channelRequest(ctx, "conversations.create", values)
 	if err != nil {
@@ -358,18 +373,32 @@ func (api *Client) CreateConversationContext(ctx context.Context, channelName st
 	return &response.Channel, nil
 }
 
+// GetConversationInfoInput Defines the parameters of a GetConversationInfo and GetConversationInfoContext function
+type GetConversationInfoInput struct {
+	ChannelID         string
+	IncludeLocale     bool
+	IncludeNumMembers bool
+}
+
 // GetConversationInfo retrieves information about a conversation
-func (api *Client) GetConversationInfo(channelID string, includeLocale, includeNumMembers bool) (*Channel, error) {
-	return api.GetConversationInfoContext(context.Background(), channelID, includeLocale, includeNumMembers)
+func (api *Client) GetConversationInfo(input *GetConversationInfoInput) (*Channel, error) {
+	return api.GetConversationInfoContext(context.Background(), input)
 }
 
 // GetConversationInfoContext retrieves information about a conversation with a custom context
-func (api *Client) GetConversationInfoContext(ctx context.Context, channelID string, includeLocale, includeNumMembers bool) (*Channel, error) {
+func (api *Client) GetConversationInfoContext(ctx context.Context, input *GetConversationInfoInput) (*Channel, error) {
+	if input == nil {
+		return nil, errors.New("GetConversationInfoInput must not be nil")
+	}
+
+	if input.ChannelID == "" {
+		return nil, errors.New("ChannelID must be defined")
+	}
 	values := url.Values{
 		"token":               {api.token},
-		"channel":             {channelID},
-		"include_locale":      {strconv.FormatBool(includeLocale)},
-		"include_num_members": {strconv.FormatBool(includeNumMembers)},
+		"channel":             {input.ChannelID},
+		"include_locale":      {strconv.FormatBool(input.IncludeLocale)},
+		"include_num_members": {strconv.FormatBool(input.IncludeNumMembers)},
 	}
 	response, err := api.channelRequest(ctx, "conversations.info", values)
 	if err != nil {
@@ -400,13 +429,14 @@ func (api *Client) LeaveConversationContext(ctx context.Context, channelID strin
 }
 
 type GetConversationRepliesParameters struct {
-	ChannelID string
-	Timestamp string
-	Cursor    string
-	Inclusive bool
-	Latest    string
-	Limit     int
-	Oldest    string
+	ChannelID          string
+	Timestamp          string
+	Cursor             string
+	Inclusive          bool
+	Latest             string
+	Limit              int
+	Oldest             string
+	IncludeAllMetadata bool
 }
 
 // GetConversationReplies retrieves a thread of messages posted to a conversation
@@ -437,6 +467,11 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		values.Add("inclusive", "1")
 	} else {
 		values.Add("inclusive", "0")
+	}
+	if params.IncludeAllMetadata {
+		values.Add("include_all_metadata", "1")
+	} else {
+		values.Add("include_all_metadata", "0")
 	}
 	response := struct {
 		SlackResponse
@@ -573,12 +608,13 @@ func (api *Client) JoinConversationContext(ctx context.Context, channelID string
 }
 
 type GetConversationHistoryParameters struct {
-	ChannelID string
-	Cursor    string
-	Inclusive bool
-	Latest    string
-	Limit     int
-	Oldest    string
+	ChannelID          string
+	Cursor             string
+	Inclusive          bool
+	Latest             string
+	Limit              int
+	Oldest             string
+	IncludeAllMetadata bool
 }
 
 type GetConversationHistoryResponse struct {
@@ -616,6 +652,11 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 	}
 	if params.Oldest != "" {
 		values.Add("oldest", params.Oldest)
+	}
+	if params.IncludeAllMetadata {
+		values.Add("include_all_metadata", "1")
+	} else {
+		values.Add("include_all_metadata", "0")
 	}
 
 	response := GetConversationHistoryResponse{}

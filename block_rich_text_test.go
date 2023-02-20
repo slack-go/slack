@@ -80,12 +80,13 @@ func TestRichTextSection_UnmarshalJSON(t *testing.T) {
 		err      error
 	}{
 		{
-			[]byte(`{"elements":[{"type":"unknown","value":10},{"type":"text","text":"hi"}]}`),
+			[]byte(`{"elements":[{"type":"unknown","value":10},{"type":"text","text":"hi"},{"type":"date","timestamp":1636961629}]}`),
 			RichTextSection{
 				Type: RTESection,
 				Elements: []RichTextSectionElement{
 					&RichTextSectionUnknownElement{Type: RTSEUnknown, Raw: `{"type":"unknown","value":10}`},
 					&RichTextSectionTextElement{Type: RTSEText, Text: "hi"},
+					&RichTextSectionDateElement{Type: RTSEDate, Timestamp: JSONTime(1636961629)},
 				},
 			},
 			nil,

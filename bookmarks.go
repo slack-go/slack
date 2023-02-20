@@ -11,16 +11,16 @@ type Bookmark struct {
 	ChannelID           string  `json:"channel_id"`
 	Title               string  `json:"title"`
 	Link                string  `json:"link"`
+	Emoji               string  `json:"emoji,omitempty"`
 	IconURL             *string `json:"icon_url"`
 	Type                string  `json:"type"`
-	Emoji               string  `json:"emoji,omitempty"`
-	EntityID            *string `json:"entity_id"`
 	DateCreated         uint64  `json:"date_created"`
 	DateUpdated         uint64  `json:"date_updated"`
 	Rank                string  `json:"rank"`
 	LastUpdatedByUserID *string `json:"last_updated_by_user_id"`
 	LastUpdatedByTeamID *string `json:"last_updated_by_team_id"`
 	ShortcutID          *string `json:"shortcut_id"`
+	EntityID            *string `json:"entity_id"`
 	AppID               *string `json:"app_id"`
 }
 
@@ -47,25 +47,25 @@ func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) (
 	return response.Bookmarks, nil
 }
 
-type AddBookmarkParams struct {
-	ChannelID string `json:"channel_id"`
+type AddBookmarkParameters struct {
 	Title     string `json:"title"`
 	Type      string `json:"type"`
+	Link      string `json:"link,omitempty"`
 	Emoji     string `json:"emoji,omitempty"`
 	EntityID  string `json:"entity_id,omitempty"`
-	Link      string `json:"link,omitempty"`
 	ParentID  string `json:"parent_id,omitempty"`
+	ChannelID string `json:"channel_id"`
 }
 
 // AddBookmark creates a new bookmark. ChannelID, Title, and Type are required
 // (`Type=link` is the sensible default!). The other params are all optional.
-func (api *Client) AddBookmark(params AddBookmarkParams) (*Bookmark, error) {
+func (api *Client) AddBookmark(params AddBookmarkParameters) (*Bookmark, error) {
 	return api.AddBookmarkContext(context.Background(), params)
 }
 
 // AddBookmarkContext creates a new bookmark. ChannelID, Title, and Type are required
 // (`Type: "link"` is the sensible default!). The other params are all optional.
-func (api *Client) AddBookmarkContext(ctx context.Context, params AddBookmarkParams) (*Bookmark, error) {
+func (api *Client) AddBookmarkContext(ctx context.Context, params AddBookmarkParameters) (*Bookmark, error) {
 	response := &singleBookmarkResponse{}
 	values := url.Values{
 		"token":      {api.token},
@@ -101,24 +101,24 @@ func (api *Client) AddBookmarkContext(ctx context.Context, params AddBookmarkPar
 	return &response.Bookmark, nil
 }
 
-type EditBookmarkParams struct {
-	ChannelID  string `json:"channel_id"`
-	BookmarkID string `json:"bookmark_id"`
-	Type       string `json:"type,omitempty"`
+type EditBookmarkParameters struct {
 	Title      string `json:"title,omitempty"`
 	Emoji      string `json:"emoji,omitempty"`
 	Link       string `json:"link,omitempty"`
+	ChannelID  string `json:"channel_id"`
+	BookmarkID string `json:"bookmark_id"`
+	Type       string `json:"type,omitempty"`
 }
 
 // EditBookmark updates an existing bookmark. ChannelID and BookmarkID are
 // required, other params are optional.
-func (api *Client) EditBookmark(params EditBookmarkParams) (*Bookmark, error) {
+func (api *Client) EditBookmark(params EditBookmarkParameters) (*Bookmark, error) {
 	return api.EditBookmarkContext(context.Background(), params)
 }
 
 // EditBookmarkContext updates an existing bookmark. ChannelID and BookmarkID
 // are required, other params are optional.
-func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkParams) (*Bookmark, error) {
+func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkParameters) (*Bookmark, error) {
 	response := &singleBookmarkResponse{}
 	values := url.Values{
 		"token":       {api.token},
