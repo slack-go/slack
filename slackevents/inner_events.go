@@ -16,13 +16,14 @@ type EventsAPIInnerEvent struct {
 
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
-	Type            string      `json:"type"`
-	User            string      `json:"user"`
-	Text            string      `json:"text"`
-	TimeStamp       string      `json:"ts"`
-	ThreadTimeStamp string      `json:"thread_ts"`
-	Channel         string      `json:"channel"`
-	EventTimeStamp  json.Number `json:"event_ts"`
+	Type            string `json:"type"`
+	User            string `json:"user"`
+	Text            string `json:"text"`
+	TimeStamp       string `json:"ts"`
+	ThreadTimeStamp string `json:"thread_ts"`
+	Channel         string `json:"channel"`
+	// Upstream uses a string for EventTimeStamp
+	EventTimeStamp json.Number `json:"event_ts"`
 
 	// When Message comes from a channel that is shared between workspaces
 	UserTeam   string `json:"user_team,omitempty"`
@@ -239,15 +240,16 @@ type SharedLinks struct {
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
 	// Basic Message Event - https://api.slack.com/events/message
-	ClientMsgID     string      `json:"client_msg_id"`
-	Type            string      `json:"type"`
-	User            string      `json:"user"`
-	Text            string      `json:"text"`
-	ThreadTimeStamp string      `json:"thread_ts"`
-	TimeStamp       string      `json:"ts"`
-	Channel         string      `json:"channel"`
-	ChannelType     string      `json:"channel_type"`
-	EventTimeStamp  json.Number `json:"event_ts"`
+	ClientMsgID     string `json:"client_msg_id"`
+	Type            string `json:"type"`
+	User            string `json:"user"`
+	Text            string `json:"text"`
+	ThreadTimeStamp string `json:"thread_ts"`
+	TimeStamp       string `json:"ts"`
+	Channel         string `json:"channel"`
+	ChannelType     string `json:"channel_type"`
+	// Upstream uses a string for EventTimeStamp
+	EventTimeStamp json.Number `json:"event_ts"`
 
 	// When Message comes from a channel that is shared between workspaces
 	UserTeam   string `json:"user_team,omitempty"`
@@ -536,6 +538,18 @@ func (e MessageEvent) IsEdited() bool {
 		e.Message.Edited != nil
 }
 
+// TeamAccessGrantedEvent is sent if access to teams was granted for your org-wide app.
+type TeamAccessGrantedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
+// TeamAccessRevokedEvent is sent if access to teams was revoked for your org-wide app.
+type TeamAccessRevokedEvent struct {
+	Type    string   `json:"type"`
+	TeamIDs []string `json:"team_ids"`
+}
+
 type EventsAPIType string
 
 const (
@@ -613,6 +627,10 @@ const (
 	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
 	// MessageMetadataPosted A message with metadata was deleted
 	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
+	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
+	TeamAccessGranted = EventsAPIType("team_access_granted")
+	// TeamAccessrevoked is sent if access to teams was revoked for your org-wide app.
+	TeamAccessrevoked = EventsAPIType("team_access_revoked")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -629,13 +647,13 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	ChannelLeft:            ChannelLeftEvent{},
 	ChannelRename:          ChannelRenameEvent{},
 	ChannelIDChanged:       ChannelIDChangedEvent{},
-	GroupDeleted:           GroupDeletedEvent{},
-	GroupArchive:           GroupArchiveEvent{},
-	GroupUnarchive:         GroupUnarchiveEvent{},
 	FileChange:             FileChangeEvent{},
 	FileDeleted:            FileDeletedEvent{},
 	FileShared:             FileSharedEvent{},
 	FileUnshared:           FileUnsharedEvent{},
+	GroupDeleted:           GroupDeletedEvent{},
+	GroupArchive:           GroupArchiveEvent{},
+	GroupUnarchive:         GroupUnarchiveEvent{},
 	GroupLeft:              GroupLeftEvent{},
 	GroupRename:            GroupRenameEvent{},
 	GridMigrationFinished:  GridMigrationFinishedEvent{},
@@ -644,9 +662,6 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	Message:                MessageEvent{},
 	MemberJoinedChannel:    MemberJoinedChannelEvent{},
 	MemberLeftChannel:      MemberLeftChannelEvent{},
-	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
-	MessageMetadataPosted:  MessageMetadataPostedEvent{},
-	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
 	PinAdded:               PinAddedEvent{},
 	PinRemoved:             PinRemovedEvent{},
 	ReactionAdded:          ReactionAddedEvent{},
@@ -656,4 +671,9 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	EmojiChanged:           EmojiChangedEvent{},
 	UserChange:             UserChangeEvent{},
 	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
+	MessageMetadataPosted:  MessageMetadataPostedEvent{},
+	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
+	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
+	TeamAccessGranted:      TeamAccessGrantedEvent{},
+	TeamAccessrevoked:      TeamAccessRevokedEvent{},
 }
