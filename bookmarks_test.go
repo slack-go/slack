@@ -87,7 +87,7 @@ func TestAddBookmark(t *testing.T) {
 	once.Do(startServer)
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	bookmark, err := api.AddBookmark(AddBookmarkParams{
+	bookmark, err := api.AddBookmark(AddBookmarkParameters{
 		ChannelID: "C12345",
 		Title:     "Homepage",
 		Type:      "link",
@@ -113,7 +113,7 @@ func TestEditBookmark(t *testing.T) {
 	once.Do(startServer)
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	bookmark, err := api.EditBookmark(EditBookmarkParams{
+	bookmark, err := api.EditBookmark(EditBookmarkParameters{
 		ChannelID:  "C12345",
 		BookmarkID: "Bk12345",
 		Emoji:      ":siren:",
