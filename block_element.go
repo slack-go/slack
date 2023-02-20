@@ -10,11 +10,11 @@ const (
 	METDatepicker     MessageElementType = "datepicker"
 	METTimepicker     MessageElementType = "timepicker"
 	METDatetimepicker MessageElementType = "datetimepicker"
+	METPlainTextInput MessageElementType = "plain_text_input"
+	METRadioButtons   MessageElementType = "radio_buttons"
 	METEmailInput     MessageElementType = "email_text_input"
 	METNumberInput    MessageElementType = "number_input"
 	METURLInput       MessageElementType = "url_text_input"
-	METPlainTextInput MessageElementType = "plain_text_input"
-	METRadioButtons   MessageElementType = "radio_buttons"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
@@ -168,6 +168,12 @@ func (s ButtonBlockElement) ElementType() MessageElementType {
 // WithStyle adds styling to the button object and returns the modified ButtonBlockElement
 func (s *ButtonBlockElement) WithStyle(style Style) *ButtonBlockElement {
 	s.Style = style
+	return s
+}
+
+// WithConfirm adds a confirmation dialogue to the button object and returns the modified ButtonBlockElement
+func (s *ButtonBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *ButtonBlockElement {
+	s.Confirm = confirm
 	return s
 }
 
@@ -393,7 +399,7 @@ func NewTimePickerBlockElement(actionID string) *TimePickerBlockElement {
 // More Information: https://api.slack.com/reference/block-kit/block-elements#datetimepicker
 type DatetimePickerBlockElement struct {
 	Type            MessageElementType       `json:"type"`
-	ActionID        string                   `json:"action_id"`
+	ActionID        string                   `json:"action_id,omitempty"`
 	InitialDateTime *JSONTime                `json:"initial_date_time,omitempty"`
 	Confirm         *ConfirmationBlockObject `json:"confirm,omitempty"`
 	FocusOnLoad     bool                     `json:"focus_on_load,omitempty"`
@@ -462,11 +468,12 @@ func (s NumberInputBlockElement) ElementType() MessageElementType {
 }
 
 // NewNumberInputBlockElement returns an instance of a number input.
-func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string) *NumberInputBlockElement {
+func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string, isDecimalAllowed bool) *NumberInputBlockElement {
 	return &NumberInputBlockElement{
 		Type:        METNumberInput,
 		ActionID:    actionID,
 		Placeholder: placeholder,
+		IsDecimalAllowed: isDecimalAllowed,
 	}
 }
 

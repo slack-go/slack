@@ -162,10 +162,11 @@ func TestNewEmailInputBlockElement(t *testing.T) {
 
 func TestNewNumberInputBlockElement(t *testing.T) {
 
-	numberInputElement := NewNumberInputBlockElement(nil, "test")
+	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
 
 	assert.Equal(t, string(numberInputElement.Type), "number_input")
 	assert.Equal(t, numberInputElement.ActionID, "test")
+	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
 
 }
 
