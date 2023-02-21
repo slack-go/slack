@@ -12,6 +12,11 @@ type EventsAPIInnerEvent struct {
 	Data interface{}
 }
 
+// EventsAPIInnerEventData is the common data for inner events
+type EventsAPIInnerEventData interface {
+	EventType() EventsAPIType
+}
+
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
 	Type            string `json:"type"`
@@ -30,6 +35,11 @@ type AppMentionEvent struct {
 	BotID string `json:"bot_id,omitempty"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e AppMentionEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // AppHomeOpenedEvent Your Slack app home was opened.
 type AppHomeOpenedEvent struct {
 	Type           string     `json:"type"`
@@ -40,9 +50,19 @@ type AppHomeOpenedEvent struct {
 	View           slack.View `json:"view"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e AppHomeOpenedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // AppUninstalledEvent Your Slack app was uninstalled.
 type AppUninstalledEvent struct {
 	Type string `json:"type"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e AppUninstalledEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // ChannelCreatedEvent represents the Channel created event
@@ -52,11 +72,21 @@ type ChannelCreatedEvent struct {
 	EventTimestamp string             `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelCreatedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // ChannelDeletedEvent represents the Channel deleted event
 type ChannelDeletedEvent struct {
 	Type           string `json:"type"`
 	Channel        string `json:"channel"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelDeletedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // ChannelArchiveEvent represents the Channel archive event
@@ -67,12 +97,22 @@ type ChannelArchiveEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelArchiveEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // ChannelUnarchiveEvent represents the Channel unarchive event
 type ChannelUnarchiveEvent struct {
 	Type           string `json:"type"`
 	Channel        string `json:"channel"`
 	User           string `json:"user"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelUnarchiveEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // ChannelLeftEvent represents the Channel left event
@@ -82,11 +122,21 @@ type ChannelLeftEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelLeftEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // ChannelRenameEvent represents the Channel rename event
 type ChannelRenameEvent struct {
 	Type           string            `json:"type"`
 	Channel        ChannelRenameInfo `json:"channel"`
 	EventTimestamp string            `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelRenameEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // ChannelIDChangedEvent represents the Channel identifier changed event
@@ -95,6 +145,11 @@ type ChannelIDChangedEvent struct {
 	OldChannelID   string `json:"old_channel_id"`
 	NewChannelID   string `json:"new_channel_id"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e ChannelIDChangedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // ChannelCreatedInfo represents the information associated with the Channel created event
@@ -120,11 +175,21 @@ type GroupDeletedEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e GroupDeletedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // GroupArchiveEvent represents the Group archive event
 type GroupArchiveEvent struct {
 	Type           string `json:"type"`
 	Channel        string `json:"channel"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e GroupArchiveEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // GroupUnarchiveEvent represents the Group unarchive event
@@ -134,6 +199,11 @@ type GroupUnarchiveEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e GroupUnarchiveEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // GroupLeftEvent represents the Group left event
 type GroupLeftEvent struct {
 	Type           string `json:"type"`
@@ -141,11 +211,21 @@ type GroupLeftEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e GroupLeftEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // GroupRenameEvent represents the Group rename event
 type GroupRenameEvent struct {
 	Type           string          `json:"type"`
 	Channel        GroupRenameInfo `json:"channel"`
 	EventTimestamp string          `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e GroupRenameEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // GroupRenameInfo represents the information associated with the Group rename event
@@ -163,12 +243,22 @@ type FileChangeEvent struct {
 	File   FileEventFile `json:"file"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e FileChangeEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // FileDeletedEvent represents the information associated with the File deleted
 // event.
 type FileDeletedEvent struct {
 	Type           string `json:"type"`
 	FileID         string `json:"file_id"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e FileDeletedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // FileSharedEvent represents the information associated with the File shared
@@ -182,12 +272,22 @@ type FileSharedEvent struct {
 	EventTimestamp string        `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e FileSharedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // FileUnsharedEvent represents the information associated with the File
 // unshared event.
 type FileUnsharedEvent struct {
 	Type   string        `json:"type"`
 	FileID string        `json:"file_id"`
 	File   FileEventFile `json:"file"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e FileUnsharedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // FileEventFile represents information on the specific file being shared in a
@@ -202,10 +302,20 @@ type GridMigrationFinishedEvent struct {
 	EnterpriseID string `json:"enterprise_id"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e GridMigrationFinishedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // GridMigrationStartedEvent An enterprise grid migration has started on this workspace.
 type GridMigrationStartedEvent struct {
 	Type         string `json:"type"`
 	EnterpriseID string `json:"enterprise_id"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e GridMigrationStartedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // LinkSharedEvent A message was posted containing one or more links relevant to your application
@@ -221,6 +331,11 @@ type LinkSharedEvent struct {
 	ThreadTimeStamp  string        `json:"thread_ts"`
 	Links            []SharedLinks `json:"links"`
 	EventTimestamp   string        `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e LinkSharedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 type SharedLinks struct {
@@ -275,6 +390,11 @@ type MessageEvent struct {
 	Root *MessageEvent `json:"root"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e MessageEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // MemberJoinedChannelEvent A member joined a public or private channel
 type MemberJoinedChannelEvent struct {
 	Type           string `json:"type"`
@@ -284,6 +404,11 @@ type MemberJoinedChannelEvent struct {
 	Team           string `json:"team"`
 	Inviter        string `json:"inviter"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e MemberJoinedChannelEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // MemberLeftChannelEvent A member left a public or private channel
@@ -296,6 +421,11 @@ type MemberLeftChannelEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e MemberLeftChannelEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 type pinEvent struct {
 	Type           string `json:"type"`
 	User           string `json:"user"`
@@ -303,6 +433,11 @@ type pinEvent struct {
 	Channel        string `json:"channel_id"`
 	EventTimestamp string `json:"event_ts"`
 	HasPins        bool   `json:"has_pins,omitempty"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e pinEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 type reactionEvent struct {
@@ -314,17 +449,30 @@ type reactionEvent struct {
 	EventTimestamp string `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e reactionEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // ReactionAddedEvent An reaction was added to a message - https://api.slack.com/events/reaction_added
-type ReactionAddedEvent reactionEvent
+type ReactionAddedEvent struct {
+	reactionEvent
+}
 
 // ReactionRemovedEvent An reaction was removed from a message - https://api.slack.com/events/reaction_removed
-type ReactionRemovedEvent reactionEvent
+type ReactionRemovedEvent struct {
+	reactionEvent
+}
 
 // PinAddedEvent An item was pinned to a channel - https://api.slack.com/events/pin_added
-type PinAddedEvent pinEvent
+type PinAddedEvent struct {
+	pinEvent
+}
 
 // PinRemovedEvent An item was unpinned from a channel - https://api.slack.com/events/pin_removed
-type PinRemovedEvent pinEvent
+type PinRemovedEvent struct {
+	pinEvent
+}
 
 type tokens struct {
 	Oauth []string `json:"oauth"`
@@ -338,11 +486,21 @@ type TeamJoinEvent struct {
 	EventTimestamp string      `json:"event_ts"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e TeamJoinEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // TokensRevokedEvent APP's API tokens are revoked - https://api.slack.com/events/tokens_revoked
 type TokensRevokedEvent struct {
 	Type           string `json:"type"`
 	Tokens         tokens `json:"tokens"`
 	EventTimestamp string `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e TokensRevokedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // EmojiChangedEvent is the event of custom emoji has been added or changed
@@ -365,12 +523,22 @@ type EmojiChangedEvent struct {
 	Value string `json:"value,omitempty"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e EmojiChangedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // WorkflowStepExecuteEvent is fired, if a workflow step of your app is invoked
 type WorkflowStepExecuteEvent struct {
 	Type           string            `json:"type"`
 	CallbackID     string            `json:"callback_id"`
 	WorkflowStep   EventWorkflowStep `json:"workflow_step"`
 	EventTimestamp string            `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e WorkflowStepExecuteEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // MessageMetadataPostedEvent is sent, if a message with metadata is posted
@@ -384,6 +552,11 @@ type MessageMetadataPostedEvent struct {
 	Metadata         *slack.SlackMetadata `json:"metadata"`
 	MessageTimestamp string               `json:"message_ts"`
 	EventTimestamp   string               `json:"event_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e MessageMetadataPostedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 // MessageMetadataUpdatedEvent is sent, if a message with metadata is deleted
@@ -400,6 +573,11 @@ type MessageMetadataUpdatedEvent struct {
 	Metadata         *slack.SlackMetadata `json:"metadata"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e MessageMetadataUpdatedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // MessageMetadataDeletedEvent is sent, if a message with metadata is deleted
 type MessageMetadataDeletedEvent struct {
 	Type             string               `json:"type"`
@@ -412,6 +590,11 @@ type MessageMetadataDeletedEvent struct {
 	TeamId           string               `json:"team_id"`
 	MessageTimestamp string               `json:"message_ts"`
 	DeletedTimestamp string               `json:"deleted_ts"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e MessageMetadataDeletedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 type EventWorkflowStep struct {
@@ -530,10 +713,20 @@ type TeamAccessGrantedEvent struct {
 	TeamIDs []string `json:"team_ids"`
 }
 
+// EventType implements EventAPIInnerEventData interface
+func (e TeamAccessGrantedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
+}
+
 // TeamAccessRevokedEvent is sent if access to teams was revoked for your org-wide app.
 type TeamAccessRevokedEvent struct {
 	Type    string   `json:"type"`
 	TeamIDs []string `json:"team_ids"`
+}
+
+// EventType implements EventAPIInnerEventData interface
+func (e TeamAccessRevokedEvent) EventType() EventsAPIType {
+	return EventsAPIType(e.Type)
 }
 
 type EventsAPIType string

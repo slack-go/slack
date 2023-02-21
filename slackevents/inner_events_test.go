@@ -20,9 +20,14 @@ func TestAppMention(t *testing.T) {
 				"blah": "test"
 		}
 	`)
-	err := json.Unmarshal(rawE, &AppMentionEvent{})
+
+	var e AppMentionEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -32,9 +37,14 @@ func TestAppUninstalled(t *testing.T) {
 			"type": "app_uninstalled"
 		}
 	`)
-	err := json.Unmarshal(rawE, &AppUninstalledEvent{})
+
+	var e AppUninstalledEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -62,6 +72,9 @@ func TestFileChangeEvent(t *testing.T) {
 	if e.File.ID != "F1234567890" {
 		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
 	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
+	}
 }
 
 func TestFileDeletedEvent(t *testing.T) {
@@ -85,6 +98,9 @@ func TestFileDeletedEvent(t *testing.T) {
 	}
 	if e.EventTimestamp != "1234567890.123456" {
 		t.Errorf("event timestamp should be 1234567890.123456, was %s", e.EventTimestamp)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -124,6 +140,9 @@ func TestFileSharedEvent(t *testing.T) {
 	if e.EventTimestamp != "1234567890.123456" {
 		t.Errorf("event timestamp should be 1234567890.123456, was %s", e.EventTimestamp)
 	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
+	}
 }
 
 func TestFileUnsharedEvent(t *testing.T) {
@@ -150,6 +169,9 @@ func TestFileUnsharedEvent(t *testing.T) {
 	if e.File.ID != "F1234567890" {
 		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
 	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
+	}
 }
 
 func TestGridMigrationFinishedEvent(t *testing.T) {
@@ -159,9 +181,14 @@ func TestGridMigrationFinishedEvent(t *testing.T) {
 				"enterprise_id": "EXXXXXXXX"
 			}
 	`)
-	err := json.Unmarshal(rawE, &GridMigrationFinishedEvent{})
+
+	var e GridMigrationFinishedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -180,9 +207,13 @@ func TestGridMigrationStartedEvent(t *testing.T) {
 				"event_time": 1234567890
 		}
 	`)
-	err := json.Unmarshal(rawE, &GridMigrationStartedEvent{})
+	var e GridMigrationStartedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -211,9 +242,13 @@ func TestLinkSharedEvent(t *testing.T) {
 						]
 		}
 	`)
-	err := json.Unmarshal(rawE, &LinkSharedEvent{})
+	var e LinkSharedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -243,6 +278,9 @@ func TestLinkSharedEvent_struct(t *testing.T) {
 	if string(rawE) != expected {
 		t.Errorf("expected %s, but got %s", expected, string(rawE))
 	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
+	}
 }
 
 func TestLinkSharedComposerEvent(t *testing.T) {
@@ -271,9 +309,13 @@ func TestLinkSharedComposerEvent(t *testing.T) {
 				]
 			}
 	`)
-	err := json.Unmarshal(rawE, &LinkSharedEvent{})
+	var e LinkSharedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -302,9 +344,13 @@ func TestMessageEvent(t *testing.T) {
 				}
 		}
 	`)
-	err := json.Unmarshal(rawE, &MessageEvent{})
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -320,9 +366,13 @@ func TestBotMessageEvent(t *testing.T) {
 				"icons": {}
 		}
 	`)
-	err := json.Unmarshal(rawE, &MessageEvent{})
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -372,6 +422,10 @@ func TestThreadBroadcastEvent(t *testing.T) {
 	if me.Message.Root.TimeStamp != "1355517523.000005" {
 		t.Errorf("me.Message.Root.TimeStamp = %q, want %q", me.Root.TimeStamp, "1355517523.000005")
 	}
+
+	if string(me.EventType()) != me.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", me.Type, me.EventType())
+	}
 }
 
 func TestMemberJoinedChannelEvent(t *testing.T) {
@@ -385,9 +439,13 @@ func TestMemberJoinedChannelEvent(t *testing.T) {
 				"inviter": "U123456789"
 		}
 	`)
-	err := json.Unmarshal(rawE, &MemberJoinedChannelEvent{})
+	var e MemberJoinedChannelEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -401,9 +459,13 @@ func TestMemberLeftChannelEvent(t *testing.T) {
 				"team": "T024BE7LD"
 		}
 	`)
-	err := json.Unmarshal(rawE, &MemberLeftChannelEvent{})
+	var e MemberLeftChannelEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -429,9 +491,13 @@ func TestPinAdded(t *testing.T) {
 				"event_ts": "1515449522000016"
 		}
 	`)
-	err := json.Unmarshal(rawE, &PinAddedEvent{})
+	var e PinAddedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -457,9 +523,13 @@ func TestPinRemoved(t *testing.T) {
 				"event_ts": "1515449522000016"
 		}
 	`)
-	err := json.Unmarshal(rawE, &PinRemovedEvent{})
+	var e PinRemovedEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+	if string(e.EventType()) != e.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", e.Type, e.EventType())
 	}
 }
 
@@ -493,6 +563,10 @@ func TestTokensRevoked(t *testing.T) {
 
 	if len(tre.Tokens.Oauth) != 1 || tre.Tokens.Oauth[0] != "OUXXXXXXXX" {
 		t.Fail()
+	}
+
+	if string(tre.EventType()) != tre.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", tre.Type, tre.EventType())
 	}
 }
 
@@ -573,6 +647,9 @@ func TestEmojiChanged(t *testing.T) {
 	if ece.NewName != "cheese-grin" {
 		t.Fail()
 	}
+	if string(ece.EventType()) != ece.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", ece.Type, ece.EventType())
+	}
 }
 
 func TestWorkflowStepExecute(t *testing.T) {
@@ -634,6 +711,9 @@ func TestWorkflowStepExecute(t *testing.T) {
 			t.Fail()
 		}
 	}
+	if string(wse.EventType()) != wse.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", wse.Type, wse.EventType())
+	}
 }
 
 func TestMessageMetadataPosted(t *testing.T) {
@@ -690,6 +770,9 @@ func TestMessageMetadataPosted(t *testing.T) {
 	}
 	if mmp.MessageTimestamp != "1660398079.756349" {
 		t.Fail()
+	}
+	if string(mmp.EventType()) != mmp.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", mmp.Type, mmp.EventType())
 	}
 }
 
@@ -759,6 +842,9 @@ func TestMessageMetadataUpdated(t *testing.T) {
 	if len(payload) <= 0 {
 		t.Fail()
 	}
+	if string(mmp.EventType()) != mmp.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", mmp.Type, mmp.EventType())
+	}
 }
 
 func TestMessageMetadataDeleted(t *testing.T) {
@@ -819,5 +905,8 @@ func TestMessageMetadataDeleted(t *testing.T) {
 	}
 	if mmp.DeletedTimestamp != "1660398079.756349" {
 		t.Fail()
+	}
+	if string(mmp.EventType()) != mmp.Type {
+		t.Errorf("EventType() method return value should be %q, was %q", mmp.Type, mmp.EventType())
 	}
 }
