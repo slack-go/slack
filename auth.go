@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"net/url"
+	"strconv"
 )
 
 // AuthRevokeResponse contains our Auth response from the auth.revoke endpoint
@@ -45,8 +46,9 @@ type listTeamsResponse struct {
 }
 
 type ListTeamsParameters struct {
-	Limit  int
-	Cursor string
+	Limit       int
+	Cursor      string
+	IncludeIcon *bool
 }
 
 // ListTeams returns all workspaces a token can access.
@@ -62,6 +64,9 @@ func (api *Client) ListTeamsContext(ctx context.Context, params ListTeamsParamet
 	}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
+	}
+	if params.IncludeIcon != nil {
+		values.Add("include_icon", strconv.FormatBool(*params.IncludeIcon))
 	}
 
 	response := &listTeamsResponse{}
