@@ -143,11 +143,19 @@ func GetUserGroupsOptionIncludeUsers(b bool) GetUserGroupsOption {
 	}
 }
 
+// GetUserGroupsOptionTeamID team to list user groups in, required if org token is used
+func GetUserGroupsOptionTeamID(teamID string) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.TeamID = teamID
+	}
+}
+
 // GetUserGroupsParams contains arguments for GetUserGroups method call
 type GetUserGroupsParams struct {
 	IncludeCount    bool
 	IncludeDisabled bool
 	IncludeUsers    bool
+	TeamID          string
 }
 
 // GetUserGroups returns a list of user groups for the team
@@ -174,6 +182,9 @@ func (api *Client) GetUserGroupsContext(ctx context.Context, options ...GetUserG
 	}
 	if params.IncludeUsers {
 		values.Add("include_users", "true")
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.list", values)
