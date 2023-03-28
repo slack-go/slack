@@ -1,7 +1,9 @@
 # slacktest
 
-This package was copied from https://github.com/lusis/slack-test for historical reasons.  
-This package's license is the following.
+This package was originally copied from https://github.com/lusis/slack-test for historical reasons.  
+It is currently in use with some modifications.
+
+The license of this package is as follows.
 
 ---
 
