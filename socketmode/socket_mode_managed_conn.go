@@ -1,7 +1,6 @@
 package socketmode
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -469,18 +468,6 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 	case len(event) == 0:
 		smc.Debugln("Received empty event")
 	default:
-		if smc.debug {
-			buf := &bytes.Buffer{}
-			d := json.NewEncoder(buf)
-			d.SetIndent("", "  ")
-			if err := d.Encode(event); err != nil {
-				smc.Debugln("Failed encoding decoded json:", err)
-			}
-			reencoded := buf.String()
-
-			smc.Debugln("Incoming WebSocket message:", reencoded)
-		}
-
 		select {
 		case sink <- event:
 		case <-ctx.Done():
