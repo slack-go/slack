@@ -17,6 +17,7 @@ type Call struct {
 	DesktopAppJoinURL string     `json:"desktop_app_join_url"`
 	ExternalDisplayID string     `json:"external_display_id"`
 	Users             []CallUser `json:"users"`
+	Channels          []string   `json:"channels"`
 }
 
 // A thin user representation which has a SlackID, ExternalID, or both.
