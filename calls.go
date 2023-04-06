@@ -11,6 +11,7 @@ type Call struct {
 	ID                string     `json:"id"`
 	Title             string     `json:"title"`
 	DateStart         JSONTime   `json:"date_start"`
+	DateEnd           JSONTime   `json:"date_end"`
 	ExternalUniqueID  string     `json:"external_unique_id"`
 	JoinURL           string     `json:"join_url"`
 	DesktopAppJoinURL string     `json:"desktop_app_join_url"`
