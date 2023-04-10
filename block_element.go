@@ -279,6 +279,7 @@ type MultiSelectBlockElement struct {
 	InitialChannels      []string                  `json:"initial_channels,omitempty"`
 	MinQueryLength       *int                      `json:"min_query_length,omitempty"`
 	MaxSelectedItems     *int                      `json:"max_selected_items,omitempty"`
+	Filter               *SelectBlockElementFilter `json:"filter,omitempty"`
 	Confirm              *ConfirmationBlockObject  `json:"confirm,omitempty"`
 }
 
