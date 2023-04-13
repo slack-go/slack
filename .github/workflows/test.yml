@@ -30,6 +30,8 @@ jobs:
     name: lint
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # v3.4.0
         with:
