@@ -690,3 +690,46 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 	}
 	return response.Err()
 }
+
+type InviteSharedParams struct {
+	Emails          []string
+	ExternalLimited bool
+	UserIDs         []string
+}
+
+var InvalidSharedInviteParamsError = errors.New("one of Emails or UserIDs must be supplied to InviteSharedParams")
+
+// InviteSharedContext sends array(s) of user IDs and/or emails an invitation to a Slack Connect channel with a custom context
+// At least one array of either emails or user IDs must be supplied to invite the recipient
+func (api *Client) InviteSharedContext(ctx context.Context, channelID string, params InviteSharedParams) error {
+	if len(params.UserIDs) < 1 && len(params.Emails) < 1 {
+		return InvalidSharedInviteParamsError
+	}
+
+	values := url.Values{
+		"channel": {channelID},
+	}
+	if params.Emails != nil {
+		values.Add("emails", strings.Join(params.Emails, "'"))
+	}
+	if params.ExternalLimited == false {
+		values.Add("external_limited", "false")
+	}
+	if params.UserIDs != nil {
+		values.Add("user_ids", strings.Join(params.Emails, "'"))
+	}
+
+	response := &SlackResponse{}
+	err := api.getMethod(ctx, "conversations.inviteShared", api.token, values, &response)
+	if err != nil {
+		return err
+	}
+
+	return response.Err()
+}
+
+// InviteShared sends array(s) of user IDs and/or emails an invitation to a Slack Connect channel
+// At least one array of either emails or user IDs must be supplied to invite the recipient
+func (api *Client) InviteShared(channelID string, params InviteSharedParams) error {
+	return api.InviteSharedContext(context.Background(), channelID, params)
+}
