@@ -121,8 +121,6 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	// We don't wait on runMessageReceiver because it doesn't block on a select with the context,
-	// so we'd have to wait for the ReadJSON to time out, which can take a while.
 	go func() {
 		defer cancel()
 		// We close messages here as it is the producer for the channel.
