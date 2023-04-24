@@ -19,7 +19,10 @@ func (smc *deadmanTimer) Elapsed() <-chan time.Time {
 }
 
 func (smc *deadmanTimer) Reset() {
-	// Note that this is the correct way to Reset a non-expired timer
+	// FIXME: Race on "deadmanTimer", timer channel cannot be read concurrently while resetting.
+	// "This should not be done concurrent to other receives from the Timer's channel."
+	// https://pkg.go.dev/time#Timer.Reset
+	// See socket_mode_managed_conn.go lines ~59 & ~151.
 	if !smc.timer.Stop() {
 		select {
 		case <-smc.timer.C:

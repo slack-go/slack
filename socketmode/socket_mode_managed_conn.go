@@ -55,8 +55,12 @@ func (smc *Client) RunContext(ctx context.Context) error {
 
 func (smc *Client) run(ctx context.Context, connectionCount int) error {
 	messages := make(chan json.RawMessage, 1)
-	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
 
+	// FIXME: Race on "deadmanTimer", timer channel cannot be read concurrently while resetting.
+	// "This should not be done concurrent to other receives from the Timer's channel."
+	// https://pkg.go.dev/time#Timer.Reset
+	// See deadman.go line ~22.
+	deadmanTimer := newDeadmanTimer(smc.maxPingInterval)
 	pingHandler := func(_ string) error {
 		deadmanTimer.Reset()
 
@@ -143,6 +147,11 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 			if err := conn.Close(); err != nil {
 				smc.Debugf("Failed to close connection: %v", err)
 			}
+
+		// FIXME: Race on "deadmanTimer", timer channel cannot be read concurrently while resetting.
+		// "This should not be done concurrent to other receives from the Timer's channel."
+		// https://pkg.go.dev/time#Timer.Reset
+		// See deadman.go line ~22.
 		case <-deadmanTimer.Elapsed():
 			sendErr(errors.New("ping timeout: Slack did not send us WebSocket PING for more than Client.maxInterval"))
 
