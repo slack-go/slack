@@ -692,15 +692,9 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 }
 
 type InviteSharedParams struct {
-	// Emails are the emails to be invited to the Slack Connect
-	Emails []string
-	// ExternalLimited determines whether the invitee is an external limited member.
-	// External limited members cannot invite other cannot invite others, export channel history,
-	// change channel visibility, topic, or name, and the channel will be set as private in the guest workspace.
-	// Defaults to true
-	ExternalLimited *bool
-	// UserIDs are the Slack IDs to be invited to the Slack Connect
-	UserIDs []string
+	Emails          []string
+	ExternalLimited bool
+	UserIDs         []string
 }
 
 var InvalidSharedInviteParamsError = errors.New("one of Emails or UserIDs must be supplied to InviteSharedParams")
@@ -718,8 +712,7 @@ func (api *Client) InviteSharedContext(ctx context.Context, channelID string, pa
 	if params.Emails != nil {
 		values.Add("emails", strings.Join(params.Emails, "'"))
 	}
-	// the externalLimited parameter defaults to true; ignore it unless it is explicitly false
-	if params.ExternalLimited != nil && *params.ExternalLimited == false {
+	if params.ExternalLimited == false {
 		values.Add("external_limited", "false")
 	}
 	if params.UserIDs != nil {
