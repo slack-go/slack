@@ -266,7 +266,7 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 	smc.Debugf("Dialing to websocket on url %s", url)
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	upgradeHeader := http.Header{}
-	upgradeHeader.Add("Origin", "https://api.slack.com")
+	upgradeHeader.Add("Origin", smc.endpoint)
 	dialer := websocket.DefaultDialer
 	if smc.dialer != nil {
 		dialer = smc.dialer

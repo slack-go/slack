@@ -102,6 +102,11 @@ func OptionLog(l logger) func(*Client) {
 	}
 }
 
+// OptionAPIURL set the url for the client. only useful for testing.
+func OptionAPIURL(u string) func(*Client) {
+	return func(c *Client) { c.endpoint = u }
+}
+
 // New returns a Socket Mode client which provides a fully managed connection to
 // Slack's Websocket-based Socket Mode.
 func New(api *slack.Client, options ...Option) *Client {
@@ -110,6 +115,7 @@ func New(api *slack.Client, options ...Option) *Client {
 		Events:              make(chan Event, 50),
 		socketModeResponses: make(chan *Response, 20),
 		maxPingInterval:     defaultMaxPingInterval,
+		endpoint:            "https://api.slack.com",
 		log:                 log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
 	}
 
