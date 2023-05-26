@@ -74,6 +74,10 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 		values["channels"] = []string{strings.Join(userGroup.Prefs.Channels, ",")}
 	}
 
+	if userGroup.TeamID != "" {
+		values["team_id"] = []string{userGroup.TeamID}
+	}
+
 	response, err := api.userGroupRequest(ctx, "usergroups.create", values)
 	if err != nil {
 		return UserGroup{}, err
@@ -81,16 +85,53 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 	return response.UserGroup, nil
 }
 
+// DisableUserGroupOption options for the DisableUserGroup and EnableUserGroup method calls.
+type DisableUserGroupOption func(*DisableUserGroupParams)
+
+// DisableUserGroupParams contains arguments for DisableUserGroup and EnableUserGroup method calls.
+type DisableUserGroupParams struct {
+	IncludeCount bool
+	TeamID       string
+}
+
+// DisableUserGroupOptionIncludeCount include the count of User Groups (default: false)
+func DisableUserGroupOptionIncludeCount(b bool) DisableUserGroupOption {
+	return func(params *DisableUserGroupParams) {
+		params.IncludeCount = b
+	}
+}
+
+// DisableUserGroupOptionTeamID include team Id
+func DisableUserGroupOptionTeamID(teamID string) DisableUserGroupOption {
+	return func(params *DisableUserGroupParams) {
+		params.TeamID = teamID
+	}
+}
+
 // DisableUserGroup disables an existing user group
-func (api *Client) DisableUserGroup(userGroup string) (UserGroup, error) {
-	return api.DisableUserGroupContext(context.Background(), userGroup)
+func (api *Client) DisableUserGroup(userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	return api.DisableUserGroupContext(context.Background(), userGroup, options...)
 }
 
 // DisableUserGroupContext disables an existing user group with a custom context
-func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string) (UserGroup, error) {
+func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	params := DisableUserGroupParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.disable", values)
@@ -101,15 +142,29 @@ func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string
 }
 
 // EnableUserGroup enables an existing user group
-func (api *Client) EnableUserGroup(userGroup string) (UserGroup, error) {
-	return api.EnableUserGroupContext(context.Background(), userGroup)
+func (api *Client) EnableUserGroup(userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	return api.EnableUserGroupContext(context.Background(), userGroup, options...)
 }
 
 // EnableUserGroupContext enables an existing user group with a custom context
-func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string) (UserGroup, error) {
+func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	params := DisableUserGroupParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.enable", values)
@@ -143,11 +198,19 @@ func GetUserGroupsOptionIncludeUsers(b bool) GetUserGroupsOption {
 	}
 }
 
+// GetUsersOptionTeamID include team ID
+func GetUserGroupsOptionTeamID(teamID string) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.TeamID = teamID
+	}
+}
+
 // GetUserGroupsParams contains arguments for GetUserGroups method call
 type GetUserGroupsParams struct {
 	IncludeCount    bool
 	IncludeDisabled bool
 	IncludeUsers    bool
+	TeamID          string
 }
 
 // GetUserGroups returns a list of user groups for the team
@@ -174,6 +237,9 @@ func (api *Client) GetUserGroupsContext(ctx context.Context, options ...GetUserG
 	}
 	if params.IncludeUsers {
 		values.Add("include_users", "true")
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.list", values)
@@ -214,12 +280,20 @@ func UpdateUserGroupsOptionChannels(channels []string) UpdateUserGroupsOption {
 	}
 }
 
+// UpdateUserGroupsOptionTeamID specify the team id for the User Group. (default: nil, so it's no-op)
+func UpdateUserGroupsOptionTeamID(teamID *string) UpdateUserGroupsOption {
+	return func(params *UpdateUserGroupsParams) {
+		params.TeamID = teamID
+	}
+}
+
 // UpdateUserGroupsParams contains arguments for UpdateUserGroup method call
 type UpdateUserGroupsParams struct {
 	Name        string
 	Handle      string
 	Description *string
 	Channels    *[]string
+	TeamID      *string
 }
 
 // UpdateUserGroup will update an existing user group
@@ -256,6 +330,10 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 		values["channels"] = []string{strings.Join(*params.Channels, ",")}
 	}
 
+	if params.TeamID != nil {
+		values["team_id"] = []string{*params.TeamID}
+	}
+
 	response, err := api.userGroupRequest(ctx, "usergroups.update", values)
 	if err != nil {
 		return UserGroup{}, err
@@ -263,16 +341,53 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 	return response.UserGroup, nil
 }
 
+// GetUserGroupMembersOption options for the GetUserGroupMembers method call.
+type GetUserGroupMembersOption func(*GetUserGroupMembersParams)
+
+// GetUserGroupMembersParams contains arguments for GetUserGroupMembers method call
+type GetUserGroupMembersParams struct {
+	IncludeDisabled bool
+	TeamID          string
+}
+
+// GetUserGroupMembersOptionIncludeDisabled include disabled User Groups (default: false)
+func GetUserGroupMembersOptionIncludeDisabled(b bool) GetUserGroupMembersOption {
+	return func(params *GetUserGroupMembersParams) {
+		params.IncludeDisabled = b
+	}
+}
+
+// GetUserGroupMembersOptionTeamID include team Id
+func GetUserGroupMembersOptionTeamID(teamID string) GetUserGroupMembersOption {
+	return func(params *GetUserGroupMembersParams) {
+		params.TeamID = teamID
+	}
+}
+
 // GetUserGroupMembers will retrieve the current list of users in a group
-func (api *Client) GetUserGroupMembers(userGroup string) ([]string, error) {
-	return api.GetUserGroupMembersContext(context.Background(), userGroup)
+func (api *Client) GetUserGroupMembers(userGroup string, options ...GetUserGroupMembersOption) ([]string, error) {
+	return api.GetUserGroupMembersContext(context.Background(), userGroup, options...)
 }
 
 // GetUserGroupMembersContext will retrieve the current list of users in a group with a custom context
-func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup string) ([]string, error) {
+func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup string, options ...GetUserGroupMembersOption) ([]string, error) {
+	params := GetUserGroupMembersParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeDisabled {
+		values.Add("include_disabled", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.users.list", values)
@@ -282,17 +397,54 @@ func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup str
 	return response.Users, nil
 }
 
+// UpdateUserGroupMembersOption options for the UpdateUserGroupMembers method call.
+type UpdateUserGroupMembersOption func(*UpdateUserGroupMembersParams)
+
+// UpdateUserGroupMembersParams contains arguments for UpdateUserGroupMembers method call
+type UpdateUserGroupMembersParams struct {
+	IncludeCount bool
+	TeamID       string
+}
+
+// UpdateUserGroupMembersOptionIncludeCount include the count of User Groups (default: false)
+func UpdateUserGroupMembersOptionIncludeCount(b bool) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.IncludeCount = b
+	}
+}
+
+// UpdateUserGroupMembersOptionTeamID include team Id
+func UpdateUserGroupMembersOptionTeamID(teamID string) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.TeamID = teamID
+	}
+}
+
 // UpdateUserGroupMembers will update the members of an existing user group
-func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error) {
-	return api.UpdateUserGroupMembersContext(context.Background(), userGroup, members)
+func (api *Client) UpdateUserGroupMembers(userGroup string, members string, options ...UpdateUserGroupMembersOption) (UserGroup, error) {
+	return api.UpdateUserGroupMembersContext(context.Background(), userGroup, members, options...)
 }
 
 // UpdateUserGroupMembersContext will update the members of an existing user group with a custom context
-func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string) (UserGroup, error) {
+func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string, options ...UpdateUserGroupMembersOption) (UserGroup, error) {
+	params := UpdateUserGroupMembersParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
 		"users":     {members},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.users.update", values)
