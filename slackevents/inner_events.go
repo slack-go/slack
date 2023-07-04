@@ -352,6 +352,12 @@ type UserChangeEvent struct {
 	User *slack.User `json:"user"`
 }
 
+// UserProfileChangeEvent happens when a user's profile changes
+type UserProfileChangeEvent struct {
+	Type string      `json:"type"`
+	User *slack.User `json:"user"`
+}
+
 // TokensRevokedEvent APP's API tokens are revoked - https://api.slack.com/events/tokens_revoked
 type TokensRevokedEvent struct {
 	Type           string `json:"type"`
@@ -619,6 +625,8 @@ const (
 	EmojiChanged = EventsAPIType("emoji_changed")
 	// A user has changed
 	UserChange = EventsAPIType("user_change")
+	// Specifically the user's profile has changed
+	UserProfileChange = EventsAPIType("user_profile_changed")
 	// WorkflowStepExecute Happens, if a workflow step of your app is invoked
 	WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 	// MessageMetadataPosted A message with metadata was posted
@@ -669,6 +677,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamJoin:               TeamJoinEvent{},
 	TokensRevoked:          TokensRevokedEvent{},
 	EmojiChanged:           EmojiChangedEvent{},
+	UserProfileChange:      UserProfileChangeEvent{},
 	UserChange:             UserChangeEvent{},
 	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
 	MessageMetadataPosted:  MessageMetadataPostedEvent{},
