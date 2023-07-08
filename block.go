@@ -18,6 +18,7 @@ const (
 	MBTInput    MessageBlockType = "input"
 	MBTHeader   MessageBlockType = "header"
 	MBTRichText MessageBlockType = "rich_text"
+	MBTVideo    MessageBlockType = "video"
 )
 
 // Block defines an interface all block types should implement
