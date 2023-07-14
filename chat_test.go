@@ -1,11 +1,14 @@
 package slack
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -39,7 +42,6 @@ func TestGetPermalink(t *testing.T) {
 	timeStamp := "p135854651500008"
 
 	http.HandleFunc("/chat.getPermalink", func(rw http.ResponseWriter, r *http.Request) {
-
 		if got, want := r.Header.Get("Content-Type"), "application/x-www-form-urlencoded"; got != want {
 			t.Errorf("request uses unexpected content type: got %s, want %s", got, want)
 		}
@@ -295,4 +297,32 @@ func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 	responseURL := api.endpoint + "response-url"
 
 	_, _, _ = api.PostMessage("CXXX", MsgOptionDeleteOriginal(responseURL))
+}
+
+func TestSendMessageContextRedactsTokenInDebugLog(t *testing.T) {
+	once.Do(startServer)
+	buf := bytes.NewBufferString("")
+
+	token := "xtest-token-1234-abcd"
+	opts := []Option{
+		OptionAPIURL("http://" + serverAddr + "/"),
+		OptionLog(log.New(buf, "", log.Lshortfile)),
+		OptionDebug(true),
+	}
+	api := New(token, opts...)
+	// Why send the token in the message text too? To test that we're not
+	// redacting substrings in the request which look like a token but aren't.
+	api.SendMessage("CXXX", MsgOptionText(token, false))
+	s := buf.String()
+
+	re := regexp.MustCompile(`token=[\w-]*`)
+	want := "token=xtest-REDACTED"
+	if got := re.FindString(s); got != want {
+		t.Errorf("Logged token in SendMessageContext(): got %q, want %q", got, want)
+	}
+	re = regexp.MustCompile(`text=[\w-]*`)
+	want = "text=" + token
+	if got := re.FindString(s); got != want {
+		t.Errorf("Logged text in SendMessageContext(): got %q, want %q", got, want)
+	}
 }
