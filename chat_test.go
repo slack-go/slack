@@ -300,29 +300,48 @@ func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 }
 
 func TestSendMessageContextRedactsTokenInDebugLog(t *testing.T) {
-	once.Do(startServer)
-	buf := bytes.NewBufferString("")
-
-	token := "xtest-token-1234-abcd"
-	opts := []Option{
-		OptionAPIURL("http://" + serverAddr + "/"),
-		OptionLog(log.New(buf, "", log.Lshortfile)),
-		OptionDebug(true),
+	tests := []struct {
+		name  string
+		token string
+		want  string
+	}{
+		{
+			name:  "regular token",
+			token: "xtest-token-1234-abcd",
+			want:  "xtest-REDACTED",
+		},
+		{
+			name:  "refresh token",
+			token: "xoxe.xtest-token-1234-abcd",
+			want:  "xoxe.xtest-REDACTED",
+		},
 	}
-	api := New(token, opts...)
-	// Why send the token in the message text too? To test that we're not
-	// redacting substrings in the request which look like a token but aren't.
-	api.SendMessage("CXXX", MsgOptionText(token, false))
-	s := buf.String()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			once.Do(startServer)
+			buf := bytes.NewBufferString("")
 
-	re := regexp.MustCompile(`token=[\w-]*`)
-	want := "token=xtest-REDACTED"
-	if got := re.FindString(s); got != want {
-		t.Errorf("Logged token in SendMessageContext(): got %q, want %q", got, want)
-	}
-	re = regexp.MustCompile(`text=[\w-]*`)
-	want = "text=" + token
-	if got := re.FindString(s); got != want {
-		t.Errorf("Logged text in SendMessageContext(): got %q, want %q", got, want)
+			opts := []Option{
+				OptionAPIURL("http://" + serverAddr + "/"),
+				OptionLog(log.New(buf, "", log.Lshortfile)),
+				OptionDebug(true),
+			}
+			api := New(tt.token, opts...)
+			// Why send the token in the message text too? To test that we're not
+			// redacting substrings in the request which look like a token but aren't.
+			api.SendMessage("CXXX", MsgOptionText(token, false))
+			s := buf.String()
+
+			re := regexp.MustCompile(`token=[\w.-]*`)
+			want := "token=" + tt.want
+			if got := re.FindString(s); got != want {
+				t.Errorf("Logged token in SendMessageContext(): got %q, want %q", got, want)
+			}
+			re = regexp.MustCompile(`text=[\w.-]*`)
+			want = "text=" + token
+			if got := re.FindString(s); got != want {
+				t.Errorf("Logged text in SendMessageContext(): got %q, want %q", got, want)
+			}
+		})
 	}
 }
