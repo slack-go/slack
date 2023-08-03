@@ -1,5 +1,11 @@
 package slack
 
+import (
+	"context"
+	"encoding/json"
+	"net/url"
+)
+
 // Manifest is an application manifest schema
 type Manifest struct {
 	Metadata    ManifestMetadata `json:"_metadata,omitempty" yaml:"_metadata,omitempty"`
@@ -7,6 +13,41 @@ type Manifest struct {
 	Settings    Settings         `json:"settings,omitempty" yaml:"settings,omitempty"`
 	Features    Features         `json:"features,omitempty" yaml:"features,omitempty"`
 	OAuthConfig OAuthConfig      `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
+}
+
+// ValidateManifest sends a request to apps.manifest.validate to validate your app manifest
+func (api *Client) ValidateManifest(manifest *Manifest, token string, appId string) (*ValidateManifestResponse, error) {
+	return api.ValidateManifestContext(context.Background(), manifest, token, appId)
+}
+
+// ValidateManifestContext sends a request to apps.manifest.validate to validate your app manifest with context
+func (api *Client) ValidateManifestContext(ctx context.Context, manifest *Manifest, token string, appId string) (*ValidateManifestResponse, error) {
+	if token == "" {
+		token = api.appLevelToken
+	}
+
+	// Marshal manifest into string
+	jsonBytes, err := json.Marshal(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	values := url.Values{
+		"token":    {token},
+		"manifest": {string(jsonBytes)},
+	}
+
+	if appId != "" {
+		values.Add("app_id", appId)
+	}
+
+	response := &ValidateManifestResponse{}
+	err = api.postMethod(ctx, "apps.manifest.validate", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
 
 // ManifestMetadata is a group of settings that describe the manifest
@@ -109,4 +150,17 @@ type OAuthConfig struct {
 type OAuthScopes struct {
 	Bot  []string `json:"bot,omitempty" yaml:"bot,omitempty"`
 	User []string `json:"user,omitempty" yaml:"user,omitempty"`
+}
+
+// ValidateManifestResponse is the response returned by the API
+type ValidateManifestResponse struct {
+	Ok     bool                      `json:"ok"`
+	Error  string                    `json:"error,omitempty"`
+	Errors []ManifestValidationError `json:"errors,omitempty"`
+}
+
+// ManifestValidationError is an error message returned for invalid manifests
+type ManifestValidationError struct {
+	Message string `json:"message"`
+	Pointer string `json:"pointer"`
 }
