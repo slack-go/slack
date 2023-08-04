@@ -57,12 +57,14 @@ type authTestResponseFull struct {
 type ParamOption func(*url.Values)
 
 type Client struct {
-	token         string
-	appLevelToken string
-	endpoint      string
-	debug         bool
-	log           ilogger
-	httpclient    httpClient
+	token              string
+	appLevelToken      string
+	configToken        string
+	configRefreshToken string
+	endpoint           string
+	debug              bool
+	log                ilogger
+	httpclient         httpClient
 }
 
 // Option defines an option for a Client
