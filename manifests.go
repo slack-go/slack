@@ -70,6 +70,62 @@ func (api *Client) DeleteManifestContext(ctx context.Context, token string, appI
 	return response, response.Err()
 }
 
+// ExportManifest exports an app manifest from an existing app
+func (api *Client) ExportManifest(token string, appId string) (*ExportManifestResponse, error) {
+	return api.ExportManifestContext(context.Background(), token, appId)
+}
+
+// ExportManifestContext exports an app manifest from an existing app with a custom context
+func (api *Client) ExportManifestContext(ctx context.Context, token string, appId string) (*ExportManifestResponse, error) {
+	if token == "" {
+		token = api.configToken
+	}
+
+	values := url.Values{
+		"token":  {token},
+		"app_id": {appId},
+	}
+
+	response := &ExportManifestResponse{}
+	err := api.postMethod(ctx, "apps.manifest.export", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, response.Err()
+}
+
+// UpdateManifest updates an app from an app manifest
+func (api *Client) UpdateManifest(manifest *Manifest, token string, appId string) (*UpdateManifestResponse, error) {
+	return api.UpdateManifestContext(context.Background(), manifest, token, appId)
+}
+
+// UpdateManifestContext updates an app from an app manifest with a custom context
+func (api *Client) UpdateManifestContext(ctx context.Context, manifest *Manifest, token string, appId string) (*UpdateManifestResponse, error) {
+	if token == "" {
+		token = api.configToken
+	}
+
+	jsonBytes, err := json.Marshal(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	values := url.Values{
+		"token":    {token},
+		"app_id":   {appId},
+		"manifest": {string(jsonBytes)},
+	}
+
+	response := &UpdateManifestResponse{}
+	err = api.postMethod(ctx, "apps.manifest.update", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, response.Err()
+}
+
 // ValidateManifest sends a request to apps.manifest.validate to validate your app manifest
 func (api *Client) ValidateManifest(manifest *Manifest, token string, appId string) (*ManifestResponse, error) {
 	return api.ValidateManifestContext(context.Background(), manifest, token, appId)
@@ -207,7 +263,7 @@ type OAuthScopes struct {
 	User []string `json:"user,omitempty" yaml:"user,omitempty"`
 }
 
-// ManifestResponse is the response returned by the API for app.manifest.x endpoints
+// ManifestResponse is the response returned by the API for apps.manifest.x endpoints
 type ManifestResponse struct {
 	Errors []ManifestValidationError `json:"errors,omitempty"`
 	SlackResponse
@@ -217,4 +273,15 @@ type ManifestResponse struct {
 type ManifestValidationError struct {
 	Message string `json:"message"`
 	Pointer string `json:"pointer"`
+}
+
+type ExportManifestResponse struct {
+	Manifest Manifest `json:"manifest,omitempty"`
+	SlackResponse
+}
+
+type UpdateManifestResponse struct {
+	AppId              string `json:"app_id,omitempty"`
+	PermissionsUpdated bool   `json:"permissions_updated,omitempty"`
+	SlackResponse
 }
