@@ -6,12 +6,16 @@ import (
 )
 
 // RotateTokens exchanges a refresh token for a new app configuration token
-func (api *Client) RotateTokens(refreshToken string) (*TokenResponse, error) {
-	return api.RotateTokensContext(context.Background(), refreshToken)
+func (api *Client) RotateTokens(configToken string, refreshToken string) (*TokenResponse, error) {
+	return api.RotateTokensContext(context.Background(), configToken, refreshToken)
 }
 
 // RotateTokensContext exchanges a refresh token for a new app configuration token with a custom context
-func (api *Client) RotateTokensContext(ctx context.Context, refreshToken string) (*TokenResponse, error) {
+func (api *Client) RotateTokensContext(ctx context.Context, configToken string, refreshToken string) (*TokenResponse, error) {
+	if configToken == "" {
+		configToken = api.configToken
+	}
+
 	if refreshToken == "" {
 		refreshToken = api.configRefreshToken
 	}
@@ -21,7 +25,7 @@ func (api *Client) RotateTokensContext(ctx context.Context, refreshToken string)
 	}
 
 	response := &TokenResponse{}
-	err := api.getMethod(ctx, "tooling.tokens.rotate", api.configToken, values, response)
+	err := api.getMethod(ctx, "tooling.tokens.rotate", configToken, values, response)
 	if err != nil {
 		return nil, err
 	}

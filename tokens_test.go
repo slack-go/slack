@@ -14,7 +14,7 @@ func TestRotateTokens(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	tok, err := api.RotateTokens("old-refresh")
+	tok, err := api.RotateTokens("expired-config", "old-refresh")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 		return
