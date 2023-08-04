@@ -101,6 +101,16 @@ func OptionAppLevelToken(token string) func(*Client) {
 	return func(c *Client) { c.appLevelToken = token }
 }
 
+// OptionConfigToken sets a configuration token for the client.
+func OptionConfigToken(token string) func(*Client) {
+	return func(c *Client) { c.configToken = token }
+}
+
+// OptionConfigRefreshToken sets a configuration refresh token for the client.
+func OptionConfigRefreshToken(token string) func(*Client) {
+	return func(c *Client) { c.configRefreshToken = token }
+}
+
 // New builds a slack client from the provided token and options.
 func New(token string, options ...Option) *Client {
 	s := &Client{
