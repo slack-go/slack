@@ -71,12 +71,12 @@ func (api *Client) DeleteManifestContext(ctx context.Context, token string, appI
 }
 
 // ExportManifest exports an app manifest from an existing app
-func (api *Client) ExportManifest(token string, appId string) (*ExportManifestResponse, error) {
+func (api *Client) ExportManifest(token string, appId string) (*Manifest, error) {
 	return api.ExportManifestContext(context.Background(), token, appId)
 }
 
 // ExportManifestContext exports an app manifest from an existing app with a custom context
-func (api *Client) ExportManifestContext(ctx context.Context, token string, appId string) (*ExportManifestResponse, error) {
+func (api *Client) ExportManifestContext(ctx context.Context, token string, appId string) (*Manifest, error) {
 	if token == "" {
 		token = api.configToken
 	}
@@ -92,7 +92,7 @@ func (api *Client) ExportManifestContext(ctx context.Context, token string, appI
 		return nil, err
 	}
 
-	return response, response.Err()
+	return response.Manifest, response.Err()
 }
 
 // UpdateManifest updates an app from an app manifest
@@ -276,7 +276,7 @@ type ManifestValidationError struct {
 }
 
 type ExportManifestResponse struct {
-	Manifest Manifest `json:"manifest,omitempty"`
+	Manifest *Manifest `json:"manifest,omitempty"`
 	SlackResponse
 }
 
