@@ -15,17 +15,56 @@ type Manifest struct {
 	OAuthConfig OAuthConfig      `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
 }
 
+func (api *Client) CreateManifest(manifest *Manifest, token string) (*ManifestResponse, error) {
+	return api.CreateManifestContext(context.Background(), manifest, token)
+}
+
+func (api *Client) CreateManifestContext(ctx context.Context, manifest *Manifest, token string) (*ManifestResponse, error) {
+	jsonBytes, err := json.Marshal(manifest)
+	if err != nil {
+		return nil, err
+	}
+
+	values := url.Values{
+		"token":    {token},
+		"manifest": {string(jsonBytes)},
+	}
+
+	response := &ManifestResponse{}
+	err = api.postMethod(ctx, "apps.manifest.create", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, response.Err()
+}
+
+func (api *Client) DeleteManifest(token string, appId string) (*SlackResponse, error) {
+	return api.DeleteManifestContext(context.Background(), token, appId)
+}
+
+func (api *Client) DeleteManifestContext(ctx context.Context, token string, appId string) (*SlackResponse, error) {
+	values := url.Values{
+		"token":  {token},
+		"app_id": {appId},
+	}
+
+	response := &SlackResponse{}
+	err := api.postMethod(ctx, "apps.manifest.delete", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, response.Err()
+}
+
 // ValidateManifest sends a request to apps.manifest.validate to validate your app manifest
-func (api *Client) ValidateManifest(manifest *Manifest, token string, appId string) (*ValidateManifestResponse, error) {
+func (api *Client) ValidateManifest(manifest *Manifest, token string, appId string) (*ManifestResponse, error) {
 	return api.ValidateManifestContext(context.Background(), manifest, token, appId)
 }
 
 // ValidateManifestContext sends a request to apps.manifest.validate to validate your app manifest with context
-func (api *Client) ValidateManifestContext(ctx context.Context, manifest *Manifest, token string, appId string) (*ValidateManifestResponse, error) {
-	if token == "" {
-		token = api.appLevelToken
-	}
-
+func (api *Client) ValidateManifestContext(ctx context.Context, manifest *Manifest, token string, appId string) (*ManifestResponse, error) {
 	// Marshal manifest into string
 	jsonBytes, err := json.Marshal(manifest)
 	if err != nil {
@@ -41,13 +80,13 @@ func (api *Client) ValidateManifestContext(ctx context.Context, manifest *Manife
 		values.Add("app_id", appId)
 	}
 
-	response := &ValidateManifestResponse{}
+	response := &ManifestResponse{}
 	err = api.postMethod(ctx, "apps.manifest.validate", values, response)
 	if err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return response, response.Err()
 }
 
 // ManifestMetadata is a group of settings that describe the manifest
@@ -152,15 +191,35 @@ type OAuthScopes struct {
 	User []string `json:"user,omitempty" yaml:"user,omitempty"`
 }
 
-// ValidateManifestResponse is the response returned by the API
-type ValidateManifestResponse struct {
+// ManifestResponse is the response returned by the API
+// this is a different format than SlackResponse, so we can't use that here
+// However, it intentionally has an Err() method for similar usage
+type ManifestResponse struct {
 	Ok     bool                      `json:"ok"`
 	Error  string                    `json:"error,omitempty"`
 	Errors []ManifestValidationError `json:"errors,omitempty"`
+}
+
+func (m ManifestResponse) Err() error {
+	if m.Ok {
+		return nil
+	}
+
+	return ManifestErrorResponse{Err: m.Error, Errors: m.Errors}
 }
 
 // ManifestValidationError is an error message returned for invalid manifests
 type ManifestValidationError struct {
 	Message string `json:"message"`
 	Pointer string `json:"pointer"`
+}
+
+// ManifestErrorResponse is a helper struct to contain an error from a ManifestResponse
+type ManifestErrorResponse struct {
+	Err    string
+	Errors []ManifestValidationError
+}
+
+func (m ManifestErrorResponse) Error() string {
+	return m.Err
 }
