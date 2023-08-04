@@ -92,7 +92,7 @@ func (api *Client) ExportManifestContext(ctx context.Context, token string, appI
 		return nil, err
 	}
 
-	return response.Manifest, response.Err()
+	return &response.Manifest, response.Err()
 }
 
 // UpdateManifest updates an app from an app manifest
@@ -276,7 +276,7 @@ type ManifestValidationError struct {
 }
 
 type ExportManifestResponse struct {
-	Manifest *Manifest `json:"manifest,omitempty"`
+	Manifest Manifest `json:"manifest,omitempty"`
 	SlackResponse
 }
 
