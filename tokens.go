@@ -34,7 +34,7 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 	TeamId       string `json:"team_id,omitempty"`
 	UserId       string `json:"user_id,omitempty"`
-	CreatedAt    uint64 `json:"iat,omitempty"`
+	IssuedAt     uint64 `json:"iat,omitempty"`
 	ExpiresAt    uint64 `json:"exp,omitempty"`
 	SlackResponse
 }
