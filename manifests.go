@@ -248,7 +248,7 @@ type ManifestSlashCommand struct {
 // WorkflowStep is a group of settings that describes workflow steps configuration
 type WorkflowStep struct {
 	Name       string `json:"name" yaml:"name"`
-	CallbackID string `json:"callback_id", yaml:"callback_id"`
+	CallbackID string `json:"callback_id" yaml:"callback_id"`
 }
 
 // OAuthConfig is a group of settings that describe OAuth configuration for the app
