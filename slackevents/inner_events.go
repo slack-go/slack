@@ -544,6 +544,14 @@ type TeamAccessRevokedEvent struct {
 	TeamIDs []string `json:"team_ids"`
 }
 
+// SharedChannelInviteReceivedEvent is sent if a user received an invite to a shared channel.
+type SharedChannelInviteReceivedEvent struct {
+	Type         string         `json:"type"`
+	EventTs      string         `json:"event_ts"`
+	Channel      *slack.Channel `jsopn:"channel"`
+	InvitingUser *slack.User    `json:"inviting_user"`
+}
+
 // UserProfileChangedEvent is sent if access to teams was revoked for your org-wide app.
 type UserProfileChangedEvent struct {
 	User    *slack.User `json:"user"`
@@ -629,6 +637,8 @@ const (
 	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
 	// MessageMetadataDeleted A message with metadata was deleted
 	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
+	// SharedChannelInviteAccepted is sent if a user received an invite to a shared channel.
+	SharedChannelInviteReceived = EventsAPIType("shared_channel_invite_received")
 	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
 	TeamAccessGranted = EventsAPIType("team_access_granted")
 	// TeamAccessRevoked is sent if access to teams was revoked for your org-wide app.
@@ -641,44 +651,44 @@ const (
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
-	AppMention:             AppMentionEvent{},
-	AppHomeOpened:          AppHomeOpenedEvent{},
-	AppUninstalled:         AppUninstalledEvent{},
-	ChannelCreated:         ChannelCreatedEvent{},
-	ChannelDeleted:         ChannelDeletedEvent{},
-	ChannelArchive:         ChannelArchiveEvent{},
-	ChannelUnarchive:       ChannelUnarchiveEvent{},
-	ChannelLeft:            ChannelLeftEvent{},
-	ChannelRename:          ChannelRenameEvent{},
-	ChannelIDChanged:       ChannelIDChangedEvent{},
-	ChannelShared:          ChannelSharedEvent{},
-	FileChange:             FileChangeEvent{},
-	FileDeleted:            FileDeletedEvent{},
-	FileShared:             FileSharedEvent{},
-	FileUnshared:           FileUnsharedEvent{},
-	GroupDeleted:           GroupDeletedEvent{},
-	GroupArchive:           GroupArchiveEvent{},
-	GroupUnarchive:         GroupUnarchiveEvent{},
-	GroupLeft:              GroupLeftEvent{},
-	GroupRename:            GroupRenameEvent{},
-	GridMigrationFinished:  GridMigrationFinishedEvent{},
-	GridMigrationStarted:   GridMigrationStartedEvent{},
-	LinkShared:             LinkSharedEvent{},
-	Message:                MessageEvent{},
-	MemberJoinedChannel:    MemberJoinedChannelEvent{},
-	MemberLeftChannel:      MemberLeftChannelEvent{},
-	PinAdded:               PinAddedEvent{},
-	PinRemoved:             PinRemovedEvent{},
-	ReactionAdded:          ReactionAddedEvent{},
-	ReactionRemoved:        ReactionRemovedEvent{},
-	TeamJoin:               TeamJoinEvent{},
-	TokensRevoked:          TokensRevokedEvent{},
-	EmojiChanged:           EmojiChangedEvent{},
-	WorkflowStepExecute:    WorkflowStepExecuteEvent{},
-	MessageMetadataPosted:  MessageMetadataPostedEvent{},
-	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
-	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
-	TeamAccessGranted:      TeamAccessGrantedEvent{},
-	TeamAccessRevoked:      TeamAccessRevokedEvent{},
-	UserProfileChanged:     UserProfileChangedEvent{},
+	AppMention:                  AppMentionEvent{},
+	AppHomeOpened:               AppHomeOpenedEvent{},
+	AppUninstalled:              AppUninstalledEvent{},
+	ChannelCreated:              ChannelCreatedEvent{},
+	ChannelDeleted:              ChannelDeletedEvent{},
+	ChannelArchive:              ChannelArchiveEvent{},
+	ChannelUnarchive:            ChannelUnarchiveEvent{},
+	ChannelLeft:                 ChannelLeftEvent{},
+	ChannelRename:               ChannelRenameEvent{},
+	ChannelIDChanged:            ChannelIDChangedEvent{},
+	FileChange:                  FileChangeEvent{},
+	FileDeleted:                 FileDeletedEvent{},
+	FileShared:                  FileSharedEvent{},
+	FileUnshared:                FileUnsharedEvent{},
+	GroupDeleted:                GroupDeletedEvent{},
+	GroupArchive:                GroupArchiveEvent{},
+	GroupUnarchive:              GroupUnarchiveEvent{},
+	GroupLeft:                   GroupLeftEvent{},
+	GroupRename:                 GroupRenameEvent{},
+	GridMigrationFinished:       GridMigrationFinishedEvent{},
+	GridMigrationStarted:        GridMigrationStartedEvent{},
+	LinkShared:                  LinkSharedEvent{},
+	Message:                     MessageEvent{},
+	MemberJoinedChannel:         MemberJoinedChannelEvent{},
+	MemberLeftChannel:           MemberLeftChannelEvent{},
+	PinAdded:                    PinAddedEvent{},
+	PinRemoved:                  PinRemovedEvent{},
+	ReactionAdded:               ReactionAddedEvent{},
+	ReactionRemoved:             ReactionRemovedEvent{},
+	TeamJoin:                    TeamJoinEvent{},
+	TokensRevoked:               TokensRevokedEvent{},
+	EmojiChanged:                EmojiChangedEvent{},
+	WorkflowStepExecute:         WorkflowStepExecuteEvent{},
+	MessageMetadataPosted:       MessageMetadataPostedEvent{},
+	MessageMetadataUpdated:      MessageMetadataUpdatedEvent{},
+	MessageMetadataDeleted:      MessageMetadataDeletedEvent{},
+	TeamAccessGranted:           TeamAccessGrantedEvent{},
+	TeamAccessRevoked:           TeamAccessRevokedEvent{},
+	SharedChannelInviteReceived: SharedChannelInviteReceivedEvent{},
+	UserProfileChanged:          UserProfileChangedEvent{},
 }
