@@ -463,6 +463,21 @@ func TestPinRemoved(t *testing.T) {
 	}
 }
 
+func TestChannelShared(t *testing.T) {
+	rawE := []byte(`
+	{    
+		"type": "channel_shared",
+		"connected_team_id": "E163Q94DX",
+		"channel": "C123ABC456",
+		"event_ts": "1561064063.001100"
+	}
+`)
+	err := json.Unmarshal(rawE, &ChannelSharedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestTokensRevoked(t *testing.T) {
 	rawE := []byte(`
 	{
