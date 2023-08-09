@@ -588,6 +588,26 @@ type SharedChannelInviteAcceptedEvent struct {
 	Invite           *Invite        `json:"invite"`
 }
 
+type SharedChannelInviteApprovedEvent struct {
+	Type            string         `json:"type"`
+	Invite          *Invite        `json:"invite"`
+	Channel         *slack.Channel `jsopn:"channel"`
+	ApprovingTeamID string         `json:"approving_team_id"`
+	TeamsInChannel  []*slack.Team  `json:"teams_in_channel"`
+	ApprovingUser   *slack.User    `json:"approving_user"`
+	EventTs         string         `json:"event_ts"`
+}
+
+type SharedChannelInviteDeclinedEvent struct {
+	Type            string         `json:"type"`
+	Invite          *Invite        `json:"invite"`
+	Channel         *slack.Channel `jsopn:"channel"`
+	DecliningTeamID string         `json:"declining_team_id"`
+	DecliningUser   *slack.User    `json:"declining_user"`
+	TeamsInChannel  []*slack.Team  `json:"teams_in_channel"`
+	EventTs         string         `json:"event_ts"`
+}
+
 // UserProfileChangedEvent is sent if access to teams was revoked for your org-wide app.
 type UserProfileChangedEvent struct {
 	User    *slack.User `json:"user"`
@@ -680,6 +700,10 @@ const (
 	SharedChannelInviteReceived = EventsAPIType("shared_channel_invite_received")
 	// SharedChannelInviteAccepted is sent if a user accepted an invite to a shared channel.
 	SharedChannelInviteAccepted = EventsAPIType("shared_channel_invite_accepted")
+	// SharedChannelInviteApproved is sent if a user approved an invite to a shared channel.
+	SharedChannelInviteApproved = EventsAPIType("shared_channel_invite_approved")
+	// SharedChannelInviteDeclined is sent if a user declined an invite to a shared channel.
+	SharedChannelInviteDeclined = EventsAPIType("shared_channel_invite_declined")
 	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
 	TeamAccessGranted = EventsAPIType("team_access_granted")
 	// TeamAccessRevoked is sent if access to teams was revoked for your org-wide app.
@@ -736,5 +760,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamDomainChange:            TeamDomainChangeEvent{},
 	SharedChannelInviteReceived: SharedChannelInviteReceivedEvent{},
 	SharedChannelInviteAccepted: SharedChannelInviteAcceptedEvent{},
+	SharedChannelInviteApproved: SharedChannelInviteApprovedEvent{},
+	SharedChannelInviteDeclined: SharedChannelInviteDeclinedEvent{},
 	UserProfileChanged:          UserProfileChangedEvent{},
 }

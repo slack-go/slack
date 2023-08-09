@@ -563,6 +563,179 @@ func TestSharedChannelAcceptedEvent(t *testing.T) {
 	}
 }
 
+func TestSharedChannelInviteApprovedEvent(t *testing.T) {
+	rawE := []byte(`
+	{
+	"type": "shared_channel_invite_approved",
+	"invite": {
+		"id": "I01354X80CA",
+		"date_created": 1626876000,
+		"date_invalid": 1628085600,
+		"inviting_team": {
+		"id": "T12345678",
+		"name": "Corgis",
+		"icon": {...},
+		"is_verified": false,
+		"domain": "corgis",
+		"date_created": 1480946400
+		},
+		"inviting_user": {
+		"id": "U12345678",
+		"team_id": "T12345678",
+		"name": "crus",
+		"updated": 1608081902,
+		"profile": {
+			"real_name": "Corgis Rus",
+			"display_name": "Corgis Rus",
+			"real_name_normalized": "Corgis Rus",
+			"display_name_normalized": "Corgis Rus",
+			"team": "T12345678",
+			"avatar_hash": "gcfh83a4c72k",
+			"email": "corgisrus@slack-corp.com",
+			"image_24": "https://placekitten.com/24/24",
+			"image_32": "https://placekitten.com/32/32",
+			"image_48": "https://placekitten.com/48/48",
+			"image_72": "https://placekitten.com/72/72",
+			"image_192": "https://placekitten.com/192/192",
+			"image_512": "https://placekitten.com/512/512"
+		}
+		},
+		"recipient_email": "golden@doodle.com",
+		"recipient_user_id": "U87654321"
+	},
+	"channel": {
+		"id": "C12345678",
+		"is_private": false,
+		"is_im": false,
+		"name": "test-slack-connect"
+	},
+	"approving_team_id": "T87654321",
+	"teams_in_channel": [
+		{
+		"id": "T12345678",
+		"name": "Corgis",
+		"icon": {...},
+		"is_verified": false,
+		"domain": "corgis",
+		"date_created": 1626789600
+		}
+	],
+	"approving_user": {
+		"id": "U012A3CDE",
+		"team_id": "T87654321",
+		"name": "spengler",
+		"updated": 1624406532,
+		"profile": {
+		"real_name": "Egon Spengler",
+		"display_name": "Egon",
+		"real_name_normalized": "Egon Spengler",
+		"display_name_normalized": "Egon",
+		"team": "T87654321",
+		"avatar_hash": "g216425b1681",
+		"email": "spengler@ghostbusters.example.com",
+		"image_24": "https://placekitten.com/24/24",
+		"image_32": "https://placekitten.com/32/32",
+		"image_48": "https://placekitten.com/48/48",
+		"image_72": "https://placekitten.com/72/72",
+		"image_192": "https://placekitten.com/192/192",
+		"image_512": "https://placekitten.com/512/512"
+		}
+	},
+	"event_ts": "1626881400.000000"
+	}
+	`)
+	err := json.Unmarshal(rawE, &SharedChannelInviteApprovedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSharedChannelInviteDeclinedEvent(t *testing.T) {
+	rawE := []byte(`
+	{
+	"type": "shared_channel_invite_declined",
+	"invite": {
+		"id": "I01354X80CA",
+		"date_created": 1626876000,
+		"date_invalid": 1628085600,
+		"inviting_team": {
+		"id": "T12345678",
+		"name": "Corgis",
+		"icon": {...},
+		"is_verified": false,
+		"domain": "corgis",
+		"date_created": 1480946400
+		},
+		"inviting_user": {
+		"id": "U12345678",
+		"team_id": "T12345678",
+		"name": "crus",
+		"updated": 1608081902,
+		"profile": {
+			"real_name": "Corgis Rus",
+			"display_name": "Corgis Rus",
+			"real_name_normalized": "Corgis Rus",
+			"display_name_normalized": "Corgis Rus",
+			"team": "T12345678",
+			"avatar_hash": "gcfh83a4c72k",
+			"email": "corgisrus@slack-corp.com",
+			"image_24": "https://placekitten.com/24/24",
+			"image_32": "https://placekitten.com/32/32",
+			"image_48": "https://placekitten.com/48/48",
+			"image_72": "https://placekitten.com/72/72",
+			"image_192": "https://placekitten.com/192/192",
+			"image_512": "https://placekitten.com/512/512"
+		}
+		},
+		"recipient_email": "golden@doodle.com"
+	},
+	"channel": {
+		"id": "C12345678",
+		"is_private": false,
+		"is_im": false,
+		"name": "test-slack-connect"
+	},
+	"declining_team_id": "T87654321",
+	"teams_in_channel": [
+		{
+		"id": "T12345678",
+		"name": "Corgis",
+		"icon": {...},
+		"is_verified": false,
+		"domain": "corgis",
+		"date_created": 1626789600
+		}
+	],
+	"declining_user": {
+		"id": "U012A3CDE",
+		"team_id": "T87654321",
+		"name": "spengler",
+		"updated": 1624406532,
+		"profile": {
+		"real_name": "Egon Spengler",
+		"display_name": "Egon",
+		"real_name_normalized": "Egon Spengler",
+		"display_name_normalized": "Egon",
+		"team": "T87654321",
+		"avatar_hash": "g216425b1681",
+		"email": "spengler@ghostbusters.example.com",
+		"image_24": "https://placekitten.com/24/24",
+		"image_32": "https://placekitten.com/32/32",
+		"image_48": "https://placekitten.com/48/48",
+		"image_72": "https://placekitten.com/72/72",
+		"image_192": "https://placekitten.com/192/192",
+		"image_512": "https://placekitten.com/512/512"
+		}
+	},
+	"event_ts": "1626881400.000000"
+	}
+	`)
+	err := json.Unmarshal(rawE, &SharedChannelInviteDeclinedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestPinAdded(t *testing.T) {
 	rawE := []byte(`
 			{
