@@ -326,6 +326,21 @@ func TestBotMessageEvent(t *testing.T) {
 	}
 }
 
+func TestTeamDomainChangedEvent(t *testing.T) {
+	rawE := []byte(`
+	{
+		"type": "team_domain_change",
+		"url": "https://my.slack.com",
+		"domain": "my"
+		"team_id": "T1234"
+	}	
+	`)
+	err := json.Unmarshal(rawE, &TeamDomainChangedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestThreadBroadcastEvent(t *testing.T) {
 	rawE := []byte(`
 			{
