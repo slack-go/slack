@@ -334,6 +334,13 @@ type PinAddedEvent pinEvent
 // PinRemovedEvent An item was unpinned from a channel - https://api.slack.com/events/pin_removed
 type PinRemovedEvent pinEvent
 
+type ProfileOpenedEvent struct {
+	Type           string `json:"type"`
+	User           string `json:"user"`
+	Channel        string `json:"channel"`
+	EventTimestamp string `json:"event_ts"`
+}
+
 type tokens struct {
 	Oauth []string `json:"oauth"`
 	Bot   []string `json:"bot"`
@@ -627,6 +634,9 @@ const (
 	PinAdded = EventsAPIType("pin_added")
 	// PinRemoved An item was unpinned from a channel
 	PinRemoved = EventsAPIType("pin_removed")
+	// ProfileOpened Our bot's profile was opened.
+	// NOTE: This event does not seem to be properly documented.
+	ProfileOpened = EventsAPIType("profile_opened")
 	// ReactionAdded An reaction was added to a message
 	ReactionAdded = EventsAPIType("reaction_added")
 	// ReactionRemoved An reaction was removed from a message
@@ -688,6 +698,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	MemberLeftChannel:           MemberLeftChannelEvent{},
 	PinAdded:                    PinAddedEvent{},
 	PinRemoved:                  PinRemovedEvent{},
+	ProfileOpened:               ProfileOpenedEvent{},
 	ReactionAdded:               ReactionAddedEvent{},
 	ReactionRemoved:             ReactionRemovedEvent{},
 	TeamJoin:                    TeamJoinEvent{},
