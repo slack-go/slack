@@ -33,6 +33,12 @@ func (api *Client) RotateTokensContext(ctx context.Context, configToken string, 
 	return response, response.Err()
 }
 
+// UpdateConfigTokens replaces the configuration tokens in the client with those returned by the API
+func (api *Client) UpdateConfigTokens(response *TokenResponse) {
+	api.configToken = response.Token
+	api.configRefreshToken = response.RefreshToken
+}
+
 type TokenResponse struct {
 	Token        string `json:"token,omitempty"`
 	RefreshToken string `json:"refresh_token,omitempty"`

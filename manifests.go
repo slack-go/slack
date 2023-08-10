@@ -283,5 +283,5 @@ type ExportManifestResponse struct {
 type UpdateManifestResponse struct {
 	AppId              string `json:"app_id,omitempty"`
 	PermissionsUpdated bool   `json:"permissions_updated,omitempty"`
-	SlackResponse
+	ManifestResponse
 }
