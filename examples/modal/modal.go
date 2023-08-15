@@ -174,6 +174,8 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 		// You must set one of external_id or view_id and you can use hash for avoiding race condition.
 		// More details: https://api.slack.com/surfaces/modals/using#updating_apis
 		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
+		// Wait for a few seconds to see result this code is necesarry due to slack server modal is going to be closed after the update
+		time.Sleep(time.Second * 2)
 		if err != nil {
 			fmt.Printf("Error updating view: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
