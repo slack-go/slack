@@ -128,7 +128,7 @@ func handleSlash(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch s.Command {
-	case "/humboldttest":
+	case "/slash":
 		api := slack.New("YOUR_TOKEN_HERE")
 		modalRequest := generateModalRequest()
 		_, err = api.OpenView(s.TriggerID, modalRequest)
