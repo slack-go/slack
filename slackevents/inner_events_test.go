@@ -821,3 +821,96 @@ func TestMessageMetadataDeleted(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestUserProfileChanged(t *testing.T) {
+	rawE := []byte(`
+	{
+		"token": "whatever",
+		"team_id": "whatever",
+		"api_app_id": "whatever",
+		"event": {
+			"user": {
+				"id": "whatever",
+				"team_id": "whatever",
+				"name": "whatever",
+				"deleted": true,
+				"profile": {
+					"title": "",
+					"phone": "",
+					"skype": "",
+					"real_name": "whatever",
+					"real_name_normalized": "whatever",
+					"display_name": "",
+					"display_name_normalized": "",
+					"fields": {},
+					"status_text": "",
+					"status_emoji": "",
+					"status_emoji_display_info": [],
+					"status_expiration": 0,
+					"avatar_hash": "whatever",
+					"api_app_id": "whatever",
+					"always_active": true,
+					"bot_id": "whatever",
+					"first_name": "whatever",
+					"last_name": "",
+					"image_24": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"image_32": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"image_48": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"image_72": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"image_192": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"image_512": "https://secure.gravatar.com/avatar/whatever.jpg",
+					"status_text_canonical": "",
+					"team": "whatever"
+				},
+				"is_bot": true,
+				"is_app_user": false,
+				"updated": 1678984254
+			},
+			"cache_ts": 1678984254,
+			"type": "user_profile_changed",
+			"event_ts": "1678984255.006500"
+		},
+		"type": "event_callback",
+		"event_id": "whatever",
+		"event_time": 1678984255,
+		"authorizations": [
+			{
+				"enterprise_id": null,
+				"team_id": "whatever",
+				"user_id": "whatever",
+				"is_bot": false,
+				"is_enterprise_install": false
+			}
+		],
+		"is_ext_shared_channel": false
+	}
+	`)
+
+	evt := &EventsAPICallbackEvent{}
+	err := json.Unmarshal(rawE, &evt)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if evt.Type != "event_callback" {
+		t.Fail()
+	}
+
+	parsedEvent, err := parseInnerEvent(evt)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if parsedEvent.InnerEvent.Type != "user_profile_changed" {
+		t.Fail()
+	}
+
+	actual, ok := parsedEvent.InnerEvent.Data.(*UserProfileChangedEvent)
+	if !ok {
+		t.Fail()
+	}
+
+	if actual.User.Name != "whatever" {
+		t.Fail()
+	}
+}

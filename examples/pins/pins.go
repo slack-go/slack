@@ -7,9 +7,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-/*
-   WARNING: This example is destructive in the sense that it create a channel called testpinning
-*/
+// WARNING: This example is destructive in the sense that it create a channel called testpinning
 func main() {
 	var (
 		apiToken string
@@ -43,7 +41,7 @@ func main() {
 	postAsUserID = authTest.UserID
 
 	// Create a temporary channel
-	channel, err := api.CreateConversation(channelName, false)
+	channel, err := api.CreateConversation(slack.CreateConversationParams{ChannelName: channelName})
 
 	if err != nil {
 		// If the channel exists, that means we just need to unarchive it

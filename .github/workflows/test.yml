@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         go:
-          - '1.17'
           - '1.18'
           - '1.19'
+          - '1.20'
     name: test go-${{ matrix.go }}
     steps:
       - uses: actions/checkout@v3
@@ -29,8 +29,14 @@ jobs:
     runs-on: ubuntu-22.04
     name: lint
     steps:
-      - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
+      - uses: actions/setup-go@v4
         with:
-          version: v1.48.0
+          go-version: '1.20'
+          cache: false
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5 # v3.4.0
+        with:
+          version: v1.52.2

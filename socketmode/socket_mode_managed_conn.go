@@ -1,7 +1,6 @@
 package socketmode
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -123,9 +122,10 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}()
 
-	// We don't wait on runMessageReceiver because it doesn't block on a select with the context,
-	// so we'd have to wait for the ReadJSON to time out, which can take a while.
+	// Need to wait for runMessageReceiver to avoid panic described in https://github.com/slack-go/slack/issues/1125
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		defer cancel()
 
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
@@ -439,8 +439,40 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 	smc.Debugf("Starting to receive message")
 	defer smc.Debugf("Finished to receive message")
 
+	var err error
+
 	event := json.RawMessage{}
-	err := conn.ReadJSON(&event)
+
+	readJsonErr := make(chan error)
+	go func() {
+		select {
+		case readJsonErr <- conn.ReadJSON(&event):
+			// if conn.ReadJSON method returns after ctx.Done(), no one will read the unbuffered channel
+			// so, to avoid goroutines leak we need to check for ctx.Done() here too.
+			// need to say here, that conn.ReadJSON will really return after ctx.Done(), because in that case
+			// conn is closed
+			break
+		case <-ctx.Done():
+			// just need to listen ctx.Done, nothing has to be done here
+			break
+		}
+	}()
+
+	select {
+	case err = <-readJsonErr:
+		// we have awaited response from conn.ReadJSON, so, we can handle error now
+		break
+	case <-ctx.Done():
+		// context cancellation signal got, closing connection and returning
+		cerr := conn.Close()
+		if cerr != nil {
+			smc.Debugf("Failed to close connection: %v", cerr)
+		}
+
+		return ctx.Err()
+	}
+
+	// after select above, the err will be set to result from conn.ReadJSON, handling
 
 	// check if the connection was closed.
 	if websocket.IsUnexpectedCloseError(err) {
@@ -469,18 +501,6 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 	case len(event) == 0:
 		smc.Debugln("Received empty event")
 	default:
-		if smc.debug {
-			buf := &bytes.Buffer{}
-			d := json.NewEncoder(buf)
-			d.SetIndent("", "  ")
-			if err := d.Encode(event); err != nil {
-				smc.Debugln("Failed encoding decoded json:", err)
-			}
-			reencoded := buf.String()
-
-			smc.Debugln("Incoming WebSocket message:", reencoded)
-		}
-
 		select {
 		case sink <- event:
 		case <-ctx.Done():
