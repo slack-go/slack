@@ -287,6 +287,20 @@ func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
+func okInviteSharedJsonHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		InviteID              string `json:"invite_id"`
+		IsLegacySharedChannel bool   `json:"is_legacy_shared_channel"`
+	}{
+		SlackResponse:         SlackResponse{Ok: true},
+		InviteID:              "I01234567",
+		IsLegacySharedChannel: false,
+	})
+	rw.Write(response)
+}
+
 func TestSetTopicOfConversation(t *testing.T) {
 	http.HandleFunc("/conversations.setTopic", okChannelJsonHandler)
 	once.Do(startServer)
@@ -346,6 +360,44 @@ func TestInviteUsersToConversation(t *testing.T) {
 		t.Error("channel should not be nil")
 		return
 	}
+}
+
+func TestInviteSharedToConversation(t *testing.T) {
+	http.HandleFunc("/conversations.inviteShared", okInviteSharedJsonHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	t.Run("user_ids", func(t *testing.T) {
+		userIDs := []string{"UXXXXXXX1", "UXXXXXXX2"}
+		inviteID, isLegacySharedChannel, err := api.InviteSharedUserIDsToConversation("CXXXXXXXX", userIDs...)
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
+
+	t.Run("emails", func(t *testing.T) {
+		emails := []string{"nopcoder@slack.com", "nopcoder@example.com"}
+		inviteID, isLegacySharedChannel, err := api.InviteSharedEmailsToConversation("CXXXXXXXX", emails...)
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
 }
 
 func TestKickUserFromConversation(t *testing.T) {

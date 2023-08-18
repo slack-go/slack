@@ -55,6 +55,7 @@ func NewTestServer(custom ...Binder) *Server {
 	s.Handle("/conversations.setPurpose", setConversationPurposeHandler)
 	s.Handle("/conversations.rename", renameConversationHandler)
 	s.Handle("/conversations.invite", inviteConversationHandler)
+	s.Handle("/conversations.inviteShared", inviteSharedConversationHandler)
 	s.Handle("/users.info", usersInfoHandler)
 	s.Handle("/users.lookupByEmail", usersInfoHandler)
 	s.Handle("/bots.info", botsInfoHandler)

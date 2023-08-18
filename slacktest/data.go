@@ -250,3 +250,9 @@ var renameConversationJSON = fmt.Sprintf(templateConversationJSON, "newName",
 
 var inviteConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
 	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1)
+
+const inviteSharedResponseJSON = `{
+    "ok": true,
+    "invite_id": "I02UKAJ6RJA",
+    "is_legacy_shared_channel": false
+}`
