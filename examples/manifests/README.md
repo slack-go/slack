@@ -1,8 +1,8 @@
 # Manifest examples
 
-This example tries to show how to interact with the
+This example shows how to interact with the
 new [manifest endpoints](https://api.slack.com/reference/manifests#manifest_apis). These endpoints require a special set
-of tokens: **configuration tokens**. Refer to
+of tokens called `configuration tokens`. Refer to
 the [relevant documentation](https://api.slack.com/authentication/config-tokens) for how to create these tokens.
 
 For examples on how to use configuration tokens, see the [tokens example](../tokens).
