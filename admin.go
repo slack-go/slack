@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -201,6 +202,43 @@ func (api *Client) SetRestrictedContext(ctx context.Context, teamName, uid strin
 	err := api.adminRequest(ctx, "setRestricted", teamName, values)
 	if err != nil {
 		return fmt.Errorf("failed to restrict account: %s", err)
+	}
+
+	return nil
+}
+
+type adminConversationSetTeamsResponse struct {
+	Channel string `json:"channel"`
+	SlackResponse
+}
+
+// https://api.slack.com/methods/admin.conversations.setTeams
+// Set the workspaces in an Enterprise grid org that connect to a public or private channel.
+func (api *Client) ConversationsSetTeamsContext(ctx context.Context, channelID string, orgChannel *bool, targetTeamIDs *[]string, teamID *string) error {
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+	}
+
+	if orgChannel != nil {
+		values.Add("org_channel", strconv.FormatBool(*orgChannel))
+	}
+
+	if targetTeamIDs != nil {
+		values.Add("target_team_ids", strings.Join(*targetTeamIDs, ",")) // ["T123", "T456"] - > "T123,T456"
+	}
+
+	if teamID != nil {
+		values.Add("team_id", *teamID)
+	}
+
+	response := &adminConversationSetTeamsResponse{}
+	err := api.postMethod(ctx, "admin.conversations.setTeams", values, response)
+	if err != nil {
+		return err
+	}
+	if err := response.Err(); err != nil {
+		return err
 	}
 
 	return nil
