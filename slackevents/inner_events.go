@@ -267,6 +267,7 @@ type MessageEvent struct {
 	Upload bool   `json:"upload"`
 	Files  []File `json:"files"`
 
+	Blocks      slack.Blocks       `json:"blocks,omitempty"`
 	Attachments []slack.Attachment `json:"attachments,omitempty"`
 
 	// Root is the message that was broadcast to the channel when the SubType is
