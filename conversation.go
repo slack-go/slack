@@ -585,6 +585,66 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 	return response.Channels, response.ResponseMetaData.NextCursor, response.Err()
 }
 
+type GetDiscoveryConversationsParameters struct {
+	Offset        string
+	OnlyExtShared bool
+	OnlyIm        bool
+	OnlyMpim      bool
+	OnlyPrivate   bool
+	OnlyPublic    bool
+	Limit         int
+	Team          string
+}
+
+// GetDiscoveryConversations returns the list of channels in a Slack team (Discovery API)
+func (api *Client) GetDiscoveryConversations(params *GetDiscoveryConversationsParameters) (channels []Channel, nextCursor string, err error) {
+	return api.GetDiscoveryConversationsContext(context.Background(), params)
+}
+
+// GetDiscoveryConversationsContext returns the list of channels in a Slack team with a custom context
+func (api *Client) GetDiscoveryConversationsContext(ctx context.Context, params *GetDiscoveryConversationsParameters) (channels []Channel, nextCursor string, err error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	if params.Offset != "" {
+		values.Add("offset", params.Offset)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
+	if params.OnlyExtShared {
+		values.Add("only_ext_shared", strconv.FormatBool(params.OnlyExtShared))
+	}
+	if params.OnlyIm {
+		values.Add("only_im", strconv.FormatBool(params.OnlyIm))
+	}
+	if params.OnlyMpim {
+		values.Add("only_mpim", strconv.FormatBool(params.OnlyMpim))
+	}
+	if params.OnlyPrivate {
+		values.Add("only_private", strconv.FormatBool(params.OnlyPrivate))
+	}
+	if params.OnlyPublic {
+		values.Add("only_public", strconv.FormatBool(params.OnlyPublic))
+	}
+	if params.Team != "" {
+		values.Add("team", params.Team)
+	}
+
+	response := struct {
+		Channels []Channel `json:"channels"`
+		Offset   string    `json:"offset"`
+		SlackResponse
+	}{}
+
+	err = api.postMethod(ctx, "discovery.conversations.list", values, &response)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return response.Channels, response.Offset, response.Err()
+}
+
 type OpenConversationParameters struct {
 	ChannelID string
 	ReturnIM  bool
