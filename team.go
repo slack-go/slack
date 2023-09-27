@@ -16,6 +16,20 @@ type TeamResponse struct {
 	SlackResponse
 }
 
+type DiscoveryEnterpriseInfoResponse struct {
+	Enterprise DiscoveryEnterpriseInfo `json:"enterprise"`
+	SlackResponse
+}
+
+type DiscoveryEnterpriseInfo struct {
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Domain      string                 `json:"domain"`
+	EmailDomain string                 `json:"email_domain"`
+	Icon        map[string]interface{} `json:"icon"`
+	Teams       []TeamInfo             `json:"teams"`
+}
+
 type TeamInfo struct {
 	ID          string                 `json:"id"`
 	Name        string                 `json:"name"`
@@ -122,6 +136,39 @@ func (api *Client) teamProfileRequest(ctx context.Context, client httpClient, pa
 		return nil, err
 	}
 	return response, response.Err()
+}
+
+type GetDiscoveryEnterpriseInfoParameters struct {
+	Cursor         string
+	IncludeDeleted bool
+	Limit          int
+}
+
+// GetDiscoveryEnterpriseInfoParameters gets the Informations about all teams inside an Enterprise grid
+func (api *Client) GetDiscoveryEnterpriseInfo(params *GetDiscoveryEnterpriseInfoParameters) (enterprise *DiscoveryEnterpriseInfo, nextCursor string, err error) {
+	return api.GetDiscoveryEnterpriseInfoContext(context.Background(), params)
+}
+
+func (api *Client) GetDiscoveryEnterpriseInfoContext(ctx context.Context, params *GetDiscoveryEnterpriseInfoParameters) (enterprise *DiscoveryEnterpriseInfo, nextCursor string, err error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
+	if params.IncludeDeleted {
+		values.Add("include_deleted", strconv.FormatBool(params.IncludeDeleted))
+	}
+	response := DiscoveryEnterpriseInfoResponse{}
+	err = api.postMethod(ctx, "discovery.conversations.list", values, &response)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &response.Enterprise, response.ResponseMetadata.Cursor, response.Err()
 }
 
 // GetTeamInfo gets the Team Information of the user
