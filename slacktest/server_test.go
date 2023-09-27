@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/slack-go/slack"
+	"github.com/recolabs/slack"
 )
 
 func TestDefaultNewServer(t *testing.T) {

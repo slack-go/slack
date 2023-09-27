@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/slack-go/slack"
+	"github.com/recolabs/slack"
 )
 
 // WARNING: This example is destructive in the sense that it create a channel called testpinning

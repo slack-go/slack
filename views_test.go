@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/slack-go/slack/internal/errorsx"
+	"github.com/recolabs/slack/internal/errorsx"
 )
 
 var dummySlackErr = errorsx.String("dummy_error_from_slack")

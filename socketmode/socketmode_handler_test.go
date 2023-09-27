@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slackevents"
+	"github.com/recolabs/slack"
+	"github.com/recolabs/slack/slackevents"
 )
 
 func init_SocketmodeHandler() *SocketmodeHandler {
@@ -94,7 +94,7 @@ func TestSocketmodeHandler_Handle(t *testing.T) {
 				},
 				evt_type: EventTypeConnecting,
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware",
+			want: "github.com/recolabs/slack/socketmode.middleware",
 		}, {
 			name: "Event do not registered function",
 			args: args{
@@ -103,7 +103,7 @@ func TestSocketmodeHandler_Handle(t *testing.T) {
 				},
 				evt_type: EventTypeConnecting,
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		},
 	}
 	for _, tt := range tests {
@@ -149,7 +149,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 					r.HandleInteraction(slack.InteractionTypeBlockActions, testing_wrapper(c, middleware_interaction))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware_interaction",
+			want: "github.com/recolabs/slack/socketmode.middleware_interaction",
 		}, {
 			name: "Event do not Match any registered function",
 			args: args{
@@ -163,7 +163,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 					r.HandleInteraction(slack.InteractionTypeBlockSuggestion, testing_wrapper(c, middleware_interaction))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		}, {
 			name: "Event with invalid data is handled by default middleware",
 			args: args{
@@ -177,7 +177,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 					r.HandleInteraction(slack.InteractionTypeBlockActions, testing_wrapper(c, middleware_interaction))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		}, {
 			name: "Event is handled as EventTypeInteractive",
 			args: args{
@@ -191,7 +191,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 					r.Handle(EventTypeInteractive, testing_wrapper(c, middleware))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware",
+			want: "github.com/recolabs/slack/socketmode.middleware",
 		},
 	}
 	for _, tt := range tests {
@@ -240,7 +240,7 @@ func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware_eventapi",
+			want: "github.com/recolabs/slack/socketmode.middleware_eventapi",
 		}, {
 			name: "Event do not Match any registered function",
 			args: args{
@@ -257,7 +257,7 @@ func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		}, {
 			name: "Event with invalid data is handled by default middleware",
 			args: args{
@@ -271,7 +271,7 @@ func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 					r.HandleEvents(slackevents.AppMention, testing_wrapper(c, middleware_eventapi))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		}, {
 			name: "Event is handled as EventTypeInteractive",
 			args: args{
@@ -288,7 +288,7 @@ func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 					r.Handle(EventTypeEventsAPI, testing_wrapper(c, middleware))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware",
+			want: "github.com/recolabs/slack/socketmode.middleware",
 		},
 	}
 	for _, tt := range tests {
@@ -345,7 +345,7 @@ func TestSocketmodeHandler_HandleInteractionBlockAction(t *testing.T) {
 					r.HandleInteractionBlockAction("add_note", testing_wrapper(c, middleware_interaction_block_action))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware_interaction_block_action",
+			want: "github.com/recolabs/slack/socketmode.middleware_interaction_block_action",
 		}, {
 			name: "Event do not Match any registered function",
 			args: args{
@@ -359,7 +359,7 @@ func TestSocketmodeHandler_HandleInteractionBlockAction(t *testing.T) {
 					r.HandleInteractionBlockAction("add_note", testing_wrapper(c, middleware_interaction_block_action))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		},
 	}
 	for _, tt := range tests {
@@ -406,7 +406,7 @@ func TestSocketmodeHandler_HandleSlashCommand(t *testing.T) {
 					r.HandleSlashCommand("/rocket", testing_wrapper(c, middleware_slach_command))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.middleware_slach_command",
+			want: "github.com/recolabs/slack/socketmode.middleware_slach_command",
 		}, {
 			name: "Event do not Match any registered function",
 			args: args{
@@ -421,7 +421,7 @@ func TestSocketmodeHandler_HandleSlashCommand(t *testing.T) {
 					r.HandleSlashCommand("/rocket", testing_wrapper(c, middleware_slach_command))
 				},
 			},
-			want: "github.com/slack-go/slack/socketmode.defaultmiddleware",
+			want: "github.com/recolabs/slack/socketmode.defaultmiddleware",
 		},
 	}
 	for _, tt := range tests {

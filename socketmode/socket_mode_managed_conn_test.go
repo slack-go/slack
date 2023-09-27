@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slacktest"
+	"github.com/recolabs/slack"
+	"github.com/recolabs/slack/slacktest"
 
 	"github.com/stretchr/testify/assert"
 )
