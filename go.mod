@@ -1,4 +1,4 @@
-module github.com/slack-go/slack
+module github.com/recolabs/slack
 
 go 1.16
 
