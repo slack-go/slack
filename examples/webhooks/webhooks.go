@@ -13,7 +13,7 @@ func main() {
 	attachment := slack.Attachment{
 		Color:         "good",
 		Fallback:      "You successfully posted by Incoming Webhook URL!",
-		AuthorName:    "slack-go/slack",
+		AuthorName:    "recolabs/slack",
 		AuthorSubname: "github.com",
 		AuthorLink:    "https://github.com/recolabs/slack",
 		AuthorIcon:    "https://avatars2.githubusercontent.com/u/652790",
