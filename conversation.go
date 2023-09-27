@@ -776,6 +776,59 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 	return &response, response.Err()
 }
 
+type GetDiscoveryConversationHistoryParameters struct {
+	Channel   string
+	Latest    string
+	Limit     int
+	Oldest    string
+	Reactions int
+	Team      string // Not needed for im and mpim, required for a single workspace channels
+}
+
+type GetDiscoveryConversationHistoryResponse struct {
+	SlackResponse
+	HasEdits bool      `json:"has_edits"`
+	Offset   string    `json:"offset"`
+	Messages []Message `json:"messages"`
+}
+
+// GetDiscoveryConversationHistory returns the history of a given conversation (Discovery API)
+func (api *Client) GetDiscoveryConversationHistory(params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
+	return api.GetConversationHistoryContext(context.Background(), params)
+}
+
+// GetDiscoveryConversationHistoryContext  returns the history of a given conversation (Discovery API) with a custom context
+func (api *Client) GetDiscoveryConversationHistoryContext(ctx context.Context, params *GetDiscoveryConversationHistoryParameters) (*GetDiscoveryConversationHistoryResponse, error) {
+	values := url.Values{"token": {api.token}}
+	if params.Channel != "" {
+		values.Add("channel", params.Channel)
+	}
+	if params.Latest != "" {
+		values.Add("latest", params.Latest)
+	}
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
+	if params.Oldest != "" {
+		values.Add("oldest", params.Oldest)
+	}
+	if params.Reactions != 0 {
+		values.Add("reactions", strconv.Itoa(params.Reactions))
+	}
+	if params.Team != "" {
+		values.Add("team", params.Team)
+	}
+
+	response := GetDiscoveryConversationHistoryResponse{}
+
+	err := api.postMethod(ctx, "discovery.conversations.history", values, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response, response.Err()
+}
+
 // MarkConversation sets the read mark of a conversation to a specific point
 func (api *Client) MarkConversation(channel, ts string) (err error) {
 	return api.MarkConversationContext(context.Background(), channel, ts)
