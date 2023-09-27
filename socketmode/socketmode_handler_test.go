@@ -20,7 +20,7 @@ func init_SocketmodeHandler() *SocketmodeHandler {
 
 	return &SocketmodeHandler{
 		Client: &Client{
-			log: log.New(os.Stderr, "slack-go/slack/socketmode", log.LstdFlags|log.Lshortfile),
+			log: log.New(os.Stderr, "recolabs/slack/socketmode", log.LstdFlags|log.Lshortfile),
 		},
 		EventMap:                       eventMap,
 		EventApiMap:                    eventApiMap,

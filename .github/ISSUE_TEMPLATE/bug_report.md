@@ -15,4 +15,4 @@ about: Create a report to help us improve
 
 ### Versions
 - Go:
-- slack-go/slack:
+- recolabs/slack:
