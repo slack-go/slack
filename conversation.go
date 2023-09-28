@@ -24,6 +24,7 @@ type Conversation struct {
 	IsOrgShared        bool     `json:"is_org_shared"`
 	IsPendingExtShared bool     `json:"is_pending_ext_shared"`
 	IsPrivate          bool     `json:"is_private"`
+	IsReadOnly         bool     `json:"is_read_only"`
 	IsMpIM             bool     `json:"is_mpim"`
 	Unlinked           int      `json:"unlinked"`
 	NameNormalized     string   `json:"name_normalized"`
