@@ -736,3 +736,100 @@ func (api *Client) GetUserProfileContext(ctx context.Context, params *GetUserPro
 
 	return resp.Profile, nil
 }
+
+func (user *User) UserTag() string {
+	if user == nil {
+		return ""
+	}
+	if len(user.Profile.DisplayName) > 0 {
+		return user.Profile.DisplayName
+	}
+	return user.Profile.RealName
+}
+
+func (user *User) FirstName() string {
+	if user == nil {
+		return ""
+	}
+
+	fullName := user.FullName()
+
+	splitName := strings.SplitN(fullName, " ", 2)
+	if len(splitName) == 0 {
+		return ""
+	}
+	return splitName[0]
+}
+
+func (user *User) FullName() string {
+	if user == nil {
+		return ""
+	}
+	if user.Profile.RealNameNormalized != "" {
+		return user.Profile.RealNameNormalized
+	} else if user.RealName != "" {
+		return user.RealName
+	} else if user.Profile.DisplayNameNormalized != "" {
+		return user.Profile.DisplayNameNormalized
+	}
+
+	return user.Name
+}
+
+func (user *User) Email() string {
+	if user == nil {
+		return ""
+	}
+
+	return user.Profile.Email
+}
+
+func (user *User) AvatarUrl() string {
+	if user == nil {
+		return ""
+	}
+	return user.Profile.Image72
+}
+
+func (user *User) FirstAndLastName() (string, string) {
+	if user == nil {
+		return "Unknown", "Person"
+	}
+
+	var firstName, lastName string
+	if user.Profile.FirstName != "" {
+		firstName = user.Profile.FirstName
+	}
+
+	if user.Profile.LastName != "" {
+		lastName = user.Profile.LastName
+	}
+
+	if firstName == "" && lastName == "" {
+		name := user.FullName()
+		if name == "" {
+			return "Unknown", "Person"
+		}
+		if !strings.Contains(" ", name) {
+			return name, ""
+		}
+
+		splitName := strings.Split(name, " ")
+		firstName = splitName[0]
+		lastName = splitName[1]
+	}
+
+	return firstName, lastName
+}
+
+func (user *User) CompanyDomain() string {
+	if user == nil {
+		return ""
+	}
+	email := user.Profile.Email
+	emailParts := strings.Split(email, "@")
+	if len(emailParts) != 2 {
+		return ""
+	}
+	return emailParts[1]
+}
