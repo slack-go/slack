@@ -15,6 +15,7 @@ const (
 	METEmailInput     MessageElementType = "email_text_input"
 	METNumberInput    MessageElementType = "number_input"
 	METURLInput       MessageElementType = "url_text_input"
+	METRichTextInput  MessageElementType = "rich_text_input"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
@@ -51,6 +52,7 @@ type Accessory struct {
 	DatePickerElement          *DatePickerBlockElement
 	TimePickerElement          *TimePickerBlockElement
 	PlainTextInputElement      *PlainTextInputBlockElement
+	RichTextInputElement       *RichTextInputBlockElement
 	RadioButtonsElement        *RadioButtonsBlockElement
 	SelectElement              *SelectBlockElement
 	MultiSelectElement         *MultiSelectBlockElement
@@ -73,6 +75,8 @@ func NewAccessory(element BlockElement) *Accessory {
 		return &Accessory{TimePickerElement: element.(*TimePickerBlockElement)}
 	case *PlainTextInputBlockElement:
 		return &Accessory{PlainTextInputElement: element.(*PlainTextInputBlockElement)}
+	case *RichTextInputBlockElement:
+		return &Accessory{RichTextInputElement: element.(*RichTextInputBlockElement)}
 	case *RadioButtonsBlockElement:
 		return &Accessory{RadioButtonsElement: element.(*RadioButtonsBlockElement)}
 	case *SelectBlockElement:
@@ -470,9 +474,9 @@ func (s NumberInputBlockElement) ElementType() MessageElementType {
 // NewNumberInputBlockElement returns an instance of a number input.
 func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string, isDecimalAllowed bool) *NumberInputBlockElement {
 	return &NumberInputBlockElement{
-		Type:        METNumberInput,
-		ActionID:    actionID,
-		Placeholder: placeholder,
+		Type:             METNumberInput,
+		ActionID:         actionID,
+		Placeholder:      placeholder,
 		IsDecimalAllowed: isDecimalAllowed,
 	}
 }
@@ -507,6 +511,32 @@ func (s PlainTextInputBlockElement) ElementType() MessageElementType {
 func NewPlainTextInputBlockElement(placeholder *TextBlockObject, actionID string) *PlainTextInputBlockElement {
 	return &PlainTextInputBlockElement{
 		Type:        METPlainTextInput,
+		ActionID:    actionID,
+		Placeholder: placeholder,
+	}
+}
+
+// RichTextInputBlockElement creates a field where allows users to enter formatted text
+// in a WYSIWYG composer, offering the same messaging writing experience as in Slack
+// More Information: https://api.slack.com/reference/block-kit/block-elements#rich_text_input
+type RichTextInputBlockElement struct {
+	Type                 MessageElementType    `json:"type"`
+	ActionID             string                `json:"action_id,omitempty"`
+	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
+	InitialValue         string                `json:"initial_value,omitempty"`
+	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
+	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s RichTextInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewRichTextInputBlockElement returns an instance of a rich-text input element
+func NewRichTextInputBlockElement(placeholder *TextBlockObject, actionID string) *RichTextInputBlockElement {
+	return &RichTextInputBlockElement{
+		Type:        METRichTextInput,
 		ActionID:    actionID,
 		Placeholder: placeholder,
 	}

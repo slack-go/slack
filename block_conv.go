@@ -116,6 +116,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &DatetimePickerBlockElement{}
 	case "plain_text_input":
 		e = &PlainTextInputBlockElement{}
+	case "rich_text_input":
+		e = &RichTextInputBlockElement{}
 	case "email_text_input":
 		e = &EmailInputBlockElement{}
 	case "url_text_input":
@@ -198,6 +200,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &DatetimePickerBlockElement{}
 		case "plain_text_input":
 			blockElement = &PlainTextInputBlockElement{}
+		case "rich_text_input":
+			blockElement = &RichTextInputBlockElement{}
 		case "email_text_input":
 			blockElement = &EmailInputBlockElement{}
 		case "url_text_input":
@@ -300,6 +304,12 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		a.PlainTextInputElement = element.(*PlainTextInputBlockElement)
+	case "rich_text_input":
+		element, err := unmarshalBlockElement(r, &RichTextInputBlockElement{})
+		if err != nil {
+			return err
+		}
+		a.RichTextInputElement = element.(*RichTextInputBlockElement)
 	case "radio_buttons":
 		element, err := unmarshalBlockElement(r, &RadioButtonsBlockElement{})
 		if err != nil {
