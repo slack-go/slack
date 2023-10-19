@@ -33,3 +33,33 @@ func NewVideoBlock(videoURL, thumbnailURL, altText, blockID string, title *TextB
 		Title:        title,
 	}
 }
+
+// WithAuthorName sets the author name for the VideoBlock
+func (s *VideoBlock) WithAuthorName(authorName string) *VideoBlock {
+	s.AuthorName = authorName
+	return s
+}
+
+// WithTitleURL sets the title URL for the VideoBlock
+func (s *VideoBlock) WithTitleURL(titleURL string) *VideoBlock {
+	s.TitleURL = titleURL
+	return s
+}
+
+// WithDescription sets the description for the VideoBlock
+func (s *VideoBlock) WithDescription(description *slack.TextBlockObject) *VideoBlock {
+	s.Description = description
+	return s
+}
+
+// WithProviderIconURL sets the provider icon URL for the VideoBlock
+func (s *VideoBlock) WithProviderIconURL(providerIconURL string) *VideoBlock {
+	s.ProviderIconURL = providerIconURL
+	return s
+}
+
+// WithProviderName sets the provider name for the VideoBlock
+func (s *VideoBlock) WithProviderName(providerName string) *VideoBlock {
+	s.ProviderName = providerName
+	return s
+}
