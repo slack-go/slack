@@ -47,7 +47,7 @@ func (s *VideoBlock) WithTitleURL(titleURL string) *VideoBlock {
 }
 
 // WithDescription sets the description for the VideoBlock
-func (s *VideoBlock) WithDescription(description *slack.TextBlockObject) *VideoBlock {
+func (s *VideoBlock) WithDescription(description *TextBlockObject) *VideoBlock {
 	s.Description = description
 	return s
 }
