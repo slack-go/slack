@@ -68,6 +68,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &RichTextBlock{}
 		case "section":
 			block = &SectionBlock{}
+		case "video":
+			block = &VideoBlock{}
 		default:
 			block = &UnknownBlock{}
 		}
