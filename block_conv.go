@@ -66,6 +66,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &InputBlock{}
 		case "rich_text":
 			block = &RichTextBlock{}
+		case "rich_text_input":
+			block = &RichTextBlock{}
 		case "section":
 			block = &SectionBlock{}
 		default:
