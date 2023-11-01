@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 // RichTextBlock defines a new block of type rich_text.
@@ -38,8 +39,10 @@ func (e *RichTextBlock) UnmarshalJSON(b []byte) error {
 		}
 		var elem RichTextElement
 		switch s.Type {
-		case RTESection:
+		case RTESection, RTEPreformatted, RTEQuote:
 			elem = &RichTextSection{}
+		case RTEList:
+			elem = &RichTextList{}
 		default:
 			elems = append(elems, &RichTextUnknown{
 				Type: s.Type,
@@ -92,6 +95,84 @@ func (u RichTextUnknown) RichTextElementType() RichTextElementType {
 	return u.Type
 }
 
+func NewRichTextSectionQuote(elements ...RichTextSectionElement) *RichTextSection {
+	return &RichTextSection{
+		Type:     RTEQuote,
+		Elements: elements,
+	}
+}
+
+func NewRichTextSectionPreformatted(elements ...RichTextSectionElement) *RichTextSection {
+	return &RichTextSection{
+		Type:     RTEPreformatted,
+		Elements: elements,
+	}
+}
+
+type RichTextListStyle string
+
+const (
+	RTLSBullet  RichTextListStyle = "bullet"
+	RTLSOrdered RichTextListStyle = "ordered"
+)
+
+type RichTextList struct {
+	Type     RichTextElementType `json:"type"`
+	Style    RichTextListStyle   `json:"style"`
+	Elements []RichTextSection   `json:"elements"`
+}
+
+func (l RichTextList) RichTextElementType() RichTextElementType {
+	return l.Type
+}
+
+func NewRichTextList(style RichTextListStyle, elements ...RichTextSection) *RichTextList {
+	return &RichTextList{
+		Type:     RTEList,
+		Style:    style,
+		Elements: elements,
+	}
+}
+
+func (e *RichTextList) UnmarshalJSON(b []byte) error {
+	var raw struct {
+		RawElements []json.RawMessage `json:"elements"`
+		Style       RichTextListStyle `json:"style"`
+	}
+	if string(b) == "{}" {
+		return nil
+	}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	elems := make([]RichTextSection, 0, len(raw.RawElements))
+	for _, r := range raw.RawElements {
+		var s struct {
+			Type RichTextElementType `json:"type"`
+		}
+		if err := json.Unmarshal(r, &s); err != nil {
+			return err
+		}
+		var elem RichTextSection
+		switch s.Type {
+		case RTESection:
+			elem = RichTextSection{}
+		default:
+			return errors.New("expected section in list")
+		}
+		if err := json.Unmarshal(r, &elem); err != nil {
+			return err
+		}
+		elems = append(elems, elem)
+	}
+	*e = RichTextList{
+		Type:     RTEList,
+		Style:    raw.Style,
+		Elements: elems,
+	}
+	return nil
+}
+
 type RichTextSection struct {
 	Type     RichTextElementType      `json:"type"`
 	Elements []RichTextSectionElement `json:"elements"`
@@ -104,7 +185,8 @@ func (s RichTextSection) RichTextElementType() RichTextElementType {
 
 func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 	var raw struct {
-		RawElements []json.RawMessage `json:"elements"`
+		RawElements []json.RawMessage   `json:"elements"`
+		Type        RichTextElementType `json:"type"`
 	}
 	if string(b) == "{}" {
 		return nil
@@ -155,7 +237,7 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 		elems = append(elems, elem)
 	}
 	*e = RichTextSection{
-		Type:     RTESection,
+		Type:     raw.Type,
 		Elements: elems,
 	}
 	return nil
@@ -227,7 +309,7 @@ func (r RichTextSectionChannelElement) RichTextSectionElementType() RichTextSect
 
 func NewRichTextSectionChannelElement(channelID string, style *RichTextSectionTextStyle) *RichTextSectionChannelElement {
 	return &RichTextSectionChannelElement{
-		Type:      RTSEText,
+		Type:      RTSEChannel,
 		ChannelID: channelID,
 		Style:     style,
 	}
