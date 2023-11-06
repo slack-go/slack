@@ -166,7 +166,7 @@ func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID
 	return response, response.Err()
 }
 
-// GetOpenIDConnectToken gets a temporary OAuth verifier code for an access token for Sign in with Slack.
+// GetOpenIDConnectToken exchanges a temporary OAuth verifier code for an access token for Sign in with Slack.
 // see: https://api.slack.com/methods/openid.connect.token
 func GetOpenIDConnectToken(client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OpenIDConnectResponse, err error) {
 	return GetOpenIDConnectTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
