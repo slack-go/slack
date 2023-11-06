@@ -146,12 +146,12 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 	return response, response.Err()
 }
 
-// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+// RefreshOAuthV2Token with a context, gets a V2 OAuth access token response
 func RefreshOAuthV2Token(client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
 	return RefreshOAuthV2TokenContext(context.Background(), client, clientID, clientSecret, refreshToken)
 }
 
-// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+// RefreshOAuthV2TokenContext with a context, gets a V2 OAuth access token response
 func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
 	values := url.Values{
 		"client_id":     {clientID},
