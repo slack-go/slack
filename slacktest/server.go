@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/slack-go/slack"
+	"go.mills.io/logger"
 )
 
 func newMessageChannels() *messageChannels {
@@ -61,8 +62,10 @@ func NewTestServer(custom ...Binder) *Server {
 	s.Handle("/bots.info", botsInfoHandler)
 	s.Handle("/auth.test", authTestHandler)
 	s.Handle("/reactions.add", reactionAddHandler)
+	s.Handle("/apps.connections.open", appsConnectionsOpenHandler)
 
 	httpserver := httptest.NewUnstartedServer(s.mux)
+	httpserver.Config.Handler = logger.New().Handler(httpserver.Config.Handler)
 	addr := httpserver.Listener.Addr().String()
 
 	s.ServerAddr = addr
