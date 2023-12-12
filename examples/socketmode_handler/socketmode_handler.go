@@ -203,7 +203,3 @@ func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
 		}}
 	client.Ack(*evt.Request, payload)
 }
-
-func middlewareDefault(evt *socketmode.Event, client *socketmode.Client) {
-	// fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
-}

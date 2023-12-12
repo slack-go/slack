@@ -277,6 +277,11 @@ func rtmStartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handle apps.connections.open
+func appsConnectionsOpenHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(defaultAppsConnectionsJSON(r.Context())))
+}
+
 func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	Websocket(func(c *websocket.Conn) {
 		serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
