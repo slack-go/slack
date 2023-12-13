@@ -15,6 +15,11 @@ import (
 	slack "github.com/slack-go/slack"
 )
 
+var (
+	defaultPingPeriod    = time.Second * 15
+	defaultWriteDeadline = time.Second * 3
+)
+
 func contextHandler(server *Server, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.WithValue(r.Context(), ServerURLContextKey, server.GetAPIURL())
@@ -285,7 +290,12 @@ func appsConnectionsOpenHandler(w http.ResponseWriter, r *http.Request) {
 func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	Websocket(func(c *websocket.Conn) {
 		serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
+		doneCh := make(chan struct{}, 1)
+		defer func() {
+			doneCh <- struct{}{}
+		}()
 		go handlePendingMessages(c, serverAddr)
+		go handlePeriodicPings(c, doneCh)
 		for {
 			var (
 				err   error
@@ -312,6 +322,21 @@ func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	})(w, r)
+}
+
+func handlePeriodicPings(c *websocket.Conn, done chan struct{}) {
+	ticker := time.NewTicker(defaultPingPeriod)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if err := c.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(defaultWriteDeadline)); err != nil {
+				log.Println("error sending ping:", err)
+			}
+		case <-done:
+			return
+		}
+	}
 }
 
 // Websocket handler
