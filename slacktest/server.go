@@ -306,7 +306,7 @@ func (sts *Server) SendBotGroupInvite() {
 
 // GetTestRTMInstance will give you an RTM instance in the context of the current fake server
 func (sts *Server) GetTestRTMInstance() *slack.RTM {
-	api := slack.New("ABCEFG", slack.OptionAPIURL(sts.GetAPIURL()))
-	rtm := api.NewRTM()
+	api := slack.New("ABCEFG", slack.OptionDebug(true), slack.OptionAPIURL(sts.GetAPIURL()))
+	rtm := api.NewRTM(slack.RTMOptionPingInterval(5 * time.Second))
 	return rtm
 }
