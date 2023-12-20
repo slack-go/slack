@@ -15,6 +15,7 @@ const (
 	METEmailTextInput MessageElementType = "email_text_input"
 	METURLTextInput   MessageElementType = "url_text_input"
 	METNumber         MessageElementType = "number_input"
+	METFileInput      MessageElementType = "file_input"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
@@ -590,4 +591,41 @@ func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string, i
 		Placeholder:      placeholder,
 		IsDecimalAllowed: isDecimalAllowed,
 	}
+}
+
+// FileInputBlockElement creates a field where a user can upload a file.
+//
+// File input elements are currently only available in modals.
+//
+// More Information: https://api.slack.com/reference/block-kit/block-elements#file_input
+type FileInputBlockElement struct {
+	Type      MessageElementType `json:"type"`
+	ActionID  string             `json:"action_id,omitempty"`
+	FileTypes []string           `json:"filetypes,omitempty"`
+	MaxFiles  int                `json:"max_files,omitempty"`
+}
+
+// ElementType returns the type of the Element
+func (s FileInputBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewFileInputBlockElement returns an instance of a file input element
+func NewFileInputBlockElement(actionID string) *FileInputBlockElement {
+	return &FileInputBlockElement{
+		Type:     METFileInput,
+		ActionID: actionID,
+	}
+}
+
+// WithFileTypes sets the file types that can be uploaded
+func (s *FileInputBlockElement) WithFileTypes(fileTypes ...string) *FileInputBlockElement {
+	s.FileTypes = fileTypes
+	return s
+}
+
+// WithMaxFiles sets the maximum number of files that can be uploaded
+func (s *FileInputBlockElement) WithMaxFiles(maxFiles int) *FileInputBlockElement {
+	s.MaxFiles = maxFiles
+	return s
 }
