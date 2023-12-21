@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -134,9 +135,29 @@ func (sts *Server) SawOutgoingMessage(msg string) bool {
 	return false
 }
 
-// SawMessage checks if an incoming message was seen
-func (sts *Server) SawMessage(msg string) bool {
-	for _, m := range sts.seenInboundMessages.get() {
+// SawOutgoingMessageMatching checks if a message was sent to connected websocket clients that matches the given pattern
+func (sts *Server) SawOutgoingMessageMatching(pattern string) bool {
+	sts.seenOutboundMessages.RLock()
+	defer sts.seenOutboundMessages.RUnlock()
+	for _, m := range sts.seenOutboundMessages.messages {
+		evt := &slack.MessageEvent{}
+		jErr := json.Unmarshal([]byte(m), evt)
+		if jErr != nil {
+			continue
+		}
+
+		if ok, err := regexp.MatchString(pattern, evt.Text); err == nil && ok {
+			return true
+		}
+	}
+	return false
+}
+
+// SawIncomingMessage checks if an incoming message was seen
+func (sts *Server) SawIncomingMessage(msg string) bool {
+	sts.seenInboundMessages.RLock()
+	defer sts.seenInboundMessages.RUnlock()
+	for _, m := range sts.seenInboundMessages.messages {
 		evt := &slack.MessageEvent{}
 		err := json.Unmarshal([]byte(m), evt)
 		if err != nil {
@@ -148,6 +169,24 @@ func (sts *Server) SawMessage(msg string) bool {
 		}
 	}
 
+	return false
+}
+
+// SawIncomingMessageMatching checks if an incoming message was seen that matches a given pattern
+func (sts *Server) SawIncomingMessageMatching(pattern string) bool {
+	sts.seenInboundMessages.RLock()
+	defer sts.seenInboundMessages.RUnlock()
+	for _, m := range sts.seenInboundMessages.messages {
+		evt := &slack.MessageEvent{}
+		jErr := json.Unmarshal([]byte(m), evt)
+		if jErr != nil {
+			// This event isn't a message event so we'll skip it
+			continue
+		}
+		if ok, err := regexp.MatchString(pattern, evt.Text); err == nil && ok {
+			return true
+		}
+	}
 	return false
 }
 
