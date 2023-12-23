@@ -148,6 +148,12 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 }
 
+func TestNewRichTextInputBlockElement(t *testing.T) {
+	richTextInputElement := NewRichTextInputBlockElement(nil, "test")
+	assert.Equal(t, string(richTextInputElement.Type), "rich_text_input")
+	assert.Equal(t, richTextInputElement.ActionID, "test")
+}
+
 func TestNewEmailTextInputBlockElement(t *testing.T) {
 	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
 
@@ -214,4 +220,20 @@ func TestNewNumberInputBlockElement(t *testing.T) {
 	assert.Equal(t, numberInputElement.ActionID, "test")
 	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
 
+}
+
+func TestNewFileInputBlockElement(t *testing.T) {
+
+	fileInputElement := NewFileInputBlockElement("test")
+
+	assert.Equal(t, string(fileInputElement.Type), "file_input")
+	assert.Equal(t, fileInputElement.ActionID, "test")
+
+	fileInputElement.WithFileTypes("jpg", "png")
+	assert.Equal(t, len(fileInputElement.FileTypes), 2)
+	assert.Contains(t, fileInputElement.FileTypes, "jpg")
+	assert.Contains(t, fileInputElement.FileTypes, "png")
+
+	fileInputElement.WithMaxFiles(10)
+	assert.Equal(t, fileInputElement.MaxFiles, 10)
 }
