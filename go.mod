@@ -1,4 +1,4 @@
-module github.com/slack-go/slack
+module github.com/ObedSj/slack-with-rich-and-file-input
 
 go 1.16
 
