@@ -40,6 +40,7 @@ type BlockAction struct {
 	Type                  ActionType          `json:"type"`
 	Text                  TextBlockObject     `json:"text"`
 	Value                 string              `json:"value"`
+	RichTextValue         RichTextBlock       `json:"rich_text_value"`
 	ActionTs              string              `json:"action_ts"`
 	SelectedOption        OptionBlockObject   `json:"selected_option"`
 	SelectedOptions       []OptionBlockObject `json:"selected_options"`
