@@ -148,6 +148,12 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 }
 
+func TestNewRichTextInputBlockElement(t *testing.T) {
+	richTextInputElement := NewRichTextInputBlockElement(nil, "test")
+	assert.Equal(t, string(richTextInputElement.Type), "rich_text_input")
+	assert.Equal(t, richTextInputElement.ActionID, "test")
+}
+
 func TestNewEmailTextInputBlockElement(t *testing.T) {
 	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
 
