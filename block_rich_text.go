@@ -120,17 +120,19 @@ type RichTextList struct {
 	Type     RichTextElementType `json:"type"`
 	Style    RichTextListStyle   `json:"style"`
 	Elements []RichTextSection   `json:"elements"`
+	Indent   int                 `json:"indent"`
 }
 
 func (l RichTextList) RichTextElementType() RichTextElementType {
 	return l.Type
 }
 
-func NewRichTextList(style RichTextListStyle, elements ...RichTextSection) *RichTextList {
+func NewRichTextList(style RichTextListStyle, indentation int, elements ...RichTextSection) *RichTextList {
 	return &RichTextList{
 		Type:     RTEList,
 		Style:    style,
 		Elements: elements,
+		Indent:   indentation,
 	}
 }
 
