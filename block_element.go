@@ -511,6 +511,8 @@ func NewPlainTextInputBlockElement(placeholder *TextBlockObject, actionID string
 		Type:        METPlainTextInput,
 		ActionID:    actionID,
 		Placeholder: placeholder,
+		Multiline:   false,
+		MinLength:   0,
 	}
 }
 
