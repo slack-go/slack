@@ -338,7 +338,7 @@ func NewRichTextSectionUserElement(userID string, style *RichTextSectionTextStyl
 type RichTextSectionEmojiElement struct {
 	Type     RichTextSectionElementType `json:"type"`
 	Name     string                     `json:"name"`
-	SkinTone int                        `json:"skin_tone"`
+	SkinTone int                        `json:"skin_tone,omitempty"`
 	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
