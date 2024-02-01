@@ -28,6 +28,9 @@ type AppMentionEvent struct {
 
 	// BotID is filled out when a bot triggers the app_mention event
 	BotID string `json:"bot_id,omitempty"`
+
+	// When the app is mentioned in the edited message
+	Edited *Edited `json:"edited,omitempty"`
 }
 
 // AppHomeOpenedEvent Your Slack app home was opened.
