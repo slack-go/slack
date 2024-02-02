@@ -176,7 +176,7 @@ func TestRichTextList_UnmarshalJSON(t *testing.T) {
 			[]byte(`{"type": "rich_text_list","elements":[],"indent":2}`),
 			RichTextList{
 				Type:     RTEList,
-				Indent:	  2,
+				Indent:   2,
 				Elements: []RichTextElement{},
 			},
 			nil,
