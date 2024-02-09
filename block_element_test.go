@@ -43,6 +43,16 @@ func TestWithStyleForButtonElement(t *testing.T) {
 
 }
 
+func TestWithURLForButtonElement(t *testing.T) {
+
+	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
+	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
+
+	btnElement.WithURL("https://foo.bar")
+	assert.Equal(t, btnElement.URL, "https://foo.bar")
+
+}
+
 func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	testOptionText := NewTextBlockObject("plain_text", "Option One", false, false)

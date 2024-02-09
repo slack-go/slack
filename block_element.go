@@ -177,6 +177,12 @@ func (s *ButtonBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *Butt
 	return s
 }
 
+// WithURL adds a URL for the button to link to and returns the modified ButtonBlockElement
+func (s *ButtonBlockElement) WithURL(url string) *ButtonBlockElement {
+	s.URL = url
+	return s
+}
+
 // NewButtonBlockElement returns an instance of a new button element to be used within a block
 func NewButtonBlockElement(actionID, value string, text *TextBlockObject) *ButtonBlockElement {
 	return &ButtonBlockElement{
