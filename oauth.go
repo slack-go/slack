@@ -69,6 +69,15 @@ type OAuthV2ResponseAuthedUser struct {
 	TokenType    string `json:"token_type"`
 }
 
+// OpenIDConnectResponse ...
+type OpenIDConnectResponse struct {
+	Ok          bool   `json:"ok"`
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	IdToken     string `json:"id_token"`
+	SlackResponse
+}
+
 // GetOAuthToken retrieves an AccessToken
 func GetOAuthToken(client httpClient, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, err error) {
 	return GetOAuthTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
@@ -137,12 +146,12 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 	return response, response.Err()
 }
 
-// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+// RefreshOAuthV2Token with a context, gets a V2 OAuth access token response
 func RefreshOAuthV2Token(client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
 	return RefreshOAuthV2TokenContext(context.Background(), client, clientID, clientSecret, refreshToken)
 }
 
-// RefreshOAuthV2AccessContext with a context, gets a V2 OAuth access token response
+// RefreshOAuthV2TokenContext with a context, gets a V2 OAuth access token response
 func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID, clientSecret, refreshToken string) (resp *OAuthV2Response, err error) {
 	values := url.Values{
 		"client_id":     {clientID},
@@ -152,6 +161,27 @@ func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID
 	}
 	response := &OAuthV2Response{}
 	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
+// GetOpenIDConnectToken exchanges a temporary OAuth verifier code for an access token for Sign in with Slack.
+// see: https://api.slack.com/methods/openid.connect.token
+func GetOpenIDConnectToken(client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OpenIDConnectResponse, err error) {
+	return GetOpenIDConnectTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
+}
+
+// GetOpenIDConnectTokenContext with a context, gets an access token for Sign in with Slack.
+func GetOpenIDConnectTokenContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OpenIDConnectResponse, err error) {
+	values := url.Values{
+		"client_id":     {clientID},
+		"client_secret": {clientSecret},
+		"code":          {code},
+		"redirect_uri":  {redirectURI},
+	}
+	response := &OpenIDConnectResponse{}
+	if err = postForm(ctx, client, APIURL+"openid.connect.token", values, response, discard{}); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
