@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/slack-go/slack"
+	"time"
 )
 
 func generateModalRequest() slack.ModalViewRequest {
@@ -48,6 +49,30 @@ func generateModalRequest() slack.ModalViewRequest {
 			headerSection,
 			firstName,
 			lastName,
+		},
+	}
+
+	var modalRequest slack.ModalViewRequest
+	modalRequest.Type = slack.ViewType("modal")
+	modalRequest.Title = titleText
+	modalRequest.Close = closeText
+	modalRequest.Submit = submitText
+	modalRequest.Blocks = blocks
+	return modalRequest
+}
+
+func updateModal() slack.ModalViewRequest {
+	// Create a ModalViewRequest with a header and two inputs
+	titleText := slack.NewTextBlockObject("plain_text", "My App", false, false)
+	closeText := slack.NewTextBlockObject("plain_text", "Close", false, false)
+	submitText := slack.NewTextBlockObject("plain_text", "Submit", false, false)
+
+	headerText := slack.NewTextBlockObject("mrkdwn", "Modal updated!", false, false)
+	headerSection := slack.NewSectionBlock(headerText, nil, nil)
+
+	blocks := slack.Blocks{
+		BlockSet: []slack.Block{
+			headerSection,
 		},
 	}
 
@@ -104,7 +129,7 @@ func handleSlash(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch s.Command {
-	case "/humboldttest":
+	case "/slash":
 		api := slack.New("YOUR_TOKEN_HERE")
 		modalRequest := generateModalRequest()
 		_, err = api.OpenView(s.TriggerID, modalRequest)
@@ -134,20 +159,29 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Note there might be a better way to get this info, but I figured this structure out from looking at the json response
-	firstName := i.View.State.Values["First Name"]["firstName"].Value
-	lastName := i.View.State.Values["Last Name"]["lastName"].Value
-
-	msg := fmt.Sprintf("Hello %s %s, nice to meet you!", firstName, lastName)
-
 	api := slack.New("YOUR_TOKEN_HERE")
-	_, _, err = api.PostMessage(i.User.ID,
-		slack.MsgOptionText(msg, false),
-		slack.MsgOptionAttachments())
 	if err != nil {
 		fmt.Printf(err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
 		return
+	}
+
+	// update modal sample
+	switch i.Type {
+	//update when interaction type is view_submission
+	case slack.InteractionTypeViewSubmission:
+		//you can use any modal you want to show to users just like creating modal.
+		updateModal := updateModal()
+		// You must set one of external_id or view_id and you can use hash for avoiding race condition.
+		// More details: https://api.slack.com/surfaces/modals/using#updating_apis
+		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
+		// Wait for a few seconds to see result this code is necesarry due to slack server modal is going to be closed after the update
+		time.Sleep(time.Second * 2)
+		if err != nil {
+			fmt.Printf("Error updating view: %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
