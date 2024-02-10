@@ -135,6 +135,8 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &RadioButtonsBlockElement{}
 	case "number_input":
 		e = &NumberInputBlockElement{}
+	case "file_input":
+		e = &FileInputBlockElement{}
 	default:
 		return fmt.Errorf("unsupported block element type %v", s.TypeVal)
 	}

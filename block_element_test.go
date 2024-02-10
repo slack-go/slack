@@ -231,3 +231,19 @@ func TestNewNumberInputBlockElement(t *testing.T) {
 	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
 
 }
+
+func TestNewFileInputBlockElement(t *testing.T) {
+
+	fileInputElement := NewFileInputBlockElement("test")
+
+	assert.Equal(t, string(fileInputElement.Type), "file_input")
+	assert.Equal(t, fileInputElement.ActionID, "test")
+
+	fileInputElement.WithFileTypes("jpg", "png")
+	assert.Equal(t, len(fileInputElement.FileTypes), 2)
+	assert.Contains(t, fileInputElement.FileTypes, "jpg")
+	assert.Contains(t, fileInputElement.FileTypes, "png")
+
+	fileInputElement.WithMaxFiles(10)
+	assert.Equal(t, fileInputElement.MaxFiles, 10)
+}
