@@ -48,7 +48,7 @@ func TestBotDirectMessageBotHandler(t *testing.T) {
 	s := NewTestServer()
 	go s.Start()
 	s.SendDirectMessageToBot("some text")
-	expectedMsg := fmt.Sprintf("some text")
+	expectedMsg := "some text"
 	time.Sleep(2 * time.Second)
 	assert.True(t, s.SawOutgoingMessage(expectedMsg))
 	s.Stop()

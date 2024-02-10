@@ -536,6 +536,14 @@ type TeamAccessRevokedEvent struct {
 	TeamIDs []string `json:"team_ids"`
 }
 
+// UserProfileChangedEvent is sent if access to teams was revoked for your org-wide app.
+type UserProfileChangedEvent struct {
+	User    *slack.User `json:"user"`
+	CacheTs int         `json:"cache_ts"`
+	Type    string      `json:"type"`
+	EventTs string      `json:"event_ts"`
+}
+
 type EventsAPIType string
 
 const (
@@ -585,9 +593,9 @@ const (
 	LinkShared = EventsAPIType("link_shared")
 	// Message A message was posted to a channel, private channel (group), im, or mim
 	Message = EventsAPIType("message")
-	// Member Joined Channel
+	// MemberJoinedChannel is sent if a member joined a channel.
 	MemberJoinedChannel = EventsAPIType("member_joined_channel")
-	// Member Left Channel
+	// MemberLeftChannel is sent if a member left a channel.
 	MemberLeftChannel = EventsAPIType("member_left_channel")
 	// PinAdded An item was pinned to a channel
 	PinAdded = EventsAPIType("pin_added")
@@ -607,14 +615,16 @@ const (
 	WorkflowStepExecute = EventsAPIType("workflow_step_execute")
 	// MessageMetadataPosted A message with metadata was posted
 	MessageMetadataPosted = EventsAPIType("message_metadata_posted")
-	// MessageMetadataPosted A message with metadata was updated
+	// MessageMetadataUpdated A message with metadata was updated
 	MessageMetadataUpdated = EventsAPIType("message_metadata_updated")
-	// MessageMetadataPosted A message with metadata was deleted
+	// MessageMetadataDeleted A message with metadata was deleted
 	MessageMetadataDeleted = EventsAPIType("message_metadata_deleted")
 	// TeamAccessGranted is sent if access to teams was granted for your org-wide app.
 	TeamAccessGranted = EventsAPIType("team_access_granted")
-	// TeamAccessrevoked is sent if access to teams was revoked for your org-wide app.
-	TeamAccessrevoked = EventsAPIType("team_access_revoked")
+	// TeamAccessRevoked is sent if access to teams was revoked for your org-wide app.
+	TeamAccessRevoked = EventsAPIType("team_access_revoked")
+	// UserProfileChanged is sent if a user's profile information has changed.
+	UserProfileChanged = EventsAPIType("user_profile_changed")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -658,5 +668,6 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	MessageMetadataUpdated: MessageMetadataUpdatedEvent{},
 	MessageMetadataDeleted: MessageMetadataDeletedEvent{},
 	TeamAccessGranted:      TeamAccessGrantedEvent{},
-	TeamAccessrevoked:      TeamAccessRevokedEvent{},
+	TeamAccessRevoked:      TeamAccessRevokedEvent{},
+	UserProfileChanged:     UserProfileChangedEvent{},
 }

@@ -108,6 +108,11 @@ func inviteConversationHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(inviteConversationJSON))
 }
 
+// handle conversations.inviteShared
+func inviteSharedConversationHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(inviteSharedResponseJSON))
+}
+
 // handle groups.list
 func listGroupsHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultGroupsListJSON))
