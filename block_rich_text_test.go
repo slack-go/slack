@@ -27,6 +27,60 @@ const (
     }
   ]
 }`
+
+	richTextQuotePayload = `{
+		"type": "rich_text",
+		"block_id": "G7G",
+		"elements": [
+			{
+				"type": "rich_text_section",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Holy moly\n\n"
+					}
+				]
+			},
+			{
+				"type": "rich_text_preformatted",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Preformatted\n\n"
+					}
+				],
+				"border": 2
+			},
+			{
+				"type": "rich_text_quote",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Quote\n\n"
+					}
+				]
+			},
+			{
+				"type": "rich_text_quote",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Another quote"
+					}
+				]
+			},
+			{
+				"type": "rich_text_preformatted",
+				"elements": [
+					{
+						"type": "text",
+						"text": "Another preformatted\n\n"
+					}
+				],
+				"border": 42
+			}
+		]
+	}`
 )
 
 func TestRichTextBlock_UnmarshalJSON(t *testing.T) {
@@ -55,6 +109,38 @@ func TestRichTextBlock_UnmarshalJSON(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			[]byte(dummyPayload),
+			RichTextBlock{
+				Type:    MBTRichText,
+				BlockID: "FaYCD",
+				Elements: []RichTextElement{
+					&RichTextSection{
+						Type: RTESection,
+						Elements: []RichTextSectionElement{
+							&RichTextSectionChannelElement{Type: RTSEChannel, ChannelID: "C012345678"},
+							&RichTextSectionTextElement{Type: RTSEText, Text: "dummy_text"},
+						},
+					},
+				},
+			},
+			nil,
+		},
+		{
+			[]byte(richTextQuotePayload),
+			RichTextBlock{
+				Type:    MBTRichText,
+				BlockID: "G7G",
+				Elements: []RichTextElement{
+					&RichTextSection{Type: RTESection, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Holy moly\n\n"}}},
+					&RichTextPreformatted{RichTextSection: RichTextSection{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Preformatted\n\n"}}}, Border: 2},
+					&RichTextQuote{Type: RTEQuote, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Quote\n\n"}}},
+					&RichTextQuote{Type: RTEQuote, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Another quote"}}},
+					&RichTextPreformatted{RichTextSection: RichTextSection{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Another preformatted\n\n"}}}, Border: 42},
+				},
+			},
+			nil,
+		},
 	}
 	for _, tc := range cases {
 		var actual RichTextBlock
@@ -63,10 +149,10 @@ func TestRichTextBlock_UnmarshalJSON(t *testing.T) {
 			if tc.err == nil {
 				t.Errorf("unexpected error: %s", err)
 			}
-			t.Errorf("expected error is %s, but got %s", tc.err, err)
+			t.Errorf("expected error is %v, but got %v", tc.err, err)
 		}
 		if tc.err != nil {
-			t.Errorf("expected to raise an error %s", tc.err)
+			t.Errorf("expected to raise an error %v", tc.err)
 		}
 		if diff := deep.Equal(actual, tc.expected); diff != nil {
 			t.Errorf("actual value does not match expected one\n%s", diff)
@@ -198,4 +284,80 @@ func TestRichTextList_UnmarshalJSON(t *testing.T) {
 			t.Errorf("actual value does not match expected one\n%s", diff)
 		}
 	}
+}
+
+func TestRichTextQuote_Marshal(t *testing.T) {
+	t.Run("rich_text_section", func(t *testing.T) {
+		const rawRSE = "{\"type\":\"rich_text_section\",\"elements\":[{\"type\":\"text\",\"text\":\"Some Text\"}]}"
+
+		var got RichTextSection
+		if err := json.Unmarshal([]byte(rawRSE), &got); err != nil {
+			t.Fatal(err)
+		}
+		want := RichTextSection{
+			Type: RTESection,
+			Elements: []RichTextSectionElement{
+				&RichTextSectionTextElement{Type: RTSEText, Text: "Some Text"},
+			},
+		}
+
+		if diff := deep.Equal(got, want); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+		b, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if diff := deep.Equal(string(b), rawRSE); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+	})
+	t.Run("rich_text_quote", func(t *testing.T) {
+		const rawRTS = "{\"type\":\"rich_text_quote\",\"elements\":[{\"type\":\"text\",\"text\":\"Some text\"}]}"
+
+		var got RichTextQuote
+		if err := json.Unmarshal([]byte(rawRTS), &got); err != nil {
+			t.Fatal(err)
+		}
+		want := RichTextQuote{
+			Type: RTEQuote,
+			Elements: []RichTextSectionElement{
+				&RichTextSectionTextElement{Type: RTSEText, Text: "Some text"},
+			},
+		}
+		if diff := deep.Equal(got, want); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+		b, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if diff := deep.Equal(string(b), rawRTS); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+	})
+	t.Run("rich_text_preformatted", func(t *testing.T) {
+		const rawRTP = "{\"type\":\"rich_text_preformatted\",\"elements\":[{\"type\":\"text\",\"text\":\"Some other text\"}],\"border\":2}"
+		want := RichTextPreformatted{
+			RichTextSection: RichTextSection{
+				Type:     RTEPreformatted,
+				Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Some other text"}},
+			},
+			Border: 2,
+		}
+		var got RichTextPreformatted
+		if err := json.Unmarshal([]byte(rawRTP), &got); err != nil {
+			t.Fatal(err)
+		}
+		if diff := deep.Equal(got, want); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+		b, err := json.Marshal(got)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if diff := deep.Equal(string(b), rawRTP); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
+	})
 }
