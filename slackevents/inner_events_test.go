@@ -2,7 +2,10 @@ package slackevents
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAppMention(t *testing.T) {
@@ -376,19 +379,31 @@ func TestThreadBroadcastEvent(t *testing.T) {
 
 func TestMemberJoinedChannelEvent(t *testing.T) {
 	rawE := []byte(`
-			{
-				"type": "member_joined_channel",
-				"user": "W06GH7XHN",
-				"channel": "C0698JE0H",
-				"channel_type": "C",
-				"team": "T024BE7LD",
-				"inviter": "U123456789"
+		{
+			"type": "member_joined_channel",
+			"user": "W06GH7XHN",
+			"channel": "C0698JE0H",
+			"channel_type": "C",
+			"team": "T024BE7LD",
+			"inviter": "U123456789"
 		}
 	`)
-	err := json.Unmarshal(rawE, &MemberJoinedChannelEvent{})
+	evt := MemberJoinedChannelEvent{}
+	err := json.Unmarshal(rawE, &evt)
 	if err != nil {
 		t.Error(err)
 	}
+
+	expected := MemberJoinedChannelEvent{
+		Type:        "member_joined_channel",
+		User:        "W06GH7XHN",
+		Channel:     "C0698JE0H",
+		ChannelType: "C",
+		Team:        "T024BE7LD",
+		Inviter:     "U123456789",
+	}
+
+	assert.Equal(t, expected, evt)
 }
 
 func TestMemberLeftChannelEvent(t *testing.T) {
@@ -913,4 +928,573 @@ func TestUserProfileChanged(t *testing.T) {
 	if actual.User.Name != "whatever" {
 		t.Fail()
 	}
+}
+
+func TestSharedChannelInvite(t *testing.T) {
+	rawE := []byte(`
+	{
+		"token": "whatever",
+		"team_id": "whatever",
+		"api_app_id": "whatever",
+		"event": {
+			"type": "shared_channel_invite_received",
+			"invite": {
+				"id": "I028YDERZSQ",
+				"date_created": 1626876000,
+				"date_invalid": 1628085600,
+				"inviting_team": {
+					"id": "T12345678",
+					"name": "Corgis",
+					"icon": {},
+					"is_verified": false,
+					"domain": "corgis",
+					"date_created": 1480946400
+				},
+				"inviting_user": {
+					"id": "U12345678",
+					"team_id": "T12345678",
+					"name": "crus",
+					"updated": 1608081902,
+					"profile": {
+						"real_name": "Corgis Rus",
+						"display_name": "Corgis Rus",
+						"real_name_normalized": "Corgis Rus",
+						"display_name_normalized": "Corgis Rus",
+						"team": "T12345678",
+						"avatar_hash": "gcfh83a4c72k",
+						"email": "corgisrus@slack-corp.com",
+						"image_24": "https://placekitten.com/24/24",
+						"image_32": "https://placekitten.com/32/32",
+						"image_48": "https://placekitten.com/48/48",
+						"image_72": "https://placekitten.com/72/72",
+						"image_192": "https://placekitten.com/192/192",
+						"image_512": "https://placekitten.com/512/512"
+					}
+				},
+				"recipient_user_id": "U87654321"
+			},
+			"channel": {
+				"id": "C12345678",
+				"is_private": false,
+				"is_im": false,
+				"name": "test-slack-connect"
+			},
+			"event_ts": "1626876010.000100"
+		}
+	}
+	`)
+
+	evt := &EventsAPICallbackEvent{}
+	err := json.Unmarshal(rawE, evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsedEvent, err := parseInnerEvent(evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, ok := parsedEvent.InnerEvent.Data.(*SharedChannelInviteReceivedEvent)
+	if !ok {
+		t.Fail()
+	}
+
+	if actual.Invite.ID != "I028YDERZSQ" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingTeam.ID != "T12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingUser.ID != "U12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.RecipientUserID != "U87654321" {
+		t.Fail()
+	}
+
+	if actual.Channel.ID != "C12345678" {
+		t.Fail()
+	}
+
+	if parsedEvent.InnerEvent.Type != "shared_channel_invite_received" {
+		t.Fail()
+	}
+
+}
+
+// Test that the shared_channel_invite_accepted event can be unmarshalled
+func TestSharedChannelAccepted(t *testing.T) {
+	rawE := []byte(`
+	{
+		"token": "whatever",
+		"team_id": "whatever",
+		"api_app_id": "whatever",
+		"event": {
+			"type": "shared_channel_invite_accepted",
+			"approval_required": false,
+			"invite": {
+				"id": "I028YDERZSQ",
+				"date_created": 1626876000,
+				"date_invalid": 1628085600,
+				"inviting_team": {
+					"id": "T12345678",
+					"name": "Corgis",
+					"icon": {
+						"image_default": true,
+						"image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-34.png",
+						"image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-44.png",
+						"image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-68.png",
+						"image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-88.png",
+						"image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-102.png",
+						"image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-230.png",
+						"image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-132.png"
+					  },
+					"is_verified": false,
+					"domain": "corgis",
+					"date_created": 1480946400
+				},
+				"inviting_user": {
+					"id": "U12345678",
+					"team_id": "T12345678",
+					"name": "crus",
+					"updated": 1608081902,
+					"profile": {
+						"real_name": "Corgis Rus",
+						"display_name": "Corgis Rus",
+						"real_name_normalized": "Corgis Rus",
+						"display_name_normalized": "Corgis Rus",
+						"team": "T12345678",
+						"avatar_hash": "gcfh83a4c72k",
+						"email": "corgisrus@slack-corp.com",
+						"image_24": "https://placekitten.com/24/24",
+						"image_32": "https://placekitten.com/32/32",
+						"image_48": "https://placekitten.com/48/48",
+						"image_72": "https://placekitten.com/72/72",
+						"image_192": "https://placekitten.com/192/192",
+						"image_512": "https://placekitten.com/512/512"
+					}
+				},
+				"recipient_email": "golden@doodle.com",
+				"recipient_user_id": "U87654321"
+			},
+			"channel": {
+				"id": "C12345678",
+				"is_private": false,
+				"is_im": false,
+				"name": "test-slack-connect"
+			},
+			"teams_in_channel": [
+				{
+				"id": "T12345678",
+				"name": "Corgis",
+				"icon": {
+					"image_default": true,
+					"image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-34.png",
+					"image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-44.png",
+					"image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-68.png",
+					"image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-88.png",
+					"image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-102.png",
+					"image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-230.png",
+					"image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-132.png"
+				  },
+				"is_verified": false,
+				"domain": "corgis",
+				"date_created": 1626789600
+				}
+			],
+			"accepting_user": {
+				"id": "U87654321",
+				"team_id": "T87654321",
+				"name": "golden",
+				"updated": 1624406113,
+				"profile": {
+					"real_name": "Golden Doodle",
+					"display_name": "Golden",
+					"real_name_normalized": "Golden Doodle",
+					"display_name_normalized": "Golden",
+					"team": "T87654321",
+					"avatar_hash": "g717728b118x",
+					"email": "golden@doodle.com",
+					"image_24": "https://placekitten.com/24/24",
+					"image_32": "https://placekitten.com/32/32",
+					"image_48": "https://placekitten.com/48/48",
+					"image_72": "https://placekitten.com/72/72",
+					"image_192": "https://placekitten.com/192/192",
+					"image_512": "https://placekitten.com/512/512"
+				}
+			},
+			"event_ts": "1626877800.000000"
+		}
+	}
+	`)
+
+	evt := &EventsAPICallbackEvent{}
+	err := json.Unmarshal(rawE, evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsedEvent, err := parseInnerEvent(evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, ok := parsedEvent.InnerEvent.Data.(*SharedChannelInviteAcceptedEvent)
+	if !ok {
+		t.Fail()
+	}
+
+	if actual.Invite.ID != "I028YDERZSQ" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingTeam.ID != "T12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingUser.ID != "U12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.RecipientUserID != "U87654321" {
+		t.Fail()
+	}
+
+	if actual.Channel.ID != "C12345678" {
+		t.Fail()
+	}
+
+	if actual.Channel.Name != "test-slack-connect" {
+		t.Fail()
+		fmt.Println(actual.Channel.Name + ", does not match the test name.")
+	}
+
+	if actual.AcceptingUser.ID != "U87654321" {
+		t.Fail()
+	}
+
+	if actual.AcceptingUser.Profile.RealName != "Golden Doodle" {
+		t.Fail()
+	}
+
+	if parsedEvent.InnerEvent.Type != "shared_channel_invite_accepted" {
+		t.Fail()
+	}
+
+}
+
+// Test that the shared_channel_invite_declined event can be unmarshalled
+func TestSharedChannelApproved(t *testing.T) {
+	rawE := []byte(`
+	{
+		"token": "whatever",
+		"team_id": "whatever",
+		"api_app_id": "whatever",
+		"event": {
+			"type": "shared_channel_invite_approved",
+			"invite": {
+				"id": "I01354X80CA",
+				"date_created": 1626876000,
+				"date_invalid": 1628085600,
+				"inviting_team": {
+					"id": "T12345678",
+					"name": "Corgis",
+					"icon": {
+						"image_default": true,
+						"image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-34.png",
+						"image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-44.png",
+						"image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-68.png",
+						"image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-88.png",
+						"image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-102.png",
+						"image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-230.png",
+						"image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-132.png"
+					  },
+					"is_verified": false,
+					"domain": "corgis",
+					"date_created": 1480946400
+				},
+				"inviting_user": {
+					"id": "U12345678",
+					"team_id": "T12345678",
+					"name": "crus",
+					"updated": 1608081902,
+					"profile": {
+						"real_name": "Corgis Rus",
+						"display_name": "Corgis Rus",
+						"real_name_normalized": "Corgis Rus",
+						"display_name_normalized": "Corgis Rus",
+						"team": "T12345678",
+						"avatar_hash": "gcfh83a4c72k",
+						"email": "corgisrus@slack-corp.com",
+						"image_24": "https://placekitten.com/24/24",
+						"image_32": "https://placekitten.com/32/32",
+						"image_48": "https://placekitten.com/48/48",
+						"image_72": "https://placekitten.com/72/72",
+						"image_192": "https://placekitten.com/192/192",
+						"image_512": "https://placekitten.com/512/512"
+					}
+				},
+				"recipient_email": "golden@doodle.com",
+				"recipient_user_id": "U87654321"
+			},
+			"channel": {
+				"id": "C12345678",
+				"is_private": false,
+				"is_im": false,
+				"name": "test-slack-connect"
+			},
+			"approving_team_id": "T87654321",
+			"teams_in_channel": [
+				{
+				"id": "T12345678",
+				"name": "Corgis",
+				"icon": {
+					"image_default": true,
+					"image_34": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-34.png",
+					"image_44": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-44.png",
+					"image_68": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-68.png",
+					"image_88": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-88.png",
+					"image_102": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-102.png",
+					"image_230": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-230.png",
+					"image_132": "https://a.slack-edge.com/80588/img/avatars-teams/ava_0011-132.png"
+				  },
+				"is_verified": false,
+				"domain": "corgis",
+				"date_created": 1626789600
+				}
+			],
+			"approving_user": {
+				"id": "U012A3CDE",
+				"team_id": "T87654321",
+				"name": "spengler",
+				"updated": 1624406532,
+				"profile": {
+					"real_name": "Egon Spengler",
+					"display_name": "Egon",
+					"real_name_normalized": "Egon Spengler",
+					"display_name_normalized": "Egon",
+					"team": "T87654321",
+					"avatar_hash": "g216425b1681",
+					"email": "spengler@ghostbusters.example.com",
+					"image_24": "https://placekitten.com/24/24",
+					"image_32": "https://placekitten.com/32/32",
+					"image_48": "https://placekitten.com/48/48",
+					"image_72": "https://placekitten.com/72/72",
+					"image_192": "https://placekitten.com/192/192",
+					"image_512": "https://placekitten.com/512/512"
+				}
+			},
+			"event_ts": "1626881400.000000"
+		}
+	}
+	`)
+
+	evt := &EventsAPICallbackEvent{}
+	err := json.Unmarshal(rawE, evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsedEvent, err := parseInnerEvent(evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, ok := parsedEvent.InnerEvent.Data.(*SharedChannelInviteApprovedEvent)
+	if !ok {
+		t.Fail()
+	}
+
+	if actual.Invite.ID != "I01354X80CA" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingTeam.ID != "T12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingUser.ID != "U12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.RecipientUserID != "U87654321" {
+		t.Fail()
+	}
+
+	if actual.Channel.ID != "C12345678" {
+		t.Fail()
+	}
+
+	if actual.ApprovingTeamID != "T87654321" {
+		t.Fail()
+	}
+
+	if actual.ApprovingUser.Name != "spengler" {
+		t.Fail()
+	}
+
+	if actual.ApprovingUser.Profile.RealName != "Egon Spengler" {
+		t.Fail()
+	}
+
+	if actual.TeamsInChannel[0].ID != "T12345678" {
+		t.Fail()
+	}
+
+	if parsedEvent.InnerEvent.Type != "shared_channel_invite_approved" {
+		t.Fail()
+	}
+
+}
+
+func TestSharedChannelDeclined(t *testing.T) {
+	rawE := []byte(`
+	{
+		"token": "whatever",
+		"team_id": "whatever",
+		"api_app_id": "whatever",
+		"event": {
+			"type": "shared_channel_invite_declined",
+			"invite": {
+				"id": "I01354X80CA",
+				"date_created": 1626876000,
+				"date_invalid": 1628085600,
+				"inviting_team": {
+					"id": "T12345678",
+					"name": "Corgis",
+					"icon": {},
+					"is_verified": false,
+					"domain": "corgis",
+					"date_created": 1480946400
+				},
+				"inviting_user": {
+					"id": "U12345678",
+					"team_id": "T12345678",
+					"name": "crus",
+					"updated": 1608081902,
+					"profile": {
+						"real_name": "Corgis Rus",
+						"display_name": "Corgis Rus",
+						"real_name_normalized": "Corgis Rus",
+						"display_name_normalized": "Corgis Rus",
+						"team": "T12345678",
+						"avatar_hash": "gcfh83a4c72k",
+						"email": "corgisrus@slack-corp.com",
+						"image_24": "https://placekitten.com/24/24",
+						"image_32": "https://placekitten.com/32/32",
+						"image_48": "https://placekitten.com/48/48",
+						"image_72": "https://placekitten.com/72/72",
+						"image_192": "https://placekitten.com/192/192",
+						"image_512": "https://placekitten.com/512/512"
+					}
+				},
+				"recipient_email": "golden@doodle.com"
+			},
+			"channel": {
+				"id": "C12345678",
+				"is_private": false,
+				"is_im": false,
+				"name": "test-slack-connect"
+			},
+			"declining_team_id": "T87654321",
+			"teams_in_channel": [
+				{
+					"id": "T12345678",
+					"name": "Corgis",
+					"icon": {},
+					"is_verified": false,
+					"domain": "corgis",
+					"date_created": 1626789600
+				}
+			],
+			"declining_user": {
+				"id": "U012A3CDE",
+				"team_id": "T87654321",
+				"name": "spengler",
+				"updated": 1624406532,
+					"profile": {
+					"real_name": "Egon Spengler",
+					"display_name": "Egon",
+					"real_name_normalized": "Egon Spengler",
+					"display_name_normalized": "Egon",
+					"team": "T87654321",
+					"avatar_hash": "g216425b1681",
+					"email": "spengler@ghostbusters.example.com",
+					"image_24": "https://placekitten.com/24/24",
+					"image_32": "https://placekitten.com/32/32",
+					"image_48": "https://placekitten.com/48/48",
+					"image_72": "https://placekitten.com/72/72",
+					"image_192": "https://placekitten.com/192/192",
+					"image_512": "https://placekitten.com/512/512"
+				}
+			},
+			"event_ts": "1626881400.000000"
+		}
+	}
+	`)
+
+	evt := &EventsAPICallbackEvent{}
+	err := json.Unmarshal(rawE, evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsedEvent, err := parseInnerEvent(evt)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual, ok := parsedEvent.InnerEvent.Data.(*SharedChannelInviteDeclinedEvent)
+	if !ok {
+		t.Fail()
+	}
+
+	if actual.Invite.ID != "I01354X80CA" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingTeam.ID != "T12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.InvitingUser.ID != "U12345678" {
+		t.Fail()
+	}
+
+	if actual.Invite.RecipientEmail != "golden@doodle.com" {
+		t.Fail()
+	}
+
+	if actual.Channel.ID != "C12345678" {
+		t.Fail()
+	}
+
+	if actual.DecliningTeamID != "T87654321" {
+		t.Fail()
+	}
+
+	if actual.DecliningUser.Name != "spengler" {
+		t.Fail()
+	}
+
+	if actual.DecliningUser.Profile.RealName != "Egon Spengler" {
+		t.Fail()
+	}
+
+	if actual.TeamsInChannel[0].ID != "T12345678" {
+		t.Fail()
+	}
+
+	if actual.EventTs != "1626881400.000000" {
+		t.Fail()
+	}
+
+	if parsedEvent.InnerEvent.Type != "shared_channel_invite_declined" {
+		t.Fail()
+	}
+
 }
