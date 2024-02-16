@@ -42,7 +42,10 @@ func (e *RichTextBlock) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSection{}
 		case RTEList:
 			elem = &RichTextList{}
-
+		case RTEQuote:
+			elem = &RichTextQuote{}
+		case RTEPreformatted:
+			elem = &RichTextPreformatted{}
 		default:
 			elems = append(elems, &RichTextUnknown{
 				Type: s.Type,
@@ -150,6 +153,10 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSection{}
 		case RTEList:
 			elem = &RichTextList{}
+		case RTEQuote:
+			elem = &RichTextQuote{}
+		case RTEPreformatted:
+			elem = &RichTextPreformatted{}
 		default:
 			elems = append(elems, &RichTextUnknown{
 				Type: s.Type,
@@ -459,4 +466,63 @@ type RichTextSectionUnknownElement struct {
 
 func (r RichTextSectionUnknownElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
+}
+
+// RichTextQuote represents rich_text_quote element type.
+type RichTextQuote RichTextSection
+
+// RichTextElementType returns the type of the Element
+func (s *RichTextQuote) RichTextElementType() RichTextElementType {
+	return s.Type
+}
+
+func (s *RichTextQuote) UnmarshalJSON(b []byte) error {
+	// reusing the RichTextSection struct, as it's the same as RichTextQuote.
+	var rts RichTextSection
+	if err := json.Unmarshal(b, &rts); err != nil {
+		return err
+	}
+	*s = RichTextQuote(rts)
+	s.Type = RTEQuote
+	return nil
+}
+
+// RichTextPreformatted represents rich_text_quote element type.
+type RichTextPreformatted struct {
+	RichTextSection
+	Border int `json:"border"`
+}
+
+// RichTextElementType returns the type of the Element
+func (s *RichTextPreformatted) RichTextElementType() RichTextElementType {
+	return s.Type
+}
+
+func (s *RichTextPreformatted) UnmarshalJSON(b []byte) error {
+	var rts RichTextSection
+	if err := json.Unmarshal(b, &rts); err != nil {
+		return err
+	}
+	// we define standalone fields because we need to unmarshal the border
+	// field.  We can not directly unmarshal the data into
+	// RichTextPreformatted because it will cause an infinite loop.  We also
+	// can not define a struct with embedded RichTextSection and Border fields
+	// because the json package will not unmarshal the data into the
+	// standalone fields, once it sees UnmarshalJSON method on the embedded
+	// struct.  The drawback is that we have to process the data twice, and
+	// have to define a standalone struct with the same set of fields as the
+	// original struct, which may become a maintenance burden (i.e. update the
+	// fields in two places, should it ever change).
+	var standalone struct {
+		Border int `json:"border"`
+	}
+	if err := json.Unmarshal(b, &standalone); err != nil {
+		return err
+	}
+	*s = RichTextPreformatted{
+		RichTextSection: rts,
+		Border:          standalone.Border,
+	}
+	s.Type = RTEPreformatted
+	return nil
 }
