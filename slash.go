@@ -11,7 +11,7 @@ type SlashCommand struct {
 	TeamDomain          string `json:"team_domain"`
 	EnterpriseID        string `json:"enterprise_id,omitempty"`
 	EnterpriseName      string `json:"enterprise_name,omitempty"`
-	IsEnterpriseInstall bool   `json:"is_enterprise_install"`
+	IsEnterpriseInstall string   `json:"is_enterprise_install"`
 	ChannelID           string `json:"channel_id"`
 	ChannelName         string `json:"channel_name"`
 	UserID              string `json:"user_id"`
