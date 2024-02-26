@@ -283,16 +283,19 @@ func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup str
 }
 
 // UpdateUserGroupMembers will update the members of an existing user group
-func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error) {
+func (api *Client) UpdateUserGroupMembers(userGroup string, members []string) (UserGroup, error) {
 	return api.UpdateUserGroupMembersContext(context.Background(), userGroup, members)
 }
 
 // UpdateUserGroupMembersContext will update the members of an existing user group with a custom context
-func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string) (UserGroup, error) {
+func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members []string) (UserGroup, error) {
+	// A comma separated string of encoded user IDs that represent the entire list of users for the User Group.
+	users := strings.Join(members, ",")
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
-		"users":     {members},
+		"users":     {users},
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.users.update", values)
