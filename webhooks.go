@@ -24,6 +24,8 @@ type WebhookMessage struct {
 	ReplaceOriginal bool         `json:"replace_original"`
 	DeleteOriginal  bool         `json:"delete_original"`
 	ReplyBroadcast  bool         `json:"reply_broadcast,omitempty"`
+	UnfurlLinks     bool         `json:"unfurl_links,omitempty"`
+	UnfurlMedia     bool         `json:"unfurl_media,omitempty"`
 }
 
 func PostWebhook(url string, msg *WebhookMessage) error {
