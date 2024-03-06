@@ -24,6 +24,26 @@ type TeamInfo struct {
 	Icon        map[string]interface{} `json:"icon"`
 }
 
+func (teamInfo *TeamInfo) GetIconURL() *string {
+	image88, ok := teamInfo.Icon["image_88"]
+	if ok {
+		strImage88, ok := image88.(string)
+		if ok {
+			return &strImage88
+		}
+	}
+
+	image132, ok := teamInfo.Icon["image_132"]
+	if ok {
+		strImage132, ok := image132.(string)
+		if ok {
+			return &strImage132
+		}
+	}
+
+	return nil
+}
+
 type TeamProfileResponse struct {
 	Profile TeamProfile `json:"profile"`
 	SlackResponse
