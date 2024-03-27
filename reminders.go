@@ -41,10 +41,7 @@ func (api *Client) doReminders(ctx context.Context, path string, values url.Valu
 
 	// create an array of pointers to reminders
 	var reminders = make([]*Reminder, 0, len(response.Reminders))
-	for _, reminder := range response.Reminders {
-		reminders = append(reminders, reminder)
-	}
-
+	reminders = append(reminders, response.Reminders...)
 	return reminders, response.Err()
 }
 
