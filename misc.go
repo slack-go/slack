@@ -77,11 +77,11 @@ type RateLimitedError struct {
 	RetryAfter time.Duration
 }
 
-func (e *RateLimitedError) Error() string {
+func (e RateLimitedError) Error() string {
 	return fmt.Sprintf("slack rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
-func (e *RateLimitedError) Retryable() bool {
+func (e RateLimitedError) Retryable() bool {
 	return true
 }
 

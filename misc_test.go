@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -103,4 +104,20 @@ func TestRetryable(t *testing.T) {
 			t.Errorf("expected %#v to be Retryable", e)
 		}
 	}
+}
+
+func TestCanUseErrorsAs(t *testing.T) {
+	ok := errors.As(RateLimitedError{}, &RateLimitedError{})
+	if !ok {
+		t.Errorf("cannot convert to RateLimitedError")
+	}
+	ok = errors.As(StatusCodeError{}, &StatusCodeError{})
+	if !ok {
+		t.Errorf("cannot convert to StatusCodeError")
+	}
+	ok = errors.As(SlackError{}, &SlackError{})
+	if !ok {
+		t.Errorf("cannot convert to SlackError")
+	}
+	// no panic means we're good
 }
