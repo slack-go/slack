@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"net/url"
@@ -103,4 +104,11 @@ func TestRetryable(t *testing.T) {
 			t.Errorf("expected %#v to be Retryable", e)
 		}
 	}
+}
+
+func TestCanUseErrorsAs(t *testing.T) {
+	_ = errors.As(errors.New("error"), &RateLimitedError{})
+	_ = errors.As(errors.New("error"), &StatusCodeError{})
+	_ = errors.As(errors.New("error"), &SlackError{})
+	// no panic means we're good
 }
