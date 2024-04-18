@@ -424,6 +424,12 @@ func NewOverflowBlockElement(actionID string, options ...*OptionBlockObject) *Ov
 	}
 }
 
+// WithConfirm adds a confirmation dialogue to the overflow element
+func (s *OverflowBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *OverflowBlockElement {
+	s.Confirm = confirm
+	return s
+}
+
 // DatePickerBlockElement defines an element which lets users easily select a
 // date from a calendar style UI. Date picker elements can be used inside of
 // section and actions blocks.
