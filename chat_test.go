@@ -185,6 +185,28 @@ func TestPostMessage(t *testing.T) {
 				"user_auth_message": []string{"Please!"},
 			},
 		},
+		"LinkNames true": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionLinkNames(true),
+			},
+			expected: url.Values{
+				"channel":    []string{"CXXX"},
+				"token":      []string{"testing-token"},
+				"link_names": []string{"true"},
+			},
+		},
+		"LinkNames false": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionLinkNames(false),
+			},
+			expected: url.Values{
+				"channel":    []string{"CXXX"},
+				"token":      []string{"testing-token"},
+				"link_names": []string{"false"},
+			},
+		},
 	}
 
 	once.Do(startServer)
