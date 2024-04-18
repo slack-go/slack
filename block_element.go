@@ -737,6 +737,30 @@ func NewNumberInputBlockElement(placeholder *TextBlockObject, actionID string, i
 	}
 }
 
+// WithInitialValue sets the initial value for the number input element
+func (s *NumberInputBlockElement) WithInitialValue(initialValue string) *NumberInputBlockElement {
+	s.InitialValue = initialValue
+	return s
+}
+
+// WithMinValue sets the minimum value for the number input element
+func (s *NumberInputBlockElement) WithMinValue(minValue string) *NumberInputBlockElement {
+	s.MinValue = minValue
+	return s
+}
+
+// WithMaxValue sets the maximum value for the number input element
+func (s *NumberInputBlockElement) WithMaxValue(maxValue string) *NumberInputBlockElement {
+	s.MaxValue = maxValue
+	return s
+}
+
+// WithDispatchActionConfig sets the dispatch action config for the number input element
+func (s *NumberInputBlockElement) WithDispatchActionConfig(config *DispatchActionConfig) *NumberInputBlockElement {
+	s.DispatchActionConfig = config
+	return s
+}
+
 // FileInputBlockElement creates a field where a user can upload a file.
 //
 // File input elements are currently only available in modals.
