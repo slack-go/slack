@@ -696,6 +696,14 @@ func MsgOptionMetadata(metadata SlackMetadata) MsgOption {
 	}
 }
 
+// MsgOptionLinkNames finds and links user groups. Does not support linking individual users
+func MsgOptionLinkNames(linkName bool) MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("link_names", strconv.FormatBool(linkName))
+		return nil
+	}
+}
+
 // UnsafeMsgOptionEndpoint deliver the message to the specified endpoint.
 // NOTE: USE AT YOUR OWN RISK: No issues relating to the use of this Option
 // will be supported by the library, it is subject to change without notice that
