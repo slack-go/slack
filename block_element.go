@@ -258,6 +258,36 @@ func NewOptionsSelectBlockElement(optType string, placeholder *TextBlockObject, 
 	}
 }
 
+// WithInitialOption sets the initial option for the select element
+func (s *SelectBlockElement) WithInitialOption(option *OptionBlockObject) *SelectBlockElement {
+	s.InitialOption = option
+	return s
+}
+
+// WithInitialUser sets the initial user for the select element
+func (s *SelectBlockElement) WithInitialUser(user string) *SelectBlockElement {
+	s.InitialUser = user
+	return s
+}
+
+// WithInitialConversation sets the initial conversation for the select element
+func (s *SelectBlockElement) WithInitialConversation(conversation string) *SelectBlockElement {
+	s.InitialConversation = conversation
+	return s
+}
+
+// WithInitialChannel sets the initial channel for the select element
+func (s *SelectBlockElement) WithInitialChannel(channel string) *SelectBlockElement {
+	s.InitialChannel = channel
+	return s
+}
+
+// WithConfirm adds a confirmation dialogue to the select element
+func (s *SelectBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *SelectBlockElement {
+	s.Confirm = confirm
+	return s
+}
+
 // NewOptionsGroupSelectBlockElement returns a new instance of SelectBlockElement for use with
 // the Options object only.
 func NewOptionsGroupSelectBlockElement(
