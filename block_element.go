@@ -598,6 +598,36 @@ func NewPlainTextInputBlockElement(placeholder *TextBlockObject, actionID string
 	}
 }
 
+// WithInitialValue sets the initial value for the plain-text input element
+func (s *PlainTextInputBlockElement) WithInitialValue(initialValue string) *PlainTextInputBlockElement {
+	s.InitialValue = initialValue
+	return s
+}
+
+// WithMinLength sets the minimum length for the plain-text input element
+func (s *PlainTextInputBlockElement) WithMinLength(minLength int) *PlainTextInputBlockElement {
+	s.MinLength = minLength
+	return s
+}
+
+// WithMaxLength sets the maximum length for the plain-text input element
+func (s *PlainTextInputBlockElement) WithMaxLength(maxLength int) *PlainTextInputBlockElement {
+	s.MaxLength = maxLength
+	return s
+}
+
+// WithMultiline sets the multiline property for the plain-text input element
+func (s *PlainTextInputBlockElement) WithMultiline(multiline bool) *PlainTextInputBlockElement {
+	s.Multiline = multiline
+	return s
+}
+
+// WithDispatchActionConfig sets the dispatch action config for the plain-text input element
+func (s *PlainTextInputBlockElement) WithDispatchActionConfig(config *DispatchActionConfig) *PlainTextInputBlockElement {
+	s.DispatchActionConfig = config
+	return s
+}
+
 // RichTextInputBlockElement creates a field where allows users to enter formatted text
 // in a WYSIWYG composer, offering the same messaging writing experience as in Slack
 // More Information: https://api.slack.com/reference/block-kit/block-elements#rich_text_input
