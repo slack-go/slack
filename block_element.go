@@ -339,6 +339,48 @@ func NewOptionsMultiSelectBlockElement(optType string, placeholder *TextBlockObj
 	}
 }
 
+// WithInitialOptions sets the initial options for the multi-select element
+func (s *MultiSelectBlockElement) WithInitialOptions(options ...*OptionBlockObject) *MultiSelectBlockElement {
+	s.InitialOptions = options
+	return s
+}
+
+// WithInitialUsers sets the initial users for the multi-select element
+func (s *MultiSelectBlockElement) WithInitialUsers(users ...string) *MultiSelectBlockElement {
+	s.InitialUsers = users
+	return s
+}
+
+// WithInitialConversations sets the initial conversations for the multi-select element
+func (s *MultiSelectBlockElement) WithInitialConversations(conversations ...string) *MultiSelectBlockElement {
+	s.InitialConversations = conversations
+	return s
+}
+
+// WithInitialChannels sets the initial channels for the multi-select element
+func (s *MultiSelectBlockElement) WithInitialChannels(channels ...string) *MultiSelectBlockElement {
+	s.InitialChannels = channels
+	return s
+}
+
+// WithConfirm adds a confirmation dialogue to the multi-select element
+func (s *MultiSelectBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *MultiSelectBlockElement {
+	s.Confirm = confirm
+	return s
+}
+
+// WithMaxSelectedItems sets the maximum number of items that can be selected
+func (s *MultiSelectBlockElement) WithMaxSelectedItems(maxSelectedItems int) *MultiSelectBlockElement {
+	s.MaxSelectedItems = &maxSelectedItems
+	return s
+}
+
+// WithMinQueryLength sets the minimum query length for the multi-select element
+func (s *MultiSelectBlockElement) WithMinQueryLength(minQueryLength int) *MultiSelectBlockElement {
+	s.MinQueryLength = &minQueryLength
+	return s
+}
+
 // NewOptionsGroupMultiSelectBlockElement returns a new instance of MultiSelectBlockElement for use with
 // the Options object only.
 func NewOptionsGroupMultiSelectBlockElement(
