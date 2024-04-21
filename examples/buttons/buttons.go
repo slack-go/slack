@@ -50,7 +50,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("Could not send message: %v", err)
 	}
-	fmt.Printf("Message with buttons sucessfully sent to channel %s at %s", channelID, timestamp)
+	fmt.Printf("Message with buttons successfully sent to channel %s at %s", channelID, timestamp)
 	http.HandleFunc("/actions", actionHandler)
 	http.ListenAndServe(":3000", nil)
 }
