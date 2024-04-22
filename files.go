@@ -253,12 +253,12 @@ func (api *Client) GetFileInfoContext(ctx context.Context, fileID string, count,
 	return &response.File, response.Comments, &response.Paging, nil
 }
 
-// GetFile retreives a given file from its private download URL
+// GetFile retrieves a given file from its private download URL
 func (api *Client) GetFile(downloadURL string, writer io.Writer) error {
 	return api.GetFileContext(context.Background(), downloadURL, writer)
 }
 
-// GetFileContext retreives a given file from its private download URL with a custom context
+// GetFileContext retrieves a given file from its private download URL with a custom context
 //
 // For more details, see GetFile documentation.
 func (api *Client) GetFileContext(ctx context.Context, downloadURL string, writer io.Writer) error {
