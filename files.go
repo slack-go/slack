@@ -129,6 +129,7 @@ type FileUploadParameters struct {
 type GetFilesParameters struct {
 	User          string
 	Channel       string
+	TeamID        string
 	TimestampFrom JSONTime
 	TimestampTo   JSONTime
 	Types         string
@@ -142,6 +143,7 @@ type ListFilesParameters struct {
 	Limit   int
 	User    string
 	Channel string
+	TeamID  string
 	Types   string
 	Cursor  string
 }
@@ -281,6 +283,9 @@ func (api *Client) GetFilesContext(ctx context.Context, params GetFilesParameter
 	if params.Channel != DEFAULT_FILES_CHANNEL {
 		values.Add("channel", params.Channel)
 	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
 	if params.TimestampFrom != DEFAULT_FILES_TS_FROM {
 		values.Add("ts_from", strconv.FormatInt(int64(params.TimestampFrom), 10))
 	}
@@ -325,6 +330,9 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 	}
 	if params.Channel != DEFAULT_FILES_CHANNEL {
 		values.Add("channel", params.Channel)
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 	if params.Limit != DEFAULT_FILES_COUNT {
 		values.Add("limit", strconv.Itoa(params.Limit))
