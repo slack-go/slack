@@ -62,6 +62,10 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 		"name":  {userGroup.Name},
 	}
 
+	if userGroup.TeamID != "" {
+		values["team_id"] = []string{userGroup.TeamID}
+	}
+
 	if userGroup.Handle != "" {
 		values["handle"] = []string{userGroup.Handle}
 	}
