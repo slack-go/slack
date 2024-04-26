@@ -165,14 +165,17 @@ func (api *Client) GetTeamInfoContext(ctx context.Context) (*TeamInfo, error) {
 }
 
 // GetTeamProfile gets the Team Profile settings of the user
-func (api *Client) GetTeamProfile() (*TeamProfile, error) {
-	return api.GetTeamProfileContext(context.Background())
+func (api *Client) GetTeamProfile(teamID ...string) (*TeamProfile, error) {
+	return api.GetTeamProfileContext(context.Background(), teamID...)
 }
 
 // GetTeamProfileContext gets the Team Profile settings of the user with a custom context
-func (api *Client) GetTeamProfileContext(ctx context.Context) (*TeamProfile, error) {
+func (api *Client) GetTeamProfileContext(ctx context.Context, teamID ...string) (*TeamProfile, error) {
 	values := url.Values{
 		"token": {api.token},
+	}
+	if len(teamID) > 0 {
+		values["team_id"] = teamID
 	}
 
 	response, err := api.teamProfileRequest(ctx, api.httpclient, "team.profile.get", values)
@@ -180,7 +183,6 @@ func (api *Client) GetTeamProfileContext(ctx context.Context) (*TeamProfile, err
 		return nil, err
 	}
 	return &response.Profile, nil
-
 }
 
 // GetAccessLogs retrieves a page of logins according to the parameters given
