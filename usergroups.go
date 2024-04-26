@@ -126,6 +126,12 @@ func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string)
 // GetUserGroupsOption options for the GetUserGroups method call.
 type GetUserGroupsOption func(*GetUserGroupsParams)
 
+func GetUserGroupsOptionWithTeamID(teamID string) GetUserGroupsOption {
+	return func(params *GetUserGroupsParams) {
+		params.TeamID = teamID
+	}
+}
+
 // GetUserGroupsOptionIncludeCount include the number of users in each User Group (default: false)
 func GetUserGroupsOptionIncludeCount(b bool) GetUserGroupsOption {
 	return func(params *GetUserGroupsParams) {
@@ -149,6 +155,7 @@ func GetUserGroupsOptionIncludeUsers(b bool) GetUserGroupsOption {
 
 // GetUserGroupsParams contains arguments for GetUserGroups method call
 type GetUserGroupsParams struct {
+	TeamID          string
 	IncludeCount    bool
 	IncludeDisabled bool
 	IncludeUsers    bool
@@ -169,6 +176,9 @@ func (api *Client) GetUserGroupsContext(ctx context.Context, options ...GetUserG
 
 	values := url.Values{
 		"token": {api.token},
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 	if params.IncludeCount {
 		values.Add("include_count", "true")
