@@ -210,30 +210,28 @@ func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogPar
 	return response.Logins, &response.Paging, nil
 }
 
+type GetBillableInfoParams struct {
+	User   string
+	TeamID string
+}
+
 // GetBillableInfo ...
-func (api *Client) GetBillableInfo(user string) (map[string]BillingActive, error) {
-	return api.GetBillableInfoContext(context.Background(), user)
+func (api *Client) GetBillableInfo(params GetBillableInfoParams) (map[string]BillingActive, error) {
+	return api.GetBillableInfoContext(context.Background(), params)
 }
 
 // GetBillableInfoContext ...
-func (api *Client) GetBillableInfoContext(ctx context.Context, user string) (map[string]BillingActive, error) {
+func (api *Client) GetBillableInfoContext(ctx context.Context, params GetBillableInfoParams) (map[string]BillingActive, error) {
 	values := url.Values{
 		"token": {api.token},
-		"user":  {user},
 	}
 
-	return api.billableInfoRequest(ctx, "team.billableInfo", values)
-}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
 
-// GetBillableInfoForTeam returns the billing_active status of all users on the team.
-func (api *Client) GetBillableInfoForTeam() (map[string]BillingActive, error) {
-	return api.GetBillableInfoForTeamContext(context.Background())
-}
-
-// GetBillableInfoForTeamContext returns the billing_active status of all users on the team with a custom context
-func (api *Client) GetBillableInfoForTeamContext(ctx context.Context) (map[string]BillingActive, error) {
-	values := url.Values{
-		"token": {api.token},
+	if params.User != "" {
+		values.Add("user", params.User)
 	}
 
 	return api.billableInfoRequest(ctx, "team.billableInfo", values)
