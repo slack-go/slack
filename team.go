@@ -74,8 +74,9 @@ type BillingActive struct {
 
 // AccessLogParameters contains all the parameters necessary (including the optional ones) for a GetAccessLogs() request
 type AccessLogParameters struct {
-	Count int
-	Page  int
+	TeamID string
+	Count  int
+	Page   int
 }
 
 // NewAccessLogParameters provides an instance of AccessLogParameters with all the sane default values set
@@ -191,6 +192,9 @@ func (api *Client) GetAccessLogs(params AccessLogParameters) ([]Login, *Paging, 
 func (api *Client) GetAccessLogsContext(ctx context.Context, params AccessLogParameters) ([]Login, *Paging, error) {
 	values := url.Values{
 		"token": {api.token},
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 	if params.Count != DEFAULT_LOGINS_COUNT {
 		values.Add("count", strconv.Itoa(params.Count))
