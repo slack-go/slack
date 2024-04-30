@@ -517,7 +517,9 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 	values := url.Values{
 		"token":      {api.token},
 		"files":      {string(requestBytes)},
-		"channel_id": {params.channel},
+	}
+	if params.channel != "" {
+		values.Add("channels", params.channel)
 	}
 
 	if params.initialComment != "" {
@@ -556,9 +558,9 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 	if params.FileSize == 0 {
 		return nil, fmt.Errorf("file.upload.v2: file size cannot be 0")
 	}
-	if params.Channel == "" {
-		return nil, fmt.Errorf("file.upload.v2: channel cannot be empty")
-	}
+	// if params.Channel == "" {
+	// 	return nil, fmt.Errorf("file.upload.v2: channel cannot be empty")
+	// }
 	u, err := api.getUploadURLExternal(ctx, getUploadURLExternalParameters{
 		altText:     params.AltTxt,
 		fileName:    params.Filename,
