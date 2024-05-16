@@ -807,6 +807,7 @@ func (api *Client) GetPermalinkContext(ctx context.Context, params *PermalinkPar
 
 type GetScheduledMessagesParameters struct {
 	Channel string
+	TeamID  string
 	Cursor  string
 	Latest  string
 	Limit   int
@@ -825,6 +826,9 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 	}
 	if params.Channel != "" {
 		values.Add("channel", params.Channel)
+	}
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
