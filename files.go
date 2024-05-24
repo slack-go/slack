@@ -504,9 +504,8 @@ func (api *Client) getUploadURLExternal(ctx context.Context, params getUploadURL
 func (api *Client) uploadToURL(ctx context.Context, params uploadToURLParameters) (err error) {
 	values := url.Values{}
 	if params.Content != "" {
-		values.Add("content", params.Content)
-		values.Add("token", api.token)
-		err = postForm(ctx, api.httpclient, params.UploadURL, values, nil, api)
+		contentReader := strings.NewReader(params.Content)
+		err = postWithMultipartResponse(ctx, api.httpclient, params.UploadURL, params.Filename, "file", api.token, values, contentReader, nil, api)
 	} else if params.File != "" {
 		err = postLocalWithMultipartResponse(ctx, api.httpclient, params.UploadURL, params.File, "file", api.token, values, nil, api)
 	} else if params.Reader != nil {
