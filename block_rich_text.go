@@ -140,6 +140,7 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 	var raw struct {
 		RawElements []json.RawMessage `json:"elements"`
 		Style       RichTextListStyle `json:"style"`
+		Indent      int               `json:"indent"`
 	}
 	if string(b) == "{}" {
 		return nil
@@ -171,6 +172,7 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 		Type:     RTEList,
 		Style:    raw.Style,
 		Elements: elems,
+		Indent:   raw.Indent,
 	}
 	return nil
 }
