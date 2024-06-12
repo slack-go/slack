@@ -80,13 +80,13 @@ type OpenIDConnectResponse struct {
 }
 
 // GetOAuthToken retrieves an AccessToken
-func GetOAuthToken(client httpClient, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, err error) {
-	return GetOAuthTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetOAuthToken(clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, err error) {
+	return api.GetOAuthTokenContext(context.Background(), clientID, clientSecret, code, redirectURI)
 }
 
 // GetOAuthTokenContext retrieves an AccessToken with a custom context
-func GetOAuthTokenContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, err error) {
-	response, err := GetOAuthResponseContext(ctx, client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetOAuthTokenContext(ctx context.Context, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, err error) {
+	response, err := api.GetOAuthResponseContext(ctx, clientID, clientSecret, code, redirectURI)
 	if err != nil {
 		return "", "", err
 	}
@@ -94,13 +94,13 @@ func GetOAuthTokenContext(ctx context.Context, client httpClient, clientID, clie
 }
 
 // GetBotOAuthToken retrieves top-level and bot AccessToken - https://api.slack.com/legacy/oauth#bot_user_access_tokens
-func GetBotOAuthToken(client httpClient, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, bot OAuthResponseBot, err error) {
-	return GetBotOAuthTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetBotOAuthToken(clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, bot OAuthResponseBot, err error) {
+	return api.GetBotOAuthTokenContext(context.Background(), clientID, clientSecret, code, redirectURI)
 }
 
 // GetBotOAuthTokenContext retrieves top-level and bot AccessToken with a custom context
-func GetBotOAuthTokenContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, bot OAuthResponseBot, err error) {
-	response, err := GetOAuthResponseContext(ctx, client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetBotOAuthTokenContext(ctx context.Context, clientID, clientSecret, code, redirectURI string) (accessToken string, scope string, bot OAuthResponseBot, err error) {
+	response, err := api.GetOAuthResponseContext(ctx, clientID, clientSecret, code, redirectURI)
 	if err != nil {
 		return "", "", OAuthResponseBot{}, err
 	}
@@ -108,12 +108,12 @@ func GetBotOAuthTokenContext(ctx context.Context, client httpClient, clientID, c
 }
 
 // GetOAuthResponse retrieves OAuth response
-func GetOAuthResponse(client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OAuthResponse, err error) {
-	return GetOAuthResponseContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetOAuthResponse(clientID, clientSecret, code, redirectURI string) (resp *OAuthResponse, err error) {
+	return api.GetOAuthResponseContext(context.Background(), clientID, clientSecret, code, redirectURI)
 }
 
 // GetOAuthResponseContext retrieves OAuth response with custom context
-func GetOAuthResponseContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OAuthResponse, err error) {
+func (api *Client) GetOAuthResponseContext(ctx context.Context, clientID, clientSecret, code, redirectURI string) (resp *OAuthResponse, err error) {
 	values := url.Values{
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
@@ -121,19 +121,19 @@ func GetOAuthResponseContext(ctx context.Context, client httpClient, clientID, c
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthResponse{}
-	if err = postForm(ctx, client, APIURL+"oauth.access", values, response, discard{}); err != nil {
+	if err = api.postMethod(ctx, "oauth.access", values, response); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
 }
 
 // GetOAuthV2Response gets a V2 OAuth access token response - https://api.slack.com/methods/oauth.v2.access
-func GetOAuthV2Response(client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OAuthV2Response, err error) {
-	return GetOAuthV2ResponseContext(context.Background(), client, clientID, clientSecret, code, redirectURI)
+func (api *Client) GetOAuthV2Response(clientID, clientSecret, code, redirectURI string) (resp *OAuthV2Response, err error) {
+	return api.GetOAuthV2ResponseContext(context.Background(), clientID, clientSecret, code, redirectURI)
 }
 
 // GetOAuthV2ResponseContext with a context, gets a V2 OAuth access token response
-func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OAuthV2Response, err error) {
+func (api *Client) GetOAuthV2ResponseContext(ctx context.Context, clientID, clientSecret, code, redirectURI string) (resp *OAuthV2Response, err error) {
 	values := url.Values{
 		"client_id":     {clientID},
 		"client_secret": {clientSecret},
@@ -141,7 +141,7 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthV2Response{}
-	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+	if err = api.postMethod(ctx, "oauth.v2.access", values, response); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
