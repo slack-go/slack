@@ -527,7 +527,7 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 	}
 
 	if params.channel != "" {
-		values.Add("channels", params.channel)
+		values.Add("channel_id", params.channel)
 	}
 	if params.initialComment != "" {
 		values.Add("initial_comment", params.initialComment)
