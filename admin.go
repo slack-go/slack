@@ -243,3 +243,45 @@ func (api *Client) ConversationsSetTeamsContext(ctx context.Context, channelID s
 
 	return nil
 }
+
+// https://api.slack.com/methods/admin.conversations.convertToPrivate
+// ConversationsConvertToPrivate converts a public channel to a private channel, can only be used
+// with an enterprise org-level user scope.
+func (api *Client) ConversationsConvertToPrivateContext(ctx context.Context, channelID string) error {
+	values := url.Values{
+		"token":      []string{api.token},
+		"channel_id": []string{channelID},
+	}
+
+	response := &SlackResponse{}
+	err := api.postMethod(ctx, "admin.conversations.convertToPrivate", values, response)
+	if err != nil {
+		return err
+	}
+	if err := response.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// https://api.slack.com/methods/admin.conversations.convertToPrivate
+// ConversationsConvertToPublic converts a private channel to a public channel, can only be used
+// with an enterprise org-level user scope.
+func (api *Client) ConversationsConvertToPublicContext(ctx context.Context, channelID string) error {
+	values := url.Values{
+		"token":      []string{api.token},
+		"channel_id": []string{channelID},
+	}
+
+	response := &SlackResponse{}
+	err := api.postMethod(ctx, "admin.conversations.convertToPublic", values, response)
+	if err != nil {
+		return err
+	}
+	if err := response.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
