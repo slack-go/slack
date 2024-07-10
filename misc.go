@@ -83,7 +83,7 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 		return err
 	}
 
-	var bearer = "Bearer " + token
+	bearer := "Bearer " + token
 	req.Header.Add("Authorization", bearer)
 
 	resp, err := client.Do(req)
@@ -181,7 +181,6 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 	req.Header.Add("Content-Type", wr.FormDataContentType())
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	resp, err := client.Do(req)
-
 	if err != nil {
 		return err
 	}
@@ -331,9 +330,7 @@ func newTextParser(dst interface{}) responseParser {
 
 func newContentTypeParser(dst interface{}) responseParser {
 	return func(req *http.Response) (err error) {
-		var (
-			ctype string
-		)
+		var ctype string
 
 		if ctype, _, err = mime.ParseMediaType(req.Header.Get("Content-Type")); err != nil {
 			return err
