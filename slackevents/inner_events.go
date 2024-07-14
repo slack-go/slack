@@ -649,6 +649,51 @@ type SharedInvite struct {
 	IsExternalLimited bool            `json:"is_external_limited,omitempty"`
 }
 
+// FunctionExecutedEvent is sent if a function was executed - https://api.slack.com/events/function_executed
+type FunctionExecutedEvent struct {
+	Type                string            `json:"type"`
+	Function            Function          `json:"function"`
+	Inputs              map[string]string `json:"inputs"`
+	FunctionExecutionID string            `json:"function_execution_id"`
+	WorkflowExecutionID string            `json:"workflow_execution_id"`
+	EventTs             string            `json:"event_ts"`
+	BotAccessToken      string            `json:"bot_access_token"`
+}
+
+// Function is a struct for functions in FunctionExecuted events
+type Function struct {
+	Id               string             `json:"id"`
+	CallbackID       string             `json:"callback_id"`
+	Title            string             `json:"title"`
+	Description      string             `json:"description"`
+	Type             string             `json:"type"`
+	InputParameters  []InputParameters  `json:"input_parameters"`
+	OutputParameters []OutputParameters `json:"output_parameters"`
+	AppId            string             `json:"app_id"`
+	DateCreated      int                `json:"date_created"`
+	DateReleased     int                `json:"date_released"`
+	DateUpdated      int                `json:"date_updated"`
+	DateDeleted      int                `json:"date_deleted"`
+	FormEnabled      bool               `json:"form_enabled"`
+}
+
+// InputParameters is a struct for input parameters in Function events
+type InputParameters struct {
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Title       string `json:"title"`
+	IsRequired  bool   `json:"is_required"`
+}
+
+// OutputParameters is a struct for output parameters in Function events
+type OutputParameters struct {
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Title       string `json:"title"`
+}
+
 type EventsAPIType string
 
 const (
@@ -738,6 +783,8 @@ const (
 	TeamAccessRevoked = EventsAPIType("team_access_revoked")
 	// UserProfileChanged is sent if a user's profile information has changed.
 	UserProfileChanged = EventsAPIType("user_profile_changed")
+	// FunctionExecuted is sent if a function was executed
+	FunctionExecuted = EventsAPIType("function_executed")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -787,4 +834,5 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamAccessGranted:           TeamAccessGrantedEvent{},
 	TeamAccessRevoked:           TeamAccessRevokedEvent{},
 	UserProfileChanged:          UserProfileChangedEvent{},
+	FunctionExecuted:            FunctionExecutedEvent{},
 }
