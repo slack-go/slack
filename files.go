@@ -522,11 +522,13 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 		return nil, err
 	}
 	values := url.Values{
-		"token":      {api.token},
-		"files":      {string(requestBytes)},
-		"channel_id": {params.channel},
+		"token": {api.token},
+		"files": {string(requestBytes)},
 	}
 
+	if params.channel != "" {
+		values.Add("channel_id", params.channel)
+	}
 	if params.initialComment != "" {
 		values.Add("initial_comment", params.initialComment)
 	}
@@ -555,7 +557,7 @@ func (api *Client) UploadFileV2(params UploadFileV2Parameters) (*FileSummary, er
 // UploadFileV2 uploads file to a given slack channel using 3 steps with a custom context -
 //  1. Get an upload URL using files.getUploadURLExternal API
 //  2. Send the file as a post to the URL provided by slack
-//  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
+//  3. Complete the upload and if a channel is specified, post it to the specified channel using files.completeUploadExternal
 func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2Parameters) (file *FileSummary, err error) {
 	if params.Filename == "" {
 		return nil, fmt.Errorf("file.upload.v2: filename cannot be empty")
@@ -563,9 +565,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 	if params.FileSize == 0 {
 		return nil, fmt.Errorf("file.upload.v2: file size cannot be 0")
 	}
-	if params.Channel == "" {
-		return nil, fmt.Errorf("file.upload.v2: channel cannot be empty")
-	}
+
 	u, err := api.getUploadURLExternal(ctx, getUploadURLExternalParameters{
 		altText:     params.AltTxt,
 		fileName:    params.Filename,

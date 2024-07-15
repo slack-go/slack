@@ -272,4 +272,13 @@ func TestUploadFileV2(t *testing.T) {
 	if _, err := api.UploadFileV2(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
+
+	reader = bytes.NewBufferString("test no channel")
+	params = UploadFileV2Parameters{
+		Filename: "test.txt",
+		Reader:   reader,
+		FileSize: 15}
+	if _, err := api.UploadFileV2(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
 }
