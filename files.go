@@ -355,13 +355,15 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 }
 
 // UploadFile uploads a file.
-// For more details, see UploadFileContext documentation.
+// DEPRECATED: Use UploadFileV2 instead. This will stop functioning on March 11, 2025.
+// For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	return api.UploadFileContext(context.Background(), params)
 }
 
 // UploadFileContext uploads a file and setting a custom context.
-// For more details, see: https://api.slack.com/methods/files.upload
+// DEPRECATED: Use UploadFileV2Context instead. This will stop functioning on March 11, 2025.
+// For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
 	// investigation needed, but for now this will do.
@@ -535,11 +537,13 @@ func (api *Client) completeUploadExternal(ctx context.Context, fileID string, pa
 		return nil, err
 	}
 	values := url.Values{
-		"token":      {api.token},
-		"files":      {string(requestBytes)},
-		"channel_id": {params.channel},
+		"token": {api.token},
+		"files": {string(requestBytes)},
 	}
 
+	if params.channel != "" {
+		values.Add("channel_id", params.channel)
+	}
 	if params.initialComment != "" {
 		values.Add("initial_comment", params.initialComment)
 	}
@@ -576,9 +580,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 	if params.FileSize == 0 {
 		return nil, fmt.Errorf("file.upload.v2: file size cannot be 0")
 	}
-	if params.Channel == "" {
-		return nil, fmt.Errorf("file.upload.v2: channel cannot be empty")
-	}
+
 	u, err := api.getUploadURLExternal(ctx, getUploadURLExternalParameters{
 		altText:     params.AltTxt,
 		fileName:    params.Filename,
