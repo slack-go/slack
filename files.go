@@ -351,12 +351,16 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 	return response.Files, &params, nil
 }
 
-// UploadFile uploads a file
+// UploadFile uploads a file.
+// DEPRECATED: Use UploadFileV2 instead. This will stop functioning on March 11, 2025.
+// For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	return api.UploadFileContext(context.Background(), params)
 }
 
-// UploadFileContext uploads a file and setting a custom context
+// UploadFileContext uploads a file and setting a custom context.
+// DEPRECATED: Use UploadFileV2Context instead. This will stop functioning on March 11, 2025.
+// For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
 	// investigation needed, but for now this will do.
