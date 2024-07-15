@@ -84,12 +84,14 @@ type responseMetaData struct {
 	NextCursor string `json:"next_cursor"`
 }
 
-// GetUsersInConversation returns the list of users in a conversation
+// GetUsersInConversation returns the list of users in a conversation.
+// For more details, see GetUsersInConversationContext documentation.
 func (api *Client) GetUsersInConversation(params *GetUsersInConversationParameters) ([]string, string, error) {
 	return api.GetUsersInConversationContext(context.Background(), params)
 }
 
-// GetUsersInConversationContext returns the list of users in a conversation with a custom context
+// GetUsersInConversationContext returns the list of users in a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.members
 func (api *Client) GetUsersInConversationContext(ctx context.Context, params *GetUsersInConversationParameters) ([]string, string, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -119,12 +121,14 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 	return response.Members, response.ResponseMetaData.NextCursor, nil
 }
 
-// GetConversationsForUser returns the list conversations for a given user
+// GetConversationsForUser returns the list conversations for a given user.
+// For more details, see GetConversationsForUserContext documentation.
 func (api *Client) GetConversationsForUser(params *GetConversationsForUserParameters) (channels []Channel, nextCursor string, err error) {
 	return api.GetConversationsForUserContext(context.Background(), params)
 }
 
 // GetConversationsForUserContext returns the list conversations for a given user with a custom context
+// Slack API docs: https://api.slack.com/methods/users.conversations
 func (api *Client) GetConversationsForUserContext(ctx context.Context, params *GetConversationsForUserParameters) (channels []Channel, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
@@ -161,12 +165,14 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	return response.Channels, response.ResponseMetaData.NextCursor, response.Err()
 }
 
-// ArchiveConversation archives a conversation
+// ArchiveConversation archives a conversation.
+// For more details, see ArchiveConversationContext documentation.
 func (api *Client) ArchiveConversation(channelID string) error {
 	return api.ArchiveConversationContext(context.Background(), channelID)
 }
 
-// ArchiveConversationContext archives a conversation with a custom context
+// ArchiveConversationContext archives a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.archive
 func (api *Client) ArchiveConversationContext(ctx context.Context, channelID string) error {
 	values := url.Values{
 		"token":   {api.token},
@@ -182,12 +188,14 @@ func (api *Client) ArchiveConversationContext(ctx context.Context, channelID str
 	return response.Err()
 }
 
-// UnArchiveConversation reverses conversation archival
+// UnArchiveConversation reverses conversation archival.
+// For more details, see UnArchiveConversationContext documentation.
 func (api *Client) UnArchiveConversation(channelID string) error {
 	return api.UnArchiveConversationContext(context.Background(), channelID)
 }
 
-// UnArchiveConversationContext reverses conversation archival with a custom context
+// UnArchiveConversationContext reverses conversation archival with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.unarchive
 func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID string) error {
 	values := url.Values{
 		"token":   {api.token},
@@ -202,12 +210,14 @@ func (api *Client) UnArchiveConversationContext(ctx context.Context, channelID s
 	return response.Err()
 }
 
-// SetTopicOfConversation sets the topic for a conversation
+// SetTopicOfConversation sets the topic for a conversation.
+// For more details, see SetTopicOfConversationContext documentation.
 func (api *Client) SetTopicOfConversation(channelID, topic string) (*Channel, error) {
 	return api.SetTopicOfConversationContext(context.Background(), channelID, topic)
 }
 
-// SetTopicOfConversationContext sets the topic for a conversation with a custom context
+// SetTopicOfConversationContext sets the topic for a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.setTopic
 func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID, topic string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -226,12 +236,14 @@ func (api *Client) SetTopicOfConversationContext(ctx context.Context, channelID,
 	return response.Channel, response.Err()
 }
 
-// SetPurposeOfConversation sets the purpose for a conversation
+// SetPurposeOfConversation sets the purpose for a conversation.
+// For more details, see SetPurposeOfConversationContext documentation.
 func (api *Client) SetPurposeOfConversation(channelID, purpose string) (*Channel, error) {
 	return api.SetPurposeOfConversationContext(context.Background(), channelID, purpose)
 }
 
-// SetPurposeOfConversationContext sets the purpose for a conversation with a custom context
+// SetPurposeOfConversationContext sets the purpose for a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.setPurpose
 func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelID, purpose string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -251,12 +263,14 @@ func (api *Client) SetPurposeOfConversationContext(ctx context.Context, channelI
 	return response.Channel, response.Err()
 }
 
-// RenameConversation renames a conversation
+// RenameConversation renames a conversation.
+// For more details, see RenameConversationContext documentation.
 func (api *Client) RenameConversation(channelID, channelName string) (*Channel, error) {
 	return api.RenameConversationContext(context.Background(), channelID, channelName)
 }
 
-// RenameConversationContext renames a conversation with a custom context
+// RenameConversationContext renames a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.rename
 func (api *Client) RenameConversationContext(ctx context.Context, channelID, channelName string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -276,12 +290,14 @@ func (api *Client) RenameConversationContext(ctx context.Context, channelID, cha
 	return response.Channel, response.Err()
 }
 
-// InviteUsersToConversation invites users to a channel
+// InviteUsersToConversation invites users to a channel.
+// For more details, see InviteUsersToConversation documentation.
 func (api *Client) InviteUsersToConversation(channelID string, users ...string) (*Channel, error) {
 	return api.InviteUsersToConversationContext(context.Background(), channelID, users...)
 }
 
-// InviteUsersToConversationContext invites users to a channel with a custom context
+// InviteUsersToConversationContext invites users to a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.invite
 func (api *Client) InviteUsersToConversationContext(ctx context.Context, channelID string, users ...string) (*Channel, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -301,22 +317,26 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 	return response.Channel, response.Err()
 }
 
-// InviteSharedEmailsToConversation invites users to a shared channels by email
+// InviteSharedEmailsToConversation invites users to a shared channels by email.
+// For more details, see InviteSharedEmailsToConversationContext documentation.
 func (api *Client) InviteSharedEmailsToConversation(channelID string, emails ...string) (string, bool, error) {
 	return api.inviteSharedToConversationHelper(context.Background(), channelID, emails, nil)
 }
 
-// InviteSharedEmailsToConversationContext invites users to a shared channels by email using context
+// InviteSharedEmailsToConversationContext invites users to a shared channels by email using context.
+// For more details, see inviteSharedToConversationHelper documentation.
 func (api *Client) InviteSharedEmailsToConversationContext(ctx context.Context, channelID string, emails ...string) (string, bool, error) {
 	return api.inviteSharedToConversationHelper(ctx, channelID, emails, nil)
 }
 
-// InviteSharedUserIDsToConversation invites users to a shared channels by user id
+// InviteSharedUserIDsToConversation invites users to a shared channels by user id.
+// For more details, see InviteSharedUserIDsToConversationContext documentation.
 func (api *Client) InviteSharedUserIDsToConversation(channelID string, userIDs ...string) (string, bool, error) {
 	return api.inviteSharedToConversationHelper(context.Background(), channelID, nil, userIDs)
 }
 
-// InviteSharedUserIDsToConversationContext invites users to a shared channels by user id with context
+// InviteSharedUserIDsToConversationContext invites users to a shared channels by user id with context.
+// For more details, see inviteSharedToConversationHelper documentation.
 func (api *Client) InviteSharedUserIDsToConversationContext(ctx context.Context, channelID string, userIDs ...string) (string, bool, error) {
 	return api.inviteSharedToConversationHelper(ctx, channelID, nil, userIDs)
 }
@@ -324,6 +344,7 @@ func (api *Client) InviteSharedUserIDsToConversationContext(ctx context.Context,
 // inviteSharedToConversationHelper invites emails or userIDs to a channel with a custom context.
 // This is a helper function for InviteSharedEmailsToConversation and InviteSharedUserIDsToConversation.
 // It accepts either emails or userIDs, but not both.
+// Slack API docs: https://api.slack.com/methods/conversations.inviteShared
 func (api *Client) inviteSharedToConversationHelper(ctx context.Context, channelID string, emails []string, userIDs []string) (string, bool, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -348,12 +369,14 @@ func (api *Client) inviteSharedToConversationHelper(ctx context.Context, channel
 	return response.InviteID, response.IsLegacySharedChannel, response.Err()
 }
 
-// KickUserFromConversation removes a user from a conversation
+// KickUserFromConversation removes a user from a conversation.
+// For more details, see KickUserFromConversationContext documentation.
 func (api *Client) KickUserFromConversation(channelID string, user string) error {
 	return api.KickUserFromConversationContext(context.Background(), channelID, user)
 }
 
-// KickUserFromConversationContext removes a user from a conversation with a custom context
+// KickUserFromConversationContext removes a user from a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.kick
 func (api *Client) KickUserFromConversationContext(ctx context.Context, channelID string, user string) error {
 	values := url.Values{
 		"token":   {api.token},
@@ -370,12 +393,14 @@ func (api *Client) KickUserFromConversationContext(ctx context.Context, channelI
 	return response.Err()
 }
 
-// CloseConversation closes a direct message or multi-person direct message
+// CloseConversation closes a direct message or multi-person direct message.
+// For more details, see CloseConversationContext documentation.
 func (api *Client) CloseConversation(channelID string) (noOp bool, alreadyClosed bool, err error) {
 	return api.CloseConversationContext(context.Background(), channelID)
 }
 
-// CloseConversationContext closes a direct message or multi-person direct message with a custom context
+// CloseConversationContext closes a direct message or multi-person direct message with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.close
 func (api *Client) CloseConversationContext(ctx context.Context, channelID string) (noOp bool, alreadyClosed bool, err error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -401,12 +426,14 @@ type CreateConversationParams struct {
 	TeamID      string
 }
 
-// CreateConversation initiates a public or private channel-based conversation
+// CreateConversation initiates a public or private channel-based conversation.
+// For more details, see CreateConversationContext documentation.
 func (api *Client) CreateConversation(params CreateConversationParams) (*Channel, error) {
 	return api.CreateConversationContext(context.Background(), params)
 }
 
-// CreateConversationContext initiates a public or private channel-based conversation with a custom context
+// CreateConversationContext initiates a public or private channel-based conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.create
 func (api *Client) CreateConversationContext(ctx context.Context, params CreateConversationParams) (*Channel, error) {
 	values := url.Values{
 		"token":      {api.token},
@@ -431,12 +458,14 @@ type GetConversationInfoInput struct {
 	IncludeNumMembers bool
 }
 
-// GetConversationInfo retrieves information about a conversation
+// GetConversationInfo retrieves information about a conversation.
+// For more details, see GetConversationInfoContext documentation.
 func (api *Client) GetConversationInfo(input *GetConversationInfoInput) (*Channel, error) {
 	return api.GetConversationInfoContext(context.Background(), input)
 }
 
-// GetConversationInfoContext retrieves information about a conversation with a custom context
+// GetConversationInfoContext retrieves information about a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.info
 func (api *Client) GetConversationInfoContext(ctx context.Context, input *GetConversationInfoInput) (*Channel, error) {
 	if input == nil {
 		return nil, errors.New("GetConversationInfoInput must not be nil")
@@ -460,12 +489,14 @@ func (api *Client) GetConversationInfoContext(ctx context.Context, input *GetCon
 	return &response.Channel, response.Err()
 }
 
-// LeaveConversation leaves a conversation
+// LeaveConversation leaves a conversation.
+// For more details, see LeaveConversationContext documentation.
 func (api *Client) LeaveConversation(channelID string) (bool, error) {
 	return api.LeaveConversationContext(context.Background(), channelID)
 }
 
-// LeaveConversationContext leaves a conversation with a custom context
+// LeaveConversationContext leaves a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.leave
 func (api *Client) LeaveConversationContext(ctx context.Context, channelID string) (bool, error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -491,12 +522,14 @@ type GetConversationRepliesParameters struct {
 	IncludeAllMetadata bool
 }
 
-// GetConversationReplies retrieves a thread of messages posted to a conversation
+// GetConversationReplies retrieves a thread of messages posted to a conversation.
+// For more details, see GetConversationRepliesContext documentation.
 func (api *Client) GetConversationReplies(params *GetConversationRepliesParameters) (msgs []Message, hasMore bool, nextCursor string, err error) {
 	return api.GetConversationRepliesContext(context.Background(), params)
 }
 
-// GetConversationRepliesContext retrieves a thread of messages posted to a conversation with a custom context
+// GetConversationRepliesContext retrieves a thread of messages posted to a conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.replies
 func (api *Client) GetConversationRepliesContext(ctx context.Context, params *GetConversationRepliesParameters) (msgs []Message, hasMore bool, nextCursor string, err error) {
 	values := url.Values{
 		"token":   {api.token},
@@ -550,12 +583,14 @@ type GetConversationsParameters struct {
 	TeamID          string
 }
 
-// GetConversations returns the list of channels in a Slack team
+// GetConversations returns the list of channels in a Slack team.
+// For more details, see GetConversationsContext documentation.
 func (api *Client) GetConversations(params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
 	return api.GetConversationsContext(context.Background(), params)
 }
 
-// GetConversationsContext returns the list of channels in a Slack team with a custom context
+// GetConversationsContext returns the list of channels in a Slack team with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.list
 func (api *Client) GetConversationsContext(ctx context.Context, params *GetConversationsParameters) (channels []Channel, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
@@ -596,12 +631,14 @@ type OpenConversationParameters struct {
 	Users     []string
 }
 
-// OpenConversation opens or resumes a direct message or multi-person direct message
+// OpenConversation opens or resumes a direct message or multi-person direct message.
+// For more details, see OpenConversationContext documentation.
 func (api *Client) OpenConversation(params *OpenConversationParameters) (*Channel, bool, bool, error) {
 	return api.OpenConversationContext(context.Background(), params)
 }
 
-// OpenConversationContext opens or resumes a direct message or multi-person direct message with a custom context
+// OpenConversationContext opens or resumes a direct message or multi-person direct message with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.open
 func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConversationParameters) (*Channel, bool, bool, error) {
 	values := url.Values{
 		"token":     {api.token},
@@ -628,12 +665,14 @@ func (api *Client) OpenConversationContext(ctx context.Context, params *OpenConv
 	return response.Channel, response.NoOp, response.AlreadyOpen, response.Err()
 }
 
-// JoinConversation joins an existing conversation
+// JoinConversation joins an existing conversation.
+// For more details, see JoinConversationContext documentation.
 func (api *Client) JoinConversation(channelID string) (*Channel, string, []string, error) {
 	return api.JoinConversationContext(context.Background(), channelID)
 }
 
-// JoinConversationContext joins an existing conversation with a custom context
+// JoinConversationContext joins an existing conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.join
 func (api *Client) JoinConversationContext(ctx context.Context, channelID string) (*Channel, string, []string, error) {
 	values := url.Values{"token": {api.token}, "channel": {channelID}}
 	response := struct {
@@ -680,12 +719,14 @@ type GetConversationHistoryResponse struct {
 	Messages []Message `json:"messages"`
 }
 
-// GetConversationHistory joins an existing conversation
+// GetConversationHistory joins an existing conversation.
+// For more details, see GetConversationHistoryContext documentation.
 func (api *Client) GetConversationHistory(params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
 	return api.GetConversationHistoryContext(context.Background(), params)
 }
 
-// GetConversationHistoryContext joins an existing conversation with a custom context
+// GetConversationHistoryContext joins an existing conversation with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.history
 func (api *Client) GetConversationHistoryContext(ctx context.Context, params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
 	values := url.Values{"token": {api.token}, "channel": {params.ChannelID}}
 	if params.Cursor != "" {
@@ -721,12 +762,14 @@ func (api *Client) GetConversationHistoryContext(ctx context.Context, params *Ge
 	return &response, response.Err()
 }
 
-// MarkConversation sets the read mark of a conversation to a specific point
+// MarkConversation sets the read mark of a conversation to a specific point.
+// For more details, see MarkConversationContext documentation.
 func (api *Client) MarkConversation(channel, ts string) (err error) {
 	return api.MarkConversationContext(context.Background(), channel, ts)
 }
 
-// MarkConversationContext sets the read mark of a conversation to a specific point with a custom context
+// MarkConversationContext sets the read mark of a conversation to a specific point with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.mark
 func (api *Client) MarkConversationContext(ctx context.Context, channel, ts string) error {
 	values := url.Values{
 		"token":   {api.token},
