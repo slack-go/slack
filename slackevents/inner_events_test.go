@@ -1498,3 +1498,239 @@ func TestSharedChannelDeclined(t *testing.T) {
 	}
 
 }
+
+func TestChannelHistoryChangedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "channel_history_changed",
+			"latest": "1358877455.000010",
+			"ts": "1358877455.000008",
+			"event_ts": "1358877455.000011"
+		}
+	`)
+
+	var e ChannelHistoryChangedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "channel_history_changed" {
+		t.Errorf("type should be channel_history_changed, was %s", e.Type)
+	}
+	if e.Latest != "1358877455.000010" {
+		t.Errorf("latest should be 1358877455.000010, was %s", e.Latest)
+	}
+	if e.Ts != "1358877455.000008" {
+		t.Errorf("ts should be 1358877455.000008, was %s", e.Ts)
+	}
+	if e.EventTs != "1358877455.000011" {
+		t.Errorf("event_ts should be 1358877455.000011, was %s", e.EventTs)
+	}
+}
+
+func TestDndUpdatedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "dnd_updated",
+			"user": "U1234567890",
+			"dnd_status": {
+				"dnd_enabled": true,
+				"next_dnd_start_ts": 1624473600,
+				"next_dnd_end_ts": 1624516800,
+				"snooze_enabled": false
+			}
+		}
+	`)
+
+	var e DndUpdatedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "dnd_updated" {
+		t.Errorf("type should be dnd_updated, was %s", e.Type)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user should be U1234567890, was %s", e.User)
+	}
+	if !e.DndStatus.DndEnabled {
+		t.Errorf("dnd_enabled should be true, was %v", e.DndStatus.DndEnabled)
+	}
+	if e.DndStatus.NextDndStartTs != 1624473600 {
+		t.Errorf("next_dnd_start_ts should be 1624473600, was %d", e.DndStatus.NextDndStartTs)
+	}
+	if e.DndStatus.NextDndEndTs != 1624516800 {
+		t.Errorf("next_dnd_end_ts should be 1624516800, was %d", e.DndStatus.NextDndEndTs)
+	}
+	if e.DndStatus.SnoozeEnabled {
+		t.Errorf("snooze_enabled should be false, was %v", e.DndStatus.SnoozeEnabled)
+	}
+}
+
+func TestEmailDomainChangedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "email_domain_changed",
+			"email_domain": "example.com",
+			"event_ts": "1234567890.123456"
+		}
+	`)
+
+	var e EmailDomainChangedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "email_domain_changed" {
+		t.Errorf("type should be email_domain_changed, was %s", e.Type)
+	}
+	if e.EmailDomain != "example.com" {
+		t.Errorf("email_domain should be example.com, was %s", e.EmailDomain)
+	}
+	if e.EventTs != "1234567890.123456" {
+		t.Errorf("event_ts should be 1234567890.123456, was %s", e.EventTs)
+	}
+}
+
+func TestFileCommentAddedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "file_comment_added",
+			"comment": {
+				"id": "Fc1234567890",
+				"created": 1624473600,
+				"timestamp": 1624473600,
+				"user": "U1234567890",
+				"comment": "This is a comment"
+			},
+			"file": {
+				"id": "F1234567890"
+			}
+		}
+	`)
+
+	var e FileCommentAddedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "file_comment_added" {
+		t.Errorf("type should be file_comment_added, was %s", e.Type)
+	}
+	if e.Comment.ID != "Fc1234567890" {
+		t.Errorf("comment.id should be Fc1234567890, was %s", e.Comment.ID)
+	}
+	if e.Comment.Created != 1624473600 {
+		t.Errorf("comment.created should be 1624473600, was %d", e.Comment.Created)
+	}
+	if e.Comment.Timestamp != 1624473600 {
+		t.Errorf("comment.timestamp should be 1624473600, was %d", e.Comment.Timestamp)
+	}
+	if e.Comment.User != "U1234567890" {
+		t.Errorf("comment.user should be U1234567890, was %s", e.Comment.User)
+	}
+	if e.Comment.Comment != "This is a comment" {
+		t.Errorf("comment.comment should be 'This is a comment', was %s", e.Comment.Comment)
+	}
+	if e.File.ID != "F1234567890" {
+		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	}
+}
+
+func TestGroupCloseEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "group_close",
+			"user": "U1234567890",
+			"channel": "G1234567890"
+		}
+	`)
+
+	var e GroupCloseEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "group_close" {
+		t.Errorf("type should be group_close, was %s", e.Type)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user should be U1234567890, was %s", e.User)
+	}
+	if e.Channel != "G1234567890" {
+		t.Errorf("channel should be G1234567890, was %s", e.Channel)
+	}
+}
+
+func TestImCloseEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "im_close",
+			"user": "U1234567890",
+			"channel": "D1234567890"
+		}
+	`)
+
+	var e ImCloseEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "im_close" {
+		t.Errorf("type should be im_close, was %s", e.Type)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user should be U1234567890, was %s", e.User)
+	}
+	if e.Channel != "D1234567890" {
+		t.Errorf("channel should be D1234567890, was %s", e.Channel)
+	}
+}
+
+func TestImCreatedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "im_created",
+			"user": "U1234567890",
+			"channel": {
+				"id": "C12345678"
+			}
+		}
+	`)
+
+	var e ImCreatedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "im_created" {
+		t.Errorf("type should be im_created, was %s", e.Type)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user should be U1234567890, was %s", e.User)
+	}
+	if e.Channel.ID != "C12345678" {
+		t.Errorf("channel.id should be C12345678, was %s", e.Channel.ID)
+	}
+}
+
+func TestImHistoryChangedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+    		"type": "im_history_changed",
+    		"latest": "1358877455.000010",
+    		"ts": "1361482916.000003",
+    		"event_ts": "1361482916.000004"
+		}
+	`)
+
+	var e ImHistoryChangedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "im_history_changed" {
+		t.Errorf("type should be im_created, was %s", e.Type)
+	}
+	if e.Latest != "1358877455.000010" {
+		t.Errorf("latest should be 1358877455.000010, was %s", e.Latest)
+	}
+	if e.Ts != "1361482916.000003" {
+		t.Errorf("ts should be 1361482916.000003, was %s", e.Ts)
+	}
+	if e.EventTs != "1361482916.000004" {
+		t.Errorf("event_ts should be 1361482916.000004, was %s", e.EventTs)
+	}
+}

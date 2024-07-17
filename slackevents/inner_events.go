@@ -649,6 +649,229 @@ type SharedInvite struct {
 	IsExternalLimited bool            `json:"is_external_limited,omitempty"`
 }
 
+type AppRateLimitedEvent struct {
+	Type       string `json:"type"`
+	Token      string `json:"token"`
+	TeamID     string `json:"team_id"`
+	MinuteRate int    `json:"minute_rate"`
+	APIAppID   string `json:"api_app_id"`
+}
+
+type ChannelHistoryChangedEvent struct {
+	Type    string `json:"type"`
+	Latest  string `json:"latest"`
+	Ts      string `json:"ts"`
+	EventTs string `json:"event_ts"`
+}
+
+type CommandsChangedEvent struct {
+	Type    string `json:"type"`
+	EventTs string `json:"event_ts"`
+}
+
+type DndUpdatedEvent struct {
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	DndStatus struct {
+		DndEnabled     bool  `json:"dnd_enabled"`
+		NextDndStartTs int64 `json:"next_dnd_start_ts"`
+		NextDndEndTs   int64 `json:"next_dnd_end_ts"`
+		SnoozeEnabled  bool  `json:"snooze_enabled"`
+		SnoozeEndtime  int64 `json:"snooze_endtime"`
+	} `json:"dnd_status"`
+}
+
+type DndUpdatedUserEvent struct {
+	Type      string `json:"type"`
+	User      string `json:"user"`
+	DndStatus struct {
+		DndEnabled     bool  `json:"dnd_enabled"`
+		NextDndStartTs int64 `json:"next_dnd_start_ts"`
+		NextDndEndTs   int64 `json:"next_dnd_end_ts"`
+		SnoozeEnabled  bool  `json:"snooze_enabled"`
+		SnoozeEndtime  int64 `json:"snooze_endtime"`
+	} `json:"dnd_status"`
+}
+
+type EmailDomainChangedEvent struct {
+	Type        string `json:"type"`
+	EmailDomain string `json:"email_domain"`
+	EventTs     string `json:"event_ts"`
+}
+
+type FileCommentAddedEvent struct {
+	Type    string `json:"type"`
+	Comment struct {
+		ID        string `json:"id"`
+		Created   int64  `json:"created"`
+		Timestamp int64  `json:"timestamp"`
+		User      string `json:"user"`
+		Comment   string `json:"comment"`
+	} `json:"comment"`
+	File struct {
+		ID string `json:"id"`
+	} `json:"file"`
+}
+
+type FileCommentDeletedEvent struct {
+	Type    string `json:"type"`
+	Comment struct {
+		ID string `json:"id"`
+	} `json:"comment"`
+	File struct {
+		ID string `json:"id"`
+	} `json:"file"`
+}
+
+type FileCommentEditedEvent struct {
+	Type    string `json:"type"`
+	Comment struct {
+		ID        string `json:"id"`
+		Created   int64  `json:"created"`
+		Timestamp int64  `json:"timestamp"`
+		User      string `json:"user"`
+		Comment   string `json:"comment"`
+	} `json:"comment"`
+	File struct {
+		ID string `json:"id"`
+	} `json:"file"`
+}
+
+type GroupCloseEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
+}
+
+type GroupHistoryChangedEvent struct {
+	Type    string `json:"type"`
+	Latest  string `json:"latest"`
+	Ts      string `json:"ts"`
+	EventTs string `json:"event_ts"`
+}
+
+type GroupOpenEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
+}
+
+type ImCloseEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
+}
+
+type ImCreatedEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel struct {
+		ID string `json:"id"`
+	} `json:"channel"`
+}
+
+type ImHistoryChangedEvent struct {
+	Type    string `json:"type"`
+	Latest  string `json:"latest"`
+	Ts      string `json:"ts"`
+	EventTs string `json:"event_ts"`
+}
+
+type ImOpenEvent struct {
+	Type    string `json:"type"`
+	User    string `json:"user"`
+	Channel string `json:"channel"`
+}
+
+type SubTeam struct {
+	ID          string `json:"id"`
+	TeamID      string `json:"team_id"`
+	IsUsergroup bool   `json:"is_usergroup"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Handle      string `json:"handle"`
+	IsExternal  bool   `json:"is_external"`
+	DateCreate  int64  `json:"date_create"`
+	DateUpdate  int64  `json:"date_update"`
+	DateDelete  int64  `json:"date_delete"`
+	AutoType    string `json:"auto_type"`
+	CreatedBy   string `json:"created_by"`
+	UpdatedBy   string `json:"updated_by"`
+	DeletedBy   string `json:"deleted_by"`
+	Prefs       struct {
+		Channels []string `json:"channels"`
+		Groups   []string `json:"groups"`
+	} `json:"prefs"`
+	Users     []string `json:"users"`
+	UserCount int      `json:"user_count"`
+}
+
+type SubteamCreatedEvent struct {
+	Type    string  `json:"type"`
+	Subteam SubTeam `json:"subteam"`
+}
+
+type SubteamMembersChangedEvent struct {
+	Type         string   `json:"type"`
+	SubteamID    string   `json:"subteam_id"`
+	TeamID       string   `json:"team_id"`
+	DateUpdate   int64    `json:"date_update"`
+	AddedUsers   []string `json:"added_users"`
+	RemovedUsers []string `json:"removed_users"`
+}
+
+type SubteamSelfAddedEvent struct {
+	Type      string `json:"type"`
+	SubteamID string `json:"subteam_id"`
+}
+
+type SubteamSelfRemovedEvent struct {
+	Type      string `json:"type"`
+	SubteamID string `json:"subteam_id"`
+}
+
+type SubteamUpdatedEvent struct {
+	Type    string  `json:"type"`
+	Subteam SubTeam `json:"subteam"`
+}
+
+type TeamDomainChangeEvent struct {
+	Type   string `json:"type"`
+	URL    string `json:"url"`
+	Domain string `json:"domain"`
+}
+
+type TeamRenameEvent struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+}
+
+type UserChangeEvent struct {
+	Type string `json:"type"`
+	User struct {
+		ID      string `json:"id"`
+		TeamID  string `json:"team_id"`
+		Name    string `json:"name"`
+		Deleted bool   `json:"deleted"`
+		Profile struct {
+			AvatarHash            string `json:"avatar_hash"`
+			RealName              string `json:"real_name"`
+			DisplayName           string `json:"display_name"`
+			RealNameNormalized    string `json:"real_name_normalized"`
+			DisplayNameNormalized string `json:"display_name_normalized"`
+			Email                 string `json:"email"`
+			Image24               string `json:"image_24"`
+			Image32               string `json:"image_32"`
+			Image48               string `json:"image_48"`
+			Image72               string `json:"image_72"`
+			Image192              string `json:"image_192"`
+			Image512              string `json:"image_512"`
+		} `json:"profile"`
+		IsBot   bool  `json:"is_bot"`
+		Updated int64 `json:"updated"`
+	} `json:"user"`
+}
+
 type EventsAPIType string
 
 const (
@@ -738,6 +961,52 @@ const (
 	TeamAccessRevoked = EventsAPIType("team_access_revoked")
 	// UserProfileChanged is sent if a user's profile information has changed.
 	UserProfileChanged = EventsAPIType("user_profile_changed")
+	// ChannelHistoryChanged The history of a channel changed
+	ChannelHistoryChanged = EventsAPIType("channel_history_changed")
+	// CommandsChanged A command was changed
+	CommandsChanged = EventsAPIType("commands_changed")
+	// DndUpdated Do Not Disturb settings were updated
+	DndUpdated = EventsAPIType("dnd_updated")
+	// DndUpdatedUser Do Not Disturb settings for a user were updated
+	DndUpdatedUser = EventsAPIType("dnd_updated_user")
+	// EmailDomainChanged The email domain changed
+	EmailDomainChanged = EventsAPIType("email_domain_changed")
+	// FileCommentAdded A comment was added to a file
+	FileCommentAdded = EventsAPIType("file_comment_added")
+	// FileCommentDeleted A comment was deleted from a file
+	FileCommentDeleted = EventsAPIType("file_comment_deleted")
+	// FileCommentEdited A comment was edited on a file
+	FileCommentEdited = EventsAPIType("file_comment_edited")
+	// GroupClose A group was closed
+	GroupClose = EventsAPIType("group_close")
+	// GroupHistoryChanged The history of a group changed
+	GroupHistoryChanged = EventsAPIType("group_history_changed")
+	// GroupOpen A group was opened
+	GroupOpen = EventsAPIType("group_open")
+	// ImClose An instant message channel was closed
+	ImClose = EventsAPIType("im_close")
+	// ImCreated An instant message channel was created
+	ImCreated = EventsAPIType("im_created")
+	// ImHistoryChanged The history of an instant message channel changed
+	ImHistoryChanged = EventsAPIType("im_history_changed")
+	// ImOpen An instant message channel was opened
+	ImOpen = EventsAPIType("im_open")
+	// SubteamCreated A subteam was created
+	SubteamCreated = EventsAPIType("subteam_created")
+	// SubteamMembersChanged The members of a subteam changed
+	SubteamMembersChanged = EventsAPIType("subteam_members_changed")
+	// SubteamSelfAdded The current user was added to a subteam
+	SubteamSelfAdded = EventsAPIType("subteam_self_added")
+	// SubteamSelfRemoved The current user was removed from a subteam
+	SubteamSelfRemoved = EventsAPIType("subteam_self_removed")
+	// SubteamUpdated A subteam was updated
+	SubteamUpdated = EventsAPIType("subteam_updated")
+	// TeamDomainChange The team's domain changed
+	TeamDomainChange = EventsAPIType("team_domain_change")
+	// TeamRename The team was renamed
+	TeamRename = EventsAPIType("team_rename")
+	// UserChange A user object has changed
+	UserChange = EventsAPIType("user_change")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
@@ -787,4 +1056,27 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamAccessGranted:           TeamAccessGrantedEvent{},
 	TeamAccessRevoked:           TeamAccessRevokedEvent{},
 	UserProfileChanged:          UserProfileChangedEvent{},
+	AppRateLimited:              AppRateLimitedEvent{},
+	ChannelHistoryChanged:       ChannelHistoryChangedEvent{},
+	DndUpdated:                  DndUpdatedEvent{},
+	DndUpdatedUser:              DndUpdatedUserEvent{},
+	EmailDomainChanged:          EmailDomainChangedEvent{},
+	FileCommentAdded:            FileCommentAddedEvent{},
+	FileCommentDeleted:          FileCommentDeletedEvent{},
+	FileCommentEdited:           FileCommentEditedEvent{},
+	GroupClose:                  GroupCloseEvent{},
+	GroupHistoryChanged:         GroupHistoryChangedEvent{},
+	GroupOpen:                   GroupOpenEvent{},
+	ImClose:                     ImCloseEvent{},
+	ImCreated:                   ImCreatedEvent{},
+	ImHistoryChanged:            ImHistoryChangedEvent{},
+	ImOpen:                      ImOpenEvent{},
+	SubteamCreated:              SubteamCreatedEvent{},
+	SubteamMembersChanged:       SubteamMembersChangedEvent{},
+	SubteamSelfAdded:            SubteamSelfAddedEvent{},
+	SubteamSelfRemoved:          SubteamSelfRemovedEvent{},
+	SubteamUpdated:              SubteamUpdatedEvent{},
+	TeamDomainChange:            TeamDomainChangeEvent{},
+	TeamRename:                  TeamRenameEvent{},
+	UserChange:                  UserChangeEvent{},
 }
