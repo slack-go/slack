@@ -1734,3 +1734,423 @@ func TestImHistoryChangedEvent(t *testing.T) {
 		t.Errorf("event_ts should be 1361482916.000004, was %s", e.EventTs)
 	}
 }
+
+func TestImOpenEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "im_open",
+			"user": "U1234567890",
+			"channel": "D1234567890"
+		}
+	`)
+
+	var e ImOpenEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "im_open" {
+		t.Errorf("type should be im_open, was %s", e.Type)
+	}
+	if e.User != "U1234567890" {
+		t.Errorf("user should be U1234567890, was %s", e.User)
+	}
+	if e.Channel != "D1234567890" {
+		t.Errorf("channel should be D1234567890, was %s", e.Channel)
+	}
+}
+
+func TestSubteamCreatedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "subteam_created",
+			"subteam": {
+				"id": "S1234567890",
+				"team_id": "T1234567890",
+				"is_usergroup": true,
+				"name": "subteam",
+				"description": "A test subteam",
+				"handle": "subteam_handle",
+				"is_external": false,
+				"date_create": 1624473600,
+				"date_update": 1624473600,
+				"date_delete": 0,
+				"auto_type": "auto",
+				"created_by": "U1234567890",
+				"updated_by": "U1234567890",
+				"deleted_by": "",
+				"prefs": {
+					"channels": ["C1234567890"],
+					"groups": ["G1234567890"]
+				},
+				"users": ["U1234567890"],
+				"user_count": 1
+			}
+		}
+	`)
+
+	var e SubteamCreatedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "subteam_created" {
+		t.Errorf("type should be subteam_created, was %s", e.Type)
+	}
+	if e.Subteam.ID != "S1234567890" {
+		t.Errorf("subteam.id should be S1234567890, was %s", e.Subteam.ID)
+	}
+	if e.Subteam.TeamID != "T1234567890" {
+		t.Errorf("subteam.team_id should be T1234567890, was %s", e.Subteam.TeamID)
+	}
+	if !e.Subteam.IsUsergroup {
+		t.Errorf("subteam.is_usergroup should be true, was %v", e.Subteam.IsUsergroup)
+	}
+	if e.Subteam.Name != "subteam" {
+		t.Errorf("subteam.name should be subteam, was %s", e.Subteam.Name)
+	}
+	if e.Subteam.Description != "A test subteam" {
+		t.Errorf("subteam.description should be 'A test subteam', was %s", e.Subteam.Description)
+	}
+	if e.Subteam.Handle != "subteam_handle" {
+		t.Errorf("subteam.handle should be subteam_handle, was %s", e.Subteam.Handle)
+	}
+	if e.Subteam.IsExternal {
+		t.Errorf("subteam.is_external should be false, was %v", e.Subteam.IsExternal)
+	}
+	if e.Subteam.DateCreate != 1624473600 {
+		t.Errorf("subteam.date_create should be 1624473600, was %d", e.Subteam.DateCreate)
+	}
+	if e.Subteam.DateUpdate != 1624473600 {
+		t.Errorf("subteam.date_update should be 1624473600, was %d", e.Subteam.DateUpdate)
+	}
+	if e.Subteam.DateDelete != 0 {
+		t.Errorf("subteam.date_delete should be 0, was %d", e.Subteam.DateDelete)
+	}
+	if e.Subteam.AutoType != "auto" {
+		t.Errorf("subteam.auto_type should be auto, was %s", e.Subteam.AutoType)
+	}
+	if e.Subteam.CreatedBy != "U1234567890" {
+		t.Errorf("subteam.created_by should be U1234567890, was %s", e.Subteam.CreatedBy)
+	}
+	if e.Subteam.UpdatedBy != "U1234567890" {
+		t.Errorf("subteam.updated_by should be U1234567890, was %s", e.Subteam.UpdatedBy)
+	}
+	if e.Subteam.DeletedBy != "" {
+		t.Errorf("subteam.deleted_by should be empty, was %s", e.Subteam.DeletedBy)
+	}
+	if len(e.Subteam.Prefs.Channels) != 1 || e.Subteam.Prefs.Channels[0] != "C1234567890" {
+		t.Errorf("subteam.prefs.channels should contain C1234567890, was %v", e.Subteam.Prefs.Channels)
+	}
+	if len(e.Subteam.Prefs.Groups) != 1 || e.Subteam.Prefs.Groups[0] != "G1234567890" {
+		t.Errorf("subteam.prefs.groups should contain G1234567890, was %v", e.Subteam.Prefs.Groups)
+	}
+	if len(e.Subteam.Users) != 1 || e.Subteam.Users[0] != "U1234567890" {
+		t.Errorf("subteam.users should contain U1234567890, was %v", e.Subteam.Users)
+	}
+	if e.Subteam.UserCount != 1 {
+		t.Errorf("subteam.user_count should be 1, was %d", e.Subteam.UserCount)
+	}
+}
+
+func TestSubteamMembersChangedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "subteam_members_changed",
+			"subteam_id": "S1234567890",
+			"team_id": "T1234567890",
+			"date_update": 1624473600,
+			"added_users": ["U1234567890"],
+			"removed_users": ["U0987654321"]
+		}
+	`)
+
+	var e SubteamMembersChangedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "subteam_members_changed" {
+		t.Errorf("type should be subteam_members_changed, was %s", e.Type)
+	}
+	if e.SubteamID != "S1234567890" {
+		t.Errorf("subteam_id should be S1234567890, was %s", e.SubteamID)
+	}
+	if e.TeamID != "T1234567890" {
+		t.Errorf("team_id should be T1234567890, was %s", e.TeamID)
+	}
+	if e.DateUpdate != 1624473600 {
+		t.Errorf("date_update should be 1624473600, was %d", e.DateUpdate)
+	}
+	if len(e.AddedUsers) != 1 || e.AddedUsers[0] != "U1234567890" {
+		t.Errorf("subteam.users should contain U1234567890, was %v", e.AddedUsers)
+	}
+	if len(e.RemovedUsers) != 1 || e.RemovedUsers[0] != "U0987654321" {
+		t.Errorf("subteam.users should contain U0987654321, was %v", e.RemovedUsers)
+	}
+}
+
+func TestSubteamSelfAddedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "subteam_self_added",
+			"subteam_id": "S1234567890"
+		}
+	`)
+
+	var e SubteamSelfAddedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "subteam_self_added" {
+		t.Errorf("type should be subteam_self_added, was %s", e.Type)
+	}
+	if e.SubteamID != "S1234567890" {
+		t.Errorf("subteam_id should be S1234567890, was %s", e.SubteamID)
+	}
+}
+
+func TestSubteamSelfRemovedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "subteam_self_removed",
+			"subteam_id": "S1234567890"
+		}
+	`)
+
+	var e SubteamSelfRemovedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "subteam_self_removed" {
+		t.Errorf("type should be subteam_self_removed, was %s", e.Type)
+	}
+	if e.SubteamID != "S1234567890" {
+		t.Errorf("subteam_id should be S1234567890, was %s", e.SubteamID)
+	}
+}
+
+func TestSubteamUpdatedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "subteam_updated",
+			"subteam": {
+				"id": "S1234567890",
+				"team_id": "T1234567890",
+				"is_usergroup": true,
+				"name": "updated_subteam",
+				"description": "An updated test subteam",
+				"handle": "updated_subteam_handle",
+				"is_external": false,
+				"date_create": 1624473600,
+				"date_update": 1624473600,
+				"date_delete": 0,
+				"auto_type": "auto",
+				"created_by": "U1234567890",
+				"updated_by": "U1234567890",
+				"deleted_by": "",
+				"prefs": {
+					"channels": ["C1234567890"],
+					"groups": ["G1234567890"]
+				},
+				"users": ["U1234567890"],
+				"user_count": 1
+			}
+		}
+	`)
+
+	var e SubteamUpdatedEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "subteam_updated" {
+		t.Errorf("type should be subteam_updated, was %s", e.Type)
+	}
+	if e.Subteam.ID != "S1234567890" {
+		t.Errorf("subteam.id should be S1234567890, was %s", e.Subteam.ID)
+	}
+	if e.Subteam.TeamID != "T1234567890" {
+		t.Errorf("subteam.team_id should be T1234567890, was %s", e.Subteam.TeamID)
+	}
+	if !e.Subteam.IsUsergroup {
+		t.Errorf("subteam.is_usergroup should be true, was %v", e.Subteam.IsUsergroup)
+	}
+	if e.Subteam.Name != "updated_subteam" {
+		t.Errorf("subteam.name should be updated_subteam, was %s", e.Subteam.Name)
+	}
+	if e.Subteam.Description != "An updated test subteam" {
+		t.Errorf("subteam.description should be 'An updated test subteam', was %s", e.Subteam.Description)
+	}
+	if e.Subteam.Handle != "updated_subteam_handle" {
+		t.Errorf("subteam.handle should be updated_subteam_handle, was %s", e.Subteam.Handle)
+	}
+	if e.Subteam.IsExternal {
+		t.Errorf("subteam.is_external should be false, was %v", e.Subteam.IsExternal)
+	}
+	if e.Subteam.DateCreate != 1624473600 {
+		t.Errorf("subteam.date_create should be 1624473600, was %d", e.Subteam.DateCreate)
+	}
+	if e.Subteam.DateUpdate != 1624473600 {
+		t.Errorf("subteam.date_update should be 1624473600, was %d", e.Subteam.DateUpdate)
+	}
+	if e.Subteam.DateDelete != 0 {
+		t.Errorf("subteam.date_delete should be 0, was %d", e.Subteam.DateDelete)
+	}
+	if e.Subteam.AutoType != "auto" {
+		t.Errorf("subteam.auto_type should be auto, was %s", e.Subteam.AutoType)
+	}
+	if e.Subteam.CreatedBy != "U1234567890" {
+		t.Errorf("subteam.created_by should be U1234567890, was %s", e.Subteam.CreatedBy)
+	}
+	if e.Subteam.UpdatedBy != "U1234567890" {
+		t.Errorf("subteam.updated_by should be U1234567890, was %s", e.Subteam.UpdatedBy)
+	}
+	if e.Subteam.DeletedBy != "" {
+		t.Errorf("subteam.deleted_by should be empty, was %s", e.Subteam.DeletedBy)
+	}
+	if len(e.Subteam.Prefs.Channels) != 1 || e.Subteam.Prefs.Channels[0] != "C1234567890" {
+		t.Errorf("subteam.prefs.channels should contain C1234567890, was %v", e.Subteam.Prefs.Channels)
+	}
+	if len(e.Subteam.Prefs.Groups) != 1 || e.Subteam.Prefs.Groups[0] != "G1234567890" {
+		t.Errorf("subteam.prefs.groups should contain G1234567890, was %v", e.Subteam.Prefs.Groups)
+	}
+	if len(e.Subteam.Users) != 1 || e.Subteam.Users[0] != "U1234567890" {
+		t.Errorf("subteam.users should contain U1234567890, was %v", e.Subteam.Users)
+	}
+	if e.Subteam.UserCount != 1 {
+		t.Errorf("subteam.user_count should be 1, was %d", e.Subteam.UserCount)
+	}
+}
+
+func TestTeamDomainChangeEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "team_domain_change",
+			"url": "https://newdomain.slack.com",
+			"domain": "newdomain"
+		}
+	`)
+
+	var e TeamDomainChangeEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "team_domain_change" {
+		t.Errorf("type should be team_domain_change, was %s", e.Type)
+	}
+	if e.URL != "https://newdomain.slack.com" {
+		t.Errorf("url should be https://newdomain.slack.com, was %s", e.URL)
+	}
+	if e.Domain != "newdomain" {
+		t.Errorf("domain should be newdomain, was %s", e.Domain)
+	}
+}
+
+func TestTeamRenameEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "team_rename",
+			"name": "new_team_name"
+		}
+	`)
+
+	var e TeamRenameEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "team_rename" {
+		t.Errorf("type should be team_rename, was %s", e.Type)
+	}
+	if e.Name != "new_team_name" {
+		t.Errorf("name should be new_team_name, was %s", e.Name)
+	}
+}
+
+func TestUserChangeEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "user_change",
+			"user": {
+				"id": "U1234567890",
+				"team_id": "T1234567890",
+				"name": "test_user",
+				"deleted": false,
+				"profile": {
+					"avatar_hash": "123456abcdef",
+					"real_name": "Test User",
+					"display_name": "TestUser",
+					"real_name_normalized": "Test User",
+					"display_name_normalized": "TestUser",
+					"email": "testuser@example.com",
+					"image_24": "https://example.com/image_24.jpg",
+					"image_32": "https://example.com/image_32.jpg",
+					"image_48": "https://example.com/image_48.jpg",
+					"image_72": "https://example.com/image_72.jpg",
+					"image_192": "https://example.com/image_192.jpg",
+					"image_512": "https://example.com/image_512.jpg"
+				},
+				"is_bot": false,
+				"updated": 1624473600
+			}
+		}
+	`)
+
+	var e UserChangeEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "user_change" {
+		t.Errorf("type should be user_change, was %s", e.Type)
+	}
+	if e.User.ID != "U1234567890" {
+		t.Errorf("user.id should be U1234567890, was %s", e.User.ID)
+	}
+	if e.User.TeamID != "T1234567890" {
+		t.Errorf("user.team_id should be T1234567890, was %s", e.User.TeamID)
+	}
+	if e.User.Name != "test_user" {
+		t.Errorf("user.name should be test_user, was %s", e.User.Name)
+	}
+	if e.User.Deleted {
+		t.Errorf("user.deleted should be false, was %v", e.User.Deleted)
+	}
+	if e.User.Profile.AvatarHash != "123456abcdef" {
+		t.Errorf("user.profile.avatar_hash should be 123456abcdef, was %s", e.User.Profile.AvatarHash)
+	}
+	if e.User.Profile.RealName != "Test User" {
+		t.Errorf("user.profile.real_name should be 'Test User', was %s", e.User.Profile.RealName)
+	}
+	if e.User.Profile.DisplayName != "TestUser" {
+		t.Errorf("user.profile.display_name should be 'TestUser', was %s", e.User.Profile.DisplayName)
+	}
+	if e.User.Profile.RealNameNormalized != "Test User" {
+		t.Errorf("user.profile.real_name_normalized should be 'Test User', was %s", e.User.Profile.RealNameNormalized)
+	}
+	if e.User.Profile.DisplayNameNormalized != "TestUser" {
+		t.Errorf("user.profile.display_name_normalized should be 'TestUser', was %s", e.User.Profile.DisplayNameNormalized)
+	}
+	if e.User.Profile.Email != "testuser@example.com" {
+		t.Errorf("user.profile.email should be 'testuser@example.com', was %s", e.User.Profile.Email)
+	}
+	if e.User.Profile.Image24 != "https://example.com/image_24.jpg" {
+		t.Errorf("user.profile.image_24 should be 'https://example.com/image_24.jpg', was %s", e.User.Profile.Image24)
+	}
+	if e.User.Profile.Image32 != "https://example.com/image_32.jpg" {
+		t.Errorf("user.profile.image_32 should be 'https://example.com/image_32.jpg', was %s", e.User.Profile.Image32)
+	}
+	if e.User.Profile.Image48 != "https://example.com/image_48.jpg" {
+		t.Errorf("user.profile.image_48 should be 'https://example.com/image_48.jpg', was %s", e.User.Profile.Image48)
+	}
+	if e.User.Profile.Image72 != "https://example.com/image_72.jpg" {
+		t.Errorf("user.profile.image_72 should be 'https://example.com/image_72.jpg', was %s", e.User.Profile.Image72)
+	}
+	if e.User.Profile.Image192 != "https://example.com/image_192.jpg" {
+		t.Errorf("user.profile.image_192 should be 'https://example.com/image_192.jpg', was %s", e.User.Profile.Image192)
+	}
+	if e.User.Profile.Image512 != "https://example.com/image_512.jpg" {
+		t.Errorf("user.profile.image_512 should be 'https://example.com/image_512.jpg', was %s", e.User.Profile.Image512)
+	}
+	if e.User.IsBot {
+		t.Errorf("user.is_bot should be false, was %v", e.User.IsBot)
+	}
+	if e.User.Updated != 1624473600 {
+		t.Errorf("user.updated should be 1624473600, was %d", e.User.Updated)
+	}
+}
