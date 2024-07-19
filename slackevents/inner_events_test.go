@@ -300,6 +300,12 @@ func TestMessageEvent(t *testing.T) {
 						"ts": "1355517524.000000"
 					}
 				},
+				"metadata": {
+					"event_type": "example",
+					"event_payload": {
+						"key": "value"
+					}
+				},
 				"previous_message": {
 					"text": "Live long and prospect."
 				}
