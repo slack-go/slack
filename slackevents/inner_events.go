@@ -276,6 +276,8 @@ type MessageEvent struct {
 	Blocks      slack.Blocks       `json:"blocks,omitempty"`
 	Attachments []slack.Attachment `json:"attachments,omitempty"`
 
+	Metadata slack.SlackMetadata `json:"metadata,omitempty"`
+
 	// Root is the message that was broadcast to the channel when the SubType is
 	// thread_broadcast. If this is not a thread_broadcast message event, this
 	// value is nil.
