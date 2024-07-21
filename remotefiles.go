@@ -247,9 +247,7 @@ func (api *Client) UpdateRemoteFile(fileID string, params RemoteFileParameters) 
 // Slack API docs: https://api.slack.com/methods/files.remote.update
 func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, params RemoteFileParameters) (remotefile *RemoteFile, err error) {
 	response := &remoteFileResponseFull{}
-	values := url.Values{
-		"token": {api.token},
-	}
+	values := url.Values{}
 	if fileID != "" {
 		values.Add("file", fileID)
 	}
@@ -271,6 +269,7 @@ func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, p
 	if params.PreviewImageReader != nil {
 		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", "preview.png", "preview_image", api.token, values, params.PreviewImageReader, response, api)
 	} else {
+		values.Add("token", api.token)
 		response, err = api.remoteFileRequest(ctx, "files.remote.update", values)
 	}
 
