@@ -314,7 +314,7 @@ type pinEvent struct {
 	HasPins        bool   `json:"has_pins,omitempty"`
 }
 
-type reactionEvent struct {
+type ReactionEvent struct {
 	Type           string `json:"type"`
 	User           string `json:"user"`
 	Reaction       string `json:"reaction"`
@@ -324,10 +324,10 @@ type reactionEvent struct {
 }
 
 // ReactionAddedEvent An reaction was added to a message - https://api.slack.com/events/reaction_added
-type ReactionAddedEvent reactionEvent
+type ReactionAddedEvent ReactionEvent
 
 // ReactionRemovedEvent An reaction was removed from a message - https://api.slack.com/events/reaction_removed
-type ReactionRemovedEvent reactionEvent
+type ReactionRemovedEvent ReactionEvent
 
 // PinAddedEvent An item was pinned to a channel - https://api.slack.com/events/pin_added
 type PinAddedEvent pinEvent
