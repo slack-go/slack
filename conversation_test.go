@@ -643,3 +643,19 @@ func TestMarkConversation(t *testing.T) {
 		return
 	}
 }
+
+func TestInviteShared(t *testing.T) {
+	http.HandleFunc("/conversations.inviteShared", okJSONHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	params := &InviteSharedParams{}
+	err := api.InviteShared("CXXXXXXXX", *params)
+	assert.EqualError(t, err, InvalidSharedInviteParamsError.Error())
+
+	params.Emails = []string{"fake@email.com", "another@email.com"}
+	err = api.InviteShared("CXXXXXXXX", *params)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
