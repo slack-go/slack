@@ -65,6 +65,17 @@ type Purpose struct {
 	LastSet JSONTime `json:"last_set"`
 }
 
+// Properties contains the Canvas associated to the channel.
+type Properties struct {
+	Canvas Canvas `json:"canvas"`
+}
+
+type Canvas struct {
+	FileId       string `json:"file_id"`
+	IsEmpty      bool   `json:"is_empty"`
+	QuipThreadId string `json:"quip_thread_id"`
+}
+
 type GetUsersInConversationParameters struct {
 	ChannelID string
 	Cursor    string
