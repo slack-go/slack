@@ -212,6 +212,32 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 		}
 		return innerEvent, nil
 	}
+
+	if e.Type == AppRateLimited {
+		appRateLimitedEvent := &EventsAPIAppRateLimited{}
+		err = json.Unmarshal(rawEvent, appRateLimitedEvent)
+		if err != nil {
+			return EventsAPIEvent{
+				"",
+				"",
+				"unmarshalling_error",
+				"",
+				"",
+				&slack.UnmarshallingErrorEvent{ErrorObj: err},
+				EventsAPIInnerEvent{},
+			}, err
+		}
+		return EventsAPIEvent{
+			e.Token,
+			e.TeamID,
+			e.Type,
+			e.APIAppID,
+			e.EnterpriseID,
+			appRateLimitedEvent,
+			EventsAPIInnerEvent{},
+		}, nil
+	}
+
 	urlVerificationEvent := &EventsAPIURLVerificationEvent{}
 	err = json.Unmarshal(rawEvent, urlVerificationEvent)
 	if err != nil {
