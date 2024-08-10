@@ -15,7 +15,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/slack-go/slack"
@@ -95,13 +95,13 @@ func verifySigningSecret(r *http.Request) error {
 		return err
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
 	// Need to use r.Body again when unmarshalling SlashCommand and InteractionCallback
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 	verifier.Write(body)
 	if err = verifier.Ensure(); err != nil {

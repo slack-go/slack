@@ -3,7 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -44,7 +44,7 @@ func (h *fileCommentHandler) handler(w http.ResponseWriter, r *http.Request) {
 type mockHTTPClient struct{}
 
 func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
-	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(`OK`))}, nil
+	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
 
 func TestSlack_GetFile(t *testing.T) {
