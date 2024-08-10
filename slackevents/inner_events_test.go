@@ -1565,6 +1565,40 @@ func TestDndUpdatedEvent(t *testing.T) {
 	}
 }
 
+func TestDndUpdatedUserEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+    		"type": "dnd_updated_user",
+    		"user": "U1234",
+    		"dnd_status": {
+        		"dnd_enabled": true,
+        		"next_dnd_start_ts": 1450387800,
+        		"next_dnd_end_ts": 1450423800
+    		}
+		}
+	`)
+
+	var e DndUpdatedUserEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
+	}
+	if e.Type != "dnd_updated_user" {
+		t.Errorf("type should be dnd_updated_user, was %s", e.Type)
+	}
+	if e.User != "U1234" {
+		t.Errorf("user should be U1234, was %s", e.User)
+	}
+	if !e.DndStatus.DndEnabled {
+		t.Errorf("dnd_enabled should be true, was %v", e.DndStatus.DndEnabled)
+	}
+	if e.DndStatus.NextDndStartTs != 1450387800 {
+		t.Errorf("next_dnd_start_ts should be 1450387800, was %d", e.DndStatus.NextDndStartTs)
+	}
+	if e.DndStatus.NextDndEndTs != 1450423800 {
+		t.Errorf("next_dnd_end_ts should be 1450423800, was %d", e.DndStatus.NextDndEndTs)
+	}
+}
+
 func TestEmailDomainChangedEvent(t *testing.T) {
 	rawE := []byte(`
 		{
@@ -1589,47 +1623,52 @@ func TestEmailDomainChangedEvent(t *testing.T) {
 	}
 }
 
-func TestFileCommentAddedEvent(t *testing.T) {
+func TestGroupHistoryChangedEvent(t *testing.T) {
 	rawE := []byte(`
 		{
-			"type": "file_comment_added",
-			"comment": {
-				"id": "Fc1234567890",
-				"created": 1624473600,
-				"timestamp": 1624473600,
-				"user": "U1234567890",
-				"comment": "This is a comment"
-			},
-			"file": {
-				"id": "F1234567890"
-			}
+    		"type": "group_history_changed",
+    		"latest": "1358877455.000010",
+    		"ts": "1361482916.000003",
+    		"event_ts": "1361482916.000004"
 		}
 	`)
 
-	var e FileCommentAddedEvent
+	var e GroupHistoryChangedEvent
 	if err := json.Unmarshal(rawE, &e); err != nil {
 		t.Fatal(err)
 	}
-	if e.Type != "file_comment_added" {
-		t.Errorf("type should be file_comment_added, was %s", e.Type)
+	if e.Type != "group_history_changed" {
+		t.Errorf("type should be group_history_changed, was %s", e.Type)
 	}
-	if e.Comment.ID != "Fc1234567890" {
-		t.Errorf("comment.id should be Fc1234567890, was %s", e.Comment.ID)
+	if e.Latest != "1358877455.000010" {
+		t.Errorf("latest should be 1358877455.000010, was %s", e.Latest)
 	}
-	if e.Comment.Created != 1624473600 {
-		t.Errorf("comment.created should be 1624473600, was %d", e.Comment.Created)
+	if e.Ts != "1361482916.000003" {
+		t.Errorf("ts should be 1361482916.000003, was %s", e.Ts)
 	}
-	if e.Comment.Timestamp != 1624473600 {
-		t.Errorf("comment.timestamp should be 1624473600, was %d", e.Comment.Timestamp)
+}
+
+func TestGroupOpenEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+    		"type": "group_open",
+    		"user": "U024BE7LH",
+    		"channel": "G024BE91L"
+		}
+	`)
+
+	var e GroupOpenEvent
+	if err := json.Unmarshal(rawE, &e); err != nil {
+		t.Fatal(err)
 	}
-	if e.Comment.User != "U1234567890" {
-		t.Errorf("comment.user should be U1234567890, was %s", e.Comment.User)
+	if e.Type != "group_open" {
+		t.Errorf("type should be group_open, was %s", e.Type)
 	}
-	if e.Comment.Comment != "This is a comment" {
-		t.Errorf("comment.comment should be 'This is a comment', was %s", e.Comment.Comment)
+	if e.User != "U024BE7LH" {
+		t.Errorf("user should be U024BE7LH, was %s", e.User)
 	}
-	if e.File.ID != "F1234567890" {
-		t.Errorf("file.id should be F1234567890, was %s", e.File.ID)
+	if e.Channel != "G024BE91L" {
+		t.Errorf("channel should be G024BE91L, was %s", e.Channel)
 	}
 }
 
@@ -1857,9 +1896,12 @@ func TestSubteamMembersChangedEvent(t *testing.T) {
 			"type": "subteam_members_changed",
 			"subteam_id": "S1234567890",
 			"team_id": "T1234567890",
+			"date_previous_update": 1446670362,
 			"date_update": 1624473600,
 			"added_users": ["U1234567890"],
-			"removed_users": ["U0987654321"]
+			"added_users_count": "3",
+			"removed_users": ["U0987654321"],
+			"removed_users_count": "1"
 		}
 	`)
 
@@ -2024,7 +2066,8 @@ func TestTeamDomainChangeEvent(t *testing.T) {
 		{
 			"type": "team_domain_change",
 			"url": "https://newdomain.slack.com",
-			"domain": "newdomain"
+			"domain": "newdomain",
+			"team_id": "T1234"
 		}
 	`)
 
@@ -2041,13 +2084,17 @@ func TestTeamDomainChangeEvent(t *testing.T) {
 	if e.Domain != "newdomain" {
 		t.Errorf("domain should be newdomain, was %s", e.Domain)
 	}
+	if e.TeamID != "T1234" {
+		t.Errorf("team_id should be 'T1234', was %s", e.TeamID)
+	}
 }
 
 func TestTeamRenameEvent(t *testing.T) {
 	rawE := []byte(`
 		{
 			"type": "team_rename",
-			"name": "new_team_name"
+			"name": "new_team_name",
+			"team_id": "T1234"
 		}
 	`)
 
@@ -2061,96 +2108,542 @@ func TestTeamRenameEvent(t *testing.T) {
 	if e.Name != "new_team_name" {
 		t.Errorf("name should be new_team_name, was %s", e.Name)
 	}
+	if e.TeamID != "T1234" {
+		t.Errorf("team_id should be 'T1234', was %s", e.TeamID)
+	}
 }
 
 func TestUserChangeEvent(t *testing.T) {
-	rawE := []byte(`
-		{
-			"type": "user_change",
+	jsonStr := `{
+		"user": {
+			"id": "U1234567",
+			"team_id": "T1234567",
+			"name": "some-user",
+			"deleted": false,
+			"color": "4bbe2e",
+			"real_name": "Some User",
+			"tz": "America/Los_Angeles",
+			"tz_label": "Pacific Daylight Time",
+			"tz_offset": -25200,
+			"profile": {
+				"title": "",
+				"phone": "",
+				"skype": "",
+				"real_name": "Some User",
+				"real_name_normalized": "Some User",
+				"display_name": "",
+				"display_name_normalized": "",
+				"fields": {},
+				"status_text": "riding a train",
+				"status_emoji": ":mountain_railway:",
+				"status_emoji_display_info": [],
+				"status_expiration": 0,
+				"avatar_hash": "g12345678910",
+				"first_name": "Some",
+				"last_name": "User",
+				"image_24": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=24&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-24.png",
+				"image_32": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=32&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-32.png",
+				"image_48": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=48&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-48.png",
+				"image_72": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=72&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-72.png",
+				"image_192": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=192&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-192.png",
+				"image_512": "https://secure.gravatar.com/avatar/cb0c2b2ca5e8de16be31a55a734d0f31.jpg?s=512&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1648136338%2Fimg%2Favatars%2Fuser_shapes%2Fava_0001-512.png",
+				"status_text_canonical": "",
+				"team": "T1234567"
+			},
+			"is_admin": false,
+			"is_owner": false,
+			"is_primary_owner": false,
+			"is_restricted": false,
+			"is_ultra_restricted": false,
+			"is_bot": false,
+			"is_app_user": false,
+			"updated": 1648596421,
+			"is_email_confirmed": true,
+			"who_can_share_contact_card": "EVERYONE",
+			"locale": "en-US"
+		},
+		"cache_ts": 1648596421,
+		"type": "user_change",
+		"event_ts": "1648596712.000001"
+	}`
+
+	var event UserChangeEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal UserChangeEvent: %v", err)
+	}
+
+	if event.Type != "user_change" {
+		t.Errorf("Expected type to be 'user_change', got %s", event.Type)
+	}
+
+	if event.User.ID != "U1234567" {
+		t.Errorf("Expected user ID to be 'U1234567', got %s", event.User.ID)
+	}
+
+	if event.User.Profile.StatusText != "riding a train" {
+		t.Errorf("Expected status text to be 'riding a train', got %s", event.User.Profile.StatusText)
+	}
+
+	if event.User.Profile.StatusEmoji != ":mountain_railway:" {
+		t.Errorf("Expected status emoji to be ':mountain_railway:', got %s", event.User.Profile.StatusEmoji)
+	}
+
+	if event.CacheTS != 1648596421 {
+		t.Errorf("Expected cache_ts to be 1648596421, got %d", event.CacheTS)
+	}
+
+	if event.EventTS != "1648596712.000001" {
+		t.Errorf("Expected event_ts to be '1648596712.000001', got %s", event.EventTS)
+	}
+}
+
+func TestAppDeletedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "app_deleted",
+		"app_id": "A015CA1LGHG",
+		"app_name": "my-admin-app",
+		"app_owner_id": "U013B64J7MSZ",
+		"team_id": "E073D7H7BBE",
+		"team_domain": "ACME Enterprises",
+		"event_ts": "1700001891.279278"
+	}`
+
+	var event AppDeletedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal AppDeletedEvent: %v", err)
+	}
+
+	if event.Type != "app_deleted" {
+		t.Errorf("Expected type to be 'app_deleted', got %s", event.Type)
+	}
+
+	if event.AppName != "my-admin-app" {
+		t.Errorf("app_name should be 'my-admin-app', was %s", event.AppName)
+	}
+
+	if event.AppOwnerID != "U013B64J7MSZ" {
+		t.Errorf("app_owner_id should be 'U013B64J7MSZ', was %s", event.AppOwnerID)
+	}
+
+	if event.TeamID != "E073D7H7BBE" {
+		t.Errorf("team_id should be 'E073D7H7BBE', was %s", event.TeamID)
+	}
+}
+
+func TestAppInstalledEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "app_installed",
+		"app_id": "A015CA1LGHG",
+		"app_name": "my-admin-app",
+		"app_owner_id": "U013B64J7MSZ",
+		"user_id": "U013B64J7SZ",
+		"team_id": "E073D7H7BBE",
+		"team_domain": "ACME Enterprises",
+		"event_ts": "1700001891.279278"
+	}`
+
+	var event AppInstalledEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal AppInstalledEvent: %v", err)
+	}
+
+	if event.Type != "app_installed" {
+		t.Errorf("Expected type to be 'app_installed', got %s", event.Type)
+	}
+
+	if event.AppName != "my-admin-app" {
+		t.Errorf("app_name should be 'my-admin-app', was %s", event.AppName)
+	}
+
+	if event.AppOwnerID != "U013B64J7MSZ" {
+		t.Errorf("app_owner_id should be 'U013B64J7MSZ', was %s", event.AppOwnerID)
+	}
+
+	if event.TeamID != "E073D7H7BBE" {
+		t.Errorf("team_id should be 'E073D7H7BBE', was %s", event.TeamID)
+	}
+}
+
+func TestAppRequestedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "app_requested",
+		"app_request": {
+			"id": "1234",
+			"app": {
+				"id": "A5678",
+				"name": "Brent's app",
+				"description": "They're good apps, Bront.",
+				"help_url": "brontsapp.com",
+				"privacy_policy_url": "brontsapp.com",
+				"app_homepage_url": "brontsapp.com",
+				"app_directory_url": "https://slack.slack.com/apps/A102ARD7Y",
+				"is_app_directory_approved": true,
+				"is_internal": false,
+				"additional_info": "none"
+			},
+			"previous_resolution": {
+				"status": "approved",
+				"scopes": [{
+					"name": "app_requested",
+					"description": "allows this app to listen for app install requests",
+					"is_sensitive": false,
+					"token_type": "user"
+				}]
+			},
 			"user": {
-				"id": "U1234567890",
-				"team_id": "T1234567890",
-				"name": "test_user",
-				"deleted": false,
-				"profile": {
-					"avatar_hash": "123456abcdef",
-					"real_name": "Test User",
-					"display_name": "TestUser",
-					"real_name_normalized": "Test User",
-					"display_name_normalized": "TestUser",
-					"email": "testuser@example.com",
-					"image_24": "https://example.com/image_24.jpg",
-					"image_32": "https://example.com/image_32.jpg",
-					"image_48": "https://example.com/image_48.jpg",
-					"image_72": "https://example.com/image_72.jpg",
-					"image_192": "https://example.com/image_192.jpg",
-					"image_512": "https://example.com/image_512.jpg"
-				},
-				"is_bot": false,
-				"updated": 1624473600
+				"id": "U1234",
+				"name": "Bront",
+				"email": "bront@brent.com"
+			},
+			"team": {
+				"id": "T1234",
+				"name": "Brant App Team",
+				"domain": "brantappteam"
+			},
+			"enterprise": null,
+			"scopes": [{
+				"name": "app_requested",
+				"description": "allows this app to listen for app install requests",
+				"is_sensitive": false,
+				"token_type": "user"
+			}],
+			"message": "none"
+		}
+	}`
+
+	var event AppRequestedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal AppRequestedEvent: %v", err)
+	}
+
+	if event.Type != "app_requested" {
+		t.Errorf("Expected type to be 'app_requested', got %s", event.Type)
+	}
+
+	if event.AppRequest.ID != "1234" {
+		t.Errorf("app_request.id should be '1234', was %s", event.AppRequest.ID)
+	}
+
+	if event.AppRequest.App.ID != "A5678" {
+		t.Fail()
+	}
+
+	if event.AppRequest.User.ID != "U1234" {
+		t.Errorf("app_request.user.id should be 'U1234', was %s", event.AppRequest.User.ID)
+	}
+
+	if event.AppRequest.Team.ID != "T1234" {
+		t.Fail()
+	}
+}
+
+func TestAppUninstalledTeamEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "app_uninstalled_team",
+		"app_id": "A015CA1LGHG",
+		"app_name": "my-admin-app",
+		"app_owner_id": "U013B64J7MSZ",
+		"user_id": "U013B64J7SZ",
+		"team_id": "E073D7H7BBE",
+		"team_domain": "ACME Enterprises",
+		"event_ts": "1700001891.279278"
+	}`
+
+	var event AppUninstalledTeamEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal AppUninstalledTeamEvent: %v", err)
+	}
+
+	if event.Type != "app_uninstalled_team" {
+		t.Errorf("Expected type to be 'app_uninstalled_team', got %s", event.Type)
+	}
+
+	if event.AppName != "my-admin-app" {
+		t.Errorf("app_name should be 'my-admin-app', was %s", event.AppName)
+	}
+
+	if event.AppOwnerID != "U013B64J7MSZ" {
+		t.Errorf("app_owner_id should be 'U013B64J7MSZ', was %s", event.AppOwnerID)
+	}
+
+	if event.TeamID != "E073D7H7BBE" {
+		t.Errorf("team_id should be 'E073D7H7BBE', was %s", event.TeamID)
+	}
+}
+
+func TestCallRejectedEvent(t *testing.T) {
+	jsonStr := `{
+		"token": "12345FVmRUzNDOAu12345h",
+		"team_id": "T123ABC456",
+		"api_app_id": "BBBU04BB4",
+		"event": {
+			"type": "call_rejected",
+			"call_id": "R123ABC456",
+			"user_id": "U123ABC456",
+			"channel_id": "D123ABC456",
+			"external_unique_id": "123-456-7890"
+		},
+		"type": "event_callback",
+		"event_id": "Ev123ABC456",
+		"event_time": 1563448153,
+		"authed_users": ["U123ABC456"]
+	}`
+
+	var event CallRejectedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal CallRejectedEvent: %v", err)
+	}
+
+	if event.Event.Type != "call_rejected" {
+		t.Errorf("Expected event type to be 'call_rejected', got %s", event.Event.Type)
+	}
+	if event.TeamID != "T123ABC456" {
+		t.Errorf("Expected team_id to be 'T123ABC456', got %s", event.TeamID)
+	}
+	if event.Event.CallID != "R123ABC456" {
+		t.Fail()
+	}
+
+}
+
+func TestChannelSharedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "channel_shared",
+		"connected_team_id": "E163Q94DX",
+		"channel": "C123ABC456",
+		"event_ts": "1561064063.001100"
+	}`
+
+	var event ChannelSharedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal ChannelSharedEvent: %v", err)
+	}
+
+	if event.Type != "channel_shared" {
+		t.Errorf("Expected type to be 'channel_shared', got %s", event.Type)
+	}
+
+	if event.ConnectedTeamID != "E163Q94DX" {
+		t.Errorf("Expected connected_team_id to be 'E163Q94DX', got %s", event.ConnectedTeamID)
+	}
+
+	if event.Channel != "C123ABC456" {
+		t.Fail()
+	}
+}
+
+func TestFileCreatedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "file_created",
+		"file_id": "F2147483862",
+		"file": {
+			"id": "F2147483862"
+		}
+	}`
+
+	var event FileCreatedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal FileCreatedEvent: %v", err)
+	}
+
+	if event.Type != "file_created" {
+		t.Errorf("Expected type to be 'file_created', got %s", event.Type)
+	}
+	if event.FileID != "F2147483862" {
+		t.Errorf("Expected file_id to be 'F2147483862', got %s", event.FileID)
+	}
+}
+
+func TestFilePublicEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "file_public",
+		"file_id": "F2147483862",
+		"file": {
+			"id": "F2147483862"
+		}
+	}`
+
+	var event FilePublicEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal FilePublicEvent: %v", err)
+	}
+
+	if event.Type != "file_public" {
+		t.Errorf("Expected type to be 'file_public', got %s", event.Type)
+	}
+
+	if event.FileID != "F2147483862" {
+		t.Errorf("Expected file_id to be 'F2147483862', got %s", event.FileID)
+	}
+}
+
+func TestFunctionExecutedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "function_executed",
+		"function": {
+			"id": "Fn123456789O",
+			"callback_id": "sample_function",
+			"title": "Sample function",
+			"description": "Runs sample function",
+			"type": "app",
+			"input_parameters": [
+				{
+					"type": "slack#/types/user_id",
+					"name": "user_id",
+					"description": "Message recipient",
+					"title": "User",
+					"is_required": true
+				}
+			],
+			"output_parameters": [
+				{
+					"type": "slack#/types/user_id",
+					"name": "user_id",
+					"description": "User that completed the function",
+					"title": "Greeting",
+					"is_required": true
+				}
+			],
+			"app_id": "AP123456789",
+			"date_created": 1694727597,
+			"date_updated": 1698947481,
+			"date_deleted": 0
+		},
+		"inputs": { "user_id": "USER12345678" },
+		"function_execution_id": "Fx1234567O9L",
+		"workflow_execution_id": "WxABC123DEF0",
+		"event_ts": "1698958075.998738",
+		"bot_access_token": "abcd-1325532282098-1322446258629-6123648410839-527a1cab3979cad288c9e20330d212cf"
+	}`
+
+	var event FunctionExecutedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal FunctionExecutedEvent: %v", err)
+	}
+
+	if event.Type != "function_executed" {
+		t.Errorf("Expected type to be 'function_executed', got %s", event.Type)
+	}
+
+	if event.Function.ID != "Fn123456789O" {
+		t.Errorf("Expected function.id to be 'Fn123456789O', got %s", event.Function.ID)
+	}
+
+	if event.FunctionExecutionID != "Fx1234567O9L" {
+		t.Fail()
+	}
+}
+
+func TestInviteRequestedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "invite_requested",
+		"invite_request": {
+			"id": "12345",
+			"email": "bront@puppies.com",
+			"date_created": 123455,
+			"requester_ids": ["U123ABC456"],
+			"channel_ids": ["C123ABC456"],
+			"invite_type": "full_member",
+			"real_name": "Brent",
+			"date_expire": 123456,
+			"request_reason": "They're good dogs, Brant",
+			"team": {
+				"id": "T12345",
+				"name": "Puppy ratings workspace incorporated",
+				"domain": "puppiesrus"
 			}
 		}
-	`)
+	}`
 
-	var e UserChangeEvent
-	if err := json.Unmarshal(rawE, &e); err != nil {
-		t.Fatal(err)
+	var event InviteRequestedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal InviteRequestedEvent: %v", err)
 	}
-	if e.Type != "user_change" {
-		t.Errorf("type should be user_change, was %s", e.Type)
+
+	if event.Type != "invite_requested" {
+		t.Errorf("Expected type to be 'invite_requested', got %s", event.Type)
 	}
-	if e.User.ID != "U1234567890" {
-		t.Errorf("user.id should be U1234567890, was %s", e.User.ID)
+
+	if event.InviteRequest.ID != "12345" {
+		t.Errorf("invite_request.id should be '12345', was %s", event.InviteRequest.ID)
 	}
-	if e.User.TeamID != "T1234567890" {
-		t.Errorf("user.team_id should be T1234567890, was %s", e.User.TeamID)
+
+	if event.InviteRequest.Email != "bront@puppies.com" {
+		t.Fail()
 	}
-	if e.User.Name != "test_user" {
-		t.Errorf("user.name should be test_user, was %s", e.User.Name)
+}
+
+func TestSharedChannelInviteRequested_UnmarshalJSON(t *testing.T) {
+	jsonData := `
+	{
+		"actor": {
+			"id": "U012345ABCD",
+			"name": "primary-owner",
+			"is_bot": false,
+			"team_id": "E0123456ABC",
+			"timezone": "",
+			"real_name": "primary-owner",
+			"display_name": ""
+		},
+		"channel_id": "C0123ABCDEF",
+		"event_type": "slack#/events/shared_channel_invite_requested",
+		"channel_name": "our-channel",
+		"channel_type": "public",
+		"target_users": [
+			{
+				"email": "user@some-corp.com",
+				"invite_id": "I0123456ABC"
+			}
+		],
+		"teams_in_channel": [
+			{
+				"id": "E0123456ABC",
+				"icon": {
+					"image_34": "https://slack.com/some-corp/v123/img/abc_0123.png",
+					"image_default": true
+				},
+				"name": "some_enterprise",
+				"domain": "someenterprise",
+				"is_verified": false,
+				"date_created": 1637947110,
+				"avatar_base_url": "https://slack.com/some-corp/",
+				"requires_sponsorship": false
+			},
+			{
+				"id": "T012345ABCD",
+				"icon": {
+					"image_34": "https://slack.com/another-corp/v456/img/def_4567.png",
+					"image_default": true
+				},
+				"name": "another_enterprise",
+				"domain": "anotherenterprise",
+				"is_verified": false,
+				"date_created": 1645550933,
+				"avatar_base_url": "https://slack.com/another-corp/",
+				"requires_sponsorship": false
+			}
+		],
+		"is_external_limited": true,
+		"channel_date_created": 1718725442,
+		"channel_message_latest_counted_timestamp": 1718745614025449
+	}`
+
+	var event SharedChannelInviteRequestedEvent
+	err := json.Unmarshal([]byte(jsonData), &event)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
 	}
-	if e.User.Deleted {
-		t.Errorf("user.deleted should be false, was %v", e.User.Deleted)
+
+	if event.Actor.ID != "U012345ABCD" {
+		t.Errorf("Expected Actor.ID to be 'U012345ABCD', got '%s'", event.Actor.ID)
 	}
-	if e.User.Profile.AvatarHash != "123456abcdef" {
-		t.Errorf("user.profile.avatar_hash should be 123456abcdef, was %s", e.User.Profile.AvatarHash)
+	if event.ChannelID != "C0123ABCDEF" {
+		t.Errorf("Expected ChannelID to be 'C0123ABCDEF', got '%s'", event.ChannelID)
 	}
-	if e.User.Profile.RealName != "Test User" {
-		t.Errorf("user.profile.real_name should be 'Test User', was %s", e.User.Profile.RealName)
+	if len(event.TargetUsers) != 1 || event.TargetUsers[0].Email != "user@some-corp.com" {
+		t.Errorf("Expected one TargetUser with Email 'user@some-corp.com', got '%v'", event.TargetUsers)
 	}
-	if e.User.Profile.DisplayName != "TestUser" {
-		t.Errorf("user.profile.display_name should be 'TestUser', was %s", e.User.Profile.DisplayName)
-	}
-	if e.User.Profile.RealNameNormalized != "Test User" {
-		t.Errorf("user.profile.real_name_normalized should be 'Test User', was %s", e.User.Profile.RealNameNormalized)
-	}
-	if e.User.Profile.DisplayNameNormalized != "TestUser" {
-		t.Errorf("user.profile.display_name_normalized should be 'TestUser', was %s", e.User.Profile.DisplayNameNormalized)
-	}
-	if e.User.Profile.Email != "testuser@example.com" {
-		t.Errorf("user.profile.email should be 'testuser@example.com', was %s", e.User.Profile.Email)
-	}
-	if e.User.Profile.Image24 != "https://example.com/image_24.jpg" {
-		t.Errorf("user.profile.image_24 should be 'https://example.com/image_24.jpg', was %s", e.User.Profile.Image24)
-	}
-	if e.User.Profile.Image32 != "https://example.com/image_32.jpg" {
-		t.Errorf("user.profile.image_32 should be 'https://example.com/image_32.jpg', was %s", e.User.Profile.Image32)
-	}
-	if e.User.Profile.Image48 != "https://example.com/image_48.jpg" {
-		t.Errorf("user.profile.image_48 should be 'https://example.com/image_48.jpg', was %s", e.User.Profile.Image48)
-	}
-	if e.User.Profile.Image72 != "https://example.com/image_72.jpg" {
-		t.Errorf("user.profile.image_72 should be 'https://example.com/image_72.jpg', was %s", e.User.Profile.Image72)
-	}
-	if e.User.Profile.Image192 != "https://example.com/image_192.jpg" {
-		t.Errorf("user.profile.image_192 should be 'https://example.com/image_192.jpg', was %s", e.User.Profile.Image192)
-	}
-	if e.User.Profile.Image512 != "https://example.com/image_512.jpg" {
-		t.Errorf("user.profile.image_512 should be 'https://example.com/image_512.jpg', was %s", e.User.Profile.Image512)
-	}
-	if e.User.IsBot {
-		t.Errorf("user.is_bot should be false, was %v", e.User.IsBot)
-	}
-	if e.User.Updated != 1624473600 {
-		t.Errorf("user.updated should be 1624473600, was %d", e.User.Updated)
+	if len(event.TeamsInChannel) != 2 || event.TeamsInChannel[1].Name != "another_enterprise" {
+		t.Errorf("Expected second team to have name 'another_enterprise', got '%v'", event.TeamsInChannel)
 	}
 }

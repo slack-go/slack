@@ -649,14 +649,6 @@ type SharedInvite struct {
 	IsExternalLimited bool            `json:"is_external_limited,omitempty"`
 }
 
-type AppRateLimitedEvent struct {
-	Type       string `json:"type"`
-	Token      string `json:"token"`
-	TeamID     string `json:"team_id"`
-	MinuteRate int    `json:"minute_rate"`
-	APIAppID   string `json:"api_app_id"`
-}
-
 type ChannelHistoryChangedEvent struct {
 	Type    string `json:"type"`
 	Latest  string `json:"latest"`
@@ -688,8 +680,6 @@ type DndUpdatedUserEvent struct {
 		DndEnabled     bool  `json:"dnd_enabled"`
 		NextDndStartTs int64 `json:"next_dnd_start_ts"`
 		NextDndEndTs   int64 `json:"next_dnd_end_ts"`
-		SnoozeEnabled  bool  `json:"snooze_enabled"`
-		SnoozeEndtime  int64 `json:"snooze_endtime"`
 	} `json:"dnd_status"`
 }
 
@@ -697,44 +687,6 @@ type EmailDomainChangedEvent struct {
 	Type        string `json:"type"`
 	EmailDomain string `json:"email_domain"`
 	EventTs     string `json:"event_ts"`
-}
-
-type FileCommentAddedEvent struct {
-	Type    string `json:"type"`
-	Comment struct {
-		ID        string `json:"id"`
-		Created   int64  `json:"created"`
-		Timestamp int64  `json:"timestamp"`
-		User      string `json:"user"`
-		Comment   string `json:"comment"`
-	} `json:"comment"`
-	File struct {
-		ID string `json:"id"`
-	} `json:"file"`
-}
-
-type FileCommentDeletedEvent struct {
-	Type    string `json:"type"`
-	Comment struct {
-		ID string `json:"id"`
-	} `json:"comment"`
-	File struct {
-		ID string `json:"id"`
-	} `json:"file"`
-}
-
-type FileCommentEditedEvent struct {
-	Type    string `json:"type"`
-	Comment struct {
-		ID        string `json:"id"`
-		Created   int64  `json:"created"`
-		Timestamp int64  `json:"timestamp"`
-		User      string `json:"user"`
-		Comment   string `json:"comment"`
-	} `json:"comment"`
-	File struct {
-		ID string `json:"id"`
-	} `json:"file"`
 }
 
 type GroupCloseEvent struct {
@@ -812,12 +764,15 @@ type SubteamCreatedEvent struct {
 }
 
 type SubteamMembersChangedEvent struct {
-	Type         string   `json:"type"`
-	SubteamID    string   `json:"subteam_id"`
-	TeamID       string   `json:"team_id"`
-	DateUpdate   int64    `json:"date_update"`
-	AddedUsers   []string `json:"added_users"`
-	RemovedUsers []string `json:"removed_users"`
+	Type               string   `json:"type"`
+	SubteamID          string   `json:"subteam_id"`
+	TeamID             string   `json:"team_id"`
+	DatePreviousUpdate int      `json:"date_previous_update"`
+	DateUpdate         int64    `json:"date_update"`
+	AddedUsers         []string `json:"added_users"`
+	AddedUsersCount    string   `json:"added_users_count"`
+	RemovedUsers       []string `json:"removed_users"`
+	RemovedUsersCount  string   `json:"removed_users_count"`
 }
 
 type SubteamSelfAddedEvent struct {
@@ -839,37 +794,315 @@ type TeamDomainChangeEvent struct {
 	Type   string `json:"type"`
 	URL    string `json:"url"`
 	Domain string `json:"domain"`
+	TeamID string `json:"team_id"`
 }
 
 type TeamRenameEvent struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
+	Type   string `json:"type"`
+	Name   string `json:"name"`
+	TeamID string `json:"team_id"`
 }
 
 type UserChangeEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+type AppDeletedEvent struct {
+	Type       string `json:"type"`
+	AppID      string `json:"app_id"`
+	AppName    string `json:"app_name"`
+	AppOwnerID string `json:"app_owner_id"`
+	TeamID     string `json:"team_id"`
+	TeamDomain string `json:"team_domain"`
+	EventTs    string `json:"event_ts"`
+}
+
+type AppInstalledEvent struct {
+	Type       string `json:"type"`
+	AppID      string `json:"app_id"`
+	AppName    string `json:"app_name"`
+	AppOwnerID string `json:"app_owner_id"`
+	UserID     string `json:"user_id"`
+	TeamID     string `json:"team_id"`
+	TeamDomain string `json:"team_domain"`
+	EventTs    string `json:"event_ts"`
+}
+
+type AppRequestedEvent struct {
+	Type       string `json:"type"`
+	AppRequest struct {
+		ID  string `json:"id"`
+		App struct {
+			ID                     string `json:"id"`
+			Name                   string `json:"name"`
+			Description            string `json:"description"`
+			HelpURL                string `json:"help_url"`
+			PrivacyPolicyURL       string `json:"privacy_policy_url"`
+			AppHomepageURL         string `json:"app_homepage_url"`
+			AppDirectoryURL        string `json:"app_directory_url"`
+			IsAppDirectoryApproved bool   `json:"is_app_directory_approved"`
+			IsInternal             bool   `json:"is_internal"`
+			AdditionalInfo         string `json:"additional_info"`
+		} `json:"app"`
+		PreviousResolution struct {
+			Status string `json:"status"`
+			Scopes []struct {
+				Name        string `json:"name"`
+				Description string `json:"description"`
+				IsSensitive bool   `json:"is_sensitive"`
+				TokenType   string `json:"token_type"`
+			} `json:"scopes"`
+		} `json:"previous_resolution"`
+		User struct {
+			ID    string `json:"id"`
+			Name  string `json:"name"`
+			Email string `json:"email"`
+		} `json:"user"`
+		Team struct {
+			ID     string `json:"id"`
+			Name   string `json:"name"`
+			Domain string `json:"domain"`
+		} `json:"team"`
+		Enterprise interface{} `json:"enterprise"`
+		Scopes     []struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			IsSensitive bool   `json:"is_sensitive"`
+			TokenType   string `json:"token_type"`
+		} `json:"scopes"`
+		Message string `json:"message"`
+	} `json:"app_request"`
+}
+
+type AppUninstalledTeamEvent struct {
+	Type       string `json:"type"`
+	AppID      string `json:"app_id"`
+	AppName    string `json:"app_name"`
+	AppOwnerID string `json:"app_owner_id"`
+	UserID     string `json:"user_id"`
+	TeamID     string `json:"team_id"`
+	TeamDomain string `json:"team_domain"`
+	EventTs    string `json:"event_ts"`
+}
+
+type CallRejectedEvent struct {
+	Token    string `json:"token"`
+	TeamID   string `json:"team_id"`
+	APIAppID string `json:"api_app_id"`
+	Event    struct {
+		Type             string `json:"type"`
+		CallID           string `json:"call_id"`
+		UserID           string `json:"user_id"`
+		ChannelID        string `json:"channel_id"`
+		ExternalUniqueID string `json:"external_unique_id"`
+	} `json:"event"`
+	Type        string   `json:"type"`
+	EventID     string   `json:"event_id"`
+	AuthedUsers []string `json:"authed_users"`
+}
+
+type ChannelSharedEvent struct {
+	Type            string `json:"type"`
+	ConnectedTeamID string `json:"connected_team_id"`
+	Channel         string `json:"channel"`
+	EventTs         string `json:"event_ts"`
+}
+
+type FileCreatedEvent struct {
+	Type   string `json:"type"`
+	FileID string `json:"file_id"`
+	File   struct {
+		ID string `json:"id"`
+	} `json:"file"`
+}
+
+type FilePublicEvent struct {
+	Type   string `json:"type"`
+	FileID string `json:"file_id"`
+	File   struct {
+		ID string `json:"id"`
+	} `json:"file"`
+}
+
+type FunctionExecutedEvent struct {
+	Type     string `json:"type"`
+	Function struct {
+		ID              string `json:"id"`
+		CallbackID      string `json:"callback_id"`
+		Title           string `json:"title"`
+		Description     string `json:"description"`
+		Type            string `json:"type"`
+		InputParameters []struct {
+			Type        string `json:"type"`
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Title       string `json:"title"`
+			IsRequired  bool   `json:"is_required"`
+		} `json:"input_parameters"`
+		OutputParameters []struct {
+			Type        string `json:"type"`
+			Name        string `json:"name"`
+			Description string `json:"description"`
+			Title       string `json:"title"`
+			IsRequired  bool   `json:"is_required"`
+		} `json:"output_parameters"`
+		AppID       string `json:"app_id"`
+		DateCreated int64  `json:"date_created"`
+		DateUpdated int64  `json:"date_updated"`
+		DateDeleted int64  `json:"date_deleted"`
+	} `json:"function"`
+	Inputs              map[string]string `json:"inputs"`
+	FunctionExecutionID string            `json:"function_execution_id"`
+	WorkflowExecutionID string            `json:"workflow_execution_id"`
+	EventTs             string            `json:"event_ts"`
+	BotAccessToken      string            `json:"bot_access_token"`
+}
+
+type InviteRequestedEvent struct {
+	Type          string `json:"type"`
+	InviteRequest struct {
+		ID            string   `json:"id"`
+		Email         string   `json:"email"`
+		DateCreated   int64    `json:"date_created"`
+		RequesterIDs  []string `json:"requester_ids"`
+		ChannelIDs    []string `json:"channel_ids"`
+		InviteType    string   `json:"invite_type"`
+		RealName      string   `json:"real_name"`
+		DateExpire    int64    `json:"date_expire"`
+		RequestReason string   `json:"request_reason"`
+		Team          struct {
+			ID     string `json:"id"`
+			Name   string `json:"name"`
+			Domain string `json:"domain"`
+		} `json:"team"`
+	} `json:"invite_request"`
+}
+
+type StarAddedEvent struct {
 	Type string `json:"type"`
-	User struct {
-		ID      string `json:"id"`
-		TeamID  string `json:"team_id"`
-		Name    string `json:"name"`
-		Deleted bool   `json:"deleted"`
-		Profile struct {
-			AvatarHash            string `json:"avatar_hash"`
-			RealName              string `json:"real_name"`
-			DisplayName           string `json:"display_name"`
-			RealNameNormalized    string `json:"real_name_normalized"`
-			DisplayNameNormalized string `json:"display_name_normalized"`
-			Email                 string `json:"email"`
-			Image24               string `json:"image_24"`
-			Image32               string `json:"image_32"`
-			Image48               string `json:"image_48"`
-			Image72               string `json:"image_72"`
-			Image192              string `json:"image_192"`
-			Image512              string `json:"image_512"`
-		} `json:"profile"`
-		IsBot   bool  `json:"is_bot"`
-		Updated int64 `json:"updated"`
-	} `json:"user"`
+	User string `json:"user"`
+	Item struct {
+	} `json:"item"`
+	EventTS string `json:"event_ts"`
+}
+
+type StarRemovedEvent struct {
+	Type string `json:"type"`
+	User string `json:"user"`
+	Item struct {
+	} `json:"item"`
+	EventTS string `json:"event_ts"`
+}
+
+type UserHuddleChangedEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+type User struct {
+	ID                     string  `json:"id"`
+	TeamID                 string  `json:"team_id"`
+	Name                   string  `json:"name"`
+	Deleted                bool    `json:"deleted"`
+	Color                  string  `json:"color"`
+	RealName               string  `json:"real_name"`
+	TZ                     string  `json:"tz"`
+	TZLabel                string  `json:"tz_label"`
+	TZOffset               int     `json:"tz_offset"`
+	Profile                Profile `json:"profile"`
+	IsAdmin                bool    `json:"is_admin"`
+	IsOwner                bool    `json:"is_owner"`
+	IsPrimaryOwner         bool    `json:"is_primary_owner"`
+	IsRestricted           bool    `json:"is_restricted"`
+	IsUltraRestricted      bool    `json:"is_ultra_restricted"`
+	IsBot                  bool    `json:"is_bot"`
+	IsAppUser              bool    `json:"is_app_user"`
+	Updated                int64   `json:"updated"`
+	IsEmailConfirmed       bool    `json:"is_email_confirmed"`
+	WhoCanShareContactCard string  `json:"who_can_share_contact_card"`
+	Locale                 string  `json:"locale"`
+}
+
+type Profile struct {
+	Title                  string                 `json:"title"`
+	Phone                  string                 `json:"phone"`
+	Skype                  string                 `json:"skype"`
+	RealName               string                 `json:"real_name"`
+	RealNameNormalized     string                 `json:"real_name_normalized"`
+	DisplayName            string                 `json:"display_name"`
+	DisplayNameNormalized  string                 `json:"display_name_normalized"`
+	Fields                 map[string]interface{} `json:"fields"`
+	StatusText             string                 `json:"status_text"`
+	StatusEmoji            string                 `json:"status_emoji"`
+	StatusEmojiDisplayInfo []interface{}          `json:"status_emoji_display_info"`
+	StatusExpiration       int                    `json:"status_expiration"`
+	AvatarHash             string                 `json:"avatar_hash"`
+	FirstName              string                 `json:"first_name"`
+	LastName               string                 `json:"last_name"`
+	Image24                string                 `json:"image_24"`
+	Image32                string                 `json:"image_32"`
+	Image48                string                 `json:"image_48"`
+	Image72                string                 `json:"image_72"`
+	Image192               string                 `json:"image_192"`
+	Image512               string                 `json:"image_512"`
+	StatusTextCanonical    string                 `json:"status_text_canonical"`
+	Team                   string                 `json:"team"`
+}
+
+type UserStatusChangedEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+type Actor struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	IsBot       bool   `json:"is_bot"`
+	TeamID      string `json:"team_id"`
+	Timezone    string `json:"timezone"`
+	RealName    string `json:"real_name"`
+	DisplayName string `json:"display_name"`
+}
+
+type TargetUser struct {
+	Email    string `json:"email"`
+	InviteID string `json:"invite_id"`
+}
+
+type TeamIcon struct {
+	Image34      string `json:"image_34"`
+	ImageDefault bool   `json:"image_default"`
+}
+
+type Team struct {
+	ID                  string   `json:"id"`
+	Icon                TeamIcon `json:"icon"`
+	Name                string   `json:"name"`
+	Domain              string   `json:"domain"`
+	IsVerified          bool     `json:"is_verified"`
+	DateCreated         int64    `json:"date_created"`
+	AvatarBaseURL       string   `json:"avatar_base_url"`
+	RequiresSponsorship bool     `json:"requires_sponsorship"`
+}
+
+type SharedChannelInviteRequestedEvent struct {
+	Actor                       Actor        `json:"actor"`
+	ChannelID                   string       `json:"channel_id"`
+	EventType                   string       `json:"event_type"`
+	ChannelName                 string       `json:"channel_name"`
+	ChannelType                 string       `json:"channel_type"`
+	TargetUsers                 []TargetUser `json:"target_users"`
+	TeamsInChannel              []Team       `json:"teams_in_channel"`
+	IsExternalLimited           bool         `json:"is_external_limited"`
+	ChannelDateCreated          int64        `json:"channel_date_created"`
+	ChannelMessageLatestCounted int64        `json:"channel_message_latest_counted_timestamp"`
 }
 
 type EventsAPIType string
@@ -971,12 +1204,6 @@ const (
 	DndUpdatedUser = EventsAPIType("dnd_updated_user")
 	// EmailDomainChanged The email domain changed
 	EmailDomainChanged = EventsAPIType("email_domain_changed")
-	// FileCommentAdded A comment was added to a file
-	FileCommentAdded = EventsAPIType("file_comment_added")
-	// FileCommentDeleted A comment was deleted from a file
-	FileCommentDeleted = EventsAPIType("file_comment_deleted")
-	// FileCommentEdited A comment was edited on a file
-	FileCommentEdited = EventsAPIType("file_comment_edited")
 	// GroupClose A group was closed
 	GroupClose = EventsAPIType("group_close")
 	// GroupHistoryChanged The history of a group changed
@@ -1007,76 +1234,117 @@ const (
 	TeamRename = EventsAPIType("team_rename")
 	// UserChange A user object has changed
 	UserChange = EventsAPIType("user_change")
+	// AppDeleted is an event when an app is deleted from a workspace
+	AppDeleted = EventsAPIType("app_deleted")
+	// AppInstalled is an event when an app is installed to a workspace
+	AppInstalled = EventsAPIType("app_installed")
+	// AppRequested is an event when a user requests to install an app to a workspace
+	AppRequested = EventsAPIType("app_requested")
+	// AppUninstalledTeam is an event when an app is uninstalled from a team
+	AppUninstalledTeam = EventsAPIType("app_uninstalled_team")
+	// CallRejected is an event when a Slack call is rejected
+	CallRejected = EventsAPIType("call_rejected")
+	// ChannelShared is an event when a channel is shared with another workspace
+	ChannelShared = EventsAPIType("channel_shared")
+	// FileCreated is an event when a file is created in a workspace
+	FileCreated = EventsAPIType("file_created")
+	// FilePublic is an event when a file is made public in a workspace
+	FilePublic = EventsAPIType("file_public")
+	// FunctionExecuted is an event when a Slack function is executed
+	FunctionExecuted = EventsAPIType("function_executed")
+	// InviteRequested is an event when a user requests an invite to a workspace
+	InviteRequested = EventsAPIType("invite_requested")
+	// SharedChannelInviteRequested is an event when an invitation to share a channel is requested
+	SharedChannelInviteRequested = EventsAPIType("shared_channel_invite_requested")
+	// StarAdded is an event when a star is added to a message or file
+	StarAdded = EventsAPIType("star_added")
+	// StarRemoved is an event when a star is removed from a message or file
+	StarRemoved = EventsAPIType("star_removed")
+	// UserHuddleChanged is an event when a user's huddle status changes
+	UserHuddleChanged = EventsAPIType("user_huddle_changed")
+	// UserStatusChanged is an event when a user's status changes
+	UserStatusChanged = EventsAPIType("user_status_changed")
 )
 
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
-	AppMention:                  AppMentionEvent{},
-	AppHomeOpened:               AppHomeOpenedEvent{},
-	AppUninstalled:              AppUninstalledEvent{},
-	ChannelCreated:              ChannelCreatedEvent{},
-	ChannelDeleted:              ChannelDeletedEvent{},
-	ChannelArchive:              ChannelArchiveEvent{},
-	ChannelUnarchive:            ChannelUnarchiveEvent{},
-	ChannelLeft:                 ChannelLeftEvent{},
-	ChannelRename:               ChannelRenameEvent{},
-	ChannelIDChanged:            ChannelIDChangedEvent{},
-	FileChange:                  FileChangeEvent{},
-	FileDeleted:                 FileDeletedEvent{},
-	FileShared:                  FileSharedEvent{},
-	FileUnshared:                FileUnsharedEvent{},
-	GroupDeleted:                GroupDeletedEvent{},
-	GroupArchive:                GroupArchiveEvent{},
-	GroupUnarchive:              GroupUnarchiveEvent{},
-	GroupLeft:                   GroupLeftEvent{},
-	GroupRename:                 GroupRenameEvent{},
-	GridMigrationFinished:       GridMigrationFinishedEvent{},
-	GridMigrationStarted:        GridMigrationStartedEvent{},
-	LinkShared:                  LinkSharedEvent{},
-	Message:                     MessageEvent{},
-	MemberJoinedChannel:         MemberJoinedChannelEvent{},
-	MemberLeftChannel:           MemberLeftChannelEvent{},
-	PinAdded:                    PinAddedEvent{},
-	PinRemoved:                  PinRemovedEvent{},
-	ReactionAdded:               ReactionAddedEvent{},
-	ReactionRemoved:             ReactionRemovedEvent{},
-	SharedChannelInviteApproved: SharedChannelInviteApprovedEvent{},
-	SharedChannelInviteAccepted: SharedChannelInviteAcceptedEvent{},
-	SharedChannelInviteDeclined: SharedChannelInviteDeclinedEvent{},
-	SharedChannelInviteReceived: SharedChannelInviteReceivedEvent{},
-	TeamJoin:                    TeamJoinEvent{},
-	TokensRevoked:               TokensRevokedEvent{},
-	EmojiChanged:                EmojiChangedEvent{},
-	WorkflowStepExecute:         WorkflowStepExecuteEvent{},
-	MessageMetadataPosted:       MessageMetadataPostedEvent{},
-	MessageMetadataUpdated:      MessageMetadataUpdatedEvent{},
-	MessageMetadataDeleted:      MessageMetadataDeletedEvent{},
-	TeamAccessGranted:           TeamAccessGrantedEvent{},
-	TeamAccessRevoked:           TeamAccessRevokedEvent{},
-	UserProfileChanged:          UserProfileChangedEvent{},
-	AppRateLimited:              AppRateLimitedEvent{},
-	ChannelHistoryChanged:       ChannelHistoryChangedEvent{},
-	DndUpdated:                  DndUpdatedEvent{},
-	DndUpdatedUser:              DndUpdatedUserEvent{},
-	EmailDomainChanged:          EmailDomainChangedEvent{},
-	FileCommentAdded:            FileCommentAddedEvent{},
-	FileCommentDeleted:          FileCommentDeletedEvent{},
-	FileCommentEdited:           FileCommentEditedEvent{},
-	GroupClose:                  GroupCloseEvent{},
-	GroupHistoryChanged:         GroupHistoryChangedEvent{},
-	GroupOpen:                   GroupOpenEvent{},
-	ImClose:                     ImCloseEvent{},
-	ImCreated:                   ImCreatedEvent{},
-	ImHistoryChanged:            ImHistoryChangedEvent{},
-	ImOpen:                      ImOpenEvent{},
-	SubteamCreated:              SubteamCreatedEvent{},
-	SubteamMembersChanged:       SubteamMembersChangedEvent{},
-	SubteamSelfAdded:            SubteamSelfAddedEvent{},
-	SubteamSelfRemoved:          SubteamSelfRemovedEvent{},
-	SubteamUpdated:              SubteamUpdatedEvent{},
-	TeamDomainChange:            TeamDomainChangeEvent{},
-	TeamRename:                  TeamRenameEvent{},
-	UserChange:                  UserChangeEvent{},
+	AppMention:                   AppMentionEvent{},
+	AppHomeOpened:                AppHomeOpenedEvent{},
+	AppUninstalled:               AppUninstalledEvent{},
+	ChannelCreated:               ChannelCreatedEvent{},
+	ChannelDeleted:               ChannelDeletedEvent{},
+	ChannelArchive:               ChannelArchiveEvent{},
+	ChannelUnarchive:             ChannelUnarchiveEvent{},
+	ChannelLeft:                  ChannelLeftEvent{},
+	ChannelRename:                ChannelRenameEvent{},
+	ChannelIDChanged:             ChannelIDChangedEvent{},
+	FileChange:                   FileChangeEvent{},
+	FileDeleted:                  FileDeletedEvent{},
+	FileShared:                   FileSharedEvent{},
+	FileUnshared:                 FileUnsharedEvent{},
+	GroupDeleted:                 GroupDeletedEvent{},
+	GroupArchive:                 GroupArchiveEvent{},
+	GroupUnarchive:               GroupUnarchiveEvent{},
+	GroupLeft:                    GroupLeftEvent{},
+	GroupRename:                  GroupRenameEvent{},
+	GridMigrationFinished:        GridMigrationFinishedEvent{},
+	GridMigrationStarted:         GridMigrationStartedEvent{},
+	LinkShared:                   LinkSharedEvent{},
+	Message:                      MessageEvent{},
+	MemberJoinedChannel:          MemberJoinedChannelEvent{},
+	MemberLeftChannel:            MemberLeftChannelEvent{},
+	PinAdded:                     PinAddedEvent{},
+	PinRemoved:                   PinRemovedEvent{},
+	ReactionAdded:                ReactionAddedEvent{},
+	ReactionRemoved:              ReactionRemovedEvent{},
+	SharedChannelInviteApproved:  SharedChannelInviteApprovedEvent{},
+	SharedChannelInviteAccepted:  SharedChannelInviteAcceptedEvent{},
+	SharedChannelInviteDeclined:  SharedChannelInviteDeclinedEvent{},
+	SharedChannelInviteReceived:  SharedChannelInviteReceivedEvent{},
+	TeamJoin:                     TeamJoinEvent{},
+	TokensRevoked:                TokensRevokedEvent{},
+	EmojiChanged:                 EmojiChangedEvent{},
+	WorkflowStepExecute:          WorkflowStepExecuteEvent{},
+	MessageMetadataPosted:        MessageMetadataPostedEvent{},
+	MessageMetadataUpdated:       MessageMetadataUpdatedEvent{},
+	MessageMetadataDeleted:       MessageMetadataDeletedEvent{},
+	TeamAccessGranted:            TeamAccessGrantedEvent{},
+	TeamAccessRevoked:            TeamAccessRevokedEvent{},
+	UserProfileChanged:           UserProfileChangedEvent{},
+	ChannelHistoryChanged:        ChannelHistoryChangedEvent{},
+	DndUpdated:                   DndUpdatedEvent{},
+	DndUpdatedUser:               DndUpdatedUserEvent{},
+	EmailDomainChanged:           EmailDomainChangedEvent{},
+	GroupClose:                   GroupCloseEvent{},
+	GroupHistoryChanged:          GroupHistoryChangedEvent{},
+	GroupOpen:                    GroupOpenEvent{},
+	ImClose:                      ImCloseEvent{},
+	ImCreated:                    ImCreatedEvent{},
+	ImHistoryChanged:             ImHistoryChangedEvent{},
+	ImOpen:                       ImOpenEvent{},
+	SubteamCreated:               SubteamCreatedEvent{},
+	SubteamMembersChanged:        SubteamMembersChangedEvent{},
+	SubteamSelfAdded:             SubteamSelfAddedEvent{},
+	SubteamSelfRemoved:           SubteamSelfRemovedEvent{},
+	SubteamUpdated:               SubteamUpdatedEvent{},
+	TeamDomainChange:             TeamDomainChangeEvent{},
+	TeamRename:                   TeamRenameEvent{},
+	UserChange:                   UserChangeEvent{},
+	AppDeleted:                   AppDeletedEvent{},
+	AppInstalled:                 AppInstalledEvent{},
+	AppRequested:                 AppRequestedEvent{},
+	AppUninstalledTeam:           AppUninstalledTeamEvent{},
+	CallRejected:                 CallRejectedEvent{},
+	ChannelShared:                ChannelSharedEvent{},
+	FileCreated:                  FileCreatedEvent{},
+	FilePublic:                   FilePublicEvent{},
+	FunctionExecuted:             FunctionExecutedEvent{},
+	InviteRequested:              InviteRequestedEvent{},
+	SharedChannelInviteRequested: SharedChannelInviteRequestedEvent{},
+	StarAdded:                    StarAddedEvent{},
+	StarRemoved:                  StarRemovedEvent{},
+	UserHuddleChanged:            UserHuddleChangedEvent{},
+	UserStatusChanged:            UserStatusChangedEvent{},
 }
