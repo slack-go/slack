@@ -465,6 +465,7 @@ type File struct {
 	DisplayAsBot       bool   `json:"display_as_bot"`
 	Username           string `json:"username"`
 	URLPrivate         string `json:"url_private"`
+	FileAccess         string `json:"file_access"`
 	URLPrivateDownload string `json:"url_private_download"`
 	Thumb64            string `json:"thumb_64"`
 	Thumb80            string `json:"thumb_80"`
