@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -127,7 +126,7 @@ func jsonReq(ctx context.Context, endpoint string, body interface{}) (req *http.
 }
 
 func parseResponseBody(body io.ReadCloser, intf interface{}, d Debug) error {
-	response, err := ioutil.ReadAll(body)
+	response, err := io.ReadAll(body)
 	if err != nil {
 		return err
 	}
@@ -316,7 +315,7 @@ func newJSONParser(dst interface{}) responseParser {
 
 func newTextParser(dst interface{}) responseParser {
 	return func(resp *http.Response) error {
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}

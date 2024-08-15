@@ -3,7 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -216,7 +216,7 @@ func TestPostMessage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			http.DefaultServeMux = new(http.ServeMux)
 			http.HandleFunc(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
-				body, err := ioutil.ReadAll(r.Body)
+				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 					return
@@ -242,7 +242,7 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -270,7 +270,7 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -297,7 +297,7 @@ func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
