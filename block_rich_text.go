@@ -341,6 +341,7 @@ type RichTextSectionEmojiElement struct {
 	Type     RichTextSectionElementType `json:"type"`
 	Name     string                     `json:"name"`
 	SkinTone int                        `json:"skin_tone"`
+	Unicode  string                     `json:"unicode,omitempty"`
 	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
