@@ -3,7 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -185,6 +185,28 @@ func TestPostMessage(t *testing.T) {
 				"user_auth_message": []string{"Please!"},
 			},
 		},
+		"LinkNames true": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionLinkNames(true),
+			},
+			expected: url.Values{
+				"channel":    []string{"CXXX"},
+				"token":      []string{"testing-token"},
+				"link_names": []string{"true"},
+			},
+		},
+		"LinkNames false": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionLinkNames(false),
+			},
+			expected: url.Values{
+				"channel":    []string{"CXXX"},
+				"token":      []string{"testing-token"},
+				"link_names": []string{"false"},
+			},
+		},
 	}
 
 	once.Do(startServer)
@@ -194,7 +216,7 @@ func TestPostMessage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			http.DefaultServeMux = new(http.ServeMux)
 			http.HandleFunc(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
-				body, err := ioutil.ReadAll(r.Body)
+				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
 					return
@@ -220,7 +242,7 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -248,7 +270,7 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return
@@ -275,7 +297,7 @@ func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 			return

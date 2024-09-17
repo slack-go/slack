@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -46,7 +46,7 @@ type GroupConversationResponse struct {
 }
 
 func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		msg := fmt.Sprintf("error reading body: %s", err.Error())
 		log.Printf(msg)
@@ -126,7 +126,7 @@ func reactionAddHandler(w http.ResponseWriter, _ *http.Request) {
 // handle chat.postMessage
 func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		msg := fmt.Sprintf("error reading body: %s", err.Error())
 		log.Printf(msg)
@@ -218,7 +218,7 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 // RTMConnectHandler generates a valid connection
 func RTMConnectHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := ioutil.ReadAll(r.Body)
+	_, err := io.ReadAll(r.Body)
 	if err != nil {
 		msg := fmt.Sprintf("Error reading body: %s", err.Error())
 		log.Printf(msg)
@@ -248,7 +248,7 @@ func RTMConnectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func rtmStartHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := ioutil.ReadAll(r.Body)
+	_, err := io.ReadAll(r.Body)
 	if err != nil {
 		msg := fmt.Sprintf("Error reading body: %s", err.Error())
 		log.Printf(msg)
