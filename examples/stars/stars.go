@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/wesionaryTEAM/slack"
+	"github.com/slack-go/slack"
 )
 
 func main() {

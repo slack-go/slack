@@ -2,7 +2,7 @@ package manifests
 
 import (
 	"fmt"
-	"github.com/wesionaryTEAM/slack"
+	"github.com/slack-go/slack"
 )
 
 // createManifest programmatically creates a Slack app manifest

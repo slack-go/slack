@@ -12,7 +12,7 @@ import (
 
 	websocket "github.com/gorilla/websocket"
 
-	slack "github.com/wesionaryTEAM/slack"
+	slack "github.com/slack-go/slack"
 )
 
 func contextHandler(server *Server, next http.HandlerFunc) http.Handler {

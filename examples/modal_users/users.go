@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/wesionaryTEAM/slack"
+	"github.com/slack-go/slack"
 )
 
 // An example how to open a modal with different kinds of input fields

@@ -3,7 +3,7 @@
 package slackevents
 
 import (
-	"github.com/wesionaryTEAM/slack"
+	"github.com/slack-go/slack"
 )
 
 // EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.

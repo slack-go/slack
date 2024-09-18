@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/wesionaryTEAM/slack"
-	"github.com/wesionaryTEAM/slack/slacktest"
+	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slacktest"
 )
 
 const (
