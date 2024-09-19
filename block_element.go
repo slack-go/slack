@@ -527,7 +527,7 @@ type RichTextInputBlockElement struct {
 	Type                 MessageElementType    `json:"type"`
 	ActionID             string                `json:"action_id,omitempty"`
 	Placeholder          *TextBlockObject      `json:"placeholder,omitempty"`
-	InitialValue         string                `json:"initial_value,omitempty"`
+	InitialValue         *RichTextBlock        `json:"initial_value,omitempty"`
 	DispatchActionConfig *DispatchActionConfig `json:"dispatch_action_config,omitempty"`
 	FocusOnLoad          bool                  `json:"focus_on_load,omitempty"`
 }
