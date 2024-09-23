@@ -2,6 +2,7 @@ package slack
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -125,6 +126,24 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Verbatim: false,
 			},
 			expected: errors.New("emoji cannot be true in mrkdown"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "",
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: errors.New("text must have a minimum length of 1"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     strings.Repeat("a", 3001),
+				Emoji:    false,
+				Verbatim: false,
+			},
+			expected: errors.New("text cannot be longer than 3000 characters"),
 		},
 	}
 

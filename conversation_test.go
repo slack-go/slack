@@ -149,6 +149,85 @@ func TestCreateSimpleGroup(t *testing.T) {
 	assertSimpleGroup(t, group)
 }
 
+// Channel with Canvas
+var channelWithCanvas = `{
+    "id": "C024BE91L",
+    "name": "fun",
+    "is_channel": true,
+    "created": 1360782804,
+    "creator": "U024BE7LH",
+    "is_archived": false,
+    "is_general": false,
+    "members": [
+        "U024BE7LH"
+    ],
+    "topic": {
+        "value": "Fun times",
+        "creator": "U024BE7LV",
+        "last_set": 1369677212
+    },
+    "purpose": {
+        "value": "This channel is for fun",
+        "creator": "U024BE7LH",
+        "last_set": 1360782804
+    },
+    "is_member": true,
+    "last_read": "1401383885.000061",
+    "unread_count": 0,
+    "unread_count_display": 0,
+	"properties": {
+        "canvas": {
+            "file_id": "F05RQ01LJU0",
+            "is_empty": true,
+            "quip_thread_id": "XFB9AAlvIyJ"
+        }
+    }
+}`
+
+func unmarshalChannelWithCanvas(j string) (*Channel, error) {
+	channel := &Channel{}
+	if err := json.Unmarshal([]byte(j), &channel); err != nil {
+		return nil, err
+	}
+	return channel, nil
+}
+
+func TestChannelWithCanvas(t *testing.T) {
+	channel, err := unmarshalChannelWithCanvas(channelWithCanvas)
+	assert.Nil(t, err)
+	assertChannelWithCanvas(t, channel)
+}
+
+func assertChannelWithCanvas(t *testing.T, channel *Channel) {
+	assertSimpleChannel(t, channel)
+	assert.Equal(t, "F05RQ01LJU0", channel.Properties.Canvas.FileId)
+	assert.Equal(t, true, channel.Properties.Canvas.IsEmpty)
+	assert.Equal(t, "XFB9AAlvIyJ", channel.Properties.Canvas.QuipThreadId)
+}
+
+func TestCreateChannelWithCanvas(t *testing.T) {
+	channel := &Channel{}
+	channel.ID = "C024BE91L"
+	channel.Name = "fun"
+	channel.IsChannel = true
+	channel.Created = JSONTime(1360782804)
+	channel.Creator = "U024BE7LH"
+	channel.IsArchived = false
+	channel.IsGeneral = false
+	channel.IsMember = true
+	channel.LastRead = "1401383885.000061"
+	channel.UnreadCount = 0
+	channel.UnreadCountDisplay = 0
+	channel.Properties = &Properties{
+		Canvas: Canvas{
+			FileId:       "F05RQ01LJU0",
+			IsEmpty:      true,
+			QuipThreadId: "XFB9AAlvIyJ",
+		},
+	}
+	assertChannelWithCanvas(t, channel)
+}
+
 // IM
 var simpleIM = `{
     "id": "D024BFF1M",
@@ -287,6 +366,20 @@ func okChannelJsonHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
+func okInviteSharedJsonHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		InviteID              string `json:"invite_id"`
+		IsLegacySharedChannel bool   `json:"is_legacy_shared_channel"`
+	}{
+		SlackResponse:         SlackResponse{Ok: true},
+		InviteID:              "I01234567",
+		IsLegacySharedChannel: false,
+	})
+	rw.Write(response)
+}
+
 func TestSetTopicOfConversation(t *testing.T) {
 	http.HandleFunc("/conversations.setTopic", okChannelJsonHandler)
 	once.Do(startServer)
@@ -346,6 +439,44 @@ func TestInviteUsersToConversation(t *testing.T) {
 		t.Error("channel should not be nil")
 		return
 	}
+}
+
+func TestInviteSharedToConversation(t *testing.T) {
+	http.HandleFunc("/conversations.inviteShared", okInviteSharedJsonHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	t.Run("user_ids", func(t *testing.T) {
+		userIDs := []string{"UXXXXXXX1", "UXXXXXXX2"}
+		inviteID, isLegacySharedChannel, err := api.InviteSharedUserIDsToConversation("CXXXXXXXX", userIDs...)
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
+
+	t.Run("emails", func(t *testing.T) {
+		emails := []string{"nopcoder@slack.com", "nopcoder@example.com"}
+		inviteID, isLegacySharedChannel, err := api.InviteSharedEmailsToConversation("CXXXXXXXX", emails...)
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
 }
 
 func TestKickUserFromConversation(t *testing.T) {
