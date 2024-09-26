@@ -9,22 +9,22 @@ import (
 )
 
 type Call struct {
-	ID                string     `json:"id"`
-	Title             string     `json:"title"`
-	DateStart         JSONTime   `json:"date_start"`
-	DateEnd           JSONTime   `json:"date_end"`
-	ExternalUniqueID  string     `json:"external_unique_id"`
-	JoinURL           string     `json:"join_url"`
-	DesktopAppJoinURL string     `json:"desktop_app_join_url"`
-	ExternalDisplayID string     `json:"external_display_id"`
-	Users             []CallUser `json:"users"`
-	Channels          []string   `json:"channels"`
+	ID                string            `json:"id"`
+	Title             string            `json:"title"`
+	DateStart         JSONTime          `json:"date_start"`
+	DateEnd           JSONTime          `json:"date_end"`
+	ExternalUniqueID  string            `json:"external_unique_id"`
+	JoinURL           string            `json:"join_url"`
+	DesktopAppJoinURL string            `json:"desktop_app_join_url"`
+	ExternalDisplayID string            `json:"external_display_id"`
+	Participants      []CallParticipant `json:"users"`
+	Channels          []string          `json:"channels"`
 }
 
-// A thin user representation which has a SlackID, ExternalID, or both.
+// CallParticipant is a thin user representation which has a SlackID, ExternalID, or both.
 //
 // See: https://api.slack.com/apis/calls#users
-type CallUser struct {
+type CallParticipant struct {
 	SlackID     string `json:"slack_id,omitempty"`
 	ExternalID  string `json:"external_id,omitempty"`
 	DisplayName string `json:"display_name,omitempty"`
@@ -32,7 +32,7 @@ type CallUser struct {
 }
 
 // Valid checks if the CallUser has a is valid with a SlackID or ExternalID or both.
-func (u CallUser) Valid() bool {
+func (u CallParticipant) Valid() bool {
 	return u.SlackID != "" || u.ExternalID != ""
 }
 
@@ -44,7 +44,7 @@ type AddCallParameters struct {
 	DesktopAppJoinURL string
 	ExternalDisplayID string
 	DateStart         JSONTime
-	Users             []CallUser
+	Participants      []CallParticipant
 }
 
 type UpdateCallParameters struct {
@@ -90,8 +90,8 @@ func (api *Client) AddCallContext(ctx context.Context, params AddCallParameters)
 	if params.Title != "" {
 		values.Set("title", params.Title)
 	}
-	if len(params.Users) > 0 {
-		data, err := json.Marshal(params.Users)
+	if len(params.Participants) > 0 {
+		data, err := json.Marshal(params.Participants)
 		if err != nil {
 			return Call{}, err
 		}
@@ -176,33 +176,33 @@ func (api *Client) EndCallContext(ctx context.Context, callID string, params End
 	return response.Err()
 }
 
-// CallAddUsers adds users to a Call.
-func (api *Client) CallAddUsers(callID string, users []CallUser) error {
-	return api.CallAddUsersContext(context.Background(), callID, users)
+// CallAddParticipants adds users to a Call.
+func (api *Client) CallAddParticipants(callID string, participants []CallParticipant) error {
+	return api.CallAddParticipantsContext(context.Background(), callID, participants)
 }
 
-// CallAddUsersContext adds users to a Call.
-func (api *Client) CallAddUsersContext(ctx context.Context, callID string, users []CallUser) error {
-	return api.setCallUsers(ctx, "calls.participants.add", callID, users)
+// CallAddParticipantsContext adds users to a Call.
+func (api *Client) CallAddParticipantsContext(ctx context.Context, callID string, participants []CallParticipant) error {
+	return api.setCallParticipants(ctx, "calls.participants.add", callID, participants)
 }
 
-// CallRemoveUsers removes users from a Call.
-func (api *Client) CallRemoveUsers(callID string, users []CallUser) error {
-	return api.CallRemoveUsersContext(context.Background(), callID, users)
+// CallRemoveParticipants removes users from a Call.
+func (api *Client) CallRemoveParticipants(callID string, participants []CallParticipant) error {
+	return api.CallRemoveParticipantsContext(context.Background(), callID, participants)
 }
 
-// CallRemoveUsersContext removes users from a Call.
-func (api *Client) CallRemoveUsersContext(ctx context.Context, callID string, users []CallUser) error {
-	return api.setCallUsers(ctx, "calls.participants.remove", callID, users)
+// CallRemoveParticipantsContext removes users from a Call.
+func (api *Client) CallRemoveParticipantsContext(ctx context.Context, callID string, participants []CallParticipant) error {
+	return api.setCallParticipants(ctx, "calls.participants.remove", callID, participants)
 }
 
-func (api *Client) setCallUsers(ctx context.Context, method, callID string, users []CallUser) error {
+func (api *Client) setCallParticipants(ctx context.Context, method, callID string, participants []CallParticipant) error {
 	values := url.Values{
 		"token": {api.token},
 		"id":    {callID},
 	}
 
-	data, err := json.Marshal(users)
+	data, err := json.Marshal(participants)
 	if err != nil {
 		return err
 	}

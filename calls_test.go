@@ -44,7 +44,7 @@ func addCallHandler(t *testing.T) http.HandlerFunc {
 			DesktopAppJoinURL: r.FormValue("desktop_app_join_url"),
 		}
 		callTestId += 1
-		json.Unmarshal([]byte(r.FormValue("users")), &call.Users)
+		json.Unmarshal([]byte(r.FormValue("users")), &call.Participants)
 		if start := r.FormValue("date_start"); start != "" {
 			dateStart, err := strconv.ParseInt(start, 10, 64)
 			require.NoError(t, err)
