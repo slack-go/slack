@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 type Call struct {
@@ -50,6 +51,11 @@ type UpdateCallParameters struct {
 	Title             string
 	DesktopAppJoinURL string
 	JoinURL           string
+}
+
+type EndCallParameters struct {
+	// Duration is the duration of the call in seconds. Omitted if 0.
+	Duration time.Duration
 }
 
 type callResponse struct {
@@ -148,15 +154,19 @@ func (api *Client) UpdateCallContext(ctx context.Context, callID string, params 
 }
 
 // EndCall ends a Call.
-func (api *Client) EndCall(callID string) error {
-	return api.EndCallContext(context.Background(), callID)
+func (api *Client) EndCall(callID string, params EndCallParameters) error {
+	return api.EndCallContext(context.Background(), callID, params)
 }
 
 // EndCallContext ends a Call.
-func (api *Client) EndCallContext(ctx context.Context, callID string) error {
+func (api *Client) EndCallContext(ctx context.Context, callID string, params EndCallParameters) error {
 	values := url.Values{
 		"token": {api.token},
 		"id":    {callID},
+	}
+
+	if params.Duration != 0 {
+		values.Set("duration", strconv.FormatInt(int64(params.Duration.Seconds()), 10))
 	}
 
 	response := &SlackResponse{}
