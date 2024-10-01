@@ -30,6 +30,11 @@ func FunctionCompleteSuccessRequestOptionOutput(outputs map[string]string) Funct
 
 // FunctionCompleteSuccess indicates function is completed
 func (api *Client) FunctionCompleteSuccess(functionExecutionId string, options ...FunctionCompleteSuccessRequestOption) error {
+	return api.FunctionCompleteSuccessContext(context.Background(), functionExecutionId, options...)
+}
+
+// FunctionCompleteSuccess indicates function is completed
+func (api *Client) FunctionCompleteSuccessContext(ctx context.Context, functionExecutionId string, options ...FunctionCompleteSuccessRequestOption) error {
 	// More information: https://api.slack.com/methods/functions.completeSuccess
 	r := &FunctionCompleteSuccessRequest{
 		FunctionExecutionID: functionExecutionId,
@@ -45,7 +50,7 @@ func (api *Client) FunctionCompleteSuccess(functionExecutionId string, options .
 	}
 
 	response := &SlackResponse{}
-	if err := postJSON(context.Background(), api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
+	if err := postJSON(ctx, api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
 		return err
 	}
 
@@ -58,6 +63,11 @@ func (api *Client) FunctionCompleteSuccess(functionExecutionId string, options .
 
 // FunctionCompleteError indicates function is completed with error
 func (api *Client) FunctionCompleteError(functionExecutionID string, errorMessage string) error {
+	return api.FunctionCompleteErrorContext(context.Background(), functionExecutionID, errorMessage)
+}
+
+// FunctionCompleteErrorContext indicates function is completed with error
+func (api *Client) FunctionCompleteErrorContext(ctx context.Context, functionExecutionID string, errorMessage string) error {
 	// More information: https://api.slack.com/methods/functions.completeError
 	r := FunctionCompleteErrorRequest{
 		FunctionExecutionID: functionExecutionID,
@@ -71,7 +81,7 @@ func (api *Client) FunctionCompleteError(functionExecutionID string, errorMessag
 	}
 
 	response := &SlackResponse{}
-	if err := postJSON(context.Background(), api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
+	if err := postJSON(ctx, api.httpclient, endpoint, api.token, jsonData, response, api); err != nil {
 		return err
 	}
 
