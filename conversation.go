@@ -329,42 +329,71 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 }
 
 // InviteSharedEmailsToConversation invites users to a shared channels by email.
-// For more details, see InviteSharedEmailsToConversationContext documentation.
+// For more details, see InviteSharedToConversationContext documentation.
 func (api *Client) InviteSharedEmailsToConversation(channelID string, emails ...string) (string, bool, error) {
-	return api.inviteSharedToConversationHelper(context.Background(), channelID, emails, nil)
+	return api.InviteSharedToConversationContext(context.Background(), InviteSharedToConversationParams{
+		ChannelID: channelID,
+		Emails:    emails,
+	})
 }
 
 // InviteSharedEmailsToConversationContext invites users to a shared channels by email using context.
-// For more details, see inviteSharedToConversationHelper documentation.
+// For more details, see InviteSharedToConversationContext documentation.
 func (api *Client) InviteSharedEmailsToConversationContext(ctx context.Context, channelID string, emails ...string) (string, bool, error) {
-	return api.inviteSharedToConversationHelper(ctx, channelID, emails, nil)
+	return api.InviteSharedToConversationContext(ctx, InviteSharedToConversationParams{
+		ChannelID: channelID,
+		Emails:    emails,
+	})
 }
 
 // InviteSharedUserIDsToConversation invites users to a shared channels by user id.
-// For more details, see InviteSharedUserIDsToConversationContext documentation.
+// For more details, see InviteSharedToConversationContext documentation.
 func (api *Client) InviteSharedUserIDsToConversation(channelID string, userIDs ...string) (string, bool, error) {
-	return api.inviteSharedToConversationHelper(context.Background(), channelID, nil, userIDs)
+	return api.InviteSharedToConversationContext(context.Background(), InviteSharedToConversationParams{
+		ChannelID: channelID,
+		UserIDs:   userIDs,
+	})
 }
 
 // InviteSharedUserIDsToConversationContext invites users to a shared channels by user id with context.
-// For more details, see inviteSharedToConversationHelper documentation.
+// For more details, see InviteSharedToConversationContext documentation.
 func (api *Client) InviteSharedUserIDsToConversationContext(ctx context.Context, channelID string, userIDs ...string) (string, bool, error) {
-	return api.inviteSharedToConversationHelper(ctx, channelID, nil, userIDs)
+	return api.InviteSharedToConversationContext(ctx, InviteSharedToConversationParams{
+		ChannelID: channelID,
+		UserIDs:   userIDs,
+	})
 }
 
-// inviteSharedToConversationHelper invites emails or userIDs to a channel with a custom context.
+// InviteSharedToConversationParams defines the parameters for the InviteSharedToConversation and InviteSharedToConversationContext functions.
+type InviteSharedToConversationParams struct {
+	ChannelID       string
+	Emails          []string
+	UserIDs         []string
+	ExternalLimited *bool
+}
+
+// InviteSharedToConversation invites emails or userIDs to a channel.
+// For more details, see InviteSharedToConversationContext documentation.
+func (api *Client) InviteSharedToConversation(params InviteSharedToConversationParams) (string, bool, error) {
+	return api.InviteSharedToConversationContext(context.Background(), params)
+}
+
+// InviteSharedToConversationContext invites emails or userIDs to a channel with a custom context.
 // This is a helper function for InviteSharedEmailsToConversation and InviteSharedUserIDsToConversation.
 // It accepts either emails or userIDs, but not both.
 // Slack API docs: https://api.slack.com/methods/conversations.inviteShared
-func (api *Client) inviteSharedToConversationHelper(ctx context.Context, channelID string, emails []string, userIDs []string) (string, bool, error) {
+func (api *Client) InviteSharedToConversationContext(ctx context.Context, params InviteSharedToConversationParams) (string, bool, error) {
 	values := url.Values{
 		"token":   {api.token},
-		"channel": {channelID},
+		"channel": {params.ChannelID},
 	}
-	if len(emails) > 0 {
-		values.Add("emails", strings.Join(emails, ","))
-	} else if len(userIDs) > 0 {
-		values.Add("user_ids", strings.Join(userIDs, ","))
+	if len(params.Emails) > 0 {
+		values.Add("emails", strings.Join(params.Emails, ","))
+	} else if len(params.UserIDs) > 0 {
+		values.Add("user_ids", strings.Join(params.UserIDs, ","))
+	}
+	if params.ExternalLimited != nil {
+		values.Add("external_limited", strconv.FormatBool(*params.ExternalLimited))
 	}
 	response := struct {
 		SlackResponse
