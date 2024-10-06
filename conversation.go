@@ -366,9 +366,10 @@ func (api *Client) InviteSharedUserIDsToConversationContext(ctx context.Context,
 
 // InviteSharedToConversationParams defines the parameters for the InviteSharedToConversation and InviteSharedToConversationContext functions.
 type InviteSharedToConversationParams struct {
-	ChannelID string
-	Emails    []string
-	UserIDs   []string
+	ChannelID       string
+	Emails          []string
+	UserIDs         []string
+	ExternalLimited *bool
 }
 
 // InviteSharedToConversation invites emails or userIDs to a channel.
@@ -390,6 +391,9 @@ func (api *Client) InviteSharedToConversationContext(ctx context.Context, params
 		values.Add("emails", strings.Join(params.Emails, ","))
 	} else if len(params.UserIDs) > 0 {
 		values.Add("user_ids", strings.Join(params.UserIDs, ","))
+	}
+	if params.ExternalLimited != nil {
+		values.Add("external_limited", strconv.FormatBool(*params.ExternalLimited))
 	}
 	response := struct {
 		SlackResponse
