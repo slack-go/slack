@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/slack-go/slack"
+	"github.com/ikasamah/slack"
 )
 
 func getAllUserUIDs(ctx context.Context, client *slack.Client, pageSize int) ([]string, error) {

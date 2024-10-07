@@ -142,7 +142,7 @@ func (s TextBlockObject) Validate() error {
 		return errors.New("type must be either of plain_text or mrkdwn")
 	}
 
-	// https://github.com/slack-go/slack/issues/881
+	// https://github.com/ikasamah/slack/issues/881
 	if s.Type == "mrkdwn" && s.Emoji {
 		return errors.New("emoji cannot be true in mrkdown")
 	}

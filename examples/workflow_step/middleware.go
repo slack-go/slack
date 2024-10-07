@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/slack-go/slack"
+	"github.com/ikasamah/slack"
 )
 
 func (v *SecretsVerifierMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {

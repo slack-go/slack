@@ -62,7 +62,7 @@ type InteractionCallback struct {
 	ViewClosedCallback
 
 	// FIXME(kanata2): just workaround for backward-compatibility.
-	// See also https://github.com/slack-go/slack/issues/816
+	// See also https://github.com/ikasamah/slack/issues/816
 	RawState json.RawMessage `json:"state,omitempty"`
 
 	// BlockActionState stands for the `state` field in block_actions type.
