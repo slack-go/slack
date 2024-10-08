@@ -2,8 +2,8 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
-	"strconv"
 )
 
 // AssistantThreadSetStatusParameters are the parameters for AssistantThreadSetStatus
@@ -44,12 +44,12 @@ func (p *AssistantThreadsSetSuggestedPromptsParameters) AddPrompt(title, message
 // SetAssistantThreadsSugesstedPrompts sets the suggested prompts for a thread
 // @see https://api.slack.com/methods/assistant.threads.setSuggestedPrompts
 func (api *Client) SetAssistantThreadsSuggestedPrompts(params AssistantThreadsSetSuggestedPromptsParameters) (err error) {
-	return api.SetAssistantThreadSuggestedPromptsContext(context.Background(), params)
+	return api.SetAssistantThreadsSuggestedPromptsContext(context.Background(), params)
 }
 
 // SetAssistantThreadSuggestedPromptsContext sets the suggested prompts for a thread with a custom context
 // @see https://api.slack.com/methods/assistant.threads.setSuggestedPrompts
-func (api *Client) SetAssistantThreadSuggestedPromptsContext(ctx context.Context, params AssistantThreadsSetSuggestedPromptsParameters) (err error) {
+func (api *Client) SetAssistantThreadsSuggestedPromptsContext(ctx context.Context, params AssistantThreadsSetSuggestedPromptsParameters) (err error) {
 
 	values := url.Values{
 		"token": {api.token},
@@ -63,10 +63,13 @@ func (api *Client) SetAssistantThreadSuggestedPromptsContext(ctx context.Context
 		values.Add("thread_ts", params.ThreadTS)
 	}
 
-	for i, prompt := range params.Prompts {
-		values.Add("prompts["+strconv.Itoa(i)+"][title]", prompt.Title)
-		values.Add("prompts["+strconv.Itoa(i)+"][message]", prompt.Message)
+	// Send Prompts as JSON
+	prompts, err := json.Marshal(params.Prompts)
+	if err != nil {
+		return err
 	}
+
+	values.Add("prompts", string(prompts))
 
 	response := struct {
 		SlackResponse
