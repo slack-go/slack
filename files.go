@@ -638,7 +638,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 	return &c.Files[0], nil
 }
 
-func (api *Client) UploadMultipleFilesV2Context(ctx context.Context, params UploadMultipleFilesV2Parameters) (file *FileSummary, err error) {
+func (api *Client) UploadMultipleFilesV2Context(ctx context.Context, params UploadMultipleFilesV2Parameters) (files []FileSummary, err error) {
 
 	summaries := make([]*FileSummary, len(params.Files))
 	for i, fileParam := range params.Files {
@@ -680,11 +680,8 @@ func (api *Client) UploadMultipleFilesV2Context(ctx context.Context, params Uplo
 	if err != nil {
 		return nil, err
 	}
-	if len(c.Files) != 1 {
-		return nil, fmt.Errorf("file.upload.v2: something went wrong; received %d files instead of 1", len(c.Files))
-	}
 
-	return &c.Files[0], nil
+	return c.Files, nil
 }
 
 // completeUploadExternal once files are uploaded, this completes the upload and shares it to the specified channel
