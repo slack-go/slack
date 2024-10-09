@@ -23,12 +23,11 @@ func assistantThreadsSuggestedPromptsHandler(rw http.ResponseWriter, r *http.Req
 
 	if channelID != "" && threadTS != "" && len(prompts) == 2 {
 
-		resp, _ := json.Marshal(&AssistantThreadsSetSuggestedPromptsParameters{
-			ChannelID: channelID,
-			ThreadTS:  threadTS,
-			Prompts:   prompts,
+		resp, _ := json.Marshal(&addBookmarkResponse{
+			SlackResponse: SlackResponse{Ok: true},
 		})
 		rw.Write(resp)
+
 	} else {
 		rw.Write([]byte(`{ "ok": false, "error": "errored" }`))
 	}
@@ -66,12 +65,11 @@ func setAssistantThreadsStatusHandler(rw http.ResponseWriter, r *http.Request) {
 
 	if channelID != "" && threadTS != "" && status != "" {
 
-		resp, _ := json.Marshal(&AssistantThreadsSetStatusParameters{
-			ChannelID: channelID,
-			ThreadTS:  threadTS,
-			Status:    status,
+		resp, _ := json.Marshal(&addBookmarkResponse{
+			SlackResponse: SlackResponse{Ok: true},
 		})
 		rw.Write(resp)
+
 	} else {
 		rw.Write([]byte(`{ "ok": false, "error": "errored" }`))
 	}
@@ -107,10 +105,8 @@ func assistantThreadsTitleHandler(rw http.ResponseWriter, r *http.Request) {
 
 	if channelID != "" && threadTS != "" && title != "" {
 
-		resp, _ := json.Marshal(&AssistantThreadsSetTitleParameters{
-			ChannelID: channelID,
-			ThreadTS:  threadTS,
-			Title:     title,
+		resp, _ := json.Marshal(&addBookmarkResponse{
+			SlackResponse: SlackResponse{Ok: true},
 		})
 		rw.Write(resp)
 	} else {
