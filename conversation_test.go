@@ -477,6 +477,27 @@ func TestInviteSharedToConversation(t *testing.T) {
 			t.Error("is legacy shared channel should be false")
 		}
 	})
+
+	t.Run("external_limited", func(t *testing.T) {
+		userIDs := []string{"UXXXXXXX1", "UXXXXXXX2"}
+		externalLimited := true
+		inviteID, isLegacySharedChannel, err := api.InviteSharedToConversation(InviteSharedToConversationParams{
+			ChannelID:       "CXXXXXXXX",
+			UserIDs:         userIDs,
+			ExternalLimited: &externalLimited,
+		})
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
 }
 
 func TestKickUserFromConversation(t *testing.T) {
