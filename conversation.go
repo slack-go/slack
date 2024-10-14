@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strconv"
@@ -824,4 +825,37 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 		return err
 	}
 	return response.Err()
+}
+
+// CreateChannelCanvas creates a new canvas in a channel.
+// For more details, see CreateChannelCanvasContext documentation.
+func (api *Client) CreateChannelCanvas(channel string, documentContent DocumentContent) (string, error) {
+	return api.CreateChannelCanvasContext(context.Background(), channel, documentContent)
+}
+
+// CreateChannelCanvasContext creates a new canvas in a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/conversations.canvases.create
+func (api *Client) CreateChannelCanvasContext(ctx context.Context, channel string, documentContent DocumentContent) (string, error) {
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channel},
+	}
+	if documentContent.Type != "" {
+		documentContentJSON, err := json.Marshal(documentContent)
+		if err != nil {
+			return "", err
+		}
+		values.Add("document_content", string(documentContentJSON))
+	}
+
+	response := struct {
+		SlackResponse
+		CanvasID string `json:"canvas_id"`
+	}{}
+	err := api.postMethod(ctx, "conversations.canvases.create", values, &response)
+	if err != nil {
+		return "", err
+	}
+
+	return response.CanvasID, response.Err()
 }
