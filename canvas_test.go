@@ -32,7 +32,12 @@ func TestCreateCanvas(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	canvasID, err := api.CreateCanvas("Test Canvas", "Test Content")
+	documentContent := DocumentContent{
+		Type:     "markdown",
+		Markdown: "Test Content",
+	}
+
+	canvasID, err := api.CreateCanvas("Test Canvas", documentContent)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -88,8 +93,9 @@ func TestEditCanvas(t *testing.T) {
 			{
 				Operation: "update",
 				SectionID: "S1234",
-				DocumentContent: map[string]interface{}{
-					"text": "Updated Content",
+				DocumentContent: DocumentContent{
+					Type:     "markdown",
+					Markdown: "Updated Content",
 				},
 			},
 		},

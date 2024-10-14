@@ -10,10 +10,15 @@ type CanvasDetails struct {
 	CanvasID string `json:"canvas_id"`
 }
 
+type DocumentContent struct {
+	Type     string `json:"type"`
+	Markdown string `json:"markdown,omitempty"`
+}
+
 type CanvasChange struct {
-	Operation       string                 `json:"operation"`
-	SectionID       string                 `json:"section_id,omitempty"`
-	DocumentContent map[string]interface{} `json:"document_content"`
+	Operation       string          `json:"operation"`
+	SectionID       string          `json:"section_id,omitempty"`
+	DocumentContent DocumentContent `json:"document_content"`
 }
 
 type EditCanvasParams struct {
@@ -55,21 +60,25 @@ type LookupCanvasSectionsResponse struct {
 
 // CreateCanvas creates a new canvas.
 // For more details, see CreateCanvasContext documentation.
-func (api *Client) CreateCanvas(title, documentContent string) (string, error) {
+func (api *Client) CreateCanvas(title string, documentContent DocumentContent) (string, error) {
 	return api.CreateCanvasContext(context.Background(), title, documentContent)
 }
 
 // CreateCanvasContext creates a new canvas with a custom context.
 // Slack API docs: https://api.slack.com/methods/canvases.create
-func (api *Client) CreateCanvasContext(ctx context.Context, title, documentContent string) (string, error) {
+func (api *Client) CreateCanvasContext(ctx context.Context, title string, documentContent DocumentContent) (string, error) {
 	values := url.Values{
 		"token": {api.token},
 	}
 	if title != "" {
 		values.Add("title", title)
 	}
-	if documentContent != "" {
-		values.Add("document_content", documentContent)
+	if documentContent.Type != "" {
+		documentContentJSON, err := json.Marshal(documentContent)
+		if err != nil {
+			return "", err
+		}
+		values.Add("document_content", string(documentContentJSON))
 	}
 
 	response := struct {
