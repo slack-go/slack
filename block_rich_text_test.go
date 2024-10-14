@@ -187,6 +187,16 @@ func TestRichTextSection_UnmarshalJSON(t *testing.T) {
 			},
 			nil,
 		},
+		{
+			[]byte(`{"type": "rich_text_section","elements":[{"type": "emoji","name": "+1","unicode": "1f44d-1f3fb","skin_tone": 2}]}`),
+			RichTextSection{
+				Type: RTESection,
+				Elements: []RichTextSectionElement{
+					&RichTextSectionEmojiElement{Type: RTSEEmoji, Name: "+1", Unicode: "1f44d-1f3fb", SkinTone: 2},
+				},
+			},
+			nil,
+		},
 	}
 	for _, tc := range cases {
 		var actual RichTextSection
