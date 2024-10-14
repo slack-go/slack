@@ -1,0 +1,56 @@
+{
+  "display_information": {
+    "name": "Function Example"
+  },
+  "features": {
+    "app_home": {
+      "home_tab_enabled": false,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": true
+    },
+    "bot_user": {
+      "display_name": "Function Example",
+      "always_online": true
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "chat:write"
+      ]
+    }
+  },
+  "settings": {
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": true,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  },
+  "functions": {
+    "sample_function": {
+      "title": "Sample function",
+      "description": "Runs sample function",
+      "input_parameters": {
+        "user_id": {
+          "type": "slack#/types/user_id",
+          "title": "User",
+          "description": "Message recipient",
+          "is_required": true,
+          "hint": "Select a user in the workspace",
+          "name": "user_id"
+        }
+      },
+      "output_parameters": {
+        "user_id": {
+          "type": "slack#/types/user_id",
+          "title": "User",
+          "description": "User that completed the function",
+          "is_required": true,
+          "name": "user_id"
+        }
+      }
+    }
+  }
+}
