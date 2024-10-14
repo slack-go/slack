@@ -137,12 +137,6 @@ type openViewRequest struct {
 	View      ModalViewRequest `json:"view"`
 }
 
-type publishViewRequest struct {
-	UserID string             `json:"user_id"`
-	View   HomeTabViewRequest `json:"view"`
-	Hash   *string            `json:"hash,omitempty"`
-}
-
 type pushViewRequest struct {
 	TriggerID string           `json:"trigger_id"`
 	View      ModalViewRequest `json:"view"`
