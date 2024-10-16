@@ -22,6 +22,7 @@ type AssistantThreadsSetTitleParameters struct {
 
 // AssistantThreadSetSuggestedPromptsParameters are the parameters for AssistantThreadSetSuggestedPrompts
 type AssistantThreadsSetSuggestedPromptsParameters struct {
+	Title     string                   `json:"title"`
 	ChannelID string                   `json:"channel_id"`
 	ThreadTS  string                   `json:"thread_ts"`
 	Prompts   []AssistantThreadsPrompt `json:"prompts"`
@@ -53,10 +54,6 @@ func (api *Client) SetAssistantThreadsSuggestedPromptsContext(ctx context.Contex
 
 	values := url.Values{
 		"token": {api.token},
-	}
-
-	if params.ChannelID != "" {
-		values.Add("channel_id", params.ChannelID)
 	}
 
 	if params.ThreadTS != "" {
@@ -95,10 +92,6 @@ func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params 
 
 	values := url.Values{
 		"token": {api.token},
-	}
-
-	if params.ChannelID != "" {
-		values.Add("channel_id", params.ChannelID)
 	}
 
 	if params.ThreadTS != "" {
