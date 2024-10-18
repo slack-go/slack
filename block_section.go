@@ -9,6 +9,7 @@ type SectionBlock struct {
 	BlockID   string             `json:"block_id,omitempty"`
 	Fields    []*TextBlockObject `json:"fields,omitempty"`
 	Accessory *Accessory         `json:"accessory,omitempty"`
+	Expand    boolean            `json:"expand",omitempty"`
 }
 
 // BlockType returns the type of the block
@@ -22,6 +23,12 @@ type SectionBlockOption func(*SectionBlock)
 func SectionBlockOptionBlockID(blockID string) SectionBlockOption {
 	return func(block *SectionBlock) {
 		block.BlockID = blockID
+	}
+}
+
+func SectionBlockOptionExpand(expand bool) SectionBlockOption {
+	return func(block *SectionBlock) {
+		block.Expand = expand
 	}
 }
 
