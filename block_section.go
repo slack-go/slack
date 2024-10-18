@@ -9,7 +9,7 @@ type SectionBlock struct {
 	BlockID   string             `json:"block_id,omitempty"`
 	Fields    []*TextBlockObject `json:"fields,omitempty"`
 	Accessory *Accessory         `json:"accessory,omitempty"`
-	Expand    boolean            `json:"expand",omitempty"`
+	Expand    bool               `json:"expand",omitempty"`
 }
 
 // BlockType returns the type of the block
