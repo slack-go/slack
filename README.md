@@ -15,7 +15,7 @@ a fully managed way.
 There is currently no major version released.
 Therefore, minor version releases may include backward incompatible changes.
 
-See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) or [Releases](https://github.com/slack-go/slack/releases) for more information about the changes.
+See [Releases](https://github.com/slack-go/slack/releases) for more information about the changes.
 
 ## Installing
 
