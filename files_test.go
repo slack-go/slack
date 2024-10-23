@@ -3,7 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -44,7 +44,7 @@ func (h *fileCommentHandler) handler(w http.ResponseWriter, r *http.Request) {
 type mockHTTPClient struct{}
 
 func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
-	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(`OK`))}, nil
+	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
 
 func TestSlack_GetFile(t *testing.T) {
@@ -209,5 +209,76 @@ func TestUploadFileWithoutFilename(t *testing.T) {
 
 	if !strings.Contains(err.Error(), ".Filename is mandatory") {
 		t.Errorf("Error message should mention empty FileUploadParameters.Filename")
+	}
+}
+
+func uploadURLHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(getUploadURLExternalResponse{
+		FileID:        "RandomID",
+		UploadURL:     "http://" + serverAddr + "/abc",
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func urlFileUploadHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "text")
+	rw.Write([]byte("Ok: 200, file uploaded"))
+}
+
+func completeURLUpload(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(completeUploadExternalResponse{
+		Files: []FileSummary{
+			{
+				ID:    "RandomID",
+				Title: "",
+			},
+		},
+		SlackResponse: SlackResponse{Ok: true}})
+	rw.Write(response)
+}
+
+func TestUploadFileV2(t *testing.T) {
+	http.HandleFunc("/files.getUploadURLExternal", uploadURLHandler)
+	http.HandleFunc("/abc", urlFileUploadHandler)
+	http.HandleFunc("/files.completeUploadExternal", completeURLUpload)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	params := UploadFileV2Parameters{
+		Filename: "test.txt", Content: "test content", FileSize: 10,
+		Channel: "CXXXXXXXX",
+	}
+	if _, err := api.UploadFileV2(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+
+	reader := bytes.NewBufferString("test reader")
+	params = UploadFileV2Parameters{
+		Filename: "test.txt",
+		Reader:   reader,
+		FileSize: 10,
+		Channel:  "CXXXXXXXX"}
+	if _, err := api.UploadFileV2(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+
+	largeByt := make([]byte, 107374200)
+	reader = bytes.NewBuffer(largeByt)
+	params = UploadFileV2Parameters{
+		Filename: "test.txt", Reader: reader, FileSize: len(largeByt),
+		Channel: "CXXXXXXXX"}
+	if _, err := api.UploadFileV2(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+
+	reader = bytes.NewBufferString("test no channel")
+	params = UploadFileV2Parameters{
+		Filename: "test.txt",
+		Reader:   reader,
+		FileSize: 15}
+	if _, err := api.UploadFileV2(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
 	}
 }

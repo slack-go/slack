@@ -43,6 +43,16 @@ func TestWithStyleForButtonElement(t *testing.T) {
 
 }
 
+func TestWithURLForButtonElement(t *testing.T) {
+
+	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
+	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
+
+	btnElement.WithURL("https://foo.bar")
+	assert.Equal(t, btnElement.URL, "https://foo.bar")
+
+}
+
 func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	testOptionText := NewTextBlockObject("plain_text", "Option One", false, false)
@@ -133,6 +143,12 @@ func TestNewTimePickerBlockElement(t *testing.T) {
 	assert.Equal(t, timepickerElement.ActionID, "test")
 }
 
+func TestNewDateTimePickerBlockElement(t *testing.T) {
+	datetimepickerElement := NewDateTimePickerBlockElement("test")
+	assert.Equal(t, string(datetimepickerElement.Type), "datetimepicker")
+	assert.Equal(t, datetimepickerElement.ActionID, "test")
+}
+
 func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 	plainTextInputElement := NewPlainTextInputBlockElement(nil, "test")
@@ -140,6 +156,26 @@ func TestNewPlainTextInputBlockElement(t *testing.T) {
 	assert.Equal(t, string(plainTextInputElement.Type), "plain_text_input")
 	assert.Equal(t, plainTextInputElement.ActionID, "test")
 
+}
+
+func TestNewRichTextInputBlockElement(t *testing.T) {
+	richTextInputElement := NewRichTextInputBlockElement(nil, "test")
+	assert.Equal(t, string(richTextInputElement.Type), "rich_text_input")
+	assert.Equal(t, richTextInputElement.ActionID, "test")
+}
+
+func TestNewEmailTextInputBlockElement(t *testing.T) {
+	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
+
+	assert.Equal(t, string(emailTextInputElement.Type), "email_text_input")
+	assert.Equal(t, emailTextInputElement.ActionID, "example@example.com")
+}
+
+func TestNewURLTextInputBlockElement(t *testing.T) {
+	urlTextInputElement := NewURLTextInputBlockElement(nil, "www.example.com")
+
+	assert.Equal(t, string(urlTextInputElement.Type), "url_text_input")
+	assert.Equal(t, urlTextInputElement.ActionID, "www.example.com")
 }
 
 func TestNewCheckboxGroupsBlockElement(t *testing.T) {
@@ -184,4 +220,30 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 	assert.Equal(t, radioButtonsElement.ActionID, "test")
 	assert.Equal(t, len(radioButtonsElement.Options), 3)
 
+}
+
+func TestNewNumberInputBlockElement(t *testing.T) {
+
+	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
+
+	assert.Equal(t, string(numberInputElement.Type), "number_input")
+	assert.Equal(t, numberInputElement.ActionID, "test")
+	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
+
+}
+
+func TestNewFileInputBlockElement(t *testing.T) {
+
+	fileInputElement := NewFileInputBlockElement("test")
+
+	assert.Equal(t, string(fileInputElement.Type), "file_input")
+	assert.Equal(t, fileInputElement.ActionID, "test")
+
+	fileInputElement.WithFileTypes("jpg", "png")
+	assert.Equal(t, len(fileInputElement.FileTypes), 2)
+	assert.Contains(t, fileInputElement.FileTypes, "jpg")
+	assert.Contains(t, fileInputElement.FileTypes, "png")
+
+	fileInputElement.WithMaxFiles(10)
+	assert.Equal(t, fileInputElement.MaxFiles, 10)
 }
