@@ -1309,7 +1309,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	AppMention:                    AppMentionEvent{},
 	AppHomeOpened:                 AppHomeOpenedEvent{},
 	AppUninstalled:                AppUninstalledEvent{},
-  AssistantThreadStarted:        AssistantThreadStartedEvent{},
+	AssistantThreadStarted:        AssistantThreadStartedEvent{},
 	AssistantThreadContextChanged: AssistantThreadContextChangedEvent{},
 	ChannelCreated:                ChannelCreatedEvent{},
 	ChannelDeleted:                ChannelDeletedEvent{},
