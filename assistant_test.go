@@ -6,46 +6,9 @@ import (
 	"testing"
 )
 
-func assistantThreadsSuggestedPromptsHandler(rw http.ResponseWriter, r *http.Request) {
-
-	channelID := r.FormValue("channel_id")
-	threadTS := r.FormValue("thread_ts")
-	promptStr := r.FormValue("prompts")
-
-	var prompts []AssistantThreadsPrompt
-	err := json.Unmarshal([]byte(promptStr), &prompts)
-	if err != nil {
-		rw.Write([]byte(`{ "ok": false, "error": "errored" }`))
-		return
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-
-	if channelID == "" {
-		rw.Write([]byte(`{ "ok": false, "error": "channel_id missing" }`))
-		return
-	}
-
-	if threadTS == "" {
-		rw.Write([]byte(`{ "ok": false, "error": "thread_ts missing" }`))
-		return
-	}
-
-	if len(prompts) != 2 {
-		rw.Write([]byte(`{ "ok": false, "error": "incorrect prompt count" }`))
-		return
-	}
-
-	resp, _ := json.Marshal(&addBookmarkResponse{
-		SlackResponse: SlackResponse{Ok: true},
-	})
-	rw.Write(resp)
-
-}
-
 func TestAssistantThreadsSuggestedPrompts(t *testing.T) {
 
-	http.HandleFunc("/assistant.threads.setSuggestedPrompts", assistantThreadsSuggestedPromptsHandler)
+	http.HandleFunc("/assistant.threads.setSuggestedPrompts", okJSONHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
@@ -64,39 +27,9 @@ func TestAssistantThreadsSuggestedPrompts(t *testing.T) {
 
 }
 
-func setAssistantThreadsStatusHandler(rw http.ResponseWriter, r *http.Request) {
-
-	channelID := r.FormValue("channel_id")
-	threadTS := r.FormValue("thread_ts")
-	status := r.FormValue("status")
-
-	rw.Header().Set("Content-Type", "application/json")
-
-	if channelID == "" {
-		rw.Write([]byte(`{ "ok": false, "error": "channel_id missing" }`))
-		return
-	}
-
-	if threadTS == "" {
-		rw.Write([]byte(`{ "ok": false, "error": "thread_ts missing" }`))
-		return
-	}
-
-	if status == "" {
-		rw.Write([]byte(`{ "ok": false, "error": "status missing" }`))
-		return
-	}
-
-	resp, _ := json.Marshal(&addBookmarkResponse{
-		SlackResponse: SlackResponse{Ok: true},
-	})
-	rw.Write(resp)
-
-}
-
 func TestSetAssistantThreadsStatus(t *testing.T) {
 
-	http.HandleFunc("/assistant.threads.setStatus", setAssistantThreadsStatusHandler)
+	http.HandleFunc("/assistant.threads.setStatus", okJSONHandler)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
