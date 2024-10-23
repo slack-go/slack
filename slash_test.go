@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -97,5 +98,72 @@ func TestSlash_ServeHTTP(t *testing.T) {
 			t.Errorf("%d: Got params %#v, want %#v", i, slashCommand, test.wantParams)
 		}
 		resp.Body.Close()
+	}
+}
+
+func TestSlash_UnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		body                    string
+		wantIsEnterpriseInstall bool
+		wantToken               string
+		wantUnmarshalError      string
+	}{
+		{
+			body:                    `{"token":"blahblah","is_enterprise_install":"false"}`,
+			wantIsEnterpriseInstall: false,
+			wantToken:               "blahblah",
+			wantUnmarshalError:      "",
+		},
+		{
+			body:                    `{"token":"blahblah","is_enterprise_install":false}`,
+			wantIsEnterpriseInstall: false,
+			wantToken:               "blahblah",
+			wantUnmarshalError:      "",
+		},
+		{
+			body:                    `{"token":"blahblah","is_enterprise_install":"true"}`,
+			wantIsEnterpriseInstall: true,
+			wantToken:               "blahblah",
+			wantUnmarshalError:      "",
+		},
+		{
+			body:                    `{"token":"blahblah","is_enterprise_install":true}`,
+			wantIsEnterpriseInstall: true,
+			wantToken:               "blahblah",
+			wantUnmarshalError:      "",
+		},
+		{
+			body:               `{"token":"blahblah","is_enterprise_install":42}`,
+			wantUnmarshalError: "wrong data type for is_enterprise_install: float64",
+		},
+		{
+			body:               `{"token":"blahblah","is_enterprise_install":"unconvertable to bool"}`,
+			wantUnmarshalError: "parsing boolean for is_enterprise_install: strconv.ParseBool: parsing \"unconvertable to bool\": invalid syntax",
+		},
+	}
+
+	for i, test := range tests {
+		var result SlashCommand
+
+		err := json.Unmarshal([]byte(test.body), &result)
+		if err != nil {
+			if err.Error() != test.wantUnmarshalError {
+				t.Errorf("%d: Got error %v, want error %q", i, err, test.wantUnmarshalError)
+			}
+			continue
+		}
+
+		if test.wantUnmarshalError != "" {
+			t.Errorf("%d: Got no error, want error %q", i, test.wantUnmarshalError)
+			continue
+		}
+
+		if result.IsEnterpriseInstall != test.wantIsEnterpriseInstall {
+			t.Errorf("%d: Got IsEnterpriseInstall %v, want IsEnterpriseInstall %v", i, result.IsEnterpriseInstall, test.wantIsEnterpriseInstall)
+		}
+
+		if result.Token != test.wantToken {
+			t.Errorf("%d: Got Token %v, want Token %v", i, result.Token, test.wantToken)
+		}
 	}
 }

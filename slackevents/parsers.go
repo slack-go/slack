@@ -12,7 +12,7 @@ import (
 
 // eventsMap checks both slack.EventsMapping and
 // and slackevents.EventsAPIInnerEventMapping. If the event
-// exists, returns the the unmarshalled struct instance of
+// exists, returns the unmarshalled struct instance of
 // target for the matching event type.
 // TODO: Consider moving all events into its own package?
 func eventsMap(t string) (interface{}, bool) {
@@ -102,7 +102,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -114,10 +114,10 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			iE.Type,
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			nil,
 			EventsAPIInnerEvent{},
-		}, fmt.Errorf("Inner Event does not exist! %s", iE.Type)
+		}, fmt.Errorf("inner Event does not exist! %s", iE.Type)
 	}
 	t := reflect.TypeOf(v)
 	recvEvent := reflect.New(t).Interface()
@@ -128,7 +128,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 			e.TeamID,
 			"unmarshalling_error",
 			e.APIAppID,
-			"",
+			e.EnterpriseID,
 			&slack.UnmarshallingErrorEvent{ErrorObj: err},
 			EventsAPIInnerEvent{},
 		}, err
@@ -138,7 +138,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 		e.TeamID,
 		e.Type,
 		e.APIAppID,
-		"",
+		e.EnterpriseID,
 		e,
 		EventsAPIInnerEvent{iE.Type, recvEvent},
 	}, nil
@@ -176,7 +176,7 @@ func (c TokenComparator) Verify(t string) bool {
 	return subtle.ConstantTimeCompare([]byte(c.VerificationToken), []byte(t)) == 1
 }
 
-// ParseEvent parses the outter and inner events (if applicable) of an events
+// ParseEvent parses the outer and inner events (if applicable) of an events
 // api event returning a EventsAPIEvent type. If the event is a url_verification event,
 // the inner event is empty.
 func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error) {
@@ -192,7 +192,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 	}
 
 	if !cfg.TokenVerified {
-		return EventsAPIEvent{}, errors.New("Invalid verification token")
+		return EventsAPIEvent{}, errors.New("invalid verification token")
 	}
 
 	if e.Type == CallbackEvent {
@@ -212,6 +212,32 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 		}
 		return innerEvent, nil
 	}
+
+	if e.Type == AppRateLimited {
+		appRateLimitedEvent := &EventsAPIAppRateLimited{}
+		err = json.Unmarshal(rawEvent, appRateLimitedEvent)
+		if err != nil {
+			return EventsAPIEvent{
+				"",
+				"",
+				"unmarshalling_error",
+				"",
+				"",
+				&slack.UnmarshallingErrorEvent{ErrorObj: err},
+				EventsAPIInnerEvent{},
+			}, err
+		}
+		return EventsAPIEvent{
+			e.Token,
+			e.TeamID,
+			e.Type,
+			e.APIAppID,
+			e.EnterpriseID,
+			appRateLimitedEvent,
+			EventsAPIInnerEvent{},
+		}, nil
+	}
+
 	urlVerificationEvent := &EventsAPIURLVerificationEvent{}
 	err = json.Unmarshal(rawEvent, urlVerificationEvent)
 	if err != nil {

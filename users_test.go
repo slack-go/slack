@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -33,22 +32,31 @@ func getTestUserProfileCustomFields() UserProfileCustomFields {
 		}}
 }
 
+func getTestUserProfileStatusEmojiDisplayInfo() []UserProfileStatusEmojiDisplayInfo {
+	return []UserProfileStatusEmojiDisplayInfo{{
+		EmojiName:  "construction",
+		Unicode:    "1f6a7",
+		DisplayURL: "https://a.slack-edge.com/production-standard-emoji-assets/14.0/apple-large/1f6a7.png",
+	}}
+}
+
 func getTestUserProfile() UserProfile {
 	return UserProfile{
-		StatusText:            "testStatus",
-		StatusEmoji:           ":construction:",
-		RealName:              "Test Real Name",
-		RealNameNormalized:    "Test Real Name Normalized",
-		DisplayName:           "Test Display Name",
-		DisplayNameNormalized: "Test Display Name Normalized",
-		Email:                 "test@test.com",
-		Image24:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
-		Image32:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
-		Image48:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
-		Image72:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
-		Image192:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
-		Image512:              "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_512.jpg",
-		Fields:                getTestUserProfileCustomFields(),
+		StatusText:             "testStatus",
+		StatusEmoji:            ":construction:",
+		StatusEmojiDisplayInfo: getTestUserProfileStatusEmojiDisplayInfo(),
+		RealName:               "Test Real Name",
+		RealNameNormalized:     "Test Real Name Normalized",
+		DisplayName:            "Test Display Name",
+		DisplayNameNormalized:  "Test Display Name Normalized",
+		Email:                  "test@test.com",
+		Image24:                "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_24.jpg",
+		Image32:                "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_32.jpg",
+		Image48:                "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_48.jpg",
+		Image72:                "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_72.jpg",
+		Image192:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_192.jpg",
+		Image512:               "https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-10-18/92962080834_ef14c1469fc0741caea1_512.jpg",
+		Fields:                 getTestUserProfileCustomFields(),
 	}
 }
 
@@ -547,7 +555,7 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 			httpTestErrReply(w, true, fmt.Sprintf("failed to open uploaded file: %+v", err))
 			return
 		}
-		gotBytes, err := ioutil.ReadAll(file)
+		gotBytes, err := io.ReadAll(file)
 		if err != nil {
 			httpTestErrReply(w, true, fmt.Sprintf("failed to read uploaded file: %+v", err))
 			return
@@ -568,7 +576,7 @@ func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
 	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
 	draw.Draw(photo, photo.Bounds(), image.Black, image.ZP, draw.Src)
 
-	f, err := ioutil.TempFile(os.TempDir(), "profile.png")
+	f, err := os.CreateTemp(os.TempDir(), "profile.png")
 	if err != nil {
 		t.Fatalf("failed to create test photo: %+v\n", err)
 	}
@@ -607,6 +615,9 @@ func TestGetUserProfile(t *testing.T) {
 	exp := getTestUserProfile()
 	if profile.DisplayName != exp.DisplayName {
 		t.Fatalf(`profile.DisplayName = "%s", wanted "%s"`, profile.DisplayName, exp.DisplayName)
+	}
+	if len(profile.StatusEmojiDisplayInfo) != 1 {
+		t.Fatalf(`expected 1 emoji, got %d`, len(profile.StatusEmojiDisplayInfo))
 	}
 }
 

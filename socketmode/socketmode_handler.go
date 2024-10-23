@@ -1,6 +1,7 @@
 package socketmode
 
 import (
+	"context"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -105,15 +106,31 @@ func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 // RunSlackEventLoop receives the event via the socket
 func (r *SocketmodeHandler) RunEventLoop() error {
 
-	go r.runEventLoop()
+	go r.runEventLoop(context.Background())
 
 	return r.Client.Run()
 }
 
+func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
+	go r.runEventLoop(ctx)
+
+	return r.Client.RunContext(ctx)
+}
+
 // Call the dispatcher for each incomming event
-func (r *SocketmodeHandler) runEventLoop() {
-	for evt := range r.Client.Events {
-		r.dispatcher(evt)
+func (r *SocketmodeHandler) runEventLoop(ctx context.Context) {
+	for {
+		select {
+		case evt, ok := <-r.Client.Events:
+			if !ok {
+				return
+			}
+
+			r.dispatcher(evt)
+
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 

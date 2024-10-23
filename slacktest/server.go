@@ -26,10 +26,10 @@ type Customize interface {
 	Handle(pattern string, handler http.HandlerFunc)
 }
 
-type binder func(Customize)
+type Binder func(Customize)
 
 // NewTestServer returns a slacktest.Server ready to be started
-func NewTestServer(custom ...binder) *Server {
+func NewTestServer(custom ...Binder) *Server {
 	serverChans := newMessageChannels()
 
 	channels := &serverChannels{}
@@ -55,6 +55,7 @@ func NewTestServer(custom ...binder) *Server {
 	s.Handle("/conversations.setPurpose", setConversationPurposeHandler)
 	s.Handle("/conversations.rename", renameConversationHandler)
 	s.Handle("/conversations.invite", inviteConversationHandler)
+	s.Handle("/conversations.inviteShared", inviteSharedConversationHandler)
 	s.Handle("/users.info", usersInfoHandler)
 	s.Handle("/users.lookupByEmail", usersInfoHandler)
 	s.Handle("/bots.info", botsInfoHandler)

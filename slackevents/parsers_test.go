@@ -73,6 +73,33 @@ func TestParseURLVerificationEvent(t *testing.T) {
 	}
 }
 
+func TestParseAppRateLimitedEvent(t *testing.T) {
+	event := `
+		{
+			"token": "fake-token",
+			"team_id": "T123ABC456",
+			"minute_rate_limited": 1518467820,
+			"api_app_id": "A123ABC456",
+			"type": "app_rate_limited"
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(event), OptionVerifyToken(&TokenComparator{"fake-token"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+	switch ev := msg.Data.(type) {
+	case *EventsAPIAppRateLimited:
+		{
+		}
+	default:
+		{
+			fmt.Println(ev)
+			t.Fail()
+		}
+	}
+}
+
 func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
 			{
@@ -95,7 +122,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	switch outterEvent := msg.Data.(type) {
+	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
 			switch innerEvent := msg.InnerEvent.Data.(type) {
@@ -109,7 +136,7 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 		}
 	default:
 		{
-			fmt.Println(outterEvent)
+			fmt.Println(outerEvent)
 			t.Fail()
 		}
 	}
