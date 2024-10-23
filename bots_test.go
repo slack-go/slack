@@ -29,7 +29,7 @@ func TestGetBotInfo(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	bot, err := api.GetBotInfo("B02875YLA")
+	bot, err := api.GetBotInfo(GetBotInfoParameters{Bot: "B02875YLA"})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
