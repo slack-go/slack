@@ -21,16 +21,25 @@ func assistantThreadsSuggestedPromptsHandler(rw http.ResponseWriter, r *http.Req
 
 	rw.Header().Set("Content-Type", "application/json")
 
-	if channelID != "" && threadTS != "" && len(prompts) == 2 {
-
-		resp, _ := json.Marshal(&addBookmarkResponse{
-			SlackResponse: SlackResponse{Ok: true},
-		})
-		rw.Write(resp)
-
-	} else {
-		rw.Write([]byte(`{ "ok": false, "error": "errored" }`))
+	if channelID == "" {
+		rw.Write([]byte(`{ "ok": false, "error": "channel_id missing" }`))
+		return
 	}
+
+	if threadTS == "" {
+		rw.Write([]byte(`{ "ok": false, "error": "thread_ts missing" }`))
+		return
+	}
+
+	if len(prompts) != 2 {
+		rw.Write([]byte(`{ "ok": false, "error": "incorrect prompt count" }`))
+		return
+	}
+
+	resp, _ := json.Marshal(&addBookmarkResponse{
+		SlackResponse: SlackResponse{Ok: true},
+	})
+	rw.Write(resp)
 
 }
 
@@ -63,16 +72,25 @@ func setAssistantThreadsStatusHandler(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Set("Content-Type", "application/json")
 
-	if channelID != "" && threadTS != "" && status != "" {
-
-		resp, _ := json.Marshal(&addBookmarkResponse{
-			SlackResponse: SlackResponse{Ok: true},
-		})
-		rw.Write(resp)
-
-	} else {
-		rw.Write([]byte(`{ "ok": false, "error": "errored" }`))
+	if channelID == "" {
+		rw.Write([]byte(`{ "ok": false, "error": "channel_id missing" }`))
+		return
 	}
+
+	if threadTS == "" {
+		rw.Write([]byte(`{ "ok": false, "error": "thread_ts missing" }`))
+		return
+	}
+
+	if status == "" {
+		rw.Write([]byte(`{ "ok": false, "error": "status missing" }`))
+		return
+	}
+
+	resp, _ := json.Marshal(&addBookmarkResponse{
+		SlackResponse: SlackResponse{Ok: true},
+	})
+	rw.Write(resp)
 
 }
 
