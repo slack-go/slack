@@ -1,5 +1,5 @@
-name: iorgin/Test
-auto
+name:Test
+
 on:
   push:
     branches:
