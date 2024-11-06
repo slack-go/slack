@@ -8,6 +8,59 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAssistantThreadStartedEvent(t *testing.T) {
+
+	rawE := []byte(`
+		{
+			"type": "assistant_thread_started",
+			"assistant_thread": {
+				"user_id": "U123ABC456",
+				"context": { 
+					"channel_id": "C123ABC456", 
+					"team_id": "T07XY8FPJ5C", 
+					"enterprise_id": "E480293PS82"
+					},
+				"channel_id": "D123ABC456",
+				"thread_ts": "1729999327.187299"
+
+			},
+			"event_ts": "1715873754.429808"
+		}
+	`)
+
+	err := json.Unmarshal(rawE, &AssistantThreadStartedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestAssistantThreadContextChangedEvent(t *testing.T) {
+
+	rawE := []byte(`
+		{
+			"type": "assistant_thread_context_changed",
+			"assistant_thread": {
+				"user_id": "U123ABC456",
+				"context": { 
+					"channel_id": "C123ABC456", 
+					"team_id": "T07XY8FPJ5C", 
+					"enterprise_id": "E480293PS82"
+					},
+				"channel_id": "D123ABC456",
+				"thread_ts": "1729999327.187299"
+			},
+			"event_ts": "17298244.022142"
+		}
+	`)
+
+	err := json.Unmarshal(rawE, &AssistantThreadContextChangedEvent{})
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
 func TestAppMention(t *testing.T) {
 	rawE := []byte(`
 			{
