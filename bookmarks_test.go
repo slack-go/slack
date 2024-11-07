@@ -87,19 +87,13 @@ func TestAddBookmark(t *testing.T) {
 	once.Do(startServer)
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	bookmark, err := api.AddBookmark(AddBookmarkParameters{
-		ChannelID: "C12345",
-		Title:     "Homepage",
-		Type:      "link",
+	bookmark, err := api.AddBookmark("C12345", AddBookmarkParameters{
+		Title: "Homepage",
+		Type:  "link",
 	})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if bookmark == nil {
-		t.Fatal("bookmark returned was nil")
 		return
 	}
 
@@ -112,21 +106,17 @@ func TestEditBookmark(t *testing.T) {
 	http.HandleFunc("/bookmarks.edit", getBookmark)
 	once.Do(startServer)
 
+	emoji := ":siren:"
+	title := "hello2"
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	bookmark, err := api.EditBookmark(EditBookmarkParameters{
-		ChannelID:  "C12345",
-		BookmarkID: "Bk12345",
-		Emoji:      ":siren:",
-		Title:      "hello2",
+	bookmark, err := api.EditBookmark("C12345", "Bk12345", EditBookmarkParameters{
+		Emoji: &emoji,
+		Title: &title,
 	})
 
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if bookmark == nil {
-		t.Fatal("bookmark returned was nil")
 		return
 	}
 

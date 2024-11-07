@@ -12,13 +12,16 @@ jobs:
     strategy:
       matrix:
         go:
-          - '1.17'
           - '1.18'
           - '1.19'
+          - '1.20'
+          - '1.21'
+          - '1.22'
+          - '1.23'
     name: test go-${{ matrix.go }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
       - name: run test
@@ -29,13 +32,17 @@ jobs:
     runs-on: ubuntu-22.04
     name: lint
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+          cache: false
+      - uses: actions/checkout@v4
         with:
           # NOTE: Because we are a fork,
           # we must fetch all history for all branches
           # and tags.
-          fetch-depth: '0'
+          fetch-depth: 0
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
+        uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86 # v6.1.0
         with:
-          version: v1.49.0
+          version: v1.52.2

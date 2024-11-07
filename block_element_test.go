@@ -43,6 +43,16 @@ func TestWithStyleForButtonElement(t *testing.T) {
 
 }
 
+func TestWithURLForButtonElement(t *testing.T) {
+
+	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
+	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
+
+	btnElement.WithURL("https://foo.bar")
+	assert.Equal(t, btnElement.URL, "https://foo.bar")
+
+}
+
 func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	testOptionText := NewTextBlockObject("plain_text", "Option One", false, false)
@@ -165,16 +175,6 @@ func TestNewRichTextInputBlockElement(t *testing.T) {
 	assert.Equal(t, richTextInputElement.ActionID, "test")
 }
 
-func TestNewNumberInputBlockElement(t *testing.T) {
-
-	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
-
-	assert.Equal(t, string(numberInputElement.Type), "number_input")
-	assert.Equal(t, numberInputElement.ActionID, "test")
-	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
-
-}
-
 func TestNewURLInputBlockElement(t *testing.T) {
 
 	urlInputElement := NewURLInputBlockElement(nil, "test")
@@ -226,4 +226,30 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 	assert.Equal(t, radioButtonsElement.ActionID, "test")
 	assert.Equal(t, len(radioButtonsElement.Options), 3)
 
+}
+
+func TestNewNumberInputBlockElement(t *testing.T) {
+
+	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
+
+	assert.Equal(t, string(numberInputElement.Type), "number_input")
+	assert.Equal(t, numberInputElement.ActionID, "test")
+	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
+
+}
+
+func TestNewFileInputBlockElement(t *testing.T) {
+
+	fileInputElement := NewFileInputBlockElement("test")
+
+	assert.Equal(t, string(fileInputElement.Type), "file_input")
+	assert.Equal(t, fileInputElement.ActionID, "test")
+
+	fileInputElement.WithFileTypes("jpg", "png")
+	assert.Equal(t, len(fileInputElement.FileTypes), 2)
+	assert.Contains(t, fileInputElement.FileTypes, "jpg")
+	assert.Contains(t, fileInputElement.FileTypes, "png")
+
+	fileInputElement.WithMaxFiles(10)
+	assert.Equal(t, fileInputElement.MaxFiles, 10)
 }

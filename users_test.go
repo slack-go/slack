@@ -8,7 +8,6 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
@@ -556,7 +555,7 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 			httpTestErrReply(w, true, fmt.Sprintf("failed to open uploaded file: %+v", err))
 			return
 		}
-		gotBytes, err := ioutil.ReadAll(file)
+		gotBytes, err := io.ReadAll(file)
 		if err != nil {
 			httpTestErrReply(w, true, fmt.Sprintf("failed to read uploaded file: %+v", err))
 			return
@@ -577,7 +576,7 @@ func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
 	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
 	draw.Draw(photo, photo.Bounds(), image.Black, image.ZP, draw.Src)
 
-	f, err := ioutil.TempFile(os.TempDir(), "profile.png")
+	f, err := os.CreateTemp(os.TempDir(), "profile.png")
 	if err != nil {
 		t.Fatalf("failed to create test photo: %+v\n", err)
 	}

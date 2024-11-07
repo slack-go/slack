@@ -2,7 +2,7 @@ package slack
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -185,7 +185,7 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 		]
 	}`
 
-	return &http.Response{StatusCode: 200, Body: ioutil.NopCloser(bytes.NewBufferString(responseString))}, nil
+	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(responseString))}, nil
 }
 
 func TestSlack_ListReminders(t *testing.T) {

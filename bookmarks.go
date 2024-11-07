@@ -24,12 +24,107 @@ type Bookmark struct {
 	AppID               *string `json:"app_id"`
 }
 
-// ListBookmarks returns all the bookmarks in the given channel
+type AddBookmarkParameters struct {
+	Title     string // A required title for the bookmark
+	Type      string // A required type for the bookmark
+	Link      string // URL required for type:link
+	Emoji     string // An optional emoji
+	EntityID  string
+	ParentID  string
+	ChannelID string `json:"channel_id"`
+}
+
+type EditBookmarkParameters struct {
+	Title      *string // Change the title. Set to "" to clear
+	Emoji      *string // Change the emoji. Set to "" to clear
+	Link       string  // Change the link
+	ChannelID  string  `json:"channel_id"`
+	BookmarkID string  `json:"bookmark_id"`
+	Type       string  `json:"type,omitempty"`
+}
+
+type addBookmarkResponse struct {
+	Bookmark Bookmark `json:"bookmark"`
+	SlackResponse
+}
+
+type editBookmarkResponse struct {
+	Bookmark Bookmark `json:"bookmark"`
+	SlackResponse
+}
+
+type listBookmarksResponse struct {
+	Bookmarks []Bookmark `json:"bookmarks"`
+	SlackResponse
+}
+
+// AddBookmark adds a bookmark in a channel.
+// For more details, see AddBookmarkContext documentation.
+func (api *Client) AddBookmark(channelID string, params AddBookmarkParameters) (Bookmark, error) {
+	return api.AddBookmarkContext(context.Background(), channelID, params)
+}
+
+// AddBookmarkContext adds a bookmark in a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/bookmarks.add
+func (api *Client) AddBookmarkContext(ctx context.Context, channelID string, params AddBookmarkParameters) (Bookmark, error) {
+	values := url.Values{
+		"channel_id": {channelID},
+		"token":      {api.token},
+		"title":      {params.Title},
+		"type":       {params.Type},
+	}
+	if params.Link != "" {
+		values.Set("link", params.Link)
+	}
+	if params.Emoji != "" {
+		values.Set("emoji", params.Emoji)
+	}
+	if params.EntityID != "" {
+		values.Set("entity_id", params.EntityID)
+	}
+	if params.ParentID != "" {
+		values.Set("parent_id", params.ParentID)
+	}
+
+	response := &addBookmarkResponse{}
+	if err := api.postMethod(ctx, "bookmarks.add", values, response); err != nil {
+		return Bookmark{}, err
+	}
+
+	return response.Bookmark, response.Err()
+}
+
+// RemoveBookmark removes a bookmark from a channel.
+// For more details, see RemoveBookmarkContext documentation.
+func (api *Client) RemoveBookmark(channelID, bookmarkID string) error {
+	return api.RemoveBookmarkContext(context.Background(), channelID, bookmarkID)
+}
+
+// RemoveBookmarkContext removes a bookmark from a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/bookmarks.remove
+func (api *Client) RemoveBookmarkContext(ctx context.Context, channelID, bookmarkID string) error {
+	values := url.Values{
+		"channel_id":  {channelID},
+		"token":       {api.token},
+		"bookmark_id": {bookmarkID},
+	}
+
+	response := &SlackResponse{}
+	if err := api.postMethod(ctx, "bookmarks.remove", values, response); err != nil {
+		return err
+	}
+
+	return response.Err()
+}
+
+// ListBookmarks returns all bookmarks for a channel.
+// For more details, see ListBookmarksContext documentation.
 func (api *Client) ListBookmarks(channelID string) ([]Bookmark, error) {
 	return api.ListBookmarksContext(context.Background(), channelID)
 }
 
-// ListBookmarksContext returns all the bookmarks in the given channel
+// ListBookmarksContext returns all bookmarks for a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/bookmarks.edit
 func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) ([]Bookmark, error) {
 	values := url.Values{
 		"token":      {api.token},
@@ -47,79 +142,15 @@ func (api *Client) ListBookmarksContext(ctx context.Context, channelID string) (
 	return response.Bookmarks, nil
 }
 
-type AddBookmarkParameters struct {
-	Title     string `json:"title"`
-	Type      string `json:"type"`
-	Link      string `json:"link,omitempty"`
-	Emoji     string `json:"emoji,omitempty"`
-	EntityID  string `json:"entity_id,omitempty"`
-	ParentID  string `json:"parent_id,omitempty"`
-	ChannelID string `json:"channel_id"`
+// EditBookmark edits a bookmark in a channel.
+// For more details, see EditBookmarkContext documentation.
+func (api *Client) EditBookmark(channelID, bookmarkID string, params EditBookmarkParameters) (Bookmark, error) {
+	return api.EditBookmarkContext(context.Background(), channelID, bookmarkID, params)
 }
 
-// AddBookmark creates a new bookmark. ChannelID, Title, and Type are required
-// (`Type=link` is the sensible default!). The other params are all optional.
-func (api *Client) AddBookmark(params AddBookmarkParameters) (*Bookmark, error) {
-	return api.AddBookmarkContext(context.Background(), params)
-}
-
-// AddBookmarkContext creates a new bookmark. ChannelID, Title, and Type are required
-// (`Type: "link"` is the sensible default!). The other params are all optional.
-func (api *Client) AddBookmarkContext(ctx context.Context, params AddBookmarkParameters) (*Bookmark, error) {
-	response := &singleBookmarkResponse{}
-	values := url.Values{
-		"token":      {api.token},
-		"channel_id": {params.ChannelID},
-		"title":      {params.Title},
-		"type":       {params.Type},
-	}
-
-	if params.Emoji != "" {
-		values["emoji"] = []string{params.Emoji}
-	}
-
-	if params.EntityID != "" {
-		values["entity_id"] = []string{params.EntityID}
-	}
-
-	if params.Link != "" {
-		values["link"] = []string{params.Link}
-	}
-
-	if params.ParentID != "" {
-		values["parent_id"] = []string{params.ParentID}
-	}
-
-	err := api.postMethod(ctx, "bookmarks.add", values, response)
-	if err != nil {
-		return nil, err
-	}
-	if err := response.Err(); err != nil {
-		return nil, err
-	}
-
-	return &response.Bookmark, nil
-}
-
-type EditBookmarkParameters struct {
-	Title      string `json:"title,omitempty"`
-	Emoji      string `json:"emoji,omitempty"`
-	Link       string `json:"link,omitempty"`
-	ChannelID  string `json:"channel_id"`
-	BookmarkID string `json:"bookmark_id"`
-	Type       string `json:"type,omitempty"`
-}
-
-// EditBookmark updates an existing bookmark. ChannelID and BookmarkID are
-// required, other params are optional.
-func (api *Client) EditBookmark(params EditBookmarkParameters) (*Bookmark, error) {
-	return api.EditBookmarkContext(context.Background(), params)
-}
-
-// EditBookmarkContext updates an existing bookmark. ChannelID and BookmarkID
-// are required, other params are optional.
-func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkParameters) (*Bookmark, error) {
-	response := &singleBookmarkResponse{}
+// EditBookmarkContext edits a bookmark in a channel with a custom context.
+// Slack API docs: https://api.slack.com/methods/bookmarks.edit
+func (api *Client) EditBookmarkContext(ctx context.Context, channelID, bookmarkID string, params EditBookmarkParameters) (Bookmark, error) {
 	values := url.Values{
 		"token":       {api.token},
 		"channel_id":  {params.ChannelID},
@@ -130,49 +161,29 @@ func (api *Client) EditBookmarkContext(ctx context.Context, params EditBookmarkP
 		values["type"] = []string{params.Type}
 	}
 
-	if params.Emoji != "" {
-		values["emoji"] = []string{params.Emoji}
+	if params.Emoji != nil {
+		values["emoji"] = []string{*params.Emoji}
 	}
 
 	if params.Link != "" {
 		values["link"] = []string{params.Link}
 	}
 
-	if params.Title != "" {
-		values["title"] = []string{params.Title}
+	if params.Title != nil {
+		values["title"] = []string{*params.Title}
 	}
 
+	response := &editBookmarkResponse{}
 	err := api.postMethod(ctx, "bookmarks.edit", values, &response)
 
 	if err != nil {
-		return nil, err
+		return Bookmark{}, err
 	}
 	if err := response.Err(); err != nil {
-		return nil, err
+		return Bookmark{}, err
 	}
 
-	return &response.Bookmark, nil
-}
-
-// RemoveBookmark deletes a bookmark from the given channel
-func (api *Client) RemoveBookmark(channelID, bookmarkID string) error {
-	return api.RemoveBookmarkContext(context.Background(), channelID, bookmarkID)
-}
-
-// RemoveBookmarkContext deletes a bookmark from the given channel
-func (api *Client) RemoveBookmarkContext(ctx context.Context, channelID, bookmarkID string) error {
-	response := &SlackResponse{}
-	values := url.Values{
-		"token":       {api.token},
-		"channel_id":  {channelID},
-		"bookmark_id": {bookmarkID},
-	}
-
-	err := api.postMethod(ctx, "bookmarks.remove", values, response)
-	if err != nil {
-		return err
-	}
-	return response.Err()
+	return response.Bookmark, nil
 }
 
 type listBookmarksResponseFull struct {

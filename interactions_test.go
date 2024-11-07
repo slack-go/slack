@@ -293,13 +293,13 @@ func TestViewSubmissionCallback(t *testing.T) {
 			State: &ViewState{
 				Values: map[string]map[string]BlockAction{
 					"multi-line": {
-						"ml-value": BlockAction{
+						"ml-value": {
 							Type:  "plain_text_input",
 							Value: "No onions",
 						},
 					},
 					"target_channel": {
-						"target_select": BlockAction{
+						"target_select": {
 							Type:  "conversations_select",
 							Value: "C1AB2C3DE",
 						},
