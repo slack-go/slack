@@ -100,6 +100,8 @@ func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params 
 		values.Add("thread_ts", params.ThreadTS)
 	}
 
+	values.Add("channel_id", params.ChannelID)
+
 	// Always send the status parameter, if empty, it will clear any existing status
 	values.Add("status", params.Status)
 
