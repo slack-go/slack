@@ -60,6 +60,8 @@ func (api *Client) SetAssistantThreadsSuggestedPromptsContext(ctx context.Contex
 		values.Add("thread_ts", params.ThreadTS)
 	}
 
+	values.Add("channel_id", params.ChannelID)
+
 	// Send Prompts as JSON
 	prompts, err := json.Marshal(params.Prompts)
 	if err != nil {
@@ -97,6 +99,8 @@ func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params 
 	if params.ThreadTS != "" {
 		values.Add("thread_ts", params.ThreadTS)
 	}
+
+	values.Add("channel_id", params.ChannelID)
 
 	// Always send the status parameter, if empty, it will clear any existing status
 	values.Add("status", params.Status)
