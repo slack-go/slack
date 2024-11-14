@@ -116,13 +116,13 @@ func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOptio
 // ScheduleMessageContext sends a message to a channel with a custom context.
 // Slack API docs: https://api.slack.com/methods/chat.scheduleMessage
 func (api *Client) ScheduleMessageContext(ctx context.Context, channelID, postAt string, options ...MsgOption) (string, string, error) {
-	respChannel, respTimestamp, _, err := api.SendMessageContext(
+	respChannel, scheduledMessageId, _, err := api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionSchedule(postAt),
 		MsgOptionCompose(options...),
 	)
-	return respChannel, respTimestamp, err
+	return respChannel, scheduledMessageId, err
 }
 
 // PostMessage sends a message to a channel.
@@ -214,7 +214,7 @@ func (api *Client) SendMessage(channel string, options ...MsgOption) (string, st
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
 // Slack API docs: https://api.slack.com/methods/chat.postMessage
-func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestamp string, _text string, err error) {
+func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestampOrScheduledMessageId string, _text string, err error) {
 	var (
 		req      *http.Request
 		parser   func(*chatResponseFull) responseParser
@@ -238,7 +238,11 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	if response.ScheduledMessageID != "" {
+		return response.Channel, response.ScheduledMessageID, response.Text, response.Err()
+	} else {
+		return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	}
 }
 
 func redactToken(b []byte) []byte {
