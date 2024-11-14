@@ -477,6 +477,27 @@ func TestInviteSharedToConversation(t *testing.T) {
 			t.Error("is legacy shared channel should be false")
 		}
 	})
+
+	t.Run("external_limited", func(t *testing.T) {
+		userIDs := []string{"UXXXXXXX1", "UXXXXXXX2"}
+		externalLimited := true
+		inviteID, isLegacySharedChannel, err := api.InviteSharedToConversation(InviteSharedToConversationParams{
+			ChannelID:       "CXXXXXXXX",
+			UserIDs:         userIDs,
+			ExternalLimited: &externalLimited,
+		})
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+		if inviteID == "" {
+			t.Error("invite id should have a value")
+			return
+		}
+		if isLegacySharedChannel {
+			t.Error("is legacy shared channel should be false")
+		}
+	})
 }
 
 func TestKickUserFromConversation(t *testing.T) {
@@ -721,4 +742,35 @@ func TestMarkConversation(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
+}
+
+func createChannelCanvasHandler(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	response, _ := json.Marshal(struct {
+		SlackResponse
+		CanvasID string `json:"canvas_id"`
+	}{
+		SlackResponse: SlackResponse{Ok: true},
+		CanvasID:      "F05RQ01LJU0",
+	})
+	rw.Write(response)
+}
+
+func TestCreateChannelCanvas(t *testing.T) {
+	http.HandleFunc("/conversations.canvases.create", createChannelCanvasHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	documentContent := DocumentContent{
+		Type:     "markdown",
+		Markdown: "> channel canvas!",
+	}
+
+	canvasID, err := api.CreateChannelCanvas("C1234567890", documentContent)
+	if err != nil {
+		t.Errorf("Failed to create channel canvas: %v", err)
+		return
+	}
+
+	assert.Equal(t, "F05RQ01LJU0", canvasID)
 }
