@@ -26,6 +26,12 @@ type SlackResponse struct {
 	ResponseMetadata ResponseMetadata `json:"response_metadata"`
 }
 
+type ResponsePointer struct {
+	Ok               *bool            `json:"ok,omitempty"`
+	Error            *string          `json:"error,omitempty"`
+	ResponseMetadata ResponseMetadata `json:"response_metadata,omitempty"`
+}
+
 func (t SlackResponse) Err() error {
 	if t.Ok {
 		return nil
