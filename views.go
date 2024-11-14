@@ -110,7 +110,7 @@ type ModalViewRequest struct {
 	ExternalID      string           `json:"external_id,omitempty"`
 }
 
-type PublishViewContextInput struct {
+type PublishViewContextRequest struct {
 	UserID string             `json:"user_id"`
 	View   HomeTabViewRequest `json:"view"`
 	Hash   *string            `json:"hash,omitempty"`
@@ -212,29 +212,14 @@ func (api *Client) OpenViewContext(
 // PublishView publishes a static view for a user.
 // For more information see the PublishViewContext documentation.
 func (api *Client) PublishView(userID string, view HomeTabViewRequest, hash string) (*ViewResponse, error) {
-	return api.PublishViewContext(context.Background(), userID, view, hash)
+	return api.PublishViewContext(context.Background(), PublishViewContextRequest{UserID: userID, View: view, Hash: &hash})
 }
 
 // PublishViewContext publishes a static view for a user with a custom context.
 // Slack API docs: https://api.slack.com/methods/views.publish
 func (api *Client) PublishViewContext(
 	ctx context.Context,
-	userID string,
-	view HomeTabViewRequest,
-	hash string,
-) (*ViewResponse, error) {
-	return api.PublishViewContextV2(ctx, PublishViewContextInput{
-		UserID: userID,
-		View:   view,
-		Hash:   &hash,
-	})
-}
-
-// PublishViewContextV2 publishes a static view for a user with a custom context.
-// Slack API docs: https://api.slack.com/methods/views.publish
-func (api *Client) PublishViewContextV2(
-	ctx context.Context,
-	req PublishViewContextInput,
+	req PublishViewContextRequest,
 ) (*ViewResponse, error) {
 	if req.UserID == "" {
 		return nil, ErrParametersMissing
