@@ -649,67 +649,6 @@ func TestEmojiChanged(t *testing.T) {
 	}
 }
 
-func TestWorkflowStepExecute(t *testing.T) {
-	// see: https://api.slack.com/events/workflow_step_execute
-	rawE := []byte(`
-	{
-		"type":"workflow_step_execute",
-		"callback_id":"open_ticket",
-		"workflow_step":{
-			"workflow_step_execute_id":"1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326",
-			"workflow_id":"123456789012345678",
-			"workflow_instance_id":"987654321098765432",
-			"step_id":"12a345bc-1a23-4567-8b90-1234a567b8c9",
-			"inputs":{
-				"example-select-input":{
-					"value": "value-two",
-					"skip_variable_replacement": false
-				}
-			},
-			"outputs":[
-			]
-		},
-		"event_ts":"1643290847.766536"
-	}
-	`)
-
-	wse := WorkflowStepExecuteEvent{}
-	err := json.Unmarshal(rawE, &wse)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if wse.Type != "workflow_step_execute" {
-		t.Fail()
-	}
-	if wse.CallbackID != "open_ticket" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowStepExecuteID != "1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowID != "123456789012345678" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowInstanceID != "987654321098765432" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.StepID != "12a345bc-1a23-4567-8b90-1234a567b8c9" {
-		t.Fail()
-	}
-	if len(*wse.WorkflowStep.Inputs) == 0 {
-		t.Fail()
-	}
-	if inputElement, ok := (*wse.WorkflowStep.Inputs)["example-select-input"]; ok {
-		if inputElement.Value != "value-two" {
-			t.Fail()
-		}
-		if inputElement.SkipVariableReplacement != false {
-			t.Fail()
-		}
-	}
-}
-
 func TestMessageMetadataPosted(t *testing.T) {
 	rawE := []byte(`
 	{
