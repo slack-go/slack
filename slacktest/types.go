@@ -1,7 +1,6 @@
 package slacktest
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -64,7 +63,6 @@ type Server struct {
 	registered           map[string]struct{}
 	server               *httptest.Server
 	mux                  *http.ServeMux
-	Logger               *log.Logger
 	BotName              string
 	BotID                string
 	ServerAddr           string
