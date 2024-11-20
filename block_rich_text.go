@@ -121,18 +121,20 @@ type RichTextList struct {
 	Style    RichTextListStyle   `json:"style"`
 	Elements []RichTextSection   `json:"elements"`
 	Indent   int                 `json:"indent"`
+	Border   int                 `json:"border"`
 }
 
 func (l RichTextList) RichTextElementType() RichTextElementType {
 	return l.Type
 }
 
-func NewRichTextList(style RichTextListStyle, indentation int, elements ...RichTextSection) *RichTextList {
+func NewRichTextList(style RichTextListStyle, indentation, border int, elements ...RichTextSection) *RichTextList {
 	return &RichTextList{
 		Type:     RTEList,
 		Style:    style,
 		Elements: elements,
 		Indent:   indentation,
+		Border:   border,
 	}
 }
 
@@ -141,6 +143,7 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 		RawElements []json.RawMessage `json:"elements"`
 		Style       RichTextListStyle `json:"style"`
 		Indent      int               `json:"indent"`
+		Border      int               `json:"border"`
 	}
 	if string(b) == "{}" {
 		return nil
@@ -173,6 +176,7 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 		Style:    raw.Style,
 		Elements: elems,
 		Indent:   raw.Indent,
+		Border:   raw.Border,
 	}
 	return nil
 }
