@@ -51,13 +51,15 @@ const (
 			"type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "launch project"
+				"text": "launch project",
+				"emoji": false
 			},
 			"blocks": [{
 				"type": "section",
 				"text": {
 				  "text": "*Sally* has requested you set the deadline for the Nano launch project",
-				  "type": "mrkdwn"
+				  "type": "mrkdwn",
+				  "emoji": false
 				},
 				"accessory": {
 				  "type": "datepicker",
@@ -65,7 +67,8 @@ const (
 				  "initial_date": "1990-04-28",
 				  "placeholder": {
 					"type": "plain_text",
-					"text": "Select a date"
+					"text": "Select a date",
+				  	"emoji": false
 				  }
 				}
 			}],
@@ -92,7 +95,8 @@ const (
 			"type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "meal choice"
+				"text": "meal choice",
+				"emoji": false
 			},
 			"blocks": [
 				{
@@ -100,7 +104,8 @@ const (
 					"block_id": "multi-line",
 					"label": {
 						"type": "plain_text",
-						"text": "dietary restrictions"
+						"text": "dietary restrictions",
+				  		"emoji": false
 					},
 					"element": {
 						"type": "plain_text_input",
@@ -113,7 +118,8 @@ const (
 					"block_id": "target_channel",
 					"label": {
 						"type": "plain_text",
-						"text": "Select a channel to post the result on"
+						"text": "Select a channel to post the result on",
+				  "emoji": false
 					},
 					"element": {
 						"type": "conversations_select",

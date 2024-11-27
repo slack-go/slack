@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/guregu/null.v4"
 )
 
 func TestNewImageBlockObject(t *testing.T) {
@@ -24,7 +25,7 @@ func TestNewTextBlockObject(t *testing.T) {
 
 	assert.Equal(t, textObject.Type, "plain_text")
 	assert.Equal(t, textObject.Text, "test")
-	assert.True(t, textObject.Emoji, "Emoji property should be true")
+	assert.True(t, textObject.Emoji.ValueOrZero(), "Emoji property should be true")
 	assert.False(t, textObject.Verbatim, "Verbatim should be false")
 
 }
@@ -95,7 +96,16 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    null.BoolFrom(false),
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    null.BoolFromPtr(nil),
 				Verbatim: false,
 			},
 			expected: nil,
@@ -104,7 +114,16 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    null.BoolFrom(false),
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    null.BoolFromPtr(nil),
 				Verbatim: false,
 			},
 			expected: nil,
@@ -113,7 +132,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "invalid",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    null.BoolFrom(false),
 				Verbatim: false,
 			},
 			expected: errors.New("type must be either of plain_text or mrkdwn"),
@@ -122,7 +141,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    true,
+				Emoji:    null.BoolFrom(true),
 				Verbatim: false,
 			},
 			expected: errors.New("emoji cannot be true in mrkdown"),
@@ -131,7 +150,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "",
-				Emoji:    false,
+				Emoji:    null.BoolFrom(false),
 				Verbatim: false,
 			},
 			expected: errors.New("text must have a minimum length of 1"),
@@ -140,7 +159,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     strings.Repeat("a", 3001),
-				Emoji:    false,
+				Emoji:    null.BoolFrom(false),
 				Verbatim: false,
 			},
 			expected: errors.New("text cannot be longer than 3000 characters"),

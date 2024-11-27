@@ -19,6 +19,7 @@ func TestAttachment_UnmarshalMarshalJSON_WithBlocks(t *testing.T) {
         "text": {
           "type": "mrkdwn",
           "text": "Pick something:",
+          "emoji": null,
           "verbatim": true
         },
         "accessory": {
