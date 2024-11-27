@@ -1,10 +1,12 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
 
+	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/guregu/null.v4"
 )
@@ -105,6 +107,15 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
+				Emoji:    null.BoolFrom(true),
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
 				Emoji:    null.BoolFromPtr(nil),
 				Verbatim: false,
 			},
@@ -169,5 +180,80 @@ func TestValidateTextBlockObject(t *testing.T) {
 	for _, test := range tests {
 		err := test.input.Validate()
 		assert.Equal(t, err, test.expected)
+	}
+}
+
+func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
+	cases := []struct {
+		raw      []byte
+		expected TextBlockObject
+		err      error
+	}{
+		{
+			[]byte(`{"type":"plain_text","text":"testText"}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    null.BoolFromPtr(nil),
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"plain_text","text":":+1:","emoji":true}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     ":+1:",
+				Emoji:    null.BoolFrom(true),
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"plain_text","text":"No emojis allowed :(","emoji":false}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     "No emojis allowed :(",
+				Emoji:    null.BoolFrom(false),
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"mrkdwn","text":"testText"}`),
+			TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    null.BoolFromPtr(nil),
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"mrkdwn","text":"No emojis allowed :(","emoji":false}`),
+			TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "No emojis allowed :(",
+				Emoji:    null.BoolFrom(false),
+				Verbatim: false,
+			},
+			nil,
+		},
+	}
+	for _, tc := range cases {
+		var actual TextBlockObject
+		err := json.Unmarshal(tc.raw, &actual)
+		if err != nil {
+			if tc.err == nil {
+				t.Errorf("unexpected error: %s", err)
+			}
+			t.Errorf("expected error is %v, but got %v", tc.err, err)
+		}
+		if tc.err != nil {
+			t.Errorf("expected to raise an error %v", tc.err)
+		}
+		if diff := deep.Equal(actual, tc.expected); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
 	}
 }
