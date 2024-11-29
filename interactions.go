@@ -28,6 +28,7 @@ const (
 	InteractionTypeViewSubmission     = InteractionType("view_submission")
 	InteractionTypeViewClosed         = InteractionType("view_closed")
 	InteractionTypeShortcut           = InteractionType("shortcut")
+	InteractionTypeExternalSelect     = InteractionType("external_select")
 	InteractionTypeWorkflowStepEdit   = InteractionType("workflow_step_edit")
 )
 
