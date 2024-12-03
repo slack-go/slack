@@ -165,6 +165,12 @@ func TestCreateSharedChannel(t *testing.T) {
 	channel.LastRead = "1401383885.000061"
 	channel.UnreadCount = 0
 	channel.UnreadCountDisplay = 0
+	channel.IsShared = true
+	channel.IsExtShared = true
+	channel.ContextTeamID = "T1ABCD2E12"
+	channel.ConversationHostID = "T07XY8FPJ5C"
+	channel.SharedTeamIDs = []string{"T07XY8FPJ5C"}
+	channel.ConnectedTeamIDs = []string{"T07XY8FPJ5C", "T1ABCD2E12"}
 	assertSharedChannel(t, channel)
 }
 
