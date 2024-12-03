@@ -36,6 +36,8 @@ type Conversation struct {
 	ConnectedTeamIDs   []string `json:"connected_team_ids,omitempty"`
 	SharedTeamIDs      []string `json:"shared_team_ids,omitempty"`
 	InternalTeamIDs    []string `json:"internal_team_ids,omitempty"`
+	ContextTeamID      string   `json:"context_team_id,omitempty"`
+	ConversationHostID string   `json:"conversation_host_id,omitempty"`
 
 	// TODO support pending_shared
 	// TODO support previous_names
