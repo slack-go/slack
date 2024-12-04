@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
-	"os"
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 						if callbackID == "sample_function" {
 							userId := ev.Inputs["user_id"]
 							payload := map[string]string{
-								"user_id": userId,
+								"user_id": userId.(string),
 							}
 
 							err := api.FunctionCompleteSuccess(ev.FunctionExecutionID, slack.FunctionCompleteSuccessRequestOptionOutput(payload))

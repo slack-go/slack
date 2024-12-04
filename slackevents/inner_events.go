@@ -986,11 +986,11 @@ type FunctionExecutedEvent struct {
 		DateUpdated int64  `json:"date_updated"`
 		DateDeleted int64  `json:"date_deleted"`
 	} `json:"function"`
-	Inputs              map[string]string `json:"inputs"`
-	FunctionExecutionID string            `json:"function_execution_id"`
-	WorkflowExecutionID string            `json:"workflow_execution_id"`
-	EventTs             string            `json:"event_ts"`
-	BotAccessToken      string            `json:"bot_access_token"`
+	Inputs              map[string]interface{} `json:"inputs"`
+	FunctionExecutionID string                 `json:"function_execution_id"`
+	WorkflowExecutionID string                 `json:"workflow_execution_id"`
+	EventTs             string                 `json:"event_ts"`
+	BotAccessToken      string                 `json:"bot_access_token"`
 }
 
 type InviteRequestedEvent struct {
