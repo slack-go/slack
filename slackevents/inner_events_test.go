@@ -2547,6 +2547,13 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"type": "app",
 			"input_parameters": [
 				{
+					"type": "slack#/types/message_context",
+					"name": "message_context",
+					"description": "",
+					"title": "Message Context",
+					"is_required": true
+				},
+				{
 					"type": "slack#/types/user_id",
 					"name": "user_id",
 					"description": "Message recipient",
@@ -2568,7 +2575,13 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"date_updated": 1698947481,
 			"date_deleted": 0
 		},
-		"inputs": { "user_id": "USER12345678" },
+		"inputs": {
+			"user_id": "USER12345678",
+			"message_context": {
+				"channel_id": "C07H1ER7U66",
+				"message_ts": "1733331835.871019"
+			}
+		},
 		"function_execution_id": "Fx1234567O9L",
 		"workflow_execution_id": "WxABC123DEF0",
 		"event_ts": "1698958075.998738",
