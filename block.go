@@ -26,6 +26,7 @@ const (
 // to ensure consistency between blocks.
 type Block interface {
 	BlockType() MessageBlockType
+	ID() string
 }
 
 // Blocks is a convenience struct defined to allow dynamic unmarshalling of

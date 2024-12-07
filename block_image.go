@@ -12,6 +12,11 @@ type ImageBlock struct {
 	SlackFile *SlackFileObject `json:"slack_file,omitempty"`
 }
 
+// ID returns the ID of the block
+func (s ImageBlock) ID() string {
+	return s.BlockID
+}
+
 // SlackFileObject Defines an object containing Slack file information to be used in an
 // image block or image element.
 //

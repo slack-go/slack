@@ -17,6 +17,11 @@ func (s SectionBlock) BlockType() MessageBlockType {
 	return s.Type
 }
 
+// ID returns the ID of the block
+func (s SectionBlock) ID() string {
+	return s.BlockID
+}
+
 // SectionBlockOption allows configuration of options for a new section block
 type SectionBlockOption func(*SectionBlock)
 
