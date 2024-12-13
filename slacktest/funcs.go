@@ -15,11 +15,9 @@ func (sts *Server) queueForWebsocket(s, hubname string) {
 	channel, err := getHubForServer(hubname)
 	if err != nil {
 		log.Printf("Unable to get server's channels: %s", err.Error())
+	} else {
+		channel.sent <- s
 	}
-	sts.seenOutboundMessages.Lock()
-	sts.seenOutboundMessages.messages = append(sts.seenOutboundMessages.messages, s)
-	sts.seenOutboundMessages.Unlock()
-	channel.sent <- s
 }
 
 func handlePendingMessages(c *websocket.Conn, hubname string) {
@@ -43,9 +41,7 @@ func (sts *Server) postProcessMessage(m, hubname string) {
 		log.Printf("Unable to get server's channels: %s", err.Error())
 		return
 	}
-	sts.seenInboundMessages.Lock()
-	sts.seenInboundMessages.messages = append(sts.seenInboundMessages.messages, m)
-	sts.seenInboundMessages.Unlock()
+	sts.seenInboundMessages.observe(m)
 	// send to firehose
 	channel.seen <- m
 }
