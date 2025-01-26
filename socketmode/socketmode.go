@@ -91,6 +91,7 @@ func OptionPingInterval(d time.Duration) Option {
 // OptionDebug enable debugging for the client
 func OptionDebug(b bool) func(*Client) {
 	return func(c *Client) {
+		c.log.Printf("Using debug mode: %t", b)
 		c.debug = b
 	}
 }
