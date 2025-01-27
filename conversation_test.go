@@ -82,6 +82,98 @@ func TestCreateSimpleChannel(t *testing.T) {
 	assertSimpleChannel(t, channel)
 }
 
+// Shared Channel
+var sharedChannel = `{
+	"id": "C024BE91L",
+	"name": "fun",
+	"is_channel": true,
+	"created": 1360782804,
+	"creator": "U024BE7LH",
+	"is_archived": false,
+	"is_general": false,
+	"members": [
+			"U024BE7LH"
+	],
+	"is_shared": true,
+	"context_team_id": "T1ABCD2E12",
+	"is_ext_shared": true,
+	"shared_team_ids": [
+			"T07XY8FPJ5C"
+	],
+	"internal_team_ids": [],
+	"connected_team_ids": [
+			"T07XY8FPJ5C",
+			"T1ABCD2E12"
+	],
+	"connected_limited_team_ids": [],
+	"pending_connected_team_ids": [],
+	"conversation_host_id": "T07XY8FPJ5C",
+	"topic": {
+			"value": "Fun times",
+			"creator": "U024BE7LV",
+			"last_set": 1369677212
+	},
+	"purpose": {
+			"value": "This channel is for fun",
+			"creator": "U024BE7LH",
+			"last_set": 1360782804
+	},
+	"is_member": true,
+	"last_read": "1401383885.000061",
+	"unread_count": 0,
+	"unread_count_display": 0
+}`
+
+func unmarshalSharedChannel(j string) (*Channel, error) {
+	channel := &Channel{}
+	if err := json.Unmarshal([]byte(j), &channel); err != nil {
+		return nil, err
+	}
+	return channel, nil
+}
+
+func TestSharedChannel(t *testing.T) {
+	channel, err := unmarshalSharedChannel(sharedChannel)
+	assert.Nil(t, err)
+	assertSharedChannel(t, channel)
+}
+
+func assertSharedChannel(t *testing.T, channel *Channel) {
+	assertSimpleChannel(t, channel)
+	assert.Equal(t, true, channel.IsShared)
+	assert.Equal(t, true, channel.IsExtShared)
+	assert.Equal(t, "T1ABCD2E12", channel.ContextTeamID)
+	assert.Equal(t, "T07XY8FPJ5C", channel.ConversationHostID)
+	if !reflect.DeepEqual([]string{"T07XY8FPJ5C"}, channel.SharedTeamIDs) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+	if !reflect.DeepEqual([]string{"T07XY8FPJ5C", "T1ABCD2E12"}, channel.ConnectedTeamIDs) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestCreateSharedChannel(t *testing.T) {
+	channel := &Channel{}
+	channel.ID = "C024BE91L"
+	channel.Name = "fun"
+	channel.IsChannel = true
+	channel.Created = JSONTime(1360782804)
+	channel.Creator = "U024BE7LH"
+	channel.IsArchived = false
+	channel.IsGeneral = false
+	channel.IsMember = true
+	channel.LastRead = "1401383885.000061"
+	channel.UnreadCount = 0
+	channel.UnreadCountDisplay = 0
+	channel.IsShared = true
+	channel.IsExtShared = true
+	channel.ContextTeamID = "T1ABCD2E12"
+	channel.ConversationHostID = "T07XY8FPJ5C"
+	channel.SharedTeamIDs = []string{"T07XY8FPJ5C"}
+	channel.ConnectedTeamIDs = []string{"T07XY8FPJ5C", "T1ABCD2E12"}
+	assertSharedChannel(t, channel)
+}
+
 // Group
 var simpleGroup = `{
     "id": "G024BE91L",
