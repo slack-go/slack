@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         go:
@@ -27,7 +27,7 @@ jobs:
       - name: run test
         run: go test -v -race ./...
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     name: lint
     steps:
       - uses: actions/setup-go@v5
