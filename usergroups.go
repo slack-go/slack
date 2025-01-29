@@ -51,18 +51,18 @@ func (api *Client) userGroupRequest(ctx context.Context, path string, values url
 	return response, response.Err()
 }
 
-// CreateUserGroupParams contains arguments for CreateUserGroup method call
-type CreateUserGroupParams struct {
-	EnableSection bool
+// createUserGroupParams contains arguments for CreateUserGroup method call
+type createUserGroupParams struct {
+	enableSection bool
 }
 
 // CreateUserGroupOption options for the CreateUserGroup method call.
-type CreateUserGroupOption func(*CreateUserGroupParams)
+type CreateUserGroupOption func(*createUserGroupParams)
 
 // CreateUserGroupOptionEnableSection enable the section for the user group (default: false)
 func CreateUserGroupOptionEnableSection(enableSection bool) CreateUserGroupOption {
-	return func(params *CreateUserGroupParams) {
-		params.EnableSection = enableSection
+	return func(params *createUserGroupParams) {
+		params.enableSection = enableSection
 	}
 }
 
@@ -75,7 +75,7 @@ func (api *Client) CreateUserGroup(userGroup UserGroup, options ...CreateUserGro
 // CreateUserGroupContext creates a new user group with a custom context.
 // Slack API docs: https://api.slack.com/methods/usergroups.create
 func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGroup, options ...CreateUserGroupOption) (UserGroup, error) {
-	params := CreateUserGroupParams{}
+	params := createUserGroupParams{}
 
 	for _, opt := range options {
 		opt(&params)
@@ -86,8 +86,8 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 		"name":  {userGroup.Name},
 	}
 
-	if params.EnableSection {
-		values["enable_section"] = []string{strconv.FormatBool(params.EnableSection)}
+	if params.enableSection {
+		values["enable_section"] = []string{strconv.FormatBool(params.enableSection)}
 	}
 
 	if userGroup.TeamID != "" {
