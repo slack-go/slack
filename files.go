@@ -79,19 +79,21 @@ type File struct {
 	Lines            int    `json:"lines"`
 	LinesMore        int    `json:"lines_more"`
 
-	IsPublic        bool                `json:"is_public"`
-	PublicURLShared bool                `json:"public_url_shared"`
-	Channels        []string            `json:"channels"`
-	Groups          []string            `json:"groups"`
-	IMs             []string            `json:"ims"`
-	InitialComment  Comment             `json:"initial_comment"`
-	CommentsCount   int                 `json:"comments_count"`
-	NumStars        int                 `json:"num_stars"`
-	IsStarred       bool                `json:"is_starred"`
-	Shares          Share               `json:"shares"`
-	Subject         string              `json:"subject"`
-	To              []EmailFileUserInfo `json:"to"`
-	From            []EmailFileUserInfo `json:"from"`
+	IsPublic        bool     `json:"is_public"`
+	PublicURLShared bool     `json:"public_url_shared"`
+	Channels        []string `json:"channels"`
+	Groups          []string `json:"groups"`
+	IMs             []string `json:"ims"`
+	InitialComment  Comment  `json:"initial_comment"`
+	CommentsCount   int      `json:"comments_count"`
+	NumStars        int      `json:"num_stars"`
+	IsStarred       bool     `json:"is_starred"`
+	Shares          Share    `json:"shares"`
+
+	Subject string              `json:"subject"`
+	To      []EmailFileUserInfo `json:"to"`
+	From    []EmailFileUserInfo `json:"from"`
+	Cc      []EmailFileUserInfo `json:"cc"`
 }
 
 type EmailFileUserInfo struct {
