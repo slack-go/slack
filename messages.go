@@ -49,6 +49,7 @@ const (
 	MsgSubTypeUnpinnedItem              = "unpinned_item"               // [RTM] An item was unpinned from a channel
 	MsgSubTypeEkmAccessDenied           = "ekm_access_denied"           // [Events API, RTM] Message content redacted due to Enterprise Key Management (EKM)
 	MsgSubTypeChannelPostingPermissions = "channel_posting_permissions" // [Events API, RTM] The posting permissions for a channel changed
+	MsgSubTypeAssistantAppThread        = "assistant_app_thread"        // [Events API, RTM] The message is an app assistant thread
 )
 
 // Msg contains information about a slack message
