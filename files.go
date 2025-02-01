@@ -89,6 +89,17 @@ type File struct {
 	NumStars        int      `json:"num_stars"`
 	IsStarred       bool     `json:"is_starred"`
 	Shares          Share    `json:"shares"`
+
+	Subject string              `json:"subject"`
+	To      []EmailFileUserInfo `json:"to"`
+	From    []EmailFileUserInfo `json:"from"`
+	Cc      []EmailFileUserInfo `json:"cc"`
+}
+
+type EmailFileUserInfo struct {
+	Address  string `json:"address"`
+	Name     string `json:"name"`
+	Original string `json:"original"`
 }
 
 type Share struct {
