@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -312,6 +313,7 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 		return nil, nil, err
 	}
 	if additionalPingHandler == nil {
+		log.Print("no ping handler, default to null handler")
 		additionalPingHandler = func(_ string) error { return nil }
 	}
 
@@ -380,6 +382,7 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 			// listen for incoming messages that need to be parsed
 			evt, err := smc.parseEvent(message)
 			if err != nil {
+				log.Printf("error parsing event %q: %s", message, err)
 				smc.sendEvent(ctx, newEvent(EventTypeErrorBadMessage, &ErrorBadMessage{
 					Cause:   err,
 					Message: message,
