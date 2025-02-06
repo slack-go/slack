@@ -16,6 +16,11 @@ func (b RichTextBlock) BlockType() MessageBlockType {
 	return b.Type
 }
 
+// ID returns the ID of the block
+func (s RichTextBlock) ID() string {
+	return s.BlockID
+}
+
 func (e *RichTextBlock) UnmarshalJSON(b []byte) error {
 	var raw struct {
 		Type        MessageBlockType  `json:"type"`

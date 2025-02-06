@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/go-test/deep"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -82,6 +83,15 @@ const (
 		]
 	}`
 )
+
+func TestNewRichTextBlock(t *testing.T) {
+	richTextBlock := NewRichTextBlock("test_block")
+
+	assert.Equal(t, richTextBlock.BlockType(), MBTRichText)
+	assert.Equal(t, string(richTextBlock.Type), "rich_text")
+	assert.Equal(t, richTextBlock.BlockID, "test_block")
+	assert.Equal(t, richTextBlock.ID(), "test_block")
+}
 
 func TestRichTextBlock_UnmarshalJSON(t *testing.T) {
 	cases := []struct {
