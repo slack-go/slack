@@ -27,7 +27,7 @@ func TestCustomNewServer(t *testing.T) {
 
 func TestServerSendMessageToChannel(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	s.SendMessageToChannel("C123456789", "some text")
 	time.Sleep(2 * time.Second)
 	assert.True(t, s.SawOutgoingMessage("some text"))
@@ -36,7 +36,7 @@ func TestServerSendMessageToChannel(t *testing.T) {
 
 func TestServerSendMessageToBot(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	s.SendMessageToBot("C123456789", "some text")
 	expectedMsg := fmt.Sprintf("<@%s> %s", s.BotID, "some text")
 	time.Sleep(2 * time.Second)
@@ -46,7 +46,7 @@ func TestServerSendMessageToBot(t *testing.T) {
 
 func TestBotDirectMessageBotHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	s.SendDirectMessageToBot("some text")
 	expectedMsg := "some text"
 	time.Sleep(2 * time.Second)
@@ -55,14 +55,14 @@ func TestBotDirectMessageBotHandler(t *testing.T) {
 }
 
 func TestGetSeenOutboundMessages(t *testing.T) {
-	maxWait := 5 * time.Second
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 
 	s.SendMessageToChannel("foo", "should see this message")
-	time.Sleep(maxWait)
+
 	seenOutbound := s.GetSeenOutboundMessages()
-	assert.True(t, len(seenOutbound) > 0)
+	assert.Len(t, seenOutbound, 1)
+
 	hadMessage := false
 	for _, msg := range seenOutbound {
 		var m = slack.Message{}
@@ -79,7 +79,7 @@ func TestGetSeenOutboundMessages(t *testing.T) {
 func TestGetSeenInboundMessages(t *testing.T) {
 	maxWait := 5 * time.Second
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 
 	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	rtm := api.NewRTM()
@@ -108,7 +108,7 @@ func TestGetSeenInboundMessages(t *testing.T) {
 func TestSendChannelInvite(t *testing.T) {
 	maxWait := 5 * time.Second
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	rtm := s.GetTestRTMInstance()
 	go rtm.ManageConnection()
 	evChan := make(chan (slack.Channel), 1)
@@ -137,7 +137,7 @@ func TestSendChannelInvite(t *testing.T) {
 func TestSendGroupInvite(t *testing.T) {
 	maxWait := 5 * time.Second
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	rtm := s.GetTestRTMInstance()
 	go rtm.ManageConnection()
 	evChan := make(chan (slack.Channel), 1)
@@ -165,12 +165,12 @@ func TestSendGroupInvite(t *testing.T) {
 
 func TestServerSawMessage(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	assert.False(t, s.SawMessage("foo"), "should not have seen any message")
 }
 
 func TestServerSawOutgoingMessage(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	s.Start()
 	assert.False(t, s.SawOutgoingMessage("foo"), "should not have seen any message")
 }
