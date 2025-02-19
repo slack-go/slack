@@ -216,7 +216,7 @@ func TestUploadFileWithoutFilename(t *testing.T) {
 
 func uploadURLHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(getUploadURLExternalResponse{
+	response, _ := json.Marshal(GetUploadURLExternalResponse{
 		FileID:        "RandomID",
 		UploadURL:     "http://" + serverAddr + "/abc",
 		SlackResponse: SlackResponse{Ok: true}})
@@ -282,6 +282,121 @@ func TestUploadFileV2(t *testing.T) {
 		FileSize: 15}
 	if _, err := api.UploadFileV2(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
+type mockGetUploadURLExternalHttpClient struct {
+	ResponseStatus int
+	ResponseBody   []byte
+}
+
+func (m *mockGetUploadURLExternalHttpClient) Do(req *http.Request) (*http.Response, error) {
+	if req.URL.Path != "files.getUploadURLExternal" {
+		return nil, fmt.Errorf("invalid path: %s", req.URL.Path)
+	}
+
+	return &http.Response{
+		StatusCode: m.ResponseStatus,
+		Body:       io.NopCloser(bytes.NewBuffer(m.ResponseBody)),
+	}, nil
+}
+
+func TestGetUploadURLExternalContext(t *testing.T) {
+	type testCase struct {
+		title             string
+		params            GetUploadURLExternalParameters
+		wantSlackResponse []byte
+		wantResponse      GetUploadURLExternalResponse
+		wantErr           error
+	}
+	testCases := []testCase{
+		{
+			title: "Testing with required parameters",
+			params: GetUploadURLExternalParameters{
+				FileName: "test.txt",
+				FileSize: 10,
+			},
+			wantSlackResponse: []byte(`{"ok":true,"file_id":"RandomID","upload_url":"http://test-server/abc"}`),
+			wantResponse: GetUploadURLExternalResponse{
+				FileID:    "RandomID",
+				UploadURL: "http://test-server/abc",
+				SlackResponse: SlackResponse{
+					Ok: true,
+				},
+			},
+		},
+		{
+			title: "Testing with optional parameters",
+			params: GetUploadURLExternalParameters{
+				FileSize:    10,
+				FileName:    "test.txt",
+				AltText:     "test-alt-text",
+				SnippetText: "test-snippet-text",
+			},
+			wantSlackResponse: []byte(`{"ok":true,"file_id":"RandomID","upload_url":"http://test-server/abc"}`),
+			wantResponse: GetUploadURLExternalResponse{
+				FileID:    "RandomID",
+				UploadURL: "http://test-server/abc",
+				SlackResponse: SlackResponse{
+					Ok: true,
+				},
+			},
+		},
+		{
+			title: "Testing with request error",
+			params: GetUploadURLExternalParameters{
+				FileName: "test.txt",
+				FileSize: 10,
+			},
+			wantSlackResponse: []byte(`{"ok":false,"error":"errored"}`),
+			wantErr:           fmt.Errorf("errored"),
+		},
+		{
+			title: "Testing with invalid parameters: empty file name",
+			params: GetUploadURLExternalParameters{
+				FileName: "",
+				FileSize: 10,
+			},
+			wantErr: fmt.Errorf("GetUploadURLExternalContext: fileName cannot be empty"),
+		},
+		{
+			title: "Testing with invalid parameters: file size 0",
+			params: GetUploadURLExternalParameters{
+				FileName: "test.txt",
+				FileSize: 0,
+			},
+			wantErr: fmt.Errorf("GetUploadURLExternalContext: fileSize cannot be 0"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.title, func(t *testing.T) {
+			api := &Client{
+				token: validToken,
+				httpclient: &mockGetUploadURLExternalHttpClient{
+					ResponseStatus: 200,
+					ResponseBody:   tc.wantSlackResponse,
+				},
+			}
+
+			gotResponse, err := api.GetUploadURLExternalContext(context.Background(), tc.params)
+
+			if err != nil {
+				if tc.wantErr == nil {
+					t.Fatalf("GetUploadURLExternalContext() error = %v, want nil", err)
+				}
+				if err.Error() != tc.wantErr.Error() {
+					t.Errorf("GetUploadURLExternalContext() error = %v, want %v", err, tc.wantErr)
+				}
+			} else {
+				if tc.wantErr != nil {
+					t.Fatalf("GetUploadURLExternalContext() error = nil, want %v", tc.wantErr)
+				}
+				if !reflect.DeepEqual(gotResponse, &tc.wantResponse) {
+					t.Errorf("GetUploadURLExternalContext() = %v, want %v", gotResponse, tc.wantResponse)
+				}
+			}
+		})
 	}
 }
 

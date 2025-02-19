@@ -173,14 +173,14 @@ type UploadFileV2Parameters struct {
 	SnippetText     string
 }
 
-type getUploadURLExternalParameters struct {
-	altText     string
-	fileSize    int
-	fileName    string
-	snippetText string
+type GetUploadURLExternalParameters struct {
+	AltText     string
+	FileSize    int
+	FileName    string
+	SnippetText string
 }
 
-type getUploadURLExternalResponse struct {
+type GetUploadURLExternalResponse struct {
 	UploadURL string `json:"upload_url"`
 	FileID    string `json:"file_id"`
 	SlackResponse
@@ -506,20 +506,28 @@ func (api *Client) ShareFilePublicURLContext(ctx context.Context, fileID string)
 	return &response.File, response.Comments, &response.Paging, nil
 }
 
-// getUploadURLExternal gets a URL and fileID from slack which can later be used to upload a file.
-func (api *Client) getUploadURLExternal(ctx context.Context, params getUploadURLExternalParameters) (*getUploadURLExternalResponse, error) {
+// GetUploadURLExternalContext gets a URL and fileID from slack which can later be used to upload a file.
+// Slack API docs: https://api.slack.com/methods/files.getUploadURLExternal
+func (api *Client) GetUploadURLExternalContext(ctx context.Context, params GetUploadURLExternalParameters) (*GetUploadURLExternalResponse, error) {
+	if params.FileName == "" {
+		return nil, fmt.Errorf("GetUploadURLExternalContext: fileName cannot be empty")
+	}
+	if params.FileSize == 0 {
+		return nil, fmt.Errorf("GetUploadURLExternalContext: fileSize cannot be 0")
+	}
+
 	values := url.Values{
 		"token":    {api.token},
-		"filename": {params.fileName},
-		"length":   {strconv.Itoa(params.fileSize)},
+		"filename": {params.FileName},
+		"length":   {strconv.Itoa(params.FileSize)},
 	}
-	if params.altText != "" {
-		values.Add("initial_comment", params.altText)
+	if params.AltText != "" {
+		values.Add("initial_comment", params.AltText)
 	}
-	if params.snippetText != "" {
-		values.Add("thread_ts", params.snippetText)
+	if params.SnippetText != "" {
+		values.Add("thread_ts", params.SnippetText)
 	}
-	response := &getUploadURLExternalResponse{}
+	response := &GetUploadURLExternalResponse{}
 	err := api.postMethod(ctx, "files.getUploadURLExternal", values, response)
 	if err != nil {
 		return nil, err
@@ -594,11 +602,11 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		return nil, fmt.Errorf("file.upload.v2: file size cannot be 0")
 	}
 
-	u, err := api.getUploadURLExternal(ctx, getUploadURLExternalParameters{
-		altText:     params.AltTxt,
-		fileName:    params.Filename,
-		fileSize:    params.FileSize,
-		snippetText: params.SnippetText,
+	u, err := api.GetUploadURLExternalContext(ctx, GetUploadURLExternalParameters{
+		AltText:     params.AltTxt,
+		FileName:    params.Filename,
+		FileSize:    params.FileSize,
+		SnippetText: params.SnippetText,
 	})
 	if err != nil {
 		return nil, err
