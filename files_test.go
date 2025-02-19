@@ -2,7 +2,9 @@ package slack
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -228,7 +230,7 @@ func urlFileUploadHandler(rw http.ResponseWriter, r *http.Request) {
 
 func completeURLUpload(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(completeUploadExternalResponse{
+	response, _ := json.Marshal(CompleteUploadExternalResponse{
 		Files: []FileSummary{
 			{
 				ID:    "RandomID",
@@ -280,5 +282,151 @@ func TestUploadFileV2(t *testing.T) {
 		FileSize: 15}
 	if _, err := api.UploadFileV2(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
+type mockCompleteUploadExternalHttpClient struct {
+	ResponseStatus int
+	ResponseBody   []byte
+}
+
+func (m *mockCompleteUploadExternalHttpClient) Do(req *http.Request) (*http.Response, error) {
+	if req.URL.Path != "files.completeUploadExternal" {
+		return nil, fmt.Errorf("invalid path: %s", req.URL.Path)
+	}
+
+	return &http.Response{
+		StatusCode: m.ResponseStatus,
+		Body:       io.NopCloser(bytes.NewBuffer(m.ResponseBody)),
+	}, nil
+}
+
+func TestCompleteUploadExternalContext(t *testing.T) {
+	type testCase struct {
+		title        string
+		params       CompleteUploadExternalParameters
+		wantResponse CompleteUploadExternalResponse
+		wantErr      bool
+	}
+	testCases := []testCase{
+		{
+			title: "Testing with required parameters",
+			params: CompleteUploadExternalParameters{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID: "ID2",
+					},
+				},
+			},
+			wantResponse: CompleteUploadExternalResponse{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID: "ID2",
+					},
+				},
+				SlackResponse: SlackResponse{Ok: true},
+			},
+		},
+		{
+			title: "Testing with optional parameters",
+			params: CompleteUploadExternalParameters{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID:    "ID2",
+						Title: "Title2",
+					},
+				},
+				Channel:         "test-channel",
+				InitialComment:  "test-comment",
+				ThreadTimestamp: "1234567890.123456",
+			},
+			wantResponse: CompleteUploadExternalResponse{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID:    "ID2",
+						Title: "Title2",
+					},
+				},
+				SlackResponse: SlackResponse{Ok: true},
+			},
+		},
+		{
+			title: "Testing with error",
+			params: CompleteUploadExternalParameters{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.title, func(t *testing.T) {
+			var resBody map[string]interface{}
+			if !tc.wantErr {
+				resBody = map[string]interface{}{
+					"ok": true,
+				}
+				files := make([]map[string]string, 0)
+				for _, file := range tc.params.Files {
+					m := map[string]string{
+						"id": file.ID,
+					}
+					if file.Title != "" {
+						m["title"] = file.Title
+					}
+					files = append(files, m)
+				}
+				resBody["files"] = files
+			} else {
+				resBody = map[string]interface{}{
+					"ok":    false,
+					"error": "errored",
+				}
+			}
+
+			resBodyBytes, err := json.Marshal(resBody)
+			if err != nil {
+				t.Fatalf("failed to marshal response body: %v", err)
+			}
+
+			api := &Client{
+				token: validToken,
+				httpclient: &mockCompleteUploadExternalHttpClient{
+					ResponseStatus: 200,
+					ResponseBody:   resBodyBytes,
+				},
+			}
+
+			gotResponse, err := api.CompleteUploadExternalContext(context.Background(), tc.params)
+
+			if err != nil {
+				if !tc.wantErr {
+					t.Errorf("CompleteUploadExternalContext() error = %v, want nil", err)
+				}
+			} else {
+				if tc.wantErr {
+					t.Fatalf("CompleteUploadExternalContext() error = nil, want %v", tc.wantErr)
+				}
+				if !reflect.DeepEqual(gotResponse, &tc.wantResponse) {
+					t.Errorf("CompleteUploadExternalContext() = %v, want %v", gotResponse, tc.wantResponse)
+				}
+			}
+		})
 	}
 }

@@ -199,14 +199,14 @@ type FileSummary struct {
 	Title string `json:"title"`
 }
 
-type completeUploadExternalParameters struct {
-	title           string
-	channel         string
-	initialComment  string
-	threadTimestamp string
+type CompleteUploadExternalParameters struct {
+	Files           []FileSummary
+	Channel         string
+	InitialComment  string
+	ThreadTimestamp string
 }
 
-type completeUploadExternalResponse struct {
+type CompleteUploadExternalResponse struct {
 	SlackResponse
 	Files []FileSummary `json:"files"`
 }
@@ -542,28 +542,28 @@ func (api *Client) uploadToURL(ctx context.Context, params uploadToURLParameters
 	return err
 }
 
-// completeUploadExternal once files are uploaded, this completes the upload and shares it to the specified channel
-func (api *Client) completeUploadExternal(ctx context.Context, fileID string, params completeUploadExternalParameters) (file *completeUploadExternalResponse, err error) {
-	request := []FileSummary{{ID: fileID, Title: params.title}}
-	requestBytes, err := json.Marshal(request)
+// CompleteUploadExternalContext once files are uploaded, this completes the upload and shares it to the specified channel
+// Slack API docs: https://api.slack.com/methods/files.completeUploadExternal
+func (api *Client) CompleteUploadExternalContext(ctx context.Context, params CompleteUploadExternalParameters) (file *CompleteUploadExternalResponse, err error) {
+	filesBytes, err := json.Marshal(params.Files)
 	if err != nil {
 		return nil, err
 	}
 	values := url.Values{
 		"token": {api.token},
-		"files": {string(requestBytes)},
+		"files": {string(filesBytes)},
 	}
 
-	if params.channel != "" {
-		values.Add("channel_id", params.channel)
+	if params.Channel != "" {
+		values.Add("channel_id", params.Channel)
 	}
-	if params.initialComment != "" {
-		values.Add("initial_comment", params.initialComment)
+	if params.InitialComment != "" {
+		values.Add("initial_comment", params.InitialComment)
 	}
-	if params.threadTimestamp != "" {
-		values.Add("thread_ts", params.threadTimestamp)
+	if params.ThreadTimestamp != "" {
+		values.Add("thread_ts", params.ThreadTimestamp)
 	}
-	response := &completeUploadExternalResponse{}
+	response := &CompleteUploadExternalResponse{}
 	err = api.postMethod(ctx, "files.completeUploadExternal", values, response)
 	if err != nil {
 		return nil, err
@@ -615,11 +615,14 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		return nil, err
 	}
 
-	c, err := api.completeUploadExternal(ctx, u.FileID, completeUploadExternalParameters{
-		title:           params.Title,
-		channel:         params.Channel,
-		initialComment:  params.InitialComment,
-		threadTimestamp: params.ThreadTimestamp,
+	c, err := api.CompleteUploadExternalContext(ctx, CompleteUploadExternalParameters{
+		Files: []FileSummary{{
+			ID:    u.FileID,
+			Title: params.Title,
+		}},
+		Channel:         params.Channel,
+		InitialComment:  params.InitialComment,
+		ThreadTimestamp: params.ThreadTimestamp,
 	})
 	if err != nil {
 		return nil, err
