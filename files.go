@@ -90,10 +90,11 @@ type File struct {
 	IsStarred       bool     `json:"is_starred"`
 	Shares          Share    `json:"shares"`
 
-	Subject string              `json:"subject"`
-	To      []EmailFileUserInfo `json:"to"`
-	From    []EmailFileUserInfo `json:"from"`
-	Cc      []EmailFileUserInfo `json:"cc"`
+	Subject string                 `json:"subject"`
+	To      []EmailFileUserInfo    `json:"to"`
+	From    []EmailFileUserInfo    `json:"from"`
+	Cc      []EmailFileUserInfo    `json:"cc"`
+	Headers map[string]interface{} `json:"headers"`
 }
 
 type EmailFileUserInfo struct {
