@@ -2547,10 +2547,31 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"type": "app",
 			"input_parameters": [
 				{
+					"type": "slack#/types/message_context",
+					"name": "message_context",
+					"description": "",
+					"title": "Message Context",
+					"is_required": true
+				},
+				{
 					"type": "slack#/types/user_id",
 					"name": "user_id",
 					"description": "Message recipient",
 					"title": "User",
+					"is_required": true
+				},
+				{
+					"type": "integer",
+					"name": "timestamp",
+					"description": "Timestamp of the event",
+					"title": "Timestamp",
+					"is_required": true
+				},
+				{
+					"type": "boolean",
+					"name": "enabled",
+					"description": "Indicates if the feature is enabled",
+					"title": "Enabled",
 					"is_required": true
 				}
 			],
@@ -2568,12 +2589,31 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"date_updated": 1698947481,
 			"date_deleted": 0
 		},
-		"inputs": { "user_id": "USER12345678" },
+		"inputs": {
+			"user_id": "USER12345678",
+			"timestamp": 1698947481,
+			"enabled": true,
+			"message_context": {
+				"channel_id": "C0123456789",
+				"message_ts": "1733331835.871019"
+			}
+		},
 		"function_execution_id": "Fx1234567O9L",
 		"workflow_execution_id": "WxABC123DEF0",
 		"event_ts": "1698958075.998738",
 		"bot_access_token": "abcd-1325532282098-1322446258629-6123648410839-527a1cab3979cad288c9e20330d212cf"
 	}`
+
+	type MessageContext struct {
+		ChannelId string `json:"channel_id"`
+		MessageTs string `json:"message_ts"`
+	}
+	type TestInputs struct {
+		UserId    string         `json:"user_id"`
+		Timestamp int            `json:"timestamp"`
+		Enabled   bool           `json:"enabled"`
+		Context   MessageContext `json:"message_context"`
+	}
 
 	var event FunctionExecutedEvent
 	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
@@ -2591,6 +2631,21 @@ func TestFunctionExecutedEvent(t *testing.T) {
 	if event.FunctionExecutionID != "Fx1234567O9L" {
 		t.Fail()
 	}
+
+	inputStr, err := json.Marshal(event.Inputs)
+	if err != nil {
+		t.Errorf("Failed to marshal Inputs of FunctionExecutedEvent: %v", err)
+	}
+	testInputs := new(TestInputs)
+	err = json.Unmarshal(inputStr, testInputs)
+	if err != nil {
+		t.Errorf("Failed to unmarshal Inputs of FunctionExecutedEvent: %v", err)
+	}
+	assert.Equal(t, "USER12345678", testInputs.UserId)
+	assert.Equal(t, 1698947481, testInputs.Timestamp)
+	assert.True(t, testInputs.Enabled)
+	assert.Equal(t, "C0123456789", testInputs.Context.ChannelId)
+	assert.Equal(t, "1733331835.871019", testInputs.Context.MessageTs)
 }
 
 func TestInviteRequestedEvent(t *testing.T) {
