@@ -40,13 +40,27 @@ type hub struct {
 }
 
 type messageChannels struct {
-	seen   chan (string)
-	sent   chan (string)
-	posted chan (slack.Message)
+	seen   chan string
+	sent   chan string
+	posted chan slack.Message
 }
 type messageCollection struct {
 	sync.RWMutex
 	messages []string
+}
+
+func (mc *messageCollection) observe(msg string) {
+	mc.Lock()
+	defer mc.Unlock()
+	mc.messages = append(mc.messages, msg)
+}
+
+func (mc *messageCollection) get() []string {
+	mc.RLock()
+	defer mc.RUnlock()
+
+	m := mc.messages
+	return m
 }
 
 type serverChannels struct {
@@ -68,7 +82,7 @@ type Server struct {
 	BotName              string
 	BotID                string
 	ServerAddr           string
-	SeenFeed             chan (string)
+	SeenFeed             chan string
 	channels             *serverChannels
 	groups               *serverGroups
 	seenInboundMessages  *messageCollection
