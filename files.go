@@ -510,10 +510,10 @@ func (api *Client) ShareFilePublicURLContext(ctx context.Context, fileID string)
 // Slack API docs: https://api.slack.com/methods/files.getUploadURLExternal
 func (api *Client) GetUploadURLExternalContext(ctx context.Context, params GetUploadURLExternalParameters) (*GetUploadURLExternalResponse, error) {
 	if params.FileName == "" {
-		return nil, fmt.Errorf("GetUploadURLExternalContext: fileName cannot be empty")
+		return nil, fmt.Errorf("files.getUploadURLExternal: fileName cannot be empty")
 	}
 	if params.FileSize == 0 {
-		return nil, fmt.Errorf("GetUploadURLExternalContext: fileSize cannot be 0")
+		return nil, fmt.Errorf("files.getUploadURLExternal: fileSize cannot be 0")
 	}
 
 	values := url.Values{
