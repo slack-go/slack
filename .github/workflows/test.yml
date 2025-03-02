@@ -26,8 +26,6 @@ jobs:
           go-version: ${{ matrix.go }}
       - name: run test
         run: go test -v -race ./...
-        env:
-          GO111MODULE: on
   lint:
     runs-on: ubuntu-22.04
     name: lint
