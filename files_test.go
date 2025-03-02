@@ -357,7 +357,7 @@ func TestGetUploadURLExternalContext(t *testing.T) {
 				FileName: "",
 				FileSize: 10,
 			},
-			wantErr: fmt.Errorf("files.getUploadURLExternal: fileName cannot be empty"),
+			wantErr: fmt.Errorf("FileName cannot be empty"),
 		},
 		{
 			title: "Testing with invalid parameters: file size 0",
@@ -365,7 +365,7 @@ func TestGetUploadURLExternalContext(t *testing.T) {
 				FileName: "test.txt",
 				FileSize: 0,
 			},
-			wantErr: fmt.Errorf("files.getUploadURLExternal: fileSize cannot be 0"),
+			wantErr: fmt.Errorf("FileSize cannot be 0"),
 		},
 	}
 
