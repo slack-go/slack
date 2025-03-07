@@ -90,17 +90,24 @@ type File struct {
 	IsStarred       bool     `json:"is_starred"`
 	Shares          Share    `json:"shares"`
 
-	Subject string                 `json:"subject"`
-	To      []EmailFileUserInfo    `json:"to"`
-	From    []EmailFileUserInfo    `json:"from"`
-	Cc      []EmailFileUserInfo    `json:"cc"`
-	Headers map[string]interface{} `json:"headers"`
+	Subject string              `json:"subject"`
+	To      []EmailFileUserInfo `json:"to"`
+	From    []EmailFileUserInfo `json:"from"`
+	Cc      []EmailFileUserInfo `json:"cc"`
+	Headers EmailHeaders        `json:"headers"`
 }
 
 type EmailFileUserInfo struct {
 	Address  string `json:"address"`
 	Name     string `json:"name"`
 	Original string `json:"original"`
+}
+
+type EmailHeaders struct {
+	Date      string `json:"date"`
+	InReplyTo string `json:"in_reply_to"`
+	ReplyTo   string `json:"reply_to"`
+	MessageID string `json:"message_id"`
 }
 
 type Share struct {
