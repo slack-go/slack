@@ -119,7 +119,7 @@ const (
 					"label": {
 						"type": "plain_text",
 						"text": "Select a channel to post the result on",
-				  "emoji": false
+						"emoji": false
 					},
 					"element": {
 						"type": "conversations_select",
