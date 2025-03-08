@@ -3,8 +3,6 @@ package slack
 import (
 	"encoding/json"
 	"errors"
-
-	"gopkg.in/guregu/null.v4"
 )
 
 // Block Objects are also known as Composition Objects
@@ -122,10 +120,10 @@ func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, e
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#text
 type TextBlockObject struct {
-	Type     string    `json:"type"`
-	Text     string    `json:"text"`
-	Emoji    null.Bool `json:"emoji,omitempty"`
-	Verbatim bool      `json:"verbatim,omitempty"`
+	Type     string `json:"type"`
+	Text     string `json:"text"`
+	Emoji    *bool  `json:"emoji"`
+	Verbatim bool   `json:"verbatim,omitempty"`
 }
 
 // validateType enforces block objects for element and block parameters
@@ -145,7 +143,7 @@ func (s TextBlockObject) Validate() error {
 	}
 
 	// https://github.com/slack-go/slack/issues/881
-	if s.Type == "mrkdwn" && s.Emoji.ValueOrZero() == true {
+	if s.Type == "mrkdwn" && s.Emoji != nil && *s.Emoji {
 		return errors.New("emoji cannot be true in mrkdown")
 	}
 
@@ -167,7 +165,7 @@ func NewTextBlockObject(elementType, text string, emoji bool, verbatim bool) *Te
 	return &TextBlockObject{
 		Type:     elementType,
 		Text:     text,
-		Emoji:    null.BoolFrom(emoji),
+		Emoji:    &emoji,
 		Verbatim: verbatim,
 	}
 }

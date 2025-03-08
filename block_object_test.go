@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/guregu/null.v4"
 )
 
 func TestNewImageBlockObject(t *testing.T) {
@@ -27,7 +26,7 @@ func TestNewTextBlockObject(t *testing.T) {
 
 	assert.Equal(t, textObject.Type, "plain_text")
 	assert.Equal(t, textObject.Text, "test")
-	assert.True(t, textObject.Emoji.ValueOrZero(), "Emoji property should be true")
+	assert.True(t, *textObject.Emoji, "Emoji property should be true")
 	assert.False(t, textObject.Verbatim, "Verbatim should be false")
 
 }
@@ -90,6 +89,11 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 }
 
 func TestValidateTextBlockObject(t *testing.T) {
+	emojiTrue := new(bool)
+	emojiFalse := new(bool)
+	*emojiTrue = true
+	*emojiFalse = false
+
 	tests := []struct {
 		input    TextBlockObject
 		expected error
@@ -98,7 +102,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -107,7 +111,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    null.BoolFrom(true),
+				Emoji:    emojiTrue,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -116,7 +120,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    null.BoolFromPtr(nil),
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -125,7 +129,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -134,7 +138,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    null.BoolFromPtr(nil),
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -143,7 +147,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "invalid",
 				Text:     "testText",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("type must be either of plain_text or mrkdwn"),
@@ -152,7 +156,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    null.BoolFrom(true),
+				Emoji:    emojiTrue,
 				Verbatim: false,
 			},
 			expected: errors.New("emoji cannot be true in mrkdown"),
@@ -161,7 +165,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("text must have a minimum length of 1"),
@@ -170,7 +174,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     strings.Repeat("a", 3001),
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("text cannot be longer than 3000 characters"),
@@ -184,6 +188,11 @@ func TestValidateTextBlockObject(t *testing.T) {
 }
 
 func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
+	emojiTrue := new(bool)
+	emojiFalse := new(bool)
+	*emojiTrue = true
+	*emojiFalse = false
+
 	cases := []struct {
 		raw      []byte
 		expected TextBlockObject
@@ -194,7 +203,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 			TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    null.BoolFromPtr(nil),
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			nil,
@@ -204,7 +213,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 			TextBlockObject{
 				Type:     "plain_text",
 				Text:     ":+1:",
-				Emoji:    null.BoolFrom(true),
+				Emoji:    emojiTrue,
 				Verbatim: false,
 			},
 			nil,
@@ -214,7 +223,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 			TextBlockObject{
 				Type:     "plain_text",
 				Text:     "No emojis allowed :(",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			nil,
@@ -224,7 +233,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 			TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    null.BoolFromPtr(nil),
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			nil,
@@ -234,7 +243,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 			TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "No emojis allowed :(",
-				Emoji:    null.BoolFrom(false),
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			nil,
