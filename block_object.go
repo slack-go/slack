@@ -122,7 +122,7 @@ func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, e
 type TextBlockObject struct {
 	Type     string `json:"type"`
 	Text     string `json:"text"`
-	Emoji    bool   `json:"emoji,omitempty"`
+	Emoji    *bool  `json:"emoji"`
 	Verbatim bool   `json:"verbatim,omitempty"`
 }
 
@@ -143,7 +143,7 @@ func (s TextBlockObject) Validate() error {
 	}
 
 	// https://github.com/slack-go/slack/issues/881
-	if s.Type == "mrkdwn" && s.Emoji {
+	if s.Type == "mrkdwn" && s.Emoji != nil && *s.Emoji {
 		return errors.New("emoji cannot be true in mrkdown")
 	}
 
@@ -161,11 +161,11 @@ func (s TextBlockObject) Validate() error {
 }
 
 // NewTextBlockObject returns an instance of a new Text Block Object
-func NewTextBlockObject(elementType, text string, emoji, verbatim bool) *TextBlockObject {
+func NewTextBlockObject(elementType, text string, emoji bool, verbatim bool) *TextBlockObject {
 	return &TextBlockObject{
 		Type:     elementType,
 		Text:     text,
-		Emoji:    emoji,
+		Emoji:    &emoji,
 		Verbatim: verbatim,
 	}
 }

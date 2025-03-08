@@ -1,10 +1,12 @@
 package slack
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
 
+	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +23,7 @@ func TestNewTextBlockObject(t *testing.T) {
 
 	assert.Equal(t, textObject.Type, "plain_text")
 	assert.Equal(t, textObject.Text, "test")
-	assert.True(t, textObject.Emoji, "Emoji property should be true")
+	assert.True(t, *textObject.Emoji, "Emoji property should be true")
 	assert.False(t, textObject.Verbatim, "Verbatim should be false")
 }
 
@@ -75,6 +77,11 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 }
 
 func TestValidateTextBlockObject(t *testing.T) {
+	emojiTrue := new(bool)
+	emojiFalse := new(bool)
+	*emojiTrue = true
+	*emojiFalse = false
+
 	tests := []struct {
 		input    TextBlockObject
 		expected error
@@ -83,7 +90,25 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "plain_text",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    emojiFalse,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    emojiTrue,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -92,7 +117,16 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    emojiFalse,
+				Verbatim: false,
+			},
+			expected: nil,
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: nil,
@@ -101,7 +135,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "invalid",
 				Text:     "testText",
-				Emoji:    false,
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("type must be either of plain_text or mrkdwn"),
@@ -110,7 +144,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    true,
+				Emoji:    emojiTrue,
 				Verbatim: false,
 			},
 			expected: errors.New("emoji cannot be true in mrkdown"),
@@ -119,7 +153,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "",
-				Emoji:    false,
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("text must have a minimum length of 1"),
@@ -128,7 +162,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     strings.Repeat("a", 3001),
-				Emoji:    false,
+				Emoji:    emojiFalse,
 				Verbatim: false,
 			},
 			expected: errors.New("text cannot be longer than 3000 characters"),
@@ -138,5 +172,85 @@ func TestValidateTextBlockObject(t *testing.T) {
 	for _, test := range tests {
 		err := test.input.Validate()
 		assert.Equal(t, err, test.expected)
+	}
+}
+
+func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
+	emojiTrue := new(bool)
+	emojiFalse := new(bool)
+	*emojiTrue = true
+	*emojiFalse = false
+
+	cases := []struct {
+		raw      []byte
+		expected TextBlockObject
+		err      error
+	}{
+		{
+			[]byte(`{"type":"plain_text","text":"testText"}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     "testText",
+				Emoji:    nil,
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"plain_text","text":":+1:","emoji":true}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     ":+1:",
+				Emoji:    emojiTrue,
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"plain_text","text":"No emojis allowed :(","emoji":false}`),
+			TextBlockObject{
+				Type:     "plain_text",
+				Text:     "No emojis allowed :(",
+				Emoji:    emojiFalse,
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"mrkdwn","text":"testText"}`),
+			TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    nil,
+				Verbatim: false,
+			},
+			nil,
+		},
+		{
+			[]byte(`{"type":"mrkdwn","text":"No emojis allowed :(","emoji":false}`),
+			TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "No emojis allowed :(",
+				Emoji:    emojiFalse,
+				Verbatim: false,
+			},
+			nil,
+		},
+	}
+	for _, tc := range cases {
+		var actual TextBlockObject
+		err := json.Unmarshal(tc.raw, &actual)
+		if err != nil {
+			if tc.err == nil {
+				t.Errorf("unexpected error: %s", err)
+			}
+			t.Errorf("expected error is %v, but got %v", tc.err, err)
+		}
+		if tc.err != nil {
+			t.Errorf("expected to raise an error %v", tc.err)
+		}
+		if diff := deep.Equal(actual, tc.expected); diff != nil {
+			t.Errorf("actual value does not match expected one\n%s", diff)
+		}
 	}
 }
