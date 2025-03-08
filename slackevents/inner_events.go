@@ -403,14 +403,6 @@ type EmojiChangedEvent struct {
 	Value string `json:"value,omitempty"`
 }
 
-// WorkflowStepExecuteEvent is fired, if a workflow step of your app is invoked
-type WorkflowStepExecuteEvent struct {
-	Type           string            `json:"type"`
-	CallbackID     string            `json:"callback_id"`
-	WorkflowStep   EventWorkflowStep `json:"workflow_step"`
-	EventTimestamp string            `json:"event_ts"`
-}
-
 // MessageMetadataPostedEvent is sent, if a message with metadata is posted
 type MessageMetadataPostedEvent struct {
 	Type             string               `json:"type"`
@@ -450,15 +442,6 @@ type MessageMetadataDeletedEvent struct {
 	TeamId           string               `json:"team_id"`
 	MessageTimestamp string               `json:"message_ts"`
 	DeletedTimestamp string               `json:"deleted_ts"`
-}
-
-type EventWorkflowStep struct {
-	WorkflowStepExecuteID string                      `json:"workflow_step_execute_id"`
-	WorkflowID            string                      `json:"workflow_id"`
-	WorkflowInstanceID    string                      `json:"workflow_instance_id"`
-	StepID                string                      `json:"step_id"`
-	Inputs                *slack.WorkflowStepInputs   `json:"inputs,omitempty"`
-	Outputs               *[]slack.WorkflowStepOutput `json:"outputs,omitempty"`
 }
 
 // JSONTime exists so that we can have a String method converting the date
@@ -986,11 +969,11 @@ type FunctionExecutedEvent struct {
 		DateUpdated int64  `json:"date_updated"`
 		DateDeleted int64  `json:"date_deleted"`
 	} `json:"function"`
-	Inputs              map[string]string `json:"inputs"`
-	FunctionExecutionID string            `json:"function_execution_id"`
-	WorkflowExecutionID string            `json:"workflow_execution_id"`
-	EventTs             string            `json:"event_ts"`
-	BotAccessToken      string            `json:"bot_access_token"`
+	Inputs              map[string]interface{} `json:"inputs"`
+	FunctionExecutionID string                 `json:"function_execution_id"`
+	WorkflowExecutionID string                 `json:"workflow_execution_id"`
+	EventTs             string                 `json:"event_ts"`
+	BotAccessToken      string                 `json:"bot_access_token"`
 }
 
 type InviteRequestedEvent struct {
@@ -1344,7 +1327,6 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	TeamJoin:                      TeamJoinEvent{},
 	TokensRevoked:                 TokensRevokedEvent{},
 	EmojiChanged:                  EmojiChangedEvent{},
-	WorkflowStepExecute:           WorkflowStepExecuteEvent{},
 	MessageMetadataPosted:         MessageMetadataPostedEvent{},
 	MessageMetadataUpdated:        MessageMetadataUpdatedEvent{},
 	MessageMetadataDeleted:        MessageMetadataDeletedEvent{},

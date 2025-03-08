@@ -649,67 +649,6 @@ func TestEmojiChanged(t *testing.T) {
 	}
 }
 
-func TestWorkflowStepExecute(t *testing.T) {
-	// see: https://api.slack.com/events/workflow_step_execute
-	rawE := []byte(`
-	{
-		"type":"workflow_step_execute",
-		"callback_id":"open_ticket",
-		"workflow_step":{
-			"workflow_step_execute_id":"1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326",
-			"workflow_id":"123456789012345678",
-			"workflow_instance_id":"987654321098765432",
-			"step_id":"12a345bc-1a23-4567-8b90-1234a567b8c9",
-			"inputs":{
-				"example-select-input":{
-					"value": "value-two",
-					"skip_variable_replacement": false
-				}
-			},
-			"outputs":[
-			]
-		},
-		"event_ts":"1643290847.766536"
-	}
-	`)
-
-	wse := WorkflowStepExecuteEvent{}
-	err := json.Unmarshal(rawE, &wse)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if wse.Type != "workflow_step_execute" {
-		t.Fail()
-	}
-	if wse.CallbackID != "open_ticket" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowStepExecuteID != "1036669284371.19077474947.c94bcf942e047298d21f89faf24f1326" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowID != "123456789012345678" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.WorkflowInstanceID != "987654321098765432" {
-		t.Fail()
-	}
-	if wse.WorkflowStep.StepID != "12a345bc-1a23-4567-8b90-1234a567b8c9" {
-		t.Fail()
-	}
-	if len(*wse.WorkflowStep.Inputs) == 0 {
-		t.Fail()
-	}
-	if inputElement, ok := (*wse.WorkflowStep.Inputs)["example-select-input"]; ok {
-		if inputElement.Value != "value-two" {
-			t.Fail()
-		}
-		if inputElement.SkipVariableReplacement != false {
-			t.Fail()
-		}
-	}
-}
-
 func TestMessageMetadataPosted(t *testing.T) {
 	rawE := []byte(`
 	{
@@ -2547,10 +2486,31 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"type": "app",
 			"input_parameters": [
 				{
+					"type": "slack#/types/message_context",
+					"name": "message_context",
+					"description": "",
+					"title": "Message Context",
+					"is_required": true
+				},
+				{
 					"type": "slack#/types/user_id",
 					"name": "user_id",
 					"description": "Message recipient",
 					"title": "User",
+					"is_required": true
+				},
+				{
+					"type": "integer",
+					"name": "timestamp",
+					"description": "Timestamp of the event",
+					"title": "Timestamp",
+					"is_required": true
+				},
+				{
+					"type": "boolean",
+					"name": "enabled",
+					"description": "Indicates if the feature is enabled",
+					"title": "Enabled",
 					"is_required": true
 				}
 			],
@@ -2568,12 +2528,31 @@ func TestFunctionExecutedEvent(t *testing.T) {
 			"date_updated": 1698947481,
 			"date_deleted": 0
 		},
-		"inputs": { "user_id": "USER12345678" },
+		"inputs": {
+			"user_id": "USER12345678",
+			"timestamp": 1698947481,
+			"enabled": true,
+			"message_context": {
+				"channel_id": "C0123456789",
+				"message_ts": "1733331835.871019"
+			}
+		},
 		"function_execution_id": "Fx1234567O9L",
 		"workflow_execution_id": "WxABC123DEF0",
 		"event_ts": "1698958075.998738",
 		"bot_access_token": "abcd-1325532282098-1322446258629-6123648410839-527a1cab3979cad288c9e20330d212cf"
 	}`
+
+	type MessageContext struct {
+		ChannelId string `json:"channel_id"`
+		MessageTs string `json:"message_ts"`
+	}
+	type TestInputs struct {
+		UserId    string         `json:"user_id"`
+		Timestamp int            `json:"timestamp"`
+		Enabled   bool           `json:"enabled"`
+		Context   MessageContext `json:"message_context"`
+	}
 
 	var event FunctionExecutedEvent
 	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
@@ -2591,6 +2570,21 @@ func TestFunctionExecutedEvent(t *testing.T) {
 	if event.FunctionExecutionID != "Fx1234567O9L" {
 		t.Fail()
 	}
+
+	inputStr, err := json.Marshal(event.Inputs)
+	if err != nil {
+		t.Errorf("Failed to marshal Inputs of FunctionExecutedEvent: %v", err)
+	}
+	testInputs := new(TestInputs)
+	err = json.Unmarshal(inputStr, testInputs)
+	if err != nil {
+		t.Errorf("Failed to unmarshal Inputs of FunctionExecutedEvent: %v", err)
+	}
+	assert.Equal(t, "USER12345678", testInputs.UserId)
+	assert.Equal(t, 1698947481, testInputs.Timestamp)
+	assert.True(t, testInputs.Enabled)
+	assert.Equal(t, "C0123456789", testInputs.Context.ChannelId)
+	assert.Equal(t, "1733331835.871019", testInputs.Context.MessageTs)
 }
 
 func TestInviteRequestedEvent(t *testing.T) {

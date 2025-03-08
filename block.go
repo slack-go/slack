@@ -1,9 +1,5 @@
 package slack
 
-// @NOTE: Blocks are in beta and subject to change.
-
-// More Information: https://api.slack.com/block-kit
-
 // MessageBlockType defines a named string type to define each block type
 // as a constant for use within the package.
 type MessageBlockType string
@@ -20,12 +16,14 @@ const (
 	MBTRichText MessageBlockType = "rich_text"
 	MBTCall     MessageBlockType = "call"
 	MBTVideo    MessageBlockType = "video"
+	MBTMarkdown MessageBlockType = "markdown"
 )
 
 // Block defines an interface all block types should implement
 // to ensure consistency between blocks.
 type Block interface {
 	BlockType() MessageBlockType
+	ID() string
 }
 
 // Blocks is a convenience struct defined to allow dynamic unmarshalling of
