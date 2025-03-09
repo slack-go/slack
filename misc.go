@@ -306,7 +306,7 @@ func timerReset(t *time.Timer, d time.Duration) {
 }
 
 func checkStatusCode(resp *http.Response, d Debug) error {
-	if resp.StatusCode == http.StatusTooManyRequests {
+	if resp.StatusCode == http.StatusTooManyRequests && resp.Header.Get("Retry-After") != "" {
 		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
 			return err
