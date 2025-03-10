@@ -767,7 +767,8 @@ func TestSlack_UpdateViewSubmissionResponse(t *testing.T) {
 			"type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "Test update view submission response"
+				"text": "Test update view submission response",
+				"emoji": false
 			},
 			"blocks": [
 				{
@@ -803,7 +804,8 @@ func TestSlack_PushViewSubmissionResponse(t *testing.T) {
 			"type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "Test update view submission response"
+				"text": "Test update view submission response",
+				"emoji": false
 			},
 			"blocks": [
 				{
@@ -812,7 +814,8 @@ func TestSlack_PushViewSubmissionResponse(t *testing.T) {
 					"elements": [
 						{
 							"type": "plain_text",
-							"text": "Context text"
+							"text": "Context text",
+							"emoji": false
 						},
 						{
 							"type": "image",

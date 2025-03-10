@@ -81,7 +81,7 @@ func TestPostMessage(t *testing.T) {
 	}
 
 	blocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
-	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello"}]}]`
+	blockStr := `[{"type":"context","block_id":"context","elements":[{"type":"plain_text","text":"hello","emoji":false}]}]`
 
 	tests := map[string]messageTest{
 		"OnlyBasicProperties": {
