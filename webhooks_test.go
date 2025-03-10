@@ -66,6 +66,25 @@ func TestPostWebhook_NotOK(t *testing.T) {
 	}
 }
 
+func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
+	once.Do(startServer)
+
+	http.HandleFunc("/message_limit_exceeded", func(rw http.ResponseWriter, r *http.Request) {
+		// When a workspace's message limit is exceeded we get a 429 without a Retry-After header
+		rw.WriteHeader(http.StatusTooManyRequests)
+		rw.Write([]byte("message_limit_exceeded"))
+	})
+
+	url := "http://" + serverAddr + "/message_limit_exceeded"
+
+	err := PostWebhook(url, &WebhookMessage{})
+
+	if err == nil {
+		t.Errorf("Expected to receive error")
+	}
+	assert.IsType(t, StatusCodeError{}, err)
+}
+
 func TestWebhookMessage_WithBlocks(t *testing.T) {
 	textBlockObject := NewTextBlockObject("plain_text", "text", false, false)
 	sectionBlock := NewSectionBlock(textBlockObject, nil, nil)
