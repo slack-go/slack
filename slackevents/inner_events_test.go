@@ -370,16 +370,12 @@ func TestThreadBroadcastEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if me.Root != nil {
-		t.Error("me.Root should be nil")
-	}
-
 	if me.Message.Root == nil {
 		t.Fatal("me.Message.Root is nil")
 	}
 
-	if me.Message.Root.TimeStamp != "1355517523.000005" {
-		t.Errorf("me.Message.Root.TimeStamp = %q, want %q", me.Root.TimeStamp, "1355517523.000005")
+	if me.Message.Root.Timestamp != "1355517523.000005" {
+		t.Errorf("me.Message.Root.Timestamp = %q, want %q", me.Message.Root.Timestamp, "1355517523.000005")
 	}
 }
 

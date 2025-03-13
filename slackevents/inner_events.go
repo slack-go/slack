@@ -259,9 +259,8 @@ type MessageEvent struct {
 	SourceTeam string `json:"source_team,omitempty"`
 
 	// Edited Message
-	Message         *MessageEvent `json:"message,omitempty"`
-	PreviousMessage *MessageEvent `json:"previous_message,omitempty"`
-	Edited          *Edited       `json:"edited,omitempty"`
+	Message         *slack.Message `json:"message,omitempty"`
+	PreviousMessage *slack.Message `json:"previous_message,omitempty"`
 
 	// DeletedTimestamp is set if the SubType is message_deleted. It is the
 	// timestamp of the message that has been deleted.
@@ -274,19 +273,6 @@ type MessageEvent struct {
 	BotID    string `json:"bot_id,omitempty"`
 	Username string `json:"username,omitempty"`
 	Icons    *Icon  `json:"icons,omitempty"`
-
-	Upload bool   `json:"upload"`
-	Files  []File `json:"files"`
-
-	Blocks      slack.Blocks       `json:"blocks,omitempty"`
-	Attachments []slack.Attachment `json:"attachments,omitempty"`
-
-	Metadata slack.SlackMetadata `json:"metadata,omitempty"`
-
-	// Root is the message that was broadcast to the channel when the SubType is
-	// thread_broadcast. If this is not a thread_broadcast message event, this
-	// value is nil.
-	Root *MessageEvent `json:"root"`
 }
 
 // MemberJoinedChannelEvent A member joined a public or private channel

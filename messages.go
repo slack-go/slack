@@ -17,6 +17,10 @@ type Message struct {
 	Msg
 	SubMessage      *Msg `json:"message,omitempty"`
 	PreviousMessage *Msg `json:"previous_message,omitempty"`
+	// Root is the message that was broadcast to the channel when the SubType is
+	// thread_broadcast. If this is not a thread_broadcast message event, this
+	// value is nil.
+	Root *Msg `json:"root,omitempty"`
 }
 
 // Msg SubTypes (https://api.slack.com/events/message)
