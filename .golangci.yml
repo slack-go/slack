@@ -4,11 +4,11 @@ run:
 linters:
   disable-all: true
   enable:
+    - gocritic
     - goimports
     - govet
-    - interfacer
     - misspell
-    - structcheck
+    - unused
     - unconvert
 issues:
   new: true
