@@ -38,9 +38,8 @@ type Conversation struct {
 	InternalTeamIDs    []string `json:"internal_team_ids,omitempty"`
 	ContextTeamID      string   `json:"context_team_id,omitempty"`
 	ConversationHostID string   `json:"conversation_host_id,omitempty"`
-
-	// TODO support pending_shared
-	// TODO support previous_names
+	PreviousNames      []string `json:"previous_names,omitempty"`
+	PendingShared      []string `json:"pending_shared,omitempty"`
 }
 
 // GroupConversation is the foundation for Group and Channel
@@ -70,7 +69,21 @@ type Purpose struct {
 
 // Properties contains the Canvas associated to the channel.
 type Properties struct {
-	Canvas Canvas `json:"canvas"`
+	Canvas              Canvas       `json:"canvas"`
+	PostingRestrictedTo RestrictedTo `json:"posting_restricted_to"`
+	Tabs                []Tab        `json:"tabs"`
+	ThreadsRestrictedTo RestrictedTo `json:"threads_restricted_to"`
+}
+
+type RestrictedTo struct {
+	Type []string `json:"type"`
+	User []string `json:"user"`
+}
+
+type Tab struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+	Type  string `json:"type"`
 }
 
 type Canvas struct {
