@@ -141,6 +141,8 @@ func main() {
 				}
 
 				client.Ack(*evt.Request, payload)
+			case socketmode.EventTypeHello:
+				client.Debugf("Hello received!")
 			default:
 				fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
 			}
