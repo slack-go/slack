@@ -49,6 +49,7 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeConnecting, middlewareConnecting)
 	socketmodeHandler.Handle(socketmode.EventTypeConnectionError, middlewareConnectionError)
 	socketmodeHandler.Handle(socketmode.EventTypeConnected, middlewareConnected)
+	socketmodeHandler.Handle(socketmode.EventTypeHello, middlewareHello)
 
 	//\\ EventTypeEventsAPI //\\
 	// Handle all EventsAPI
@@ -83,6 +84,10 @@ func middlewareConnectionError(evt *socketmode.Event, client *socketmode.Client)
 
 func middlewareConnected(evt *socketmode.Event, client *socketmode.Client) {
 	fmt.Println("Connected to Slack with Socket Mode.")
+}
+
+func middlewareHello(evt *socketmode.Event, client *socketmode.Client) {
+	fmt.Println("Received a hello message. Howdy to you too.")
 }
 
 func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
