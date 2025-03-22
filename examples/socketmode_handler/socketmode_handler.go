@@ -102,7 +102,7 @@ func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
 		innerEvent := eventsAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
-			fmt.Printf("We have been mentionned in %v", ev.Channel)
+			fmt.Printf("We have been mentioned in %v", ev.Channel)
 			_, _, err := client.Client.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
 			if err != nil {
 				fmt.Printf("failed posting message: %v", err)
@@ -131,7 +131,7 @@ func middlewareAppMentionEvent(evt *socketmode.Event, client *socketmode.Client)
 		return
 	}
 
-	fmt.Printf("We have been mentionned in %v\n", ev.Channel)
+	fmt.Printf("We have been mentioned in %v\n", ev.Channel)
 	_, _, err := client.Client.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
 	if err != nil {
 		fmt.Printf("failed posting message: %v", err)
