@@ -7,25 +7,34 @@ import (
 	"strings"
 )
 
+// AdminConversationsSetTeamsParams contains arguments for AdminConversationsSetTeams
+// method calls.
+type AdminConversationsSetTeamsParams struct {
+	ChannelID     string
+	OrgChannel    *bool
+	TargetTeamIDs []string
+	TeamID        *string
+}
+
 // Set the workspaces in an Enterprise Grid organisation that connect to a public or
 // private channel.
 // See: https://api.slack.com/methods/admin.conversations.setTeams
-func (api *Client) AdminConversationsSetTeams(ctx context.Context, channelID string, orgChannel *bool, targetTeamIDs *[]string, teamID *string) error {
+func (api *Client) AdminConversationsSetTeams(ctx context.Context, params AdminConversationsSetTeamsParams) error {
 	values := url.Values{
 		"token":      {api.token},
-		"channel_id": {channelID},
+		"channel_id": {params.ChannelID},
 	}
 
-	if orgChannel != nil {
-		values.Add("org_channel", strconv.FormatBool(*orgChannel))
+	if params.OrgChannel != nil {
+		values.Add("org_channel", strconv.FormatBool(*params.OrgChannel))
 	}
 
-	if targetTeamIDs != nil {
-		values.Add("target_team_ids", strings.Join(*targetTeamIDs, ",")) // ["T123", "T456"] - > "T123,T456"
+	if len(params.TargetTeamIDs) > 0 {
+		values.Add("target_team_ids", strings.Join(params.TargetTeamIDs, ",")) // ["T123", "T456"] - > "T123,T456"
 	}
 
-	if teamID != nil {
-		values.Add("team_id", *teamID)
+	if params.TeamID != nil {
+		values.Add("team_id", *params.TeamID)
 	}
 
 	response := &SlackResponse{}
