@@ -124,19 +124,6 @@ func jsonReq(ctx context.Context, endpoint string, body interface{}) (req *http.
 	return req, nil
 }
 
-func parseResponseBody(body io.ReadCloser, intf interface{}, d Debug) error {
-	response, err := io.ReadAll(body)
-	if err != nil {
-		return err
-	}
-
-	if d.Debug() {
-		d.Debugln("parseResponseBody", string(response))
-	}
-
-	return json.Unmarshal(response, intf)
-}
-
 func postLocalWithMultipartResponse(ctx context.Context, client httpClient, method, fpath, fieldname, token string, values url.Values, intf interface{}, d Debug) error {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {
@@ -220,7 +207,7 @@ func createFormFields(mw *multipart.Writer, values url.Values) error {
 	return nil
 }
 
-func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d Debug) error {
+func doPost(client httpClient, req *http.Request, parser responseParser, d Debug) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -245,7 +232,7 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 // post a url encoded form.
@@ -256,7 +243,7 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf interface{}, d Debug) error {
@@ -269,7 +256,7 @@ func getResource(ctx context.Context, client httpClient, endpoint, token string,
 
 	req.URL.RawQuery = values.Encode()
 
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d Debug) error {
@@ -295,14 +282,6 @@ func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 		Ok: true,
 	})
 	rw.Write(response)
-}
-
-// timerReset safely reset a timer, see time.Timer.Reset for details.
-func timerReset(t *time.Timer, d time.Duration) {
-	if !t.Stop() {
-		<-t.C
-	}
-	t.Reset(d)
 }
 
 func checkStatusCode(resp *http.Response, d Debug) error {
@@ -336,6 +315,10 @@ func newJSONParser(dst interface{}) responseParser {
 
 func newTextParser(dst interface{}) responseParser {
 	return func(resp *http.Response) error {
+		if dst == nil {
+			return nil
+		}
+
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err

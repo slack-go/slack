@@ -494,7 +494,6 @@ func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
 			IsEphemeral:  false,
 			IsAppUnfurl:  false,
 		},
-		RawState: json.RawMessage(`{}`),
 	}
 
 	actual := new(InteractionCallback)
@@ -537,7 +536,6 @@ func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testin
 			IsEphemeral:  false,
 			IsAppUnfurl:  false,
 		},
-		RawState: json.RawMessage(`{}`),
 	}
 
 	actual := new(InteractionCallback)
