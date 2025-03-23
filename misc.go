@@ -336,6 +336,10 @@ func newJSONParser(dst interface{}) responseParser {
 
 func newTextParser(dst interface{}) responseParser {
 	return func(resp *http.Response) error {
+		if dst == nil {
+			return nil
+		}
+
 		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
