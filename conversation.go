@@ -344,6 +344,44 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 	return response.Channel, response.Err()
 }
 
+// The following functions are for inviting users to a channel but setting the `force`
+// parameter to true. We have added this so that we don't break the existing API.
+//
+// IMPORTANT: If we ever get here for _another_ parameter, we should consider refactoring
+// this to be more flexible.
+//
+// ForceInviteUsersToConversation invites users to a channel but sets the `force`
+// parameter to true.
+//
+// For more details, see ForceInviteUsersToConversationContext documentation.
+func (api *Client) ForceInviteUsersToConversation(channelID string, users ...string) (*Channel, error) {
+	return api.ForceInviteUsersToConversationContext(context.Background(), channelID, users...)
+}
+
+// ForceInviteUsersToConversationContext invites users to a channel with a custom context
+// while setting the `force` argument to true.
+//
+// Slack API docs: https://api.slack.com/methods/conversations.invite
+func (api *Client) ForceInviteUsersToConversationContext(ctx context.Context, channelID string, users ...string) (*Channel, error) {
+	values := url.Values{
+		"token":   {api.token},
+		"channel": {channelID},
+		"users":   {strings.Join(users, ",")},
+		"force":   {"true"},
+	}
+	response := struct {
+		SlackResponse
+		Channel *Channel `json:"channel"`
+	}{}
+
+	err := api.postMethod(ctx, "conversations.invite", values, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Channel, response.Err()
+}
+
 // InviteSharedEmailsToConversation invites users to a shared channels by email.
 // For more details, see InviteSharedToConversationContext documentation.
 func (api *Client) InviteSharedEmailsToConversation(channelID string, emails ...string) (string, bool, error) {
