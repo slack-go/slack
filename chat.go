@@ -234,7 +234,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		api.Debugf("Sending request: %s", redactToken(reqBody))
 	}
 
-	if err = doPost(ctx, api.httpclient, req, parser(&response), api); err != nil {
+	if err = doPost(api.httpclient, req, parser(&response), api); err != nil {
 		return "", "", "", err
 	}
 

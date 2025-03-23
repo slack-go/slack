@@ -33,7 +33,7 @@ func postHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postSuccess(rw http.ResponseWriter, r *http.Request) {
+func postSuccess(rw http.ResponseWriter, _ *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
     "ok": true
@@ -41,7 +41,7 @@ func postSuccess(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-func postFailure(rw http.ResponseWriter, r *http.Request) {
+func postFailure(rw http.ResponseWriter, _ *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
 			"ok": false,
