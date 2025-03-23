@@ -491,6 +491,7 @@ type DateTimePickerBlockElement struct {
 	ActionID        string                   `json:"action_id,omitempty"`
 	InitialDateTime int64                    `json:"initial_date_time,omitempty"`
 	Confirm         *ConfirmationBlockObject `json:"confirm,omitempty"`
+	FocusOnLoad     bool                     `json:"focus_on_load,omitempty"`
 }
 
 // ElementType returns the type of the Element
