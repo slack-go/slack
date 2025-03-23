@@ -26,14 +26,14 @@ func postHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
 
 		switch req.FunctionExecutionID {
 		case "function-success":
-			postSuccess(rw, r)
+			postSuccess(rw)
 		case "function-failure":
-			postFailure(rw, r)
+			postFailure(rw)
 		}
 	}
 }
 
-func postSuccess(rw http.ResponseWriter, r *http.Request) {
+func postSuccess(rw http.ResponseWriter) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
     "ok": true
@@ -41,7 +41,7 @@ func postSuccess(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-func postFailure(rw http.ResponseWriter, r *http.Request) {
+func postFailure(rw http.ResponseWriter) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
 			"ok": false,
