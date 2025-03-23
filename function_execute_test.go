@@ -42,13 +42,14 @@ func postSuccess(rw http.ResponseWriter, r *http.Request) {
 }
 
 func postFailure(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
-			"ok": false,
-			"error": "function_execution_not_found"
+		"ok": false,
+		"error": "function_execution_not_found"
 	}`)
-	rw.Write(response)
+
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(500)
+	rw.Write(response)
 }
 
 func TestFunctionComplete(t *testing.T) {
