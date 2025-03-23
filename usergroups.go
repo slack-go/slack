@@ -54,6 +54,7 @@ func (api *Client) userGroupRequest(ctx context.Context, path string, values url
 // createUserGroupParams contains arguments for CreateUserGroup method call
 type createUserGroupParams struct {
 	enableSection bool
+	includeCount  bool
 }
 
 // CreateUserGroupOption options for the CreateUserGroup method call.
@@ -63,6 +64,13 @@ type CreateUserGroupOption func(*createUserGroupParams)
 func CreateUserGroupOptionEnableSection(enableSection bool) CreateUserGroupOption {
 	return func(params *createUserGroupParams) {
 		params.enableSection = enableSection
+	}
+}
+
+// CreateUserGroupOptionIncludeCount include the number of users in each User Group
+func CreateUserGroupOptionIncludeCount(includeCount bool) CreateUserGroupOption {
+	return func(params *createUserGroupParams) {
+		params.includeCount = includeCount
 	}
 }
 
@@ -90,6 +98,10 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 		values["enable_section"] = []string{strconv.FormatBool(params.enableSection)}
 	}
 
+	if params.includeCount {
+		values["include_count"] = []string{strconv.FormatBool(params.includeCount)}
+	}
+
 	if userGroup.TeamID != "" {
 		values["team_id"] = []string{userGroup.TeamID}
 	}
@@ -113,18 +125,55 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 	return response.UserGroup, nil
 }
 
+// DisableUserGroupParams contains arguments for DisableUserGroup method calls.
+type DisableUserGroupParams struct {
+	IncludeCount bool
+	TeamID       string
+}
+
+// DisableUserGroupOption options for the DisableUserGroup method calls.
+type DisableUserGroupOption func(*DisableUserGroupParams)
+
+// DisableUserGroupOptionIncludeCount include the count of User Groups (default: false)
+func DisableUserGroupOptionIncludeCount(b bool) DisableUserGroupOption {
+	return func(params *DisableUserGroupParams) {
+		params.IncludeCount = b
+	}
+}
+
+// DisableUserGroupOptionTeamID include team Id
+func DisableUserGroupOptionTeamID(teamID string) DisableUserGroupOption {
+	return func(params *DisableUserGroupParams) {
+		params.TeamID = teamID
+	}
+}
+
 // DisableUserGroup disables an existing user group.
 // For more information see the DisableUserGroupContext documentation.
-func (api *Client) DisableUserGroup(userGroup string) (UserGroup, error) {
-	return api.DisableUserGroupContext(context.Background(), userGroup)
+func (api *Client) DisableUserGroup(userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	return api.DisableUserGroupContext(context.Background(), userGroup, options...)
 }
 
 // DisableUserGroupContext disables an existing user group with a custom context.
 // Slack API docs: https://api.slack.com/methods/usergroups.disable
-func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string) (UserGroup, error) {
+func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string, options ...DisableUserGroupOption) (UserGroup, error) {
+	params := DisableUserGroupParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.disable", values)
@@ -134,18 +183,55 @@ func (api *Client) DisableUserGroupContext(ctx context.Context, userGroup string
 	return response.UserGroup, nil
 }
 
+// EnableUserGroupParams contains arguments for EnableUserGroup method calls.
+type EnableUserGroupParams struct {
+	IncludeCount bool
+	TeamID       string
+}
+
+// EnableUserGroupOption options for the EnableUserGroup method calls.
+type EnableUserGroupOption func(*EnableUserGroupParams)
+
+// EnableUserGroupOptionIncludeCount include the count of User Groups (default: false)
+func EnableUserGroupOptionIncludeCount(b bool) EnableUserGroupOption {
+	return func(params *EnableUserGroupParams) {
+		params.IncludeCount = b
+	}
+}
+
+// EnableUserGroupOptionTeamID include team Id
+func EnableUserGroupOptionTeamID(teamID string) EnableUserGroupOption {
+	return func(params *EnableUserGroupParams) {
+		params.TeamID = teamID
+	}
+}
+
 // EnableUserGroup enables an existing user group.
 // For more information see the EnableUserGroupContext documentation.
-func (api *Client) EnableUserGroup(userGroup string) (UserGroup, error) {
-	return api.EnableUserGroupContext(context.Background(), userGroup)
+func (api *Client) EnableUserGroup(userGroup string, options ...EnableUserGroupOption) (UserGroup, error) {
+	return api.EnableUserGroupContext(context.Background(), userGroup, options...)
 }
 
 // EnableUserGroupContext enables an existing user group with a custom context.
 // Slack API docs: https://api.slack.com/methods/usergroups.enable
-func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string) (UserGroup, error) {
+func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string, options ...EnableUserGroupOption) (UserGroup, error) {
+	params := EnableUserGroupParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.enable", values)
@@ -158,7 +244,12 @@ func (api *Client) EnableUserGroupContext(ctx context.Context, userGroup string)
 // GetUserGroupsOption options for the GetUserGroups method call.
 type GetUserGroupsOption func(*GetUserGroupsParams)
 
+// Deprecated: GetUserGroupsOptionWithTeamID is deprecated, use GetUserGroupsOptionTeamID instead
 func GetUserGroupsOptionWithTeamID(teamID string) GetUserGroupsOption {
+	return GetUserGroupsOptionTeamID(teamID)
+}
+
+func GetUserGroupsOptionTeamID(teamID string) GetUserGroupsOption {
 	return func(params *GetUserGroupsParams) {
 		params.TeamID = teamID
 	}
@@ -269,6 +360,13 @@ func UpdateUserGroupsOptionEnableSection(enableSection bool) UpdateUserGroupsOpt
 	}
 }
 
+// UpdateUserGroupsOptionTeamID specify the team id for the User Group. (default: nil, so it's no-op)
+func UpdateUserGroupsOptionTeamID(teamID string) UpdateUserGroupsOption {
+	return func(params *UpdateUserGroupsParams) {
+		params.TeamID = teamID
+	}
+}
+
 // UpdateUserGroupsParams contains arguments for UpdateUserGroup method call
 type UpdateUserGroupsParams struct {
 	Name          string
@@ -276,6 +374,7 @@ type UpdateUserGroupsParams struct {
 	Description   *string
 	Channels      *[]string
 	EnableSection bool
+	TeamID        string
 }
 
 // UpdateUserGroup will update an existing user group.
@@ -318,6 +417,10 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 		values["enable_section"] = []string{strconv.FormatBool(params.EnableSection)}
 	}
 
+	if params.TeamID != "" {
+		values["team_id"] = []string{params.TeamID}
+	}
+
 	response, err := api.userGroupRequest(ctx, "usergroups.update", values)
 	if err != nil {
 		return UserGroup{}, err
@@ -325,18 +428,55 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 	return response.UserGroup, nil
 }
 
+// GetUserGroupMembersOption options for the GetUserGroupMembers method call.
+type GetUserGroupMembersOption func(*GetUserGroupMembersParams)
+
+// GetUserGroupMembersParams contains arguments for GetUserGroupMembers method call
+type GetUserGroupMembersParams struct {
+	IncludeDisabled bool
+	TeamID          string
+}
+
+// GetUserGroupMembersOptionIncludeDisabled include disabled User Groups (default: false)
+func GetUserGroupMembersOptionIncludeDisabled(b bool) GetUserGroupMembersOption {
+	return func(params *GetUserGroupMembersParams) {
+		params.IncludeDisabled = b
+	}
+}
+
+// GetUserGroupMembersOptionTeamID include team Id
+func GetUserGroupMembersOptionTeamID(teamID string) GetUserGroupMembersOption {
+	return func(params *GetUserGroupMembersParams) {
+		params.TeamID = teamID
+	}
+}
+
 // GetUserGroupMembers will retrieve the current list of users in a group.
 // For more information see the GetUserGroupMembersContext documentation.
-func (api *Client) GetUserGroupMembers(userGroup string) ([]string, error) {
-	return api.GetUserGroupMembersContext(context.Background(), userGroup)
+func (api *Client) GetUserGroupMembers(userGroup string, options ...GetUserGroupMembersOption) ([]string, error) {
+	return api.GetUserGroupMembersContext(context.Background(), userGroup, options...)
 }
 
 // GetUserGroupMembersContext will retrieve the current list of users in a group with a custom context.
 // Slack API docs: https://api.slack.com/methods/usergroups.users.list
-func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup string) ([]string, error) {
+func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup string, options ...GetUserGroupMembersOption) ([]string, error) {
+	params := GetUserGroupMembersParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
+	}
+
+	if params.IncludeDisabled {
+		values.Add("include_disabled", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.users.list", values)
@@ -346,19 +486,80 @@ func (api *Client) GetUserGroupMembersContext(ctx context.Context, userGroup str
 	return response.Users, nil
 }
 
+// UpdateUserGroupMembersOption options for the UpdateUserGroupMembers method call.
+type UpdateUserGroupMembersOption func(*UpdateUserGroupMembersParams)
+
+// UpdateUserGroupMembersParams contains arguments for UpdateUserGroupMembers method call
+type UpdateUserGroupMembersParams struct {
+	AdditionalChannels []string
+	IncludeCount       bool
+	IsShared           bool
+	TeamID             string
+}
+
+// UpdateUserGroupMembersOptionAdditionalChannels include additional channels
+func UpdateUserGroupMembersOptionAdditionalChannels(channels []string) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.AdditionalChannels = channels
+	}
+}
+
+// UpdateUserGroupMembersOptionIsShared include the count of User Groups (default: false)
+func UpdateUserGroupMembersOptionIsShared(b bool) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.IsShared = b
+	}
+}
+
+// UpdateUserGroupMembersOptionIncludeCount include the count of User Groups (default: false)
+func UpdateUserGroupMembersOptionIncludeCount(b bool) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.IncludeCount = b
+	}
+}
+
+// UpdateUserGroupMembersOptionTeamID include team Id
+func UpdateUserGroupMembersOptionTeamID(teamID string) UpdateUserGroupMembersOption {
+	return func(params *UpdateUserGroupMembersParams) {
+		params.TeamID = teamID
+	}
+}
+
 // UpdateUserGroupMembers will update the members of an existing user group.
 // For more information see the UpdateUserGroupMembersContext documentation.
-func (api *Client) UpdateUserGroupMembers(userGroup string, members string) (UserGroup, error) {
-	return api.UpdateUserGroupMembersContext(context.Background(), userGroup, members)
+func (api *Client) UpdateUserGroupMembers(userGroup string, members string, options ...UpdateUserGroupMembersOption) (UserGroup, error) {
+	return api.UpdateUserGroupMembersContext(context.Background(), userGroup, members, options...)
 }
 
 // UpdateUserGroupMembersContext will update the members of an existing user group with a custom context.
 // Slack API docs: https://api.slack.com/methods/usergroups.update
-func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string) (UserGroup, error) {
+func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string, options ...UpdateUserGroupMembersOption) (UserGroup, error) {
+	params := UpdateUserGroupMembersParams{}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":     {api.token},
 		"usergroup": {userGroup},
 		"users":     {members},
+	}
+
+	if params.IncludeCount {
+		values.Add("include_count", "true")
+	}
+
+	if params.IsShared {
+		values.Add("is_shared", "true")
+	}
+
+	if params.TeamID != "" {
+		values.Add("team_id", params.TeamID)
+	}
+
+	if len(params.AdditionalChannels) > 0 {
+		values["additional_channels"] = []string{strings.Join(params.AdditionalChannels, ",")}
 	}
 
 	response, err := api.userGroupRequest(ctx, "usergroups.users.update", values)
