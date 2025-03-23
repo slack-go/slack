@@ -115,6 +115,8 @@ type RichTextList struct {
 	Elements []RichTextElement       `json:"elements"`
 	Style    RichTextListElementType `json:"style"`
 	Indent   int                     `json:"indent"`
+	Border   int                     `json:"border"`
+	Offset   int                     `json:"offset"`
 }
 
 // NewRichTextList returns a new rich text list element.
@@ -137,6 +139,8 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 		RawElements []json.RawMessage       `json:"elements"`
 		Style       RichTextListElementType `json:"style"`
 		Indent      int                     `json:"indent"`
+		Border      int                     `json:"border"`
+		Offset      int                     `json:"offset"`
 	}
 	if string(b) == "{}" {
 		return nil
@@ -179,6 +183,8 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 		Elements: elems,
 		Style:    raw.Style,
 		Indent:   raw.Indent,
+		Border:   raw.Border,
+		Offset:   raw.Offset,
 	}
 	return nil
 }
@@ -195,7 +201,8 @@ func (s RichTextSection) RichTextElementType() RichTextElementType {
 
 func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 	var raw struct {
-		RawElements []json.RawMessage `json:"elements"`
+		RawElements []json.RawMessage   `json:"elements"`
+		Type        RichTextElementType `json:"type"`
 	}
 	if string(b) == "{}" {
 		return nil
@@ -245,8 +252,11 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 		}
 		elems = append(elems, elem)
 	}
+	if raw.Type == "" {
+		raw.Type = RTESection
+	}
 	*e = RichTextSection{
-		Type:     RTESection,
+		Type:     raw.Type,
 		Elements: elems,
 	}
 	return nil
