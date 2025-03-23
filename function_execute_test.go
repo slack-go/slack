@@ -53,9 +53,10 @@ func postFailure(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestFunctionComplete(t *testing.T) {
-	http.HandleFunc("/functions.completeSuccess", postHandler(t))
-
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+	
+	s.RegisterHandler("/functions.completeSuccess", postHandler(t))
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 

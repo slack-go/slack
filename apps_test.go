@@ -7,8 +7,10 @@ import (
 )
 
 func TestListEventAuthorizations(t *testing.T) {
-	http.HandleFunc("/apps.event.authorizations.list", testListEventAuthorizationsHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.event.authorizations.list", testListEventAuthorizationsHandler)
 
 	api := New("", OptionAppLevelToken("test-token"), OptionAPIURL("http://"+serverAddr+"/"))
 
@@ -38,8 +40,10 @@ func testListEventAuthorizationsHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func TestUninstallApp(t *testing.T) {
-	http.HandleFunc("/apps.uninstall", testUninstallAppHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.uninstall", testUninstallAppHandler)
 
 	api := New("test-token", OptionAPIURL("http://"+serverAddr+"/"))
 

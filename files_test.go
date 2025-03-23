@@ -85,7 +85,9 @@ func TestSlack_GetFile(t *testing.T) {
 }
 
 func TestSlack_DeleteFileComment(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		title       string
@@ -131,7 +133,7 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 	}
 
 	var fch *fileCommentHandler
-	http.HandleFunc("/files.comments.delete", func(w http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/files.comments.delete", func(w http.ResponseWriter, r *http.Request) {
 		fch.handler(w, r)
 	})
 
@@ -146,7 +148,7 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
-			log.Fatalf("%s: Got params [%#v]\nBut received [%#v]\n", test.title, fch.gotParams, test.wantParams)
+			log.Fatalf("%s: Got params [%#v] But received [%#v]", test.title, fch.gotParams, test.wantParams)
 		}
 	}
 }
@@ -166,9 +168,12 @@ func uploadFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestUploadFile(t *testing.T) {
-	http.HandleFunc("/auth.test", authTestHandler)
-	http.HandleFunc("/files.upload", uploadFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/auth.test", authTestHandler)
+	s.RegisterHandler("/files.upload", uploadFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := FileUploadParameters{
 		Filename: "test.txt", Content: "test content",
@@ -197,7 +202,11 @@ func TestUploadFile(t *testing.T) {
 }
 
 func TestUploadFileWithoutFilename(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/auth.test", authTestHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	reader := bytes.NewBufferString("test reader")
@@ -242,10 +251,13 @@ func completeURLUpload(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestUploadFileV2(t *testing.T) {
-	http.HandleFunc("/files.getUploadURLExternal", uploadURLHandler)
-	http.HandleFunc("/abc", urlFileUploadHandler)
-	http.HandleFunc("/files.completeUploadExternal", completeURLUpload)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.getUploadURLExternal", uploadURLHandler)
+	s.RegisterHandler("/abc", urlFileUploadHandler)
+	s.RegisterHandler("/files.completeUploadExternal", completeURLUpload)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := UploadFileV2Parameters{

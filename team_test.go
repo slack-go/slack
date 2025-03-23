@@ -28,9 +28,11 @@ func getTeamInfo(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetTeamInfo(t *testing.T) {
-	http.HandleFunc("/team.info", getTeamInfo)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/team.info", getTeamInfo)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	teamInfo, err := api.GetTeamInfo()
@@ -93,9 +95,11 @@ func getTeamProfile(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetTeamProfile(t *testing.T) {
-	http.HandleFunc("/team.profile.get", getTeamProfile)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/team.profile.get", getTeamProfile)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	teamProfile, err := api.GetTeamProfile()
@@ -161,9 +165,11 @@ func getTeamAccessLogs(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetAccessLogs(t *testing.T) {
-	http.HandleFunc("/team.accessLogs", getTeamAccessLogs)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/team.accessLogs", getTeamAccessLogs)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	logins, paging, err := api.GetAccessLogs(NewAccessLogParameters())

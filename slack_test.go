@@ -1,22 +1,39 @@
 package slack
 
 import (
-	"log"
+	"net/http"
 	"net/http/httptest"
-	"sync"
 )
 
-const (
-	validToken = "testing-token"
-)
+const validToken = "testing-token"
 
-var (
-	serverAddr string
-	once       sync.Once
-)
+var serverAddr string
 
-func startServer() {
-	server := httptest.NewServer(nil)
+type testServer struct {
+	server    *httptest.Server
+	mux       *http.ServeMux
+	wasCalled bool
+}
+
+func (t *testServer) Close() {
+	if !t.wasCalled {
+		panic("close called on test server, but nothing was registered")
+	}
+	t.server.Close()
+}
+
+func (t *testServer) RegisterHandler(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	t.wasCalled = true
+	t.mux.HandleFunc(pattern, handler)
+}
+
+func startServer() *testServer {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
 	serverAddr = server.Listener.Addr().String()
-	log.Print("Test WebSocket server listening on ", serverAddr)
+
+	return &testServer{
+		server: server,
+		mux:    mux,
+	}
 }

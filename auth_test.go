@@ -29,9 +29,10 @@ func getTeamList(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestListTeams(t *testing.T) {
-	http.HandleFunc("/auth.teams.list", getTeamList)
+	s := startServer()
+	s.RegisterHandler("/auth.teams.list", getTeamList)
+	defer s.Close()
 
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	teams, cursor, err := api.ListTeams(ListTeamsParameters{})

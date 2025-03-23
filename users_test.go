@@ -220,9 +220,10 @@ func newProfileHandler(up *UserProfile) (setter func(http.ResponseWriter, *http.
 }
 
 func TestGetUserIdentity(t *testing.T) {
-	http.HandleFunc("/users.identity", getUserIdentity)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.identity", getUserIdentity)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	identity, err := api.GetUserIdentity()
@@ -259,10 +260,11 @@ func TestGetUserIdentity(t *testing.T) {
 }
 
 func TestGetUserInfo(t *testing.T) {
-	http.HandleFunc("/users.info", getUserInfo)
-	expectedUser := getTestUser()
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.info", getUserInfo)
+	expectedUser := getTestUser()
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	user, err := api.GetUserInfo("UXXXXXXXX")
@@ -276,11 +278,11 @@ func TestGetUserInfo(t *testing.T) {
 }
 
 func TestGetUsersInfo(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/users.info", getUsersInfo)
-	expectedUsers := getTestUsers()
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.info", getUsersInfo)
+	expectedUsers := getTestUsers()
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	user, err := api.GetUsersInfo("UYYYYYYYY", "UZZZZZZZZ")
@@ -294,10 +296,11 @@ func TestGetUsersInfo(t *testing.T) {
 }
 
 func TestGetUserByEmail(t *testing.T) {
-	http.HandleFunc("/users.lookupByEmail", getUserByEmail)
-	expectedUser := getTestUser()
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.lookupByEmail", getUserByEmail)
+	expectedUser := getTestUser()
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	user, err := api.GetUserByEmail("test@test.com")
@@ -313,11 +316,11 @@ func TestGetUserByEmail(t *testing.T) {
 func TestUserProfileSet(t *testing.T) {
 	up := &UserProfile{}
 
+	s := startServer()
+	defer s.Close()
+
 	setUserProfile := newProfileHandler(up)
-
-	http.HandleFunc("/users.profile.set", setUserProfile)
-
-	once.Do(startServer)
+	s.RegisterHandler("/users.profile.set", setUserProfile)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	testSetUserCustomStatus(api, up, t)
@@ -402,10 +405,10 @@ func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 }
 
 func TestGetUsers(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/users.list", getUserPage(4))
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.list", getUserPage(4))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	users, err := api.GetUsers()
@@ -497,9 +500,10 @@ func TestSetUserPhoto(t *testing.T) {
 
 	params := UserSetPhotoParams{CropX: 0, CropY: 0, CropW: 32}
 
-	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.setPhoto", setUserPhotoHandler(fileContent, params))
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	err := api.SetUserPhoto(file.Name(), params)
@@ -605,8 +609,10 @@ func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetUserProfile(t *testing.T) {
-	http.HandleFunc("/users.profile.get", getUserProfileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/users.profile.get", getUserProfileHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	profile, err := api.GetUserProfile(&GetUserProfileParameters{UserID: "UXXXXXXXX"})
 	if err != nil {
@@ -701,10 +707,10 @@ func TestUserProfileCustomFieldsSetMap(t *testing.T) {
 }
 
 func TestGetUsersHandlesRateLimit(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/users.list", getUserPagesWithRateLimitErrors(4))
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/users.list", getUserPagesWithRateLimitErrors(4))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	users, err := api.GetUsers()
@@ -724,12 +730,12 @@ func TestGetUsersHandlesRateLimit(t *testing.T) {
 }
 
 func TestGetUsersReturnsServerError(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/users.list", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	_, err := api.GetUsers()

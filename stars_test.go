@@ -38,7 +38,9 @@ func (sh *starsHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestSlack_AddStar(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		channel    string
@@ -71,7 +73,7 @@ func TestSlack_AddStar(t *testing.T) {
 		},
 	}
 	var rh *starsHandler
-	http.HandleFunc("/stars.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/stars.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newStarsHandler()
 		err := api.AddStar(test.channel, test.ref)
@@ -85,7 +87,9 @@ func TestSlack_AddStar(t *testing.T) {
 }
 
 func TestSlack_RemoveStar(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		channel    string
@@ -118,7 +122,7 @@ func TestSlack_RemoveStar(t *testing.T) {
 		},
 	}
 	var rh *starsHandler
-	http.HandleFunc("/stars.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/stars.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newStarsHandler()
 		err := api.RemoveStar(test.channel, test.ref)
@@ -132,10 +136,12 @@ func TestSlack_RemoveStar(t *testing.T) {
 }
 
 func TestSlack_ListStars(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	rh := newStarsHandler()
-	http.HandleFunc("/stars.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/stars.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,
     "items": [
         {

@@ -7,11 +7,13 @@ import (
 )
 
 func TestSlack_EndDND(t *testing.T) {
-	http.HandleFunc("/dnd.endDnd", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dnd.endDnd", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{ "ok": true }`))
 	})
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.EndDND()
 	if err != nil {
@@ -20,7 +22,10 @@ func TestSlack_EndDND(t *testing.T) {
 }
 
 func TestSlack_EndSnooze(t *testing.T) {
-	http.HandleFunc("/dnd.endSnooze", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dnd.endSnooze", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{ "ok": true,
                           "dnd_enabled": true,
@@ -34,7 +39,6 @@ func TestSlack_EndSnooze(t *testing.T) {
 		NextEndTimestamp:   1450454400,
 		SnoozeInfo:         SnoozeInfo{SnoozeEnabled: false},
 	}
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	snoozeState, err := api.EndSnooze()
 	if err != nil {
@@ -47,7 +51,10 @@ func TestSlack_EndSnooze(t *testing.T) {
 }
 
 func TestSlack_GetDNDInfo(t *testing.T) {
-	http.HandleFunc("/dnd.info", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dnd.info", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{
             "ok": true,
@@ -69,7 +76,6 @@ func TestSlack_GetDNDInfo(t *testing.T) {
 			SnoozeRemaining: 1196,
 		},
 	}
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	userDNDInfoResponse, err := api.GetDNDInfo(nil)
 	if err != nil {
@@ -82,7 +88,10 @@ func TestSlack_GetDNDInfo(t *testing.T) {
 }
 
 func TestSlack_GetDNDTeamInfo(t *testing.T) {
-	http.HandleFunc("/dnd.teamInfo", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dnd.teamInfo", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{
             "ok": true,
@@ -112,7 +121,6 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
 			NextEndTimestamp:   1,
 		},
 	}
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	usersDNDInfoResponse, err := api.GetDNDTeamInfo(nil)
 	if err != nil {
@@ -125,7 +133,10 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
 }
 
 func TestSlack_SetSnooze(t *testing.T) {
-	http.HandleFunc("/dnd.setSnooze", func(w http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dnd.setSnooze", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{
             "ok": true,
@@ -141,7 +152,6 @@ func TestSlack_SetSnooze(t *testing.T) {
 			SnoozeRemaining: 60,
 		},
 	}
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	snoozeResponse, err := api.SetSnooze(60)
 	if err != nil {

@@ -20,12 +20,6 @@ func getTestCall(callID string) Call {
 	}
 }
 
-func testClient(api string, f http.HandlerFunc) *Client {
-	http.HandleFunc(api, f)
-	once.Do(startServer)
-	return New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-}
-
 var callTestId = 999
 
 func addCallHandler(t *testing.T) http.HandlerFunc {
@@ -56,7 +50,12 @@ func addCallHandler(t *testing.T) http.HandlerFunc {
 }
 
 func TestAddCall(t *testing.T) {
-	api := testClient("/calls.add", addCallHandler(t))
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/calls.add", addCallHandler(t))
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
 	params := AddCallParameters{
 		Title:            "test call",
 		JoinURL:          "https://example.com/example",
@@ -87,12 +86,14 @@ func getCallHandler(calls []Call) func(rw http.ResponseWriter, r *http.Request) 
 }
 
 func TestGetCall(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	calls := []Call{
 		getTestCall("R1234567890"),
 		getTestCall("R1234567891"),
 	}
-	http.HandleFunc("/calls.info", getCallHandler(calls))
-	once.Do(startServer)
+	s.RegisterHandler("/calls.info", getCallHandler(calls))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	for _, call := range calls {
@@ -137,6 +138,9 @@ func updateCallHandler(calls []Call) func(rw http.ResponseWriter, r *http.Reques
 }
 
 func TestUpdateCall(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	calls := []Call{
 		getTestCall("R1234567890"),
 		getTestCall("R1234567891"),
@@ -144,8 +148,7 @@ func TestUpdateCall(t *testing.T) {
 		getTestCall("R1234567893"),
 		getTestCall("R1234567894"),
 	}
-	http.HandleFunc("/calls.update", updateCallHandler(calls))
-	once.Do(startServer)
+	s.RegisterHandler("/calls.update", updateCallHandler(calls))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	changes := []struct {

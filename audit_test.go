@@ -45,9 +45,10 @@ func getAuditLogs(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetAuditLogs(t *testing.T) {
-	http.HandleFunc("/audit/v1/logs", getAuditLogs)
+	s := startServer()
+	s.RegisterHandler("/audit/v1/logs", getAuditLogs)
+	defer s.Close()
 
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	events, nextCursor, err := api.GetAuditLogs(AuditLogParameters{})

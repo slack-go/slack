@@ -43,8 +43,10 @@ func addBookmarkLinkHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestAddBookmarkLink(t *testing.T) {
-	http.HandleFunc("/bookmarks.add", addBookmarkLinkHandler)
-	once.Do(startServer)
+	s := startServer()
+	s.RegisterHandler("/bookmarks.add", addBookmarkLinkHandler)
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := AddBookmarkParameters{
 		Title: "test",
@@ -80,8 +82,11 @@ func listBookmarksHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestListBookmarks(t *testing.T) {
-	http.HandleFunc("/bookmarks.list", listBookmarksHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/bookmarks.list", listBookmarksHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	channel := "CXXXXXXXX"
 	bookmarks, err := api.ListBookmarks(channel)
@@ -115,10 +120,12 @@ func removeBookmarkHandler(bookmark *Bookmark) func(rw http.ResponseWriter, r *h
 }
 
 func TestRemoveBookmark(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	channel := "CXXXXXXXX"
 	bookmark := getTestBookmark(channel, "BkXXXXX")
-	http.HandleFunc("/bookmarks.remove", removeBookmarkHandler(&bookmark))
-	once.Do(startServer)
+	s.RegisterHandler("/bookmarks.remove", removeBookmarkHandler(&bookmark))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	err := api.RemoveBookmark(channel, bookmark.ID)
@@ -163,6 +170,9 @@ func editBookmarkHandler(bookmarks []Bookmark) func(rw http.ResponseWriter, r *h
 }
 
 func TestEditBookmark(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	channel := "CXXXXXXXX"
 	bookmarks := []Bookmark{
 		getTestBookmark(channel, "Bk001"),
@@ -170,8 +180,7 @@ func TestEditBookmark(t *testing.T) {
 		getTestBookmark(channel, "Bk003"),
 		getTestBookmark(channel, "Bk004"),
 	}
-	http.HandleFunc("/bookmarks.edit", editBookmarkHandler(bookmarks))
-	once.Do(startServer)
+	s.RegisterHandler("/bookmarks.edit", editBookmarkHandler(bookmarks))
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	smileEmoji := ":smile:"
