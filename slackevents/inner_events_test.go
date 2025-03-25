@@ -346,27 +346,70 @@ func TestMessageEvent(t *testing.T) {
 				"channel_type": "channel",
 				"source_team": "T3MQV36V7",
 				"user_team": "T3MQV36V7",
-				"message": {
-					"text": "To infinity and beyond.",
-					"edited": {
-						"user": "U2147483697",
-						"ts": "1355517524.000000"
-					}
-				},
 				"metadata": {
 					"event_type": "example",
 					"event_payload": {
 						"key": "value"
 					}
-				},
-				"previous_message": {
-					"text": "Live long and prospect."
 				}
 		}
 	`)
-	err := json.Unmarshal(rawE, &MessageEvent{})
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
 	if err != nil {
 		t.Error(err)
+	}
+
+	if e.Channel != "G024BE91L" {
+		t.Error(fmt.Errorf("expected channel G024BE91L, got %s", e.Channel))
+	}
+	if e.User != "U2147483697" {
+		t.Error(fmt.Errorf("expected user U2147483697, got %s", e.User))
+	}
+	if e.Text != "Live long and prospect." {
+		t.Error(fmt.Errorf("expected e.Text Live long and prospect., got %s", e.Text))
+	}
+	if e.Message.Text != "Live long and prospect." {
+		t.Error(fmt.Errorf("expected e.Message.Text Live long and prospect., got %s", e.Message.Text))
+	}
+
+}
+
+func TestMessageChangedEvent(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "message",
+			"subtype": "message_changed",
+			"hidden": true,
+			"channel": "G024BE91L",
+			"ts": "1358878755.000001",
+			"message": {
+				"type": "message",
+				"user": "U123ABC456",
+				"text": "Live long and prospect.",
+				"ts": "1355517523.000005",
+				"edited": {
+					"user": "U123ABC456",
+					"ts": "1358878755.000001"
+				}
+			}
+		}
+	`)
+
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e.Channel != "G024BE91L" {
+		t.Error(fmt.Errorf("expected channel G024BE91L, got %s", e.Channel))
+	}
+	if e.Message.Text != "Live long and prospect." {
+		t.Error(fmt.Errorf("expected e.Message.Text Live long and prospect., got %s", e.Message.Text))
+	}
+	if e.Message.Edited.User != "U123ABC456" {
+		t.Error(fmt.Errorf("expected e.Message.Edited.User U123ABC456, got %s", e.Message.Edited.User))
 	}
 }
 
@@ -393,29 +436,65 @@ func TestThreadBroadcastEvent(t *testing.T) {
 			{
 				"type": "message",
 				"subtype": "thread_broadcast",
-				"channel": "G024BE91L",
-				"user": "U2147483697",
-				"text": "Live long and prospect.",
-				"ts": "1355517523.000005",
-				"event_ts": "1355517523.000005",
-				"channel_type": "channel",
-				"source_team": "T3MQV36V7",
-				"user_team": "T3MQV36V7",
-				"message": {
-					"text": "To infinity and beyond.",
-					"root": {
-						"text": "To infinity and beyond.",
-						"ts": "1355517523.000005"
-					},
-					"edited": {
-						"user": "U2147483697",
-						"ts": "1355517524.000000"
-					}
+				"text": "broadcasting this reply",
+				"user": "U123ABC456",
+				"ts": "1673464745.620769",
+				"thread_ts": "1673464730.703009",
+				"root": {
+					"client_msg_id": "123abc456-...",
+					"type": "message",
+					"text": "This is the original message",
+					"user": "U123ABC456",
+					"ts": "1673464730.703009",
+					"blocks": [
+						{
+							"type": "rich_text",
+							"block_id": "qTg",
+							"elements": [
+								{
+									"type": "rich_text_section",
+									"elements": [
+										{
+											"type": "text",
+											"text": "This is the original message"
+										}
+									]
+								}
+							]
+						}
+					],
+					"team": "T123ABC456",
+					"thread_ts": "1673464730.703009",
+					"reply_count": 1,
+					"reply_users_count": 1,
+					"latest_reply": "1673464745.620769",
+					"reply_users": [
+						"U123ABC456"
+					],
+					"is_locked": false
 				},
-				"previous_message": {
-					"text": "Live long and prospect."
-				}
-		}
+				"blocks": [
+					{
+						"type": "rich_text",
+						"block_id": "BVp",
+						"elements": [
+							{
+								"type": "rich_text_section",
+								"elements": [
+									{
+										"type": "text",
+										"text": "broadcasting this reply"
+									}
+								]
+							}
+						]
+					}
+				],
+				"client_msg_id": "123abc456-...",
+				"channel": "C123ABC456",
+				"event_ts": "1673464745.620769",
+				"channel_type": "channel"
+			}
 	`)
 
 	var me MessageEvent
@@ -423,12 +502,8 @@ func TestThreadBroadcastEvent(t *testing.T) {
 		t.Error(err)
 	}
 
-	if me.Message.Root == nil {
-		t.Fatal("me.Message.Root is nil")
-	}
-
-	if me.Message.Root.Timestamp != "1355517523.000005" {
-		t.Errorf("me.Message.Root.Timestamp = %q, want %q", me.Message.Root.Timestamp, "1355517523.000005")
+	if me.Root.Timestamp != "1673464730.703009" {
+		t.Errorf("me.Root.Timestamp = %q, want %q", me.Root.Timestamp, "1673464730.703009")
 	}
 }
 
