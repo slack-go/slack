@@ -44,17 +44,20 @@ func postSuccess(rw http.ResponseWriter) {
 func postFailure(rw http.ResponseWriter) {
 	rw.Header().Set("Content-Type", "application/json")
 	response := []byte(`{
-			"ok": false,
-			"error": "function_execution_not_found"
+		"ok": false,
+		"error": "function_execution_not_found"
 	}`)
-	rw.Write(response)
+
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(500)
+	rw.Write(response)
 }
 
 func TestFunctionComplete(t *testing.T) {
-	http.HandleFunc("/functions.completeSuccess", postHandler(t))
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/functions.completeSuccess", postHandler(t))
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 

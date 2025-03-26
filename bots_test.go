@@ -24,9 +24,11 @@ func getBotInfo(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetBotInfo(t *testing.T) {
-	http.HandleFunc("/bots.info", getBotInfo)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/bots.info", getBotInfo)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	bot, err := api.GetBotInfo(GetBotInfoParameters{Bot: "B02875YLA"})

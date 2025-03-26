@@ -17,9 +17,10 @@ func getEmojiHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetEmoji(t *testing.T) {
-	http.HandleFunc("/emoji.list", getEmojiHandler)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/emoji.list", getEmojiHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	emojisResponse := map[string]string{
 		"bowtie":   "https://my.slack.com/emoji/bowtie/46ec6f2bb0.png",

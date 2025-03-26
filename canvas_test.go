@@ -28,8 +28,10 @@ func createCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestCreateCanvas(t *testing.T) {
-	http.HandleFunc("/canvases.create", createCanvasHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.create", createCanvasHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	documentContent := DocumentContent{
@@ -60,8 +62,10 @@ func deleteCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestDeleteCanvas(t *testing.T) {
-	http.HandleFunc("/canvases.delete", deleteCanvasHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.delete", deleteCanvasHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	err := api.DeleteCanvas("F1234ABCD")
@@ -83,8 +87,10 @@ func editCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestEditCanvas(t *testing.T) {
-	http.HandleFunc("/canvases.edit", editCanvasHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.edit", editCanvasHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := EditCanvasParams{
@@ -120,8 +126,10 @@ func setCanvasAccessHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestSetCanvasAccess(t *testing.T) {
-	http.HandleFunc("/canvases.access.set", setCanvasAccessHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.access.set", setCanvasAccessHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := SetCanvasAccessParams{
@@ -150,8 +158,11 @@ func deleteCanvasAccessHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestDeleteCanvasAccess(t *testing.T) {
-	http.HandleFunc("/canvases.access.delete", deleteCanvasAccessHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.access.delete", deleteCanvasAccessHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := DeleteCanvasAccessParams{
@@ -188,8 +199,11 @@ func lookupCanvasSectionsHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestLookupCanvasSections(t *testing.T) {
-	http.HandleFunc("/canvases.sections.lookup", lookupCanvasSectionsHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/canvases.sections.lookup", lookupCanvasSectionsHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := LookupCanvasSectionsParams{

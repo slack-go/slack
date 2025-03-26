@@ -8,8 +8,10 @@ import (
 )
 
 func TestCreateManifest(t *testing.T) {
-	http.HandleFunc("/apps.manifest.create", handleCreateManifest)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.manifest.create", handleCreateManifest)
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
@@ -33,10 +35,12 @@ func handleCreateManifest(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestDeleteManifest(t *testing.T) {
-	http.HandleFunc("/apps.manifest.delete", handleDeleteManifest)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.manifest.delete", handleDeleteManifest)
 	expectedResponse := SlackResponse{Ok: true}
 
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	resp, err := api.DeleteManifest("token", "app id")
@@ -58,7 +62,10 @@ func handleDeleteManifest(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestExportManifest(t *testing.T) {
-	http.HandleFunc("/apps.manifest.export", handleExportManifest)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.manifest.export", handleExportManifest)
 	expectedResponse := getTestManifest()
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
@@ -82,7 +89,10 @@ func handleExportManifest(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestUpdateManifest(t *testing.T) {
-	http.HandleFunc("/apps.manifest.update", handleUpdateManifest)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.manifest.update", handleUpdateManifest)
 	expectedResponse := UpdateManifestResponse{AppId: "app id"}
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
@@ -107,7 +117,10 @@ func handleUpdateManifest(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestValidateManifest(t *testing.T) {
-	http.HandleFunc("/apps.manifest.validate", handleValidateManifest)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/apps.manifest.validate", handleValidateManifest)
 	expectedResponse := ManifestResponse{SlackResponse: SlackResponse{Ok: true}}
 
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))

@@ -37,7 +37,9 @@ func (rh *pinsHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestSlack_AddPin(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		channel    string
@@ -70,7 +72,7 @@ func TestSlack_AddPin(t *testing.T) {
 		},
 	}
 	var rh *pinsHandler
-	http.HandleFunc("/pins.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/pins.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newPinsHandler()
 		err := api.AddPin(test.channel, test.ref)
@@ -84,7 +86,9 @@ func TestSlack_AddPin(t *testing.T) {
 }
 
 func TestSlack_RemovePin(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		channel    string
@@ -117,7 +121,7 @@ func TestSlack_RemovePin(t *testing.T) {
 		},
 	}
 	var rh *pinsHandler
-	http.HandleFunc("/pins.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/pins.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newPinsHandler()
 		err := api.RemovePin(test.channel, test.ref)
@@ -131,10 +135,12 @@ func TestSlack_RemovePin(t *testing.T) {
 }
 
 func TestSlack_ListPins(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	rh := newPinsHandler()
-	http.HandleFunc("/pins.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/pins.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,
     "items": [
         {

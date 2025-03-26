@@ -55,7 +55,9 @@ func (ugh *userGroupsHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestCreateUserGroup(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	tests := []struct {
@@ -77,7 +79,7 @@ func TestCreateUserGroup(t *testing.T) {
 	}
 
 	var rh *userGroupsHandler
-	http.HandleFunc("/usergroups.create", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/usergroups.create", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 
 	for i, test := range tests {
 		rh = newUserGroupsHandler()
@@ -134,9 +136,11 @@ func getUserGroups(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetUserGroups(t *testing.T) {
-	http.HandleFunc("/usergroups.list", getUserGroups)
+	s := startServer()
+	defer s.Close()
 
-	once.Do(startServer)
+	s.RegisterHandler("/usergroups.list", getUserGroups)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	userGroups, err := api.GetUserGroups(GetUserGroupsOptionIncludeUsers(true))
@@ -216,7 +220,9 @@ func updateUserGroupsHandler() *userGroupsHandler {
 	}
 }
 func TestUpdateUserGroup(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	emptyDescription := ""
@@ -265,7 +271,7 @@ func TestUpdateUserGroup(t *testing.T) {
 	}
 
 	var rh *userGroupsHandler
-	http.HandleFunc("/usergroups.update", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/usergroups.update", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 
 	for i, test := range tests {
 		rh = updateUserGroupsHandler()

@@ -18,8 +18,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/slack-go/slack"
 	"time"
+
+	"github.com/slack-go/slack"
 )
 
 func generateModalRequest() slack.ModalViewRequest {

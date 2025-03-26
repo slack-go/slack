@@ -31,13 +31,12 @@ func parseResponseHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-func setParseResponseHandler() {
-	http.HandleFunc("/parseResponse", parseResponseHandler)
-}
-
 func TestParseResponse(t *testing.T) {
-	parseResponseOnce.Do(setParseResponseHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/parseResponse", parseResponseHandler)
+
 	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {validToken},
@@ -51,8 +50,11 @@ func TestParseResponse(t *testing.T) {
 }
 
 func TestParseResponseNoToken(t *testing.T) {
-	parseResponseOnce.Do(setParseResponseHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/parseResponse", parseResponseHandler)
+
 	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{}
 
@@ -70,8 +72,11 @@ func TestParseResponseNoToken(t *testing.T) {
 }
 
 func TestParseResponseInvalidToken(t *testing.T) {
-	parseResponseOnce.Do(setParseResponseHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/parseResponse", parseResponseHandler)
+
 	APIURL := "http://" + serverAddr + "/"
 	values := url.Values{
 		"token": {"whatever"},

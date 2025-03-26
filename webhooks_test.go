@@ -10,11 +10,12 @@ import (
 )
 
 func TestPostWebhook_OK(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
 
 	var receivedPayload WebhookMessage
 
-	http.HandleFunc("/webhook", func(rw http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/webhook", func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 
 		decoder := json.NewDecoder(r.Body)
@@ -50,9 +51,10 @@ func TestPostWebhook_OK(t *testing.T) {
 }
 
 func TestPostWebhook_NotOK(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
 
-	http.HandleFunc("/webhook2", func(rw http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/webhook2", func(rw http.ResponseWriter, r *http.Request) {
 		rw.WriteHeader(http.StatusInternalServerError)
 		rw.Write([]byte("500 - Something bad happened!"))
 	})
@@ -67,9 +69,10 @@ func TestPostWebhook_NotOK(t *testing.T) {
 }
 
 func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
 
-	http.HandleFunc("/message_limit_exceeded", func(rw http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/message_limit_exceeded", func(rw http.ResponseWriter, r *http.Request) {
 		// When a workspace's message limit is exceeded we get a 429 without a Retry-After header
 		rw.WriteHeader(http.StatusTooManyRequests)
 		rw.Write([]byte("message_limit_exceeded"))

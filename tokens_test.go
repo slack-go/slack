@@ -8,10 +8,12 @@ import (
 )
 
 func TestRotateTokens(t *testing.T) {
-	http.HandleFunc("/tooling.tokens.rotate", handleRotateToken)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/tooling.tokens.rotate", handleRotateToken)
 	expected := getTestTokenResponse()
 
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	tok, err := api.RotateTokens("expired-config", "old-refresh")

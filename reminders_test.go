@@ -39,7 +39,9 @@ func (rh *remindersHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestSlack_AddReminder(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		chanID     string
@@ -99,7 +101,7 @@ func TestSlack_AddReminder(t *testing.T) {
 		},
 	}
 	var rh *remindersHandler
-	http.HandleFunc("/reminders.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reminders.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newRemindersHandler()
 		var err error
@@ -120,7 +122,9 @@ func TestSlack_AddReminder(t *testing.T) {
 }
 
 func TestSlack_DeleteReminder(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		reminder   string
@@ -143,7 +147,7 @@ func TestSlack_DeleteReminder(t *testing.T) {
 		},
 	}
 	var rh *remindersHandler
-	http.HandleFunc("/reminders.delete", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reminders.delete", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newRemindersHandler()
 		err := api.DeleteReminder(test.reminder)
@@ -191,7 +195,6 @@ func (m *mockRemindersListHTTPClient) Do(*http.Request) (*http.Response, error) 
 func TestSlack_ListReminders(t *testing.T) {
 	expectedIDs := []string{"Rm12345678", "Gm12345678"}
 
-	once.Do(startServer)
 	api := &Client{
 		endpoint:   "http://" + serverAddr + "/",
 		token:      "testing-token",

@@ -284,8 +284,10 @@ func openDialogHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestOpenDialog(t *testing.T) {
-	http.HandleFunc("/dialog.open", openDialogHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/dialog.open", openDialogHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	dialog, err := unmarshalDialog()
 	if err != nil {

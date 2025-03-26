@@ -15,8 +15,11 @@ func addRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestAddRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.add", addRemoteFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.add", addRemoteFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := RemoteFileParameters{
 		ExternalID:  "externalID",
@@ -29,7 +32,6 @@ func TestAddRemoteFile(t *testing.T) {
 }
 
 func TestAddRemoteFileWithoutTitle(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := RemoteFileParameters{
 		ExternalID:  "externalID",
@@ -48,8 +50,11 @@ func listRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestListRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.list", listRemoteFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.list", listRemoteFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := ListRemoteFilesParameters{}
 	if _, err := api.ListRemoteFiles(params); err != nil {
@@ -65,8 +70,11 @@ func getRemoteFileInfoHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetRemoteFileInfo(t *testing.T) {
-	http.HandleFunc("/files.remote.info", getRemoteFileInfoHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.info", getRemoteFileInfoHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	if _, err := api.GetRemoteFileInfo("ExternalID", ""); err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -74,7 +82,6 @@ func TestGetRemoteFileInfo(t *testing.T) {
 }
 
 func TestGetRemoteFileInfoWithoutID(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, err := api.GetRemoteFileInfo("", "")
 	if err == nil {
@@ -86,7 +93,6 @@ func TestGetRemoteFileInfoWithoutID(t *testing.T) {
 }
 
 func TestGetRemoteFileInfoWithFileIDAndExternalID(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, err := api.GetRemoteFileInfo("ExternalID", "FileID")
 	if err == nil {
@@ -105,8 +111,11 @@ func shareRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestShareRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.share", shareRemoteFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.share", shareRemoteFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	if _, err := api.ShareRemoteFile([]string{"channel"}, "ExternalID", ""); err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -114,7 +123,6 @@ func TestShareRemoteFile(t *testing.T) {
 }
 
 func TestShareRemoteFileWithoutChannels(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	if _, err := api.ShareRemoteFile([]string{}, "ExternalID", ""); err != ErrParametersMissing {
 		t.Errorf("Expected ErrParametersMissing. got %s", err)
@@ -122,7 +130,6 @@ func TestShareRemoteFileWithoutChannels(t *testing.T) {
 }
 
 func TestShareRemoteFileWithoutID(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, err := api.ShareRemoteFile([]string{"channel"}, "", "")
 	if err == nil {
@@ -141,8 +148,11 @@ func updateRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestUpdateRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.update", updateRemoteFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.update", updateRemoteFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	params := RemoteFileParameters{
 		ExternalURL: "http://example.com/",
@@ -161,8 +171,11 @@ func removeRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestRemoveRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.remove", removeRemoteFileHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/files.remote.remove", removeRemoteFileHandler)
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	if err := api.RemoveRemoteFile("ExternalID", ""); err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -170,7 +183,6 @@ func TestRemoveRemoteFile(t *testing.T) {
 }
 
 func TestRemoveRemoteFileWithoutID(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.RemoveRemoteFile("", "")
 	if err == nil {
@@ -182,7 +194,6 @@ func TestRemoveRemoteFileWithoutID(t *testing.T) {
 }
 
 func TestRemoveRemoteFileWithFileIDAndExternalID(t *testing.T) {
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	err := api.RemoveRemoteFile("ExternalID", "FileID")
 	if err == nil {

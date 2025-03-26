@@ -23,7 +23,15 @@ func (h *viewsHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestSlack_OpenView(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/message_limit_exceeded", func(rw http.ResponseWriter, r *http.Request) {
+		// When a workspace's message limit is exceeded we get a 429 without a Retry-After header
+		rw.WriteHeader(http.StatusTooManyRequests)
+		rw.Write([]byte("message_limit_exceeded"))
+	})
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	cases := []struct {
@@ -193,7 +201,7 @@ func TestSlack_OpenView(t *testing.T) {
 	}
 
 	h := &viewsHandler{}
-	http.HandleFunc("/views.open", h.handler)
+	s.RegisterHandler("/views.open", h.handler)
 	for _, c := range cases {
 		t.Run(c.caseName, func(t *testing.T) {
 			h.rawResponse = c.rawResp
@@ -222,7 +230,9 @@ func TestSlack_OpenView(t *testing.T) {
 }
 
 func TestSlack_View_PublishView(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	cases := []struct {
@@ -356,7 +366,7 @@ func TestSlack_View_PublishView(t *testing.T) {
 	}
 
 	h := &viewsHandler{}
-	http.HandleFunc("/views.publish", h.handler)
+	s.RegisterHandler("/views.publish", h.handler)
 	for _, c := range cases {
 		t.Run(c.caseName, func(t *testing.T) {
 			h.rawResponse = c.rawResp
@@ -385,7 +395,9 @@ func TestSlack_View_PublishView(t *testing.T) {
 }
 
 func TestSlack_PushView(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	cases := []struct {
@@ -532,7 +544,7 @@ func TestSlack_PushView(t *testing.T) {
 	}
 
 	h := &viewsHandler{}
-	http.HandleFunc("/views.push", h.handler)
+	s.RegisterHandler("/views.push", h.handler)
 	for _, c := range cases {
 		t.Run(c.caseName, func(t *testing.T) {
 			h.rawResponse = c.rawResp
@@ -561,7 +573,9 @@ func TestSlack_PushView(t *testing.T) {
 }
 
 func TestSlack_UpdateView(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	cases := []struct {
@@ -712,7 +726,7 @@ func TestSlack_UpdateView(t *testing.T) {
 	}
 
 	h := &viewsHandler{}
-	http.HandleFunc("/views.update", h.handler)
+	s.RegisterHandler("/views.update", h.handler)
 	for _, c := range cases {
 		t.Run(c.caseName, func(t *testing.T) {
 			h.rawResponse = c.rawResp

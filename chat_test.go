@@ -21,9 +21,10 @@ func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func TestPostMessageInvalidChannel(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/chat.postMessage", postMessageInvalidChannelHandler)
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/chat.postMessage", postMessageInvalidChannelHandler)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	_, _, err := api.PostMessage("CXXXXXXXX", MsgOptionText("hello", false))
 	if err == nil {
@@ -38,10 +39,13 @@ func TestPostMessageInvalidChannel(t *testing.T) {
 }
 
 func TestGetPermalink(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	channel := "C1H9RESGA"
 	timeStamp := "p135854651500008"
 
-	http.HandleFunc("/chat.getPermalink", func(rw http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/chat.getPermalink", func(rw http.ResponseWriter, r *http.Request) {
 		if got, want := r.Header.Get("Content-Type"), "application/x-www-form-urlencoded"; got != want {
 			t.Errorf("request uses unexpected content type: got %s, want %s", got, want)
 		}
@@ -59,7 +63,6 @@ func TestGetPermalink(t *testing.T) {
 		rw.Write(response)
 	})
 
-	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	pp := PermalinkParameters{Channel: channel, Ts: timeStamp}
 	pl, err := api.GetPermalink(&pp)
@@ -209,13 +212,14 @@ func TestPostMessage(t *testing.T) {
 		},
 	}
 
-	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			http.DefaultServeMux = new(http.ServeMux)
-			http.HandleFunc(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
+			s := startServer()
+			defer s.Close()
+
+			s.RegisterHandler(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
 				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					t.Errorf("unexpected error: %v", err)
@@ -238,10 +242,12 @@ func TestPostMessage(t *testing.T) {
 }
 
 func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
+	s := startServer()
+	defer s.Close()
+
 	expectedBlocks := []Block{NewContextBlock("context", NewTextBlockObject(PlainTextType, "hello", false, false))}
 
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/response-url", func(rw http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -259,7 +265,6 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 		}
 	})
 
-	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	responseURL := api.endpoint + "response-url"
@@ -268,8 +273,10 @@ func TestPostMessageWithBlocksWhenMsgOptionResponseURLApplied(t *testing.T) {
 }
 
 func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/response-url", func(rw http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -286,7 +293,6 @@ func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 		}
 	})
 
-	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	responseURL := api.endpoint + "response-url"
@@ -295,8 +301,10 @@ func TestPostMessageWhenMsgOptionReplaceOriginalApplied(t *testing.T) {
 }
 
 func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/response-url", func(rw http.ResponseWriter, r *http.Request) {
+	s := startServer()
+	defer s.Close()
+
+	s.RegisterHandler("/response-url", func(rw http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -313,7 +321,6 @@ func TestPostMessageWhenMsgOptionDeleteOriginalApplied(t *testing.T) {
 		}
 	})
 
-	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
 	responseURL := api.endpoint + "response-url"
@@ -340,7 +347,6 @@ func TestSendMessageContextRedactsTokenInDebugLog(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			once.Do(startServer)
 			buf := bytes.NewBufferString("")
 
 			opts := []Option{
@@ -352,16 +358,16 @@ func TestSendMessageContextRedactsTokenInDebugLog(t *testing.T) {
 			// Why send the token in the message text too? To test that we're not
 			// redacting substrings in the request which look like a token but aren't.
 			api.SendMessage("CXXX", MsgOptionText(token, false))
-			s := buf.String()
+			str := buf.String()
 
 			re := regexp.MustCompile(`token=[\w.-]*`)
 			want := "token=" + tt.want
-			if got := re.FindString(s); got != want {
+			if got := re.FindString(str); got != want {
 				t.Errorf("Logged token in SendMessageContext(): got %q, want %q", got, want)
 			}
 			re = regexp.MustCompile(`text=[\w.-]*`)
 			want = "text=" + token
-			if got := re.FindString(s); got != want {
+			if got := re.FindString(str); got != want {
 				t.Errorf("Logged text in SendMessageContext(): got %q, want %q", got, want)
 			}
 		})

@@ -40,7 +40,9 @@ func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestSlack_AddReaction(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		name       string
@@ -74,7 +76,7 @@ func TestSlack_AddReaction(t *testing.T) {
 		},
 	}
 	var rh *reactionsHandler
-	http.HandleFunc("/reactions.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reactions.add", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newReactionsHandler()
 		err := api.AddReaction(test.name, test.ref)
@@ -88,7 +90,9 @@ func TestSlack_AddReaction(t *testing.T) {
 }
 
 func TestSlack_RemoveReaction(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		name       string
@@ -122,7 +126,7 @@ func TestSlack_RemoveReaction(t *testing.T) {
 		},
 	}
 	var rh *reactionsHandler
-	http.HandleFunc("/reactions.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reactions.remove", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newReactionsHandler()
 		err := api.RemoveReaction(test.name, test.ref)
@@ -136,7 +140,9 @@ func TestSlack_RemoveReaction(t *testing.T) {
 }
 
 func TestSlack_GetReactions(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	tests := []struct {
 		ref           ItemRef
@@ -232,7 +238,7 @@ func TestSlack_GetReactions(t *testing.T) {
 		},
 	}
 	var rh *reactionsHandler
-	http.HandleFunc("/reactions.get", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reactions.get", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	for i, test := range tests {
 		rh = newReactionsHandler()
 		rh.response = test.json
@@ -250,10 +256,12 @@ func TestSlack_GetReactions(t *testing.T) {
 }
 
 func TestSlack_ListReactions(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	rh := newReactionsHandler()
-	http.HandleFunc("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
+	s.RegisterHandler("/reactions.list", func(w http.ResponseWriter, r *http.Request) { rh.handler(w, r) })
 	rh.response = `{"ok": true,
     "items": [
         {

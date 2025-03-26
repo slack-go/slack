@@ -11,7 +11,9 @@ import (
 )
 
 func TestSlash_ServeHTTP(t *testing.T) {
-	once.Do(startServer)
+	s := startServer()
+	defer s.Close()
+
 	serverURL := fmt.Sprintf("http://%s/slash", serverAddr)
 
 	tests := []struct {
@@ -67,7 +69,7 @@ func TestSlash_ServeHTTP(t *testing.T) {
 
 	var slashCommand SlashCommand
 	client := &http.Client{}
-	http.HandleFunc("/slash", func(w http.ResponseWriter, r *http.Request) {
+	s.RegisterHandler("/slash", func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		slashCommand, err = SlashCommandParse(r)
 		if err != nil {
