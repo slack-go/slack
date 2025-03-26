@@ -3,6 +3,8 @@
 package slackevents
 
 import (
+	"encoding/json"
+
 	"github.com/slack-go/slack"
 )
 
@@ -283,9 +285,16 @@ type MessageEvent struct {
 	UserTeam   string `json:"user_team,omitempty"`
 	SourceTeam string `json:"source_team,omitempty"`
 
+	// When we get a 'message' event with no subtype, i.e. telling us about a new
+	// message, the message information is stored at the top level. But when we get
+	// a 'message_changed' event, the message information is stored in
+	// the Message property. This is really hard to represent nicely in Go, so we use
+	// a custom JSON unmarshaller to populate the Message field in both cases.
+	Message *slack.Msg `json:"message,omitempty"`
+	// Root is set if the SubType is `thread_broadcast`.
+	Root *slack.Msg `json:"root,omitempty"`
 	// Edited Message
-	Message         *slack.Message `json:"message,omitempty"`
-	PreviousMessage *slack.Message `json:"previous_message,omitempty"`
+	PreviousMessage *slack.Msg `json:"previous_message,omitempty"`
 
 	// Deleted Message
 	DeletedTimeStamp string `json:"deleted_ts,omitempty"`
@@ -297,6 +306,40 @@ type MessageEvent struct {
 	BotID    string `json:"bot_id,omitempty"`
 	Username string `json:"username,omitempty"`
 	Icons    *Icon  `json:"icons,omitempty"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for MessageEvent.
+// This custom unmarshaler handles both regular messages and message_changed events
+// by normalizing the message data into the Message field.
+func (e *MessageEvent) UnmarshalJSON(data []byte) error {
+	// First, unmarshal into an anonymous struct to avoid infinite recursion
+	// when calling json.Unmarshal on the MessageEvent type itself
+	type MessageEventAlias MessageEvent
+	alias := struct {
+		MessageEventAlias
+	}{}
+
+	if err := json.Unmarshal(data, &alias.MessageEventAlias); err != nil {
+		return err
+	}
+
+	// Copy all fields from alias to the original struct
+	*e = MessageEvent(alias.MessageEventAlias)
+
+	// Now check if there's no Message field (which would happen for regular messages)
+	if e.Message == nil {
+		// For regular messages, the message content is at the top level,
+		// so we need to unmarshal the data again into a slack.Msg
+		msg := &slack.Msg{}
+		if err := json.Unmarshal(data, msg); err != nil {
+			return err
+		}
+
+		// Set the Message field to the unmarshaled msg
+		e.Message = msg
+	}
+
+	return nil
 }
 
 // MemberJoinedChannelEvent A member joined a public or private channel
