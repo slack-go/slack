@@ -11,7 +11,10 @@ func TestNewInputBlock(t *testing.T) {
 	element := NewDatePickerBlockElement("action_id")
 	hint := NewTextBlockObject("plain_text", "hint", false, false)
 	inputBlock := NewInputBlock("test", label, hint, element)
+
+	assert.Equal(t, inputBlock.BlockType(), MBTInput)
 	assert.Equal(t, string(inputBlock.Type), "input")
+	assert.Equal(t, inputBlock.ID(), "test")
 	assert.Equal(t, inputBlock.BlockID, "test")
 	assert.Equal(t, inputBlock.Label, label)
 	assert.Equal(t, inputBlock.Element, element)

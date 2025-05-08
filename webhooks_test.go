@@ -66,6 +66,25 @@ func TestPostWebhook_NotOK(t *testing.T) {
 	}
 }
 
+func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
+	once.Do(startServer)
+
+	http.HandleFunc("/message_limit_exceeded", func(rw http.ResponseWriter, r *http.Request) {
+		// When a workspace's message limit is exceeded we get a 429 without a Retry-After header
+		rw.WriteHeader(http.StatusTooManyRequests)
+		rw.Write([]byte("message_limit_exceeded"))
+	})
+
+	url := "http://" + serverAddr + "/message_limit_exceeded"
+
+	err := PostWebhook(url, &WebhookMessage{})
+
+	if err == nil {
+		t.Errorf("Expected to receive error")
+	}
+	assert.IsType(t, StatusCodeError{}, err)
+}
+
 func TestWebhookMessage_WithBlocks(t *testing.T) {
 	textBlockObject := NewTextBlockObject("plain_text", "text", false, false)
 	sectionBlock := NewSectionBlock(textBlockObject, nil, nil)
@@ -77,13 +96,13 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
 
 	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
 
 	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
 	assert.Equal(t, 2, len(msgTwoBlocks.Blocks.BlockSet))
 
 	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text"}},{"type":"section","text":{"type":"plain_text","text":"text"}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
+	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
 
 	msgNoBlocks := WebhookMessage{Text: "foo"}
 	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)

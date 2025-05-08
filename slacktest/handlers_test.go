@@ -117,7 +117,7 @@ func TestBotInfoHandler(t *testing.T) {
 	go s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	bot, err := client.GetBotInfo(s.BotID)
+	bot, err := client.GetBotInfo(slack.GetBotInfoParameters{Bot: s.BotID})
 	assert.NoError(t, err)
 	assert.Equal(t, s.BotID, bot.ID)
 	assert.Equal(t, s.BotName, bot.Name)

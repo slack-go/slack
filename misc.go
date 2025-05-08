@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -63,13 +62,12 @@ func (e *RateLimitedError) Retryable() bool {
 	return true
 }
 
-func fileUploadReq(ctx context.Context, path string, values url.Values, r io.Reader) (*http.Request, error) {
+func fileUploadReq(ctx context.Context, path string, r io.Reader) (*http.Request, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, path, r)
 	if err != nil {
 		return nil, err
 	}
 
-	req.URL.RawQuery = values.Encode()
 	return req, nil
 }
 
@@ -126,19 +124,6 @@ func jsonReq(ctx context.Context, endpoint string, body interface{}) (req *http.
 	return req, nil
 }
 
-func parseResponseBody(body io.ReadCloser, intf interface{}, d Debug) error {
-	response, err := ioutil.ReadAll(body)
-	if err != nil {
-		return err
-	}
-
-	if d.Debug() {
-		d.Debugln("parseResponseBody", string(response))
-	}
-
-	return json.Unmarshal(response, intf)
-}
-
 func postLocalWithMultipartResponse(ctx context.Context, client httpClient, method, fpath, fieldname, token string, values url.Values, intf interface{}, d Debug) error {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {
@@ -156,9 +141,16 @@ func postLocalWithMultipartResponse(ctx context.Context, client httpClient, meth
 func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname, token string, values url.Values, r io.Reader, intf interface{}, d Debug) error {
 	pipeReader, pipeWriter := io.Pipe()
 	wr := multipart.NewWriter(pipeWriter)
+
 	errc := make(chan error)
 	go func() {
 		defer pipeWriter.Close()
+		defer wr.Close()
+		err := createFormFields(wr, values)
+		if err != nil {
+			errc <- err
+			return
+		}
 		ioWriter, err := wr.CreateFormFile(fieldname, name)
 		if err != nil {
 			errc <- err
@@ -174,7 +166,8 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 			return
 		}
 	}()
-	req, err := fileUploadReq(ctx, path, values, pipeReader)
+
+	req, err := fileUploadReq(ctx, path, pipeReader)
 	if err != nil {
 		return err
 	}
@@ -200,7 +193,21 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 	}
 }
 
-func doPost(ctx context.Context, client httpClient, req *http.Request, parser responseParser, d Debug) error {
+func createFormFields(mw *multipart.Writer, values url.Values) error {
+	for key, value := range values {
+		writer, err := mw.CreateFormField(key)
+		if err != nil {
+			return err
+		}
+		_, err = writer.Write([]byte(value[0]))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func doPost(client httpClient, req *http.Request, parser responseParser, d Debug) error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -225,7 +232,7 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 // post a url encoded form.
@@ -236,7 +243,7 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf interface{}, d Debug) error {
@@ -249,7 +256,7 @@ func getResource(ctx context.Context, client httpClient, endpoint, token string,
 
 	req.URL.RawQuery = values.Encode()
 
-	return doPost(ctx, client, req, newJSONParser(intf), d)
+	return doPost(client, req, newJSONParser(intf), d)
 }
 
 func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf interface{}, d Debug) error {
@@ -277,16 +284,8 @@ func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-// timerReset safely reset a timer, see time.Timer.Reset for details.
-func timerReset(t *time.Timer, d time.Duration) {
-	if !t.Stop() {
-		<-t.C
-	}
-	t.Reset(d)
-}
-
 func checkStatusCode(resp *http.Response, d Debug) error {
-	if resp.StatusCode == http.StatusTooManyRequests {
+	if resp.StatusCode == http.StatusTooManyRequests && resp.Header.Get("Retry-After") != "" {
 		retry, err := strconv.ParseInt(resp.Header.Get("Retry-After"), 10, 64)
 		if err != nil {
 			return err
@@ -316,7 +315,11 @@ func newJSONParser(dst interface{}) responseParser {
 
 func newTextParser(dst interface{}) responseParser {
 	return func(resp *http.Response) error {
-		b, err := ioutil.ReadAll(resp.Body)
+		if dst == nil {
+			return nil
+		}
+
+		b, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}

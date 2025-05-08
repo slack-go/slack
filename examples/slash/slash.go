@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/slack-go/slack"
@@ -27,7 +26,7 @@ func main() {
 			return
 		}
 
-		r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &verifier))
+		r.Body = io.NopCloser(io.TeeReader(r.Body, &verifier))
 		s, err := slack.SlashCommandParse(r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
