@@ -61,8 +61,7 @@ const (
 				"type": "section",
 				"text": {
 				  "text": "*Sally* has requested you set the deadline for the Nano launch project",
-				  "type": "mrkdwn",
-				  "emoji": false
+				  "type": "mrkdwn"
 				},
 				"accessory": {
 				  "type": "datepicker",
