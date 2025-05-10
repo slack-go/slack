@@ -814,9 +814,9 @@ type SubteamMembersChangedEvent struct {
 	DatePreviousUpdate int      `json:"date_previous_update"`
 	DateUpdate         int64    `json:"date_update"`
 	AddedUsers         []string `json:"added_users"`
-	AddedUsersCount    string   `json:"added_users_count"`
+	AddedUsersCount    int      `json:"added_users_count"`
 	RemovedUsers       []string `json:"removed_users"`
-	RemovedUsersCount  string   `json:"removed_users_count"`
+	RemovedUsersCount  int      `json:"removed_users_count"`
 }
 
 type SubteamSelfAddedEvent struct {

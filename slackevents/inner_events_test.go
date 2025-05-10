@@ -1968,9 +1968,9 @@ func TestSubteamMembersChangedEvent(t *testing.T) {
 			"date_previous_update": 1446670362,
 			"date_update": 1624473600,
 			"added_users": ["U1234567890"],
-			"added_users_count": "3",
+			"added_users_count": 3,
 			"removed_users": ["U0987654321"],
-			"removed_users_count": "1"
+			"removed_users_count": 1
 		}
 	`)
 
