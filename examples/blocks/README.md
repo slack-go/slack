@@ -9,7 +9,7 @@ The examples below should cover implementing most supported block elements.
 For additional information on Blocks, see the [Block Kit website](https://api.slack.com/block-kit).
 
 ### Using examples with the Block Kit Builder website
-When generating examples, they will be printed to the screen as a complete message that is meant to be sent back to slack as a direct response, or throuogh the ResponseURL provided.  To test your examples in the Block Kit Builder, you must take the contents of the `blocks` property and paste the results into the builder. 
+When generating examples, they will be printed to the screen as a complete message that is meant to be sent back to slack as a direct response, or throuogh the ResponseURL provided.  To test your examples in the Block Kit Builder, you must take the contents of the `blocks` property and paste the results into the builder.
 
 For example, when printing a simple header, the output will be
 
