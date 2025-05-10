@@ -376,7 +376,7 @@ func NewRichTextSectionEmojiElement(name string, skinTone int, style *RichTextSe
 type RichTextSectionLinkElement struct {
 	Type  RichTextSectionElementType `json:"type"`
 	URL   string                     `json:"url"`
-	Text  string                     `json:"text"`
+	Text  string                     `json:"text,omitempty"`
 	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
