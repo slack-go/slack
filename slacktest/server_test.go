@@ -102,7 +102,7 @@ func TestGetSeenInboundMessages(t *testing.T) {
 		}
 	}
 	assert.True(t, hadMessage, "did not see my sent message")
-	assert.True(t, s.SawMessage("should see this inbound message"))
+	assert.True(t, s.SawIncomingMessage("should see this inbound message"))
 }
 
 func TestSendChannelInvite(t *testing.T) {
