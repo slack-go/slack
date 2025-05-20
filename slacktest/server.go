@@ -153,8 +153,8 @@ func (sts *Server) SawOutgoingMessageMatching(pattern string) bool {
 	return false
 }
 
-// SawMessage checks if an incoming message was seen
-func (sts *Server) SawMessage(msg string) bool {
+// SawIncomingMessage checks if an incoming message was seen
+func (sts *Server) SawIncomingMessage(msg string) bool {
 	for _, m := range sts.seenInboundMessages.get() {
 		evt := &slack.MessageEvent{}
 		err := json.Unmarshal([]byte(m), evt)

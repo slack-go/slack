@@ -166,7 +166,7 @@ func TestSendGroupInvite(t *testing.T) {
 func TestServerSawMessage(t *testing.T) {
 	s := NewTestServer()
 	s.Start()
-	assert.False(t, s.SawMessage("foo"), "should not have seen any message")
+	assert.False(t, s.SawIncomingMessage("foo"), "should not have seen any message")
 }
 
 func TestServerSawOutgoingMessage(t *testing.T) {
