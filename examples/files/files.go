@@ -1,30 +1,41 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
-	params := slack.FileUploadParameters{
-		Title: "Batman Example",
-		//Filetype: "txt",
-		File: "example.txt",
-		//Content:  "Nan Nan Nan Nan Nan Nan Nan Nan Batman",
+	token, ok := os.LookupEnv("SLACK_BOT_TOKEN")
+	if !ok {
+		fmt.Println("Missing SLACK_BOT_TOKEN in environment")
+		os.Exit(1)
 	}
-	file, err := api.UploadFile(params)
+	api := slack.New(token, slack.OptionDebug(true))
+
+	ctx := context.Background()
+
+	// Upload a file
+	params := slack.UploadFileV2Parameters{
+		Title:    "Batman Example",
+		Filename: "example.txt",
+		File:     "example.txt",
+		FileSize: 38,
+	}
+	file, err := api.UploadFileV2Context(ctx, params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("Name: %s, URL: %s\n", file.Name, file.URL)
+	fmt.Printf("ID: %s, title: %s\n", file.ID, file.Title)
 
 	err = api.DeleteFile(file.ID)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("File %s deleted successfully.\n", file.Name)
+	fmt.Printf("File %s deleted successfully.\n", file.ID)
 }

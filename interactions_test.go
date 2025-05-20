@@ -2,6 +2,9 @@ package slack
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,8 +61,7 @@ const (
 				"type": "section",
 				"text": {
 				  "text": "*Sally* has requested you set the deadline for the Nano launch project",
-				  "type": "mrkdwn",
-				  "emoji": false
+				  "type": "mrkdwn"
 				},
 				"accessory": {
 				  "type": "datepicker",
@@ -547,4 +549,75 @@ func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testin
 	actualJSON, err := json.Marshal(actual.Container)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedJSON, actualJSON)
+}
+
+func TestInteractionCallback_Parser(t *testing.T) {
+	payload := `{
+		"type": "block_actions",
+		"actions": [
+			{
+				"type": "multi_conversations_select",
+				"action_id": "multi_convos",
+				"block_id": "test123",
+				"selected_conversations": ["G12345"]
+			}
+		],
+		"container": {
+			"type": "view",
+			"view_id": "V12345"
+		},
+		"state": {
+			"values": {
+				"section_block_id": {
+					"multi_convos": {
+						"type": "multi_conversations_select",
+						"selected_conversations": ["G12345"]
+					}
+				},
+				"other_block_id": {
+					"other_action_id": {
+						"type": "plain_text_input",
+						"value": "test123"
+					}
+				}
+			}
+		}
+	}`
+
+	// create request body
+	body := url.Values{}
+	body.Set("payload", payload)
+
+	// create new request
+	req, err := http.NewRequest(http.MethodPost, "http://slack.example.org/interactions", strings.NewReader(body.Encode()))
+	assert.NoError(t, err)
+	assert.NotNil(t, req)
+
+	// without this header, the parser will not decode the payload
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// parse payload from request
+	ic, err := InteractionCallbackParse(req)
+	assert.NoError(t, err)
+	assert.NotNil(t, ic)
+
+	// test parsed InteractionCallback payload
+	assert.Equal(t, ic.Type, InteractionTypeBlockActions)
+
+	assert.Equal(t, len(ic.ActionCallback.BlockActions), 1)
+	assert.Equal(t, ic.ActionCallback.BlockActions[0].ActionID, "multi_convos")
+	assert.Equal(t, ic.ActionCallback.BlockActions[0].BlockID, "test123")
+	assert.Equal(t, ic.ActionCallback.BlockActions[0].Type, ActionType(MultiOptTypeConversations))
+	assert.Equal(t, len(ic.ActionCallback.BlockActions[0].SelectedConversations), 1)
+	assert.Equal(t, ic.ActionCallback.BlockActions[0].SelectedConversations[0], "G12345")
+
+	assert.Equal(t, ic.Container.Type, "view")
+	assert.Equal(t, ic.Container.ViewID, "V12345")
+
+	assert.Equal(t, len(ic.BlockActionState.Values), 2)
+	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].Type, ActionType(MultiOptTypeConversations))
+	assert.Equal(t, len(ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations), 1)
+	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations[0], "G12345")
+	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Type, ActionType(METPlainTextInput))
+	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Value, "test123")
 }

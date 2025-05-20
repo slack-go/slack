@@ -178,14 +178,14 @@ type UploadFileV2Parameters struct {
 	Channel         string
 	ThreadTimestamp string
 	AltTxt          string
-	SnippetText     string
+	SnippetType     string
 }
 
 type GetUploadURLExternalParameters struct {
-	AltText     string
+	AltTxt      string
 	FileSize    int
 	FileName    string
-	SnippetText string
+	SnippetType string
 }
 
 type GetUploadURLExternalResponse struct {
@@ -194,7 +194,7 @@ type GetUploadURLExternalResponse struct {
 	SlackResponse
 }
 
-type uploadToURLParameters struct {
+type UploadToURLParameters struct {
 	UploadURL string
 	Reader    io.Reader
 	File      string
@@ -375,7 +375,11 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 
 // UploadFile uploads a file.
 //
-// Deprecated: Use [Client.UploadFileV2] instead. This will stop functioning on March 11, 2025.
+// Deprecated: Use [Client.UploadFileV2] instead.
+//
+// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
+// this will stop functioning on November 12, 2025.
+//
 // For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	return api.UploadFileContext(context.Background(), params)
@@ -383,7 +387,11 @@ func (api *Client) UploadFile(params FileUploadParameters) (file *File, err erro
 
 // UploadFileContext uploads a file and setting a custom context.
 //
-// Deprecated: Use [Client.UploadFileV2Context] instead. This will stop functioning on March 11, 2025.
+// Deprecated: Use [Client.UploadFileV2Context] instead.
+//
+// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
+// this will stop functioning on November 12, 2025.
+//
 // For more details, see: https://api.slack.com/methods/files.upload#markdown
 func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
@@ -529,11 +537,11 @@ func (api *Client) GetUploadURLExternalContext(ctx context.Context, params GetUp
 		"filename": {params.FileName},
 		"length":   {strconv.Itoa(params.FileSize)},
 	}
-	if params.AltText != "" {
-		values.Add("initial_comment", params.AltText)
+	if params.AltTxt != "" {
+		values.Add("alt_txt", params.AltTxt)
 	}
-	if params.SnippetText != "" {
-		values.Add("thread_ts", params.SnippetText)
+	if params.SnippetType != "" {
+		values.Add("snippet_type", params.SnippetType)
 	}
 	response := &GetUploadURLExternalResponse{}
 	err := api.postMethod(ctx, "files.getUploadURLExternal", values, response)
@@ -544,8 +552,9 @@ func (api *Client) GetUploadURLExternalContext(ctx context.Context, params GetUp
 	return response, response.Err()
 }
 
-// uploadToURL uploads the file to the provided URL using post method
-func (api *Client) uploadToURL(ctx context.Context, params uploadToURLParameters) (err error) {
+// UploadToURL uploads the file to the provided URL using post method
+// This is not a Slack API method, but a helper function to upload files to the URL
+func (api *Client) UploadToURL(ctx context.Context, params UploadToURLParameters) (err error) {
 	values := url.Values{}
 	if params.Content != "" {
 		contentReader := strings.NewReader(params.Content)
@@ -565,6 +574,7 @@ func (api *Client) CompleteUploadExternalContext(ctx context.Context, params Com
 	if err != nil {
 		return nil, err
 	}
+
 	values := url.Values{
 		"token": {api.token},
 		"files": {string(filesBytes)},
@@ -611,16 +621,16 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 	}
 
 	u, err := api.GetUploadURLExternalContext(ctx, GetUploadURLExternalParameters{
-		AltText:     params.AltTxt,
+		AltTxt:      params.AltTxt,
 		FileName:    params.Filename,
 		FileSize:    params.FileSize,
-		SnippetText: params.SnippetText,
+		SnippetType: params.SnippetType,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	err = api.uploadToURL(ctx, uploadToURLParameters{
+	err = api.UploadToURL(ctx, UploadToURLParameters{
 		UploadURL: u.UploadURL,
 		Reader:    params.Reader,
 		File:      params.File,

@@ -117,15 +117,6 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "testText",
-				Emoji:    emojiFalse,
-				Verbatim: false,
-			},
-			expected: nil,
-		},
-		{
-			input: TextBlockObject{
-				Type:     "mrkdwn",
-				Text:     "testText",
 				Emoji:    nil,
 				Verbatim: false,
 			},
@@ -147,13 +138,22 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Emoji:    emojiTrue,
 				Verbatim: false,
 			},
-			expected: errors.New("emoji cannot be true in mrkdown"),
+			expected: errors.New("emoji cannot be set for mrkdwn type"),
+		},
+		{
+			input: TextBlockObject{
+				Type:     "mrkdwn",
+				Text:     "testText",
+				Emoji:    emojiFalse,
+				Verbatim: false,
+			},
+			expected: errors.New("emoji cannot be set for mrkdwn type"),
 		},
 		{
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     "",
-				Emoji:    emojiFalse,
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: errors.New("text must have a minimum length of 1"),
@@ -162,7 +162,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 			input: TextBlockObject{
 				Type:     "mrkdwn",
 				Text:     strings.Repeat("a", 3001),
-				Emoji:    emojiFalse,
+				Emoji:    nil,
 				Verbatim: false,
 			},
 			expected: errors.New("text cannot be longer than 3000 characters"),
@@ -171,7 +171,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 
 	for _, test := range tests {
 		err := test.input.Validate()
-		assert.Equal(t, err, test.expected)
+		assert.Equal(t, test.expected, err)
 	}
 }
 

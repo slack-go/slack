@@ -330,8 +330,8 @@ func TestGetUploadURLExternalContext(t *testing.T) {
 			params: GetUploadURLExternalParameters{
 				FileSize:    10,
 				FileName:    "test.txt",
-				AltText:     "test-alt-text",
-				SnippetText: "test-snippet-text",
+				AltTxt:      "test-alt-text",
+				SnippetType: "test-snippet-type",
 			},
 			wantSlackResponse: []byte(`{"ok":true,"file_id":"RandomID","upload_url":"http://test-server/abc"}`),
 			wantResponse: GetUploadURLExternalResponse{
