@@ -85,6 +85,15 @@ func BotNameFromContext(ctx context.Context) string {
 	return botname
 }
 
+// ServerWSFromContext returns the server websocket endpoint from a provided context
+func ServerWSFromContext(ctx context.Context) string {
+	url, ok := ctx.Value(ServerWSContextKey).(string)
+	if !ok {
+		return "ws://wtf?!"
+	}
+	return url
+}
+
 // BotIDFromContext returns the bot userid from a provided context
 func BotIDFromContext(ctx context.Context) string {
 	botname, ok := ctx.Value(ServerBotIDContextKey).(string)
@@ -111,6 +120,16 @@ func generateRTMInfo(ctx context.Context, wsurl string) *fullInfoSlackResponse {
 
 func nowAsJSONTime() slack.JSONTime {
 	return slack.JSONTime(time.Now().Unix())
+}
+
+func defaultAppsConnectionsJSON(ctx context.Context) string {
+	url := ServerWSFromContext(ctx)
+	return fmt.Sprintf(`
+		{
+			"ok":true,
+			"url": "%s"
+		}
+		`, url)
 }
 
 func defaultBotInfoJSON(ctx context.Context) string {
