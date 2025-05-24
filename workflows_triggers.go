@@ -2,7 +2,7 @@ package slack
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 )
 
@@ -69,64 +69,82 @@ type (
 	}
 )
 
-// WorkflowsTriggersPermissionsAdd allows users to run a trigger that has its permission type set to named_entities.
+// WorkflowsTriggersPermissionsAdd allows users to run a trigger that has its permission
+// type set to named_entities.
 //
-// Slack API Docs:https://api.dev.slack.com/methods/workflows.triggers.permissions.add
+// Slack API Docs:https://api.slack.com/methods/workflows.triggers.permissions.add
 func (api *Client) WorkflowsTriggersPermissionsAdd(ctx context.Context, input *WorkflowsTriggersPermissionsAddInput) (*WorkflowsTriggersPermissionsAddOutput, error) {
 	response := struct {
-		*ResponsePointer
+		SlackResponse
 		*WorkflowsTriggersPermissionsAddOutput
 	}{}
 
-	err := api.postJSON(ctx, "workflows.triggers.permissions.add", input, &response)
+	jsonPayload, err := json.Marshal(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal WorkflowsTriggersPermissionsAddInput: %w", err)
+	}
+
+	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.triggers.permissions.add", api.token, jsonPayload, &response, api)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.Error != nil {
-		return nil, errors.New(fmt.Sprintf("error: %s", *response.Error))
+	if err := response.Err(); err != nil {
+		return nil, err
 	}
 
 	return response.WorkflowsTriggersPermissionsAddOutput, nil
 }
 
-// WorkflowsTriggersPermissionsList returns the permission type of a trigger and if applicable, includes the entities that have been granted access.
+// WorkflowsTriggersPermissionsList returns the permission type of a trigger and if
+// applicable, includes the entities that have been granted access.
 //
-// Slack API Docs:https://api.dev.slack.com/methods/workflows.triggers.permissions.list
+// Slack API Docs:https://api.slack.com/methods/workflows.triggers.permissions.list
 func (api *Client) WorkflowsTriggersPermissionsList(ctx context.Context, input *WorkflowsTriggersPermissionsListInput) (*WorkflowsTriggersPermissionsListOutput, error) {
 	response := struct {
-		*ResponsePointer
+		SlackResponse
 		*WorkflowsTriggersPermissionsListOutput
 	}{}
 
-	err := api.postJSON(ctx, "workflows.triggers.permissions.list", input, &response)
+	jsonPayload, err := json.Marshal(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal WorkflowsTriggersPermissionsListInput: %w", err)
+	}
+
+	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.triggers.permissions.list", api.token, jsonPayload, &response, api)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.Error != nil {
-		return nil, errors.New(fmt.Sprintf("error: %s", *response.Error))
+	if err := response.Err(); err != nil {
+		return nil, err
 	}
 
 	return response.WorkflowsTriggersPermissionsListOutput, nil
 }
 
-// WorkflowsTriggersPermissionsRemove revoke an entity's access to a trigger that has its permission type set to named_entities.
+// WorkflowsTriggersPermissionsRemove revoke an entity's access to a trigger that has its
+// permission type set to named_entities.
 //
-// Slack API Docs:https://api.dev.slack.com/methods/workflows.triggers.permissions.remove
+// Slack API Docs:https://api.slack.com/methods/workflows.triggers.permissions.remove
 func (api *Client) WorkflowsTriggersPermissionsRemove(ctx context.Context, input *WorkflowsTriggersPermissionsRemoveInput) (*WorkflowsTriggersPermissionsRemoveOutput, error) {
 	response := struct {
-		*ResponsePointer
+		SlackResponse
 		*WorkflowsTriggersPermissionsRemoveOutput
 	}{}
 
-	err := api.postJSON(ctx, "workflows.triggers.permissions.remove", input, &response)
+	jsonPayload, err := json.Marshal(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal WorkflowsTriggersPermissionsRemoveInput: %w", err)
+	}
+
+	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.triggers.permissions.remove", api.token, jsonPayload, &response, api)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.Error != nil {
-		return nil, errors.New(fmt.Sprintf("error: %s", *response.Error))
+	if err := response.Err(); err != nil {
+		return nil, err
 	}
 
 	return response.WorkflowsTriggersPermissionsRemoveOutput, nil
@@ -134,20 +152,25 @@ func (api *Client) WorkflowsTriggersPermissionsRemove(ctx context.Context, input
 
 // WorkflowsTriggersPermissionsSet sets the permission type for who can run a trigger.
 //
-// Slack API Docs:https://api.dev.slack.com/methods/workflows.triggers.permissions.set
+// Slack API Docs:https://api.slack.com/methods/workflows.triggers.permissions.set
 func (api *Client) WorkflowsTriggersPermissionsSet(ctx context.Context, input *WorkflowsTriggersPermissionsSetInput) (*WorkflowsTriggersPermissionsSetOutput, error) {
 	response := struct {
-		*ResponsePointer
+		SlackResponse
 		*WorkflowsTriggersPermissionsSetOutput
 	}{}
 
-	err := api.postJSON(ctx, "workflows.triggers.permissions.set", input, &response)
+	jsonPayload, err := json.Marshal(input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal WorkflowsTriggersPermissionsSetInput: %w", err)
+	}
+
+	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.triggers.permissions.set", api.token, jsonPayload, &response, api)
 	if err != nil {
 		return nil, err
 	}
 
-	if response.Error != nil {
-		return nil, errors.New(fmt.Sprintf("error: %s", *response.Error))
+	if err := response.Err(); err != nil {
+		return nil, err
 	}
 
 	return response.WorkflowsTriggersPermissionsSetOutput, nil
