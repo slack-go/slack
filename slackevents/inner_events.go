@@ -66,12 +66,12 @@ type AppMentionEvent struct {
 
 // AppHomeOpenedEvent Your Slack app home was opened.
 type AppHomeOpenedEvent struct {
-	Type           string     `json:"type"`
-	User           string     `json:"user"`
-	Channel        string     `json:"channel"`
-	EventTimeStamp string     `json:"event_ts"`
-	Tab            string     `json:"tab"`
-	View           slack.View `json:"view"`
+	Type           string      `json:"type"`
+	User           string      `json:"user"`
+	Channel        string      `json:"channel"`
+	EventTimeStamp string      `json:"event_ts"`
+	Tab            string      `json:"tab"`
+	View           *slack.View `json:"view,omitempty"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.

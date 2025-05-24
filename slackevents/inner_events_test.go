@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,9 +16,9 @@ func TestAssistantThreadStartedEvent(t *testing.T) {
 			"type": "assistant_thread_started",
 			"assistant_thread": {
 				"user_id": "U123ABC456",
-				"context": { 
-					"channel_id": "C123ABC456", 
-					"team_id": "T07XY8FPJ5C", 
+				"context": {
+					"channel_id": "C123ABC456",
+					"team_id": "T07XY8FPJ5C",
 					"enterprise_id": "E480293PS82"
 					},
 				"channel_id": "D123ABC456",
@@ -42,9 +43,9 @@ func TestAssistantThreadContextChangedEvent(t *testing.T) {
 			"type": "assistant_thread_context_changed",
 			"assistant_thread": {
 				"user_id": "U123ABC456",
-				"context": { 
-					"channel_id": "C123ABC456", 
-					"team_id": "T07XY8FPJ5C", 
+				"context": {
+					"channel_id": "C123ABC456",
+					"team_id": "T07XY8FPJ5C",
 					"enterprise_id": "E480293PS82"
 					},
 				"channel_id": "D123ABC456",
@@ -725,10 +726,10 @@ func TestMessageMetadataPosted(t *testing.T) {
 	{
 		"type":"message_metadata_posted",
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
-		"channel_id":"CHANNELXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
+		"channel_id":"CHANNELXXX",
 		"metadata":{
 			"event_type":"type",
 			"event_payload":{"key": "value"}
@@ -781,16 +782,16 @@ func TestMessageMetadataUpdated(t *testing.T) {
 	rawE := []byte(`
 	{
 		"type":"message_metadata_updated",
-		"channel_id":"CHANNELXXX",	
+		"channel_id":"CHANNELXXX",
 		"event_ts":"1660398079.756349",
 		"previous_metadata":{
 			"event_type":"type1",
 			"event_payload":{"key1": "value1"}
 		},
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
 		"message_ts":"1660398079.756349",
 		"metadata":{
 			"event_type":"type2",
@@ -849,16 +850,16 @@ func TestMessageMetadataDeleted(t *testing.T) {
 	rawE := []byte(`
 	{
 		"type":"message_metadata_deleted",
-		"channel_id":"CHANNELXXX",	
+		"channel_id":"CHANNELXXX",
 		"event_ts":"1660398079.756349",
 		"previous_metadata":{
 			"event_type":"type",
 			"event_payload":{"key": "value"}
 		},
 		"app_id":"APPXXX",
-		"bot_id":"BOTXXX",	
-		"user_id":"USERXXX",	
-		"team_id":"TEAMXXX",	
+		"bot_id":"BOTXXX",
+		"user_id":"USERXXX",
+		"team_id":"TEAMXXX",
 		"message_ts":"1660398079.756349",
 		"deleted_ts":"1660398079.756349"
 	}
@@ -2770,4 +2771,185 @@ func TestSharedChannelInviteRequested_UnmarshalJSON(t *testing.T) {
 	if len(event.TeamsInChannel) != 2 || event.TeamsInChannel[1].Name != "another_enterprise" {
 		t.Errorf("Expected second team to have name 'another_enterprise', got '%v'", event.TeamsInChannel)
 	}
+}
+
+func TestAppHomeOpenedEvent_WithView(t *testing.T) {
+	eventJSON := []byte(`{
+		"type": "app_home_opened",
+		"user": "U12345678",
+		"channel": "D12345678",
+		"tab": "home",
+		"event_ts": "1747319568.267214",
+		"view": {
+			"id": "V12345678",
+			"team_id": "T12345678",
+			"type": "home",
+			"blocks": [],
+			"private_metadata": "",
+			"callback_id": "",
+			"state": {
+				"values": {}
+			},
+			"hash": "1234567890.abcdef",
+			"title": {
+				"type": "plain_text",
+				"text": "App Home"
+			},
+			"clear_on_close": false,
+			"notify_on_close": false,
+			"close": null,
+			"submit": null,
+			"previous_view_id": "",
+			"root_view_id": "V12345678",
+			"app_id": "A12345678",
+			"external_id": "",
+			"app_installed_team_id": "T12345678",
+			"bot_id": "B12345678"
+		}
+	}`)
+
+	var event AppHomeOpenedEvent
+	err := json.Unmarshal(eventJSON, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "app_home_opened", event.Type)
+	assert.Equal(t, "U12345678", event.User)
+	assert.Equal(t, "D12345678", event.Channel)
+	assert.Equal(t, "home", event.Tab)
+	assert.Equal(t, "1747319568.267214", event.EventTimeStamp)
+	assert.NotNil(t, event.View)
+	assert.Equal(t, "V12345678", event.View.ID)
+	assert.Equal(t, "T12345678", event.View.TeamID)
+	assert.Equal(t, slack.ViewType("home"), event.View.Type)
+}
+
+func TestAppHomeOpenedEvent_WithoutView(t *testing.T) {
+	eventJSON := []byte(`{
+		"type": "app_home_opened",
+		"user": "U12345678",
+		"channel": "D12345678",
+		"tab": "home",
+		"event_ts": "1747319568.267214"
+	}`)
+
+	var event AppHomeOpenedEvent
+	err := json.Unmarshal(eventJSON, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "app_home_opened", event.Type)
+	assert.Equal(t, "U12345678", event.User)
+	assert.Equal(t, "D12345678", event.Channel)
+	assert.Equal(t, "home", event.Tab)
+	assert.Equal(t, "1747319568.267214", event.EventTimeStamp)
+	assert.Nil(t, event.View)
+}
+
+func TestAppHomeOpenedEvent_FullEventParsing_WithView(t *testing.T) {
+	fullEventJSON := []byte(`{
+		"token": "verification-token",
+		"team_id": "T12345678",
+		"api_app_id": "A12345678",
+		"event": {
+			"type": "app_home_opened",
+			"user": "U12345678",
+			"channel": "D12345678",
+			"tab": "home",
+			"event_ts": "1747319568.267214",
+			"view": {
+				"id": "V12345678",
+				"team_id": "T12345678",
+				"type": "home",
+				"blocks": [],
+				"private_metadata": "",
+				"callback_id": "",
+				"state": {
+					"values": {}
+				},
+				"hash": "1234567890.abcdef",
+				"title": {
+					"type": "plain_text",
+					"text": "App Home"
+				},
+				"clear_on_close": false,
+				"notify_on_close": false,
+				"close": null,
+				"submit": null,
+				"previous_view_id": "",
+				"root_view_id": "V12345678",
+				"app_id": "A12345678",
+				"external_id": "",
+				"app_installed_team_id": "T12345678",
+				"bot_id": "B12345678"
+			}
+		},
+		"type": "event_callback",
+		"event_id": "Ev12345678",
+		"event_time": 1747319568,
+		"authorizations": [{
+			"enterprise_id": null,
+			"team_id": "T12345678",
+			"user_id": "U12345678",
+			"is_bot": true,
+			"is_enterprise_install": false
+		}],
+		"is_ext_shared_channel": false
+	}`)
+
+	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
+
+	assert.NoError(t, err)
+	assert.Equal(t, "T12345678", parsedEvent.TeamID)
+	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
+	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
+	appHomeEvent, ok := parsedEvent.InnerEvent.Data.(*AppHomeOpenedEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "app_home_opened", appHomeEvent.Type)
+	assert.Equal(t, "U12345678", appHomeEvent.User)
+	assert.Equal(t, "D12345678", appHomeEvent.Channel)
+	assert.Equal(t, "home", appHomeEvent.Tab)
+	assert.Equal(t, "1747319568.267214", appHomeEvent.EventTimeStamp)
+	assert.NotNil(t, appHomeEvent.View)
+	assert.Equal(t, "V12345678", appHomeEvent.View.ID)
+	assert.Equal(t, "T12345678", appHomeEvent.View.TeamID)
+}
+
+func TestAppHomeOpenedEvent_FullEventParsing_WithoutView(t *testing.T) {
+	fullEventJSON := []byte(`{
+		"token": "verification-token",
+		"team_id": "T12345678",
+		"api_app_id": "A12345678",
+		"event": {
+			"type": "app_home_opened",
+			"user": "U12345678",
+			"channel": "D12345678",
+			"tab": "home",
+			"event_ts": "1747319568.267214"
+		},
+		"type": "event_callback",
+		"event_id": "Ev12345678",
+		"event_time": 1747319568,
+		"authorizations": [{
+			"enterprise_id": null,
+			"team_id": "T12345678",
+			"user_id": "U12345678",
+			"is_bot": true,
+			"is_enterprise_install": false
+		}],
+		"is_ext_shared_channel": false
+	}`)
+
+	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
+
+	assert.NoError(t, err)
+	assert.Equal(t, "T12345678", parsedEvent.TeamID)
+	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
+	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
+	appHomeEvent, ok := parsedEvent.InnerEvent.Data.(*AppHomeOpenedEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "app_home_opened", appHomeEvent.Type)
+	assert.Equal(t, "U12345678", appHomeEvent.User)
+	assert.Equal(t, "D12345678", appHomeEvent.Channel)
+	assert.Equal(t, "home", appHomeEvent.Tab)
+	assert.Equal(t, "1747319568.267214", appHomeEvent.EventTimeStamp)
+	assert.Nil(t, appHomeEvent.View)
 }

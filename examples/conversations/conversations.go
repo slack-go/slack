@@ -8,13 +8,13 @@ import (
 )
 
 func main() {
-	botToken := os.Getenv("SLACK_BOT_TOKEN")
-	if botToken == "" {
-		fmt.Fprintf(os.Stderr, "SLACK_BOT_TOKEN must be set.\n")
+	userToken := os.Getenv("SLACK_USER_TOKEN")
+	if userToken == "" {
+		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN must be set.\n")
 		os.Exit(1)
 	}
 
-	api := slack.New(botToken)
+	api := slack.New(userToken)
 	params := slack.GetConversationsParameters{
 		ExcludeArchived: true,
 		Limit:           100,
@@ -25,6 +25,19 @@ func main() {
 		return
 	}
 	for _, channel := range channels {
-		fmt.Printf("Channel: %v\n", channel)
+		info, err := api.GetConversationInfo(&slack.GetConversationInfoInput{
+			ChannelID:         channel.ID,
+			IncludeNumMembers: true,
+			IncludeLocale:     true,
+		})
+		if err != nil {
+			fmt.Printf("Error getting info for channel %s: %s\n", channel.ID, err)
+			continue
+		}
+		fmt.Printf("Channel: %s\n", channel.ID)
+		if info.Properties != nil {
+			fmt.Printf("Canvas: %+v\n", info.Properties.Canvas)
+			fmt.Printf("Tabs: %+v\n", info.Properties.Tabs)
+		}
 	}
 }

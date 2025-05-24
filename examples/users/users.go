@@ -2,12 +2,19 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	userToken := os.Getenv("SLACK_USER_TOKEN")
+	if userToken == "" {
+		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN must be set.\n")
+		os.Exit(1)
+	}
+
+	api := slack.New(userToken)
 	user, err := api.GetUserInfo("U023BECGF")
 	if err != nil {
 		fmt.Printf("%s\n", err)
