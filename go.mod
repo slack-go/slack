@@ -3,7 +3,7 @@ module github.com/slack-go/slack
 go 1.22
 
 require (
-	github.com/go-test/deep v1.0.4
+	github.com/go-test/deep v1.1.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/stretchr/testify v1.10.0
 )
