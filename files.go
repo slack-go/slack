@@ -175,6 +175,7 @@ type UploadFileV2Parameters struct {
 	Filename        string
 	Title           string
 	InitialComment  string
+	Blocks          Blocks
 	Channel         string
 	ThreadTimestamp string
 	AltTxt          string
@@ -209,6 +210,7 @@ type FileSummary struct {
 
 type CompleteUploadExternalParameters struct {
 	Files           []FileSummary
+	Blocks          Blocks
 	Channel         string
 	InitialComment  string
 	ThreadTimestamp string
@@ -586,6 +588,13 @@ func (api *Client) CompleteUploadExternalContext(ctx context.Context, params Com
 	if params.InitialComment != "" {
 		values.Add("initial_comment", params.InitialComment)
 	}
+	if params.Blocks.BlockSet != nil && params.InitialComment == "" {
+		blocksBytes, err := json.Marshal(params.Blocks)
+		if err != nil {
+			return nil, err
+		}
+		values.Add("blocks", string(blocksBytes))
+	}
 	if params.ThreadTimestamp != "" {
 		values.Add("thread_ts", params.ThreadTimestamp)
 	}
@@ -649,6 +658,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		Channel:         params.Channel,
 		InitialComment:  params.InitialComment,
 		ThreadTimestamp: params.ThreadTimestamp,
+		Blocks:          params.Blocks,
 	})
 	if err != nil {
 		return nil, err
