@@ -1,6 +1,7 @@
 package slacktest
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -86,6 +87,32 @@ func TestServerInviteConversationHandler(t *testing.T) {
 	response, err := client.InviteUsersToConversation("conversationID", "username")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, response.NumMembers)
+}
+
+func TestServerInviteConversationHandlerReturnUserIDForFailedInvites(t *testing.T) {
+	s := NewTestServer(func(c Customize) {
+		c.Handle("/conversations.invite", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte(inviteConversationFailureJSON))
+		})
+	})
+	s.Start()
+
+	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
+	_, err := client.InviteUsersToConversation("conversationID", "xxxxxxxx", "zzzzzzzz")
+
+	unwrapJoinedErrors := func(err error) []error {
+		var errs []error
+		if j, ok := err.(interface{ Unwrap() []error }); ok {
+			errs = j.Unwrap()
+		}
+		return errs
+	}
+	errs := unwrapJoinedErrors(err)
+	assert.Len(t, errs, 3)
+	assert.EqualError(t, errs[0], "user_not_found")
+	assert.EqualError(t, errs[1], "U111111:user_not_found")
+	assert.EqualError(t, errs[2], "U222222:cant_invite_self")
+	s.Stop()
 }
 
 func TestUserInfoHandler(t *testing.T) {

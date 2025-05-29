@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -331,9 +332,14 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 		"channel": {channelID},
 		"users":   {strings.Join(users, ",")},
 	}
+
 	response := struct {
 		SlackResponse
 		Channel *Channel `json:"channel"`
+		Errors  []struct {
+			User string `json:"user"`
+			SlackResponse
+		} `json:"errors"`
 	}{}
 
 	err := api.postMethod(ctx, "conversations.invite", values, &response)
@@ -341,6 +347,13 @@ func (api *Client) InviteUsersToConversationContext(ctx context.Context, channel
 		return nil, err
 	}
 
+	if !response.Ok && response.Errors != nil {
+		errs := []error{response.Err()}
+		for _, userError := range response.Errors {
+			errs = append(errs, fmt.Errorf("%s:%s", userError.User, userError.Error))
+		}
+		return nil, errors.Join(errs...)
+	}
 	return response.Channel, response.Err()
 }
 
