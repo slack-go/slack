@@ -478,6 +478,39 @@ func TestCompleteUploadExternalContext(t *testing.T) {
 			},
 		},
 		{
+			title: "Testing with blocks",
+			params: CompleteUploadExternalParameters{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID:    "ID2",
+						Title: "Title2",
+					},
+				},
+				Channel:         "test-channel",
+				ThreadTimestamp: "1234567890.123456",
+				Blocks: Blocks{BlockSet: []Block{
+					NewSectionBlock(
+						NewTextBlockObject("plain_text", "This is a section block", false, false), nil, nil),
+				},
+				},
+			},
+			wantResponse: CompleteUploadExternalResponse{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+					{
+						ID:    "ID2",
+						Title: "Title2",
+					},
+				},
+				SlackResponse: SlackResponse{Ok: true},
+			},
+		},
+		{
 			title: "Testing with error",
 			params: CompleteUploadExternalParameters{
 				Files: []FileSummary{
