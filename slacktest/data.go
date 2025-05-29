@@ -238,6 +238,25 @@ var templateConversationJSON = `
 	}
 }`
 
+var templateConversationInviteFailureJSON = `
+{
+    "ok": false,
+    "error": "%s",
+    "errors": [
+        {
+            "user": "%s",
+            "ok": false,
+            "error": "%s"
+        },
+        {
+            "user": "%s",
+            "ok": false,
+            "error": "%s"
+        }
+    ]
+}
+`
+
 var defaultConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
 	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 0)
 
@@ -250,6 +269,9 @@ var renameConversationJSON = fmt.Sprintf(templateConversationJSON, "newName",
 
 var inviteConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConversationName,
 	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1)
+
+var inviteConversationFailureJSON = fmt.Sprintf(templateConversationInviteFailureJSON,
+	"user_not_found", "U111111", "user_not_found", "U222222", "cant_invite_self")
 
 const inviteSharedResponseJSON = `{
     "ok": true,
