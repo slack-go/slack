@@ -147,6 +147,15 @@ type ChannelRenameInfo struct {
 	Created int    `json:"created"`
 }
 
+// ChannelUnsharedEvent represents a channel has been unshared with an external workspace event
+type ChannelUnsharedEvent struct {
+	Type                      string `json:"type"`
+	PreviouslyConnectedTeamID string `json:"previously_connected_team_id"`
+	Channel                   string `json:"channel"`
+	IsExtShared               bool   `json:"is_ext_shared"`
+	EventTimestamp            string `json:"event_ts"`
+}
+
 // GroupDeletedEvent represents the Group deleted event
 type GroupDeletedEvent struct {
 	Type           string `json:"type"`
@@ -1170,6 +1179,8 @@ const (
 	ChannelArchive = EventsAPIType("channel_archive")
 	// ChannelUnarchive is sent when a channel is unarchived.
 	ChannelUnarchive = EventsAPIType("channel_unarchive")
+	// ChannelUnshared is sent when a channel is unshared.
+	ChannelUnshared = EventsAPIType("channel_unshared")
 	// ChannelLeft is sent when a channel is left.
 	ChannelLeft = EventsAPIType("channel_left")
 	// ChannelRename is sent when a channel is rename.
@@ -1327,6 +1338,7 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
 	ChannelDeleted:                ChannelDeletedEvent{},
 	ChannelArchive:                ChannelArchiveEvent{},
 	ChannelUnarchive:              ChannelUnarchiveEvent{},
+	ChannelUnshared:               ChannelUnsharedEvent{},
 	ChannelLeft:                   ChannelLeftEvent{},
 	ChannelRename:                 ChannelRenameEvent{},
 	ChannelIDChanged:              ChannelIDChangedEvent{},

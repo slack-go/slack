@@ -2502,6 +2502,37 @@ func TestChannelSharedEvent(t *testing.T) {
 	}
 }
 
+func TestChannelUnsharedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "channel_unshared",
+		"previously_connected_team_id": "E163Q94DX",
+		"channel": "C123ABC456",
+        "is_ext_shared": false,
+		"event_ts": "1561064063.001100"
+	}`
+
+	var event ChannelUnsharedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal ChannelUnsharedEvent: %v", err)
+	}
+
+	if event.Type != "channel_unshared" {
+		t.Errorf("Expected type to be 'channel_unshared', got %s", event.Type)
+	}
+
+	if event.PreviouslyConnectedTeamID != "E163Q94DX" {
+		t.Errorf("Expected previously_connected_team_id to be 'E163Q94DX', got %s", event.PreviouslyConnectedTeamID)
+	}
+
+	if event.IsExtShared {
+		t.Errorf("Expected is_ext_shared to be false, got %t", event.IsExtShared)
+	}
+
+	if event.Channel != "C123ABC456" {
+		t.Fail()
+	}
+}
+
 func TestFileCreatedEvent(t *testing.T) {
 	jsonStr := `{
 		"type": "file_created",
