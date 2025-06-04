@@ -36,6 +36,11 @@ type AssistantThread struct {
 	ThreadTimeStamp string                 `json:"thread_ts"`
 }
 
+// AssistantThreadActionToken contains the action token for Data Access API queries
+type AssistantThreadActionToken struct {
+	ActionToken string `json:"action_token"`
+}
+
 // AssistantThreadContext is an object that represents the context of an assistant thread.
 type AssistantThreadContext struct {
 	ChannelID    string `json:"channel_id"`
@@ -62,6 +67,9 @@ type AppMentionEvent struct {
 
 	// When the app is mentioned in the edited message
 	Edited *Edited `json:"edited,omitempty"`
+
+	// AssistantThread contains action token for Data Access API queries when app is mentioned
+	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
 }
 
 // AppHomeOpenedEvent Your Slack app home was opened.
@@ -306,6 +314,9 @@ type MessageEvent struct {
 	BotID    string `json:"bot_id,omitempty"`
 	Username string `json:"username,omitempty"`
 	Icons    *Icon  `json:"icons,omitempty"`
+
+	// AssistantThread contains action token for Data Access API queries in message events
+	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface for MessageEvent.
