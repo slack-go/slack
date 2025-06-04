@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"net/url"
 )
 
 // SocketModeConnection contains various details about the SocketMode connection.
@@ -34,7 +35,9 @@ func (api *Client) StartSocketModeContext(ctx context.Context) (info *SocketMode
 	// can add a query parameter `debug_reconnects=true` to the URL to make the connection
 	// time significantly shorter (360 seconds).
 	if api.debug {
-		response.SocketModeConnection.URL += "&debug_reconnects=true"
+		u, _ := url.Parse(response.SocketModeConnection.URL)
+		u.Query().Add("debug_reconnects", "true")
+		response.SocketModeConnection.URL = u.String()
 	}
 	return &response.SocketModeConnection, response.SocketModeConnection.URL, response.Err()
 }
