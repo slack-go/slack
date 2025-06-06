@@ -34,3 +34,19 @@ func TestNewBlockSectionContainsAddedTextBlockAndAccessory(t *testing.T) {
 	assert.False(t, textBlockInSection.Verbatim)
 	assert.Equal(t, sectionBlock.Accessory.ImageElement, conflictImage)
 }
+
+func TestSectionBlockOptionExpand(t *testing.T) {
+	textInfo := NewTextBlockObject("mrkdwn", "This is a long text that should be auto-expanded", false, false)
+
+	// Create a section block with expand option set to true
+	sectionBlock := NewSectionBlock(textInfo, nil, nil, SectionBlockOptionExpand(true))
+
+	// Verify that the expand field is set correctly
+	assert.True(t, sectionBlock.Expand)
+
+	// Create another section block with expand option set to false
+	sectionBlock = NewSectionBlock(textInfo, nil, nil, SectionBlockOptionExpand(false))
+
+	// Verify that the expand field is set correctly
+	assert.False(t, sectionBlock.Expand)
+}
