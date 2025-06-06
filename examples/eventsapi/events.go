@@ -11,11 +11,11 @@ import (
 	"github.com/slack-go/slack/slackevents"
 )
 
-// You more than likely want your "Bot User OAuth Access Token" which starts with "xoxb-"
-var api = slack.New("TOKEN")
-
 func main() {
+	botToken := os.Getenv("SLACK_BOT_TOKEN")
 	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
+
+	api := slack.New(botToken, slack.OptionDebug(true), slack.OptionLog(nil))
 
 	http.HandleFunc("/events-endpoint", func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -42,7 +42,9 @@ func main() {
 			return
 		}
 
-		if eventsAPIEvent.Type == slackevents.URLVerification {
+		fmt.Println("[INFO] Received event:", eventsAPIEvent.Type)
+		switch eventsAPIEvent.Type {
+		case slackevents.URLVerification:
 			var r *slackevents.ChallengeResponse
 			err := json.Unmarshal([]byte(body), &r)
 			if err != nil {
@@ -51,9 +53,9 @@ func main() {
 			}
 			w.Header().Set("Content-Type", "text")
 			w.Write([]byte(r.Challenge))
-		}
-		if eventsAPIEvent.Type == slackevents.CallbackEvent {
+		case slackevents.CallbackEvent:
 			innerEvent := eventsAPIEvent.InnerEvent
+			fmt.Println("[INFO] Received inner event:", innerEvent.Type)
 			switch ev := innerEvent.Data.(type) {
 			case *slackevents.AppMentionEvent:
 				api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
