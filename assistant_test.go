@@ -182,7 +182,7 @@ func assistantSearchContextHandlerWithNewParams(rw http.ResponseWriter, r *http.
 	actionToken := r.FormValue("action_token")
 	contextChannelID := r.FormValue("context_channel_id")
 	includeBots := r.FormValue("include_bots")
-	
+
 	rw.Header().Set("Content-Type", "application/json")
 
 	if query != "" && actionToken != "" && contextChannelID != "" && includeBots == "true" {
@@ -230,11 +230,11 @@ func TestSearchAssistantContextWithNewParameters(t *testing.T) {
 
 	// We need to temporarily change the API method for this test
 	// Since we can't easily override the method, we'll test the parameter building logic
-	
+
 	// Create a custom client to test parameter handling
 	values := url.Values{"token": {"testing-token"}}
 	values.Add("query", params.Query)
-	
+
 	if params.ActionToken != "" {
 		values.Add("action_token", params.ActionToken)
 	}

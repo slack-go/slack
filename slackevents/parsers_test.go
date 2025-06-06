@@ -199,7 +199,7 @@ func TestParseEventAPIAppMentionWithAssistantThread(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	
+
 	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
@@ -255,7 +255,7 @@ func TestParseEventAPIMessageIMWithAssistantThread(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	
+
 	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
@@ -314,7 +314,7 @@ func TestParseEventAPIMessageChannelWithAssistantThread(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	
+
 	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
@@ -373,7 +373,7 @@ func TestParseEventAPIMessageMPIMWithAssistantThread(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	
+
 	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
@@ -432,7 +432,7 @@ func TestParseEventAPIMessageGroupWithAssistantThread(t *testing.T) {
 		fmt.Println(e)
 		t.Fail()
 	}
-	
+
 	switch outerEvent := msg.Data.(type) {
 	case *EventsAPICallbackEvent:
 		{
@@ -461,4 +461,3 @@ func TestParseEventAPIMessageGroupWithAssistantThread(t *testing.T) {
 		}
 	}
 }
-

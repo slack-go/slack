@@ -105,11 +105,11 @@ func TestAppMentionWithAssistantThread(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if event.AssistantThread == nil {
 		t.Error("Expected AssistantThread to be non-nil")
 	}
-	
+
 	if event.AssistantThread.ActionToken != "1234567.abcdefg" {
 		t.Errorf("Expected ActionToken to be '1234567.abcdefg', got %s", event.AssistantThread.ActionToken)
 	}
