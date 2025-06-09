@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	websocket "github.com/gorilla/websocket"
@@ -19,6 +20,15 @@ var (
 	defaultPingPeriod    = time.Second * 15
 	defaultWriteDeadline = time.Second * 3
 )
+
+// wsWriteMutexMap serializes writes to websocket.Conn in the test server
+var wsWriteMutexMap sync.Map // map[*websocket.Conn]*sync.Mutex
+
+// getConnMutex returns a mutex for a websocket.Conn
+func getConnMutex(c *websocket.Conn) *sync.Mutex {
+	m, _ := wsWriteMutexMap.LoadOrStore(c, &sync.Mutex{})
+	return m.(*sync.Mutex)
+}
 
 func contextHandler(server *Server, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -330,7 +340,7 @@ func handlePeriodicPings(c *websocket.Conn, done chan struct{}) {
 	for {
 		select {
 		case <-ticker.C:
-			if err := c.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(defaultWriteDeadline)); err != nil {
+			if err := wrapWriteControl(c, websocket.PingMessage, []byte{}, time.Now().Add(defaultWriteDeadline)); err != nil {
 				log.Println("error sending ping:", err)
 			}
 		case <-done:
@@ -363,7 +373,7 @@ func Websocket(delegate func(c *websocket.Conn)) func(w http.ResponseWriter, r *
 
 // RTMServerSendGoodbye send a goodbye event
 func RTMServerSendGoodbye(c *websocket.Conn) error {
-	return c.WriteJSON(slack.Event{Type: "goodbye"})
+	return wrapWriteJSON(c, slack.Event{Type: "goodbye"})
 }
 
 // RTMRespEventType retrieve the event type from the next message
@@ -399,9 +409,33 @@ func RTMRespPong(c *websocket.Conn, m json.RawMessage) (err error) {
 		ReplyTo: ping.ID,
 	}
 
-	if err = c.WriteJSON(pong); err != nil {
+	if err = wrapWriteJSON(c, pong); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// wrapWriteJSON safely serializes WriteJSON calls
+func wrapWriteJSON(c *websocket.Conn, v interface{}) error {
+	mu := getConnMutex(c)
+	mu.Lock()
+	defer mu.Unlock()
+	return c.WriteJSON(v)
+}
+
+// wrapWriteMessage safely serializes WriteMessage calls
+func wrapWriteMessage(c *websocket.Conn, messageType int, data []byte) error {
+	mu := getConnMutex(c)
+	mu.Lock()
+	defer mu.Unlock()
+	return c.WriteMessage(messageType, data)
+}
+
+// wrapWriteControl safely serializes WriteControl calls
+func wrapWriteControl(c *websocket.Conn, messageType int, data []byte, deadline time.Time) error {
+	mu := getConnMutex(c)
+	mu.Lock()
+	defer mu.Unlock()
+	return c.WriteControl(messageType, data, deadline)
 }
