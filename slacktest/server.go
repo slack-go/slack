@@ -1,17 +1,50 @@
 package slacktest
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"regexp"
 	"time"
 
 	"github.com/slack-go/slack"
-	"go.mills.io/logger"
 )
+
+// loggingHandler wraps an http.Handler with request logging
+func loggingHandler(logger *log.Logger, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		lw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		next.ServeHTTP(lw, r)
+		host := r.Host
+		if host == "" {
+			host = "-"
+		}
+		logger.Printf("%s %s %s %s %d %s", host, r.Method, r.URL, r.Proto, lw.statusCode, time.Since(start))
+	})
+}
+
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (lw *loggingResponseWriter) WriteHeader(code int) {
+	lw.statusCode = code
+	lw.ResponseWriter.WriteHeader(code)
+}
+
+func (lw *loggingResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hijacker, ok := lw.ResponseWriter.(http.Hijacker); ok {
+		return hijacker.Hijack()
+	}
+	return nil, nil, fmt.Errorf("ResponseWriter does not support Hijack")
+}
 
 func newMessageChannels() *messageChannels {
 	sent := make(chan (string))
@@ -28,6 +61,7 @@ type Customize interface {
 	Handle(pattern string, handler http.HandlerFunc)
 }
 
+// Binder is a function that customizes the test server.
 type Binder func(Customize)
 
 // NewTestServer returns a slacktest.Server ready to be started
@@ -36,9 +70,11 @@ func NewTestServer(custom ...Binder) *Server {
 
 	channels := &serverChannels{}
 	groups := &serverGroups{}
+	logger := log.New(os.Stdout, "[slacktest] ", log.LstdFlags)
 	s := &Server{
 		registered:           map[string]struct{}{},
 		mux:                  http.NewServeMux(),
+		Logger:               logger,
 		seenInboundMessages:  &messageCollection{},
 		seenOutboundMessages: &messageCollection{},
 	}
@@ -66,7 +102,7 @@ func NewTestServer(custom ...Binder) *Server {
 	s.Handle("/apps.connections.open", appsConnectionsOpenHandler)
 
 	httpserver := httptest.NewUnstartedServer(s.mux)
-	httpserver.Config.Handler = logger.New().Handler(httpserver.Config.Handler)
+	httpserver.Config.Handler = loggingHandler(logger, httpserver.Config.Handler)
 	addr := httpserver.Listener.Addr().String()
 
 	s.ServerAddr = addr
