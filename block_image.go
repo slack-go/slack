@@ -41,3 +41,15 @@ func NewImageBlock(imageURL, altText, blockID string, title *TextBlockObject) *I
 		Title:    title,
 	}
 }
+
+// NewImageBlockSlackFile returns an instance of a new Image Block type
+// TODO: BREAKING CHANGE - This should be combined with the function above
+func NewImageBlockSlackFile(slackFile *SlackFileObject, altText string, blockID string, title *TextBlockObject) *ImageBlock {
+	return &ImageBlock{
+		Type:      MBTImage,
+		SlackFile: slackFile,
+		AltText:   altText,
+		BlockID:   blockID,
+		Title:     title,
+	}
+}
