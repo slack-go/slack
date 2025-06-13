@@ -123,6 +123,11 @@ func reactionAddHandler(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte(defaultOkJSON))
 }
 
+// handle apps.connections.open
+func appsConnectionsOpenHandler(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte(defaultAppsConnectionsJSON(r.Context())))
+}
+
 // handle chat.postMessage
 func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
