@@ -468,6 +468,7 @@ type TimePickerBlockElement struct {
 	Placeholder *TextBlockObject         `json:"placeholder,omitempty"`
 	InitialTime string                   `json:"initial_time,omitempty"`
 	Confirm     *ConfirmationBlockObject `json:"confirm,omitempty"`
+	Timezone    string                   `json:"timezone,omitempty"`
 }
 
 // ElementType returns the type of the Element
