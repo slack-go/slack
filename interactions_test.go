@@ -144,6 +144,19 @@ const (
 							"type": "conversations_select",
 							"value": "C1AB2C3DE"
 						}
+					},
+          "some_datetime": {
+            "value": {
+              "type": "datetimepicker",
+              "selected_date_time": null
+            }
+          },
+					"some_timepicker": {
+						"value": {
+							"type": "timepicker",
+							"timezone": "Europe/Berlin",
+							"initial_time": "12:00"
+						}
 					}
 				}
 			},
@@ -304,6 +317,19 @@ func TestViewSubmissionCallback(t *testing.T) {
 						"target_select": {
 							Type:  "conversations_select",
 							Value: "C1AB2C3DE",
+						},
+					},
+					"some_datetime": {
+						"value": BlockAction{
+							Type: "datetimepicker",
+							// No selected datetime!
+						},
+					},
+					"some_timepicker": {
+						"value": BlockAction{
+							Type:        "timepicker",
+							InitialTime: "12:00",
+							Timezone:    "Europe/Berlin",
 						},
 					},
 				},
