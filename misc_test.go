@@ -134,6 +134,13 @@ func TestSlackResponseErrorsMarshaling(t *testing.T) {
 			expected: `{"error":"invalid_user","ok":false,"user":"U12345678"}`,
 		},
 		{
+			name: "StringError",
+			errors: SlackResponseErrors{
+				Message: func() *string { s := "failed to match all allowed schemas"; return &s }(),
+			},
+			expected: `"failed to match all allowed schemas"`,
+		},
+		{
 			name:     "EmptyErrors",
 			errors:   SlackResponseErrors{},
 			expected: `null`,
@@ -185,6 +192,16 @@ func TestSlackResponseErrorsUnmarshaling(t *testing.T) {
 			input:    `null`,
 			expected: SlackResponseErrors{},
 		},
+		{
+			name:  "StringError",
+			input: `"failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"`,
+			expected: SlackResponseErrors{
+				Message: func() *string {
+					s := "failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"
+					return &s
+				}(),
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -208,6 +225,14 @@ func TestSlackResponseErrorsUnmarshaling(t *testing.T) {
 					t.Error("expected ConversationsInviteResponseError, got nil")
 				} else if *errors.ConversationsInviteResponseError != *tt.expected.ConversationsInviteResponseError {
 					t.Errorf("got %+v; want %+v", *errors.ConversationsInviteResponseError, *tt.expected.ConversationsInviteResponseError)
+				}
+			}
+
+			if tt.expected.Message != nil {
+				if errors.Message == nil {
+					t.Error("expected Message, got nil")
+				} else if *errors.Message != *tt.expected.Message {
+					t.Errorf("got %+v; want %+v", *errors.Message, *tt.expected.Message)
 				}
 			}
 		})
@@ -254,6 +279,28 @@ func TestSlackResponseWithErrors(t *testing.T) {
 			input: `{"ok":true}`,
 			expected: SlackResponse{
 				Ok: true,
+			},
+		},
+		{
+			name:  "ResponseWithStringErrors",
+			input: `{"ok":false,"error":"invalid_blocks","errors":["failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]","invalid additional property: emoji [json-pointer:\\/blocks\\/3\\/text]"]}`,
+			expected: SlackResponse{
+				Ok:    false,
+				Error: "invalid_blocks",
+				Errors: []SlackResponseErrors{
+					{
+						Message: func() *string {
+							s := "failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"
+							return &s
+						}(),
+					},
+					{
+						Message: func() *string {
+							s := "invalid additional property: emoji [json-pointer:\\/blocks\\/3\\/text]"
+							return &s
+						}(),
+					},
+				},
 			},
 		},
 	}
