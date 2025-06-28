@@ -68,6 +68,9 @@ type PostMessageParameters struct {
 
 	// chat metadata support
 	MetaData SlackMetadata `json:"metadata"`
+
+	// file_ids support
+	FileIDs []string `json:"file_ids,omitempty"`
 }
 
 // NewPostMessageParameters provides an instance of PostMessageParameters with all the sane default values set
@@ -715,6 +718,23 @@ func MsgOptionLinkNames(linkName bool) MsgOption {
 	}
 }
 
+// MsgOptionFileIDs sets file IDs for the message
+func MsgOptionFileIDs(fileIDs []string) MsgOption {
+	return func(config *sendConfig) error {
+		if len(fileIDs) == 0 {
+			return nil
+		}
+
+		fileIDsBytes, err := json.Marshal(fileIDs)
+		if err != nil {
+			return err
+		}
+
+		config.values.Set("file_ids", string(fileIDsBytes))
+		return nil
+	}
+}
+
 // UnsafeMsgOptionEndpoint deliver the message to the specified endpoint.
 // NOTE: USE AT YOUR OWN RISK: No issues relating to the use of this Option
 // will be supported by the library, it is subject to change without notice that
@@ -776,6 +796,10 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 		if params.ReplyBroadcast != DEFAULT_MESSAGE_REPLY_BROADCAST {
 			config.values.Set("reply_broadcast", "true")
+		}
+
+		if len(params.FileIDs) > 0 {
+			return MsgOptionFileIDs(params.FileIDs)(config)
 		}
 
 		return nil
