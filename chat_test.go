@@ -367,3 +367,61 @@ func TestSendMessageContextRedactsTokenInDebugLog(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateMessage(t *testing.T) {
+	type messageTest struct {
+		endpoint string
+		opt      []MsgOption
+		expected url.Values
+	}
+	tests := map[string]messageTest{
+		"empty file_ids": {
+			endpoint: "/chat.update",
+			opt:      []MsgOption{},
+			expected: url.Values{
+				"channel": []string{"CXXX"},
+				"token":   []string{"testing-token"},
+				"ts":      []string{"1234567890.123456"},
+			},
+		},
+		"with file_ids": {
+			endpoint: "/chat.update",
+			opt: []MsgOption{
+				MsgOptionFileIDs([]string{"F123", "F456"}),
+			},
+			expected: url.Values{
+				"channel":  []string{"CXXX"},
+				"token":    []string{"testing-token"},
+				"ts":       []string{"1234567890.123456"},
+				"file_ids": []string{`["F123","F456"]`},
+			},
+		},
+	}
+
+	once.Do(startServer)
+	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			http.DefaultServeMux = new(http.ServeMux)
+			http.HandleFunc(test.endpoint, func(rw http.ResponseWriter, r *http.Request) {
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+				actual, err := url.ParseQuery(string(body))
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+					return
+				}
+				if !reflect.DeepEqual(actual, test.expected) {
+					t.Errorf("\nexpected: %s\n  actual: %s", test.expected, actual)
+					return
+				}
+			})
+
+			_, _, _, _ = api.UpdateMessage("CXXX", "1234567890.123456", test.opt...)
+		})
+	}
+}
