@@ -2,6 +2,7 @@ package manifests
 
 import (
 	"fmt"
+
 	"github.com/slack-go/slack"
 )
 

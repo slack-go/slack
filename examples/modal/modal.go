@@ -19,8 +19,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/slack-go/slack"
 	"time"
+
+	"github.com/slack-go/slack"
 )
 
 func generateModalRequest() slack.ModalViewRequest {
@@ -183,6 +184,8 @@ func handleModal(token string) func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
+		default:
+			fmt.Println("Fallback case")
 		}
 	}
 }

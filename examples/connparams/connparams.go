@@ -13,7 +13,7 @@ import (
 
 func main() {
 	channelID := flag.String("channel", "", "Channel ID (required)")
-	userIDs   := flag.String("users", "", "Comma-separated user IDs for presence monitoring (required)")
+	userIDs := flag.String("users", "", "Comma-separated user IDs for presence monitoring (required)")
 	flag.Parse()
 
 	// Get token from environment variable
