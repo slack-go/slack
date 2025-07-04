@@ -1,13 +1,34 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
+var (
+	channelID = flag.String("channel", "", "Channel ID (required)")
+)
+
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
+	flag.Parse()
+
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	// Get channel ID from flag
+	if *channelID == "" {
+		fmt.Println("Channel ID is required: use -channel flag")
+		os.Exit(1)
+	}
+
+	api := slack.New(token)
 	attachment := slack.Attachment{
 		Pretext: "some pretext",
 		Text:    "some text",
@@ -22,8 +43,8 @@ func main() {
 		*/
 	}
 
-	channelID, timestamp, err := api.PostMessage(
-		"CHANNEL_ID",
+	respChannelID, timestamp, err := api.PostMessage(
+		*channelID,
 		slack.MsgOptionText("Some text", false),
 		slack.MsgOptionAttachments(attachment),
 		slack.MsgOptionAsUser(true), // Add this if you want that the bot would post message as a user, otherwise it will send response using the default slackbot
@@ -32,5 +53,5 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
+	fmt.Printf("Message successfully sent to channel %s at %s", respChannelID, timestamp)
 }
