@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -48,7 +49,14 @@ func getAllUserUIDs(ctx context.Context, client *slack.Client, pageSize int) ([]
 }
 
 func main() {
-	client := slack.New("YOUR_TOKEN_HERE")
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	client := slack.New(token)
 
 	uids, err := getAllUserUIDs(context.Background(), client, 1000)
 	if err != nil {

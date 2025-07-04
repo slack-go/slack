@@ -1,20 +1,46 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	token, ok := os.LookupEnv("SLACK_TOKEN")
-	if !ok {
-		fmt.Println("Missing SLACK_TOKEN in environment")
+	channelID := flag.String("channel", "", "Channel ID (required)")
+	userIDs := flag.String("users", "", "Comma-separated user IDs for presence monitoring (required)")
+	flag.Parse()
+
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
 		os.Exit(1)
 	}
+
+	// Get channel ID from flag
+	if *channelID == "" {
+		fmt.Println("Channel ID is required: use -channel flag")
+		os.Exit(1)
+	}
+
+	// Get user IDs from flag
+	if *userIDs == "" {
+		fmt.Println("User IDs are required: use -users flag (comma-separated)")
+		os.Exit(1)
+	}
+
+	// Parse comma-separated user IDs
+	userIDList := strings.Split(*userIDs, ",")
+	for i, userID := range userIDList {
+		userIDList[i] = strings.TrimSpace(userID)
+	}
+
 	api := slack.New(
 		token,
 		slack.OptionDebug(true),
@@ -31,17 +57,14 @@ func main() {
 		fmt.Print("Event Received: ")
 		switch ev := msg.Data.(type) {
 		case *slack.HelloEvent:
-			// Replace USER-ID-N here with your User IDs
-			rtm.SendMessage(rtm.NewSubscribeUserPresence([]string{
-				"USER-ID-1",
-				"USER-ID-2",
-			}))
+			// Subscribe to user presence using provided user IDs
+			rtm.SendMessage(rtm.NewSubscribeUserPresence(userIDList))
 
 		case *slack.ConnectedEvent:
 			fmt.Println("Infos:", ev.Info)
 			fmt.Println("Connection counter:", ev.ConnectionCount)
-			// Replace C2147483705 with your Channel ID
-			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", "C2147483705"))
+			// Send message to provided channel ID
+			rtm.SendMessage(rtm.NewOutgoingMessage("Hello world", *channelID))
 
 		case *slack.MessageEvent:
 			fmt.Printf("Message: %v\n", ev)

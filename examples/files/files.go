@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	token, ok := os.LookupEnv("SLACK_BOT_TOKEN")
-	if !ok {
-		fmt.Println("Missing SLACK_BOT_TOKEN in environment")
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
 		os.Exit(1)
 	}
 	api := slack.New(token, slack.OptionDebug(true))

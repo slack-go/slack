@@ -1,24 +1,43 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN_HERE")
-	//Example for single user
-	billingActive, err := api.GetBillableInfo(slack.GetBillableInfoParams{User: "U023BECGF"})
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-	fmt.Printf("ID: U023BECGF, BillingActive: %v\n\n\n", billingActive["U023BECGF"])
+	userID := flag.String("user", "", "User ID for billing info (optional)")
+	flag.Parse()
 
-	//Example for team. Note: passing empty TeamID just uses the current user team.
-	billingActiveForTeam, _ := api.GetBillableInfo(slack.GetBillableInfoParams{})
-	for id, value := range billingActiveForTeam {
-		fmt.Printf("ID: %v, BillingActive: %v\n", id, value)
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	api := slack.New(token)
+
+	if *userID != "" {
+		// Example for single user
+		billingActive, err := api.GetBillableInfo(slack.GetBillableInfoParams{User: *userID})
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+		fmt.Printf("ID: %s, BillingActive: %v\n\n\n", *userID, billingActive[*userID])
+	} else {
+		// Example for team. Note: passing empty TeamID just uses the current user team.
+		billingActiveForTeam, err := api.GetBillableInfo(slack.GetBillableInfoParams{})
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+		for id, value := range billingActiveForTeam {
+			fmt.Printf("ID: %v, BillingActive: %v\n", id, value)
+		}
 	}
 }

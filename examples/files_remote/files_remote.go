@@ -3,12 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
-	api := slack.New("YOUR_TOKEN")
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	api := slack.New(token)
 	params := slack.RemoteFileParameters{
 		Title:       "My File",
 		ExternalID:  "my-file-123",
