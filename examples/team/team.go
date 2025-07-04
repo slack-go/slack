@@ -25,7 +25,7 @@ func main() {
 	api := slack.New(token)
 
 	if *userID != "" {
-		//Example for single user
+		// Example for single user
 		billingActive, err := api.GetBillableInfo(slack.GetBillableInfoParams{User: *userID})
 		if err != nil {
 			fmt.Printf("%s\n", err)
@@ -33,7 +33,7 @@ func main() {
 		}
 		fmt.Printf("ID: %s, BillingActive: %v\n\n\n", *userID, billingActive[*userID])
 	} else {
-		//Example for team. Note: passing empty TeamID just uses the current user team.
+		// Example for team. Note: passing empty TeamID just uses the current user team.
 		billingActiveForTeam, err := api.GetBillableInfo(slack.GetBillableInfoParams{})
 		if err != nil {
 			fmt.Printf("%s\n", err)
