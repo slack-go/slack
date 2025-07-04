@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
@@ -10,13 +11,18 @@ import (
 // WARNING: This example is destructive in the sense that it create a channel called testpinning
 func main() {
 	var (
-		apiToken string
-		debug    bool
+		debug bool
 	)
 
-	flag.StringVar(&apiToken, "token", "YOUR_TOKEN_HERE", "Your Slack API Token")
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
+
+	// Get token from environment variable
+	apiToken := os.Getenv("SLACK_BOT_TOKEN")
+	if apiToken == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
 
 	api := slack.New(apiToken, slack.OptionDebug(debug))
 
