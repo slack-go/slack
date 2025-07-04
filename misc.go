@@ -45,6 +45,7 @@ func (t ConversationsInviteResponseError) Err() error {
 type SlackResponseErrors struct {
 	AppsManifestCreateResponseError  *AppsManifestCreateResponseError  `json:"-"`
 	ConversationsInviteResponseError *ConversationsInviteResponseError `json:"-"`
+	Message                          *string                           `json:"-"`
 }
 
 // MarshalJSON implements custom marshaling for SlackResponseErrors
@@ -54,6 +55,9 @@ func (e SlackResponseErrors) MarshalJSON() ([]byte, error) {
 	}
 	if e.ConversationsInviteResponseError != nil {
 		return json.Marshal(e.ConversationsInviteResponseError)
+	}
+	if e.Message != nil {
+		return json.Marshal(*e.Message)
 	}
 	return json.Marshal(nil)
 }
@@ -67,6 +71,15 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 	// Try to determine the error type by checking for unique fields
 	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
+		// If we can't unmarshal as object, try as string (fallback case)
+		//
+		// For more details on this specific problem look up issue
+		// https://github.com/slack-go/slack/issues/1446.
+		var stringError string
+		if stringErr := json.Unmarshal(data, &stringError); stringErr == nil {
+			e.Message = &stringError
+			return nil
+		}
 		return err
 	}
 
