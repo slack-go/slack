@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,17 +10,23 @@ import (
 	"github.com/slack-go/slack"
 )
 
+var (
+	channelID = flag.String("channel", "", "Channel ID (required)")
+)
+
 func main() {
-	var token, channel string
-	var ok bool
-	token, ok = os.LookupEnv("SLACK_TOKEN")
-	if !ok {
-		fmt.Println("Missing SLACK_TOKEN in environment")
+	flag.Parse()
+
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
 		os.Exit(1)
 	}
-	channel, ok = os.LookupEnv("SLACK_CHANNEL")
-	if !ok {
-		fmt.Println("Missing SLACK_CHANNEL in environment")
+
+	// Get channel ID from flag
+	if *channelID == "" {
+		fmt.Println("Channel ID is required: use -channel flag")
 		os.Exit(1)
 	}
 	api := slack.New(token)
@@ -46,11 +53,11 @@ func main() {
 	}
 
 	message := slack.MsgOptionAttachments(attachment)
-	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText("", false), message)
+	respChannelID, timestamp, err := api.PostMessage(*channelID, slack.MsgOptionText("", false), message)
 	if err != nil {
 		fmt.Printf("Could not send message: %v", err)
 	}
-	fmt.Printf("Message with buttons successfully sent to channel %s at %s", channelID, timestamp)
+	fmt.Printf("Message with buttons successfully sent to channel %s at %s", respChannelID, timestamp)
 	http.HandleFunc("/actions", actionHandler)
 	http.ListenAndServe(":3000", nil)
 }
