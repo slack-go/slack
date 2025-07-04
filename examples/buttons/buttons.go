@@ -12,7 +12,6 @@ import (
 
 func main() {
 	channelID := flag.String("channel", "", "Channel ID (required)")
-
 	flag.Parse()
 
 	// Get token from environment variable
@@ -53,7 +52,8 @@ func main() {
 	message := slack.MsgOptionAttachments(attachment)
 	respChannelID, timestamp, err := api.PostMessage(*channelID, slack.MsgOptionText("", false), message)
 	if err != nil {
-		fmt.Printf("Could not send message: %v", err)
+		fmt.Printf("Could not send message: %v\n", err)
+		os.Exit(1)
 	}
 	fmt.Printf("Message with buttons successfully sent to channel %s at %s", respChannelID, timestamp)
 	http.HandleFunc("/actions", actionHandler)
