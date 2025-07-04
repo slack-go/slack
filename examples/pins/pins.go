@@ -10,11 +10,8 @@ import (
 
 // WARNING: This example is destructive in the sense that it create a channel called testpinning
 func main() {
-	var (
-		debug bool
-	)
+	debug := flag.Bool("debug", false, "Show JSON output")
 
-	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
 	// Get token from environment variable

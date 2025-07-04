@@ -9,11 +9,8 @@ import (
 )
 
 func main() {
-	var (
-		debug bool
-	)
+	debug := flag.Bool("debug", false, "Show JSON output")
 
-	flag.BoolVar(&debug, "debug", false, "Show JSON output")
 	flag.Parse()
 
 	// Get token from environment variable
