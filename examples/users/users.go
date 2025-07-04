@@ -1,21 +1,35 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
 	"github.com/slack-go/slack"
 )
 
+var (
+	userID = flag.String("user", "", "User ID (required)")
+)
+
 func main() {
+	flag.Parse()
+
+	// Get token from environment variable
 	userToken := os.Getenv("SLACK_USER_TOKEN")
 	if userToken == "" {
-		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN must be set.\n")
+		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN environment variable is required\n")
+		os.Exit(1)
+	}
+
+	// Get user ID from flag
+	if *userID == "" {
+		fmt.Println("User ID is required: use -user flag")
 		os.Exit(1)
 	}
 
 	api := slack.New(userToken)
-	user, err := api.GetUserInfo("U023BECGF")
+	user, err := api.GetUserInfo(*userID)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return
