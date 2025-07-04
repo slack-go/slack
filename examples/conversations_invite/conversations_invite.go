@@ -9,12 +9,10 @@ import (
 	"github.com/slack-go/slack"
 )
 
-var (
-	channelID = flag.String("channel", "", "Channel ID (required)")
-	userID    = flag.String("user", "", "User ID to invite (required)")
-)
-
 func main() {
+	channelID := flag.String("channel", "", "Channel ID (required)")
+	userID := flag.String("user", "", "User ID to invite (required)")
+
 	flag.Parse()
 
 	// Get token from environment variable

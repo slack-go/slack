@@ -8,11 +8,8 @@ import (
 	"github.com/slack-go/slack"
 )
 
-var (
-	userID = flag.String("user", "", "User ID for billing info (optional)")
-)
-
 func main() {
+	userID := flag.String("user", "", "User ID for billing info (optional)")
 	flag.Parse()
 
 	// Get token from environment variable

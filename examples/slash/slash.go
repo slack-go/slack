@@ -19,7 +19,6 @@ func main() {
 	}
 
 	http.HandleFunc("/slash", func(w http.ResponseWriter, r *http.Request) {
-
 		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

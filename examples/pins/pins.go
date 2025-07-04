@@ -11,7 +11,6 @@ import (
 // WARNING: This example is destructive in the sense that it create a channel called testpinning
 func main() {
 	debug := flag.Bool("debug", false, "Show JSON output")
-
 	flag.Parse()
 
 	// Get token from environment variable
@@ -21,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	api := slack.New(apiToken, slack.OptionDebug(debug))
+	api := slack.New(apiToken, slack.OptionDebug(*debug))
 
 	var (
 		postAsUserName  string

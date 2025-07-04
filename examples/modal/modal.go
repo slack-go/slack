@@ -23,27 +23,6 @@ import (
 	"time"
 )
 
-var (
-	token         string
-	signingSecret string
-)
-
-func init() {
-	// Get token from environment variable
-	token = os.Getenv("SLACK_BOT_TOKEN")
-	if token == "" {
-		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
-		os.Exit(1)
-	}
-
-	// Get signing secret from environment variable
-	signingSecret = os.Getenv("SLACK_SIGNING_SECRET")
-	if signingSecret == "" {
-		fmt.Println("SLACK_SIGNING_SECRET environment variable is required")
-		os.Exit(1)
-	}
-}
-
 func generateModalRequest() slack.ModalViewRequest {
 	// Create a ModalViewRequest with a header and two inputs
 	titleText := slack.NewTextBlockObject("plain_text", "My App", false, false)
@@ -107,9 +86,14 @@ func updateModal() slack.ModalViewRequest {
 	return modalRequest
 }
 
-// This was taken from the slash example
-// https://github.com/slack-go/slack/blob/master/examples/slash/slash.go
 func verifySigningSecret(r *http.Request) error {
+	// Get signing secret from environment variable
+	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
+	if signingSecret == "" {
+		fmt.Println("SLACK_SIGNING_SECRET environment variable is required")
+		os.Exit(1)
+	}
+
 	verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -133,76 +117,85 @@ func verifySigningSecret(r *http.Request) error {
 	return nil
 }
 
-func handleSlash(w http.ResponseWriter, r *http.Request) {
-
-	err := verifySigningSecret(r)
-	if err != nil {
-		fmt.Printf(err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	s, err := slack.SlashCommandParse(r)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
-
-	switch s.Command {
-	case "/slash":
-		api := slack.New(token)
-		modalRequest := generateModalRequest()
-		_, err = api.OpenView(s.TriggerID, modalRequest)
+func handleSlash(token string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := verifySigningSecret(r)
 		if err != nil {
-			fmt.Printf("Error opening view: %s", err)
+			fmt.Printf(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
-	default:
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
 
-func handleModal(w http.ResponseWriter, r *http.Request) {
-
-	err := verifySigningSecret(r)
-	if err != nil {
-		fmt.Printf(err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	var i slack.InteractionCallback
-	err = json.Unmarshal([]byte(r.FormValue("payload")), &i)
-	if err != nil {
-		fmt.Printf(err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	api := slack.New(token)
-
-	// update modal sample
-	switch i.Type {
-	//update when interaction type is view_submission
-	case slack.InteractionTypeViewSubmission:
-		//you can use any modal you want to show to users just like creating modal.
-		updateModal := updateModal()
-		// You must set one of external_id or view_id and you can use hash for avoiding race condition.
-		// More details: https://api.slack.com/surfaces/modals/using#updating_apis
-		_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
-		// Wait for a few seconds to see result this code is necesarry due to slack server modal is going to be closed after the update
-		time.Sleep(time.Second * 2)
+		s, err := slack.SlashCommandParse(r)
 		if err != nil {
-			fmt.Printf("Error updating view: %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Println(err.Error())
+			return
+		}
+
+		switch s.Command {
+		case "/slash":
+			api := slack.New(token)
+			modalRequest := generateModalRequest()
+			_, err = api.OpenView(s.TriggerID, modalRequest)
+			if err != nil {
+				fmt.Printf("Error opening view: %s", err)
+			}
+		default:
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
 }
 
+func handleModal(token string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := verifySigningSecret(r)
+		if err != nil {
+			fmt.Printf(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		var i slack.InteractionCallback
+		err = json.Unmarshal([]byte(r.FormValue("payload")), &i)
+		if err != nil {
+			fmt.Printf(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		api := slack.New(token)
+
+		// update modal sample
+		switch i.Type {
+		// update when interaction type is view_submission
+		case slack.InteractionTypeViewSubmission:
+			// you can use any modal you want to show to users just like creating modal.
+			updateModal := updateModal()
+			// You must set one of external_id or view_id and you can use hash for avoiding race condition.
+			// More details: https://api.slack.com/surfaces/modals/using#updating_apis
+			_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
+			// Wait for a few seconds to see result this code is necesarry due to slack server modal is going to be closed after the update
+			time.Sleep(time.Second * 2)
+			if err != nil {
+				fmt.Printf("Error updating view: %s", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+}
+
 func main() {
-	http.HandleFunc("/slash", handleSlash)
-	http.HandleFunc("/modal", handleModal)
+	// Get token from environment variable
+	token := os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	http.HandleFunc("/slash", handleSlash(token))
+	http.HandleFunc("/modal", handleModal(token))
 	http.ListenAndServe(":4390", nil)
 }
