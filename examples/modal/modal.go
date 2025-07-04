@@ -5,7 +5,7 @@
 // 3. This will send a request to http://URL/modal and send a greeting message to the user
 
 // Note: Within your slack app you will need to enable and provide a URL for "Interactivity & Shortcuts" and "Slash Commands"
-// Note: Be sure to update YOUR_SIGNING_SECRET_HERE and YOUR_TOKEN_HERE
+// Note: Set SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET environment variables
 // You can use ngrok to test this example: https://api.slack.com/tutorials/tunneling-with-ngrok
 // Helpful slack documentation to learn more: https://api.slack.com/interactivity/handling
 
@@ -17,10 +17,32 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/slack-go/slack"
 	"time"
 )
+
+var (
+	token         string
+	signingSecret string
+)
+
+func init() {
+	// Get token from environment variable
+	token = os.Getenv("SLACK_BOT_TOKEN")
+	if token == "" {
+		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
+	// Get signing secret from environment variable
+	signingSecret = os.Getenv("SLACK_SIGNING_SECRET")
+	if signingSecret == "" {
+		fmt.Println("SLACK_SIGNING_SECRET environment variable is required")
+		os.Exit(1)
+	}
+}
 
 func generateModalRequest() slack.ModalViewRequest {
 	// Create a ModalViewRequest with a header and two inputs
@@ -88,7 +110,6 @@ func updateModal() slack.ModalViewRequest {
 // This was taken from the slash example
 // https://github.com/slack-go/slack/blob/master/examples/slash/slash.go
 func verifySigningSecret(r *http.Request) error {
-	signingSecret := "YOUR_SIGNING_SECRET_HERE"
 	verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -130,7 +151,7 @@ func handleSlash(w http.ResponseWriter, r *http.Request) {
 
 	switch s.Command {
 	case "/slash":
-		api := slack.New("YOUR_TOKEN_HERE")
+		api := slack.New(token)
 		modalRequest := generateModalRequest()
 		_, err = api.OpenView(s.TriggerID, modalRequest)
 		if err != nil {
@@ -159,12 +180,7 @@ func handleModal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api := slack.New("YOUR_TOKEN_HERE")
-	if err != nil {
-		fmt.Printf(err.Error())
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	api := slack.New(token)
 
 	// update modal sample
 	switch i.Type {
