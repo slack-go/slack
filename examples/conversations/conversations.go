@@ -10,7 +10,7 @@ import (
 func main() {
 	userToken := os.Getenv("SLACK_USER_TOKEN")
 	if userToken == "" {
-		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN must be set.\n")
+		fmt.Fprintf(os.Stderr, "SLACK_USER_TOKEN environment variable is required\n")
 		os.Exit(1)
 	}
 
