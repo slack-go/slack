@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -56,6 +57,8 @@ func main() {
 
 	// Handle a specific event from EventsAPI
 	socketmodeHandler.HandleEvents(slackevents.AppMention, middlewareAppMentionEvent)
+	socketmodeHandler.HandleEvents(slackevents.Message, middlewareMessageEvent)
+	socketmodeHandler.HandleEvents(slackevents.AssistantThreadStarted, middlewareAssistantThreadStartedEvent)
 
 	//\\ EventTypeInteractive //\\
 	// Handle all Interactive Events
@@ -202,6 +205,92 @@ func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
 			),
 		}}
 	client.Ack(*evt.Request, payload)
+}
+
+func middlewareAssistantThreadStartedEvent(evt *socketmode.Event, client *socketmode.Client) {
+	ctx := context.Background()
+	fmt.Printf("assistant thread started event: %+v\n", evt)
+
+	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+	if !ok {
+		fmt.Printf("Ignored: %+v\n", evt)
+		return
+	}
+
+	innerEvent, ok := eventsAPIEvent.InnerEvent.Data.(*slackevents.AssistantThreadStartedEvent)
+	if !ok {
+		fmt.Printf("Can't get inner event: %+v\n", evt)
+		return
+	}
+
+	fmt.Printf("Inner event: %+v\n", innerEvent)
+
+	params := slack.AssistantThreadsSetSuggestedPromptsParameters{
+		Title:     "Welcome. What can I do for you?",
+		ChannelID: innerEvent.AssistantThread.ChannelID,
+		ThreadTS:  innerEvent.AssistantThread.ThreadTimeStamp,
+		Prompts: []slack.AssistantThreadsPrompt{
+			{
+				Title:   "Generate ideas",
+				Message: "Pretend you are a marketing associate and you need new ideas for an enterprise productivity feature. Generate 10 ideas for a new feature launch.",
+			},
+			{
+				Title:   "Explain what SLACK stands for",
+				Message: "What does SLACK stand for?",
+			},
+		},
+	}
+
+	if err := client.SetAssistantThreadsSuggestedPromptsContext(ctx, params); err != nil {
+		fmt.Printf("Can't SetAssistantThreadsSuggestedPromptsContext: %v\n", err)
+		return
+	}
+}
+
+func middlewareMessageEvent(evt *socketmode.Event, client *socketmode.Client) {
+	ctx := context.Background()
+	fmt.Printf("message event: %+v\n", evt)
+
+	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+	if !ok {
+		fmt.Printf("Ignored: %+v\n", evt)
+		return
+	}
+
+	messageEvent, ok := eventsAPIEvent.InnerEvent.Data.(*slackevents.MessageEvent)
+	if !ok {
+		fmt.Printf("Can't get message event: %+v\n", evt)
+		return
+	}
+
+	// Assistant thread message handling
+	if messageEvent.AssistantThread != nil {
+		fmt.Printf("Assistant thread message received - user: %s, text: %s, channel: %s, assistantThread: %+v\n",
+			messageEvent.User, messageEvent.Text, messageEvent.Channel, messageEvent.AssistantThread)
+
+		// Call Data Access API for context search
+		resp, err := client.SearchAssistantContextContext(ctx, slack.AssistantSearchContextParameters{
+			Query:        messageEvent.Text,
+			ActionToken:  messageEvent.AssistantThread.ActionToken,
+			ChannelTypes: []string{"public_channel"},
+			ContentTypes: []string{"messages"},
+			Limit:        10,
+		})
+		if err != nil {
+			fmt.Printf("SearchAssistantContextContext error: %v\n", err)
+		} else {
+			fmt.Printf("SearchAssistantContextContext response: %+v\n", resp)
+		}
+
+		// Acknowledge the event
+		client.Ack(*evt.Request)
+
+		// Simple response for demonstration
+		_, _, err = client.Client.PostMessage(messageEvent.Channel, slack.MsgOptionText("Hello! I received your message: "+messageEvent.Text, false), slack.MsgOptionTS(messageEvent.TimeStamp))
+		if err != nil {
+			fmt.Printf("Failed to post message: %v\n", err)
+		}
+	}
 }
 
 func middlewareDefault(evt *socketmode.Event, client *socketmode.Client) {
