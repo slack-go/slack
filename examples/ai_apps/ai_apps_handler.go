@@ -125,7 +125,7 @@ func searchAssistantContext(ctx context.Context, client *socketmode.Client, at *
 	// Assistant thread message handling
 	if at != nil {
 		fmt.Printf("Assistant thread message received - text: %s, channel: %s",
-			text, channel, at)
+			text, channel)
 
 		// Call Data Access API for context search
 		resp, err := client.SearchAssistantContextContext(ctx, slack.AssistantSearchContextParameters{
