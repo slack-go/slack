@@ -771,12 +771,7 @@ func TestGetConversations(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
-}
 
-func TestGetAllConversationsContext(t *testing.T) {
-	http.HandleFunc("/conversations.list", getConversationsHandler)
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 	conversations, err := api.GetAllConversationsContext(context.Background())
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
