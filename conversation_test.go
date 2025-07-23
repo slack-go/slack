@@ -3,9 +3,13 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -898,4 +902,130 @@ func TestCreateChannelCanvas(t *testing.T) {
 	}
 
 	assert.Equal(t, "F05RQ01LJU0", canvasID)
+}
+
+func getTestChannelWithId(id string) Channel {
+	return Channel{
+		GroupConversation: GroupConversation{
+			Conversation: Conversation{
+				ID: id,
+			},
+			Name: "Test Channel",
+			Topic: Topic{
+				Value: "Test topic",
+			},
+			Purpose: Purpose{
+				Value: "Test purpose",
+			},
+		},
+		IsChannel: true,
+		IsGeneral: false,
+		IsMember:  true,
+	}
+}
+
+// returns n pages of conversations and sends rate limited errors in between successful pages.
+func getConversationPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *http.Request) {
+	var n int64
+	doRateLimit := false
+	return func(rw http.ResponseWriter, r *http.Request) {
+		defer func() {
+			doRateLimit = !doRateLimit
+		}()
+		if doRateLimit {
+			rw.Header().Set("Retry-After", "1")
+			rw.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		var cpage int64
+		sresp := SlackResponse{
+			Ok: true,
+		}
+		channels := []Channel{
+			getTestChannelWithId(fmt.Sprintf("C%03d", n)),
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+			response, _ := json.Marshal(struct {
+				SlackResponse
+				Channels []Channel `json:"channels"`
+			}{
+				SlackResponse: sresp,
+				Channels:      channels,
+			})
+			rw.Write(response)
+			return
+		}
+		response, _ := json.Marshal(struct {
+			SlackResponse
+			Channels         []Channel        `json:"channels"`
+			ResponseMetaData responseMetaData `json:"response_metadata"`
+		}{
+			SlackResponse: sresp,
+			Channels:      channels,
+			ResponseMetaData: responseMetaData{
+				NextCursor: strconv.Itoa(int(cpage)),
+			},
+		})
+		rw.Write(response)
+	}
+}
+
+func TestGetAllConversationsHandlesRateLimit(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/conversations.list", getConversationPagesWithRateLimitErrors(3))
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	start := time.Now()
+	conversations, err := api.GetAllConversations()
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	// Should have 3 conversations (one per page)
+	if len(conversations) != 3 {
+		t.Errorf("Expected 3 conversations, got %d", len(conversations))
+		return
+	}
+
+	// Should have taken at least 2 seconds due to rate limiting (2 rate limit delays)
+	if elapsed < 2*time.Second {
+		t.Errorf("Expected at least 2 seconds due to rate limiting, took %v", elapsed)
+		return
+	}
+
+	// Verify conversation IDs
+	expectedIDs := []string{"C000", "C001", "C002"}
+	for i, conv := range conversations {
+		if conv.ID != expectedIDs[i] {
+			t.Errorf("Expected conversation ID %s, got %s", expectedIDs[i], conv.ID)
+		}
+	}
+}
+
+func TestGetAllConversationsReturnsServerError(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/conversations.list", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	_, err := api.GetAllConversations()
+
+	if err == nil {
+		t.Errorf("Expected error but got nil")
+		return
+	}
+
+	expectedErr := "slack server error: 500 Internal Server Error"
+	if err.Error() != expectedErr {
+		t.Errorf("Expected: %s. Got: %s", expectedErr, err.Error())
+	}
 }
