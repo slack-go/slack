@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"reflect"
@@ -734,7 +735,29 @@ func getConversationsHandler(rw http.ResponseWriter, r *http.Request) {
 		Channels []Channel `json:"channels"`
 	}{
 		SlackResponse: SlackResponse{Ok: true},
-		Channels:      []Channel{}})
+		Channels: []Channel{
+			{
+				GroupConversation: GroupConversation{
+					Conversation: Conversation{
+						ID: "CXXXXXXXX",
+					},
+				},
+			},
+			{
+				GroupConversation: GroupConversation{
+					Conversation: Conversation{
+						ID: "CYYYYYYYY",
+					},
+				},
+			},
+			{
+				GroupConversation: GroupConversation{
+					Conversation: Conversation{
+						ID: "CZZZZZZZZ",
+					},
+				},
+			},
+		}})
 	rw.Write(response)
 }
 
@@ -746,6 +769,21 @@ func TestGetConversations(t *testing.T) {
 	_, _, err := api.GetConversations(&params)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestGetAllConversationsContext(t *testing.T) {
+	http.HandleFunc("/conversations.list", getConversationsHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	conversations, err := api.GetAllConversationsContext(context.Background())
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	if len(conversations) != 3 {
+		t.Errorf("Expected 3 conversations, got %d", len(conversations))
 		return
 	}
 }
