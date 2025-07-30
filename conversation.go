@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Conversation is the foundation for IM and BaseGroupConversation
@@ -675,6 +676,150 @@ type GetConversationsParameters struct {
 	Limit           int
 	Types           []string
 	TeamID          string
+}
+
+// GetConversationsOption options for the GetAllConversationsContext method call.
+type GetConversationsOption func(*ConversationPagination)
+
+// GetConversationsOptionLimit limit the number of conversations returned
+func GetConversationsOptionLimit(n int) GetConversationsOption {
+	return func(p *ConversationPagination) {
+		p.limit = n
+	}
+}
+
+// GetConversationsOptionExcludeArchived exclude archived conversations
+func GetConversationsOptionExcludeArchived(exclude bool) GetConversationsOption {
+	return func(p *ConversationPagination) {
+		p.excludeArchived = exclude
+	}
+}
+
+// GetConversationsOptionTypes filter conversations by type
+func GetConversationsOptionTypes(types []string) GetConversationsOption {
+	return func(p *ConversationPagination) {
+		p.types = types
+	}
+}
+
+// GetConversationsOptionTeamID include team Id
+func GetConversationsOptionTeamID(teamId string) GetConversationsOption {
+	return func(p *ConversationPagination) {
+		p.teamId = teamId
+	}
+}
+
+func newConversationPagination(c *Client, options ...GetConversationsOption) (cp ConversationPagination) {
+	cp = ConversationPagination{
+		c:     c,
+		limit: 200, // per slack api documentation.
+	}
+
+	for _, opt := range options {
+		opt(&cp)
+	}
+
+	return cp
+}
+
+// ConversationPagination allows for paginating over the conversations
+type ConversationPagination struct {
+	Conversations   []Channel
+	limit           int
+	excludeArchived bool
+	types           []string
+	teamId          string
+	previousResp    *ResponseMetadata
+	c               *Client
+}
+
+// Done checks if the pagination has completed
+func (ConversationPagination) Done(err error) bool {
+	return errors.Is(err, errPaginationComplete)
+}
+
+// Failure checks if pagination failed.
+func (t ConversationPagination) Failure(err error) error {
+	if t.Done(err) {
+		return nil
+	}
+
+	return err
+}
+
+func (t ConversationPagination) Next(ctx context.Context) (_ ConversationPagination, err error) {
+	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
+		return t, errPaginationComplete
+	}
+
+	t.previousResp = t.previousResp.initialize()
+
+	values := url.Values{
+		"token":  {t.c.token},
+		"limit":  {strconv.Itoa(t.limit)},
+		"cursor": {t.previousResp.Cursor},
+	}
+	if t.excludeArchived {
+		values.Add("exclude_archived", strconv.FormatBool(t.excludeArchived))
+	}
+	if t.types != nil {
+		values.Add("types", strings.Join(t.types, ","))
+	}
+	if t.teamId != "" {
+		values.Add("team_id", t.teamId)
+	}
+
+	response := struct {
+		Channels         []Channel        `json:"channels"`
+		ResponseMetaData responseMetaData `json:"response_metadata"`
+		SlackResponse
+	}{}
+
+	err = t.c.postMethod(ctx, "conversations.list", values, &response)
+	if err != nil {
+		return t, err
+	}
+
+	if err := response.Err(); err != nil {
+		return t, err
+	}
+
+	t.c.Debugf("GetAllConversationsContext: got %d conversations; cursor %s", len(response.Channels), response.ResponseMetaData.NextCursor)
+	t.Conversations = response.Channels
+	t.previousResp = &ResponseMetadata{Cursor: response.ResponseMetaData.NextCursor}
+
+	return t, nil
+}
+
+// GetConversationsPaginated fetches conversations in a paginated fashion, see GetAllConversationsContext for usage.
+func (api *Client) GetConversationsPaginated(options ...GetConversationsOption) ConversationPagination {
+	return newConversationPagination(api, options...)
+}
+
+// GetAllConversations returns the list of all conversations, handling pagination and rate limiting
+func (api *Client) GetAllConversations(options ...GetConversationsOption) (results []Channel, err error) {
+	return api.GetAllConversationsContext(context.Background(), options...)
+}
+
+// GetAllConversationsContext returns the list of all conversations with a custom context, handling pagination and rate limiting
+func (api *Client) GetAllConversationsContext(ctx context.Context, options ...GetConversationsOption) (results []Channel, err error) {
+	results = []Channel{}
+	p := api.GetConversationsPaginated(options...)
+	for err == nil {
+		p, err = p.Next(ctx)
+		if err == nil {
+			results = append(results, p.Conversations...)
+		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case <-time.After(rateLimitedError.RetryAfter):
+				err = nil
+			}
+		}
+	}
+
+	return results, p.Failure(err)
 }
 
 // GetConversations returns the list of channels in a Slack team.
