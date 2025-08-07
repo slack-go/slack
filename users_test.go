@@ -2,6 +2,7 @@ package slack
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"image"
@@ -408,27 +409,54 @@ func TestGetUsers(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	users, err := api.GetUsers()
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
+	t.Run("Get all users", func(t *testing.T) {
 
-	if !reflect.DeepEqual([]User{
-		getTestUserWithId("U000"),
-		getTestUserWithId("U001"),
-		getTestUserWithId("U002"),
-		getTestUserWithId("U003"),
-	}, users) {
-		t.Fatal(ErrIncorrectResponse)
-	}
+		users, err := api.GetUsers()
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+
+		if !reflect.DeepEqual([]User{
+			getTestUserWithId("U000"),
+			getTestUserWithId("U001"),
+			getTestUserWithId("U002"),
+			getTestUserWithId("U003"),
+		}, users) {
+			t.Fatal(ErrIncorrectResponse)
+		}
+	})
+
+	t.Run("Get users with cursor", func(t *testing.T) {
+		page := api.GetUsersPaginated(GetUsersOptionCursor("2"), GetUsersOptionLimit(1))
+		nextPage, err := page.Next(context.TODO())
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+			return
+		}
+
+		if !reflect.DeepEqual([]User{
+			getTestUserWithId("U002"),
+		}, nextPage.Users) {
+			t.Fatal(ErrIncorrectResponse)
+		}
+
+		if nextPage.Cursor != "3" {
+			t.Fatal(ErrIncorrectResponse)
+		}
+	})
 }
 
 // returns n pages users.
 func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
-	var n int64
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var cpage int64
+		var n int64
+
+		_ = r.ParseForm()
+		if cursor := r.FormValue("cursor"); cursor != "" {
+			n, _ = strconv.ParseInt(cursor, 10, 64)
+		}
+
 		sresp := SlackResponse{
 			Ok: true,
 		}
@@ -436,7 +464,11 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 			getTestUserWithId(fmt.Sprintf("U%03d", n)),
 		}
 		rw.Header().Set("Content-Type", "application/json")
-		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+
+		// Increment n for next page
+		nextPage := n + 1
+		if nextPage >= max {
+			// Last page - no cursor
 			response, _ := json.Marshal(userResponseFull{
 				SlackResponse: sresp,
 				Members:       members,
@@ -444,10 +476,11 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 			rw.Write(response)
 			return
 		}
+		// Return next cursor
 		response, _ := json.Marshal(userResponseFull{
 			SlackResponse: sresp,
 			Members:       members,
-			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
+			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(nextPage))},
 		})
 		rw.Write(response)
 	}
