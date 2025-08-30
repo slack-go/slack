@@ -395,4 +395,19 @@ func TestRichTextQuote_Marshal(t *testing.T) {
 	})
 }
 
+func TestNewRichTextSectionChannelElement(t *testing.T) {
+	style := &RichTextSectionTextStyle{Bold: true}
+	element := NewRichTextSectionChannelElement("C012345678", style)
+
+	assert.Equal(t, RTSEChannel, element.Type)
+	assert.Equal(t, "C012345678", element.ChannelID)
+	assert.Equal(t, style, element.Style)
+
+	// Test JSON marshaling to ensure correct type
+	data, err := json.Marshal(element)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"type":"channel"`)
+	assert.Contains(t, string(data), `"channel_id":"C012345678"`)
+}
+
 func strp(in string) *string { return &in }
