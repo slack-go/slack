@@ -118,6 +118,68 @@ type SlackResponse struct {
 	ResponseMetadata ResponseMetadata      `json:"response_metadata"`
 }
 
+// KickUserFromConversationSlackResponse is a variant of SlackResponse that can handle the case where
+// "errors" can be either an empty object {} or an array of errors.
+// This addresses issue #1446 where conversations.kick endpoint returns {"ok":true,"errors":{}}
+type KickUserFromConversationSlackResponse struct {
+	Ok               bool                  `json:"ok"`
+	Error            string                `json:"error"`
+	Errors           []SlackResponseErrors `json:"-"`
+	ResponseMetadata ResponseMetadata      `json:"response_metadata"`
+}
+
+// UnmarshalJSON implements custom unmarshaling for KickUserFromConversationSlackResponse to handle
+// the case where "errors" can be either an empty object {} or an array of errors
+func (s *KickUserFromConversationSlackResponse) UnmarshalJSON(data []byte) error {
+	// First, unmarshal everything except errors
+	type Alias KickUserFromConversationSlackResponse
+	aux := &struct {
+		*Alias
+		ErrorsRaw json.RawMessage `json:"errors,omitempty"`
+	}{
+		Alias: (*Alias)(s),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Handle the errors field
+	if len(aux.ErrorsRaw) > 0 {
+		// Check if it's an empty object by looking for just "{}"
+		trimmed := bytes.TrimSpace(aux.ErrorsRaw)
+		if bytes.Equal(trimmed, []byte("{}")) {
+			// Empty object, leave errors as nil/empty slice
+			s.Errors = nil
+		} else {
+			// Try to unmarshal as array of errors
+			var errors []SlackResponseErrors
+			if err := json.Unmarshal(aux.ErrorsRaw, &errors); err != nil {
+				return err
+			}
+			s.Errors = errors
+		}
+	}
+
+	return nil
+}
+
+// Err returns any API error present in the response.
+func (s KickUserFromConversationSlackResponse) Err() error {
+	if s.Ok {
+		return nil
+	}
+
+	// handle pure text based responses like chat.post
+	// which while they have a slack response in their data structure
+	// it doesn't actually get set during parsing.
+	if strings.TrimSpace(s.Error) == "" {
+		return nil
+	}
+
+	return SlackErrorResponse{Err: s.Error, Errors: s.Errors, ResponseMetadata: s.ResponseMetadata}
+}
+
 func (t SlackResponse) Err() error {
 	if t.Ok {
 		return nil
