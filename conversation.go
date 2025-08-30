@@ -479,7 +479,7 @@ func (api *Client) KickUserFromConversationContext(ctx context.Context, channelI
 		"user":    {user},
 	}
 
-	response := SlackResponse{}
+	response := KickUserFromConversationSlackResponse{}
 	err := api.postMethod(ctx, "conversations.kick", values, &response)
 	if err != nil {
 		return err

@@ -336,3 +336,67 @@ func TestSlackResponseWithErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestKickUserFromConversationSlackResponseWithErrors(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected KickUserFromConversationSlackResponse
+	}{
+		{
+			name:  "ResponseWithEmptyErrorsObject",
+			input: `{"ok":true,"errors":{}}`,
+			expected: KickUserFromConversationSlackResponse{
+				Ok:     true,
+				Errors: nil,
+			},
+		},
+		{
+			name:  "ResponseWithErrorsArray",
+			input: `{"ok":false,"error":"some_error","errors":[]}`,
+			expected: KickUserFromConversationSlackResponse{
+				Ok:     false,
+				Error:  "some_error",
+				Errors: []SlackResponseErrors{},
+			},
+		},
+		{
+			name:  "ResponseWithoutErrors",
+			input: `{"ok":true}`,
+			expected: KickUserFromConversationSlackResponse{
+				Ok: true,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var response KickUserFromConversationSlackResponse
+			err := json.Unmarshal([]byte(tt.input), &response)
+			if err != nil {
+				t.Fatalf("Unmarshal failed: %v", err)
+			}
+
+			if response.Ok != tt.expected.Ok {
+				t.Errorf("got Ok=%v; want Ok=%v", response.Ok, tt.expected.Ok)
+			}
+			if response.Error != tt.expected.Error {
+				t.Errorf("got Error=%q; want Error=%q", response.Error, tt.expected.Error)
+			}
+
+			if tt.expected.Errors == nil {
+				if response.Errors != nil {
+					t.Error("expected nil Errors, got non-nil")
+				}
+			} else {
+				if response.Errors == nil {
+					t.Error("expected non-nil Errors, got nil")
+					return
+				}
+				if len(tt.expected.Errors) != len(response.Errors) {
+					t.Errorf("got Errors length=%d; want length=%d", len(response.Errors), len(tt.expected.Errors))
+				}
+			}
+		})
+	}
+}
