@@ -35,7 +35,7 @@ const (
 
 // InteractionCallback is sent from slack when a user interactions with a button or dialog.
 type InteractionCallback struct {
-	Type                InteractionType `json:"type" form:"type"` // continue adding form tag
+	Type                InteractionType `json:"type" form:"type"`
 	Token               string          `json:"token" form:"token"`
 	CallbackID          string          `json:"callback_id" form:"callback_id"`
 	ResponseURL         string          `json:"response_url" form:"response_url"`
@@ -64,12 +64,12 @@ type InteractionCallback struct {
 
 	// FIXME(kanata2): just workaround for backward-compatibility.
 	// See also https://github.com/slack-go/slack/issues/816
-	RawState json.RawMessage `json:"state,omitempty"`
+	RawState json.RawMessage `json:"state,omitempty" form:"-"`
 
 	// BlockActionState stands for the `state` field in block_actions type.
 	// NOTE: InteractionCallback.State has a role for the state of dialog_submission type,
 	// so we cannot use this field for backward-compatibility for now.
-	BlockActionState *BlockActionStates `json:"-"`
+	BlockActionState *BlockActionStates `json:"-" form:"-"`
 }
 
 type BlockActionStates struct {

@@ -425,19 +425,19 @@ func (t *JSONTime) UnmarshalJSON(buf []byte) error {
 
 // Team contains details about a team
 type Team struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Domain string `json:"domain"`
-	Icons  *Icons `json:"icon,omitempty"`
+	ID     string `json:"id" form:"id"`
+	Name   string `json:"name" form:"name"`
+	Domain string `json:"domain" form:"domain"`
+	Icons  *Icons `json:"icon,omitempty" from:"icon"`
 }
 
 // Icons XXX: needs further investigation
 type Icons struct {
-	Image36  string `json:"image_36,omitempty"`
-	Image48  string `json:"image_48,omitempty"`
-	Image72  string `json:"image_72,omitempty"`
-	Image132 string `json:"image_132,omitempty"`
-	Image230 string `json:"image_230,omitempty"`
+	Image36  string `json:"image_36,omitempty" form:"image_36"`
+	Image48  string `json:"image_48,omitempty" form:"image_48"`
+	Image72  string `json:"image_72,omitempty" form:"image_72"`
+	Image132 string `json:"image_132,omitempty" form:"image_132"`
+	Image230 string `json:"image_230,omitempty" form:"image_230"`
 }
 
 // Info contains various details about the authenticated user and team.

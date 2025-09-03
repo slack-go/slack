@@ -113,7 +113,7 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 // SlackResponse handles parsing out errors from the web api.
 type SlackResponse struct {
 	Ok               bool                  `json:"ok" form:"ok"`
-	Error            string                `json:"error" from:"error"`
+	Error            string                `json:"error" form:"error"`
 	Errors           []SlackResponseErrors `json:"errors,omitempty" form:"errors"`
 	ResponseMetadata ResponseMetadata      `json:"response_metadata" form:"response_metadata"`
 }
