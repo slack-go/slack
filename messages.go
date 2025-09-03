@@ -59,20 +59,20 @@ const (
 // Msg contains information about a slack message
 type Msg struct {
 	// Basic Message
-	ClientMsgID     string       `json:"client_msg_id,omitempty"`
-	Type            string       `json:"type,omitempty"`
-	Channel         string       `json:"channel,omitempty"`
-	User            string       `json:"user,omitempty"`
-	Text            string       `json:"text,omitempty"`
-	Timestamp       string       `json:"ts,omitempty"`
-	ThreadTimestamp string       `json:"thread_ts,omitempty"`
-	IsStarred       bool         `json:"is_starred,omitempty"`
-	PinnedTo        []string     `json:"pinned_to,omitempty"`
-	Attachments     []Attachment `json:"attachments,omitempty"`
-	Edited          *Edited      `json:"edited,omitempty"`
-	LastRead        string       `json:"last_read,omitempty"`
-	Subscribed      bool         `json:"subscribed,omitempty"`
-	UnreadCount     int          `json:"unread_count,omitempty"`
+	ClientMsgID     string       `json:"client_msg_id,omitempty" form:"client"`
+	Type            string       `json:"type,omitempty" form:"type"`
+	Channel         string       `json:"channel,omitempty" form:"channel"`
+	User            string       `json:"user,omitempty" form:"user"`
+	Text            string       `json:"text,omitempty" form:"text"`
+	Timestamp       string       `json:"ts,omitempty" form:"ts"`
+	ThreadTimestamp string       `json:"thread_ts,omitempty" form:"thread_ts"`
+	IsStarred       bool         `json:"is_starred,omitempty" form:"is_starred"`
+	PinnedTo        []string     `json:"pinned_to,omitempty" form:"pinned_to"`
+	Attachments     []Attachment `json:"attachments,omitempty" form:"attachments"`
+	Edited          *Edited      `json:"edited,omitempty" form:"edited"`
+	LastRead        string       `json:"last_read,omitempty" form:"last_read"`
+	Subscribed      bool         `json:"subscribed,omitempty" form:"subscribed"`
+	UnreadCount     int          `json:"unread_count,omitempty" form:"unread_count"`
 
 	// Message Subtypes
 	SubType string `json:"subtype,omitempty"`
@@ -179,8 +179,8 @@ type BotProfile struct {
 
 // Edited indicates that a message has been edited.
 type Edited struct {
-	User      string `json:"user,omitempty"`
-	Timestamp string `json:"ts,omitempty"`
+	User      string `json:"user,omitempty" form:"user"`
+	Timestamp string `json:"ts,omitempty" form:"ts"`
 }
 
 // Reply contains information about a reply for a thread

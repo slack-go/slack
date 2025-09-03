@@ -94,7 +94,7 @@ func NewAccessory(element BlockElement) *Accessory {
 // BlockElements is a convenience struct defined to allow dynamic unmarshalling of
 // the "elements" value in Slack's JSON response, which varies depending on BlockElement type
 type BlockElements struct {
-	ElementSet []BlockElement `json:"elements,omitempty"`
+	ElementSet []BlockElement `json:"elements,omitempty" form:"elements"`
 }
 
 // UnknownBlockElement any block element that this library does not directly support.
@@ -167,13 +167,13 @@ const (
 //
 // More Information: https://api.slack.com/reference/messaging/block-elements#button
 type ButtonBlockElement struct {
-	Type     MessageElementType       `json:"type,omitempty"`
-	Text     *TextBlockObject         `json:"text"`
-	ActionID string                   `json:"action_id,omitempty"`
-	URL      string                   `json:"url,omitempty"`
-	Value    string                   `json:"value,omitempty"`
-	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty"`
-	Style    Style                    `json:"style,omitempty"`
+	Type     MessageElementType       `json:"type,omitempty" form:"type"`
+	Text     *TextBlockObject         `json:"text" form:"text"`
+	ActionID string                   `json:"action_id,omitempty" form:"action_id"`
+	URL      string                   `json:"url,omitempty" form:"url"`
+	Value    string                   `json:"value,omitempty" form:"value"`
+	Confirm  *ConfirmationBlockObject `json:"confirm,omitempty" form:"confirm"`
+	Style    Style                    `json:"style,omitempty" form:"style"`
 }
 
 // ElementType returns the type of the element

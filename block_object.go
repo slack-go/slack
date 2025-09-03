@@ -120,10 +120,10 @@ func unmarshalBlockObject(r json.RawMessage, object blockObject) (blockObject, e
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#text
 type TextBlockObject struct {
-	Type     string `json:"type"`
-	Text     string `json:"text"`
-	Emoji    *bool  `json:"emoji,omitempty"`
-	Verbatim bool   `json:"verbatim,omitempty"`
+	Type     string `json:"type" form:"type"`
+	Text     string `json:"text" form:"text"`
+	Emoji    *bool  `json:"emoji,omitempty" form:"emoji"`
+	Verbatim bool   `json:"verbatim,omitempty" from:"verbatim"`
 }
 
 // validateType enforces block objects for element and block parameters
@@ -200,10 +200,10 @@ func (t TextBlockObject) BlockType() MessageBlockType {
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#confirm
 type ConfirmationBlockObject struct {
-	Title   *TextBlockObject `json:"title"`
-	Text    *TextBlockObject `json:"text"`
-	Confirm *TextBlockObject `json:"confirm"`
-	Deny    *TextBlockObject `json:"deny,omitempty"`
+	Title   *TextBlockObject `json:"title" form:"title"`
+	Text    *TextBlockObject `json:"text" form:"text"`
+	Confirm *TextBlockObject `json:"confirm" form:"confirm"`
+	Deny    *TextBlockObject `json:"deny,omitempty" form:"deny"`
 	Style   Style            `json:"style,omitempty"`
 }
 
@@ -232,10 +232,10 @@ func NewConfirmationBlockObject(title, text, confirm, deny *TextBlockObject) *Co
 //
 // More Information: https://api.slack.com/reference/messaging/composition-objects#option
 type OptionBlockObject struct {
-	Text        *TextBlockObject `json:"text"`
-	Value       string           `json:"value"`
-	Description *TextBlockObject `json:"description,omitempty"`
-	URL         string           `json:"url,omitempty"`
+	Text        *TextBlockObject `json:"text" form:"text"`
+	Value       string           `json:"value" form:"value"`
+	Description *TextBlockObject `json:"description,omitempty" form:"description"`
+	URL         string           `json:"url,omitempty" form:"url"`
 }
 
 // NewOptionBlockObject returns an instance of a new Option Block Element

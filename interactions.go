@@ -35,29 +35,29 @@ const (
 
 // InteractionCallback is sent from slack when a user interactions with a button or dialog.
 type InteractionCallback struct {
-	Type                InteractionType `json:"type"`
-	Token               string          `json:"token"`
-	CallbackID          string          `json:"callback_id"`
-	ResponseURL         string          `json:"response_url"`
-	TriggerID           string          `json:"trigger_id"`
-	ActionTs            string          `json:"action_ts"`
-	Team                Team            `json:"team"`
-	Channel             Channel         `json:"channel"`
-	User                User            `json:"user"`
-	OriginalMessage     Message         `json:"original_message"`
-	Message             Message         `json:"message"`
-	Name                string          `json:"name"`
-	Value               string          `json:"value"`
-	MessageTs           string          `json:"message_ts"`
-	AttachmentID        string          `json:"attachment_id"`
-	ActionCallback      ActionCallbacks `json:"actions"`
-	View                View            `json:"view"`
-	ActionID            string          `json:"action_id"`
-	APIAppID            string          `json:"api_app_id"`
-	BlockID             string          `json:"block_id"`
-	Container           Container       `json:"container"`
-	Enterprise          Enterprise      `json:"enterprise"`
-	IsEnterpriseInstall bool            `json:"is_enterprise_install"`
+	Type                InteractionType `json:"type" form:"type"` // continue adding form tag
+	Token               string          `json:"token" form:"token"`
+	CallbackID          string          `json:"callback_id" form:"callback_id"`
+	ResponseURL         string          `json:"response_url" form:"response_url"`
+	TriggerID           string          `json:"trigger_id" form:"trigger_id"`
+	ActionTs            string          `json:"action_ts" form:"action_ts"`
+	Team                Team            `json:"team" form:"team"`
+	Channel             Channel         `json:"channel" form:"channel"`
+	User                User            `json:"user" form:"user"`
+	OriginalMessage     Message         `json:"original_message" form:"original_message"`
+	Message             Message         `json:"message" form:"message"`
+	Name                string          `json:"name" form:"name"`
+	Value               string          `json:"value" form:"value"`
+	MessageTs           string          `json:"message_ts" form:"message_ts"`
+	AttachmentID        string          `json:"attachment_id" form:"attachment_id"`
+	ActionCallback      ActionCallbacks `json:"actions" form:"actions"`
+	View                View            `json:"view" form:"view"`
+	ActionID            string          `json:"action_id" form:"action_id"`
+	APIAppID            string          `json:"api_app_id" form:"api_app_id"`
+	BlockID             string          `json:"block_id" form:"block_id"`
+	Container           Container       `json:"container" form:"container"`
+	Enterprise          Enterprise      `json:"enterprise" form:"enterprise"`
+	IsEnterpriseInstall bool            `json:"is_enterprise_install" form:"is_enterprise_install"`
 	DialogSubmissionCallback
 	ViewSubmissionCallback
 	ViewClosedCallback
@@ -73,7 +73,7 @@ type InteractionCallback struct {
 }
 
 type BlockActionStates struct {
-	Values map[string]map[string]BlockAction `json:"values"`
+	Values map[string]map[string]BlockAction `json:"values" form:"values"`
 }
 
 // InteractionCallbackParse parses the HTTP form value "payload" from r, unmarshals
@@ -141,19 +141,19 @@ func (ic *InteractionCallback) UnmarshalJSON(b []byte) error {
 }
 
 type Container struct {
-	Type         string      `json:"type"`
-	ViewID       string      `json:"view_id"`
-	MessageTs    string      `json:"message_ts"`
-	ThreadTs     string      `json:"thread_ts,omitempty"`
-	AttachmentID json.Number `json:"attachment_id"`
-	ChannelID    string      `json:"channel_id"`
-	IsEphemeral  bool        `json:"is_ephemeral"`
-	IsAppUnfurl  bool        `json:"is_app_unfurl"`
+	Type         string      `json:"type" form:"type"`
+	ViewID       string      `json:"view_id" form:"view_id"`
+	MessageTs    string      `json:"message_ts" form:"message_ts"`
+	ThreadTs     string      `json:"thread_ts,omitempty" form:"thread_ts"`
+	AttachmentID json.Number `json:"attachment_id" form:"attachment_id"`
+	ChannelID    string      `json:"channel_id" form:"channel_id"`
+	IsEphemeral  bool        `json:"is_ephemeral" form:"is_ephemeral"`
+	IsAppUnfurl  bool        `json:"is_app_unfurl" form:"is_app_unfurl"`
 }
 
 type Enterprise struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   string `json:"id" form:"id"`
+	Name string `json:"name" form:"name"`
 }
 
 // ActionCallback is a convenience struct defined to allow dynamic unmarshalling of

@@ -4,9 +4,9 @@ package slack
 //
 // More Information: https://api.slack.com/reference/messaging/blocks#actions
 type ActionBlock struct {
-	Type     MessageBlockType `json:"type"`
-	BlockID  string           `json:"block_id,omitempty"`
-	Elements *BlockElements   `json:"elements"`
+	Type     MessageBlockType `json:"type" form:"type"`
+	BlockID  string           `json:"block_id,omitempty" form:"block_id"`
+	Elements *BlockElements   `json:"elements" form:"elements"`
 }
 
 // BlockType returns the type of the block
