@@ -8,9 +8,9 @@ import (
 
 // ItemReaction is the reactions that have happened on an item.
 type ItemReaction struct {
-	Name  string   `json:"name"`
-	Count int      `json:"count"`
-	Users []string `json:"users"`
+	Name  string   `json:"name" form:"name"`
+	Count int      `json:"count" form:"count"`
+	Users []string `json:"users" form:"users"`
 }
 
 // ReactedItem is an item that was reacted to, and the details of the

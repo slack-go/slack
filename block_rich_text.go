@@ -7,9 +7,9 @@ import (
 // RichTextBlock defines a new block of type rich_text.
 // More Information: https://api.slack.com/changelog/2019-09-what-they-see-is-what-you-get-and-more-and-less
 type RichTextBlock struct {
-	Type     MessageBlockType  `json:"type"`
-	BlockID  string            `json:"block_id,omitempty"`
-	Elements []RichTextElement `json:"elements"`
+	Type     MessageBlockType  `json:"type" form:"type"`
+	BlockID  string            `json:"block_id,omitempty" form:"block_id"`
+	Elements []RichTextElement `json:"elements" form:"elements"`
 }
 
 func (b RichTextBlock) BlockType() MessageBlockType {
@@ -111,12 +111,12 @@ const (
 )
 
 type RichTextList struct {
-	Type     RichTextElementType     `json:"type"`
-	Elements []RichTextElement       `json:"elements"`
-	Style    RichTextListElementType `json:"style"`
-	Indent   int                     `json:"indent"`
-	Border   int                     `json:"border"`
-	Offset   int                     `json:"offset"`
+	Type     RichTextElementType     `json:"type" form:"type"`
+	Elements []RichTextElement       `json:"elements" form:"elements"`
+	Style    RichTextListElementType `json:"style" form:"style"`
+	Indent   int                     `json:"indent" form:"indent"`
+	Border   int                     `json:"border" form:"border"`
+	Offset   int                     `json:"offset" form:"offset"`
 }
 
 // NewRichTextList returns a new rich text list element.
@@ -190,8 +190,8 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 }
 
 type RichTextSection struct {
-	Type     RichTextElementType      `json:"type"`
-	Elements []RichTextSectionElement `json:"elements"`
+	Type     RichTextElementType      `json:"type" form:"type"`
+	Elements []RichTextSectionElement `json:"elements" form:"elements"`
 }
 
 // RichTextElementType returns the type of the Element
@@ -292,16 +292,16 @@ type RichTextSectionElement interface {
 }
 
 type RichTextSectionTextStyle struct {
-	Bold   bool `json:"bold,omitempty"`
-	Italic bool `json:"italic,omitempty"`
-	Strike bool `json:"strike,omitempty"`
-	Code   bool `json:"code,omitempty"`
+	Bold   bool `json:"bold,omitempty" form:"bold"`
+	Italic bool `json:"italic,omitempty" form:"italic"`
+	Strike bool `json:"strike,omitempty" form:"strike"`
+	Code   bool `json:"code,omitempty" form:"code"`
 }
 
 type RichTextSectionTextElement struct {
-	Type  RichTextSectionElementType `json:"type"`
-	Text  string                     `json:"text"`
-	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type  RichTextSectionElementType `json:"type" form:"type"`
+	Text  string                     `json:"text" form:"text"`
+	Style *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionTextElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -317,9 +317,9 @@ func NewRichTextSectionTextElement(text string, style *RichTextSectionTextStyle)
 }
 
 type RichTextSectionChannelElement struct {
-	Type      RichTextSectionElementType `json:"type"`
-	ChannelID string                     `json:"channel_id"`
-	Style     *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type      RichTextSectionElementType `json:"type" form:"type"`
+	ChannelID string                     `json:"channel_id" form:"channel_id"`
+	Style     *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionChannelElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -335,9 +335,9 @@ func NewRichTextSectionChannelElement(channelID string, style *RichTextSectionTe
 }
 
 type RichTextSectionUserElement struct {
-	Type   RichTextSectionElementType `json:"type"`
-	UserID string                     `json:"user_id"`
-	Style  *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type   RichTextSectionElementType `json:"type" form:"type"`
+	UserID string                     `json:"user_id" form:"user_id"`
+	Style  *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionUserElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -353,11 +353,11 @@ func NewRichTextSectionUserElement(userID string, style *RichTextSectionTextStyl
 }
 
 type RichTextSectionEmojiElement struct {
-	Type     RichTextSectionElementType `json:"type"`
-	Name     string                     `json:"name"`
-	SkinTone int                        `json:"skin_tone,omitempty"`
-	Unicode  string                     `json:"unicode,omitempty"`
-	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type     RichTextSectionElementType `json:"type" form:"type"`
+	Name     string                     `json:"name" form:"name"`
+	SkinTone int                        `json:"skin_tone,omitempty" form:"skin_tone"`
+	Unicode  string                     `json:"unicode,omitempty" form:"unicode"`
+	Style    *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionEmojiElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -374,10 +374,10 @@ func NewRichTextSectionEmojiElement(name string, skinTone int, style *RichTextSe
 }
 
 type RichTextSectionLinkElement struct {
-	Type  RichTextSectionElementType `json:"type"`
-	URL   string                     `json:"url"`
-	Text  string                     `json:"text,omitempty"`
-	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type  RichTextSectionElementType `json:"type" form:"type"`
+	URL   string                     `json:"url" form:"url"`
+	Text  string                     `json:"text,omitempty" form:"text"`
+	Style *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionLinkElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -394,9 +394,9 @@ func NewRichTextSectionLinkElement(url, text string, style *RichTextSectionTextS
 }
 
 type RichTextSectionTeamElement struct {
-	Type   RichTextSectionElementType `json:"type"`
-	TeamID string                     `json:"team_id"`
-	Style  *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type   RichTextSectionElementType `json:"type" form:"type"`
+	TeamID string                     `json:"team_id" form:"team_id"`
+	Style  *RichTextSectionTextStyle  `json:"style,omitempty" form:"style"`
 }
 
 func (r RichTextSectionTeamElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -412,8 +412,8 @@ func NewRichTextSectionTeamElement(teamID string, style *RichTextSectionTextStyl
 }
 
 type RichTextSectionUserGroupElement struct {
-	Type        RichTextSectionElementType `json:"type"`
-	UsergroupID string                     `json:"usergroup_id"`
+	Type        RichTextSectionElementType `json:"type" form:"type"`
+	UsergroupID string                     `json:"usergroup_id" form:"usergroup_id"`
 }
 
 func (r RichTextSectionUserGroupElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -428,11 +428,11 @@ func NewRichTextSectionUserGroupElement(usergroupID string) *RichTextSectionUser
 }
 
 type RichTextSectionDateElement struct {
-	Type      RichTextSectionElementType `json:"type"`
-	Timestamp JSONTime                   `json:"timestamp"`
-	Format    string                     `json:"format"`
-	URL       *string                    `json:"url,omitempty"`
-	Fallback  *string                    `json:"fallback,omitempty"`
+	Type      RichTextSectionElementType `json:"type" form:"type"`
+	Timestamp JSONTime                   `json:"timestamp" form:"timestamp"`
+	Format    string                     `json:"format" form:"format"`
+	URL       *string                    `json:"url,omitempty" form:"url"`
+	Fallback  *string                    `json:"fallback,omitempty" form:"fallback"`
 }
 
 func (r RichTextSectionDateElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -450,8 +450,8 @@ func NewRichTextSectionDateElement(timestamp int64, format string, url *string, 
 }
 
 type RichTextSectionBroadcastElement struct {
-	Type  RichTextSectionElementType `json:"type"`
-	Range string                     `json:"range"`
+	Type  RichTextSectionElementType `json:"type" form:"type"`
+	Range string                     `json:"range" form:"range"`
 }
 
 func (r RichTextSectionBroadcastElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -466,8 +466,8 @@ func NewRichTextSectionBroadcastElement(rangeStr string) *RichTextSectionBroadca
 }
 
 type RichTextSectionColorElement struct {
-	Type  RichTextSectionElementType `json:"type"`
-	Value string                     `json:"value"`
+	Type  RichTextSectionElementType `json:"type" form:"type"`
+	Value string                     `json:"value" form:"value"`
 }
 
 func (r RichTextSectionColorElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -482,7 +482,7 @@ func NewRichTextSectionColorElement(value string) *RichTextSectionColorElement {
 }
 
 type RichTextSectionUnknownElement struct {
-	Type RichTextSectionElementType `json:"type"`
+	Type RichTextSectionElementType `json:"type" form:"type"`
 	Raw  string
 }
 
@@ -512,7 +512,7 @@ func (s *RichTextQuote) UnmarshalJSON(b []byte) error {
 // RichTextPreformatted represents rich_text_quote element type.
 type RichTextPreformatted struct {
 	RichTextSection
-	Border int `json:"border"`
+	Border int `json:"border" form:"border"`
 }
 
 // RichTextElementType returns the type of the Element

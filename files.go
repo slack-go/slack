@@ -24,106 +24,106 @@ const (
 
 // File contains all the information for a file
 type File struct {
-	ID        string   `json:"id"`
-	Created   JSONTime `json:"created"`
-	Timestamp JSONTime `json:"timestamp"`
+	ID        string   `json:"id" form:"id"`
+	Created   JSONTime `json:"created" form:"created"`
+	Timestamp JSONTime `json:"timestamp" form:"timestamp"`
 
-	Name              string `json:"name"`
-	Title             string `json:"title"`
-	Mimetype          string `json:"mimetype"`
-	ImageExifRotation int    `json:"image_exif_rotation"`
-	Filetype          string `json:"filetype"`
-	PrettyType        string `json:"pretty_type"`
-	User              string `json:"user"`
+	Name              string `json:"name" form:"name"`
+	Title             string `json:"title" form:"title"`
+	Mimetype          string `json:"mimetype" form:"mimetype"`
+	ImageExifRotation int    `json:"image_exif_rotation" form:"image_exif_rotation"`
+	Filetype          string `json:"filetype" form:"filetype"`
+	PrettyType        string `json:"pretty_type" form:"pretty_type"`
+	User              string `json:"user" form:"user"`
 
-	Mode         string `json:"mode"`
-	Editable     bool   `json:"editable"`
-	IsExternal   bool   `json:"is_external"`
-	ExternalType string `json:"external_type"`
+	Mode         string `json:"mode" form:"mode"`
+	Editable     bool   `json:"editable" form:"editable"`
+	IsExternal   bool   `json:"is_external" form:"is_external"`
+	ExternalType string `json:"external_type" form:"external_type"`
 
-	Size int `json:"size"`
+	Size int `json:"size" form:"size"`
 
-	URL                string `json:"url"`          // Deprecated - never set
-	URLDownload        string `json:"url_download"` // Deprecated - never set
-	URLPrivate         string `json:"url_private"`
-	URLPrivateDownload string `json:"url_private_download"`
+	URL                string `json:"url" form:"url"`                   // Deprecated - never set
+	URLDownload        string `json:"url_download" form:"url_download"` // Deprecated - never set
+	URLPrivate         string `json:"url_private" form:"url_private"`
+	URLPrivateDownload string `json:"url_private_download" form:"url_private_download"`
 
-	OriginalH   int    `json:"original_h"`
-	OriginalW   int    `json:"original_w"`
-	Thumb64     string `json:"thumb_64"`
-	Thumb80     string `json:"thumb_80"`
-	Thumb160    string `json:"thumb_160"`
-	Thumb360    string `json:"thumb_360"`
-	Thumb360Gif string `json:"thumb_360_gif"`
-	Thumb360W   int    `json:"thumb_360_w"`
-	Thumb360H   int    `json:"thumb_360_h"`
-	Thumb480    string `json:"thumb_480"`
-	Thumb480W   int    `json:"thumb_480_w"`
-	Thumb480H   int    `json:"thumb_480_h"`
-	Thumb720    string `json:"thumb_720"`
-	Thumb720W   int    `json:"thumb_720_w"`
-	Thumb720H   int    `json:"thumb_720_h"`
-	Thumb960    string `json:"thumb_960"`
-	Thumb960W   int    `json:"thumb_960_w"`
-	Thumb960H   int    `json:"thumb_960_h"`
-	Thumb1024   string `json:"thumb_1024"`
-	Thumb1024W  int    `json:"thumb_1024_w"`
-	Thumb1024H  int    `json:"thumb_1024_h"`
+	OriginalH   int    `json:"original_h" form:"original_h"`
+	OriginalW   int    `json:"original_w" form:"original_w"`
+	Thumb64     string `json:"thumb_64" form:"thumb_64"`
+	Thumb80     string `json:"thumb_80" form:"thumb_80"`
+	Thumb160    string `json:"thumb_160" form:"thumb_160"`
+	Thumb360    string `json:"thumb_360" form:"thumb_360"`
+	Thumb360Gif string `json:"thumb_360_gif" form:"thumb_360_gif"`
+	Thumb360W   int    `json:"thumb_360_w" form:"thumb_360_w"`
+	Thumb360H   int    `json:"thumb_360_h" form:"thumb_360_h"`
+	Thumb480    string `json:"thumb_480" form:"thumb_480"`
+	Thumb480W   int    `json:"thumb_480_w" form:"thumb_480_w"`
+	Thumb480H   int    `json:"thumb_480_h" form:"thumb_480_h"`
+	Thumb720    string `json:"thumb_720" form:"thumb_720"`
+	Thumb720W   int    `json:"thumb_720_w" form:"thumb_720_w"`
+	Thumb720H   int    `json:"thumb_720_h" form:"thumb_720_h"`
+	Thumb960    string `json:"thumb_960" form:"thumb_960"`
+	Thumb960W   int    `json:"thumb_960_w" form:"thumb_960_w"`
+	Thumb960H   int    `json:"thumb_960_h" form:"thumb_960_h"`
+	Thumb1024   string `json:"thumb_1024" form:"thumb_1024"`
+	Thumb1024W  int    `json:"thumb_1024_w" form:"thumb_1024_w"`
+	Thumb1024H  int    `json:"thumb_1024_h" form:"thumb_1024_h"`
 
-	Permalink       string `json:"permalink"`
-	PermalinkPublic string `json:"permalink_public"`
+	Permalink       string `json:"permalink" form:"permalink"`
+	PermalinkPublic string `json:"permalink_public" form:"permalink_public"`
 
-	EditLink         string `json:"edit_link"`
-	Preview          string `json:"preview"`
-	PreviewHighlight string `json:"preview_highlight"`
-	Lines            int    `json:"lines"`
-	LinesMore        int    `json:"lines_more"`
+	EditLink         string `json:"edit_link" form:"edit_link"`
+	Preview          string `json:"preview" form:"preview"`
+	PreviewHighlight string `json:"preview_highlight" form:"preview_highlight"`
+	Lines            int    `json:"lines" form:"lines"`
+	LinesMore        int    `json:"lines_more" form:"lines_more"`
 
-	IsPublic        bool     `json:"is_public"`
-	PublicURLShared bool     `json:"public_url_shared"`
-	Channels        []string `json:"channels"`
-	Groups          []string `json:"groups"`
-	IMs             []string `json:"ims"`
-	InitialComment  Comment  `json:"initial_comment"`
-	CommentsCount   int      `json:"comments_count"`
-	NumStars        int      `json:"num_stars"`
-	IsStarred       bool     `json:"is_starred"`
-	Shares          Share    `json:"shares"`
+	IsPublic        bool     `json:"is_public" form:"is_public"`
+	PublicURLShared bool     `json:"public_url_shared" form:"public_url_shared"`
+	Channels        []string `json:"channels" form:"channels"`
+	Groups          []string `json:"groups" form:"groups"`
+	IMs             []string `json:"ims" form:"ims"`
+	InitialComment  Comment  `json:"initial_comment" form:"initial_comment"`
+	CommentsCount   int      `json:"comments_count" form:"comments_count"`
+	NumStars        int      `json:"num_stars" form:"num_stars"`
+	IsStarred       bool     `json:"is_starred" form:"is_starred"`
+	Shares          Share    `json:"shares" form:"shares"`
 
-	Subject string              `json:"subject"`
-	To      []EmailFileUserInfo `json:"to"`
-	From    []EmailFileUserInfo `json:"from"`
-	Cc      []EmailFileUserInfo `json:"cc"`
-	Headers EmailHeaders        `json:"headers"`
+	Subject string              `json:"subject" form:"subject"`
+	To      []EmailFileUserInfo `json:"to" form:"to"`
+	From    []EmailFileUserInfo `json:"from" form:"from"`
+	Cc      []EmailFileUserInfo `json:"cc" form:"cc"`
+	Headers EmailHeaders        `json:"headers" form:"headers"`
 }
 
 type EmailFileUserInfo struct {
-	Address  string `json:"address"`
-	Name     string `json:"name"`
-	Original string `json:"original"`
+	Address  string `json:"address" form:"address"`
+	Name     string `json:"name" form:"name"`
+	Original string `json:"original" form:"original"`
 }
 
 type EmailHeaders struct {
-	Date      string `json:"date"`
-	InReplyTo string `json:"in_reply_to"`
-	ReplyTo   string `json:"reply_to"`
-	MessageID string `json:"message_id"`
+	Date      string `json:"date" form:"date"`
+	InReplyTo string `json:"in_reply_to" form:"in_reply_to"`
+	ReplyTo   string `json:"reply_to" form:"reply_to"`
+	MessageID string `json:"message_id" form:"message_id"`
 }
 
 type Share struct {
-	Public  map[string][]ShareFileInfo `json:"public"`
-	Private map[string][]ShareFileInfo `json:"private"`
+	Public  map[string][]ShareFileInfo `json:"public" form:"public"`
+	Private map[string][]ShareFileInfo `json:"private" form:"private"`
 }
 
 type ShareFileInfo struct {
-	ReplyUsers      []string `json:"reply_users"`
-	ReplyUsersCount int      `json:"reply_users_count"`
-	ReplyCount      int      `json:"reply_count"`
-	Ts              string   `json:"ts"`
-	ThreadTs        string   `json:"thread_ts"`
-	LatestReply     string   `json:"latest_reply"`
-	ChannelName     string   `json:"channel_name"`
-	TeamID          string   `json:"team_id"`
+	ReplyUsers      []string `json:"reply_users" form:"reply_users"`
+	ReplyUsersCount int      `json:"reply_users_count" form:"reply_users_count"`
+	ReplyCount      int      `json:"reply_count" form:"reply_count"`
+	Ts              string   `json:"ts" form:"ts"`
+	ThreadTs        string   `json:"thread_ts" form:"thread_ts"`
+	LatestReply     string   `json:"latest_reply" form:"latest_reply"`
+	ChannelName     string   `json:"channel_name" form:"channel_name"`
+	TeamID          string   `json:"team_id" form:"team_id"`
 }
 
 // FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
