@@ -15,12 +15,12 @@ type OutgoingMessage struct {
 // Message is an auxiliary type to allow us to have a message containing sub messages
 type Message struct {
 	Msg
-	SubMessage      *Msg `json:"message,omitempty"`
-	PreviousMessage *Msg `json:"previous_message,omitempty"`
+	SubMessage      *Msg `json:"message,omitempty" form:"message"`
+	PreviousMessage *Msg `json:"previous_message,omitempty" form:"previous_message"`
 	// Root is the message that was broadcast to the channel when the SubType is
 	// thread_broadcast. If this is not a thread_broadcast message event, this
 	// value is nil.
-	Root *Msg `json:"root,omitempty"`
+	Root *Msg `json:"root,omitempty" form:"root"`
 }
 
 // Msg SubTypes (https://api.slack.com/events/message)
@@ -75,73 +75,73 @@ type Msg struct {
 	UnreadCount     int          `json:"unread_count,omitempty" form:"unread_count"`
 
 	// Message Subtypes
-	SubType string `json:"subtype,omitempty"`
+	SubType string `json:"subtype,omitempty" form:"subtype"`
 
 	// Hidden Subtypes
-	Hidden           bool   `json:"hidden,omitempty"`     // message_changed, message_deleted, unpinned_item
-	DeletedTimestamp string `json:"deleted_ts,omitempty"` // message_deleted
-	EventTimestamp   string `json:"event_ts,omitempty"`
+	Hidden           bool   `json:"hidden,omitempty" form:"hidden"`         // message_changed, message_deleted, unpinned_item
+	DeletedTimestamp string `json:"deleted_ts,omitempty" form:"deleted_ts"` // message_deleted
+	EventTimestamp   string `json:"event_ts,omitempty" form:"event_ts"`
 
 	// bot_message (https://api.slack.com/events/message/bot_message)
-	BotID      string      `json:"bot_id,omitempty"`
-	Username   string      `json:"username,omitempty"`
-	Icons      *Icon       `json:"icons,omitempty"`
-	BotProfile *BotProfile `json:"bot_profile,omitempty"`
+	BotID      string      `json:"bot_id,omitempty" form:"bot_id"`
+	Username   string      `json:"username,omitempty" form:"username"`
+	Icons      *Icon       `json:"icons,omitempty" form:"icons"`
+	BotProfile *BotProfile `json:"bot_profile,omitempty" form:"bot_profile"`
 
 	// channel_join, group_join
-	Inviter string `json:"inviter,omitempty"`
+	Inviter string `json:"inviter,omitempty" form:"inviter"`
 
 	// channel_topic, group_topic
-	Topic string `json:"topic,omitempty"`
+	Topic string `json:"topic,omitempty" form:"topic"`
 
 	// channel_purpose, group_purpose
-	Purpose string `json:"purpose,omitempty"`
+	Purpose string `json:"purpose,omitempty" form:"purpose"`
 
 	// channel_name, group_name
-	Name    string `json:"name,omitempty"`
-	OldName string `json:"old_name,omitempty"`
+	Name    string `json:"name,omitempty" form:"name"`
+	OldName string `json:"old_name,omitempty" form:"old_name"`
 
 	// channel_archive, group_archive
-	Members []string `json:"members,omitempty"`
+	Members []string `json:"members,omitempty" form:"members"`
 
 	// channels.replies, groups.replies, im.replies, mpim.replies
-	ReplyCount   int      `json:"reply_count,omitempty"`
-	ReplyUsers   []string `json:"reply_users,omitempty"`
-	Replies      []Reply  `json:"replies,omitempty"`
-	ParentUserId string   `json:"parent_user_id,omitempty"`
-	LatestReply  string   `json:"latest_reply,omitempty"`
+	ReplyCount   int      `json:"reply_count,omitempty" form:"reply_count"`
+	ReplyUsers   []string `json:"reply_users,omitempty" form:"reply_users"`
+	Replies      []Reply  `json:"replies,omitempty" form:"replies"`
+	ParentUserId string   `json:"parent_user_id,omitempty" form:"parent_user_id"`
+	LatestReply  string   `json:"latest_reply,omitempty" form:"latest_reply"`
 
 	// file_share, file_comment, file_mention
-	Files []File `json:"files,omitempty"`
+	Files []File `json:"files,omitempty" form:"files"`
 
 	// file_share
-	Upload bool `json:"upload,omitempty"`
+	Upload bool `json:"upload,omitempty" form:"upload"`
 
 	// file_comment
-	Comment *Comment `json:"comment,omitempty"`
+	Comment *Comment `json:"comment,omitempty" form:"comment"`
 
 	// pinned_item
-	ItemType string `json:"item_type,omitempty"`
+	ItemType string `json:"item_type,omitempty" form:"item_type"`
 
 	// https://api.slack.com/rtm
-	ReplyTo int    `json:"reply_to,omitempty"`
-	Team    string `json:"team,omitempty"`
+	ReplyTo int    `json:"reply_to,omitempty" form:"reply_to"`
+	Team    string `json:"team,omitempty" form:"team"`
 
 	// reactions
-	Reactions []ItemReaction `json:"reactions,omitempty"`
+	Reactions []ItemReaction `json:"reactions,omitempty" form:"reactions"`
 
 	// slash commands and interactive messages
-	ResponseType    string `json:"response_type,omitempty"`
-	ReplaceOriginal bool   `json:"replace_original"`
-	DeleteOriginal  bool   `json:"delete_original"`
+	ResponseType    string `json:"response_type,omitempty" form:"response_type"`
+	ReplaceOriginal bool   `json:"replace_original" form:"replace_original"`
+	DeleteOriginal  bool   `json:"delete_original" form:"delete_original"`
 
 	// metadata
-	Metadata SlackMetadata `json:"metadata,omitempty"`
+	Metadata SlackMetadata `json:"metadata,omitempty" form:"metadata"`
 
 	// Block type Message
-	Blocks Blocks `json:"blocks,omitempty"`
+	Blocks Blocks `json:"blocks,omitempty" form:"blocks"`
 	// permalink
-	Permalink string `json:"permalink,omitempty"`
+	Permalink string `json:"permalink,omitempty" form:"permalink"`
 }
 
 const (
@@ -162,19 +162,19 @@ type ScheduledMessage struct {
 
 // Icon is used for bot messages
 type Icon struct {
-	IconURL   string `json:"icon_url,omitempty"`
-	IconEmoji string `json:"icon_emoji,omitempty"`
+	IconURL   string `json:"icon_url,omitempty" form:"icon_url"`
+	IconEmoji string `json:"icon_emoji,omitempty" form:"icon_emoji"`
 }
 
 // BotProfile contains information about a bot
 type BotProfile struct {
-	AppID   string `json:"app_id,omitempty"`
-	Deleted bool   `json:"deleted,omitempty"`
-	Icons   *Icons `json:"icons,omitempty"`
-	ID      string `json:"id,omitempty"`
-	Name    string `json:"name,omitempty"`
-	TeamID  string `json:"team_id,omitempty"`
-	Updated int64  `json:"updated,omitempty"`
+	AppID   string `json:"app_id,omitempty" form:"app_id"`
+	Deleted bool   `json:"deleted,omitempty" form:"deleted"`
+	Icons   *Icons `json:"icons,omitempty" form:"icons"`
+	ID      string `json:"id,omitempty" form:"id"`
+	Name    string `json:"name,omitempty" form:"name"`
+	TeamID  string `json:"team_id,omitempty" form:"team_id"`
+	Updated int64  `json:"updated,omitempty" form:"updated"`
 }
 
 // Edited indicates that a message has been edited.
@@ -185,8 +185,8 @@ type Edited struct {
 
 // Reply contains information about a reply for a thread
 type Reply struct {
-	User      string `json:"user,omitempty"`
-	Timestamp string `json:"ts,omitempty"`
+	User      string `json:"user,omitempty" form:"user"`
+	Timestamp string `json:"ts,omitempty" form:"ts"`
 }
 
 // Event contains the event type
