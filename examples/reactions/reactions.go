@@ -77,14 +77,14 @@ func main() {
 	}
 
 	// Get all reactions on the message.
-	msgReactions, err := api.GetReactions(msgRef, slack.NewGetReactionsParameters())
+	msgReactionsResp, err := api.GetReactions(msgRef, slack.NewGetReactionsParameters())
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return
 	}
 	fmt.Printf("\n")
-	fmt.Printf("%d reactions to message...\n", len(msgReactions))
-	for _, r := range msgReactions {
+	fmt.Printf("%d reactions to message...\n", len(msgReactionsResp.Reactions))
+	for _, r := range msgReactionsResp.Reactions {
 		fmt.Printf("  %d users say %s\n", r.Count, r.Name)
 	}
 
@@ -111,14 +111,14 @@ func main() {
 	}
 
 	// Get all reactions on the message.
-	msgReactions, err = api.GetReactions(msgRef, slack.NewGetReactionsParameters())
+	msgReactionsResp, err = api.GetReactions(msgRef, slack.NewGetReactionsParameters())
 	if err != nil {
 		fmt.Printf("Error getting reactions: %s\n", err)
 		return
 	}
 	fmt.Printf("\n")
-	fmt.Printf("%d reactions to message after removing cry...\n", len(msgReactions))
-	for _, r := range msgReactions {
+	fmt.Printf("%d reactions to message after removing cry...\n", len(msgReactionsResp.Reactions))
+	for _, r := range msgReactionsResp.Reactions {
 		fmt.Printf("  %d users say %s\n", r.Count, r.Name)
 	}
 }
