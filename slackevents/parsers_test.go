@@ -170,3 +170,294 @@ func TestNoTokenVerification(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestParseEventAPIAppMentionWithAssistantThread(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "app_mention",
+				"event_ts": "1234567890.123456",
+				"user": "UXXXXXXX1",
+				"text": "<@U0LAN0Z89> help me with something",
+				"ts": "1515449522.000016",
+				"channel": "C0LAN2Q65",
+				"assistant_thread": {
+					"action_token": "1234567.abcdefg"
+				}
+			},
+			"type": "event_callback",
+			"authed_users": [ "UXXXXXXX1" ],
+			"event_id": "Ev08MFMKH6",
+			"event_time": 1234567890
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+
+	switch outerEvent := msg.Data.(type) {
+	case *EventsAPICallbackEvent:
+		{
+			switch innerEvent := msg.InnerEvent.Data.(type) {
+			case *AppMentionEvent:
+				{
+					if innerEvent.AssistantThread == nil {
+						t.Error("Expected AssistantThread to be non-nil")
+					}
+					if innerEvent.AssistantThread.ActionToken != "1234567.abcdefg" {
+						t.Errorf("Expected ActionToken to be '1234567.abcdefg', got %s", innerEvent.AssistantThread.ActionToken)
+					}
+				}
+			default:
+				fmt.Println(innerEvent)
+				t.Fail()
+			}
+		}
+	default:
+		{
+			fmt.Println(outerEvent)
+			t.Fail()
+		}
+	}
+}
+
+func TestParseEventAPIMessageIMWithAssistantThread(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "message",
+				"channel": "D024BE91L",
+				"user": "U2147483697",
+				"text": "Hello, I need help with something.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "im",
+				"assistant_thread": {
+					"action_token": "9876543.hijklmnop"
+				}
+			},
+			"type": "event_callback",
+			"authed_users": [ "U2147483697" ],
+			"event_id": "Ev08MFMKH7",
+			"event_time": 1234567890
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+
+	switch outerEvent := msg.Data.(type) {
+	case *EventsAPICallbackEvent:
+		{
+			switch innerEvent := msg.InnerEvent.Data.(type) {
+			case *MessageEvent:
+				{
+					if innerEvent.AssistantThread == nil {
+						t.Error("Expected AssistantThread to be non-nil")
+					}
+					if innerEvent.AssistantThread.ActionToken != "9876543.hijklmnop" {
+						t.Errorf("Expected ActionToken to be '9876543.hijklmnop', got %s", innerEvent.AssistantThread.ActionToken)
+					}
+					if innerEvent.ChannelType != "im" {
+						t.Errorf("Expected ChannelType to be 'im', got %s", innerEvent.ChannelType)
+					}
+				}
+			default:
+				fmt.Println(innerEvent)
+				t.Fail()
+			}
+		}
+	default:
+		{
+			fmt.Println(outerEvent)
+			t.Fail()
+		}
+	}
+}
+
+func TestParseEventAPIMessageChannelWithAssistantThread(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "message",
+				"channel": "C024BE91L",
+				"user": "U2147483697",
+				"text": "Hello everyone, I need help with something.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "channel",
+				"assistant_thread": {
+					"action_token": "abcd1234.qwerty"
+				}
+			},
+			"type": "event_callback",
+			"authed_users": [ "U2147483697" ],
+			"event_id": "Ev08MFMKH8",
+			"event_time": 1234567890
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+
+	switch outerEvent := msg.Data.(type) {
+	case *EventsAPICallbackEvent:
+		{
+			switch innerEvent := msg.InnerEvent.Data.(type) {
+			case *MessageEvent:
+				{
+					if innerEvent.AssistantThread == nil {
+						t.Error("Expected AssistantThread to be non-nil")
+					}
+					if innerEvent.AssistantThread.ActionToken != "abcd1234.qwerty" {
+						t.Errorf("Expected ActionToken to be 'abcd1234.qwerty', got %s", innerEvent.AssistantThread.ActionToken)
+					}
+					if innerEvent.ChannelType != "channel" {
+						t.Errorf("Expected ChannelType to be 'channel', got %s", innerEvent.ChannelType)
+					}
+				}
+			default:
+				fmt.Println(innerEvent)
+				t.Fail()
+			}
+		}
+	default:
+		{
+			fmt.Println(outerEvent)
+			t.Fail()
+		}
+	}
+}
+
+func TestParseEventAPIMessageMPIMWithAssistantThread(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "message",
+				"channel": "G024BE91L",
+				"user": "U2147483697",
+				"text": "Hey team, I need some assistance.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "mpim",
+				"assistant_thread": {
+					"action_token": "xyz789.multiparty"
+				}
+			},
+			"type": "event_callback",
+			"authed_users": [ "U2147483697" ],
+			"event_id": "Ev08MFMKH9",
+			"event_time": 1234567890
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+
+	switch outerEvent := msg.Data.(type) {
+	case *EventsAPICallbackEvent:
+		{
+			switch innerEvent := msg.InnerEvent.Data.(type) {
+			case *MessageEvent:
+				{
+					if innerEvent.AssistantThread == nil {
+						t.Error("Expected AssistantThread to be non-nil")
+					}
+					if innerEvent.AssistantThread.ActionToken != "xyz789.multiparty" {
+						t.Errorf("Expected ActionToken to be 'xyz789.multiparty', got %s", innerEvent.AssistantThread.ActionToken)
+					}
+					if innerEvent.ChannelType != "mpim" {
+						t.Errorf("Expected ChannelType to be 'mpim', got %s", innerEvent.ChannelType)
+					}
+				}
+			default:
+				fmt.Println(innerEvent)
+				t.Fail()
+			}
+		}
+	default:
+		{
+			fmt.Println(outerEvent)
+			t.Fail()
+		}
+	}
+}
+
+func TestParseEventAPIMessageGroupWithAssistantThread(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "message",
+				"channel": "G124BE91L",
+				"user": "U2147483697",
+				"text": "Private group message with assistant request.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "group",
+				"assistant_thread": {
+					"action_token": "group123.private"
+				}
+			},
+			"type": "event_callback",
+			"authed_users": [ "U2147483697" ],
+			"event_id": "Ev08MFMK10",
+			"event_time": 1234567890
+		}
+	`
+	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if e != nil {
+		fmt.Println(e)
+		t.Fail()
+	}
+
+	switch outerEvent := msg.Data.(type) {
+	case *EventsAPICallbackEvent:
+		{
+			switch innerEvent := msg.InnerEvent.Data.(type) {
+			case *MessageEvent:
+				{
+					if innerEvent.AssistantThread == nil {
+						t.Error("Expected AssistantThread to be non-nil")
+					}
+					if innerEvent.AssistantThread.ActionToken != "group123.private" {
+						t.Errorf("Expected ActionToken to be 'group123.private', got %s", innerEvent.AssistantThread.ActionToken)
+					}
+					if innerEvent.ChannelType != "group" {
+						t.Errorf("Expected ChannelType to be 'group', got %s", innerEvent.ChannelType)
+					}
+				}
+			default:
+				fmt.Println(innerEvent)
+				t.Fail()
+			}
+		}
+	default:
+		{
+			fmt.Println(outerEvent)
+			t.Fail()
+		}
+	}
+}

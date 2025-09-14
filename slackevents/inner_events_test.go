@@ -83,6 +83,38 @@ func TestAppMention(t *testing.T) {
 	}
 }
 
+func TestAppMentionWithAssistantThread(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "app_mention",
+				"user": "U061F7AUR",
+				"text": "<@U0LAN0Z89> is it everything a river should be?",
+				"ts": "1515449522.000016",
+				"thread_ts": "1515449522.000016",
+				"channel": "C0LAN2Q65",
+				"event_ts": "1515449522000016",
+				"source_team": "T3MQV36V7",
+				"user_team": "T3MQV36V7",
+				"assistant_thread": {
+					"action_token": "1234567.abcdefg"
+				}
+		}
+	`)
+	var event AppMentionEvent
+	err := json.Unmarshal(rawE, &event)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if event.AssistantThread == nil {
+		t.Error("Expected AssistantThread to be non-nil")
+	}
+
+	if event.AssistantThread.ActionToken != "1234567.abcdefg" {
+		t.Errorf("Expected ActionToken to be '1234567.abcdefg', got %s", event.AssistantThread.ActionToken)
+	}
+}
+
 func TestAppUninstalled(t *testing.T) {
 	rawE := []byte(`
 		{
@@ -374,6 +406,45 @@ func TestMessageEvent(t *testing.T) {
 		t.Error(fmt.Errorf("expected e.Message.Text Live long and prospect., got %s", e.Message.Text))
 	}
 
+}
+
+func TestMessageEventWithAssistantThread(t *testing.T) {
+	rawE := []byte(`
+			{
+				"client_msg_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+				"type": "message",
+				"channel": "D024BE91L",
+				"user": "U2147483697",
+				"text": "Hello, I need help with something.",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "im",
+				"assistant_thread": {
+					"action_token": "9876543.hijklmnop"
+				}
+		}
+	`)
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e.Channel != "D024BE91L" {
+		t.Error(fmt.Errorf("expected channel D024BE91L, got %s", e.Channel))
+	}
+	if e.User != "U2147483697" {
+		t.Error(fmt.Errorf("expected user U2147483697, got %s", e.User))
+	}
+	if e.Text != "Hello, I need help with something." {
+		t.Error(fmt.Errorf("expected e.Text Hello, I need help with something., got %s", e.Text))
+	}
+	if e.AssistantThread == nil {
+		t.Error("Expected AssistantThread to be non-nil")
+	}
+	if e.AssistantThread.ActionToken != "9876543.hijklmnop" {
+		t.Errorf("Expected ActionToken to be '9876543.hijklmnop', got %s", e.AssistantThread.ActionToken)
+	}
 }
 
 func TestMessageChangedEvent(t *testing.T) {
