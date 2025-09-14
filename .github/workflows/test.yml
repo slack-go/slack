@@ -21,7 +21,7 @@ jobs:
     name: test go-${{ matrix.go }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
       - name: run test
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     name: lint
     steps:
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: "1.22"
           cache: false
