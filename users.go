@@ -316,6 +316,13 @@ func GetUsersOptionTeamID(teamId string) GetUsersOption {
 	}
 }
 
+// GetUsersOptionCursor set the cursor to the next page of results
+func GetUsersOptionCursor(cursor string) GetUsersOption {
+	return func(p *UserPagination) {
+		p.Cursor = cursor
+	}
+}
+
 func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination) {
 	up = UserPagination{
 		c:     c,
@@ -331,12 +338,13 @@ func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination)
 
 // UserPagination allows for paginating over the users
 type UserPagination struct {
-	Users        []User
-	limit        int
-	presence     bool
-	teamId       string
-	previousResp *ResponseMetadata
-	c            *Client
+	Users    []User
+	Cursor   string
+	limit    int
+	presence bool
+	teamId   string
+	complete bool
+	c        *Client
 }
 
 // Done checks if the pagination has completed
@@ -358,17 +366,15 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 		resp *userResponseFull
 	)
 
-	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
+	if t.c == nil || t.complete {
 		return t, errPaginationComplete
 	}
-
-	t.previousResp = t.previousResp.initialize()
 
 	values := url.Values{
 		"limit":          {strconv.Itoa(t.limit)},
 		"presence":       {strconv.FormatBool(t.presence)},
 		"token":          {t.c.token},
-		"cursor":         {t.previousResp.Cursor},
+		"cursor":         {t.Cursor},
 		"team_id":        {t.teamId},
 		"include_locale": {strconv.FormatBool(true)},
 	}
@@ -379,7 +385,8 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 
 	t.c.Debugf("GetUsersContext: got %d users; metadata %v", len(resp.Members), resp.Metadata)
 	t.Users = resp.Members
-	t.previousResp = &resp.Metadata
+	t.Cursor = resp.Metadata.Cursor
+	t.complete = t.Cursor == ""
 
 	return t, nil
 }
