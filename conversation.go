@@ -1035,16 +1035,19 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 
 // CreateChannelCanvas creates a new canvas in a channel.
 // For more details, see CreateChannelCanvasContext documentation.
-func (api *Client) CreateChannelCanvas(channel string, documentContent DocumentContent) (string, error) {
-	return api.CreateChannelCanvasContext(context.Background(), channel, documentContent)
+func (api *Client) CreateChannelCanvas(channel string, title string, documentContent DocumentContent) (string, error) {
+	return api.CreateChannelCanvasContext(context.Background(), channel, title, documentContent)
 }
 
 // CreateChannelCanvasContext creates a new canvas in a channel with a custom context.
 // Slack API docs: https://api.slack.com/methods/conversations.canvases.create
-func (api *Client) CreateChannelCanvasContext(ctx context.Context, channel string, documentContent DocumentContent) (string, error) {
+func (api *Client) CreateChannelCanvasContext(ctx context.Context, channel string, title string, documentContent DocumentContent) (string, error) {
 	values := url.Values{
 		"token":      {api.token},
 		"channel_id": {channel},
+	}
+	if title != "" {
+		values.Add("title", title)
 	}
 	if documentContent.Type != "" {
 		documentContentJSON, err := json.Marshal(documentContent)
