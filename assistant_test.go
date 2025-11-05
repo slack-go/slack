@@ -35,9 +35,10 @@ func TestSetAssistantThreadsStatus(t *testing.T) {
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	params := AssistantThreadsSetStatusParameters{
-		ChannelID: "CXXXXXXXX",
-		ThreadTS:  "1234567890.123456",
-		Status:    "updated status",
+		ChannelID:       "CXXXXXXXX",
+		ThreadTS:        "1234567890.123456",
+		Status:          "updated status",
+		LoadingMessages: []string{"updating status..."},
 	}
 
 	err := api.SetAssistantThreadsStatus(params)

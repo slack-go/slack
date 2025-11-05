@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // AssistantThreadSetStatusParameters are the parameters for AssistantThreadSetStatus
 type AssistantThreadsSetStatusParameters struct {
-	ChannelID string `json:"channel_id"`
-	Status    string `json:"status"`
-	ThreadTS  string `json:"thread_ts"`
+	ChannelID       string   `json:"channel_id"`
+	Status          string   `json:"status"`
+	ThreadTS        string   `json:"thread_ts"`
+	LoadingMessages []string `json:"loading_messages,omitempty"`
 }
 
 // AssistantThreadSetTitleParameters are the parameters for AssistantThreadSetTitle
@@ -142,6 +144,10 @@ func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params 
 
 	// Always send the status parameter, if empty, it will clear any existing status
 	values.Add("status", params.Status)
+
+	if len(params.LoadingMessages) > 0 {
+		values.Add("loading_messages", strings.Join(params.LoadingMessages, ","))
+	}
 
 	response := struct {
 		SlackResponse
