@@ -11,7 +11,7 @@ func TestNewImageBlockElement(t *testing.T) {
 	imageElement := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgentLocationMarker.png", "Location Pin Icon")
 
 	assert.Equal(t, string(imageElement.Type), "image")
-	assert.Contains(t, imageElement.ImageURL, "tripAgentLocationMarker")
+	assert.Contains(t, *imageElement.ImageURL, "tripAgentLocationMarker")
 	assert.Equal(t, imageElement.AltText, "Location Pin Icon")
 }
 
@@ -22,6 +22,7 @@ func TestNewImageBlockElementSlackFile(t *testing.T) {
 	assert.Equal(t, string(imageElement.Type), "image")
 	assert.Contains(t, imageElement.SlackFile.URL, "tripAgentLocationMarker")
 	assert.Equal(t, imageElement.AltText, "Location Pin Icon")
+	assert.Nil(t, imageElement.ImageURL, "ImageURL should be nil when SlackFile is provided")
 }
 
 func TestNewButtonBlockElement(t *testing.T) {

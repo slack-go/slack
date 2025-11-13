@@ -15,7 +15,7 @@ func TestNewImageBlockObject(t *testing.T) {
 
 	assert.Equal(t, string(imageObject.Type), "image")
 	assert.Equal(t, imageObject.AltText, "Beagle")
-	assert.Contains(t, imageObject.ImageURL, "beagle.png")
+	assert.Contains(t, *imageObject.ImageURL, "beagle.png")
 }
 
 func TestNewTextBlockObject(t *testing.T) {
