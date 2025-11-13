@@ -53,6 +53,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &ActionBlock{}
 		case "context":
 			block = &ContextBlock{}
+		case "context_actions":
+			block = &ContextActionsBlock{}
 		case "divider":
 			block = &DividerBlock{}
 		case "file":
@@ -141,6 +143,10 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		e = &NumberInputBlockElement{}
 	case "file_input":
 		e = &FileInputBlockElement{}
+	case "feedback_buttons":
+		e = &FeedbackButtonsBlockElement{}
+	case "icon_button":
+		e = &IconButtonBlockElement{}
 	default:
 		return fmt.Errorf("unsupported block element type %v", s.TypeVal)
 	}
@@ -221,6 +227,10 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			blockElement = &SelectBlockElement{}
 		case "number_input":
 			blockElement = &NumberInputBlockElement{}
+		case "feedback_buttons":
+			blockElement = &FeedbackButtonsBlockElement{}
+		case "icon_button":
+			blockElement = &IconButtonBlockElement{}
 		default:
 			return fmt.Errorf("unsupported block element type %v", blockElementType)
 		}

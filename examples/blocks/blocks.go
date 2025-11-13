@@ -37,6 +37,10 @@ func main() {
 	exampleSix()
 	fmt.Println("--- End Example Six ---")
 
+	fmt.Println("--- Begin Context Actions Example ---")
+	contextActionsExample()
+	fmt.Println("--- End Context Actions Example ---")
+
 	fmt.Println("--- Begin Example Unmarshalling ---")
 	unmarshalExample()
 	fmt.Println("--- End Example Unmarshalling ---")
@@ -530,6 +534,60 @@ func unmarshalExample() {
 	respMsg := slack.NewBlockMessage(respBlocks...)
 
 	b, err = json.Marshal(&respMsg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(string(b))
+}
+
+// contextActionsExample demonstrates the context_actions block with feedback buttons and icon buttons
+func contextActionsExample() {
+	// Section with AI-generated response
+	responseText := slack.NewTextBlockObject("mrkdwn", "*AI Assistant Response:*\nBased on your query, I recommend using the `context_actions` block for interactive feedback. This allows users to provide quick feedback on AI-generated content.", false, false)
+	responseSection := slack.NewSectionBlock(responseText, nil, nil)
+
+	// Divider
+	divider := slack.NewDividerBlock()
+
+	// Create feedback buttons for the AI response
+	positiveBtnText := slack.NewTextBlockObject("plain_text", "👍", false, false)
+	negativeBtnText := slack.NewTextBlockObject("plain_text", "👎", false, false)
+	positiveBtn := slack.NewFeedbackButton(positiveBtnText, "positive_feedback")
+	negativeBtn := slack.NewFeedbackButton(negativeBtnText, "negative_feedback")
+	feedbackElement := slack.NewFeedbackButtonsBlockElement("ai_feedback_1", positiveBtn, negativeBtn)
+
+	// Create icon button for delete action
+	deleteText := slack.NewTextBlockObject("plain_text", "Delete", false, false)
+	iconButton := slack.NewIconButtonBlockElement("trash", deleteText, "delete_response_1").
+		WithValue("response_123")
+
+	// Context actions block with both feedback and delete
+	contextActionsBlock := slack.NewContextActionsBlock("actions_1", feedbackElement, iconButton)
+
+	// Another example: just feedback buttons
+	anotherResponseText := slack.NewTextBlockObject("mrkdwn", "*Another AI Response:*\nHere's an alternative solution to your problem...", false, false)
+	anotherSection := slack.NewSectionBlock(anotherResponseText, nil, nil)
+
+	goodBtnText := slack.NewTextBlockObject("plain_text", "Good", false, false)
+	badBtnText := slack.NewTextBlockObject("plain_text", "Bad", false, false)
+	goodBtn := slack.NewFeedbackButton(goodBtnText, "good").WithAccessibilityLabel("Mark this response as good")
+	badBtn := slack.NewFeedbackButton(badBtnText, "bad").WithAccessibilityLabel("Mark this response as bad")
+	simpleFeedback := slack.NewFeedbackButtonsBlockElement("ai_feedback_2", goodBtn, badBtn)
+
+	simpleContextActions := slack.NewContextActionsBlock("actions_2", simpleFeedback)
+
+	// Build Message with blocks created above
+	msg := slack.NewBlockMessage(
+		responseSection,
+		contextActionsBlock,
+		divider,
+		anotherSection,
+		simpleContextActions,
+	)
+
+	b, err := json.MarshalIndent(msg, "", "    ")
 	if err != nil {
 		fmt.Println(err)
 		return
