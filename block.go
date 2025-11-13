@@ -17,6 +17,7 @@ const (
 	MBTCall     MessageBlockType = "call"
 	MBTVideo    MessageBlockType = "video"
 	MBTMarkdown MessageBlockType = "markdown"
+	MBTTable    MessageBlockType = "table"
 )
 
 // Block defines an interface all block types should implement
