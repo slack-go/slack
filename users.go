@@ -111,33 +111,33 @@ type UserProfileCustomField struct {
 
 // User contains all the information of a user
 type User struct {
-	ID                string         `json:"id"`
-	TeamID            string         `json:"team_id"`
-	Name              string         `json:"name"`
-	Deleted           bool           `json:"deleted"`
-	Color             string         `json:"color"`
-	RealName          string         `json:"real_name"`
-	TZ                string         `json:"tz,omitempty"`
-	TZLabel           string         `json:"tz_label"`
-	TZOffset          int            `json:"tz_offset"`
-	Profile           UserProfile    `json:"profile"`
-	IsBot             bool           `json:"is_bot"`
-	IsAdmin           bool           `json:"is_admin"`
-	IsOwner           bool           `json:"is_owner"`
-	IsPrimaryOwner    bool           `json:"is_primary_owner"`
-	IsRestricted      bool           `json:"is_restricted"`
-	IsUltraRestricted bool           `json:"is_ultra_restricted"`
-	IsStranger        bool           `json:"is_stranger"`
-	IsAppUser         bool           `json:"is_app_user"`
-	IsInvitedUser     bool           `json:"is_invited_user"`
-	IsEmailConfirmed  bool           `json:"is_email_confirmed"`
-	Has2FA            bool           `json:"has_2fa"`
-	TwoFactorType     *string        `json:"two_factor_type"`
-	HasFiles          bool           `json:"has_files"`
-	Presence          string         `json:"presence"`
-	Locale            string         `json:"locale"`
-	Updated           JSONTime       `json:"updated"`
-	Enterprise        EnterpriseUser `json:"enterprise_user,omitempty"`
+	ID                string         `json:"id" form:"id"`
+	TeamID            string         `json:"team_id" form:"team_id"`
+	Name              string         `json:"name" form:"name"`
+	Deleted           bool           `json:"deleted" form:"deleted"`
+	Color             string         `json:"color" form:"color"`
+	RealName          string         `json:"real_name" form:"real_name"`
+	TZ                string         `json:"tz,omitempty" form:"tz"`
+	TZLabel           string         `json:"tz_label" form:"tz_label"`
+	TZOffset          int            `json:"tz_offset" form:"tz_offseet"`
+	Profile           UserProfile    `json:"profile" form:"profile"`
+	IsBot             bool           `json:"is_bot" form:"is_bot"`
+	IsAdmin           bool           `json:"is_admin" form:"is_admin"`
+	IsOwner           bool           `json:"is_owner" form:"is_owner"`
+	IsPrimaryOwner    bool           `json:"is_primary_owner" form:"is_primary_owner"`
+	IsRestricted      bool           `json:"is_restricted" form:"is_restricted"`
+	IsUltraRestricted bool           `json:"is_ultra_restricted" form:"is_ultra_restricted"`
+	IsStranger        bool           `json:"is_stranger" form:"is_stranger"`
+	IsAppUser         bool           `json:"is_app_user" form:"is_app_user"`
+	IsInvitedUser     bool           `json:"is_invited_user" form:"is_invited_user"`
+	IsEmailConfirmed  bool           `json:"is_email_confirmed" form:"is_email_confirmed"`
+	Has2FA            bool           `json:"has_2fa" form:"has_2fa"`
+	TwoFactorType     *string        `json:"two_factor_type" form:"two_factor_type"`
+	HasFiles          bool           `json:"has_files" form:"has_files"`
+	Presence          string         `json:"presence" form:"presence"`
+	Locale            string         `json:"locale" form:"local"`
+	Updated           JSONTime       `json:"updated" form:"updated"`
+	Enterprise        EnterpriseUser `json:"enterprise_user,omitempty" form:"enterprise_user"`
 }
 
 // UserPresence contains details about a user online status
