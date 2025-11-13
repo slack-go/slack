@@ -3,20 +3,22 @@ package slack
 // https://api.slack.com/reference/messaging/block-elements
 
 const (
-	METCheckboxGroups MessageElementType = "checkboxes"
-	METImage          MessageElementType = "image"
-	METButton         MessageElementType = "button"
-	METOverflow       MessageElementType = "overflow"
-	METDatepicker     MessageElementType = "datepicker"
-	METTimepicker     MessageElementType = "timepicker"
-	METDatetimepicker MessageElementType = "datetimepicker"
-	METPlainTextInput MessageElementType = "plain_text_input"
-	METRadioButtons   MessageElementType = "radio_buttons"
-	METRichTextInput  MessageElementType = "rich_text_input"
-	METEmailTextInput MessageElementType = "email_text_input"
-	METURLTextInput   MessageElementType = "url_text_input"
-	METNumber         MessageElementType = "number_input"
-	METFileInput      MessageElementType = "file_input"
+	METCheckboxGroups  MessageElementType = "checkboxes"
+	METImage           MessageElementType = "image"
+	METButton          MessageElementType = "button"
+	METOverflow        MessageElementType = "overflow"
+	METDatepicker      MessageElementType = "datepicker"
+	METTimepicker      MessageElementType = "timepicker"
+	METDatetimepicker  MessageElementType = "datetimepicker"
+	METPlainTextInput  MessageElementType = "plain_text_input"
+	METRadioButtons    MessageElementType = "radio_buttons"
+	METRichTextInput   MessageElementType = "rich_text_input"
+	METEmailTextInput  MessageElementType = "email_text_input"
+	METURLTextInput    MessageElementType = "url_text_input"
+	METNumber          MessageElementType = "number_input"
+	METFileInput       MessageElementType = "file_input"
+	METFeedbackButtons MessageElementType = "feedback_buttons"
+	METIconButton      MessageElementType = "icon_button"
 
 	MixedElementImage MixedElementType = "mixed_image"
 	MixedElementText  MixedElementType = "mixed_text"
@@ -809,5 +811,116 @@ func (s *FileInputBlockElement) WithFileTypes(fileTypes ...string) *FileInputBlo
 // WithMaxFiles sets the maximum number of files that can be uploaded
 func (s *FileInputBlockElement) WithMaxFiles(maxFiles int) *FileInputBlockElement {
 	s.MaxFiles = maxFiles
+	return s
+}
+
+// FeedbackButton defines a button within a feedback buttons element
+type FeedbackButton struct {
+	Text               *TextBlockObject `json:"text"`
+	Value              string           `json:"value"`
+	AccessibilityLabel string           `json:"accessibility_label,omitempty"`
+}
+
+// NewFeedbackButton returns a new instance of a feedback button
+func NewFeedbackButton(text *TextBlockObject, value string) *FeedbackButton {
+	return &FeedbackButton{
+		Text:  text,
+		Value: value,
+	}
+}
+
+// WithAccessibilityLabel sets the accessibility label for the feedback button
+func (fb *FeedbackButton) WithAccessibilityLabel(label string) *FeedbackButton {
+	fb.AccessibilityLabel = label
+	return fb
+}
+
+// FeedbackButtonsBlockElement defines an element that provides positive/negative feedback options
+//
+// More Information: https://docs.slack.dev/reference/block-kit/block-elements/feedback-buttons-element
+type FeedbackButtonsBlockElement struct {
+	Type           MessageElementType `json:"type"`
+	ActionID       string             `json:"action_id,omitempty"`
+	PositiveButton *FeedbackButton    `json:"positive_button"`
+	NegativeButton *FeedbackButton    `json:"negative_button"`
+}
+
+// ElementType returns the type of the element
+func (s FeedbackButtonsBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewFeedbackButtonsBlockElement returns a new instance of a feedback buttons element
+func NewFeedbackButtonsBlockElement(actionID string, positiveButton, negativeButton *FeedbackButton) *FeedbackButtonsBlockElement {
+	return &FeedbackButtonsBlockElement{
+		Type:           METFeedbackButtons,
+		ActionID:       actionID,
+		PositiveButton: positiveButton,
+		NegativeButton: negativeButton,
+	}
+}
+
+// WithPositiveButton sets the positive button for the feedback buttons element
+func (s *FeedbackButtonsBlockElement) WithPositiveButton(button *FeedbackButton) *FeedbackButtonsBlockElement {
+	s.PositiveButton = button
+	return s
+}
+
+// WithNegativeButton sets the negative button for the feedback buttons element
+func (s *FeedbackButtonsBlockElement) WithNegativeButton(button *FeedbackButton) *FeedbackButtonsBlockElement {
+	s.NegativeButton = button
+	return s
+}
+
+// IconButtonBlockElement defines an element that displays icon-based interactive buttons
+//
+// More Information: https://docs.slack.dev/reference/block-kit/block-elements/icon-button-element
+type IconButtonBlockElement struct {
+	Type               MessageElementType       `json:"type"`
+	Icon               string                   `json:"icon"`
+	Text               *TextBlockObject         `json:"text"`
+	ActionID           string                   `json:"action_id,omitempty"`
+	Value              string                   `json:"value,omitempty"`
+	Confirm            *ConfirmationBlockObject `json:"confirm,omitempty"`
+	AccessibilityLabel string                   `json:"accessibility_label,omitempty"`
+	VisibleToUserIDs   []string                 `json:"visible_to_user_ids,omitempty"`
+}
+
+// ElementType returns the type of the element
+func (s IconButtonBlockElement) ElementType() MessageElementType {
+	return s.Type
+}
+
+// NewIconButtonBlockElement returns a new instance of an icon button element
+func NewIconButtonBlockElement(icon string, text *TextBlockObject, actionID string) *IconButtonBlockElement {
+	return &IconButtonBlockElement{
+		Type:     METIconButton,
+		Icon:     icon,
+		Text:     text,
+		ActionID: actionID,
+	}
+}
+
+// WithValue sets the value for the icon button element
+func (s *IconButtonBlockElement) WithValue(value string) *IconButtonBlockElement {
+	s.Value = value
+	return s
+}
+
+// WithConfirm sets the confirmation dialog for the icon button element
+func (s *IconButtonBlockElement) WithConfirm(confirm *ConfirmationBlockObject) *IconButtonBlockElement {
+	s.Confirm = confirm
+	return s
+}
+
+// WithAccessibilityLabel sets the accessibility label for the icon button element
+func (s *IconButtonBlockElement) WithAccessibilityLabel(label string) *IconButtonBlockElement {
+	s.AccessibilityLabel = label
+	return s
+}
+
+// WithVisibleToUserIDs sets the user IDs who can see the icon button element
+func (s *IconButtonBlockElement) WithVisibleToUserIDs(userIDs []string) *IconButtonBlockElement {
+	s.VisibleToUserIDs = userIDs
 	return s
 }
