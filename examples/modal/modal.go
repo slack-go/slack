@@ -1,6 +1,6 @@
 // Modal example - How to respond to a slash command with an interactive modal and parse the response
 // The flow of this example:
-// 1. User trigers your app with a slash command (e.g. /modaltest) that will send a request to http://URL/slash and respond with a request to open a modal
+// 1. User triggers your app with a slash command (e.g. /modaltest) that will send a request to http://URL/slash and respond with a request to open a modal
 // 2. User fills out fields first and last name in modal and hits submit
 // 3. This will send a request to http://URL/modal and send a greeting message to the user
 
@@ -177,7 +177,7 @@ func handleModal(token string) func(w http.ResponseWriter, r *http.Request) {
 			// You must set one of external_id or view_id and you can use hash for avoiding race condition.
 			// More details: https://api.slack.com/surfaces/modals/using#updating_apis
 			_, err := api.UpdateView(updateModal, "", i.View.Hash, i.View.ID)
-			// Wait for a few seconds to see result this code is necesarry due to slack server modal is going to be closed after the update
+			// Wait for a few seconds to see result this code is necessary due to slack server modal is going to be closed after the update
 			time.Sleep(time.Second * 2)
 			if err != nil {
 				fmt.Printf("Error updating view: %s", err)
