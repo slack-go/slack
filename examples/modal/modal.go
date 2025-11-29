@@ -122,7 +122,7 @@ func handleSlash(token string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := verifySigningSecret(r)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Printf("%s", err.Error())
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -153,7 +153,7 @@ func handleModal(token string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := verifySigningSecret(r)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Printf("%s", err.Error())
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -161,7 +161,7 @@ func handleModal(token string) func(w http.ResponseWriter, r *http.Request) {
 		var i slack.InteractionCallback
 		err = json.Unmarshal([]byte(r.FormValue("payload")), &i)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Printf("%s", err.Error())
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
