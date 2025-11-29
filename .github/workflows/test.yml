@@ -33,7 +33,7 @@ jobs:
         go:
           - "1.24"
           - "1.25"
-    name: lint
+    name: lint go-${{ matrix.go }}
     steps:
       - uses: actions/setup-go@v6
         with:
