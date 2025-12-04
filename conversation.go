@@ -958,13 +958,13 @@ type GetConversationHistoryResponse struct {
 	Messages []Message `json:"messages"`
 }
 
-// GetConversationHistory joins an existing conversation.
+// GetConversationHistory retrieves the message history from the specified conversation.
 // For more details, see GetConversationHistoryContext documentation.
 func (api *Client) GetConversationHistory(params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
 	return api.GetConversationHistoryContext(context.Background(), params)
 }
 
-// GetConversationHistoryContext joins an existing conversation with a custom context.
+// GetConversationHistoryContext retrieves the message history from the specified conversation with a custom context.
 // Slack API docs: https://api.slack.com/methods/conversations.history
 func (api *Client) GetConversationHistoryContext(ctx context.Context, params *GetConversationHistoryParameters) (*GetConversationHistoryResponse, error) {
 	values := url.Values{"token": {api.token}, "channel": {params.ChannelID}}
