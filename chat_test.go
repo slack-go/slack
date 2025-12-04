@@ -493,7 +493,6 @@ func TestStartStream(t *testing.T) {
 				rw.Write(response)
 			})
 
-			// Fixed: removed timestamp parameter, pass via MsgOptionTS
 			_, _, _ = api.StartStream("CXXX", test.opt...)
 		})
 	}
