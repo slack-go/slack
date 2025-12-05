@@ -185,6 +185,61 @@ func TestPostMessage(t *testing.T) {
 				"user_auth_message": []string{"Please!"},
 			},
 		},
+		"UnfurlAuthBlocks": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlAuthBlocks("123", NewSectionBlock(NewTextBlockObject(MarkdownType, "*Authenticate* to view", false, false), nil, nil)),
+			},
+			expected: url.Values{
+				"channel":          []string{"CXXX"},
+				"token":            []string{"testing-token"},
+				"ts":               []string{"123"},
+				"user_auth_blocks": []string{`[{"type":"section","text":{"type":"mrkdwn","text":"*Authenticate* to view"}}]`},
+			},
+		},
+		"UnfurlByID": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlByID("Uxxxxxxx-909b5454-75f8-4ac4-b325-1b40e230bbd8", "composer", map[string]Attachment{"https://example.com": {Text: "Preview"}}),
+			},
+			expected: url.Values{
+				"token":     []string{"testing-token"},
+				"unfurl_id": []string{"Uxxxxxxx-909b5454-75f8-4ac4-b325-1b40e230bbd8"},
+				"source":    []string{"composer"},
+				"unfurls":   []string{`{"https://example.com":{"text":"Preview","blocks":null}}`},
+			},
+		},
+		"UnfurlByIDWithNilUnfurls": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlByID("uf-123", "composer", nil),
+			},
+			expected: url.Values{
+				"token":     []string{"testing-token"},
+				"unfurl_id": []string{"uf-123"},
+				"source":    []string{"composer"},
+				"unfurls":   []string{`{}`},
+			},
+		},
+		"UnfurlWorkObjectMetadataOnly": {
+			endpoint: "/chat.unfurl",
+			opt: []MsgOption{
+				MsgOptionUnfurlWorkObject("123", nil, WorkObjectMetadata{
+					Entities: []WorkObjectEntity{{
+						URL:           "https://example.com/doc/1",
+						ExternalRef:   WorkObjectExternalRef{ID: "1"},
+						EntityType:    EntityTypeFile,
+						EntityPayload: map[string]interface{}{"title": "Doc"},
+					}},
+				}),
+			},
+			expected: url.Values{
+				"channel":  []string{"CXXX"},
+				"token":    []string{"testing-token"},
+				"ts":       []string{"123"},
+				"metadata": []string{`{"entities":[{"url":"https://example.com/doc/1","external_ref":{"id":"1"},"entity_type":"slack#/entities/file","entity_payload":{"title":"Doc"}}]}`},
+			},
+		},
 		"LinkNames true": {
 			endpoint: "/chat.postMessage",
 			opt: []MsgOption{
@@ -516,6 +571,175 @@ func TestStartStream(t *testing.T) {
 
 			_, _, _ = api.StartStream("CXXX", test.opt...)
 		})
+	}
+}
+
+func TestWorkObjectMetadata(t *testing.T) {
+	// Test WorkObjectMetadata marshaling
+	metadata := WorkObjectMetadata{
+		Entities: []WorkObjectEntity{
+			{
+				AppUnfurlURL: "https://example.com/document/123?eid=123456&edit=abcxyz",
+				URL:          "https://example.com/document/123",
+				ExternalRef: WorkObjectExternalRef{
+					ID:   "123",
+					Type: "document",
+				},
+				EntityType: "slack#/entities/file",
+				EntityPayload: map[string]interface{}{
+					"title":       "Test Document",
+					"description": "A test document for Work Objects",
+				},
+			},
+		},
+	}
+
+	// Test JSON marshaling
+	jsonData, err := json.Marshal(metadata)
+	if err != nil {
+		t.Errorf("Failed to marshal WorkObjectMetadata: %v", err)
+	}
+
+	// Test JSON unmarshaling
+	var unmarshaled WorkObjectMetadata
+	err = json.Unmarshal(jsonData, &unmarshaled)
+	if err != nil {
+		t.Errorf("Failed to unmarshal WorkObjectMetadata: %v", err)
+	}
+
+	// Verify the data
+	if len(unmarshaled.Entities) != 1 {
+		t.Errorf("Expected 1 entity, got %d", len(unmarshaled.Entities))
+	}
+
+	entity := unmarshaled.Entities[0]
+	if entity.URL != "https://example.com/document/123" {
+		t.Errorf("Expected URL 'https://example.com/document/123', got '%s'", entity.URL)
+	}
+
+	if entity.ExternalRef.ID != "123" {
+		t.Errorf("Expected external ref ID '123', got '%s'", entity.ExternalRef.ID)
+	}
+
+	if entity.EntityType != "slack#/entities/file" {
+		t.Errorf("Expected entity type 'slack#/entities/file', got '%s'", entity.EntityType)
+	}
+}
+
+func TestMsgOptionWorkObjectMetadata(t *testing.T) {
+	metadata := WorkObjectMetadata{
+		Entities: []WorkObjectEntity{
+			{
+				URL: "https://example.com/task/456",
+				ExternalRef: WorkObjectExternalRef{
+					ID: "456",
+				},
+				EntityType: "slack#/entities/task",
+				EntityPayload: map[string]interface{}{
+					"title":  "Test Task",
+					"status": "in_progress",
+				},
+			},
+		},
+	}
+
+	// Create a sendConfig to test the option
+	config := &sendConfig{
+		values: url.Values{},
+	}
+
+	// Apply the option
+	opt := MsgOptionWorkObjectMetadata(metadata)
+	err := opt(config)
+	if err != nil {
+		t.Errorf("MsgOptionWorkObjectMetadata returned error: %v", err)
+	}
+
+	// Check that metadata was set
+	metadataValue := config.values.Get("metadata")
+	if metadataValue == "" {
+		t.Error("Expected metadata to be set, but it was empty")
+	}
+
+	// Verify the JSON structure
+	var result WorkObjectMetadata
+	err = json.Unmarshal([]byte(metadataValue), &result)
+	if err != nil {
+		t.Errorf("Failed to unmarshal metadata JSON: %v", err)
+	}
+
+	if len(result.Entities) != 1 {
+		t.Errorf("Expected 1 entity, got %d", len(result.Entities))
+	}
+}
+
+func TestMsgOptionWorkObjectMetadataNilEntities(t *testing.T) {
+	// When Entities is nil, we should marshal as "entities":[] for API compatibility
+	metadata := WorkObjectMetadata{Entities: nil}
+	config := &sendConfig{values: url.Values{}}
+	opt := MsgOptionWorkObjectMetadata(metadata)
+	if err := opt(config); err != nil {
+		t.Errorf("MsgOptionWorkObjectMetadata with nil Entities returned error: %v", err)
+	}
+	metadataValue := config.values.Get("metadata")
+	if metadataValue == "" {
+		t.Error("Expected metadata to be set")
+	}
+	if metadataValue != `{"entities":[]}` {
+		t.Errorf("Expected metadata with empty entities array, got %q", metadataValue)
+	}
+}
+
+func TestMsgOptionWorkObjectEntity(t *testing.T) {
+	entity := WorkObjectEntity{
+		URL: "https://example.com/incident/789",
+		ExternalRef: WorkObjectExternalRef{
+			ID:   "789",
+			Type: "incident",
+		},
+		EntityType: "slack#/entities/incident",
+		EntityPayload: map[string]interface{}{
+			"title":    "Production Outage",
+			"severity": "high",
+		},
+	}
+
+	// Create a sendConfig to test the option
+	config := &sendConfig{
+		values: url.Values{},
+	}
+
+	// Apply the option
+	opt := MsgOptionWorkObjectEntity(entity)
+	err := opt(config)
+	if err != nil {
+		t.Errorf("MsgOptionWorkObjectEntity returned error: %v", err)
+	}
+
+	// Check that metadata was set
+	metadataValue := config.values.Get("metadata")
+	if metadataValue == "" {
+		t.Error("Expected metadata to be set, but it was empty")
+	}
+
+	// Verify the JSON structure
+	var result WorkObjectMetadata
+	err = json.Unmarshal([]byte(metadataValue), &result)
+	if err != nil {
+		t.Errorf("Failed to unmarshal metadata JSON: %v", err)
+	}
+
+	if len(result.Entities) != 1 {
+		t.Errorf("Expected 1 entity, got %d", len(result.Entities))
+	}
+
+	resultEntity := result.Entities[0]
+	if resultEntity.URL != entity.URL {
+		t.Errorf("Expected URL '%s', got '%s'", entity.URL, resultEntity.URL)
+	}
+
+	if resultEntity.ExternalRef.ID != entity.ExternalRef.ID {
+		t.Errorf("Expected external ref ID '%s', got '%s'", entity.ExternalRef.ID, resultEntity.ExternalRef.ID)
 	}
 }
 

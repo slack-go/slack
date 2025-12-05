@@ -3055,3 +3055,142 @@ func TestAppHomeOpenedEvent_FullEventParsing_WithoutView(t *testing.T) {
 	assert.Equal(t, "1747319568.267214", appHomeEvent.EventTimeStamp)
 	assert.Nil(t, appHomeEvent.View)
 }
+
+func TestEntityDetailsRequestedEvent(t *testing.T) {
+	jsonStr := `{
+		"type": "entity_details_requested",
+		"user": "U123456789",
+		"trigger_id": "1234567890123.1234567890123.abcdef01234567890abcdef012345689",
+		"user_locale": "en-US",
+		"entity_url": "https://example.com/incidents/123",
+		"external_ref": {
+			"id": "123"
+		},
+		"link": {
+			"url": "https://example.com/incidents/123",
+			"domain": "example.com"
+		},
+		"app_unfurl_url": "https://example.com/incidents/123",
+		"channel": "C123456789",
+		"message_ts": "1234567890.123456",
+		"event_ts": "1234567890.123456"
+	}`
+
+	var event EntityDetailsRequestedEvent
+	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
+		t.Errorf("Failed to unmarshal EntityDetailsRequestedEvent: %v", err)
+	}
+
+	if event.Type != "entity_details_requested" {
+		t.Errorf("Expected type to be 'entity_details_requested', got %s", event.Type)
+	}
+
+	if event.User != "U123456789" {
+		t.Errorf("Expected user to be 'U123456789', got %s", event.User)
+	}
+
+	if event.ExternalRef.ID != "123" {
+		t.Errorf("Expected external_ref.id to be '123', got %s", event.ExternalRef.ID)
+	}
+
+	if event.EntityURL != "https://example.com/incidents/123" {
+		t.Errorf("Expected entity_url to be 'https://example.com/incidents/123', got %s", event.EntityURL)
+	}
+
+	if event.Link.URL != "https://example.com/incidents/123" {
+		t.Errorf("Expected link.url to be 'https://example.com/incidents/123', got %s", event.Link.URL)
+	}
+
+	if event.Link.Domain != "example.com" {
+		t.Errorf("Expected link.domain to be 'example.com', got %s", event.Link.Domain)
+	}
+
+	if event.TriggerID != "1234567890123.1234567890123.abcdef01234567890abcdef012345689" {
+		t.Errorf("Expected trigger_id to be '1234567890123.1234567890123.abcdef01234567890abcdef012345689', got %s", event.TriggerID)
+	}
+
+	if event.EventTS != "1234567890.123456" {
+		t.Errorf("Expected event_ts to be '1234567890.123456', got %s", event.EventTS)
+	}
+
+	if event.Channel != "C123456789" {
+		t.Errorf("Expected channel to be 'C123456789', got %s", event.Channel)
+	}
+
+	if event.MessageTs != "1234567890.123456" {
+		t.Errorf("Expected message_ts to be '1234567890.123456', got %s", event.MessageTs)
+	}
+}
+
+func TestParseEventAPIEntityDetailsRequested(t *testing.T) {
+	rawE := []byte(`
+		{
+			"token": "test-token",
+			"team_id": "T123456789",
+			"api_app_id": "A123456789",
+			"event": {
+				"type": "entity_details_requested",
+				"user": "U123456789",
+				"trigger_id": "1234567890123.1234567890123.abcdef01234567890abcdef012345689",
+				"user_locale": "en-US",
+				"entity_url": "https://example.com/incidents/123",
+				"external_ref": {
+					"id": "123"
+				},
+				"link": {
+					"url": "https://example.com/incidents/123",
+					"domain": "example.com"
+				},
+				"app_unfurl_url": "https://example.com/incidents/123",
+				"channel": "C123456789",
+				"message_ts": "1234567890.123456",
+				"event_ts": "1234567890.123456"
+			},
+			"type": "event_callback",
+			"event_id": "Ev123456789",
+			"event_time": 1234567890
+		}
+	`)
+
+	parsedEvent, err := ParseEvent(rawE, OptionNoVerifyToken())
+	if err != nil {
+		t.Errorf("Failed to parse EntityDetailsRequestedEvent: %v", err)
+	}
+
+	if parsedEvent.Type != "event_callback" {
+		t.Errorf("Expected outer event type to be 'event_callback', got %s", parsedEvent.Type)
+	}
+
+	if parsedEvent.InnerEvent.Type != "entity_details_requested" {
+		t.Errorf("Expected inner event type to be 'entity_details_requested', got %s", parsedEvent.InnerEvent.Type)
+	}
+
+	innerEvent, ok := parsedEvent.InnerEvent.Data.(*EntityDetailsRequestedEvent)
+	if !ok {
+		t.Errorf("Expected inner event data to be *EntityDetailsRequestedEvent, got %T", parsedEvent.InnerEvent.Data)
+	}
+
+	if innerEvent.Type != "entity_details_requested" {
+		t.Errorf("Expected inner event type to be 'entity_details_requested', got %s", innerEvent.Type)
+	}
+
+	if innerEvent.User != "U123456789" {
+		t.Errorf("Expected user to be 'U123456789', got %s", innerEvent.User)
+	}
+
+	if innerEvent.ExternalRef.ID != "123" {
+		t.Errorf("Expected external_ref.id to be '123', got %s", innerEvent.ExternalRef.ID)
+	}
+
+	if innerEvent.TriggerID != "1234567890123.1234567890123.abcdef01234567890abcdef012345689" {
+		t.Errorf("Expected trigger_id to be '1234567890123.1234567890123.abcdef01234567890abcdef012345689', got %s", innerEvent.TriggerID)
+	}
+
+	if innerEvent.EventTS != "1234567890.123456" {
+		t.Errorf("Expected event_ts to be '1234567890.123456', got %s", innerEvent.EventTS)
+	}
+
+	if innerEvent.Link.Domain != "example.com" {
+		t.Errorf("Expected link.domain to be 'example.com', got %s", innerEvent.Link.Domain)
+	}
+}
