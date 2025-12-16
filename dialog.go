@@ -56,8 +56,8 @@ type DialogCallback InteractionCallback
 type DialogSubmissionCallback struct {
 	// NOTE: State is only used with the dialog_submission type.
 	// You should use InteractionCallback.BlockActionsState for block_actions type.
-	State      string            `json:"-"`
-	Submission map[string]string `json:"submission"`
+	State      string            `json:"-" form:"-"`
+	Submission map[string]string `json:"submission" form:"submission"`
 }
 
 // DialogOpenResponse response from `dialog.open`

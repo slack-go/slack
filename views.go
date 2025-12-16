@@ -13,46 +13,46 @@ const (
 type ViewType string
 
 type ViewState struct {
-	Values map[string]map[string]BlockAction `json:"values"`
+	Values map[string]map[string]BlockAction `json:"values" form:"values"`
 }
 
 type View struct {
 	SlackResponse
-	ID                 string           `json:"id"`
-	TeamID             string           `json:"team_id"`
-	Type               ViewType         `json:"type"`
-	Title              *TextBlockObject `json:"title"`
-	Close              *TextBlockObject `json:"close"`
-	Submit             *TextBlockObject `json:"submit"`
-	Blocks             Blocks           `json:"blocks"`
-	PrivateMetadata    string           `json:"private_metadata"`
-	CallbackID         string           `json:"callback_id"`
-	State              *ViewState       `json:"state"`
-	Hash               string           `json:"hash"`
-	ClearOnClose       bool             `json:"clear_on_close"`
-	NotifyOnClose      bool             `json:"notify_on_close"`
-	RootViewID         string           `json:"root_view_id"`
-	PreviousViewID     string           `json:"previous_view_id"`
-	AppID              string           `json:"app_id"`
-	ExternalID         string           `json:"external_id"`
-	BotID              string           `json:"bot_id"`
-	AppInstalledTeamID string           `json:"app_installed_team_id"`
+	ID                 string           `json:"id" form:"id"`
+	TeamID             string           `json:"team_id" form:"team_id"`
+	Type               ViewType         `json:"type" form:"type"`
+	Title              *TextBlockObject `json:"title" form:"title"`
+	Close              *TextBlockObject `json:"close" form:"close"`
+	Submit             *TextBlockObject `json:"submit" form:"submit"`
+	Blocks             Blocks           `json:"blocks" form:"blocks"`
+	PrivateMetadata    string           `json:"private_metadata" form:"private_metadata"`
+	CallbackID         string           `json:"callback_id" form:"callback_id"`
+	State              *ViewState       `json:"state" form:"state"`
+	Hash               string           `json:"hash" form:"hash"`
+	ClearOnClose       bool             `json:"clear_on_close" form:"clear_on_close"`
+	NotifyOnClose      bool             `json:"notify_on_close" form:"notify_on_close"`
+	RootViewID         string           `json:"root_view_id" form:"root_view_id"`
+	PreviousViewID     string           `json:"previous_view_id" form:"previous_view_id"`
+	AppID              string           `json:"app_id" form:"app_id"`
+	ExternalID         string           `json:"external_id" form:"external_id"`
+	BotID              string           `json:"bot_id" form:"bot_id"`
+	AppInstalledTeamID string           `json:"app_installed_team_id" form:"app_installed_team_id"`
 }
 
 type ViewSubmissionCallbackResponseURL struct {
-	BlockID     string `json:"block_id"`
-	ActionID    string `json:"action_id"`
-	ChannelID   string `json:"channel_id"`
-	ResponseURL string `json:"response_url"`
+	BlockID     string `json:"block_id" form:"block_id"`
+	ActionID    string `json:"action_id" form:"action_id"`
+	ChannelID   string `json:"channel_id" form:"channel_id"`
+	ResponseURL string `json:"response_url" form:"response_url"`
 }
 
 type ViewSubmissionCallback struct {
-	Hash         string                              `json:"hash"`
-	ResponseURLs []ViewSubmissionCallbackResponseURL `json:"response_urls,omitempty"`
+	Hash         string                              `json:"hash" form:"hash"`
+	ResponseURLs []ViewSubmissionCallbackResponseURL `json:"response_urls,omitempty" form:"response_urls"`
 }
 
 type ViewClosedCallback struct {
-	IsCleared bool `json:"is_cleared"`
+	IsCleared bool `json:"is_cleared" form:"is_cleared"`
 }
 
 const (
