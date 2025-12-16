@@ -77,6 +77,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &CallBlock{}
 		case "video":
 			block = &VideoBlock{}
+		case "table":
+			block = &TableBlock{}
 		default:
 			block = &UnknownBlock{}
 		}
