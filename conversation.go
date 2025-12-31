@@ -68,12 +68,13 @@ type Purpose struct {
 	LastSet JSONTime `json:"last_set"`
 }
 
-// Properties contains the Canvas associated to the channel.
+// Properties contains additional fields that appear based on the context of the conversation
 type Properties struct {
-	Canvas              Canvas       `json:"canvas"`
-	PostingRestrictedTo RestrictedTo `json:"posting_restricted_to"`
-	Tabs                []Tab        `json:"tabs"`
-	ThreadsRestrictedTo RestrictedTo `json:"threads_restricted_to"`
+	Canvas              Canvas        `json:"canvas"`
+	PostingRestrictedTo RestrictedTo  `json:"posting_restricted_to"`
+	Tabs                []Tab         `json:"tabs"`
+	ThreadsRestrictedTo RestrictedTo  `json:"threads_restricted_to"`
+	RecordChannel       RecordChannel `json:"record_channel"`
 }
 
 type RestrictedTo struct {
@@ -91,6 +92,13 @@ type Canvas struct {
 	FileId       string `json:"file_id"`
 	IsEmpty      bool   `json:"is_empty"`
 	QuipThreadId string `json:"quip_thread_id"`
+}
+
+type RecordChannel struct {
+	RecordID          string `json:"record_id"`
+	RecordType        string `json:"record_type"`
+	RecordLabel       string `json:"record_label"`
+	RecordLabelPlural string `json:"record_label_plural"`
 }
 
 type GetUsersInConversationParameters struct {
