@@ -1033,21 +1033,55 @@ func (api *Client) MarkConversationContext(ctx context.Context, channel, ts stri
 	return response.Err()
 }
 
+// createChannelCanvasParams contains arguments for CreateChannelCanvas method call.
+type createChannelCanvasParams struct {
+	title           string
+	documentContent *DocumentContent
+}
+
+// CreateChannelCanvasOption options for the CreateChannelCanvas method call.
+type CreateChannelCanvasOption func(*createChannelCanvasParams)
+
+// CreateChannelCanvasOptionTitle sets the title of the canvas.
+func CreateChannelCanvasOptionTitle(title string) CreateChannelCanvasOption {
+	return func(params *createChannelCanvasParams) {
+		params.title = title
+	}
+}
+
+// CreateChannelCanvasOptionDocumentContent sets the document content of the canvas.
+func CreateChannelCanvasOptionDocumentContent(documentContent DocumentContent) CreateChannelCanvasOption {
+	return func(params *createChannelCanvasParams) {
+		params.documentContent = &documentContent
+	}
+}
+
 // CreateChannelCanvas creates a new canvas in a channel.
 // For more details, see CreateChannelCanvasContext documentation.
-func (api *Client) CreateChannelCanvas(channel string, documentContent DocumentContent) (string, error) {
-	return api.CreateChannelCanvasContext(context.Background(), channel, documentContent)
+func (api *Client) CreateChannelCanvas(channel string, documentContent DocumentContent, options ...CreateChannelCanvasOption) (string, error) {
+	return api.CreateChannelCanvasContext(context.Background(), channel, documentContent, options...)
 }
 
 // CreateChannelCanvasContext creates a new canvas in a channel with a custom context.
 // Slack API docs: https://api.slack.com/methods/conversations.canvases.create
-func (api *Client) CreateChannelCanvasContext(ctx context.Context, channel string, documentContent DocumentContent) (string, error) {
+func (api *Client) CreateChannelCanvasContext(ctx context.Context, channel string, documentContent DocumentContent, options ...CreateChannelCanvasOption) (string, error) {
+	params := createChannelCanvasParams{
+		documentContent: &documentContent,
+	}
+
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":      {api.token},
 		"channel_id": {channel},
 	}
-	if documentContent.Type != "" {
-		documentContentJSON, err := json.Marshal(documentContent)
+	if params.title != "" {
+		values.Add("title", params.title)
+	}
+	if params.documentContent != nil && params.documentContent.Type != "" {
+		documentContentJSON, err := json.Marshal(params.documentContent)
 		if err != nil {
 			return "", err
 		}

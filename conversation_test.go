@@ -957,6 +957,7 @@ func TestMarkConversation(t *testing.T) {
 
 func createChannelCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
+
 	response, _ := json.Marshal(struct {
 		SlackResponse
 		CanvasID string `json:"canvas_id"`
@@ -980,6 +981,28 @@ func TestCreateChannelCanvas(t *testing.T) {
 	canvasID, err := api.CreateChannelCanvas("C1234567890", documentContent)
 	if err != nil {
 		t.Errorf("Failed to create channel canvas: %v", err)
+		return
+	}
+
+	assert.Equal(t, "F05RQ01LJU0", canvasID)
+}
+
+func TestCreateChannelCanvasWithTitle(t *testing.T) {
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	documentContent := DocumentContent{
+		Type:     "markdown",
+		Markdown: "> channel canvas with title!",
+	}
+
+	canvasID, err := api.CreateChannelCanvas(
+		"C1234567890",
+		documentContent,
+		CreateChannelCanvasOptionTitle("Test Canvas Title"),
+	)
+	if err != nil {
+		t.Errorf("Failed to create channel canvas with title: %v", err)
 		return
 	}
 
