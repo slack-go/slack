@@ -978,7 +978,7 @@ func TestCreateChannelCanvas(t *testing.T) {
 		Markdown: "> channel canvas!",
 	}
 
-	canvasID, err := api.CreateChannelCanvas("C1234567890", "Test Canvas Title", documentContent)
+	canvasID, err := api.CreateChannelCanvas("C1234567890", documentContent)
 	if err != nil {
 		t.Errorf("Failed to create channel canvas: %v", err)
 		return
@@ -987,18 +987,22 @@ func TestCreateChannelCanvas(t *testing.T) {
 	assert.Equal(t, "F05RQ01LJU0", canvasID)
 }
 
-func TestCreateChannelCanvasWithEmptyTitle(t *testing.T) {
+func TestCreateChannelCanvasWithTitle(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	documentContent := DocumentContent{
 		Type:     "markdown",
-		Markdown: "> channel canvas with empty title!",
+		Markdown: "> channel canvas with title!",
 	}
 
-	canvasID, err := api.CreateChannelCanvas("C1234567890", "", documentContent)
+	canvasID, err := api.CreateChannelCanvas(
+		"C1234567890",
+		documentContent,
+		CreateChannelCanvasOptionTitle("Test Canvas Title"),
+	)
 	if err != nil {
-		t.Errorf("Failed to create channel canvas with empty title: %v", err)
+		t.Errorf("Failed to create channel canvas with title: %v", err)
 		return
 	}
 
