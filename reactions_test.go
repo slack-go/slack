@@ -154,8 +154,8 @@ func TestSlack_GetReactions(t *testing.T) {
 			},
 			`{"ok": true,
 		 "type": "message",
+		 "channel": "ChannelID",
 		 "message": {
-			"channel": "ChannelID",
 			"text": "lorem ipsum dolor sit amet",
 			"ts": "123",
 			"user": "U2147483828",
@@ -174,10 +174,11 @@ func TestSlack_GetReactions(t *testing.T) {
 		 }}`,
 			ReactedItem{
 				Item: Item{
-					Type: "message", Message: &Message{
+					Type:    "message",
+					Channel: "ChannelID",
+					Message: &Message{
 						Msg: Msg{
 							Text:      "lorem ipsum dolor sit amet",
-							Channel:   "ChannelID",
 							User:      "U2147483828",
 							Timestamp: "123",
 						},
@@ -321,8 +322,8 @@ func TestSlack_GetReactions(t *testing.T) {
 			if got.Message.Text != test.wantReactedItem.Message.Text {
 				t.Errorf("%d: Got message text %#v, want %#v", i, got.Message.Text, test.wantReactedItem.Message.Text)
 			}
-			if got.Message.Channel != test.wantReactedItem.Message.Channel {
-				t.Errorf("%d: Got message channel %#v, want %#v", i, got.Message.Channel, test.wantReactedItem.Message.Channel)
+			if got.Channel != test.wantReactedItem.Channel {
+				t.Errorf("%d: Got channel %#v, want %#v", i, got.Channel, test.wantReactedItem.Channel)
 			}
 			if got.Message.User != test.wantReactedItem.Message.User {
 				t.Errorf("%d: Got message user %#v, want %#v", i, got.Message.User, test.wantReactedItem.Message.User)

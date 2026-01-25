@@ -53,9 +53,9 @@ type authTestResponseFull struct {
 	AuthTestResponse
 }
 
-// Client for the slack api.
 type ParamOption func(*url.Values)
 
+// Client for the slack api.
 type Client struct {
 	token              string
 	appLevelToken      string
@@ -145,14 +145,14 @@ func (api *Client) AuthTestContext(ctx context.Context) (response *AuthTestRespo
 }
 
 // Debugf print a formatted debug line.
-func (api *Client) Debugf(format string, v ...interface{}) {
+func (api *Client) Debugf(format string, v ...any) {
 	if api.debug {
 		api.log.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
 // Debugln print a debug line.
-func (api *Client) Debugln(v ...interface{}) {
+func (api *Client) Debugln(v ...any) {
 	if api.debug {
 		api.log.Output(2, fmt.Sprintln(v...))
 	}
@@ -164,11 +164,11 @@ func (api *Client) Debug() bool {
 }
 
 // post to a slack web method.
-func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf interface{}) error {
+func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf any) error {
 	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
 }
 
 // get a slack web method.
-func (api *Client) getMethod(ctx context.Context, path string, token string, values url.Values, intf interface{}) error {
+func (api *Client) getMethod(ctx context.Context, path string, token string, values url.Values, intf any) error {
 	return getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
 }

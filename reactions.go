@@ -33,8 +33,9 @@ func NewGetReactionsParameters() GetReactionsParameters {
 }
 
 type getReactionsResponseFull struct {
-	Type string
-	M    struct {
+	Type    string
+	Channel string `json:"channel,omitempty"` // channel is at the root level for message types
+	M       struct {
 		*Message // message structure already contains reactions
 	} `json:"message"`
 	F struct {
@@ -54,7 +55,7 @@ func (res getReactionsResponseFull) extractReactedItem() ReactedItem {
 
 	switch item.Type {
 	case "message":
-		item.Channel = res.M.Channel
+		item.Channel = res.Channel
 		item.Message = res.M.Message
 		item.Reactions = res.M.Reactions
 	case "file":
@@ -234,7 +235,7 @@ func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params
 	if item.Comment != "" {
 		values.Set("file_comment", item.Comment)
 	}
-	if params.Full != DEFAULT_REACTIONS_FULL {
+	if params.Full {
 		values.Set("full", strconv.FormatBool(params.Full))
 	}
 
@@ -274,7 +275,7 @@ func (api *Client) ListReactionsContext(ctx context.Context, params ListReaction
 	if params.Page != DEFAULT_REACTIONS_PAGE {
 		values.Add("page", strconv.Itoa(params.Page))
 	}
-	if params.Full != DEFAULT_REACTIONS_FULL {
+	if params.Full {
 		values.Add("full", strconv.FormatBool(params.Full))
 	}
 
