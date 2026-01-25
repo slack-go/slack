@@ -50,6 +50,7 @@ func NewTestServer(custom ...Binder) *Server {
 	s.Handle("/rtm.start", rtmStartHandler)
 	s.Handle("/rtm.connect", RTMConnectHandler)
 	s.Handle("/chat.postMessage", s.postMessageHandler)
+	s.Handle("/chat.postEphemeral", s.postEphemeralHandler)
 	s.Handle("/conversations.create", createConversationHandler)
 	s.Handle("/conversations.setTopic", setConversationTopicHandler)
 	s.Handle("/conversations.setPurpose", setConversationPurposeHandler)

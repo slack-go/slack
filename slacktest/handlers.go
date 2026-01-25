@@ -221,6 +221,97 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// handle chat.postEphemeral
+func (sts *Server) postEphemeralHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		msg := fmt.Sprintf("error reading body: %s", err.Error())
+		log.Printf("%s", msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	values, vErr := url.ParseQuery(string(data))
+	if vErr != nil {
+		msg := fmt.Sprintf("Unable to decode query params: %s", vErr.Error())
+		log.Printf("%s", msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+
+	ts := time.Now().Unix()
+	resp := &struct {
+		Ok      bool   `json:"ok"`
+		Channel string `json:"channel"`
+		Ts      string `json:"ts"`
+		Text    string `json:"text"`
+	}{
+		Ok:      true,
+		Channel: values.Get("channel"),
+		Ts:      fmt.Sprintf("%d", ts),
+		Text:    values.Get("text"),
+	}
+
+	m := slack.Message{}
+	m.Type = "message"
+	m.Channel = values.Get("channel")
+	m.Timestamp = fmt.Sprintf("%d", ts)
+	m.Text = values.Get("text")
+	m.ThreadTimestamp = values.Get("thread_ts")
+	m.User = values.Get("user")
+	if values.Get("as_user") != "true" {
+		m.Username = defaultNonBotUserName
+	} else {
+		m.Username = BotNameFromContext(r.Context())
+	}
+	attachments := values.Get("attachments")
+	if attachments != "" {
+		decoded, err := url.QueryUnescape(attachments)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to decode attachments: %s", err.Error())
+			log.Printf("%s", msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		var attaches []slack.Attachment
+		aJErr := json.Unmarshal([]byte(decoded), &attaches)
+		if aJErr != nil {
+			msg := fmt.Sprintf("Unable to decode attachments string to json: %s", aJErr.Error())
+			log.Printf("%s", msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		m.Attachments = attaches
+	}
+	blocks := values.Get("blocks")
+	if blocks != "" {
+		decoded, err := url.QueryUnescape(blocks)
+		if err != nil {
+			msg := fmt.Sprintf("Unable to decode blocks: %s", err.Error())
+			log.Printf("%s", msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		var decodedBlocks slack.Blocks
+		dbJErr := json.Unmarshal([]byte(decoded), &decodedBlocks)
+		if dbJErr != nil {
+			msg := fmt.Sprintf("Unable to decode blocks string to json: %s", dbJErr.Error())
+			log.Printf("%s", msg)
+			http.Error(w, msg, http.StatusInternalServerError)
+			return
+		}
+		m.Blocks = decodedBlocks
+	}
+	jsonMessage, jsonErr := json.Marshal(m)
+	if jsonErr != nil {
+		msg := fmt.Sprintf("Unable to marshal message: %s", jsonErr.Error())
+		log.Printf("%s", msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
+	}
+	sts.SendToWebsocket(string(jsonMessage))
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
 // RTMConnectHandler generates a valid connection
 func RTMConnectHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := io.ReadAll(r.Body)
