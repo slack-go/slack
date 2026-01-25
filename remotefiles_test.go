@@ -192,3 +192,31 @@ func TestRemoveRemoteFileWithFileIDAndExternalID(t *testing.T) {
 		t.Errorf("Error message should mention don't providing both externalID and fileID")
 	}
 }
+
+func TestAddRemoteFileWithPreviewImageReader(t *testing.T) {
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	params := RemoteFileParameters{
+		ExternalID:         "externalID",
+		ExternalURL:        "http://example.com/",
+		Title:              "example",
+		PreviewImageReader: strings.NewReader("fake image data"),
+		PreviewImageName:   "preview.jpg",
+	}
+	if _, err := api.AddRemoteFile(params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
+func TestUpdateRemoteFileWithPreviewImageReader(t *testing.T) {
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	params := RemoteFileParameters{
+		Title:              "updated example",
+		PreviewImageReader: strings.NewReader("fake image data"),
+		PreviewImageName:   "preview.jpg",
+	}
+	if _, err := api.UpdateRemoteFile("fileID", params); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+}
