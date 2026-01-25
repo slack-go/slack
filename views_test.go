@@ -846,3 +846,52 @@ func TestSlack_ErrorsViewSubmissionResponse(t *testing.T) {
 
 	assertViewSubmissionResponse(t, resp, rawResp)
 }
+
+func TestPublishViewContextRequest_HashOmittedWhenNil(t *testing.T) {
+	tests := []struct {
+		name        string
+		hash        *string
+		wantHashKey bool
+		wantHashVal string
+	}{
+		{
+			name:        "nil hash omits field",
+			hash:        nil,
+			wantHashKey: false,
+		},
+		{
+			name:        "non-empty hash includes field",
+			hash:        ptrString("156772938.1827394"),
+			wantHashKey: true,
+			wantHashVal: "156772938.1827394",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := PublishViewContextRequest{
+				UserID: "U12345",
+				View:   HomeTabViewRequest{Type: VTHomeTab},
+				Hash:   tt.hash,
+			}
+
+			data, err := json.Marshal(req)
+			assert.NoError(t, err)
+
+			var decoded map[string]any
+			err = json.Unmarshal(data, &decoded)
+			assert.NoError(t, err)
+
+			_, hasHash := decoded["hash"]
+			assert.Equal(t, tt.wantHashKey, hasHash, "hash key presence mismatch")
+
+			if tt.wantHashKey {
+				assert.Equal(t, tt.wantHashVal, decoded["hash"])
+			}
+		})
+	}
+}
+
+func ptrString(s string) *string {
+	return &s
+}

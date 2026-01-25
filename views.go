@@ -212,7 +212,11 @@ func (api *Client) OpenViewContext(
 // PublishView publishes a static view for a user.
 // For more information see the PublishViewContext documentation.
 func (api *Client) PublishView(userID string, view HomeTabViewRequest, hash string) (*ViewResponse, error) {
-	return api.PublishViewContext(context.Background(), PublishViewContextRequest{UserID: userID, View: view, Hash: &hash})
+	var hashPtr *string
+	if hash != "" {
+		hashPtr = &hash
+	}
+	return api.PublishViewContext(context.Background(), PublishViewContextRequest{UserID: userID, View: view, Hash: hashPtr})
 }
 
 // PublishViewContext publishes a static view for a user with a custom context.
