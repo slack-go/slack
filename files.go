@@ -377,24 +377,14 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 
 // UploadFile uploads a file.
 //
-// Deprecated: Use [Client.UploadFileV2] instead.
-//
-// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
-// this will stop functioning on November 12, 2025.
-//
-// For more details, see: https://api.slack.com/methods/files.upload#markdown
+// Deprecated: Use [Client.FixedUploadFile] instead. This method uses deprecated Slack API endpoints and will stop functioning on November 12, 2025.
 func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
 	return api.UploadFileContext(context.Background(), params)
 }
 
 // UploadFileContext uploads a file and setting a custom context.
 //
-// Deprecated: Use [Client.UploadFileV2Context] instead.
-//
-// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
-// this will stop functioning on November 12, 2025.
-//
-// For more details, see: https://api.slack.com/methods/files.upload#markdown
+// Deprecated: Use [Client.FixedUploadFileContext] instead. This method uses deprecated Slack API endpoints and will stop functioning on November 12, 2025.
 func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *File, err error) {
 	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
 	// investigation needed, but for now this will do.
@@ -610,6 +600,8 @@ func (api *Client) CompleteUploadExternalContext(ctx context.Context, params Com
 }
 
 // UploadFileV2 uploads file to a given slack channel using 3 steps.
+//
+// Deprecated: Use [Client.FixedUploadFileV2] instead. This method has parameter validation issues and may not work correctly in all scenarios.
 // For more details, see UploadFileV2Context documentation.
 func (api *Client) UploadFileV2(params UploadFileV2Parameters) (*FileSummary, error) {
 	return api.UploadFileV2Context(context.Background(), params)
@@ -619,6 +611,8 @@ func (api *Client) UploadFileV2(params UploadFileV2Parameters) (*FileSummary, er
 //  1. Get an upload URL using files.getUploadURLExternal API
 //  2. Send the file as a post to the URL provided by slack
 //  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
+//
+// Deprecated: Use [Client.FixedUploadFileV2Context] instead. This method has parameter validation issues and may not work correctly in all scenarios.
 //
 // Slack Docs: https://api.slack.com/messaging/files#uploading_files
 func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2Parameters) (file *FileSummary, err error) {
