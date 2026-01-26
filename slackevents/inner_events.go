@@ -326,6 +326,11 @@ type MessageEvent struct {
 
 	// AssistantThread contains action token for Data Access API queries in message events
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
+
+	// Huddle-related fields (subtype "huddle_thread")
+	Room            *slack.HuddleRoom `json:"room,omitempty"`
+	NoNotifications bool              `json:"no_notifications,omitempty"`
+	Permalink       string            `json:"permalink,omitempty"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface for MessageEvent.
