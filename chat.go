@@ -119,13 +119,13 @@ func (api *Client) ScheduleMessage(channelID, postAt string, options ...MsgOptio
 // ScheduleMessageContext sends a message to a channel with a custom context.
 // Slack API docs: https://api.slack.com/methods/chat.scheduleMessage
 func (api *Client) ScheduleMessageContext(ctx context.Context, channelID, postAt string, options ...MsgOption) (string, string, error) {
-	respChannel, scheduledMessageId, _, err := api.SendMessageContext(
+	respChannel, scheduledMessageID, _, err := api.SendMessageContext(
 		ctx,
 		channelID,
 		MsgOptionSchedule(postAt),
 		MsgOptionCompose(options...),
 	)
-	return respChannel, scheduledMessageId, err
+	return respChannel, scheduledMessageID, err
 }
 
 // PostMessage sends a message to a channel.
@@ -217,7 +217,7 @@ func (api *Client) SendMessage(channel string, options ...MsgOption) (string, st
 
 // SendMessageContext more flexible method for configuring messages with a custom context.
 // Slack API docs: https://api.slack.com/methods/chat.postMessage
-func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestampOrScheduledMessageId string, _text string, err error) {
+func (api *Client) SendMessageContext(ctx context.Context, channelID string, options ...MsgOption) (_channel string, _timestampOrScheduledMessageID string, _text string, err error) {
 	var (
 		req      *http.Request
 		parser   func(*chatResponseFull) responseParser
@@ -849,6 +849,12 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 		if params.ReplyBroadcast != DEFAULT_MESSAGE_REPLY_BROADCAST {
 			config.values.Set("reply_broadcast", "true")
+		}
+
+		if params.MetaData.EventType != "" {
+			if err := MsgOptionMetadata(params.MetaData)(config); err != nil {
+				return err
+			}
 		}
 
 		if len(params.FileIDs) > 0 {

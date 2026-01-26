@@ -207,6 +207,27 @@ func TestPostMessage(t *testing.T) {
 				"link_names": []string{"false"},
 			},
 		},
+		"MetadataViaPostMessageParameters": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionPostMessageParameters(PostMessageParameters{
+					MetaData: SlackMetadata{
+						EventType: "testing-event",
+						EventPayload: map[string]interface{}{
+							"id":   13,
+							"name": "testing-name",
+						},
+					},
+				}),
+			},
+			expected: url.Values{
+				"metadata":     []string{`{"event_type":"testing-event","event_payload":{"id":13,"name":"testing-name"}}`},
+				"channel":      []string{"CXXX"},
+				"token":        []string{"testing-token"},
+				"mrkdwn":       []string{"false"},
+				"unfurl_media": []string{"false"},
+			},
+		},
 	}
 
 	once.Do(startServer)
