@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Huddle support** - New `HuddleRoom`, `HuddleParticipantEvent`, and `HuddleRecording`
+  types for handling Slack huddle events (`huddle_thread` subtype messages).
+- **Call block data parsing** - `CallBlock` now includes full call data when retrieved
+  from Slack messages, with new `CallBlockData`, `CallBlockDataV1`, and `CallBlockIconURLs`
+  types. ([#897])
 - **Chat Streaming API support** - New streaming API for real-time chat interactions
   with example usage. ([#1506])
 - **Data Access API support** - Full support for Slack's Data Access API with
@@ -61,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Previous release. See [GitHub releases](https://github.com/slack-go/slack/releases/tag/v0.17.3)
 for details.
 
+[#897]: https://github.com/slack-go/slack/issues/897
 [#1439]: https://github.com/slack-go/slack/pull/1439
 [#1461]: https://github.com/slack-go/slack/pull/1461
 [#1463]: https://github.com/slack-go/slack/pull/1463
