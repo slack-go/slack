@@ -96,5 +96,5 @@ for details.
 [#1517]: https://github.com/slack-go/slack/pull/1517
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0-rc1...HEAD
-[0.18.0-rc.1]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc1
+[0.18.0-rc1]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc1
 [0.17.3]: https://github.com/slack-go/slack/releases/tag/v0.17.3
