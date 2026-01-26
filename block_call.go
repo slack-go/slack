@@ -45,16 +45,17 @@ type CallBlockDataV1 struct {
 
 // CallBlockIconURLs contains app icon URLs at various sizes for a call integration.
 type CallBlockIconURLs struct {
-	Image32   string `json:"image_32,omitempty"`
-	Image36   string `json:"image_36,omitempty"`
-	Image48   string `json:"image_48,omitempty"`
-	Image64   string `json:"image_64,omitempty"`
-	Image72   string `json:"image_72,omitempty"`
-	Image96   string `json:"image_96,omitempty"`
-	Image128  string `json:"image_128,omitempty"`
-	Image192  string `json:"image_192,omitempty"`
-	Image512  string `json:"image_512,omitempty"`
-	Image1024 string `json:"image_1024,omitempty"`
+	Image32       string `json:"image_32,omitempty"`
+	Image36       string `json:"image_36,omitempty"`
+	Image48       string `json:"image_48,omitempty"`
+	Image64       string `json:"image_64,omitempty"`
+	Image72       string `json:"image_72,omitempty"`
+	Image96       string `json:"image_96,omitempty"`
+	Image128      string `json:"image_128,omitempty"`
+	Image192      string `json:"image_192,omitempty"`
+	Image512      string `json:"image_512,omitempty"`
+	Image1024     string `json:"image_1024,omitempty"`
+	ImageOriginal string `json:"image_original,omitempty"`
 }
 
 // BlockType returns the type of the block
