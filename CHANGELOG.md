@@ -17,8 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`MsgOptionPostMessageParameters` now passes `MetaData`** - Previously, metadata
-  was silently dropped when using `PostMessageParameters`. ([#1343])
+- **Socket mode websocket dial debugging** - Added debug logging when a custom dialer is
+  used including HTTP response status on dial failures. This helps diagnose proxy/TLS
+  issues like "bad handshake" errors. ([#1360])
+- **`MsgOptionPostMessageParameters` now passes `MetaData`** - Previously, metadata was
+  silently dropped when using `PostMessageParameters`. ([#1343])
 
 ## [0.18.0-rc1] - 2026-01-26
 
@@ -84,6 +87,7 @@ for details.
 [#897]: https://github.com/slack-go/slack/issues/897
 [#1329]: https://github.com/slack-go/slack/issues/1329
 [#1343]: https://github.com/slack-go/slack/issues/1343
+[#1360]: https://github.com/slack-go/slack/issues/1360
 [#1439]: https://github.com/slack-go/slack/pull/1439
 [#1461]: https://github.com/slack-go/slack/pull/1461
 [#1463]: https://github.com/slack-go/slack/pull/1463

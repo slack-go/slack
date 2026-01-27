@@ -304,12 +304,19 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 	upgradeHeader.Add("Origin", "https://api.slack.com")
 	dialer := websocket.DefaultDialer
 	if smc.dialer != nil {
+		smc.Debugf("Using custom websocket dialer")
 		dialer = smc.dialer
 	}
-	conn, _, err := dialer.DialContext(ctx, url, upgradeHeader)
+	conn, resp, err := dialer.DialContext(ctx, url, upgradeHeader)
 	if err != nil {
 		smc.Debugf("Failed to dial to the websocket: %s", err)
+		if resp != nil {
+			smc.Debugf("WebSocket dial response status: %s", resp.Status)
+		}
 		return nil, nil, err
+	}
+	if resp != nil && resp.Body != nil {
+		resp.Body.Close()
 	}
 	if additionalPingHandler == nil {
 		additionalPingHandler = func(_ string) error { return nil }
