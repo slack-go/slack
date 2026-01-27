@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Admin Conversations API support** - Comprehensive support for `admin.conversations.*`
+  methods including core operations (archive, unarchive, create, delete, rename, invite,
+  search, lookup, getTeams, convertToPrivate, convertToPublic, disconnectShared, setTeams),
+  bulk operations (bulkArchive, bulkDelete, bulkMove), preferences, retention management,
+  restrict access controls, and EKM channel info. ([#1329])
+
 ### Fixed
 
 - **`MsgOptionPostMessageParameters` now passes `MetaData`** - Previously, metadata
@@ -74,6 +82,8 @@ Previous release. See [GitHub releases](https://github.com/slack-go/slack/releas
 for details.
 
 [#897]: https://github.com/slack-go/slack/issues/897
+[#1329]: https://github.com/slack-go/slack/issues/1329
+[#1343]: https://github.com/slack-go/slack/issues/1343
 [#1439]: https://github.com/slack-go/slack/pull/1439
 [#1461]: https://github.com/slack-go/slack/pull/1461
 [#1463]: https://github.com/slack-go/slack/pull/1463
