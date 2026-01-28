@@ -16,9 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bulk operations (bulkArchive, bulkDelete, bulkMove), preferences, retention management,
   restrict access controls, and EKM channel info. ([#1329])
 
+### Changed
+
+- **BREAKING**: Removed deprecated `UploadFile`, `UploadFileContext`, and
+  `FileUploadParameters`. The `files.upload` API was discontinued by Slack on
+  November 12, 2025. ([#1481])
+- **BREAKING**: Renamed `UploadFileV2` → `UploadFile`, `UploadFileV2Context` →
+  `UploadFileContext`, and `UploadFileV2Parameters` → `FileUploadParameters`.
+  The "V2" suffix is no longer needed now that the old API is removed. ([#1481])
+
 ### Fixed
 
-- **File upload error wrapping** - `UploadFileV2` now wraps errors with the step name
+- **File upload error wrapping** - `UploadFile` now wraps errors with the step name
   (`GetUploadURLExternal`, `UploadToURL`, or `CompleteUploadExternal`) so callers can
   identify which of the three upload steps failed. ([#1491])
 - **Audit Logs API endpoint** - Fixed `GetAuditLogs` to use the correct endpoint

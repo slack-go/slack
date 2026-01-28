@@ -177,46 +177,46 @@ func completeURLUpload(rw http.ResponseWriter, r *http.Request) {
 	rw.Write(response)
 }
 
-func TestUploadFileV2(t *testing.T) {
+func TestUploadFile(t *testing.T) {
 	http.HandleFunc("/files.getUploadURLExternal", uploadURLHandler)
 	http.HandleFunc("/abc", urlFileUploadHandler)
 	http.HandleFunc("/files.completeUploadExternal", completeURLUpload)
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	params := UploadFileV2Parameters{
+	params := FileUploadParameters{
 		Filename: "test.txt", Content: "test content", FileSize: 10,
 		Channel: "CXXXXXXXX",
 	}
-	if _, err := api.UploadFileV2(params); err != nil {
+	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 
 	reader := bytes.NewBufferString("test reader")
-	params = UploadFileV2Parameters{
+	params = FileUploadParameters{
 		Filename: "test.txt",
 		Reader:   reader,
 		FileSize: 10,
 		Channel:  "CXXXXXXXX"}
-	if _, err := api.UploadFileV2(params); err != nil {
+	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 
 	largeByt := make([]byte, 107374200)
 	reader = bytes.NewBuffer(largeByt)
-	params = UploadFileV2Parameters{
+	params = FileUploadParameters{
 		Filename: "test.txt", Reader: reader, FileSize: len(largeByt),
 		Channel: "CXXXXXXXX"}
-	if _, err := api.UploadFileV2(params); err != nil {
+	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 
 	reader = bytes.NewBufferString("test no channel")
-	params = UploadFileV2Parameters{
+	params = FileUploadParameters{
 		Filename: "test.txt",
 		Reader:   reader,
 		FileSize: 15}
-	if _, err := api.UploadFileV2(params); err != nil {
+	if _, err := api.UploadFile(params); err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
 }

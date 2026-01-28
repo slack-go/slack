@@ -19,7 +19,7 @@ func main() {
 	api := slack.New(token, slack.OptionDebug(true))
 	ctx := context.Background()
 
-	files := []slack.UploadFileV2Parameters{
+	files := []slack.FileUploadParameters{
 		{
 			Title:    "Batman Example",
 			Filename: "batman.txt",

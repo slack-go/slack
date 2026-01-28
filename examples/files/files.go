@@ -19,13 +19,13 @@ func main() {
 	ctx := context.Background()
 
 	// Upload a file
-	params := slack.UploadFileV2Parameters{
+	params := slack.FileUploadParameters{
 		Title:    "Batman Example",
 		Filename: "example.txt",
 		File:     "example.txt",
 		FileSize: 38,
 	}
-	file, err := api.UploadFileV2Context(ctx, params)
+	file, err := api.UploadFileContext(ctx, params)
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return

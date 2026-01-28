@@ -149,7 +149,7 @@ type ListFilesParameters struct {
 	Cursor  string
 }
 
-type UploadFileV2Parameters struct {
+type FileUploadParameters struct {
 	File            string
 	FileSize        int
 	Content         string
@@ -524,19 +524,19 @@ func (api *Client) CompleteUploadExternalContext(ctx context.Context, params Com
 	return response, nil
 }
 
-// UploadFileV2 uploads file to a given slack channel using 3 steps.
-// For more details, see UploadFileV2Context documentation.
-func (api *Client) UploadFileV2(params UploadFileV2Parameters) (*FileSummary, error) {
-	return api.UploadFileV2Context(context.Background(), params)
+// UploadFile uploads file to a given slack channel using 3 steps.
+// For more details, see UploadFileContext documentation.
+func (api *Client) UploadFile(params FileUploadParameters) (*FileSummary, error) {
+	return api.UploadFileContext(context.Background(), params)
 }
 
-// UploadFileV2Context uploads file to a given slack channel using 3 steps -
+// UploadFileContext uploads file to a given slack channel using 3 steps -
 //  1. Get an upload URL using files.getUploadURLExternal API
 //  2. Send the file as a post to the URL provided by slack
 //  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
 //
 // Slack Docs: https://api.slack.com/messaging/files#uploading_files
-func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2Parameters) (file *FileSummary, err error) {
+func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *FileSummary, err error) {
 	if params.Filename == "" {
 		return nil, fmt.Errorf("file.upload.v2: filename cannot be empty")
 	}
