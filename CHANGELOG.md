@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0-rc2] - 2026-01-28
+
 ### Added
 
 - **Audit Logs example** - New example demonstrating how to use the Audit Logs API. ([#1144])
@@ -127,6 +129,7 @@ for details.
 [#1516]: https://github.com/slack-go/slack/pull/1516
 [#1517]: https://github.com/slack-go/slack/pull/1517
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0-rc1...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0-rc2...HEAD
+[0.18.0-rc2]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc2
 [0.18.0-rc1]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc1
 [0.17.3]: https://github.com/slack-go/slack/releases/tag/v0.17.3
