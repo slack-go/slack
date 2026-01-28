@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -148,69 +147,6 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 		if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
 			log.Fatalf("%s: Got params [%#v]\nBut received [%#v]\n", test.title, fch.gotParams, test.wantParams)
 		}
-	}
-}
-
-func authTestHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(authTestResponseFull{
-		SlackResponse: SlackResponse{Ok: true}})
-	rw.Write(response)
-}
-
-func uploadFileHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(fileResponseFull{
-		SlackResponse: SlackResponse{Ok: true}})
-	rw.Write(response)
-}
-
-func TestUploadFile(t *testing.T) {
-	http.HandleFunc("/auth.test", authTestHandler)
-	http.HandleFunc("/files.upload", uploadFileHandler)
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	params := FileUploadParameters{
-		Filename: "test.txt", Content: "test content",
-		Channels: []string{"CXXXXXXXX"}}
-	if _, err := api.UploadFile(params); err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
-
-	reader := bytes.NewBufferString("test reader")
-	params = FileUploadParameters{
-		Filename: "test.txt",
-		Reader:   reader,
-		Channels: []string{"CXXXXXXXX"}}
-	if _, err := api.UploadFile(params); err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
-
-	largeByt := make([]byte, 107374200)
-	reader = bytes.NewBuffer(largeByt)
-	params = FileUploadParameters{
-		Filename: "test.txt", Reader: reader,
-		Channels: []string{"CXXXXXXXX"}}
-	if _, err := api.UploadFile(params); err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
-}
-
-func TestUploadFileWithoutFilename(t *testing.T) {
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-
-	reader := bytes.NewBufferString("test reader")
-	params := FileUploadParameters{
-		Reader:   reader,
-		Channels: []string{"CXXXXXXXX"}}
-	_, err := api.UploadFile(params)
-	if err == nil {
-		t.Fatal("Expected error when omitting filename, instead got nil")
-	}
-
-	if !strings.Contains(err.Error(), ".Filename is mandatory") {
-		t.Errorf("Error message should mention empty FileUploadParameters.Filename")
 	}
 }
 

@@ -126,24 +126,6 @@ type ShareFileInfo struct {
 	TeamID          string   `json:"team_id"`
 }
 
-// FileUploadParameters contains all the parameters necessary (including the optional ones) for an UploadFile() request.
-//
-// There are three ways to upload a file. You can either set Content if file is small, set Reader if file is large,
-// or provide a local file path in File to upload it from your filesystem.
-//
-// Note that when using the Reader option, you *must* specify the Filename, otherwise the Slack API isn't happy.
-type FileUploadParameters struct {
-	File            string
-	Content         string
-	Reader          io.Reader
-	Filetype        string
-	Filename        string
-	Title           string
-	InitialComment  string
-	Channels        []string
-	ThreadTimestamp string
-}
-
 // GetFilesParameters contains all the parameters necessary (including the optional ones) for a GetFiles() request
 type GetFilesParameters struct {
 	User          string
@@ -373,73 +355,6 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 	params.Cursor = response.Metadata.Cursor
 
 	return response.Files, &params, nil
-}
-
-// UploadFile uploads a file.
-//
-// Deprecated: Use [Client.UploadFileV2] instead.
-//
-// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
-// this will stop functioning on November 12, 2025.
-//
-// For more details, see: https://api.slack.com/methods/files.upload#markdown
-func (api *Client) UploadFile(params FileUploadParameters) (file *File, err error) {
-	return api.UploadFileContext(context.Background(), params)
-}
-
-// UploadFileContext uploads a file and setting a custom context.
-//
-// Deprecated: Use [Client.UploadFileV2Context] instead.
-//
-// Per Slack Changelog, specifically [https://api.slack.com/changelog#entry-march_2025_1](this entry),
-// this will stop functioning on November 12, 2025.
-//
-// For more details, see: https://api.slack.com/methods/files.upload#markdown
-func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *File, err error) {
-	// Test if user token is valid. This helps because client.Do doesn't like this for some reason. XXX: More
-	// investigation needed, but for now this will do.
-	_, err = api.AuthTestContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	response := &fileResponseFull{}
-	values := url.Values{}
-	if params.Filetype != "" {
-		values.Add("filetype", params.Filetype)
-	}
-	if params.Filename != "" {
-		values.Add("filename", params.Filename)
-	}
-	if params.Title != "" {
-		values.Add("title", params.Title)
-	}
-	if params.InitialComment != "" {
-		values.Add("initial_comment", params.InitialComment)
-	}
-	if params.ThreadTimestamp != "" {
-		values.Add("thread_ts", params.ThreadTimestamp)
-	}
-	if len(params.Channels) != 0 {
-		values.Add("channels", strings.Join(params.Channels, ","))
-	}
-	if params.Content != "" {
-		values.Add("content", params.Content)
-		values.Add("token", api.token)
-		err = api.postMethod(ctx, "files.upload", values, response)
-	} else if params.File != "" {
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.File, "file", api.token, values, response, api)
-	} else if params.Reader != nil {
-		if params.Filename == "" {
-			return nil, fmt.Errorf("files.upload: FileUploadParameters.Filename is mandatory when using FileUploadParameters.Reader")
-		}
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.upload", params.Filename, "file", api.token, values, params.Reader, response, api)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &response.File, response.Err()
 }
 
 // DeleteFileComment deletes a file's comment.
