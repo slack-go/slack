@@ -12,6 +12,8 @@ import (
 const (
 	// APIURL of the slack api.
 	APIURL = "https://slack.com/api/"
+	// AuditAPIURL is the base URL for the Audit Logs API.
+	AuditAPIURL = "https://api.slack.com/"
 	// WEBAPIURLFormat ...
 	WEBAPIURLFormat = "https://%s.slack.com/api/users.admin.%s?t=%d"
 )
@@ -62,6 +64,7 @@ type Client struct {
 	configToken        string
 	configRefreshToken string
 	endpoint           string
+	auditEndpoint      string
 	debug              bool
 	log                ilogger
 	httpclient         httpClient
@@ -96,6 +99,11 @@ func OptionAPIURL(u string) func(*Client) {
 	return func(c *Client) { c.endpoint = u }
 }
 
+// OptionAuditAPIURL set the url for the Audit Logs API. only useful for testing.
+func OptionAuditAPIURL(u string) func(*Client) {
+	return func(c *Client) { c.auditEndpoint = u }
+}
+
 // OptionAppLevelToken sets an app-level token for the client.
 func OptionAppLevelToken(token string) func(*Client) {
 	return func(c *Client) { c.appLevelToken = token }
@@ -114,10 +122,11 @@ func OptionConfigRefreshToken(token string) func(*Client) {
 // New builds a slack client from the provided token and options.
 func New(token string, options ...Option) *Client {
 	s := &Client{
-		token:      token,
-		endpoint:   APIURL,
-		httpclient: &http.Client{},
-		log:        log.New(os.Stderr, "slack-go/slack", log.LstdFlags|log.Lshortfile),
+		token:         token,
+		endpoint:      APIURL,
+		auditEndpoint: AuditAPIURL,
+		httpclient:    &http.Client{},
+		log:           log.New(os.Stderr, "slack-go/slack", log.LstdFlags|log.Lshortfile),
 	}
 
 	for _, opt := range options {

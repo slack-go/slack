@@ -48,7 +48,7 @@ func TestGetAuditLogs(t *testing.T) {
 	http.HandleFunc("/audit/v1/logs", getAuditLogs)
 
 	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+	api := New("testing-token", OptionAuditAPIURL("http://"+serverAddr+"/"))
 
 	events, nextCursor, err := api.GetAuditLogs(AuditLogParameters{})
 	if err != nil {

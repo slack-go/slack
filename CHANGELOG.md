@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Audit Logs example** - New example demonstrating how to use the Audit Logs API. ([#1144])
 - **Admin Conversations API support** - Comprehensive support for `admin.conversations.*`
   methods including core operations (archive, unarchive, create, delete, rename, invite,
   search, lookup, getTeams, convertToPrivate, convertToPublic, disconnectShared, setTeams),
@@ -17,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Audit Logs API endpoint** - Fixed `GetAuditLogs` to use the correct endpoint
+  (`api.slack.com`) instead of the regular API endpoint (`slack.com/api`). The Audit
+  Logs API requires a different base URL. Added `OptionAuditAPIURL` for testing. ([#1144])
 - **Socket mode websocket dial debugging** - Added debug logging when a custom dialer is
   used including HTTP response status on dial failures. This helps diagnose proxy/TLS
   issues like "bad handshake" errors. ([#1360])
