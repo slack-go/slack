@@ -149,7 +149,7 @@ type ListFilesParameters struct {
 	Cursor  string
 }
 
-type FileUploadParameters struct {
+type UploadFileParameters struct {
 	File            string
 	FileSize        int
 	Content         string
@@ -526,7 +526,7 @@ func (api *Client) CompleteUploadExternalContext(ctx context.Context, params Com
 
 // UploadFile uploads file to a given slack channel using 3 steps.
 // For more details, see UploadFileContext documentation.
-func (api *Client) UploadFile(params FileUploadParameters) (*FileSummary, error) {
+func (api *Client) UploadFile(params UploadFileParameters) (*FileSummary, error) {
 	return api.UploadFileContext(context.Background(), params)
 }
 
@@ -536,7 +536,7 @@ func (api *Client) UploadFile(params FileUploadParameters) (*FileSummary, error)
 //  3. Complete the upload and share it to the specified channel using files.completeUploadExternal
 //
 // Slack Docs: https://api.slack.com/messaging/files#uploading_files
-func (api *Client) UploadFileContext(ctx context.Context, params FileUploadParameters) (file *FileSummary, err error) {
+func (api *Client) UploadFileContext(ctx context.Context, params UploadFileParameters) (file *FileSummary, err error) {
 	if params.Filename == "" {
 		return nil, fmt.Errorf("file.upload.v2: filename cannot be empty")
 	}

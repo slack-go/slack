@@ -19,7 +19,7 @@ func main() {
 	ctx := context.Background()
 
 	// Upload a file
-	params := slack.FileUploadParameters{
+	params := slack.UploadFileParameters{
 		Title:    "Batman Example",
 		Filename: "example.txt",
 		File:     "example.txt",

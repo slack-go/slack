@@ -19,11 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Removed deprecated `UploadFile`, `UploadFileContext`, and
-  `FileUploadParameters`. The `files.upload` API was discontinued by Slack on
-  November 12, 2025. ([#1481])
+  `FileUploadParameters`. The `files.upload` API was discontinued by Slack on November
+  12, 2025. ([#1481])
 - **BREAKING**: Renamed `UploadFileV2` → `UploadFile`, `UploadFileV2Context` →
-  `UploadFileContext`, and `UploadFileV2Parameters` → `FileUploadParameters`.
-  The "V2" suffix is no longer needed now that the old API is removed. ([#1481])
+  `UploadFileContext`, and `UploadFileV2Parameters` → `UploadFileParameters`. The "V2"
+  suffix is no longer needed now that the old API is removed. ([#1481])
 
 ### Fixed
 

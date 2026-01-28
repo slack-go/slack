@@ -184,7 +184,7 @@ func TestUploadFile(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	params := FileUploadParameters{
+	params := UploadFileParameters{
 		Filename: "test.txt", Content: "test content", FileSize: 10,
 		Channel: "CXXXXXXXX",
 	}
@@ -193,7 +193,7 @@ func TestUploadFile(t *testing.T) {
 	}
 
 	reader := bytes.NewBufferString("test reader")
-	params = FileUploadParameters{
+	params = UploadFileParameters{
 		Filename: "test.txt",
 		Reader:   reader,
 		FileSize: 10,
@@ -204,7 +204,7 @@ func TestUploadFile(t *testing.T) {
 
 	largeByt := make([]byte, 107374200)
 	reader = bytes.NewBuffer(largeByt)
-	params = FileUploadParameters{
+	params = UploadFileParameters{
 		Filename: "test.txt", Reader: reader, FileSize: len(largeByt),
 		Channel: "CXXXXXXXX"}
 	if _, err := api.UploadFile(params); err != nil {
@@ -212,7 +212,7 @@ func TestUploadFile(t *testing.T) {
 	}
 
 	reader = bytes.NewBufferString("test no channel")
-	params = FileUploadParameters{
+	params = UploadFileParameters{
 		Filename: "test.txt",
 		Reader:   reader,
 		FileSize: 15}
