@@ -636,7 +636,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		SnippetType: params.SnippetType,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("GetUploadURLExternal: %w", err)
 	}
 
 	err = api.UploadToURL(ctx, UploadToURLParameters{
@@ -647,7 +647,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		Filename:  params.Filename,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("UploadToURL: %w", err)
 	}
 
 	c, err := api.CompleteUploadExternalContext(ctx, CompleteUploadExternalParameters{
@@ -661,7 +661,7 @@ func (api *Client) UploadFileV2Context(ctx context.Context, params UploadFileV2P
 		Blocks:          params.Blocks,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("CompleteUploadExternal: %w", err)
 	}
 	if len(c.Files) != 1 {
 		return nil, fmt.Errorf("file.upload.v2: something went wrong; received %d files instead of 1", len(c.Files))

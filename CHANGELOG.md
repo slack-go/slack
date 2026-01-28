@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **File upload error wrapping** - `UploadFileV2` now wraps errors with the step name
+  (`GetUploadURLExternal`, `UploadToURL`, or `CompleteUploadExternal`) so callers can
+  identify which of the three upload steps failed. ([#1491])
 - **Audit Logs API endpoint** - Fixed `GetAuditLogs` to use the correct endpoint
   (`api.slack.com`) instead of the regular API endpoint (`slack.com/api`). The Audit
   Logs API requires a different base URL. Added `OptionAuditAPIURL` for testing. ([#1144])
@@ -89,6 +92,7 @@ Previous release. See [GitHub releases](https://github.com/slack-go/slack/releas
 for details.
 
 [#897]: https://github.com/slack-go/slack/issues/897
+[#1144]: https://github.com/slack-go/slack/issues/1144
 [#1329]: https://github.com/slack-go/slack/issues/1329
 [#1343]: https://github.com/slack-go/slack/issues/1343
 [#1360]: https://github.com/slack-go/slack/issues/1360
@@ -103,6 +107,7 @@ for details.
 [#1488]: https://github.com/slack-go/slack/pull/1488
 [#1489]: https://github.com/slack-go/slack/pull/1489
 [#1490]: https://github.com/slack-go/slack/pull/1490
+[#1491]: https://github.com/slack-go/slack/issues/1491
 [#1495]: https://github.com/slack-go/slack/pull/1495
 [#1499]: https://github.com/slack-go/slack/pull/1499
 [#1504]: https://github.com/slack-go/slack/pull/1504
