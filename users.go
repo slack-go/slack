@@ -40,6 +40,7 @@ type UserProfile struct {
 	Title                   string                              `json:"title,omitempty"`
 	BotID                   string                              `json:"bot_id,omitempty"`
 	ApiAppID                string                              `json:"api_app_id,omitempty"`
+	AlwaysActive            bool                                `json:"always_active,omitempty"`
 	StatusText              string                              `json:"status_text,omitempty"`
 	StatusEmoji             string                              `json:"status_emoji,omitempty"`
 	StatusEmojiDisplayInfo  []UserProfileStatusEmojiDisplayInfo `json:"status_emoji_display_info,omitempty"`
@@ -142,7 +143,6 @@ type User struct {
 	TwoFactorType          *string        `json:"two_factor_type"`
 	HasFiles               bool           `json:"has_files"`
 	Presence               string         `json:"presence"`
-	AlwaysActive           bool           `json:"always_active,omitempty"`
 	Locale                 string         `json:"locale"`
 	Updated                JSONTime       `json:"updated"`
 	WhoCanShareContactCard string         `json:"who_can_share_contact_card,omitempty"`

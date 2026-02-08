@@ -793,6 +793,7 @@ func TestUserUnmarshalJSON(t *testing.T) {
 			"image_1024": "https://example.com/1024.png",
 			"image_original": "https://example.com/original.png",
 			"is_custom_image": true,
+			"always_active": true,
 			"status_text": "Working",
 			"status_emoji": ":computer:",
 			"status_expiration": 0,
@@ -816,7 +817,6 @@ func TestUserUnmarshalJSON(t *testing.T) {
 		"has_2fa": false,
 		"has_files": true,
 		"presence": "active",
-		"always_active": false,
 		"locale": "en-US",
 		"updated": 1648596421,
 		"who_can_share_contact_card": "EVERYONE",
@@ -840,11 +840,11 @@ func TestUserUnmarshalJSON(t *testing.T) {
 	if user.WhoCanShareContactCard != "EVERYONE" {
 		t.Fatalf(`user.WhoCanShareContactCard = %q, want "EVERYONE"`, user.WhoCanShareContactCard)
 	}
-	if user.AlwaysActive != false {
-		t.Fatalf(`user.AlwaysActive = %v, want false`, user.AlwaysActive)
-	}
 
 	// Verify UserProfile fields
+	if user.Profile.AlwaysActive != true {
+		t.Fatalf(`user.Profile.AlwaysActive = %v, want true`, user.Profile.AlwaysActive)
+	}
 	if user.Profile.Pronouns != "they/them" {
 		t.Fatalf(`user.Profile.Pronouns = %q, want "they/them"`, user.Profile.Pronouns)
 	}
