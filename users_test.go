@@ -761,6 +761,134 @@ func TestGetUsersHandlesRateLimit(t *testing.T) {
 	}
 }
 
+func TestUserUnmarshalJSON(t *testing.T) {
+	userJSON := `{
+		"id": "U12345678",
+		"team_id": "T12345678",
+		"name": "testuser",
+		"deleted": false,
+		"color": "4bbe2e",
+		"real_name": "Test User",
+		"tz": "America/Los_Angeles",
+		"tz_label": "Pacific Daylight Time",
+		"tz_offset": -25200,
+		"profile": {
+			"first_name": "Test",
+			"last_name": "User",
+			"real_name": "Test User",
+			"real_name_normalized": "Test User",
+			"display_name": "testuser",
+			"display_name_normalized": "testuser",
+			"pronouns": "they/them",
+			"avatar_hash": "abc123",
+			"email": "test@example.com",
+			"skype": "",
+			"phone": "+1234567890",
+			"image_24": "https://example.com/24.png",
+			"image_32": "https://example.com/32.png",
+			"image_48": "https://example.com/48.png",
+			"image_72": "https://example.com/72.png",
+			"image_192": "https://example.com/192.png",
+			"image_512": "https://example.com/512.png",
+			"image_1024": "https://example.com/1024.png",
+			"image_original": "https://example.com/original.png",
+			"is_custom_image": true,
+			"status_text": "Working",
+			"status_emoji": ":computer:",
+			"status_expiration": 0,
+			"status_text_canonical": "",
+			"huddle_state": "in_a_huddle",
+			"huddle_state_expiration_ts": 1648596421,
+			"start_date": "2022-01-01",
+			"team": "T12345678",
+			"fields": []
+		},
+		"is_bot": false,
+		"is_admin": true,
+		"is_owner": false,
+		"is_primary_owner": false,
+		"is_restricted": false,
+		"is_ultra_restricted": false,
+		"is_stranger": false,
+		"is_app_user": false,
+		"is_invited_user": false,
+		"is_email_confirmed": true,
+		"has_2fa": false,
+		"has_files": true,
+		"presence": "active",
+		"always_active": false,
+		"locale": "en-US",
+		"updated": 1648596421,
+		"who_can_share_contact_card": "EVERYONE",
+		"enterprise_user": {
+			"id": "E12345678",
+			"enterprise_id": "E99999999",
+			"enterprise_name": "Test Enterprise",
+			"is_admin": false,
+			"is_owner": false,
+			"is_primary_owner": false,
+			"teams": ["T12345678", "T87654321"]
+		}
+	}`
+
+	var user User
+	if err := json.Unmarshal([]byte(userJSON), &user); err != nil {
+		t.Fatalf("Failed to unmarshal User: %s", err)
+	}
+
+	// Verify User fields
+	if user.WhoCanShareContactCard != "EVERYONE" {
+		t.Fatalf(`user.WhoCanShareContactCard = %q, want "EVERYONE"`, user.WhoCanShareContactCard)
+	}
+	if user.AlwaysActive != false {
+		t.Fatalf(`user.AlwaysActive = %v, want false`, user.AlwaysActive)
+	}
+
+	// Verify UserProfile fields
+	if user.Profile.Pronouns != "they/them" {
+		t.Fatalf(`user.Profile.Pronouns = %q, want "they/them"`, user.Profile.Pronouns)
+	}
+	if user.Profile.Image1024 != "https://example.com/1024.png" {
+		t.Fatalf(`user.Profile.Image1024 = %q, want "https://example.com/1024.png"`, user.Profile.Image1024)
+	}
+	if user.Profile.IsCustomImage != true {
+		t.Fatalf(`user.Profile.IsCustomImage = %v, want true`, user.Profile.IsCustomImage)
+	}
+	if user.Profile.HuddleState != "in_a_huddle" {
+		t.Fatalf(`user.Profile.HuddleState = %q, want "in_a_huddle"`, user.Profile.HuddleState)
+	}
+	if user.Profile.HuddleStateExpirationTS != 1648596421 {
+		t.Fatalf(`user.Profile.HuddleStateExpirationTS = %d, want 1648596421`, user.Profile.HuddleStateExpirationTS)
+	}
+	if user.Profile.StartDate != "2022-01-01" {
+		t.Fatalf(`user.Profile.StartDate = %q, want "2022-01-01"`, user.Profile.StartDate)
+	}
+	if user.Profile.StatusTextCanonical != "" {
+		t.Fatalf(`user.Profile.StatusTextCanonical = %q, want ""`, user.Profile.StatusTextCanonical)
+	}
+
+	// Verify EnterpriseUser fields
+	if user.Enterprise.IsPrimaryOwner != false {
+		t.Fatalf(`user.Enterprise.IsPrimaryOwner = %v, want false`, user.Enterprise.IsPrimaryOwner)
+	}
+	if user.Enterprise.EnterpriseID != "E99999999" {
+		t.Fatalf(`user.Enterprise.EnterpriseID = %q, want "E99999999"`, user.Enterprise.EnterpriseID)
+	}
+
+	// Verify round-trip: marshal and unmarshal should produce the same result
+	marshaled, err := json.Marshal(user)
+	if err != nil {
+		t.Fatalf("Failed to marshal User: %s", err)
+	}
+	var roundTripped User
+	if err := json.Unmarshal(marshaled, &roundTripped); err != nil {
+		t.Fatalf("Failed to unmarshal round-tripped User: %s", err)
+	}
+	if !reflect.DeepEqual(user, roundTripped) {
+		t.Fatal("Round-trip marshal/unmarshal produced different result")
+	}
+}
+
 func TestGetUsersReturnsServerError(t *testing.T) {
 	http.DefaultServeMux = new(http.ServeMux)
 	http.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {
