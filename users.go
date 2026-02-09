@@ -17,32 +17,40 @@ const (
 
 // UserProfile contains all the information details of a given user
 type UserProfile struct {
-	FirstName              string                              `json:"first_name,omitempty"`
-	LastName               string                              `json:"last_name,omitempty"`
-	RealName               string                              `json:"real_name"`
-	RealNameNormalized     string                              `json:"real_name_normalized"`
-	DisplayName            string                              `json:"display_name"`
-	DisplayNameNormalized  string                              `json:"display_name_normalized"`
-	AvatarHash             string                              `json:"avatar_hash"`
-	Email                  string                              `json:"email,omitempty"`
-	Skype                  string                              `json:"skype,omitempty"`
-	Phone                  string                              `json:"phone,omitempty"`
-	Image24                string                              `json:"image_24"`
-	Image32                string                              `json:"image_32"`
-	Image48                string                              `json:"image_48"`
-	Image72                string                              `json:"image_72"`
-	Image192               string                              `json:"image_192"`
-	Image512               string                              `json:"image_512"`
-	ImageOriginal          string                              `json:"image_original,omitempty"`
-	Title                  string                              `json:"title,omitempty"`
-	BotID                  string                              `json:"bot_id,omitempty"`
-	ApiAppID               string                              `json:"api_app_id,omitempty"`
-	StatusText             string                              `json:"status_text,omitempty"`
-	StatusEmoji            string                              `json:"status_emoji,omitempty"`
-	StatusEmojiDisplayInfo []UserProfileStatusEmojiDisplayInfo `json:"status_emoji_display_info,omitempty"`
-	StatusExpiration       int                                 `json:"status_expiration,omitempty"`
-	Team                   string                              `json:"team"`
-	Fields                 UserProfileCustomFields             `json:"fields,omitempty"`
+	FirstName               string                              `json:"first_name,omitempty"`
+	LastName                string                              `json:"last_name,omitempty"`
+	RealName                string                              `json:"real_name"`
+	RealNameNormalized      string                              `json:"real_name_normalized"`
+	DisplayName             string                              `json:"display_name"`
+	DisplayNameNormalized   string                              `json:"display_name_normalized"`
+	Pronouns                string                              `json:"pronouns,omitempty"`
+	AvatarHash              string                              `json:"avatar_hash"`
+	Email                   string                              `json:"email,omitempty"`
+	Skype                   string                              `json:"skype,omitempty"`
+	Phone                   string                              `json:"phone,omitempty"`
+	Image24                 string                              `json:"image_24"`
+	Image32                 string                              `json:"image_32"`
+	Image48                 string                              `json:"image_48"`
+	Image72                 string                              `json:"image_72"`
+	Image192                string                              `json:"image_192"`
+	Image512                string                              `json:"image_512"`
+	Image1024               string                              `json:"image_1024,omitempty"`
+	ImageOriginal           string                              `json:"image_original,omitempty"`
+	IsCustomImage           bool                                `json:"is_custom_image,omitempty"`
+	Title                   string                              `json:"title,omitempty"`
+	BotID                   string                              `json:"bot_id,omitempty"`
+	ApiAppID                string                              `json:"api_app_id,omitempty"`
+	AlwaysActive            bool                                `json:"always_active,omitempty"`
+	StatusText              string                              `json:"status_text,omitempty"`
+	StatusEmoji             string                              `json:"status_emoji,omitempty"`
+	StatusEmojiDisplayInfo  []UserProfileStatusEmojiDisplayInfo `json:"status_emoji_display_info,omitempty"`
+	StatusExpiration        int                                 `json:"status_expiration,omitempty"`
+	StatusTextCanonical     string                              `json:"status_text_canonical,omitempty"`
+	HuddleState             string                              `json:"huddle_state,omitempty"`
+	HuddleStateExpirationTS int                                 `json:"huddle_state_expiration_ts,omitempty"`
+	StartDate               string                              `json:"start_date,omitempty"`
+	Team                    string                              `json:"team"`
+	Fields                  UserProfileCustomFields             `json:"fields,omitempty"`
 }
 
 type UserProfileStatusEmojiDisplayInfo struct {
@@ -111,33 +119,34 @@ type UserProfileCustomField struct {
 
 // User contains all the information of a user
 type User struct {
-	ID                string         `json:"id"`
-	TeamID            string         `json:"team_id"`
-	Name              string         `json:"name"`
-	Deleted           bool           `json:"deleted"`
-	Color             string         `json:"color"`
-	RealName          string         `json:"real_name"`
-	TZ                string         `json:"tz,omitempty"`
-	TZLabel           string         `json:"tz_label"`
-	TZOffset          int            `json:"tz_offset"`
-	Profile           UserProfile    `json:"profile"`
-	IsBot             bool           `json:"is_bot"`
-	IsAdmin           bool           `json:"is_admin"`
-	IsOwner           bool           `json:"is_owner"`
-	IsPrimaryOwner    bool           `json:"is_primary_owner"`
-	IsRestricted      bool           `json:"is_restricted"`
-	IsUltraRestricted bool           `json:"is_ultra_restricted"`
-	IsStranger        bool           `json:"is_stranger"`
-	IsAppUser         bool           `json:"is_app_user"`
-	IsInvitedUser     bool           `json:"is_invited_user"`
-	IsEmailConfirmed  bool           `json:"is_email_confirmed"`
-	Has2FA            bool           `json:"has_2fa"`
-	TwoFactorType     *string        `json:"two_factor_type"`
-	HasFiles          bool           `json:"has_files"`
-	Presence          string         `json:"presence"`
-	Locale            string         `json:"locale"`
-	Updated           JSONTime       `json:"updated"`
-	Enterprise        EnterpriseUser `json:"enterprise_user,omitempty"`
+	ID                     string         `json:"id"`
+	TeamID                 string         `json:"team_id"`
+	Name                   string         `json:"name"`
+	Deleted                bool           `json:"deleted"`
+	Color                  string         `json:"color"`
+	RealName               string         `json:"real_name"`
+	TZ                     string         `json:"tz,omitempty"`
+	TZLabel                string         `json:"tz_label"`
+	TZOffset               int            `json:"tz_offset"`
+	Profile                UserProfile    `json:"profile"`
+	IsBot                  bool           `json:"is_bot"`
+	IsAdmin                bool           `json:"is_admin"`
+	IsOwner                bool           `json:"is_owner"`
+	IsPrimaryOwner         bool           `json:"is_primary_owner"`
+	IsRestricted           bool           `json:"is_restricted"`
+	IsUltraRestricted      bool           `json:"is_ultra_restricted"`
+	IsStranger             bool           `json:"is_stranger"`
+	IsAppUser              bool           `json:"is_app_user"`
+	IsInvitedUser          bool           `json:"is_invited_user"`
+	IsEmailConfirmed       bool           `json:"is_email_confirmed"`
+	Has2FA                 bool           `json:"has_2fa"`
+	TwoFactorType          *string        `json:"two_factor_type"`
+	HasFiles               bool           `json:"has_files"`
+	Presence               string         `json:"presence"`
+	Locale                 string         `json:"locale"`
+	Updated                JSONTime       `json:"updated"`
+	WhoCanShareContactCard string         `json:"who_can_share_contact_card,omitempty"`
+	Enterprise             EnterpriseUser `json:"enterprise_user,omitempty"`
 }
 
 // UserPresence contains details about a user online status
@@ -176,6 +185,7 @@ type EnterpriseUser struct {
 	EnterpriseName string   `json:"enterprise_name"`
 	IsAdmin        bool     `json:"is_admin"`
 	IsOwner        bool     `json:"is_owner"`
+	IsPrimaryOwner bool     `json:"is_primary_owner"`
 	Teams          []string `json:"teams"`
 }
 
