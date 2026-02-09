@@ -25,7 +25,7 @@ type UserProfile struct {
 	DisplayNameNormalized  string                              `json:"display_name_normalized"`
 	AvatarHash             string                              `json:"avatar_hash"`
 	Email                  string                              `json:"email,omitempty"`
-	Skype                  string                              `json:"skyp,omitempty"`
+	Skype                  string                              `json:"skype,omitempty"`
 	Phone                  string                              `json:"phone,omitempty"`
 	Image24                string                              `json:"image_24"`
 	Image32                string                              `json:"image_32"`
