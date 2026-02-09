@@ -95,6 +95,9 @@ type File struct {
 	From    []EmailFileUserInfo `json:"from"`
 	Cc      []EmailFileUserInfo `json:"cc"`
 	Headers EmailHeaders        `json:"headers"`
+
+	PlainText        string `json:"plain_text"`
+	PreviewPlainText string `json:"preview_plain_text"`
 }
 
 type EmailFileUserInfo struct {
