@@ -102,6 +102,10 @@ func (api *Client) SetAssistantThreadsSuggestedPromptsContext(ctx context.Contex
 
 	values.Add("channel_id", params.ChannelID)
 
+	if params.Title != "" {
+		values.Add("title", params.Title)
+	}
+
 	// Send Prompts as JSON
 	prompts, err := json.Marshal(params.Prompts)
 	if err != nil {
