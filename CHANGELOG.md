@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`focus_on_load` support for remaining block elements** — Static/external/users/conversations/channels select, multi-select variants, datepicker, timepicker, plain_text_input, checkboxes, radio_buttons, and number_input. ([#1519])
+- **`PlainText` and `PreviewPlainText` fields on `File`** — Email file objects now include the plain text body fields instead of silently discarding them. ([#1522])
+- **Missing fields on `User`, `UserProfile`, and `EnterpriseUser`** — `who_can_share_contact_card`, `always_active`, `pronouns`, `image_1024`, `is_custom_image`, `status_text_canonical`, `huddle_state`, `huddle_state_expiration_ts`, `start_date`, and `is_primary_owner`. ([#1526])
+- **Work Objects support** — Chat unfurl with Work Object metadata, entity details (flexpane), `entity_details_requested` event, and associated types (`WorkObjectMetadata`, `WorkObjectEntity`, `WorkObjectExternalRef`). ([#1529])
+- **`admin.roles.*` API methods** — `admin.roles.listAssignments`, `admin.roles.addAssignments`, and `admin.roles.removeAssignments`. ([#1520])
+
+### Fixed
+
+- **`UserProfile.Skype` JSON tag** — Corrected typo from `"skyp"` to `"skype"`. ([#1524])
+- **`assistant.threads.setSuggestedPrompts` title parameter** — Title is now sent when non-empty. ([#1528])
+
+### Changed
+
+- Minimum Go version bumped to 1.26 (dropped 1.24). ([#1530])
+
 ## [0.18.0-rc2] - 2026-01-28
 
 ### Added
@@ -128,6 +145,14 @@ for details.
 [#1515]: https://github.com/slack-go/slack/pull/1515
 [#1516]: https://github.com/slack-go/slack/pull/1516
 [#1517]: https://github.com/slack-go/slack/pull/1517
+[#1519]: https://github.com/slack-go/slack/pull/1519
+[#1520]: https://github.com/slack-go/slack/pull/1520
+[#1522]: https://github.com/slack-go/slack/pull/1522
+[#1524]: https://github.com/slack-go/slack/pull/1524
+[#1526]: https://github.com/slack-go/slack/pull/1526
+[#1528]: https://github.com/slack-go/slack/pull/1528
+[#1529]: https://github.com/slack-go/slack/pull/1529
+[#1530]: https://github.com/slack-go/slack/pull/1530
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0-rc2...HEAD
 [0.18.0-rc2]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc2
