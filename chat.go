@@ -209,6 +209,33 @@ func (api *Client) UnfurlMessageWithAuthURLContext(ctx context.Context, channelI
 	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlAuthURL(timestamp, userAuthURL), MsgOptionCompose(options...))
 }
 
+// UnfurlMessageWorkObject unfurls a message with Work Objects metadata.
+// For more details, see UnfurlMessageWorkObjectContext documentation.
+func (api *Client) UnfurlMessageWorkObject(channelID, timestamp string, unfurls map[string]Attachment, metadata WorkObjectMetadata, options ...MsgOption) (string, string, string, error) {
+	return api.UnfurlMessageWorkObjectContext(context.Background(), channelID, timestamp, unfurls, metadata, options...)
+}
+
+// UnfurlMessageWorkObjectContext unfurls a message with Work Objects metadata with a custom context.
+// This enables rich Work Object previews as described in https://docs.slack.dev/messaging/work-objects/
+// unfurls may be nil to send only Work Object metadata (no legacy attachment unfurls).
+func (api *Client) UnfurlMessageWorkObjectContext(ctx context.Context, channelID, timestamp string, unfurls map[string]Attachment, metadata WorkObjectMetadata, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, channelID, MsgOptionUnfurlWorkObject(timestamp, unfurls, metadata), MsgOptionCompose(options...))
+}
+
+// UnfurlMessageByID unfurls a link in the message composer using unfurl_id and source.
+// Use this when Slack sends link_shared with unfurl_id (e.g. before the message is posted).
+// For more details, see UnfurlMessageByIDContext documentation.
+func (api *Client) UnfurlMessageByID(unfurlID, source string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+	return api.UnfurlMessageByIDContext(context.Background(), unfurlID, source, unfurls, options...)
+}
+
+// UnfurlMessageByIDContext unfurls by unfurl_id and source with a custom context.
+// Both unfurl_id and source must be provided together (alternative to channel + ts).
+// Slack API docs: https://api.slack.com/methods/chat.unfurl
+func (api *Client) UnfurlMessageByIDContext(ctx context.Context, unfurlID, source string, unfurls map[string]Attachment, options ...MsgOption) (string, string, string, error) {
+	return api.SendMessageContext(ctx, "", MsgOptionUnfurlByID(unfurlID, source, unfurls), MsgOptionCompose(options...))
+}
+
 // SendMessage more flexible method for configuring messages.
 // For more details, see SendMessageContext documentation.
 func (api *Client) SendMessage(channel string, options ...MsgOption) (string, string, string, error) {
@@ -471,6 +498,51 @@ func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption 
 	}
 }
 
+// MsgOptionUnfurlByID unfurls using unfurl_id and source (e.g. when link is in the composer).
+// Use instead of channel+ts when Slack provides unfurl_id in the link_shared event.
+// unfurls may be nil; the API expects a JSON object so nil is sent as {}.
+func MsgOptionUnfurlByID(unfurlID, source string, unfurls map[string]Attachment) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Del("channel")
+		config.values.Del("ts")
+		config.values.Set("unfurl_id", unfurlID)
+		config.values.Set("source", source)
+		if unfurls == nil {
+			unfurls = make(map[string]Attachment)
+		}
+		unfurlsStr, err := json.Marshal(unfurls)
+		if err == nil {
+			config.values.Set("unfurls", string(unfurlsStr))
+		}
+		return err
+	}
+}
+
+// MsgOptionUnfurlMetadataOnly sets chat.unfurl endpoint with only Work Object metadata (no unfurls).
+func MsgOptionUnfurlMetadataOnly(timestamp string, metadata WorkObjectMetadata) MsgOption {
+	return MsgOptionCompose(
+		func(config *sendConfig) error {
+			config.endpoint = config.apiurl + string(chatUnfurl)
+			config.values.Add("ts", timestamp)
+			return nil
+		},
+		MsgOptionWorkObjectMetadata(metadata),
+	)
+}
+
+// MsgOptionUnfurlWorkObject unfurls a message with Work Objects metadata.
+// When unfurls is nil, only metadata is sent (no legacy attachment unfurls).
+func MsgOptionUnfurlWorkObject(timestamp string, unfurls map[string]Attachment, metadata WorkObjectMetadata) MsgOption {
+	if len(unfurls) > 0 {
+		return MsgOptionCompose(
+			MsgOptionUnfurl(timestamp, unfurls),
+			MsgOptionWorkObjectMetadata(metadata),
+		)
+	}
+	return MsgOptionUnfurlMetadataOnly(timestamp, metadata)
+}
+
 // MsgOptionUnfurlAuthURL unfurls a message using an auth url based on the timestamp.
 func MsgOptionUnfurlAuthURL(timestamp string, userAuthURL string) MsgOption {
 	return func(config *sendConfig) error {
@@ -500,6 +572,23 @@ func MsgOptionUnfurlAuthMessage(timestamp string, msg string) MsgOption {
 		config.values.Add("ts", timestamp)
 		config.values.Add("user_auth_message", msg)
 		return nil
+	}
+}
+
+// MsgOptionUnfurlAuthBlocks sets Block Kit blocks for the auth prompt (overrides default buttons).
+// See https://docs.slack.com/methods/chat.unfurl for user_auth_blocks.
+func MsgOptionUnfurlAuthBlocks(timestamp string, blocks ...Block) MsgOption {
+	return func(config *sendConfig) error {
+		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.values.Add("ts", timestamp)
+		if len(blocks) == 0 {
+			return nil
+		}
+		blocksStr, err := json.Marshal(blocks)
+		if err == nil {
+			config.values.Set("user_auth_blocks", string(blocksStr))
+		}
+		return err
 	}
 }
 
@@ -711,6 +800,31 @@ func MsgOptionMetadata(metadata SlackMetadata) MsgOption {
 		}
 		return err
 	}
+}
+
+// MsgOptionWorkObjectMetadata sets Work Objects metadata for unfurls and messages
+// This enables Work Objects support as described in https://docs.slack.dev/messaging/work-objects/
+// If metadata.Entities is nil, it is marshaled as [] so the API receives a valid entities array.
+func MsgOptionWorkObjectMetadata(metadata WorkObjectMetadata) MsgOption {
+	return func(config *sendConfig) error {
+		metaToMarshal := metadata
+		if metaToMarshal.Entities == nil {
+			metaToMarshal.Entities = []WorkObjectEntity{}
+		}
+		meta, err := json.Marshal(metaToMarshal)
+		if err == nil {
+			config.values.Set("metadata", string(meta))
+		}
+		return err
+	}
+}
+
+// MsgOptionWorkObjectEntity creates Work Objects metadata with a single entity
+// This is a convenience function for the common case of unfurling a single Work Object
+func MsgOptionWorkObjectEntity(entity WorkObjectEntity) MsgOption {
+	return MsgOptionWorkObjectMetadata(WorkObjectMetadata{
+		Entities: []WorkObjectEntity{entity},
+	})
 }
 
 // MsgOptionLinkNames finds and links user groups. Does not support linking individual users
