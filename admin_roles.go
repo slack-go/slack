@@ -9,10 +9,9 @@ import (
 
 // AdminRolesAddAssignmentsParams contains arguments for AdminRolesAddAssignments method call.
 type AdminRolesAddAssignmentsParams struct {
-	RoleID        string
-	EntityIDs     []string
-	UserIDs       []string
-	DateEffective int64
+	RoleID    string
+	EntityIDs []string
+	UserIDs   []string
 }
 
 // AdminRolesRejectedUser represents a user that could not be assigned a role.
@@ -49,10 +48,6 @@ func (api *Client) AdminRolesAddAssignments(ctx context.Context, params AdminRol
 
 	if len(params.UserIDs) > 0 {
 		values.Add("user_ids", strings.Join(params.UserIDs, ","))
-	}
-
-	if params.DateEffective > 0 {
-		values.Add("date_effective", strconv.FormatInt(params.DateEffective, 10))
 	}
 
 	response := &AdminRolesAddAssignmentsResponse{}
