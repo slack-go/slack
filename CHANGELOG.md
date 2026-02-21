@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-02-21
+
 ### Added
 
 - **`focus_on_load` support for remaining block elements** — Static/external/users/conversations/channels select, multi-select variants, datepicker, timepicker, plain_text_input, checkboxes, radio_buttons, and number_input. ([#1519])
@@ -22,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Minimum Go version bumped to 1.26 (dropped 1.24). ([#1530])
+- CI test matrix updated: dropped Go 1.24, added Go 1.26; bumped golangci-lint to v2.10.1. ([#1530])
 
 ## [0.18.0-rc2] - 2026-01-28
 
@@ -154,7 +156,8 @@ for details.
 [#1529]: https://github.com/slack-go/slack/pull/1529
 [#1530]: https://github.com/slack-go/slack/pull/1530
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0-rc2...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/slack-go/slack/compare/v0.18.0-rc2...v0.18.0
 [0.18.0-rc2]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc2
 [0.18.0-rc1]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc1
 [0.17.3]: https://github.com/slack-go/slack/releases/tag/v0.17.3
