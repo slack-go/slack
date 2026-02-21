@@ -59,13 +59,51 @@ func (api *Client) AdminRolesAddAssignments(ctx context.Context, params AdminRol
 	return response, response.Err()
 }
 
-// AdminRolesListAssignmentsParams contains arguments for AdminRolesListAssignments method call.
-type AdminRolesListAssignmentsParams struct {
-	RoleIDs       []string
-	EntityIDs     []string
-	Limit         int
-	Cursor        string
-	SortDirection string
+type adminRolesListAssignmentsParams struct {
+	roleIDs       []string
+	entityIDs     []string
+	limit         int
+	cursor        string
+	sortDirection string
+}
+
+// AdminRolesListAssignmentsOption is an option for AdminRolesListAssignments.
+type AdminRolesListAssignmentsOption func(*adminRolesListAssignmentsParams)
+
+// AdminRolesListAssignmentsOptionRoleIDs filters results to the specified role IDs.
+func AdminRolesListAssignmentsOptionRoleIDs(roleIDs []string) AdminRolesListAssignmentsOption {
+	return func(params *adminRolesListAssignmentsParams) {
+		params.roleIDs = roleIDs
+	}
+}
+
+// AdminRolesListAssignmentsOptionEntityIDs filters results to the specified entity IDs.
+func AdminRolesListAssignmentsOptionEntityIDs(entityIDs []string) AdminRolesListAssignmentsOption {
+	return func(params *adminRolesListAssignmentsParams) {
+		params.entityIDs = entityIDs
+	}
+}
+
+// AdminRolesListAssignmentsOptionLimit sets the maximum number of results to return.
+func AdminRolesListAssignmentsOptionLimit(limit int) AdminRolesListAssignmentsOption {
+	return func(params *adminRolesListAssignmentsParams) {
+		params.limit = limit
+	}
+}
+
+// AdminRolesListAssignmentsOptionCursor sets the cursor for pagination.
+func AdminRolesListAssignmentsOptionCursor(cursor string) AdminRolesListAssignmentsOption {
+	return func(params *adminRolesListAssignmentsParams) {
+		params.cursor = cursor
+	}
+}
+
+// AdminRolesListAssignmentsOptionSortDir sets the sort direction.
+// Valid values: "asc", "desc".
+func AdminRolesListAssignmentsOptionSortDir(sortDir string) AdminRolesListAssignmentsOption {
+	return func(params *adminRolesListAssignmentsParams) {
+		params.sortDirection = sortDir
+	}
 }
 
 // RoleAssignment represents a single role assignment.
@@ -86,29 +124,34 @@ type AdminRolesListAssignmentsResponse struct {
 // AdminRolesListAssignments lists assignments for roles.
 // For more information see the admin.roles.listAssignments docs:
 // https://api.slack.com/methods/admin.roles.listAssignments
-func (api *Client) AdminRolesListAssignments(ctx context.Context, params AdminRolesListAssignmentsParams) (*AdminRolesListAssignmentsResponse, error) {
+func (api *Client) AdminRolesListAssignments(ctx context.Context, options ...AdminRolesListAssignmentsOption) (*AdminRolesListAssignmentsResponse, error) {
+	params := adminRolesListAssignmentsParams{}
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token": {api.token},
 	}
 
-	if len(params.RoleIDs) > 0 {
-		values.Add("role_ids", strings.Join(params.RoleIDs, ","))
+	if len(params.roleIDs) > 0 {
+		values.Add("role_ids", strings.Join(params.roleIDs, ","))
 	}
 
-	if len(params.EntityIDs) > 0 {
-		values.Add("entity_ids", strings.Join(params.EntityIDs, ","))
+	if len(params.entityIDs) > 0 {
+		values.Add("entity_ids", strings.Join(params.entityIDs, ","))
 	}
 
-	if params.Limit > 0 {
-		values.Add("limit", strconv.Itoa(params.Limit))
+	if params.limit > 0 {
+		values.Add("limit", strconv.Itoa(params.limit))
 	}
 
-	if params.Cursor != "" {
-		values.Add("cursor", params.Cursor)
+	if params.cursor != "" {
+		values.Add("cursor", params.cursor)
 	}
 
-	if params.SortDirection != "" {
-		values.Add("sort_dir", params.SortDirection)
+	if params.sortDirection != "" {
+		values.Add("sort_dir", params.sortDirection)
 	}
 
 	response := &AdminRolesListAssignmentsResponse{}

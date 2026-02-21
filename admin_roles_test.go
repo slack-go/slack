@@ -64,10 +64,10 @@ func TestAdminRolesListAssignments(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	resp, err := api.AdminRolesListAssignments(context.Background(), AdminRolesListAssignmentsParams{
-		RoleIDs: []string{"Rl0L"},
-		Limit:   10,
-	})
+	resp, err := api.AdminRolesListAssignments(context.Background(),
+		AdminRolesListAssignmentsOptionRoleIDs([]string{"Rl0L"}),
+		AdminRolesListAssignmentsOptionLimit(10),
+	)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 		return
