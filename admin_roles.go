@@ -73,10 +73,10 @@ type AdminRolesListAssignmentsParams struct {
 
 // RoleAssignment represents a single role assignment.
 type RoleAssignment struct {
-	RoleID      string `json:"role_id"`
-	EntityID    string `json:"entity_id,omitempty"`
-	UserID      string `json:"user_id,omitempty"`
-	DateCreated int64  `json:"date_created,omitempty"`
+	RoleID     string `json:"role_id"`
+	EntityID   string `json:"entity_id,omitempty"`
+	UserID     string `json:"user_id,omitempty"`
+	DateCreate int64  `json:"date_create,omitempty"`
 }
 
 // AdminRolesListAssignmentsResponse represents the response from admin.roles.listAssignments.
