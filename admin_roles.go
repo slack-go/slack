@@ -66,9 +66,11 @@ func (api *Client) AdminRolesAddAssignments(ctx context.Context, params AdminRol
 
 // AdminRolesListAssignmentsParams contains arguments for AdminRolesListAssignments method call.
 type AdminRolesListAssignmentsParams struct {
-	RoleIDs []string
-	Limit   int
-	Cursor  string
+	RoleIDs       []string
+	EntityIDs     []string
+	Limit         int
+	Cursor        string
+	SortDirection string
 }
 
 // RoleAssignment represents a single role assignment.
@@ -98,12 +100,20 @@ func (api *Client) AdminRolesListAssignments(ctx context.Context, params AdminRo
 		values.Add("role_ids", strings.Join(params.RoleIDs, ","))
 	}
 
+	if len(params.EntityIDs) > 0 {
+		values.Add("entity_ids", strings.Join(params.EntityIDs, ","))
+	}
+
 	if params.Limit > 0 {
 		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
+	}
+
+	if params.SortDirection != "" {
+		values.Add("sort_dir", params.SortDirection)
 	}
 
 	response := &AdminRolesListAssignmentsResponse{}
