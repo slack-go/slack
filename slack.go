@@ -119,6 +119,39 @@ func OptionConfigRefreshToken(token string) func(*Client) {
 	return func(c *Client) { c.configRefreshToken = token }
 }
 
+// OptionRetry enables HTTP retries for rate limit (429) only; 5xx and connection errors are not retried.
+// Uses DefaultRetryHandlers. Use OptionRetryConfig with AllBuiltinRetryHandlers for connection + 429.
+// If maxRetries is zero or negative, the client is not wrapped (no retries).
+// When using a custom HTTP client, pass OptionRetry after OptionHTTPClient so the retry wrapper is applied to it.
+func OptionRetry(maxRetries int) func(*Client) {
+	return func(c *Client) {
+		if maxRetries <= 0 {
+			return
+		}
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = maxRetries
+		cfg.Handlers = DefaultRetryHandlers(cfg)
+		c.httpclient = &retryClient{client: c.httpclient, config: cfg, debug: c}
+	}
+}
+
+// OptionRetryConfig enables HTTP retries with a custom config.
+// If config.MaxRetries is 0, the client is not wrapped (no retries).
+// If config.Handlers is nil, DefaultRetryHandlers(cfg) is used (429 only).
+// When using a custom HTTP client, pass OptionRetryConfig after OptionHTTPClient so the retry wrapper is applied to it.
+func OptionRetryConfig(config RetryConfig) func(*Client) {
+	return func(c *Client) {
+		if config.MaxRetries <= 0 {
+			return
+		}
+		cfg := config
+		if cfg.Handlers == nil {
+			cfg.Handlers = DefaultRetryHandlers(cfg)
+		}
+		c.httpclient = &retryClient{client: c.httpclient, config: cfg, debug: c}
+	}
+}
+
 // New builds a slack client from the provided token and options.
 func New(token string, options ...Option) *Client {
 	s := &Client{

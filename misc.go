@@ -378,26 +378,32 @@ func doPost(client httpClient, req *http.Request, parser responseParser, d Debug
 }
 
 // post JSON.
-func postJSON(ctx context.Context, client httpClient, endpoint, token string, json []byte, intf any, d Debug) error {
-	reqBody := bytes.NewBuffer(json)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, reqBody)
+func postJSON(ctx context.Context, client httpClient, endpoint, token string, jsonBody []byte, intf any, d Debug) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(jsonBody))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
+	// allow retry client to re-send the request body on 429/5xx.
+	req.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(jsonBody)), nil
+	}
 	return doPost(client, req, newJSONParser(intf), d)
 }
 
 // post a url encoded form.
 func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf any, d Debug) error {
-	reqBody := strings.NewReader(values.Encode())
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, reqBody)
+	body := values.Encode()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// allow retry client to re-send the request body on 429/5xx.
+	req.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(strings.NewReader(body)), nil
+	}
 	return doPost(client, req, newJSONParser(intf), d)
 }
 
