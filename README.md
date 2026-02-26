@@ -75,6 +75,14 @@ func main() {
 }
 ```
 
+### HTTP retries
+
+Retries are off by default. Use **OptionRetry(n)** for 429-only retries, or **OptionRetryConfig(cfg)** for full control (connection, 429, opt-in 5xx). With a custom client, pass retry options after `OptionHTTPClient`. See package `slack` doc for handler details.
+
+```golang
+api := slack.New("YOUR_TOKEN_HERE", slack.OptionRetry(3))
+```
+
 ## Minimal Socket Mode usage:
 
 See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
