@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-03-04
+
+### Added
+
+- **Optional HTTP retry for Web API** — Retries are off by default. Enable with `OptionRetry(n)` for 429-only retries or `OptionRetryConfig(cfg)` for full control including 5xx and connection errors with exponential backoff. ([#1532])
+- **`task_card` and `plan` agent blocks** — New block types for task cards and plan agent blocks. ([#1536])
+
+### Changed
+
+- CI: bumped `actions/stale` from 10.1.1 to 10.2.0. ([#1534])
+- Use `golangci-lint` in Makefile. ([#1533])
+
 ## [0.18.0] - 2026-02-21
 
 ### Added
@@ -155,8 +167,13 @@ for details.
 [#1528]: https://github.com/slack-go/slack/pull/1528
 [#1529]: https://github.com/slack-go/slack/pull/1529
 [#1530]: https://github.com/slack-go/slack/pull/1530
+[#1532]: https://github.com/slack-go/slack/pull/1532
+[#1533]: https://github.com/slack-go/slack/pull/1533
+[#1534]: https://github.com/slack-go/slack/pull/1534
+[#1536]: https://github.com/slack-go/slack/pull/1536
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/slack-go/slack/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/slack-go/slack/compare/v0.18.0-rc2...v0.18.0
 [0.18.0-rc2]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc2
 [0.18.0-rc1]: https://github.com/slack-go/slack/releases/tag/v0.18.0-rc1
