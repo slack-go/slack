@@ -1,9 +1,7 @@
 Slack API in Go [![Go Reference](https://pkg.go.dev/badge/github.com/slack-go/slack.svg)](https://pkg.go.dev/github.com/slack-go/slack) [![CI](https://github.com/slack-go/slack/actions/workflows/test.yml/badge.svg)](https://github.com/slack-go/slack/actions/workflows/test.yml)
 ===============
 
-This is the original Slack library for Go created by Norberto Lopes, transferred to a GitHub organization.
-
-You can also chat with us on the #slack-go, #slack-go-ja Slack channel on the Gophers Slack.
+You can chat with us on the [#slack-go](https://gophers.slack.com/archives/C02JQ98JHNC), [#slack-go-ja](https://gophers.slack.com/archives/C02HNL8EN3H) Slack channel on the [Gophers Slack](https://gophers.slack.com).
 
 ![logo](logo.png "icon")
 
