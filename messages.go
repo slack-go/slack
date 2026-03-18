@@ -87,6 +87,7 @@ type Msg struct {
 	Username   string      `json:"username,omitempty"`
 	Icons      *Icon       `json:"icons,omitempty"`
 	BotProfile *BotProfile `json:"bot_profile,omitempty"`
+	WorkflowID string      `json:"workflow_id,omitempty"`
 
 	// channel_join, group_join
 	Inviter string `json:"inviter,omitempty"`
