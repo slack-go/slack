@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+[!IMPORTANT]
+`trigger_id` and `workflow_id` are NOT in any documentation or in any of the official
+libraries, so exercise caution if you use these.
+
+### Added
+
+- **`workflow_id` and `trigger_id` in `Message`** It seems that some types of messages,
+    e.g: `bot_message`, can carry `trigger_id` and `workflow_id`.
+
 ## [0.19.0] - 2026-03-04
 
 ### Added

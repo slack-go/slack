@@ -9,11 +9,11 @@ import (
 )
 
 var simpleMessage = `{
-    "type": "message",
-    "channel": "C2147483705",
-    "user": "U2147483697",
-    "text": "Hello world",
-    "ts": "1355517523.000005"
+	"type": "message",
+	"channel": "C2147483705",
+	"user": "U2147483697",
+	"text": "Hello world",
+	"ts": "1355517523.000005"
 }`
 
 func unmarshalMessage(j string) (*Message, error) {
@@ -36,12 +36,12 @@ func TestSimpleMessage(t *testing.T) {
 }
 
 var starredMessage = `{
-    "text": "is testing",
-    "type": "message",
-    "subtype": "me_message",
-    "user": "U2147483697",
-    "ts": "1433314126.000003",
-    "is_starred": true
+	"text": "is testing",
+	"type": "message",
+	"subtype": "me_message",
+	"user": "U2147483697",
+	"ts": "1433314126.000003",
+	"is_starred": true
 }`
 
 func TestStarredMessage(t *testing.T) {
@@ -57,14 +57,14 @@ func TestStarredMessage(t *testing.T) {
 }
 
 var editedMessage = `{
-    "type": "message",
-    "user": "U2147483697",
-    "text": "hello edited",
-    "edited": {
-        "user": "U2147483697",
-        "ts": "1433314416.000000"
-    },
-    "ts": "1433314408.000004"
+	"type": "message",
+	"user": "U2147483697",
+	"text": "hello edited",
+	"edited": {
+		"user": "U2147483697",
+		"ts": "1433314416.000000"
+	},
+	"ts": "1433314408.000004"
 }`
 
 func TestEditedMessage(t *testing.T) {
@@ -81,54 +81,54 @@ func TestEditedMessage(t *testing.T) {
 }
 
 var uploadedFile = `{
-    "type": "message",
-    "subtype": "file_share",
-    "text": "<@U2147483697|tester> uploaded a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test.txt|test.txt> and commented: test comment here",
-    "files": [{
-        "id": "abc",
-        "created": 1433314757,
-        "timestamp": 1433314757,
-        "name": "test.txt",
-        "title": "test.txt",
-        "mimetype": "text\/plain",
-        "filetype": "text",
-        "pretty_type": "Plain Text",
-        "user": "U2147483697",
-        "editable": true,
-        "size": 5,
-        "mode": "snippet",
-        "is_external": false,
-        "external_type": "",
-        "is_public": true,
-        "public_url_shared": false,
-        "url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test.txt",
-        "url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test.txt",
-        "url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test.txt",
-        "url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test.txt",
-        "permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test.txt",
-        "permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
-        "edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test.txt\/edit",
-        "preview": "test\n",
-        "preview_highlight": "<div class=\"sssh-code\"><div class=\"sssh-line\"><pre>test<\/pre><\/div>\n<div class=\"sssh-line\"><pre><\/pre><\/div>\n<\/div>",
-        "lines": 2,
-        "lines_more": 0,
-        "channels": [
-            "C2147483705"
-        ],
-        "groups": [],
-        "ims": [],
-        "comments_count": 1,
-        "initial_comment": {
-            "id": "Fc066YLGKH",
-            "created": 1433314757,
-            "timestamp": 1433314757,
-            "user": "U2147483697",
-            "comment": "test comment here"
-        }
-    }],
-    "user": "U2147483697",
-    "upload": true,
-    "ts": "1433314757.000006"
+	"type": "message",
+	"subtype": "file_share",
+	"text": "<@U2147483697|tester> uploaded a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test.txt|test.txt> and commented: test comment here",
+	"files": [{
+		"id": "abc",
+		"created": 1433314757,
+		"timestamp": 1433314757,
+		"name": "test.txt",
+		"title": "test.txt",
+		"mimetype": "text\/plain",
+		"filetype": "text",
+		"pretty_type": "Plain Text",
+		"user": "U2147483697",
+		"editable": true,
+		"size": 5,
+		"mode": "snippet",
+		"is_external": false,
+		"external_type": "",
+		"is_public": true,
+		"public_url_shared": false,
+		"url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test.txt",
+		"url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test.txt",
+		"url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test.txt",
+		"url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test.txt",
+		"permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test.txt",
+		"permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
+		"edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test.txt\/edit",
+		"preview": "test\n",
+		"preview_highlight": "<div class=\"sssh-code\"><div class=\"sssh-line\"><pre>test<\/pre><\/div>\n<div class=\"sssh-line\"><pre><\/pre><\/div>\n<\/div>",
+		"lines": 2,
+		"lines_more": 0,
+		"channels": [
+			"C2147483705"
+		],
+		"groups": [],
+		"ims": [],
+		"comments_count": 1,
+		"initial_comment": {
+			"id": "Fc066YLGKH",
+			"created": 1433314757,
+			"timestamp": 1433314757,
+			"user": "U2147483697",
+			"comment": "test comment here"
+		}
+	}],
+	"user": "U2147483697",
+	"upload": true,
+	"ts": "1433314757.000006"
 }`
 
 func TestUploadedFile(t *testing.T) {
@@ -145,44 +145,44 @@ func TestUploadedFile(t *testing.T) {
 }
 
 var testPost = `{
-    "type": "message",
-    "subtype": "file_share",
-    "text": "<@U2147483697|tester> shared a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>",
-    "files": [{
-        "id": "abc",
-        "created": 1433315398,
-        "timestamp": 1433315398,
-        "name": "test_post",
-        "title": "test post",
-        "mimetype": "text\/plain",
-        "filetype": "post",
-        "pretty_type": "Post",
-        "user": "U2147483697",
-        "editable": true,
-        "size": 14,
-        "mode": "post",
-        "is_external": false,
-        "external_type": "",
-        "is_public": true,
-        "public_url_shared": false,
-        "url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test_post",
-        "url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test_post",
-        "url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test_post",
-        "url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test_post",
-        "permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post",
-        "permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
-        "edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post\/edit",
-        "preview": "test post body",
-        "channels": [
-            "C2147483705"
-        ],
-        "groups": [],
-        "ims": [],
-        "comments_count": 1
-    }],
-    "user": "U2147483697",
-    "upload": false,
-    "ts": "1433315416.000008"
+	"type": "message",
+	"subtype": "file_share",
+	"text": "<@U2147483697|tester> shared a file: <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>",
+	"files": [{
+		"id": "abc",
+		"created": 1433315398,
+		"timestamp": 1433315398,
+		"name": "test_post",
+		"title": "test post",
+		"mimetype": "text\/plain",
+		"filetype": "post",
+		"pretty_type": "Post",
+		"user": "U2147483697",
+		"editable": true,
+		"size": 14,
+		"mode": "post",
+		"is_external": false,
+		"external_type": "",
+		"is_public": true,
+		"public_url_shared": false,
+		"url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test_post",
+		"url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test_post",
+		"url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test_post",
+		"url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test_post",
+		"permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post",
+		"permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
+		"edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post\/edit",
+		"preview": "test post body",
+		"channels": [
+			"C2147483705"
+		],
+		"groups": [],
+		"ims": [],
+		"comments_count": 1
+	}],
+	"user": "U2147483697",
+	"upload": false,
+	"ts": "1433315416.000008"
 }`
 
 func TestPost(t *testing.T) {
@@ -199,49 +199,49 @@ func TestPost(t *testing.T) {
 }
 
 var testComment = `{
-    "type": "message",
-    "subtype": "file_comment",
-    "text": "<@U2147483697|tester> commented on <@U2147483697|tester>'s file <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>: another comment",
-    "files": [{
-        "id": "abc",
-        "created": 1433315398,
-        "timestamp": 1433315398,
-        "name": "test_post",
-        "title": "test post",
-        "mimetype": "text\/plain",
-        "filetype": "post",
-        "pretty_type": "Post",
-        "user": "U2147483697",
-        "editable": true,
-        "size": 14,
-        "mode": "post",
-        "is_external": false,
-        "external_type": "",
-        "is_public": true,
-        "public_url_shared": false,
-        "url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test_post",
-        "url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test_post",
-        "url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test_post",
-        "url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test_post",
-        "permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post",
-        "permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
-        "edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post\/edit",
-        "preview": "test post body",
-        "channels": [
-            "C2147483705"
-        ],
-        "groups": [],
-        "ims": [],
-        "comments_count": 2
-    }],
-    "comment": {
-        "id": "xyz",
-        "created": 1433316360,
-        "timestamp": 1433316360,
-        "user": "U2147483697",
-        "comment": "another comment"
-    },
-    "ts": "1433316360.000009"
+	"type": "message",
+	"subtype": "file_comment",
+	"text": "<@U2147483697|tester> commented on <@U2147483697|tester>'s file <https:\/\/test.slack.com\/files\/tester\/abc\/test_post|test post>: another comment",
+	"files": [{
+		"id": "abc",
+		"created": 1433315398,
+		"timestamp": 1433315398,
+		"name": "test_post",
+		"title": "test post",
+		"mimetype": "text\/plain",
+		"filetype": "post",
+		"pretty_type": "Post",
+		"user": "U2147483697",
+		"editable": true,
+		"size": 14,
+		"mode": "post",
+		"is_external": false,
+		"external_type": "",
+		"is_public": true,
+		"public_url_shared": false,
+		"url": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/test_post",
+		"url_download": "https:\/\/slack-files.com\/files-pub\/abc-def-ghi\/download\/test_post",
+		"url_private": "https:\/\/files.slack.com\/files-pri\/abc-def\/test_post",
+		"url_private_download": "https:\/\/files.slack.com\/files-pri\/abc-def\/download\/test_post",
+		"permalink": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post",
+		"permalink_public": "https:\/\/slack-files.com\/abc-def-ghi",
+		"edit_link": "https:\/\/test.slack.com\/files\/tester\/abc\/test_post\/edit",
+		"preview": "test post body",
+		"channels": [
+			"C2147483705"
+		],
+		"groups": [],
+		"ims": [],
+		"comments_count": 2
+	}],
+	"comment": {
+		"id": "xyz",
+		"created": 1433316360,
+		"timestamp": 1433316360,
+		"user": "U2147483697",
+		"comment": "another comment"
+	},
+	"ts": "1433316360.000009"
 }`
 
 func TestComment(t *testing.T) {
@@ -258,43 +258,44 @@ func TestComment(t *testing.T) {
 }
 
 var botMessage = `{
-    "type": "message",
-    "subtype": "bot_message",
-    "text": "Pushing is the answer",
-    "suppress_notification": false,
-    "bot_id": "BB12033",
-    "username": "github",
-    "icons": {},
-    "team": "T01A9CUMPQA",
-    "bot_profile": {
-        "id": "BB12033",
-        "deleted": false,
-        "name": "github",
-        "updated": 1599574335,
-        "app_id": "A6DB2SWUW",
-        "icons": {
-            "image_36": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_36.png",
-            "image_48": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_48.png",
-            "image_72": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_72.png"
-        },
-        "team_id": "T01A9CUMPQA"
-    },
-    "blocks": [],
-    "channel": "C01AZ844Z32",
-    "event_ts": "1358877455.000010",
-    "ts": "1358877455.000010"
+	"type": "message",
+	"subtype": "bot_message",
+	"text": "Pushing is the answer",
+	"suppress_notification": false,
+	"bot_id": "BB12033",
+	"username": "github",
+	"icons": {},
+	"team": "T01A9CUMPQA",
+	"bot_profile": {
+		"id": "BB12033",
+		"deleted": false,
+		"name": "github",
+		"updated": 1599574335,
+		"app_id": "A6DB2SWUW",
+		"icons": {
+			"image_36": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_36.png",
+			"image_48": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_48.png",
+			"image_72": "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_72.png"
+		},
+		"team_id": "T01A9CUMPQA"
+	},
+	"blocks": [],
+	"channel": "C01AZ844Z32",
+	"event_ts": "1358877455.000010",
+	"ts": "1358877455.000010"
 }`
 
 var workflowBotMessage = `{
-    "type": "message",
-    "subtype": "bot_message",
-    "text": "Can you create a TODO.md file",
-    "bot_id": "BB12033",
-    "username": "Test Workflow",
-    "workflow_id": "Wf0123456789",
-    "blocks": [],
-    "channel": "C2147483705",
-    "ts": "1358877455.000010"
+	"type": "message",
+	"subtype": "bot_message",
+	"text": "Can you create a TODO.md file",
+	"bot_id": "BB12033",
+	"username": "Test Workflow",
+	"workflow_id": "Wf0123456789",
+	"trigger_id": "Ft0123456789",
+	"blocks": [],
+	"channel": "C2147483705",
+	"ts": "1358877455.000010"
 }`
 
 func TestWorkflowBotMessage(t *testing.T) {
@@ -306,6 +307,7 @@ func TestWorkflowBotMessage(t *testing.T) {
 	assert.Equal(t, "BB12033", message.BotID)
 	assert.Equal(t, "Test Workflow", message.Username)
 	assert.Equal(t, "Wf0123456789", message.WorkflowID)
+	assert.Equal(t, "Ft0123456789", message.TriggerID)
 	assert.Equal(t, "C2147483705", message.Channel)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
 }
@@ -337,12 +339,12 @@ func TestBotMessage(t *testing.T) {
 }
 
 var meMessage = `{
-    "type": "message",
-    "subtype": "me_message",
-    "channel": "C2147483705",
-    "user": "U2147483697",
-    "text": "is doing that thing",
-    "ts": "1355517523.000005"
+	"type": "message",
+	"subtype": "me_message",
+	"channel": "C2147483705",
+	"user": "U2147483697",
+	"text": "is doing that thing",
+	"ts": "1355517523.000005"
 }`
 
 func TestMeMessage(t *testing.T) {
@@ -358,21 +360,21 @@ func TestMeMessage(t *testing.T) {
 }
 
 var messageChangedMessage = `{
-    "type": "message",
-    "subtype": "message_changed",
-    "hidden": true,
-    "channel": "C2147483705",
-    "ts": "1358878755.000001",
-    "message": {
-        "type": "message",
-        "user": "U2147483697",
-        "text": "Hello, world!",
-        "ts": "1355517523.000005",
-        "edited": {
-            "user": "U2147483697",
-            "ts": "1358878755.000001"
-        }
-    }
+	"type": "message",
+	"subtype": "message_changed",
+	"hidden": true,
+	"channel": "C2147483705",
+	"ts": "1358878755.000001",
+	"message": {
+		"type": "message",
+		"user": "U2147483697",
+		"text": "Hello, world!",
+		"ts": "1355517523.000005",
+		"edited": {
+			"user": "U2147483697",
+			"ts": "1358878755.000001"
+		}
+	}
 }`
 
 func TestMessageChangedMessage(t *testing.T) {
@@ -395,12 +397,12 @@ func TestMessageChangedMessage(t *testing.T) {
 }
 
 var messageDeletedMessage = `{
-    "type": "message",
-    "subtype": "message_deleted",
-    "hidden": true,
-    "channel": "C2147483705",
-    "ts": "1358878755.000001",
-    "deleted_ts": "1358878749.000002"
+	"type": "message",
+	"subtype": "message_deleted",
+	"hidden": true,
+	"channel": "C2147483705",
+	"ts": "1358878755.000001",
+	"deleted_ts": "1358878749.000002"
 }`
 
 func TestMessageDeletedMessage(t *testing.T) {
@@ -416,11 +418,11 @@ func TestMessageDeletedMessage(t *testing.T) {
 }
 
 var channelJoinMessage = `{
-    "type": "message",
-    "subtype": "channel_join",
-    "ts": "1358877458.000011",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has joined the channel"
+	"type": "message",
+	"subtype": "channel_join",
+	"ts": "1358877458.000011",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has joined the channel"
 }`
 
 func TestChannelJoinMessage(t *testing.T) {
@@ -435,11 +437,11 @@ func TestChannelJoinMessage(t *testing.T) {
 }
 
 var channelJoinInvitedMessage = `{
-    "type": "message",
-    "subtype": "channel_join",
-    "ts": "1358877458.000011",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has joined the channel",
+	"type": "message",
+	"subtype": "channel_join",
+	"ts": "1358877458.000011",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has joined the channel",
 		"inviter": "U2147483829"
 }`
 
@@ -456,11 +458,11 @@ func TestChannelJoinInvitedMessage(t *testing.T) {
 }
 
 var channelLeaveMessage = `{
-    "type": "message",
-    "subtype": "channel_leave",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has left the channel"
+	"type": "message",
+	"subtype": "channel_leave",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has left the channel"
 }`
 
 func TestChannelLeaveMessage(t *testing.T) {
@@ -475,12 +477,12 @@ func TestChannelLeaveMessage(t *testing.T) {
 }
 
 var channelTopicMessage = `{
-    "type": "message",
-    "subtype": "channel_topic",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "topic": "hello world",
-    "text": "<@U2147483828|cal> set the channel topic: hello world"
+	"type": "message",
+	"subtype": "channel_topic",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"topic": "hello world",
+	"text": "<@U2147483828|cal> set the channel topic: hello world"
 }`
 
 func TestChannelTopicMessage(t *testing.T) {
@@ -496,12 +498,12 @@ func TestChannelTopicMessage(t *testing.T) {
 }
 
 var channelPurposeMessage = `{
-    "type": "message",
-    "subtype": "channel_purpose",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "purpose": "whatever",
-    "text": "<@U2147483828|cal> set the channel purpose: whatever"
+	"type": "message",
+	"subtype": "channel_purpose",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"purpose": "whatever",
+	"text": "<@U2147483828|cal> set the channel purpose: whatever"
 }`
 
 func TestChannelPurposeMessage(t *testing.T) {
@@ -517,13 +519,13 @@ func TestChannelPurposeMessage(t *testing.T) {
 }
 
 var channelNameMessage = `{
-    "type": "message",
-    "subtype": "channel_name",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "old_name": "random",
-    "name": "watercooler",
-    "text": "<@U2147483828|cal> has renamed the channel from \"random\" to \"watercooler\""
+	"type": "message",
+	"subtype": "channel_name",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"old_name": "random",
+	"name": "watercooler",
+	"text": "<@U2147483828|cal> has renamed the channel from \"random\" to \"watercooler\""
 }`
 
 func TestChannelNameMessage(t *testing.T) {
@@ -540,12 +542,12 @@ func TestChannelNameMessage(t *testing.T) {
 }
 
 var channelArchiveMessage = `{
-    "type": "message",
-    "subtype": "channel_archive",
-    "ts": "1361482916.000003",
-    "text": "<U1234|@cal> archived the channel",
-    "user": "U1234",
-    "members": ["U1234", "U5678"]
+	"type": "message",
+	"subtype": "channel_archive",
+	"ts": "1361482916.000003",
+	"text": "<U1234|@cal> archived the channel",
+	"user": "U1234",
+	"members": ["U1234", "U5678"]
 }`
 
 func TestChannelArchiveMessage(t *testing.T) {
@@ -562,11 +564,11 @@ func TestChannelArchiveMessage(t *testing.T) {
 }
 
 var channelUnarchiveMessage = `{
-    "type": "message",
-    "subtype": "channel_unarchive",
-    "ts": "1361482916.000003",
-    "text": "<U1234|@cal> un-archived the channel",
-    "user": "U1234"
+	"type": "message",
+	"subtype": "channel_unarchive",
+	"ts": "1361482916.000003",
+	"text": "<U1234|@cal> un-archived the channel",
+	"user": "U1234"
 }`
 
 func TestChannelUnarchiveMessage(t *testing.T) {
@@ -581,25 +583,25 @@ func TestChannelUnarchiveMessage(t *testing.T) {
 }
 
 var channelRepliesParentMessage = `{
-    "type": "message",
-    "user": "U1234",
-    "text": "test",
-    "thread_ts": "1493305433.915644",
-    "reply_count": 2,
-    "replies": [
-        {
-            "user": "U5678",
-            "ts": "1493305444.920992"
-        },
-        {
-            "user": "U9012",
-            "ts": "1493305894.133936"
-        }
-    ],
-    "subscribed": true,
-    "last_read": "1493305894.133936",
-    "unread_count": 0,
-    "ts": "1493305433.915644"
+	"type": "message",
+	"user": "U1234",
+	"text": "test",
+	"thread_ts": "1493305433.915644",
+	"reply_count": 2,
+	"replies": [
+		{
+			"user": "U5678",
+			"ts": "1493305444.920992"
+		},
+		{
+			"user": "U9012",
+			"ts": "1493305894.133936"
+		}
+	],
+	"subscribed": true,
+	"last_read": "1493305894.133936",
+	"unread_count": 0,
+	"ts": "1493305433.915644"
 }`
 
 func TestChannelRepliesParentMessage(t *testing.T) {
@@ -619,12 +621,12 @@ func TestChannelRepliesParentMessage(t *testing.T) {
 }
 
 var channelRepliesChildMessage = `{
-    "type": "message",
-    "user": "U5678",
-    "text": "foo",
-    "thread_ts": "1493305433.915644",
-    "parent_user_id": "U1234",
-    "ts": "1493305444.920992"
+	"type": "message",
+	"user": "U5678",
+	"text": "foo",
+	"thread_ts": "1493305433.915644",
+	"parent_user_id": "U1234",
+	"ts": "1493305444.920992"
 }`
 
 func TestChannelRepliesChildMessage(t *testing.T) {
@@ -640,11 +642,11 @@ func TestChannelRepliesChildMessage(t *testing.T) {
 }
 
 var groupJoinMessage = `{
-    "type": "message",
-    "subtype": "group_join",
-    "ts": "1358877458.000011",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has joined the group"
+	"type": "message",
+	"subtype": "group_join",
+	"ts": "1358877458.000011",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has joined the group"
 }`
 
 func TestGroupJoinMessage(t *testing.T) {
@@ -659,11 +661,11 @@ func TestGroupJoinMessage(t *testing.T) {
 }
 
 var groupJoinInvitedMessage = `{
-    "type": "message",
-    "subtype": "group_join",
-    "ts": "1358877458.000011",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has joined the group",
+	"type": "message",
+	"subtype": "group_join",
+	"ts": "1358877458.000011",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has joined the group",
 		"inviter": "U2147483829"
 }`
 
@@ -680,11 +682,11 @@ func TestGroupJoinInvitedMessage(t *testing.T) {
 }
 
 var groupLeaveMessage = `{
-    "type": "message",
-    "subtype": "group_leave",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "text": "<@U2147483828|cal> has left the group"
+	"type": "message",
+	"subtype": "group_leave",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"text": "<@U2147483828|cal> has left the group"
 }`
 
 func TestGroupLeaveMessage(t *testing.T) {
@@ -699,12 +701,12 @@ func TestGroupLeaveMessage(t *testing.T) {
 }
 
 var groupTopicMessage = `{
-    "type": "message",
-    "subtype": "group_topic",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "topic": "hello world",
-    "text": "<@U2147483828|cal> set the group topic: hello world"
+	"type": "message",
+	"subtype": "group_topic",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"topic": "hello world",
+	"text": "<@U2147483828|cal> set the group topic: hello world"
 }`
 
 func TestGroupTopicMessage(t *testing.T) {
@@ -720,12 +722,12 @@ func TestGroupTopicMessage(t *testing.T) {
 }
 
 var groupPurposeMessage = `{
-    "type": "message",
-    "subtype": "group_purpose",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "purpose": "whatever",
-    "text": "<@U2147483828|cal> set the group purpose: whatever"
+	"type": "message",
+	"subtype": "group_purpose",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"purpose": "whatever",
+	"text": "<@U2147483828|cal> set the group purpose: whatever"
 }`
 
 func TestGroupPurposeMessage(t *testing.T) {
@@ -741,13 +743,13 @@ func TestGroupPurposeMessage(t *testing.T) {
 }
 
 var groupNameMessage = `{
-    "type": "message",
-    "subtype": "group_name",
-    "ts": "1358877455.000010",
-    "user": "U2147483828",
-    "old_name": "random",
-    "name": "watercooler",
-    "text": "<@U2147483828|cal> has renamed the group from \"random\" to \"watercooler\""
+	"type": "message",
+	"subtype": "group_name",
+	"ts": "1358877455.000010",
+	"user": "U2147483828",
+	"old_name": "random",
+	"name": "watercooler",
+	"text": "<@U2147483828|cal> has renamed the group from \"random\" to \"watercooler\""
 }`
 
 func TestGroupNameMessage(t *testing.T) {
@@ -764,12 +766,12 @@ func TestGroupNameMessage(t *testing.T) {
 }
 
 var groupArchiveMessage = `{
-    "type": "message",
-    "subtype": "group_archive",
-    "ts": "1361482916.000003",
-    "text": "<U1234|@cal> archived the group",
-    "user": "U1234",
-    "members": ["U1234", "U5678"]
+	"type": "message",
+	"subtype": "group_archive",
+	"ts": "1361482916.000003",
+	"text": "<U1234|@cal> archived the group",
+	"user": "U1234",
+	"members": ["U1234", "U5678"]
 }`
 
 func TestGroupArchiveMessage(t *testing.T) {
@@ -786,11 +788,11 @@ func TestGroupArchiveMessage(t *testing.T) {
 }
 
 var groupUnarchiveMessage = `{
-    "type": "message",
-    "subtype": "group_unarchive",
-    "ts": "1361482916.000003",
-    "text": "<U1234|@cal> un-archived the group",
-    "user": "U1234"
+	"type": "message",
+	"subtype": "group_unarchive",
+	"ts": "1361482916.000003",
+	"text": "<U1234|@cal> un-archived the group",
+	"user": "U1234"
 }`
 
 func TestGroupUnarchiveMessage(t *testing.T) {
@@ -805,52 +807,52 @@ func TestGroupUnarchiveMessage(t *testing.T) {
 }
 
 var fileShareMessage = `{
-    "type": "message",
-    "subtype": "file_share",
-    "ts": "1358877455.000010",
-    "text": "<@cal> uploaded a file: <https:...7.png|7.png>",
-    "files": [{
-        "id" : "F2147483862",
-        "created" : 1356032811,
-        "timestamp" : 1356032811,
-        "name" : "file.htm",
-        "title" : "My HTML file",
-        "mimetype" : "text\/plain",
-        "filetype" : "text",
-        "pretty_type": "Text",
-        "user" : "U2147483697",
-        "mode" : "hosted",
-        "editable" : true,
-        "is_external": false,
-        "external_type": "",
-        "size" : 12345,
-        "url": "https:\/\/slack-files.com\/files-pub\/T024BE7LD-F024BERPE-09acb6\/1.png",
-        "url_download": "https:\/\/slack-files.com\/files-pub\/T024BE7LD-F024BERPE-09acb6\/download\/1.png",
-        "url_private": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/1.png",
-        "url_private_download": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/download\/1.png",
-        "thumb_64": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_64.png",
-        "thumb_80": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_80.png",
-        "thumb_360": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.png",
-        "thumb_360_gif": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.gif",
-        "thumb_360_w": 100,
-        "thumb_360_h": 100,
-        "permalink" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png",
-        "edit_link" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png/edit",
-        "preview" : "&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n&lt;meta charset='utf-8'&gt;",
-        "preview_highlight" : "&lt;div class=\"sssh-code\"&gt;&lt;div class=\"sssh-line\"&gt;&lt;pre&gt;&lt;!DOCTYPE html...",
-        "lines" : 123,
-        "lines_more": 118,
-        "is_public": true,
-        "public_url_shared": false,
-        "channels": ["C024BE7LT"],
-        "groups": ["G12345"],
-        "ims": ["D12345"],
-        "initial_comment": {},
-        "num_stars": 7,
-        "is_starred": true
-    }],
-    "user": "U2147483697",
-    "upload": true
+	"type": "message",
+	"subtype": "file_share",
+	"ts": "1358877455.000010",
+	"text": "<@cal> uploaded a file: <https:...7.png|7.png>",
+	"files": [{
+		"id" : "F2147483862",
+		"created" : 1356032811,
+		"timestamp" : 1356032811,
+		"name" : "file.htm",
+		"title" : "My HTML file",
+		"mimetype" : "text\/plain",
+		"filetype" : "text",
+		"pretty_type": "Text",
+		"user" : "U2147483697",
+		"mode" : "hosted",
+		"editable" : true,
+		"is_external": false,
+		"external_type": "",
+		"size" : 12345,
+		"url": "https:\/\/slack-files.com\/files-pub\/T024BE7LD-F024BERPE-09acb6\/1.png",
+		"url_download": "https:\/\/slack-files.com\/files-pub\/T024BE7LD-F024BERPE-09acb6\/download\/1.png",
+		"url_private": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/1.png",
+		"url_private_download": "https:\/\/slack.com\/files-pri\/T024BE7LD-F024BERPE\/download\/1.png",
+		"thumb_64": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_64.png",
+		"thumb_80": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_80.png",
+		"thumb_360": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.png",
+		"thumb_360_gif": "https:\/\/slack-files.com\/files-tmb\/T024BE7LD-F024BERPE-c66246\/1_360.gif",
+		"thumb_360_w": 100,
+		"thumb_360_h": 100,
+		"permalink" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png",
+		"edit_link" : "https:\/\/tinyspeck.slack.com\/files\/cal\/F024BERPE\/1.png/edit",
+		"preview" : "&lt;!DOCTYPE html&gt;\n&lt;html&gt;\n&lt;meta charset='utf-8'&gt;",
+		"preview_highlight" : "&lt;div class=\"sssh-code\"&gt;&lt;div class=\"sssh-line\"&gt;&lt;pre&gt;&lt;!DOCTYPE html...",
+		"lines" : 123,
+		"lines_more": 118,
+		"is_public": true,
+		"public_url_shared": false,
+		"channels": ["C024BE7LT"],
+		"groups": ["G12345"],
+		"ims": ["D12345"],
+		"initial_comment": {},
+		"num_stars": 7,
+		"is_starred": true
+	}],
+	"user": "U2147483697",
+	"upload": true
 }`
 
 func TestFileShareMessage(t *testing.T) {
