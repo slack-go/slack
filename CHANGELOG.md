@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[!IMPORTANT]
-`trigger_id` and `workflow_id` are NOT in any documentation or in any of the official
+> [!WARNING]
+> `trigger_id` and `workflow_id` are NOT in any documentation or in any of the official
 libraries, so exercise caution if you use these.
 
 ### Added
