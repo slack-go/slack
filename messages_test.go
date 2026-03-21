@@ -285,6 +285,31 @@ var botMessage = `{
     "ts": "1358877455.000010"
 }`
 
+var workflowBotMessage = `{
+    "type": "message",
+    "subtype": "bot_message",
+    "text": "Can you create a TODO.md file",
+    "bot_id": "BB12033",
+    "username": "Test Workflow",
+    "workflow_id": "Wf0123456789",
+    "blocks": [],
+    "channel": "C2147483705",
+    "ts": "1358877455.000010"
+}`
+
+func TestWorkflowBotMessage(t *testing.T) {
+	message, err := unmarshalMessage(workflowBotMessage)
+	assert.Nil(t, err)
+	assert.NotNil(t, message)
+	assert.Equal(t, "message", message.Type)
+	assert.Equal(t, MsgSubTypeBotMessage, message.SubType)
+	assert.Equal(t, "BB12033", message.BotID)
+	assert.Equal(t, "Test Workflow", message.Username)
+	assert.Equal(t, "Wf0123456789", message.WorkflowID)
+	assert.Equal(t, "C2147483705", message.Channel)
+	assert.Equal(t, "1358877455.000010", message.Timestamp)
+}
+
 func TestBotMessage(t *testing.T) {
 	message, err := unmarshalMessage(botMessage)
 	assert.Nil(t, err)

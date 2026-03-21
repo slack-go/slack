@@ -320,9 +320,10 @@ type MessageEvent struct {
 	SubType string `json:"subtype,omitempty"`
 
 	// bot_message (https://api.slack.com/events/message/bot_message)
-	BotID    string `json:"bot_id,omitempty"`
-	Username string `json:"username,omitempty"`
-	Icons    *Icon  `json:"icons,omitempty"`
+	BotID      string `json:"bot_id,omitempty"`
+	Username   string `json:"username,omitempty"`
+	Icons      *Icon  `json:"icons,omitempty"`
+	WorkflowID string `json:"workflow_id,omitempty"`
 
 	// AssistantThread contains action token for Data Access API queries in message events
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
