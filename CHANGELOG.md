@@ -13,8 +13,16 @@ libraries, so exercise caution if you use these.
 
 ### Added
 
-- **`workflow_id` and `trigger_id` in `Message`** It seems that some types of messages,
+- **`workflow_id` and `trigger_id` in `Message`** — It seems that some types of messages,
     e.g: `bot_message`, can carry `trigger_id` and `workflow_id`.
+- **`RichTextQuote.Border` field** — optional border toggle (matches the docs now)
+- **`RichTextPreformatted.Language` field** — enables syntax highlighting for preformatted
+  blocks
+
+### Fixed
+- **Remove embedding of `RichTextSection`** — `RichTextQuote` and `RichTextPreformatted`
+  are now flattened as they should have always been. This is a breaking change for anyone
+  using these structs directly.
 
 ## [0.19.0] - 2026-03-04
 
