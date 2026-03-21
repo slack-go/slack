@@ -13,19 +13,19 @@ const (
   "type":"rich_text",
   "block_id":"FaYCD",
   "elements": [
-    {
-      "type":"rich_text_section",
-      "elements": [
-        {
-          "type":"channel",
-          "channel_id":"C012345678"
-        },
-        {
-          "type":"text",
-          "text":"dummy_text"
-        }
-      ]
-    }
+	{
+	  "type":"rich_text_section",
+	  "elements": [
+		{
+		  "type":"channel",
+		  "channel_id":"C012345678"
+		},
+		{
+		  "type":"text",
+		  "text":"dummy_text"
+		}
+	  ]
+	}
   ]
 }`
 

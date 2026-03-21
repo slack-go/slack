@@ -129,7 +129,7 @@ func NewRichTextList(style RichTextListElementType, indent int, elements ...Rich
 	}
 }
 
-// ElementType returns the type of the Element
+// RichTextElementType returns the type of the Element
 func (s RichTextList) RichTextElementType() RichTextElementType {
 	return s.Type
 }
@@ -262,7 +262,9 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// NewRichTextSectionBlockElement .
+// NewRichTextSection creates a new rich text section from the provided elements. The
+// section type will default to "rich_text_section", as it's the only currently supported
+// section type.
 func NewRichTextSection(elements ...RichTextSectionElement) *RichTextSection {
 	return &RichTextSection{
 		Type:     RTESection,
@@ -491,7 +493,11 @@ func (r RichTextSectionUnknownElement) RichTextSectionElementType() RichTextSect
 }
 
 // RichTextQuote represents rich_text_quote element type.
-type RichTextQuote RichTextSection
+type RichTextQuote struct {
+	Type     RichTextElementType      `json:"type"`
+	Elements []RichTextSectionElement `json:"elements"`
+	Border   int                      `json:"border,omitempty"`
+}
 
 // RichTextElementType returns the type of the Element
 func (s *RichTextQuote) RichTextElementType() RichTextElementType {
@@ -504,15 +510,25 @@ func (s *RichTextQuote) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &rts); err != nil {
 		return err
 	}
-	*s = RichTextQuote(rts)
-	s.Type = RTEQuote
+	var standalone struct {
+		Border int `json:"border"`
+	}
+	if err := json.Unmarshal(b, &standalone); err != nil {
+		return err
+	}
+	*s = RichTextQuote{
+		Type:     RTEQuote,
+		Elements: rts.Elements,
+		Border:   standalone.Border,
+	}
 	return nil
 }
 
 // RichTextPreformatted represents rich_text_quote element type.
 type RichTextPreformatted struct {
 	RichTextSection
-	Border int `json:"border"`
+	Border   int    `json:"border"`
+	Language string `json:"language,omitempty"`
 }
 
 // RichTextElementType returns the type of the Element
@@ -536,7 +552,8 @@ func (s *RichTextPreformatted) UnmarshalJSON(b []byte) error {
 	// original struct, which may become a maintenance burden (i.e. update the
 	// fields in two places, should it ever change).
 	var standalone struct {
-		Border int `json:"border"`
+		Border   int    `json:"border"`
+		Language string `json:"language"`
 	}
 	if err := json.Unmarshal(b, &standalone); err != nil {
 		return err
@@ -544,6 +561,7 @@ func (s *RichTextPreformatted) UnmarshalJSON(b []byte) error {
 	*s = RichTextPreformatted{
 		RichTextSection: rts,
 		Border:          standalone.Border,
+		Language:        standalone.Language,
 	}
 	s.Type = RTEPreformatted
 	return nil
