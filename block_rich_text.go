@@ -526,9 +526,10 @@ func (s *RichTextQuote) UnmarshalJSON(b []byte) error {
 
 // RichTextPreformatted represents rich_text_quote element type.
 type RichTextPreformatted struct {
-	RichTextSection
-	Border   int    `json:"border"`
-	Language string `json:"language,omitempty"`
+	Type     RichTextElementType      `json:"type"`
+	Elements []RichTextSectionElement `json:"elements"`
+	Border   int                      `json:"border"`
+	Language string                   `json:"language,omitempty"`
 }
 
 // RichTextElementType returns the type of the Element
@@ -559,10 +560,10 @@ func (s *RichTextPreformatted) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	*s = RichTextPreformatted{
-		RichTextSection: rts,
-		Border:          standalone.Border,
-		Language:        standalone.Language,
+		Type:     RTEPreformatted,
+		Elements: rts.Elements,
+		Border:   standalone.Border,
+		Language: standalone.Language,
 	}
-	s.Type = RTEPreformatted
 	return nil
 }

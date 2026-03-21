@@ -143,10 +143,10 @@ func TestRichTextBlock_UnmarshalJSON(t *testing.T) {
 				BlockID: "G7G",
 				Elements: []RichTextElement{
 					&RichTextSection{Type: RTESection, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Holy moly\n\n"}}},
-					&RichTextPreformatted{RichTextSection: RichTextSection{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Preformatted\n\n"}}}, Border: 2},
+					&RichTextPreformatted{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Preformatted\n\n"}}, Border: 2},
 					&RichTextQuote{Type: RTEQuote, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Quote\n\n"}}},
 					&RichTextQuote{Type: RTEQuote, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Another quote"}}},
-					&RichTextPreformatted{RichTextSection: RichTextSection{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Another preformatted\n\n"}}}, Border: 42},
+					&RichTextPreformatted{Type: RTEPreformatted, Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Another preformatted\n\n"}}, Border: 42},
 				},
 			},
 			nil,
@@ -372,11 +372,9 @@ func TestRichTextQuote_Marshal(t *testing.T) {
 	t.Run("rich_text_preformatted", func(t *testing.T) {
 		const rawRTP = "{\"type\":\"rich_text_preformatted\",\"elements\":[{\"type\":\"text\",\"text\":\"Some other text\"}],\"border\":2}"
 		want := RichTextPreformatted{
-			RichTextSection: RichTextSection{
-				Type:     RTEPreformatted,
-				Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Some other text"}},
-			},
-			Border: 2,
+			Type:     RTEPreformatted,
+			Elements: []RichTextSectionElement{&RichTextSectionTextElement{Type: RTSEText, Text: "Some other text"}},
+			Border:   2,
 		}
 		var got RichTextPreformatted
 		if err := json.Unmarshal([]byte(rawRTP), &got); err != nil {
