@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`IsConnectorBot` and `IsWorkflowBot` in `User`** — boolean flags for connector and
+  workflow bot users
+- **`GuestInvitedBy` in `UserProfile`** — user ID of whoever invited a guest user
+
 ## [0.20.0] - 2026-03-21
 
 > [!WARNING]

@@ -49,6 +49,7 @@ type UserProfile struct {
 	HuddleState             string                              `json:"huddle_state,omitempty"`
 	HuddleStateExpirationTS int                                 `json:"huddle_state_expiration_ts,omitempty"`
 	StartDate               string                              `json:"start_date,omitempty"`
+	GuestInvitedBy          string                              `json:"guest_invited_by,omitempty"`
 	Team                    string                              `json:"team"`
 	Fields                  UserProfileCustomFields             `json:"fields,omitempty"`
 }
@@ -137,6 +138,8 @@ type User struct {
 	IsUltraRestricted      bool           `json:"is_ultra_restricted"`
 	IsStranger             bool           `json:"is_stranger"`
 	IsAppUser              bool           `json:"is_app_user"`
+	IsConnectorBot         bool           `json:"is_connector_bot"`
+	IsWorkflowBot          bool           `json:"is_workflow_bot"`
 	IsInvitedUser          bool           `json:"is_invited_user"`
 	IsEmailConfirmed       bool           `json:"is_email_confirmed"`
 	Has2FA                 bool           `json:"has_2fa"`
@@ -178,7 +181,7 @@ type UserIdentity struct {
 }
 
 // EnterpriseUser is present when a user is part of Slack Enterprise Grid
-// https://api.slack.com/types/user#enterprise_grid_user_objects
+// https://docs.slack.dev/reference/objects/user-object/#fields
 type EnterpriseUser struct {
 	ID             string   `json:"id"`
 	EnterpriseID   string   `json:"enterprise_id"`
