@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`workflows.featured` API support** — add, list, remove, and set featured workflows on
+  channels via `WorkflowsFeaturedAdd`, `WorkflowsFeaturedList`, `WorkflowsFeaturedRemove`,
+  and `WorkflowsFeaturedSet`
 - **`IsConnectorBot` and `IsWorkflowBot` in `User`** — boolean flags for connector and
   workflow bot users
 - **`GuestInvitedBy` in `UserProfile`** — user ID of whoever invited a guest user
