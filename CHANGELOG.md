@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   workflow bot users
 - **`GuestInvitedBy` in `UserProfile`** — user ID of whoever invited a guest user
 
+### Fixed
+
+- **`NewBlockHeader` nil pointer dereference** — passing a nil text object no longer panics. ([#1236])
+
 ## [0.20.0] - 2026-03-21
 
 > [!WARNING]
