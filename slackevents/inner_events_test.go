@@ -503,6 +503,57 @@ func TestBotMessageEvent(t *testing.T) {
 	}
 }
 
+func TestMessageEventWithBlocks(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "message",
+			"channel": "C024BE91L",
+			"user": "U2147483697",
+			"text": "ERROR",
+			"ts": "1355517523.000005",
+			"event_ts": "1355517523.000005",
+			"channel_type": "channel",
+			"blocks": [
+				{
+					"type": "section",
+					"text": {
+						"type": "mrkdwn",
+						"text": "> Danny Torrence left the following review for your property:"
+					}
+				}
+			]
+		}
+	`)
+	var e MessageEvent
+	err := json.Unmarshal(rawE, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e.Text != "ERROR" {
+		t.Errorf("expected e.Text ERROR, got %s", e.Text)
+	}
+
+	// Blocks should be directly accessible on MessageEvent
+	if len(e.Blocks.BlockSet) != 1 {
+		t.Fatalf("expected 1 block in e.Blocks, got %d", len(e.Blocks.BlockSet))
+	}
+	if e.Blocks.BlockSet[0].BlockType() != slack.MBTSection {
+		t.Errorf("expected section block, got %s", e.Blocks.BlockSet[0].BlockType())
+	}
+
+	// Blocks should also be accessible via Message (populated by UnmarshalJSON)
+	if e.Message == nil {
+		t.Fatal("expected e.Message to be non-nil")
+	}
+	if len(e.Message.Blocks.BlockSet) != 1 {
+		t.Fatalf("expected 1 block in e.Message.Blocks, got %d", len(e.Message.Blocks.BlockSet))
+	}
+	if e.Message.Blocks.BlockSet[0].BlockType() != slack.MBTSection {
+		t.Errorf("expected section block in e.Message.Blocks, got %s", e.Message.Blocks.BlockSet[0].BlockType())
+	}
+}
+
 func TestThreadBroadcastEvent(t *testing.T) {
 	rawE := []byte(`
 			{

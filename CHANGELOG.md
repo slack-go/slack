@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`IsConnectorBot` and `IsWorkflowBot` in `User`** — boolean flags for connector and
   workflow bot users
 - **`GuestInvitedBy` in `UserProfile`** — user ID of whoever invited a guest user
+- **`Blocks` field on `MessageEvent`** — block data from webhook payloads is now directly
+  accessible via `event.Blocks` instead of only through `event.Message.Blocks`. ([#1257])
 
 ### Fixed
 
@@ -167,6 +169,8 @@ Previous release. See [GitHub releases](https://github.com/slack-go/slack/releas
 for details.
 
 [#897]: https://github.com/slack-go/slack/issues/897
+[#1236]: https://github.com/slack-go/slack/issues/1236
+[#1257]: https://github.com/slack-go/slack/issues/1257
 [#1144]: https://github.com/slack-go/slack/issues/1144
 [#1329]: https://github.com/slack-go/slack/issues/1329
 [#1343]: https://github.com/slack-go/slack/issues/1343

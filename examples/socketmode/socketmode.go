@@ -77,6 +77,14 @@ func main() {
 						if err != nil {
 							fmt.Printf("failed posting message: %v", err)
 						}
+					case *slackevents.MessageEvent:
+						fmt.Printf("Message from %s: %s\n", ev.User, ev.Text)
+						if len(ev.Blocks.BlockSet) > 0 {
+							fmt.Printf("Message contains %d block(s):\n", len(ev.Blocks.BlockSet))
+							for i, block := range ev.Blocks.BlockSet {
+								fmt.Printf("  Block %d: type=%s\n", i, block.BlockType())
+							}
+						}
 					case *slackevents.MemberJoinedChannelEvent:
 						fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
 					}

@@ -288,15 +288,16 @@ type SharedLinks struct {
 // TODO: Improve this so that it is not required to manually parse ChannelType
 type MessageEvent struct {
 	// Basic Message Event - https://api.slack.com/events/message
-	ClientMsgID     string `json:"client_msg_id"`
-	Type            string `json:"type"`
-	User            string `json:"user"`
-	Text            string `json:"text"`
-	ThreadTimeStamp string `json:"thread_ts"`
-	TimeStamp       string `json:"ts"`
-	Channel         string `json:"channel"`
-	ChannelType     string `json:"channel_type"`
-	EventTimeStamp  string `json:"event_ts"`
+	ClientMsgID     string       `json:"client_msg_id"`
+	Type            string       `json:"type"`
+	User            string       `json:"user"`
+	Text            string       `json:"text"`
+	Blocks          slack.Blocks `json:"blocks,omitempty"`
+	ThreadTimeStamp string       `json:"thread_ts"`
+	TimeStamp       string       `json:"ts"`
+	Channel         string       `json:"channel"`
+	ChannelType     string       `json:"channel_type"`
+	EventTimeStamp  string       `json:"event_ts"`
 
 	// When Message comes from a channel that is shared between workspaces
 	UserTeam   string `json:"user_team,omitempty"`

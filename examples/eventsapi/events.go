@@ -59,9 +59,17 @@ func main() {
 			switch ev := innerEvent.Data.(type) {
 			case *slackevents.AppMentionEvent:
 				api.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
+			case *slackevents.MessageEvent:
+				fmt.Printf("[INFO] Message from %s: %s\n", ev.User, ev.Text)
+				if len(ev.Blocks.BlockSet) > 0 {
+					fmt.Printf("[INFO] Message contains %d block(s):\n", len(ev.Blocks.BlockSet))
+					for i, block := range ev.Blocks.BlockSet {
+						fmt.Printf("[INFO]   Block %d: type=%s\n", i, block.BlockType())
+					}
+				}
 			}
 		}
 	})
-	fmt.Println("[INFO] Server listening")
+	fmt.Println("[INFO] Server listening on :3000")
 	http.ListenAndServe(":3000", nil)
 }
