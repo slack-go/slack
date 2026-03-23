@@ -18,6 +18,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`Blocks` field on `MessageEvent`** — block data from webhook payloads is now directly
   accessible via `event.Blocks` instead of only through `event.Message.Blocks`. ([#1257])
 
+### Changed
+
+- **`WebhookMessage.UnfurlLinks` and `UnfurlMedia` are now `*bool`** — Previously these
+  were `bool` with `omitempty`, which meant `false` was silently stripped from the JSON
+  payload. Users could not explicitly disable link or media unfurling via webhooks. The
+  fields are now `*bool` so that `nil` (omit), `false`, and `true` all serialize correctly.
+  ([#1231])
+
+  > [!WARNING]
+  > **Breaking change.** Code that sets these fields directly must be updated:
+  >
+  > ```go
+  > // Before
+  > msg := slack.WebhookMessage{UnfurlLinks: true}
+  >
+  > // After — use a helper or a variable
+  > t := true
+  > msg := slack.WebhookMessage{UnfurlLinks: &t}
+  > ```
+  >
+  > Leaving the fields unset (`nil`) preserves the previous default behavior — Slack's
+  > server-side defaults apply (`unfurl_links=false`, `unfurl_media=true`).
+
 ### Fixed
 
 - **`NewBlockHeader` nil pointer dereference** — passing a nil text object no longer panics. ([#1236])
