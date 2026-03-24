@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks
+  now unmarshal correctly through `BlockElements`, `InputBlock`, and `Accessory` paths.
+  Also adds missing `multi_*_select` and `file_input` cases to `BlockElements.UnmarshalJSON`,
+  and fixes `toBlockElement` for `RichTextInputElement` and `WorkflowButtonElement`. ([#1539])
 - **`NewBlockHeader` nil pointer dereference** — passing a nil text object no longer panics. ([#1236])
 
 ## [0.20.0] - 2026-03-21
