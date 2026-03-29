@@ -203,9 +203,8 @@ func (api *Client) OpenViewContext(
 	if err != nil {
 		return nil, err
 	}
-	endpoint := api.endpoint + "views.open"
 	resp := &ViewResponse{}
-	err = postJSON(ctx, api.httpclient, endpoint, api.token, encoded, resp, api)
+	err = api.postJSONMethod(ctx, "views.open", api.token, encoded, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -235,9 +234,8 @@ func (api *Client) PublishViewContext(
 	if err != nil {
 		return nil, err
 	}
-	endpoint := api.endpoint + "views.publish"
 	resp := &ViewResponse{}
-	err = postJSON(ctx, api.httpclient, endpoint, api.token, encoded, resp, api)
+	err = api.postJSONMethod(ctx, "views.publish", api.token, encoded, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -268,9 +266,8 @@ func (api *Client) PushViewContext(
 	if err != nil {
 		return nil, err
 	}
-	endpoint := api.endpoint + "views.push"
 	resp := &ViewResponse{}
-	err = postJSON(ctx, api.httpclient, endpoint, api.token, encoded, resp, api)
+	err = api.postJSONMethod(ctx, "views.push", api.token, encoded, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -304,9 +301,8 @@ func (api *Client) UpdateViewContext(
 	if err != nil {
 		return nil, err
 	}
-	endpoint := api.endpoint + "views.update"
 	resp := &ViewResponse{}
-	err = postJSON(ctx, api.httpclient, endpoint, api.token, encoded, resp, api)
+	err = api.postJSONMethod(ctx, "views.update", api.token, encoded, resp)
 	if err != nil {
 		return nil, err
 	}

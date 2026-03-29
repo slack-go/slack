@@ -54,7 +54,7 @@ func (api *Client) WorkflowsFeaturedAdd(ctx context.Context, input *WorkflowsFea
 		return fmt.Errorf("failed to marshal WorkflowsFeaturedAddInput: %w", err)
 	}
 
-	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.featured.add", api.token, jsonPayload, &response, api)
+	err = api.postJSONMethod(ctx, "workflows.featured.add", api.token, jsonPayload, &response)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (api *Client) WorkflowsFeaturedList(ctx context.Context, input *WorkflowsFe
 		return nil, fmt.Errorf("failed to marshal WorkflowsFeaturedListInput: %w", err)
 	}
 
-	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.featured.list", api.token, jsonPayload, &response, api)
+	err = api.postJSONMethod(ctx, "workflows.featured.list", api.token, jsonPayload, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (api *Client) WorkflowsFeaturedRemove(ctx context.Context, input *Workflows
 		return fmt.Errorf("failed to marshal WorkflowsFeaturedRemoveInput: %w", err)
 	}
 
-	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.featured.remove", api.token, jsonPayload, &response, api)
+	err = api.postJSONMethod(ctx, "workflows.featured.remove", api.token, jsonPayload, &response)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (api *Client) WorkflowsFeaturedSet(ctx context.Context, input *WorkflowsFea
 		return fmt.Errorf("failed to marshal WorkflowsFeaturedSetInput: %w", err)
 	}
 
-	err = postJSON(ctx, api.httpclient, api.endpoint+"workflows.featured.set", api.token, jsonPayload, &response, api)
+	err = api.postJSONMethod(ctx, "workflows.featured.set", api.token, jsonPayload, &response)
 	if err != nil {
 		return err
 	}
