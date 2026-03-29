@@ -143,7 +143,7 @@ type User struct {
 	IsWorkflowBot          bool           `json:"is_workflow_bot"`
 	IsInvitedUser          bool           `json:"is_invited_user"`
 	IsEmailConfirmed       bool           `json:"is_email_confirmed"`
-	Has2FA                 bool           `json:"has_2fa"`
+	Has2FA                 *bool          `json:"has_2fa,omitempty"`
 	TwoFactorType          *string        `json:"two_factor_type"`
 	HasFiles               bool           `json:"has_files"`
 	Presence               string         `json:"presence"`

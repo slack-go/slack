@@ -79,7 +79,7 @@ func getTestUserWithId(id string) User {
 		IsRestricted:      false,
 		IsUltraRestricted: false,
 		Updated:           1555425715,
-		Has2FA:            false,
+		Has2FA:            boolPtr(false),
 	}
 }
 
@@ -886,6 +886,38 @@ func TestUserUnmarshalJSON(t *testing.T) {
 	}
 	if !reflect.DeepEqual(user, roundTripped) {
 		t.Fatal("Round-trip marshal/unmarshal produced different result")
+	}
+}
+
+func TestUserHas2FA_ThreeStates(t *testing.T) {
+	// When has_2fa is present and true
+	withTrue := []byte(`{"id":"U1","has_2fa":true}`)
+	var u1 User
+	if err := json.Unmarshal(withTrue, &u1); err != nil {
+		t.Fatal(err)
+	}
+	if u1.Has2FA == nil || *u1.Has2FA != true {
+		t.Fatalf("expected Has2FA=true, got %v", u1.Has2FA)
+	}
+
+	// When has_2fa is present and false
+	withFalse := []byte(`{"id":"U2","has_2fa":false}`)
+	var u2 User
+	if err := json.Unmarshal(withFalse, &u2); err != nil {
+		t.Fatal(err)
+	}
+	if u2.Has2FA == nil || *u2.Has2FA != false {
+		t.Fatalf("expected Has2FA=false, got %v", u2.Has2FA)
+	}
+
+	// When has_2fa is absent (bot token response)
+	withoutField := []byte(`{"id":"U3"}`)
+	var u3 User
+	if err := json.Unmarshal(withoutField, &u3); err != nil {
+		t.Fatal(err)
+	}
+	if u3.Has2FA != nil {
+		t.Fatalf("expected Has2FA=nil, got %v", *u3.Has2FA)
 	}
 }
 
