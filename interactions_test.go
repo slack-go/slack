@@ -495,6 +495,25 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 		[]string{"G12345"})
 }
 
+func TestInteractionCallback_UserUsername(t *testing.T) {
+	raw := []byte(`{
+		"type": "block_actions",
+		"user": {
+			"id": "UA8RXUSPL",
+			"username": "jtorrance",
+			"name": "jtorrance",
+			"team_id": "T9TK3CUKW"
+		},
+		"actions": []
+	}`)
+	var cb InteractionCallback
+	assert.NoError(t, json.Unmarshal(raw, &cb))
+	assert.Equal(t, "UA8RXUSPL", cb.User.ID)
+	assert.Equal(t, "jtorrance", cb.User.Username)
+	assert.Equal(t, "jtorrance", cb.User.Name)
+	assert.Equal(t, "T9TK3CUKW", cb.User.TeamID)
+}
+
 func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
 	// Contrived - you generally won't see all of the fields set in a single message
 	raw := []byte(

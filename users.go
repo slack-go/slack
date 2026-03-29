@@ -123,6 +123,7 @@ type User struct {
 	ID                     string         `json:"id"`
 	TeamID                 string         `json:"team_id"`
 	Name                   string         `json:"name"`
+	Username               string         `json:"username,omitempty"`
 	Deleted                bool           `json:"deleted"`
 	Color                  string         `json:"color"`
 	RealName               string         `json:"real_name"`
