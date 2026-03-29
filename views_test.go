@@ -62,6 +62,21 @@ func TestSlack_OpenView(t *testing.T) {
 			expectedErr:  ErrBlockIDNotUnique,
 		},
 		{
+			caseName:  "allow multiple blocks with empty block IDs",
+			triggerID: "dummy_trigger_id",
+			modalViewRequest: ModalViewRequest{
+				Blocks: Blocks{
+					BlockSet: []Block{
+						&InputBlock{BlockID: ""},
+						&InputBlock{BlockID: ""},
+					},
+				},
+			},
+			rawResp:      `{"ok": true, "view": {}}`,
+			expectedResp: &ViewResponse{SlackResponse{Ok: true}, View{}},
+			expectedErr:  nil,
+		},
+		{
 			caseName:         "raise an error from Slack API",
 			triggerID:        "dummy_trigger_id",
 			modalViewRequest: ModalViewRequest{},

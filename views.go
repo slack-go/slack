@@ -167,6 +167,9 @@ func ValidateUniqueBlockID(view ModalViewRequest) bool {
 
 	for _, b := range view.Blocks.BlockSet {
 		if inputBlock, ok := b.(*InputBlock); ok {
+			if inputBlock.BlockID == "" {
+				continue
+			}
 			if _, ok := uniqueBlockID[inputBlock.BlockID]; ok {
 				return false
 			}
