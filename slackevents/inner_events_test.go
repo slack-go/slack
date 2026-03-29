@@ -115,6 +115,69 @@ func TestAppMentionWithAssistantThread(t *testing.T) {
 	}
 }
 
+func TestAppMentionWithBlocksFilesAttachments(t *testing.T) {
+	rawE := []byte(`{
+		"type": "app_mention",
+		"user": "U061F7AUR",
+		"text": "<@U0LAN0Z89> check this file",
+		"ts": "1628259917.003000",
+		"thread_ts": "1628259917.003000",
+		"channel": "C0LAN2Q65",
+		"event_ts": "1628259917.003000",
+		"bot_id": "B12345",
+		"blocks": [
+			{
+				"type": "section",
+				"block_id": "HNku",
+				"text": {
+					"type": "mrkdwn",
+					"text": "<@U0LAN0Z89> check this file"
+				}
+			}
+		],
+		"files": [
+			{
+				"id": "F12345",
+				"name": "test.png",
+				"mimetype": "image/png",
+				"filetype": "png"
+			}
+		],
+		"upload": true,
+		"attachments": [
+			{
+				"color": "29AF7B",
+				"fallback": "[no preview available]",
+				"id": 1,
+				"text": "attachment text"
+			}
+		]
+	}`)
+	var event AppMentionEvent
+	if err := json.Unmarshal(rawE, &event); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(event.Blocks.BlockSet) != 1 {
+		t.Errorf("Expected 1 block, got %d", len(event.Blocks.BlockSet))
+	}
+	if len(event.Files) != 1 {
+		t.Errorf("Expected 1 file, got %d", len(event.Files))
+	}
+	if event.Files[0].ID != "F12345" {
+		t.Errorf("Expected file ID 'F12345', got %s", event.Files[0].ID)
+	}
+	if !event.Upload {
+		t.Error("Expected Upload to be true")
+	}
+	if len(event.Attachments) != 1 {
+		t.Errorf("Expected 1 attachment, got %d", len(event.Attachments))
+	}
+	if event.Attachments[0].Text != "attachment text" {
+		t.Errorf("Expected attachment text 'attachment text', got %s", event.Attachments[0].Text)
+	}
+}
+
 func TestAppUninstalled(t *testing.T) {
 	rawE := []byte(`
 		{

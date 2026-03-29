@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
@@ -237,6 +238,29 @@ func TestEventParsing(t *testing.T) {
 						ThreadTimeStamp: "",
 						Channel:         "redacted",
 						EventTimeStamp:  "1610927831.000200",
+						Blocks: slack.Blocks{
+							BlockSet: []slack.Block{
+								&slack.RichTextBlock{
+									Type:    slack.MBTRichText,
+									BlockID: "2Le",
+									Elements: []slack.RichTextElement{
+										&slack.RichTextSection{
+											Type: slack.RTESection,
+											Elements: []slack.RichTextSectionElement{
+												&slack.RichTextSectionUserElement{
+													Type:   slack.RTSEUser,
+													UserID: "redacted",
+												},
+												&slack.RichTextSectionTextElement{
+													Type: slack.RTSEText,
+													Text: " test39",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},

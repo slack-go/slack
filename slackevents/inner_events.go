@@ -65,6 +65,12 @@ type AppMentionEvent struct {
 	// BotID is filled out when a bot triggers the app_mention event
 	BotID string `json:"bot_id,omitempty"`
 
+	// Fields shared with message events
+	Blocks      slack.Blocks       `json:"blocks,omitempty"`
+	Attachments []slack.Attachment `json:"attachments,omitempty"`
+	Files       []slack.File       `json:"files,omitempty"`
+	Upload      bool               `json:"upload,omitempty"`
+
 	// When the app is mentioned in the edited message
 	Edited *Edited `json:"edited,omitempty"`
 
