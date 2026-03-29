@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`GuestInvitedBy` in `UserProfile`** — user ID of whoever invited a guest user
 - **`Blocks` field on `MessageEvent`** — block data from webhook payloads is now directly
   accessible via `event.Blocks` instead of only through `event.Message.Blocks`. ([#1257])
+- **`Username` field on `User`** — Slack's interaction payloads (block_actions, shortcuts)
+  include a `username` field in the user object that was previously dropped during
+  unmarshalling. ([#1218])
+- **`Blocks`, `Attachments`, `Files`, `Upload` fields on `AppMentionEvent`** — these fields
+  are sent by Slack in `app_mention` event payloads but were silently dropped. ([#961])
 
 ### Changed
 
@@ -41,6 +46,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > Leaving the fields unset (`nil`) preserves the previous default behavior — Slack's
   > server-side defaults apply (`unfurl_links=false`, `unfurl_media=true`).
 
+- **`User.Has2FA` is now `*bool`** — When using a bot token, Slack's `users.list` API omits
+  `has_2fa` entirely. With a plain `bool`, this was indistinguishable from explicitly `false`.
+  Now `nil` means absent/unknown, `false` means explicitly disabled, `true` means enabled.
+  ([#1121])
+
+  > [!WARNING]
+  > **Breaking change.** Code that reads `Has2FA` must handle the pointer:
+  >
+  > ```go
+  > // Before
+  > if user.Has2FA { ... }
+  >
+  > // After
+  > if user.Has2FA != nil && *user.Has2FA { ... }
+  > ```
+
 ### Fixed
 
 - **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks
@@ -48,6 +69,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Also adds missing `multi_*_select` and `file_input` cases to `BlockElements.UnmarshalJSON`,
   and fixes `toBlockElement` for `RichTextInputElement` and `WorkflowButtonElement`. ([#1539])
 - **`NewBlockHeader` nil pointer dereference** — passing a nil text object no longer panics. ([#1236])
+- **`ValidateUniqueBlockID` rejects empty block IDs** — multiple input blocks with no
+  explicit `block_id` set (empty string) were incorrectly flagged as duplicates, causing
+  `OpenView` to fail. ([#1184])
 
 ## [0.20.0] - 2026-03-21
 
