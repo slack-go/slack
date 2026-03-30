@@ -106,6 +106,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > // Use nextCursor for the next page: params.Cursor = nextCursor
   > ```
 
+- **`GetAccessLogs` now uses cursor-based pagination** — `AccessLogParameters` replaces
+  `Count`/`Page` with `Cursor`/`Limit` (and adds `Before`), and `GetAccessLogs`/
+  `GetAccessLogsContext` now return `string` (next cursor) instead of `*Paging`.
+  Slack's `team.accessLogs` API warns `use_cursor_pagination_instead` when using the old
+  parameters.
+
+  > [!WARNING]
+  > **Breaking change.** Both the parameters and return signature have changed:
+  >
+  > ```go
+  > // Before
+  > params := slack.NewAccessLogParameters()
+  > params.Count = 100
+  > params.Page = 2
+  > logins, paging, err := api.GetAccessLogs(params)
+  >
+  > // After
+  > params := slack.NewAccessLogParameters()
+  > params.Limit = 100
+  > logins, nextCursor, err := api.GetAccessLogs(params)
+  > // Use nextCursor for the next page: params.Cursor = nextCursor
+  > ```
+
 ### Fixed
 
 - **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks

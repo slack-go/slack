@@ -150,11 +150,8 @@ func getTeamAccessLogs(rw http.ResponseWriter, r *http.Request) {
                         "country": null,
                         "region": null
                         }],
-                        "paging": {
-    			"count": 2,
-    			"total": 2,
-    			"page": 1,
-    			"pages": 1
+                        "response_metadata": {
+    			"next_cursor": "dGVhbV9pZDo5MDAwMTcw"
     			}
   }`)
 	rw.Write(response)
@@ -166,7 +163,10 @@ func TestGetAccessLogs(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	logins, paging, err := api.GetAccessLogs(NewAccessLogParameters())
+	params := NewAccessLogParameters()
+	params.Limit = 2
+	params.TeamID = "T12345"
+	logins, nextCursor, err := api.GetAccessLogs(params)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
@@ -222,17 +222,8 @@ func TestGetAccessLogs(t *testing.T) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 
-	// test the paging
-	if paging.Count != 2 {
-		t.Fatal(ErrIncorrectResponse)
-	}
-	if paging.Total != 2 {
-		t.Fatal(ErrIncorrectResponse)
-	}
-	if paging.Page != 1 {
-		t.Fatal(ErrIncorrectResponse)
-	}
-	if paging.Pages != 1 {
-		t.Fatal(ErrIncorrectResponse)
+	// test the cursor
+	if nextCursor != "dGVhbV9pZDo5MDAwMTcw" {
+		t.Fatalf("Expected cursor %q, got %q", "dGVhbV9pZDo5MDAwMTcw", nextCursor)
 	}
 }
