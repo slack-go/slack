@@ -114,8 +114,33 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 type SlackResponse struct {
 	Ok               bool                  `json:"ok"`
 	Error            string                `json:"error"`
+	Warning          string                `json:"warning"`
 	Errors           []SlackResponseErrors `json:"errors,omitempty"`
 	ResponseMetadata ResponseMetadata      `json:"response_metadata"`
+}
+
+// Warn returns warning information from the API response, or nil if there
+// are no warnings.
+func (t SlackResponse) Warn() *Warning {
+	if t.Warning == "" && len(t.ResponseMetadata.Warnings) == 0 {
+		return nil
+	}
+	return &Warning{
+		Codes:    strings.Split(t.Warning, ","),
+		Warnings: t.ResponseMetadata.Warnings,
+	}
+}
+
+// warner is satisfied by any response type that can report warnings.
+type warner interface {
+	Warn() *Warning
+}
+
+// Warning provides warning information from the web API.
+// https://docs.slack.dev/apis/web-api/#responses
+type Warning struct {
+	Codes    []string
+	Warnings []string
 }
 
 // KickUserFromConversationSlackResponse is a variant of SlackResponse that can handle the case where
@@ -124,6 +149,7 @@ type SlackResponse struct {
 type KickUserFromConversationSlackResponse struct {
 	Ok               bool                  `json:"ok"`
 	Error            string                `json:"error"`
+	Warning          string                `json:"warning"`
 	Errors           []SlackResponseErrors `json:"-"`
 	ResponseMetadata ResponseMetadata      `json:"response_metadata"`
 }
@@ -162,6 +188,18 @@ func (s *KickUserFromConversationSlackResponse) UnmarshalJSON(data []byte) error
 	}
 
 	return nil
+}
+
+// Warn returns warning information from the API response, or nil if there
+// are no warnings.
+func (s KickUserFromConversationSlackResponse) Warn() *Warning {
+	if s.Warning == "" && len(s.ResponseMetadata.Warnings) == 0 {
+		return nil
+	}
+	return &Warning{
+		Codes:    strings.Split(s.Warning, ","),
+		Warnings: s.ResponseMetadata.Warnings,
+	}
 }
 
 // Err returns any API error present in the response.

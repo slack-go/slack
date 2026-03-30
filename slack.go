@@ -68,6 +68,7 @@ type Client struct {
 	debug              bool
 	log                ilogger
 	httpclient         httpClient
+	onWarning          func(path string, request any, w *Warning)
 }
 
 // Option defines an option for a Client
@@ -91,6 +92,25 @@ func OptionDebug(b bool) func(*Client) {
 func OptionLog(l logger) func(*Client) {
 	return func(c *Client) {
 		c.log = internalLog{logger: l}
+	}
+}
+
+// OptionOnWarning sets a callback invoked whenever an API response contains
+// warnings. The callback receives the API method path (e.g.
+// "conversations.join"), the request payload ([url.Values] for form-encoded
+// requests or []byte for JSON requests), and a [Warning] with the warning
+// codes and messages.
+//
+// Example:
+//
+//	api := slack.New("YOUR_TOKEN",
+//		slack.OptionOnWarning(func(path string, request any, w *slack.Warning) {
+//			log.Printf("slack warnings for %s: codes=%v warnings=%v", path, w.Codes, w.Warnings)
+//		}),
+//	)
+func OptionOnWarning(fn func(path string, request any, w *Warning)) func(*Client) {
+	return func(c *Client) {
+		c.onWarning = fn
 	}
 }
 
@@ -207,10 +227,32 @@ func (api *Client) Debug() bool {
 
 // post to a slack web method.
 func (api *Client) postMethod(ctx context.Context, path string, values url.Values, intf any) error {
-	return postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	err := postForm(ctx, api.httpclient, api.endpoint+path, values, intf, api)
+	api.checkWarnings(intf, path, values)
+	return err
 }
 
 // get a slack web method.
 func (api *Client) getMethod(ctx context.Context, path string, token string, values url.Values, intf any) error {
-	return getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
+	err := getResource(ctx, api.httpclient, api.endpoint+path, token, values, intf, api)
+	api.checkWarnings(intf, path, values)
+	return err
+}
+
+// postJSONMethod posts JSON to a slack web method.
+func (api *Client) postJSONMethod(ctx context.Context, path string, token string, jsonBody []byte, intf any) error {
+	err := postJSON(ctx, api.httpclient, api.endpoint+path, token, jsonBody, intf, api)
+	api.checkWarnings(intf, path, jsonBody)
+	return err
+}
+
+func (api *Client) checkWarnings(intf any, path string, request any) {
+	if api.onWarning == nil {
+		return
+	}
+	if w, ok := intf.(warner); ok {
+		if warning := w.Warn(); warning != nil {
+			api.onWarning(path, request, warning)
+		}
+	}
 }
