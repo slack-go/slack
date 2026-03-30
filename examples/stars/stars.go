@@ -3,27 +3,37 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/slack-go/slack"
 )
 
 func main() {
 	var (
-		apiToken string
-		debug    bool
+		debug bool
+		team  string
 	)
 
-	flag.StringVar(&apiToken, "token", "YOUR_TOKEN_HERE", "Your Slack API Token")
+	// Get token from environment variable
+	apiToken := os.Getenv("SLACK_USER_TOKEN")
+	if apiToken == "" {
+		fmt.Println("SLACK_USER_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+
 	flag.BoolVar(&debug, "debug", false, "Show JSON output")
+	flag.StringVar(&team, "team", "", "Team ID (required for Enterprise Grid)")
 	flag.Parse()
 
 	api := slack.New(apiToken, slack.OptionDebug(debug))
 
-	// Get all stars for the usr.
+	// Get all stars for the user.
 	params := slack.NewStarsParameters()
+	params.TeamID = team
+
 	starredItems, _, err := api.GetStarred(params)
 	if err != nil {
-		fmt.Printf("Error getting stars: %s\n", err)
+		fmt.Printf("Error getting stars: %v\n", err)
 		return
 	}
 	for _, s := range starredItems {

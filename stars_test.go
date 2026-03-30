@@ -28,10 +28,13 @@ func (sh *starsHandler) accumulateFormValue(k string, r *http.Request) {
 func (sh *starsHandler) handler(w http.ResponseWriter, r *http.Request) {
 	sh.accumulateFormValue("user", r)
 	sh.accumulateFormValue("count", r)
+	sh.accumulateFormValue("cursor", r)
 	sh.accumulateFormValue("channel", r)
 	sh.accumulateFormValue("file", r)
 	sh.accumulateFormValue("file_comment", r)
+	sh.accumulateFormValue("limit", r)
 	sh.accumulateFormValue("page", r)
+	sh.accumulateFormValue("team_id", r)
 	sh.accumulateFormValue("timestamp", r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(sh.response))
@@ -187,11 +190,8 @@ func TestSlack_ListStars(t *testing.T) {
             }
         }
     ],
-    "paging": {
-        "count": 100,
-        "total": 4,
-        "page": 1,
-        "pages": 1
+    "response_metadata": {
+        "next_cursor": "dXNlcjpVMDYxTkZUVDI="
     }}`
 	want := []Item{
 		NewMessageItem("C1", &Message{Msg: Msg{
@@ -209,13 +209,14 @@ func TestSlack_ListStars(t *testing.T) {
 		wantStarred[i] = StarredItem(item)
 	}
 	wantParams := map[string]string{
-		"count": "200",
-		"page":  "2",
+		"cursor": "somecursor",
+		"limit":  "200",
 	}
+	wantCursor := "dXNlcjpVMDYxTkZUVDI="
 	params := NewStarsParameters()
-	params.Count = 200
-	params.Page = 2
-	got, paging, err := api.ListStars(params)
+	params.Cursor = "somecursor"
+	params.Limit = 200
+	got, nextCursor, err := api.ListStars(params)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -231,11 +232,12 @@ func TestSlack_ListStars(t *testing.T) {
 	if !reflect.DeepEqual(rh.gotParams, wantParams) {
 		t.Errorf("Got params %#v, want %#v", rh.gotParams, wantParams)
 	}
-	if reflect.DeepEqual(paging, Paging{}) {
-		t.Errorf("Want paging data, got empty struct")
+	if nextCursor != wantCursor {
+		t.Errorf("Got cursor %q, want %q", nextCursor, wantCursor)
 	}
 	// Test GetStarred
-	gotStarred, paging, err := api.GetStarred(params)
+	rh.gotParams = make(map[string]string) // reset
+	gotStarred, nextCursor, err := api.GetStarred(params)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -248,10 +250,7 @@ func TestSlack_ListStars(t *testing.T) {
 			fmt.Printf("Comment  %#v\n", item.Comment)
 		}
 	}
-	if !reflect.DeepEqual(rh.gotParams, wantParams) {
-		t.Errorf("Got params %#v, want %#v", rh.gotParams, wantParams)
-	}
-	if reflect.DeepEqual(paging, Paging{}) {
-		t.Errorf("Want paging data, got empty struct")
+	if nextCursor != wantCursor {
+		t.Errorf("Got cursor %q, want %q", nextCursor, wantCursor)
 	}
 }
