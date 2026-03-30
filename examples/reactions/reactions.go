@@ -78,8 +78,8 @@ func main() {
 
 	// List all of the users reactions.
 	listParams := slack.NewListReactionsParameters()
-	fmt.Printf("Listing reactions with params: User=%q, TeamID=%q, Count=%d, Page=%d, Full=%v\n",
-		listParams.User, listParams.TeamID, listParams.Count, listParams.Page, listParams.Full)
+	fmt.Printf("Listing reactions with params: User=%q, TeamID=%q, Cursor=%q, Limit=%d, Full=%v\n",
+		listParams.User, listParams.TeamID, listParams.Cursor, listParams.Limit, listParams.Full)
 	listReactions, _, err := api.ListReactions(listParams)
 	if err != nil {
 		fmt.Printf("Error listing reactions: %v\n", err)

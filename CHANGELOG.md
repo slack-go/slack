@@ -62,6 +62,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > if user.Has2FA != nil && *user.Has2FA { ... }
   > ```
 
+- **`ListReactions` now uses cursor-based pagination** — `ListReactionsParameters` replaces
+  `Count`/`Page` with `Cursor`/`Limit`, and `ListReactions`/`ListReactionsContext` now return
+  `([]ReactedItem, string, error)` where the string is the next cursor, instead of
+  `([]ReactedItem, *Paging, error)`. ([#825])
+
+  > [!WARNING]
+  > **Breaking change.** Both the parameters and return signature have changed:
+  >
+  > ```go
+  > // Before
+  > params := slack.NewListReactionsParameters()
+  > params.Count = 100
+  > params.Page = 2
+  > items, paging, err := api.ListReactions(params)
+  >
+  > // After
+  > params := slack.NewListReactionsParameters()
+  > params.Limit = 100
+  > items, nextCursor, err := api.ListReactions(params)
+  > // Use nextCursor for the next page: params.Cursor = nextCursor
+  > ```
+
 ### Fixed
 
 - **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks

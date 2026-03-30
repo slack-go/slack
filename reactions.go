@@ -70,18 +70,16 @@ func (res getReactionsResponseFull) extractReactedItem() ReactedItem {
 }
 
 const (
-	DEFAULT_REACTIONS_USER  = ""
-	DEFAULT_REACTIONS_COUNT = 100
-	DEFAULT_REACTIONS_PAGE  = 1
-	DEFAULT_REACTIONS_FULL  = false
+	DEFAULT_REACTIONS_USER = ""
+	DEFAULT_REACTIONS_FULL = false
 )
 
 // ListReactionsParameters is the inputs to find all reactions by a user.
 type ListReactionsParameters struct {
 	User   string
 	TeamID string
-	Count  int
-	Page   int
+	Cursor string
+	Limit  int
 	Full   bool
 }
 
@@ -89,10 +87,8 @@ type ListReactionsParameters struct {
 // performed by a user.
 func NewListReactionsParameters() ListReactionsParameters {
 	return ListReactionsParameters{
-		User:  DEFAULT_REACTIONS_USER,
-		Count: DEFAULT_REACTIONS_COUNT,
-		Page:  DEFAULT_REACTIONS_PAGE,
-		Full:  DEFAULT_REACTIONS_FULL,
+		User: DEFAULT_REACTIONS_USER,
+		Full: DEFAULT_REACTIONS_FULL,
 	}
 }
 
@@ -112,8 +108,8 @@ type listReactionsResponseFull struct {
 			Reactions []ItemReaction
 		} `json:"comment"`
 	}
-	Paging `json:"paging"`
 	SlackResponse
+	ResponseMetadata `json:"response_metadata"`
 }
 
 func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
@@ -253,13 +249,13 @@ func (api *Client) GetReactionsContext(ctx context.Context, item ItemRef, params
 
 // ListReactions returns information about the items a user reacted to.
 // For more details, see ListReactionsContext documentation.
-func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
+func (api *Client) ListReactions(params ListReactionsParameters) ([]ReactedItem, string, error) {
 	return api.ListReactionsContext(context.Background(), params)
 }
 
 // ListReactionsContext returns information about the items a user reacted to with a custom context.
 // Slack API docs: https://api.slack.com/methods/reactions.list
-func (api *Client) ListReactionsContext(ctx context.Context, params ListReactionsParameters) ([]ReactedItem, *Paging, error) {
+func (api *Client) ListReactionsContext(ctx context.Context, params ListReactionsParameters) ([]ReactedItem, string, error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -269,11 +265,11 @@ func (api *Client) ListReactionsContext(ctx context.Context, params ListReaction
 	if params.TeamID != "" {
 		values.Add("team_id", params.TeamID)
 	}
-	if params.Count != DEFAULT_REACTIONS_COUNT {
-		values.Add("count", strconv.Itoa(params.Count))
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
 	}
-	if params.Page != DEFAULT_REACTIONS_PAGE {
-		values.Add("page", strconv.Itoa(params.Page))
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Full {
 		values.Add("full", strconv.FormatBool(params.Full))
@@ -282,12 +278,12 @@ func (api *Client) ListReactionsContext(ctx context.Context, params ListReaction
 	response := &listReactionsResponseFull{}
 	err := api.postMethod(ctx, "reactions.list", values, response)
 	if err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
 	if err := response.Err(); err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
-	return response.extractReactedItems(), &response.Paging, nil
+	return response.extractReactedItems(), response.ResponseMetadata.Cursor, nil
 }
