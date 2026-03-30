@@ -71,8 +71,34 @@ type ManualPresenceChangeEvent struct {
 
 // UserChangeEvent represents the user change event
 type UserChangeEvent struct {
-	Type string `json:"type"`
-	User User   `json:"user"`
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+// UserStatusChangedEvent represents the user status changed event
+type UserStatusChangedEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+// UserHuddleChangedEvent represents the user huddle changed event
+type UserHuddleChangedEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
+}
+
+// UserProfileChangedEvent represents the user profile changed event
+type UserProfileChangedEvent struct {
+	Type    string `json:"type"`
+	User    User   `json:"user"`
+	CacheTS int64  `json:"cache_ts"`
+	EventTS string `json:"event_ts"`
 }
 
 // EmojiChangedEvent represents the emoji changed event
