@@ -582,7 +582,10 @@ var EventMapping = map[string]interface{}{
 
 	"manual_presence_change": ManualPresenceChangeEvent{},
 
-	"user_change": UserChangeEvent{},
+	"user_change":          UserChangeEvent{},
+	"user_status_changed":  UserStatusChangedEvent{},
+	"user_huddle_changed":  UserHuddleChangedEvent{},
+	"user_profile_changed": UserProfileChangedEvent{},
 
 	"emoji_changed": EmojiChangedEvent{},
 

@@ -317,7 +317,7 @@ func TestRTMSingleConnect(t *testing.T) {
 }
 
 func TestRTMUnmappedError(t *testing.T) {
-	const unmappedEventName = "user_status_changed"
+	const unmappedEventName = "some_unknown_event"
 	// Set up the test server.
 	testServer := slacktest.NewTestServer()
 	go testServer.Start()

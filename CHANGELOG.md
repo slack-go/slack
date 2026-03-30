@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **RTM support for `user_status_changed`, `user_huddle_changed`, `user_profile_changed`
+  events** — these events are now mapped in `EventMapping` with dedicated structs
+  (`UserStatusChangedEvent`, `UserHuddleChangedEvent`, `UserProfileChangedEvent`).
+  Previously they triggered `UnmarshallingErrorEvent`. ([#1541])
+- **`CacheTS` and `EventTS` fields on `UserChangeEvent`** — these fields were sent by Slack
+  but silently dropped during unmarshalling.
 - **`workflows.featured` API support** — add, list, remove, and set featured workflows on
   channels via `WorkflowsFeaturedAdd`, `WorkflowsFeaturedList`, `WorkflowsFeaturedRemove`,
   and `WorkflowsFeaturedSet`
@@ -326,6 +332,7 @@ for details.
 [#1533]: https://github.com/slack-go/slack/pull/1533
 [#1534]: https://github.com/slack-go/slack/pull/1534
 [#1536]: https://github.com/slack-go/slack/pull/1536
+[#1541]: https://github.com/slack-go/slack/issues/1541
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.20.0...HEAD
 [0.20.0]: https://github.com/slack-go/slack/compare/v0.19.0...v0.20.0
