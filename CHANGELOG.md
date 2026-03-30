@@ -84,6 +84,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > // Use nextCursor for the next page: params.Cursor = nextCursor
   > ```
 
+- **`ListStars`/`GetStarred` now use cursor-based pagination** — `StarsParameters` replaces
+  `Count`/`Page` with `Cursor`/`Limit` (and adds `TeamID`), and `ListStars`/`ListStarsContext`/
+  `GetStarred`/`GetStarredContext` now return `string` (next cursor) instead of `*Paging`.
+  Slack's `stars.list` API no longer returns `paging` data — only `response_metadata.next_cursor`.
+
+  > [!WARNING]
+  > **Breaking change.** Both the parameters and return signature have changed:
+  >
+  > ```go
+  > // Before
+  > params := slack.NewStarsParameters()
+  > params.Count = 100
+  > params.Page = 2
+  > items, paging, err := api.ListStars(params)
+  >
+  > // After
+  > params := slack.NewStarsParameters()
+  > params.Limit = 100
+  > items, nextCursor, err := api.ListStars(params)
+  > // Use nextCursor for the next page: params.Cursor = nextCursor
+  > ```
+
 ### Fixed
 
 - **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks
