@@ -27,12 +27,12 @@ func (rh *reactionsHandler) accumulateFormValue(k string, r *http.Request) {
 
 func (rh *reactionsHandler) handler(w http.ResponseWriter, r *http.Request) {
 	rh.accumulateFormValue("channel", r)
-	rh.accumulateFormValue("count", r)
+	rh.accumulateFormValue("cursor", r)
 	rh.accumulateFormValue("file", r)
 	rh.accumulateFormValue("file_comment", r)
 	rh.accumulateFormValue("full", r)
+	rh.accumulateFormValue("limit", r)
 	rh.accumulateFormValue("name", r)
-	rh.accumulateFormValue("page", r)
 	rh.accumulateFormValue("timestamp", r)
 	rh.accumulateFormValue("user", r)
 	w.Header().Set("Content-Type", "application/json")
@@ -429,11 +429,8 @@ func TestSlack_ListReactions(t *testing.T) {
             }
         }
     ],
-    "paging": {
-        "count": 100,
-        "total": 4,
-        "page": 1,
-        "pages": 1
+    "response_metadata": {
+        "next_cursor": "dXNlcjpVMDYxTkZUVDI="
     }}`
 	want := []ReactedItem{
 		{
@@ -463,17 +460,18 @@ func TestSlack_ListReactions(t *testing.T) {
 		},
 	}
 	wantParams := map[string]string{
-		"user":  "User",
-		"count": "200",
-		"page":  "2",
-		"full":  "true",
+		"user":   "User",
+		"cursor": "somecursor",
+		"limit":  "200",
+		"full":   "true",
 	}
+	wantCursor := "dXNlcjpVMDYxTkZUVDI="
 	params := NewListReactionsParameters()
 	params.User = "User"
-	params.Count = 200
-	params.Page = 2
+	params.Cursor = "somecursor"
+	params.Limit = 200
 	params.Full = true
-	got, paging, err := api.ListReactions(params)
+	got, nextCursor, err := api.ListReactions(params)
 	if err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
@@ -490,7 +488,7 @@ func TestSlack_ListReactions(t *testing.T) {
 	if !reflect.DeepEqual(rh.gotParams, wantParams) {
 		t.Errorf("Got params %#v, want %#v", rh.gotParams, wantParams)
 	}
-	if reflect.DeepEqual(paging, Paging{}) {
-		t.Errorf("Want paging data, got empty struct")
+	if nextCursor != wantCursor {
+		t.Errorf("Got cursor %q, want %q", nextCursor, wantCursor)
 	}
 }
