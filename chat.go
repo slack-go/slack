@@ -683,11 +683,13 @@ func MsgOptionAttachments(attachments ...Attachment) MsgOption {
 	}
 }
 
-// MsgOptionBlocks sets blocks for the message
+// MsgOptionBlocks sets blocks for the message.
+// Calling with no arguments or an empty slice sends "blocks=[]" to clear blocks.
+// To skip setting blocks entirely, do not include this option.
 func MsgOptionBlocks(blocks ...Block) MsgOption {
 	return func(config *sendConfig) error {
 		if blocks == nil {
-			return nil
+			blocks = []Block{}
 		}
 
 		config.blocks.BlockSet = append(config.blocks.BlockSet, blocks...)

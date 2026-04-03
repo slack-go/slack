@@ -105,6 +105,32 @@ func TestPostMessage(t *testing.T) {
 				"token":   []string{"testing-token"},
 			},
 		},
+		"EmptyBlocksExplicit": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionBlocks([]Block{}...),
+				MsgOptionText("text only", false),
+			},
+			expected: url.Values{
+				"blocks":  []string{"[]"},
+				"channel": []string{"CXXX"},
+				"text":    []string{"text only"},
+				"token":   []string{"testing-token"},
+			},
+		},
+		"EmptyBlocksNoArgs": {
+			endpoint: "/chat.postMessage",
+			opt: []MsgOption{
+				MsgOptionBlocks(),
+				MsgOptionText("text only", false),
+			},
+			expected: url.Values{
+				"blocks":  []string{"[]"},
+				"channel": []string{"CXXX"},
+				"text":    []string{"text only"},
+				"token":   []string{"testing-token"},
+			},
+		},
 		"Attachment": {
 			endpoint: "/chat.postMessage",
 			opt: []MsgOption{
