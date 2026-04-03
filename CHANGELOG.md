@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **API warning callbacks** — Slack API responses may include a `warnings` field with
+  deprecation notices or usage hints. Use `OptionWarnings(func(warnings []string))` to
+  register a callback that receives these warnings. ([#1540])
 - **RTM support for `user_status_changed`, `user_huddle_changed`, `user_profile_changed`
   events** — these events are now mapped in `EventMapping` with dedicated structs
   (`UserStatusChangedEvent`, `UserHuddleChangedEvent`, `UserProfileChangedEvent`).
@@ -136,6 +139,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > ```
 
 ### Fixed
+
+- **`MsgOptionBlocks()` with no arguments now sends `blocks=[]`** — Previously, calling
+  `MsgOptionBlocks()` with no arguments or a nil spread was a silent no-op, making it
+  impossible to clear blocks from a message via `chat.update`. The Slack API requires an
+  explicit `blocks=[]` to reliably remove blocks. ([#1214])
+
+  > [!WARNING]
+  > **Breaking change.** `MsgOptionBlocks()` with no arguments now sends `blocks=[]` instead
+  > of being a no-op. If you were relying on this to be a no-op, remove the option entirely:
+  >
+  > ```go
+  > // Before — this was a no-op, now it sends blocks=[]
+  > api.PostMessage(ch, slack.MsgOptionBlocks(), slack.MsgOptionText("text", false))
+  >
+  > // After — omit MsgOptionBlocks entirely to not set blocks
+  > api.PostMessage(ch, slack.MsgOptionText("text", false))
+  > ```
 
 - **`WorkflowButtonBlockElement` missing from `UnmarshalJSON`** — `workflow_button` blocks
   now unmarshal correctly through `BlockElements`, `InputBlock`, and `Accessory` paths.
