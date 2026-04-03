@@ -166,7 +166,8 @@ type MemberLeftChannelEvent struct {
 	Team        string `json:"team"`
 }
 
-// ChannelUpdatedEvent is fired when a channel's properties are updated (tabs, meeting notes, etc.).
+// ChannelUpdatedEvent is fired when a channel's properties are updated (tabs, meeting
+// notes, etc.).
 type ChannelUpdatedEvent struct {
 	Type     string         `json:"type"`
 	Updates  map[string]any `json:"updates"`
@@ -252,4 +253,27 @@ type SHRoomUpdateEvent struct {
 	Huddle  *SHRoomHuddle `json:"huddle,omitempty"`
 	EventTS string        `json:"event_ts"`
 	TS      string        `json:"ts"`
+}
+
+// AppsUninstalledEvent represents the apps_uninstalled event sent via RTM
+// when one or more apps are uninstalled from the workspace.
+type AppsUninstalledEvent struct {
+	Type string `json:"type"`
+}
+
+// ActivityEvent represents the activity event sent via RTM. This is an
+// internal Slack event that fires during normal workspace usage (e.g. new
+// messages, bundle updates).
+type ActivityEvent struct {
+	Type           string          `json:"type"`
+	SubType        string          `json:"subtype"`
+	Key            string          `json:"key"`
+	Entry          json.RawMessage `json:"entry"`
+	EventTimestamp string          `json:"event_ts"`
+}
+
+// BadgeCountsUpdatedEvent represents the badge_counts_updated event sent via
+// RTM when notification badge counts change.
+type BadgeCountsUpdatedEvent struct {
+	Type string `json:"type"`
 }
