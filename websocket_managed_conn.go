@@ -598,6 +598,10 @@ var EventMapping = map[string]interface{}{
 
 	"accounts_changed": AccountsChangedEvent{},
 
+	"apps_uninstalled":     AppsUninstalledEvent{},
+	"activity":             ActivityEvent{},
+	"badge_counts_updated": BadgeCountsUpdatedEvent{},
+
 	"reconnect_url": ReconnectUrlEvent{},
 
 	"member_joined_channel": MemberJoinedChannelEvent{},
