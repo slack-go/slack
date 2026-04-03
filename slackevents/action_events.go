@@ -6,18 +6,25 @@ import (
 	"github.com/slack-go/slack"
 )
 
+// Deprecated: MessageActionResponse is associated with [MessageAction] which cannot
+// handle block_actions. Use [slack.InteractionCallback] instead.
 type MessageActionResponse struct {
 	ResponseType    string `json:"response_type"`
 	ReplaceOriginal bool   `json:"replace_original"`
 	Text            string `json:"text"`
 }
 
+// Deprecated: MessageActionEntity is associated with [MessageAction] which cannot
+// handle block_actions. Use [slack.InteractionCallback] instead.
 type MessageActionEntity struct {
 	ID     string `json:"id"`
 	Domain string `json:"domain"`
 	Name   string `json:"name"`
 }
 
+// Deprecated: MessageAction cannot represent block_actions payloads. Use
+// [slack.InteractionCallback] instead, which handles all interaction types.
+// See [slack.InteractionCallbackParse] for parsing from an HTTP request.
 type MessageAction struct {
 	Type             string                   `json:"type"`
 	Actions          []slack.AttachmentAction `json:"actions"`

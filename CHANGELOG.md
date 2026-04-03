@@ -138,6 +138,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > // Use nextCursor for the next page: params.Cursor = nextCursor
   > ```
 
+### Deprecated
+
+- **`slackevents.ParseActionEvent`** — Cannot parse `block_actions` payloads (returns
+  unmarshalling error). Use `slack.InteractionCallback` with `json.Unmarshal` instead,
+  or `slack.InteractionCallbackParse` for HTTP requests. `InteractionCallback` handles
+  all interaction types. ([#596])
+- **`slackevents.MessageAction`**, **`MessageActionEntity`**, **`MessageActionResponse`** —
+  Associated types that only support legacy `interactive_message` payloads.
+
 ### Fixed
 
 - **`MsgOptionBlocks()` with no arguments now sends `blocks=[]`** — Previously, calling
@@ -352,6 +361,7 @@ for details.
 [#1533]: https://github.com/slack-go/slack/pull/1533
 [#1534]: https://github.com/slack-go/slack/pull/1534
 [#1536]: https://github.com/slack-go/slack/pull/1536
+[#596]: https://github.com/slack-go/slack/issues/596
 [#1541]: https://github.com/slack-go/slack/issues/1541
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.20.0...HEAD

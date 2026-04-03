@@ -262,6 +262,22 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 	}, nil
 }
 
+// Deprecated: ParseActionEvent cannot parse block_actions payloads and will return an
+// unmarshalling error for them. Use [slack.InteractionCallback] with [json.Unmarshal]
+// instead, or [slack.InteractionCallbackParse] to parse directly from an HTTP request.
+// InteractionCallback handles all interaction types (block_actions, interactive_message,
+// view_submission, etc.).
+//
+// Migration example:
+//
+//	// Before (broken for block_actions):
+//	action, err := slackevents.ParseActionEvent(payload, slackevents.OptionNoVerifyToken())
+//
+//	// After (handles all interaction types):
+//	var ic slack.InteractionCallback
+//	err := json.Unmarshal([]byte(payload), &ic)
+//	// Use ic.ActionCallback.BlockActions for block actions
+//	// Use ic.ActionCallback.AttachmentActions for legacy attachment actions
 func ParseActionEvent(payloadString string, opts ...Option) (MessageAction, error) {
 	byteString := []byte(payloadString)
 	action := MessageAction{}
