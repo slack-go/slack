@@ -143,6 +143,23 @@ type Warning struct {
 	Warnings []string
 }
 
+// httpHeaderSetter is satisfied by response types that can store HTTP
+// response headers. The response parser checks for this interface and
+// injects headers before JSON decoding.
+type httpHeaderSetter interface {
+	setHTTPResponseHeaders(http.Header)
+}
+
+// responseHeaders is a mix-in for internal response types that need to
+// capture HTTP response headers. Embedded in types like authTestResponseFull
+// so the parser can store headers that are then propagated to the public
+// response type (e.g. AuthTestResponse.Header).
+type responseHeaders struct {
+	header http.Header
+}
+
+func (r *responseHeaders) setHTTPResponseHeaders(h http.Header) { r.header = h }
+
 // KickUserFromConversationSlackResponse is a variant of SlackResponse that can handle the case where
 // "errors" can be either an empty object {} or an array of errors.
 // This addresses issue #1446 where conversations.kick endpoint returns {"ok":true,"errors":{}}
@@ -400,26 +417,25 @@ func createFormFields(mw *multipart.Writer, values url.Values) error {
 	return nil
 }
 
-func doPost(client httpClient, req *http.Request, parser responseParser, d Debug) error {
+func doPost(client httpClient, req *http.Request, parser responseParser, d Debug) (http.Header, error) {
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	err = checkStatusCode(resp, d)
-	if err != nil {
-		return err
+	if err = checkStatusCode(resp, d); err != nil {
+		return nil, err
 	}
 
-	return parser(resp)
+	return resp.Header, parser(resp)
 }
 
 // post JSON.
-func postJSON(ctx context.Context, client httpClient, endpoint, token string, jsonBody []byte, intf any, d Debug) error {
+func postJSON(ctx context.Context, client httpClient, endpoint, token string, jsonBody []byte, intf any, d Debug) (http.Header, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(jsonBody))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -431,11 +447,11 @@ func postJSON(ctx context.Context, client httpClient, endpoint, token string, js
 }
 
 // post a url encoded form.
-func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf any, d Debug) error {
+func postForm(ctx context.Context, client httpClient, endpoint string, values url.Values, intf any, d Debug) (http.Header, error) {
 	body := values.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, strings.NewReader(body))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	// allow retry client to re-send the request body on 429/5xx.
@@ -445,10 +461,10 @@ func postForm(ctx context.Context, client httpClient, endpoint string, values ur
 	return doPost(client, req, newJSONParser(intf), d)
 }
 
-func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf any, d Debug) error {
+func getResource(ctx context.Context, client httpClient, endpoint, token string, values url.Values, intf any, d Debug) (http.Header, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -460,7 +476,8 @@ func getResource(ctx context.Context, client httpClient, endpoint, token string,
 
 func parseAdminResponse(ctx context.Context, client httpClient, method string, teamName string, values url.Values, intf any, d Debug) error {
 	endpoint := fmt.Sprintf(WEBAPIURLFormat, teamName, method, time.Now().Unix())
-	return postForm(ctx, client, endpoint, values, intf, d)
+	_, err := postForm(ctx, client, endpoint, values, intf, d)
+	return err
 }
 
 func logResponse(resp *http.Response, d Debug) error {
@@ -508,6 +525,9 @@ func newJSONParser(dst any) responseParser {
 		if dst == nil {
 			return nil
 		}
+		if hs, ok := dst.(httpHeaderSetter); ok {
+			hs.setHTTPResponseHeaders(resp.Header.Clone())
+		}
 		return json.NewDecoder(resp.Body).Decode(dst)
 	}
 }
@@ -545,6 +565,10 @@ func newContentTypeParser(dst any) responseParser {
 		case "application/json":
 			return newJSONParser(dst)(req)
 		default:
+			// newTextParser doesn't use dst, so capture headers here.
+			if hs, ok := dst.(httpHeaderSetter); ok {
+				hs.setHTTPResponseHeaders(req.Header.Clone())
+			}
 			return newTextParser(dst)(req)
 		}
 	}

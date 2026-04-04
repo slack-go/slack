@@ -127,7 +127,7 @@ func GetOAuthResponseContext(ctx context.Context, client httpClient, clientID, c
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthResponse{}
-	if err = postForm(ctx, client, APIURL+"oauth.access", values, response, discard{}); err != nil {
+	if _, err = postForm(ctx, client, APIURL+"oauth.access", values, response, discard{}); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
@@ -149,7 +149,7 @@ func GetOAuthV2ResponseContext(ctx context.Context, client httpClient, clientID,
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OAuthV2Response{}
-	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+	if _, err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
@@ -171,7 +171,7 @@ func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID
 		"grant_type":    {"refresh_token"},
 	}
 	response := &OAuthV2Response{}
-	if err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
+	if _, err = postForm(ctx, client, APIURL+"oauth.v2.access", values, response, discard{}); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
@@ -193,7 +193,7 @@ func GetOpenIDConnectTokenContext(ctx context.Context, client httpClient, client
 		"redirect_uri":  {redirectURI},
 	}
 	response := &OpenIDConnectResponse{}
-	if err = postForm(ctx, client, APIURL+"openid.connect.token", values, response, discard{}); err != nil {
+	if _, err = postForm(ctx, client, APIURL+"openid.connect.token", values, response, discard{}); err != nil {
 		return nil, err
 	}
 	return response, response.Err()
