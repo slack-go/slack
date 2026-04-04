@@ -721,8 +721,8 @@ func TestUserProfileCustomFieldsMarshalJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(b) != "[]" {
-		t.Fatalf(`string(b) = "%s", wanted "[]"`, string(b))
+	if string(b) != "{}" {
+		t.Fatalf(`string(b) = "%s", wanted "{}"`, string(b))
 	}
 	fields = getTestUserProfileCustomFields()
 	if _, err := json.Marshal(fields); err != nil {
@@ -826,7 +826,7 @@ func TestUserUnmarshalJSON(t *testing.T) {
 			"huddle_state_expiration_ts": 1648596421,
 			"start_date": "2022-01-01",
 			"team": "T12345678",
-			"fields": []
+			"fields": {}
 		},
 		"is_bot": false,
 		"is_admin": true,
