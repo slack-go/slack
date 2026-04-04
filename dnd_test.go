@@ -2,6 +2,7 @@ package slack
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 )
@@ -121,6 +122,55 @@ func TestSlack_GetDNDTeamInfo(t *testing.T) {
 	eq := reflect.DeepEqual(usersDNDInfoResponse, usersDNDInfo)
 	if !eq {
 		t.Errorf("got %v; want %v", usersDNDInfoResponse, usersDNDInfo)
+	}
+}
+
+func TestSlack_GetDNDInfoWithTeamID(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if r.FormValue("team_id") != "T12345" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"ok":false,"error":"missing_argument"}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"ok":true,"dnd_enabled":true,"next_dnd_start_ts":1450416600,"next_dnd_end_ts":1450452600}`))
+	}))
+	defer ts.Close()
+
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+	_, err := api.GetDNDInfo(nil, DNDOptionTeamID("T12345"))
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+}
+
+func TestSlack_GetDNDTeamInfoWithTeamID(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if r.FormValue("team_id") != "T12345" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"ok":false,"error":"missing_argument"}`))
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"ok":true,"users":{"U023BECGF":{"dnd_enabled":true,"next_dnd_start_ts":1450387800,"next_dnd_end_ts":1450423800}}}`))
+	}))
+	defer ts.Close()
+
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+	result, err := api.GetDNDTeamInfo(nil, DNDOptionTeamID("T12345"))
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if _, ok := result["U023BECGF"]; !ok {
+		t.Fatal("expected U023BECGF in result")
 	}
 }
 

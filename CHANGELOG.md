@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   exposes a `Header` field directly. For all other methods, use
   `OptionOnResponseHeaders(func(method string, headers http.Header))` to register a
   callback that fires after every API call. ([#1076])
+- **`DNDOptionTeamID`** — `GetDNDInfo` and `GetDNDTeamInfo` now accept optional
+  `ParamOption` arguments. Use `DNDOptionTeamID("T...")` to pass `team_id`, which is
+  required after workspace migration (Slack returns `missing_argument` without it).
+  ([#1157])
 - **`UpdateUserGroupMembersList` / `UpdateUserGroupMembersListContext`** — Convenience
   wrappers around `UpdateUserGroupMembers` that accept `[]string` instead of a
   comma-separated string, enabling clean chaining with `GetUserGroupMembers`. ([#1172])
@@ -384,6 +388,7 @@ for details.
 [#1541]: https://github.com/slack-go/slack/issues/1541
 [#1172]: https://github.com/slack-go/slack/issues/1172
 [#1076]: https://github.com/slack-go/slack/issues/1076
+[#1157]: https://github.com/slack-go/slack/issues/1157
 [#1196]: https://github.com/slack-go/slack/issues/1196
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.20.0...HEAD
