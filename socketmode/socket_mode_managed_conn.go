@@ -302,7 +302,11 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	upgradeHeader := http.Header{}
 	upgradeHeader.Add("Origin", "https://api.slack.com")
-	dialer := websocket.DefaultDialer
+	dialer := &websocket.Dialer{
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: defaultHandshakeTimeout,
+		WriteBufferSize:  defaultWriteBufferSize,
+	}
 	if smc.dialer != nil {
 		smc.Debugf("Using custom websocket dialer")
 		dialer = smc.dialer
@@ -355,6 +359,7 @@ func (smc *Client) runResponseSender(ctx context.Context, conn *websocket.Conn) 
 			smc.Debugf("Sending Socket Mode response with envelope ID %q: %v", res.EnvelopeID, res)
 
 			if err := unsafeWriteSocketModeResponse(conn, res); err != nil {
+				smc.Debugf("failed to write Socket Mode response for envelope ID %q: %v", res.EnvelopeID, err)
 				smc.sendEvent(ctx, newEvent(EventTypeErrorWriteFailed, &ErrorWriteFailed{
 					Cause:    err,
 					Response: res,
@@ -431,9 +436,15 @@ func unsafeWriteSocketModeResponse(conn *websocket.Conn, res *Response) error {
 		return err
 	}
 
-	// Remove write deadline regardless of WriteJSON succeeds or not
+	// Remove write deadline regardless of write succeeding or not
 	defer conn.SetWriteDeadline(time.Time{})
 
+	// Use pre-marshaled bytes from SendCtx when available to avoid
+	// marshaling twice. Fall back to WriteJSON for responses that
+	// bypassed SendCtx.
+	if res.rawJSON != nil {
+		return conn.WriteMessage(websocket.TextMessage, res.rawJSON)
+	}
 	return conn.WriteJSON(res)
 }
 
@@ -449,21 +460,28 @@ func newEvent(tpe EventType, data interface{}, req ...*Request) Event {
 
 // Ack acknowledges the Socket Mode request with the payload.
 //
-// This tells Slack that the we have received the request denoted by the envelope ID,
+// This tells Slack that we have received the request denoted by the envelope ID,
 // by sending back the envelope ID over the WebSocket connection.
-func (smc *Client) Ack(req Request, payload ...interface{}) {
+//
+// Returns an error if the serialized response is 20KB or larger, as Slack
+// silently drops oversized Socket Mode responses. Use Web API methods (e.g.
+// chat.PostMessage, views.Push) for large payloads.
+func (smc *Client) Ack(req Request, payload ...interface{}) error {
 	var pld interface{}
 	if len(payload) > 0 {
 		pld = payload[0]
 	}
 
-	smc.AckCtx(context.TODO(), req.EnvelopeID, pld)
+	return smc.AckCtx(context.TODO(), req.EnvelopeID, pld)
 }
 
 // AckCtx acknowledges the Socket Mode request envelope ID with the payload.
 //
-// This tells Slack that the we have received the request denoted by the request (envelope) ID,
+// This tells Slack that we have received the request denoted by the request (envelope) ID,
 // by sending back the ID over the WebSocket connection.
+//
+// Returns an error if the serialized response is 20KB or larger, as Slack
+// silently drops oversized Socket Mode responses.
 func (smc *Client) AckCtx(ctx context.Context, reqID string, payload interface{}) error {
 	return smc.SendCtx(ctx, Response{
 		EnvelopeID: reqID,
@@ -474,24 +492,39 @@ func (smc *Client) AckCtx(ctx context.Context, reqID string, payload interface{}
 // Send sends the Socket Mode response over a WebSocket connection.
 // This is usually used for acknowledging requests, but if you need more control over Client.Ack().
 // It's normally recommended to use Client.Ack() instead of this.
-func (smc *Client) Send(res Response) {
-	smc.SendCtx(context.TODO(), res)
+//
+// Returns an error if the serialized response is 20KB or larger, as Slack
+// silently drops oversized Socket Mode responses.
+func (smc *Client) Send(res Response) error {
+	return smc.SendCtx(context.TODO(), res)
 }
 
 // SendCtx sends the Socket Mode response over a WebSocket connection.
 // This is usually used for acknowledging requests, but if you need more control
 // it's normally recommended to use Client.AckCtx() instead of this.
+//
+// Slack's Socket Mode silently drops WebSocket responses that are 20KB or
+// larger (the write succeeds but Slack ignores the payload). SendCtx returns an
+// error if the serialized response reaches this limit. For large payloads, use
+// Web API methods instead (e.g. chat.PostMessage, views.Push).
 func (smc *Client) SendCtx(ctx context.Context, res Response) error {
-	if smc.debug {
-		js, err := json.Marshal(res)
-
-		// Log the error so users of `Send` don't see it entirely disappear as that method
-		// does not return an error and used to panic on failure (with or without debug)
-		smc.Debugf("Scheduling Socket Mode response (error: %v) for envelope ID %s: %s", err, res.EnvelopeID, js)
-		if err != nil {
-			return err
-		}
+	js, err := json.Marshal(res)
+	if err != nil {
+		return fmt.Errorf("marshalling socket mode response: %w", err)
 	}
+
+	if len(js) >= maxResponseSize {
+		return fmt.Errorf("socket mode response (%d bytes) meets or exceeds Slack's %d-byte WebSocket limit and would be silently dropped; use the Web API for large payloads",
+			len(js), maxResponseSize)
+	}
+
+	if smc.debug {
+		smc.Debugf("Scheduling Socket Mode response for envelope ID %s: %s", res.EnvelopeID, js)
+	}
+
+	// Store pre-marshaled bytes so unsafeWriteSocketModeResponse can use
+	// WriteMessage instead of WriteJSON, avoiding a second marshal.
+	res.rawJSON = js
 
 	select {
 	case <-ctx.Done():

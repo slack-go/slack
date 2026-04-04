@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- **`slackevents.ParseActionEvent`** — Cannot parse `block_actions` payloads (returns
+  unmarshalling error). Use `slack.InteractionCallback` with `json.Unmarshal` instead,
+  or `slack.InteractionCallbackParse` for HTTP requests. `InteractionCallback` handles
+  all interaction types. ([#596])
+- **`slackevents.MessageAction`**, **`MessageActionEntity`**, **`MessageActionResponse`** —
+  Associated types that only support legacy `interactive_message` payloads.
+
 ### Added
 
 - **API warning callbacks** — Slack API responses may include a `warnings` field with
@@ -138,16 +147,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   > // Use nextCursor for the next page: params.Cursor = nextCursor
   > ```
 
-### Deprecated
-
-- **`slackevents.ParseActionEvent`** — Cannot parse `block_actions` payloads (returns
-  unmarshalling error). Use `slack.InteractionCallback` with `json.Unmarshal` instead,
-  or `slack.InteractionCallbackParse` for HTTP requests. `InteractionCallback` handles
-  all interaction types. ([#596])
-- **`slackevents.MessageAction`**, **`MessageActionEntity`**, **`MessageActionResponse`** —
-  Associated types that only support legacy `interactive_message` payloads.
-
 ### Fixed
+
+- **Socket Mode: large Ack payloads no longer silently fail** — Two issues caused `Ack()`
+  payloads to be silently dropped by Slack. First, gorilla/websocket's default 4KB write
+  buffer fragmented messages into WebSocket continuation frames that Slack does not
+  reassemble. The library now uses a 32KB write buffer. Second, Slack silently drops
+  Socket Mode responses at or above 20KB — `Ack()`, `Send()`, and `SendCtx()` now return
+  an error when the serialized response reaches this limit. ([#1196])
+
+  > [!WARNING]
+  > **Breaking change.** `Ack()` and `Send()` now return `error`. Existing call sites that
+  > don't capture the return value continue to compile without changes.
 
 - **`MsgOptionBlocks()` with no arguments now sends `blocks=[]`** — Previously, calling
   `MsgOptionBlocks()` with no arguments or a nil spread was a silent no-op, making it
@@ -363,6 +374,7 @@ for details.
 [#1536]: https://github.com/slack-go/slack/pull/1536
 [#596]: https://github.com/slack-go/slack/issues/596
 [#1541]: https://github.com/slack-go/slack/issues/1541
+[#1196]: https://github.com/slack-go/slack/issues/1196
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.20.0...HEAD
 [0.20.0]: https://github.com/slack-go/slack/compare/v0.19.0...v0.20.0

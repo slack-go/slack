@@ -49,9 +49,32 @@ const (
 
 	websocketDefaultTimeout = 10 * time.Second
 	defaultMaxPingInterval  = 30 * time.Second
+	defaultHandshakeTimeout = 45 * time.Second
+
+	// maxResponseSize is Slack's server-side limit for Socket Mode WebSocket response
+	// messages (20KB). Responses at or above this size on the wire are silently dropped
+	// by Slack — the WebSocket write succeeds but Slack ignores the payload. Empirically
+	// verified using both this library and Slack's official Node SDK
+	// (@slack/socket-mode).
+	//
+	// Note: gorilla/websocket's WriteJSON adds a trailing newline (via
+	// json.Encoder.Encode), so the on-wire size is json.Marshal(response) + 1. The
+	// pre-flight check in SendCtx uses >= maxResponseSize on the json.Marshal output,
+	// which is equivalent to > maxResponseSize on the wire minus the newline —
+	// conservative by exactly 1 byte.
+	maxResponseSize = 20 * 1024 // 20480 bytes
+
+	// defaultWriteBufferSize is the WebSocket write buffer size used when dialing Slack's
+	// Socket Mode endpoint. gorilla/websocket's default is 4096 bytes; messages exceeding
+	// the buffer are split into WebSocket continuation frames (I think). Slack's server
+	// does not reassemble continuation frames, causing silent message drops (this is my
+	// hypothesis from testing). We set this above Slack's 20KB response limit to ensure
+	// all valid messages are sent as single frames.
+	defaultWriteBufferSize = 32 * 1024
 )
 
-// Open calls the "apps.connections.open" endpoint and returns the provided URL and the full Info block.
+// Open calls the "apps.connections.open" endpoint and returns the provided URL and the
+// full Info block.
 //
 // To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
 func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string, err error) {
@@ -61,7 +84,8 @@ func (smc *Client) Open() (info *slack.SocketModeConnection, websocketURL string
 	return smc.StartSocketModeContext(ctx)
 }
 
-// OpenContext calls the "apps.connections.open" endpoint and returns the provided URL and the full Info block.
+// OpenContext calls the "apps.connections.open" endpoint and returns the provided URL and
+// the full Info block.
 //
 // To have a fully managed Websocket connection, use `New`, and call `Run()` on it.
 func (smc *Client) OpenContext(ctx context.Context) (info *slack.SocketModeConnection, websocketURL string, err error) {
