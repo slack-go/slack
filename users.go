@@ -81,7 +81,7 @@ func (fields *UserProfileCustomFields) UnmarshalJSON(b []byte) error {
 // MarshalJSON is the implementation of the json.Marshaler interface.
 func (fields UserProfileCustomFields) MarshalJSON() ([]byte, error) {
 	if len(fields.fields) == 0 {
-		return []byte("[]"), nil
+		return []byte("{}"), nil
 	}
 	return json.Marshal(fields.fields)
 }
@@ -591,6 +591,54 @@ func (api *Client) SetUserRealNameContextWithUser(ctx context.Context, user, rea
 	values := url.Values{
 		"token":   {api.token},
 		"profile": {string(profile)},
+	}
+
+	// optional field. It should not be set if empty
+	if user != "" {
+		values["user"] = []string{user}
+	}
+
+	response := &userResponseFull{}
+	if err = api.postMethod(ctx, "users.profile.set", values, response); err != nil {
+		return err
+	}
+
+	return response.Err()
+}
+
+// SetUserProfile sets the profile for the provided user.
+// For more information see the SetUserProfileContext documentation.
+func (api *Client) SetUserProfile(user string, profile *UserProfile) error {
+	return api.SetUserProfileContext(context.Background(), user, profile)
+}
+
+// SetUserProfileContext sets the profile for the provided user with a custom context.
+//
+// The profile parameter is serialized as-is. Fields present in the JSON (including
+// zero-value fields without an omitempty tag, such as RealName and DisplayName) will
+// be updated by Slack. To avoid unintended changes, retrieve the current profile with
+// GetUserProfile, modify the desired fields, and pass the result.
+//
+// For setting individual fields, prefer the targeted methods: SetUserRealName,
+// SetUserCustomStatus, SetUserCustomFields.
+//
+// If a workspace admin has mapped custom profile fields to standard fields (e.g.
+// title), the custom field takes precedence. Update the custom field via
+// SetUserCustomFields instead.
+//
+// The user parameter is required when setting another user's profile (admin only,
+// paid plans). Pass an empty string to modify the authenticated user's own profile.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/users.profile.set/
+func (api *Client) SetUserProfileContext(ctx context.Context, user string, profile *UserProfile) error {
+	profileJSON, err := json.Marshal(profile)
+	if err != nil {
+		return err
+	}
+
+	values := url.Values{
+		"token":   {api.token},
+		"profile": {string(profileJSON)},
 	}
 
 	// optional field. It should not be set if empty

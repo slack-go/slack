@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`UpdateUserGroupMembersList` / `UpdateUserGroupMembersListContext`** — Convenience
   wrappers around `UpdateUserGroupMembers` that accept `[]string` instead of a
   comma-separated string, enabling clean chaining with `GetUserGroupMembers`. ([#1172])
+- **`SetUserProfile` / `SetUserProfileContext`** — Set multiple user profile fields in a
+  single API call by passing a `*UserProfile` struct to `users.profile.set`. Complements
+  the existing single-field methods (`SetUserRealName`, `SetUserCustomStatus`, etc.).
+  ([#1158])
 - **API warning callbacks** — Slack API responses may include a `warnings` field with
   deprecation notices or usage hints. Use `OptionWarnings(func(warnings []string))` to
   register a callback that receives these warnings. ([#1540])

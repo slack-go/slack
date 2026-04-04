@@ -329,6 +329,8 @@ func TestUserProfileSet(t *testing.T) {
 
 	up.RealName = "Real Name Test"
 	testSetUserRealName(api, up, t)
+
+	testSetUserProfile(api, up, t)
 }
 
 func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
@@ -385,6 +387,28 @@ func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, 
 	}
 	if up.StatusExpiration != statusExpiration {
 		t.Fatalf(`UserProfile.StatusExpiration = %q, want %q`, up.StatusExpiration, statusExpiration)
+	}
+}
+
+func testSetUserProfile(api *Client, up *UserProfile, t *testing.T) {
+	profile := &UserProfile{
+		RealName:    "Set Profile Test",
+		DisplayName: "setprofile",
+		Title:       "Engineer",
+	}
+
+	if err := api.SetUserProfile("U1234567", profile); err != nil {
+		t.Fatalf("SetUserProfile() = %#v, want <nil>", err)
+	}
+
+	if up.RealName != profile.RealName {
+		t.Fatalf("UserProfile.RealName = %q, want %q", up.RealName, profile.RealName)
+	}
+	if up.DisplayName != profile.DisplayName {
+		t.Fatalf("UserProfile.DisplayName = %q, want %q", up.DisplayName, profile.DisplayName)
+	}
+	if up.Title != profile.Title {
+		t.Fatalf("UserProfile.Title = %q, want %q", up.Title, profile.Title)
 	}
 }
 
