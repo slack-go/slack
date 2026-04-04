@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`UpdateUserGroupMembersList` / `UpdateUserGroupMembersListContext`** — Convenience
+  wrappers around `UpdateUserGroupMembers` that accept `[]string` instead of a
+  comma-separated string, enabling clean chaining with `GetUserGroupMembers`. ([#1172])
 - **API warning callbacks** — Slack API responses may include a `warnings` field with
   deprecation notices or usage hints. Use `OptionWarnings(func(warnings []string))` to
   register a callback that receives these warnings. ([#1540])
@@ -374,6 +377,7 @@ for details.
 [#1536]: https://github.com/slack-go/slack/pull/1536
 [#596]: https://github.com/slack-go/slack/issues/596
 [#1541]: https://github.com/slack-go/slack/issues/1541
+[#1172]: https://github.com/slack-go/slack/issues/1172
 [#1196]: https://github.com/slack-go/slack/issues/1196
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.20.0...HEAD
