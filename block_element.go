@@ -67,31 +67,31 @@ type Accessory struct {
 
 // NewAccessory returns a new Accessory for a given block element
 func NewAccessory(element BlockElement) *Accessory {
-	switch element.(type) {
+	switch element := element.(type) {
 	case *ImageBlockElement:
-		return &Accessory{ImageElement: element.(*ImageBlockElement)}
+		return &Accessory{ImageElement: element}
 	case *ButtonBlockElement:
-		return &Accessory{ButtonElement: element.(*ButtonBlockElement)}
+		return &Accessory{ButtonElement: element}
 	case *OverflowBlockElement:
-		return &Accessory{OverflowElement: element.(*OverflowBlockElement)}
+		return &Accessory{OverflowElement: element}
 	case *DatePickerBlockElement:
-		return &Accessory{DatePickerElement: element.(*DatePickerBlockElement)}
+		return &Accessory{DatePickerElement: element}
 	case *TimePickerBlockElement:
-		return &Accessory{TimePickerElement: element.(*TimePickerBlockElement)}
+		return &Accessory{TimePickerElement: element}
 	case *PlainTextInputBlockElement:
-		return &Accessory{PlainTextInputElement: element.(*PlainTextInputBlockElement)}
+		return &Accessory{PlainTextInputElement: element}
 	case *RichTextInputBlockElement:
-		return &Accessory{RichTextInputElement: element.(*RichTextInputBlockElement)}
+		return &Accessory{RichTextInputElement: element}
 	case *RadioButtonsBlockElement:
-		return &Accessory{RadioButtonsElement: element.(*RadioButtonsBlockElement)}
+		return &Accessory{RadioButtonsElement: element}
 	case *SelectBlockElement:
-		return &Accessory{SelectElement: element.(*SelectBlockElement)}
+		return &Accessory{SelectElement: element}
 	case *MultiSelectBlockElement:
-		return &Accessory{MultiSelectElement: element.(*MultiSelectBlockElement)}
+		return &Accessory{MultiSelectElement: element}
 	case *CheckboxGroupsBlockElement:
-		return &Accessory{CheckboxGroupsBlockElement: element.(*CheckboxGroupsBlockElement)}
+		return &Accessory{CheckboxGroupsBlockElement: element}
 	case *WorkflowButtonBlockElement:
-		return &Accessory{WorkflowButtonElement: element.(*WorkflowButtonBlockElement)}
+		return &Accessory{WorkflowButtonElement: element}
 	default:
 		return &Accessory{UnknownElement: element.(*UnknownBlockElement)}
 	}
