@@ -8,6 +8,41 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func getOAuthV2Response(rw http.ResponseWriter, r *http.Request) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.Write([]byte(`{
+		"ok": true,
+		"access_token": "xoxb-test-token",
+		"token_type": "bot",
+		"scope": "chat:write",
+		"bot_user_id": "U0KRQLJ9H",
+		"app_id": "A0KRD7HC3",
+		"team": {"name": "Test Team", "id": "T0KRQLJ9H"},
+		"enterprise": {"name": "", "id": ""},
+		"is_enterprise_install": false,
+		"authed_user": {"id": "U0KRQLJ9H"}
+	}`))
+}
+
+func TestGetOAuthV2ResponseWithCustomURL(t *testing.T) {
+	http.HandleFunc("/oauth.v2.access", getOAuthV2Response)
+
+	once.Do(startServer)
+
+	resp, err := GetOAuthV2Response(
+		http.DefaultClient,
+		"client-id", "client-secret", "code", "http://localhost/callback",
+		OAuthOptionAPIURL("http://"+serverAddr+"/"),
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t, "xoxb-test-token", resp.AccessToken)
+	assert.Equal(t, "bot", resp.TokenType)
+	assert.Equal(t, "chat:write", resp.Scope)
+	assert.Equal(t, "U0KRQLJ9H", resp.BotUserID)
+	assert.Equal(t, "T0KRQLJ9H", resp.Team.ID)
+}
+
 func getOpenIDConnectUserInfo(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write([]byte(`{

@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`OAuthOptionAPIURL` for package-level OAuth functions** — All package-level OAuth
+  functions (`GetOAuthV2Response`, `GetOpenIDConnectToken`, `RefreshOAuthV2Token`, etc.)
+  now accept variadic `OAuthOption` arguments. Use `OAuthOptionAPIURL(url)` to override
+  the default Slack API URL, enabling integration tests against a local HTTP server.
+  Existing callers are unaffected. ([#744])
 - **`GetOpenIDConnectUserInfo` / `GetOpenIDConnectUserInfoContext`** — Returns identity
   information about the user associated with the token via `openid.connect.userInfo`.
   Complements the existing `GetOpenIDConnectToken` method. ([#967])
