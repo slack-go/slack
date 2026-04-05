@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`GetOpenIDConnectUserInfo` / `GetOpenIDConnectUserInfoContext`** — Returns identity
+  information about the user associated with the token via `openid.connect.userInfo`.
+  Complements the existing `GetOpenIDConnectToken` method. ([#967])
 - **HTTP response headers** — Slack API response headers (e.g. `X-OAuth-Scopes`,
   `X-Accepted-OAuth-Scopes`, `X-Ratelimit-*`) are now accessible. `AuthTestResponse`
   exposes a `Header` field directly. For all other methods, use

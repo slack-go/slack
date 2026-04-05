@@ -177,6 +177,74 @@ func RefreshOAuthV2TokenContext(ctx context.Context, client httpClient, clientID
 	return response, response.Err()
 }
 
+// OpenIDConnectUserInfoResponse contains the response from openid.connect.userInfo.
+//
+// Some of the fields in the response to this method are preceded with https://slack.com/.
+// These fields are Slack-specific, and they're from the perspective of Slack.
+type OpenIDConnectUserInfoResponse struct {
+	Ok bool `json:"ok"`
+
+	Sub string `json:"sub"`
+
+	UserID string `json:"https://slack.com/user_id"`
+	TeamID string `json:"https://slack.com/team_id"`
+
+	Email             string `json:"email"`
+	EmailVerified     bool   `json:"email_verified"`
+	DateEmailVerified int64  `json:"date_email_verified"`
+
+	Name       string `json:"name"`
+	Picture    string `json:"picture"`
+	GivenName  string `json:"given_name"`
+	FamilyName string `json:"family_name"`
+	Locale     string `json:"locale"`
+
+	TeamName     string `json:"https://slack.com/team_name"`
+	TeamDomain   string `json:"https://slack.com/team_domain"`
+	TeamImage34  string `json:"https://slack.com/team_image_34"`
+	TeamImage44  string `json:"https://slack.com/team_image_44"`
+	TeamImage68  string `json:"https://slack.com/team_image_68"`
+	TeamImage88  string `json:"https://slack.com/team_image_88"`
+	TeamImage102 string `json:"https://slack.com/team_image_102"`
+	TeamImage132 string `json:"https://slack.com/team_image_132"`
+	TeamImage230 string `json:"https://slack.com/team_image_230"`
+
+	// `TeamImageDefault` indicates whether the image is a default one (true), or someone
+	// uploaded their own (false).
+	TeamImageDefault bool `json:"https://slack.com/team_image_default"`
+
+	UserImage24       string `json:"https://slack.com/user_image_24"`
+	UserImage32       string `json:"https://slack.com/user_image_32"`
+	UserImage48       string `json:"https://slack.com/user_image_48"`
+	UserImage72       string `json:"https://slack.com/user_image_72"`
+	UserImage192      string `json:"https://slack.com/user_image_192"`
+	UserImage512      string `json:"https://slack.com/user_image_512"`
+	UserImage1024     string `json:"https://slack.com/user_image_1024"`
+	UserImageOriginal string `json:"https://slack.com/user_image_original"`
+
+	SlackResponse
+}
+
+// GetOpenIDConnectUserInfo returns the user info for the token.
+// For more details, see GetOpenIDConnectUserInfoContext documentation.
+func (api *Client) GetOpenIDConnectUserInfo() (*OpenIDConnectUserInfoResponse, error) {
+	return api.GetOpenIDConnectUserInfoContext(context.Background())
+}
+
+// GetOpenIDConnectUserInfoContext returns identity information about the user associated with the token.
+// Slack API docs: https://docs.slack.dev/reference/methods/openid.connect.userInfo
+func (api *Client) GetOpenIDConnectUserInfoContext(ctx context.Context) (*OpenIDConnectUserInfoResponse, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+	response := &OpenIDConnectUserInfoResponse{}
+	err := api.postMethod(ctx, "openid.connect.userInfo", values, response)
+	if err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
 // GetOpenIDConnectToken exchanges a temporary OAuth verifier code for an access token for Sign in with Slack.
 // For more details, see GetOpenIDConnectTokenContext documentation.
 func GetOpenIDConnectToken(client httpClient, clientID, clientSecret, code, redirectURI string) (resp *OpenIDConnectResponse, err error) {
