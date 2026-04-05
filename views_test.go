@@ -848,14 +848,14 @@ func TestSlack_PushViewSubmissionResponse(t *testing.T) {
 
 func TestSlack_ErrorsViewSubmissionResponse(t *testing.T) {
 	resp := NewErrorsViewSubmissionResponse(map[string]string{
-		"input_text_action_id": "Please input a name that's at least 6 characters long",
-		"file_action_id":       "File exceeded size limit of 5 KB",
+		"name_input_block": "Please input a name that's at least 6 characters long",
+		"file_input_block": "File exceeded size limit of 5 KB",
 	})
 	rawResp := `{
 		"response_action": "errors",
 		"errors": {
-			"input_text_action_id": "Please input a name that's at least 6 characters long",
-			"file_action_id": "File exceeded size limit of 5 KB"
+			"name_input_block": "Please input a name that's at least 6 characters long",
+			"file_input_block": "File exceeded size limit of 5 KB"
 		}
 	}`
 

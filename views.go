@@ -70,12 +70,30 @@ type ViewSubmissionResponse struct {
 	Errors         map[string]string  `json:"errors,omitempty"`
 }
 
+// NewClearViewSubmissionResponse closes all open modals in the current stack.
+//
+// For HTTP-based apps, marshal this to JSON and write it as the HTTP response
+// body. The response is not sent until the handler returns, so start any slow
+// work in a goroutine and return promptly.
+//
+// For Socket Mode apps, pass this as the payload argument to Ack().
+//
+// See https://docs.slack.dev/surfaces/modals#closing_views
 func NewClearViewSubmissionResponse() *ViewSubmissionResponse {
 	return &ViewSubmissionResponse{
 		ResponseAction: RAClear,
 	}
 }
 
+// NewUpdateViewSubmissionResponse replaces the current modal with a new view.
+//
+// For HTTP-based apps, marshal this to JSON and write it as the HTTP response
+// body. The response is not sent until the handler returns, so start any slow
+// work in a goroutine and return promptly.
+//
+// For Socket Mode apps, pass this as the payload argument to Ack().
+//
+// See https://docs.slack.dev/surfaces/modals#updating_views
 func NewUpdateViewSubmissionResponse(view *ModalViewRequest) *ViewSubmissionResponse {
 	return &ViewSubmissionResponse{
 		ResponseAction: RAUpdate,
@@ -83,6 +101,15 @@ func NewUpdateViewSubmissionResponse(view *ModalViewRequest) *ViewSubmissionResp
 	}
 }
 
+// NewPushViewSubmissionResponse pushes a new view onto the modal stack.
+//
+// For HTTP-based apps, marshal this to JSON and write it as the HTTP response
+// body. The response is not sent until the handler returns, so start any slow
+// work in a goroutine and return promptly.
+//
+// For Socket Mode apps, pass this as the payload argument to Ack().
+//
+// See https://docs.slack.dev/surfaces/modals#pushing_views
 func NewPushViewSubmissionResponse(view *ModalViewRequest) *ViewSubmissionResponse {
 	return &ViewSubmissionResponse{
 		ResponseAction: RAPush,
@@ -90,6 +117,19 @@ func NewPushViewSubmissionResponse(view *ModalViewRequest) *ViewSubmissionRespon
 	}
 }
 
+// NewErrorsViewSubmissionResponse displays validation errors on form fields.
+//
+// The errors map keys must be the BlockID of an InputBlock in the view. Keys
+// that reference other block types (e.g. SectionBlock) are silently ignored
+// by Slack, which shows a generic "trouble connecting" error instead.
+//
+// For HTTP-based apps, marshal this to JSON and write it as the HTTP response
+// body. The response is not sent until the handler returns, so start any slow
+// work in a goroutine and return promptly.
+//
+// For Socket Mode apps, pass this as the payload argument to Ack().
+//
+// See https://docs.slack.dev/surfaces/modals/#displaying_errors
 func NewErrorsViewSubmissionResponse(errors map[string]string) *ViewSubmissionResponse {
 	return &ViewSubmissionResponse{
 		ResponseAction: RAErrors,
@@ -181,7 +221,7 @@ func ValidateUniqueBlockID(view ModalViewRequest) bool {
 }
 
 // OpenViewContext opens a view for a user with a custom context.
-// Slack API docs: https://api.slack.com/methods/views.open
+// Slack API docs: https://docs.slack.dev/reference/methods/views.open
 func (api *Client) OpenViewContext(
 	ctx context.Context,
 	triggerID string,
@@ -222,7 +262,7 @@ func (api *Client) PublishView(userID string, view HomeTabViewRequest, hash stri
 }
 
 // PublishViewContext publishes a static view for a user with a custom context.
-// Slack API docs: https://api.slack.com/methods/views.publish
+// Slack API docs: https://docs.slack.dev/reference/methods/views.publish
 func (api *Client) PublishViewContext(
 	ctx context.Context,
 	req PublishViewContextRequest,
@@ -249,7 +289,7 @@ func (api *Client) PushView(triggerID string, view ModalViewRequest) (*ViewRespo
 }
 
 // PushViewContext pushes a view onto the stack of a root view with a custom context.
-// Slack API docs: https://api.slack.com/methods/views.push
+// Slack API docs: https://docs.slack.dev/reference/methods/views.push
 func (api *Client) PushViewContext(
 	ctx context.Context,
 	triggerID string,
@@ -281,7 +321,7 @@ func (api *Client) UpdateView(view ModalViewRequest, externalID, hash, viewID st
 }
 
 // UpdateViewContext updates an existing view with a custom context.
-// Slack API docs: https://api.slack.com/methods/views.update
+// Slack API docs: https://docs.slack.dev/reference/methods/views.update
 func (api *Client) UpdateViewContext(
 	ctx context.Context,
 	view ModalViewRequest,

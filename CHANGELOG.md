@@ -78,6 +78,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `view_closed` interactions by `CallbackID`, matching the pattern of
   `HandleInteractionBlockAction` and `HandleSlashCommand`. ([#1161])
 
+### Documentation
+
+- **`ViewSubmissionResponse` constructors** — `NewClearViewSubmissionResponse`,
+  `NewUpdateViewSubmissionResponse`, `NewPushViewSubmissionResponse`, and
+  `NewErrorsViewSubmissionResponse` now have doc comments explaining the HTTP response
+  pattern (write JSON and return promptly) and the Socket Mode pattern (pass as Ack
+  payload). `NewErrorsViewSubmissionResponse` additionally documents that map keys must
+  be `BlockID`s of `InputBlock` elements. ([#726], [#1013])
+- **Socket Mode examples** — `examples/socketmode/` and `examples/socketmode_handler/` now
+  have doc comments explaining the two-token requirement: app-level token (`xapp-`) for the
+  WebSocket connection and bot token (`xoxb-`) for API calls. ([#941])
+
 ### Changed
 
 - Adjusted some `admin` errors that started with uppercase to be lowercase per go
