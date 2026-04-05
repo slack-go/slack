@@ -63,6 +63,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Adjusted some `admin` errors that started with uppercase to be lowercase per go
+  conventions.
+
+  > [!WARNING]
+  > **Breaking change.** If you are matching the error content in your code, this is a
+  > BREAKING CHANGE.
 - **`WebhookMessage.UnfurlLinks` and `UnfurlMedia` are now `*bool`** — Previously these
   were `bool` with `omitempty`, which meant `false` was silently stripped from the JSON
   payload. Users could not explicitly disable link or media unfurling via webhooks. The
