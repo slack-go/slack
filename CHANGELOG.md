@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`slackevents.MessageAction`**, **`MessageActionEntity`**, **`MessageActionResponse`** —
   Associated types that only support legacy `interactive_message` payloads.
 
+### Removed
+
+- **`Info.GetBotByID`, `GetUserByID`, `GetChannelByID`, `GetGroupByID`, `GetIMByID`** —
+  These methods were deprecated and returned `nil` unconditionally. They have been removed.
+
+  > [!WARNING]
+  > **Breaking change.** If you are calling any of these methods, remove those calls — they
+  > were already no-ops.
+
 ### Added
 
 - **HTTP response headers** — Slack API response headers (e.g. `X-OAuth-Scopes`,
