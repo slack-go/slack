@@ -56,6 +56,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unmarshalling. ([#1218])
 - **`Blocks`, `Attachments`, `Files`, `Upload` fields on `AppMentionEvent`** — these fields
   are sent by Slack in `app_mention` event payloads but were silently dropped. ([#961])
+- **`HandleShortcut`, `HandleViewSubmission`, `HandleViewClosed` in socketmode handler** —
+  Level 3 handlers that dispatch `shortcut`/`message_action`, `view_submission`, and
+  `view_closed` interactions by `CallbackID`, matching the pattern of
+  `HandleInteractionBlockAction` and `HandleSlashCommand`. ([#1161])
 
 ### Changed
 

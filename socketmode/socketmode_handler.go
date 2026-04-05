@@ -16,8 +16,11 @@ type SocketmodeHandler struct {
 	InteractionEventMap map[slack.InteractionType][]SocketmodeHandlerFunc
 	EventApiMap         map[slackevents.EventsAPIType][]SocketmodeHandlerFunc
 	//lvl 3 - the most userfriendly way of managing event
-	InteractionBlockActionEventMap map[string]SocketmodeHandlerFunc
-	SlashCommandMap                map[string]SocketmodeHandlerFunc
+	InteractionBlockActionEventMap    map[string]SocketmodeHandlerFunc
+	InteractionShortcutEventMap       map[string]SocketmodeHandlerFunc
+	InteractionViewSubmissionEventMap map[string]SocketmodeHandlerFunc
+	InteractionViewClosedEventMap     map[string]SocketmodeHandlerFunc
+	SlashCommandMap                   map[string]SocketmodeHandlerFunc
 
 	Default SocketmodeHandlerFunc
 }
@@ -35,15 +38,21 @@ func NewSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventApiMap := make(map[slackevents.EventsAPIType][]SocketmodeHandlerFunc)
 
 	interactionBlockActionEventMap := make(map[string]SocketmodeHandlerFunc)
+	shortcutMap := make(map[string]SocketmodeHandlerFunc)
+	viewSubmissionMap := make(map[string]SocketmodeHandlerFunc)
+	viewClosedMap := make(map[string]SocketmodeHandlerFunc)
 	slackCommandMap := make(map[string]SocketmodeHandlerFunc)
 
 	return &SocketmodeHandler{
-		Client:                         client,
-		EventMap:                       eventMap,
-		EventApiMap:                    eventApiMap,
-		InteractionEventMap:            interactionEventMap,
-		InteractionBlockActionEventMap: interactionBlockActionEventMap,
-		SlashCommandMap:                slackCommandMap,
+		Client:                            client,
+		EventMap:                          eventMap,
+		EventApiMap:                       eventApiMap,
+		InteractionEventMap:               interactionEventMap,
+		InteractionBlockActionEventMap:    interactionBlockActionEventMap,
+		InteractionShortcutEventMap:       shortcutMap,
+		InteractionViewSubmissionEventMap: viewSubmissionMap,
+		InteractionViewClosedEventMap:     viewClosedMap,
+		SlashCommandMap:                   slackCommandMap,
 		Default: func(e *Event, c *Client) {
 			c.log.Printf("Unexpected event type received: %v\n", e.Type)
 		},
@@ -57,11 +66,12 @@ func (r *SocketmodeHandler) Handle(et EventType, f SocketmodeHandlerFunc) {
 }
 
 // Register a middleware or handler for an Interaction
-// There is several types of interactions, decated functions lets you better handle them
+// There is several types of interactions, dedicated functions lets you better handle them
 // See
 // * HandleInteractionBlockAction
-// * (Not Implemented) HandleShortcut
-// * (Not Implemented) HandleView
+// * HandleShortcut
+// * HandleViewSubmission
+// * HandleViewClosed
 func (r *SocketmodeHandler) HandleInteraction(et slack.InteractionType, f SocketmodeHandlerFunc) {
 	r.InteractionEventMap[et] = append(r.InteractionEventMap[et], f)
 }
@@ -78,6 +88,48 @@ func (r *SocketmodeHandler) HandleInteractionBlockAction(actionID string, f Sock
 		panic("multiple registrations for actionID" + actionID)
 	}
 	r.InteractionBlockActionEventMap[actionID] = f
+}
+
+// Register a middleware or handler for a Shortcut (global or message) referenced by its CallbackID
+func (r *SocketmodeHandler) HandleShortcut(callbackID string, f SocketmodeHandlerFunc) {
+	if callbackID == "" {
+		panic("invalid callbackID cannot be empty")
+	}
+	if f == nil {
+		panic("invalid handler cannot be nil")
+	}
+	if _, exist := r.InteractionShortcutEventMap[callbackID]; exist {
+		panic("multiple registrations for callbackID " + callbackID)
+	}
+	r.InteractionShortcutEventMap[callbackID] = f
+}
+
+// Register a middleware or handler for a View Submission referenced by its CallbackID
+func (r *SocketmodeHandler) HandleViewSubmission(callbackID string, f SocketmodeHandlerFunc) {
+	if callbackID == "" {
+		panic("invalid callbackID cannot be empty")
+	}
+	if f == nil {
+		panic("invalid handler cannot be nil")
+	}
+	if _, exist := r.InteractionViewSubmissionEventMap[callbackID]; exist {
+		panic("multiple registrations for callbackID " + callbackID)
+	}
+	r.InteractionViewSubmissionEventMap[callbackID] = f
+}
+
+// Register a middleware or handler for a View Closed event referenced by its CallbackID
+func (r *SocketmodeHandler) HandleViewClosed(callbackID string, f SocketmodeHandlerFunc) {
+	if callbackID == "" {
+		panic("invalid callbackID cannot be empty")
+	}
+	if f == nil {
+		panic("invalid handler cannot be nil")
+	}
+	if _, exist := r.InteractionViewClosedEventMap[callbackID]; exist {
+		panic("multiple registrations for callbackID " + callbackID)
+	}
+	r.InteractionViewClosedEventMap[callbackID] = f
 }
 
 // Register a middleware or handler for an Event (from slackevents)
@@ -193,19 +245,36 @@ func (r *SocketmodeHandler) interactionDispatcher(evt *Event) bool {
 		ishandled = true
 	}
 
-	// Level 3 - interaction with actionID
-	blockActions := interaction.ActionCallback.BlockActions
-	// outmoded approach won`t be implemented
-	// attachments_actions := interaction.ActionCallback.AttachmentActions
+	// Level 3 - interaction with actionID or callbackID
+	switch interaction.Type {
+	case slack.InteractionTypeBlockActions:
+		blockActions := interaction.ActionCallback.BlockActions
+		// outmoded approach won`t be implemented
+		// attachments_actions := interaction.ActionCallback.AttachmentActions
 
-	for _, action := range blockActions {
-		if handler, ok := r.InteractionBlockActionEventMap[action.ActionID]; ok {
-
+		for _, action := range blockActions {
+			if handler, ok := r.InteractionBlockActionEventMap[action.ActionID]; ok {
+				go handler(evt, r.Client)
+				ishandled = true
+			}
+		}
+	case slack.InteractionTypeShortcut, slack.InteractionTypeMessageAction:
+		if handler, ok := r.InteractionShortcutEventMap[interaction.CallbackID]; ok {
 			go handler(evt, r.Client)
-
+			ishandled = true
+		}
+	case slack.InteractionTypeViewSubmission:
+		if handler, ok := r.InteractionViewSubmissionEventMap[interaction.View.CallbackID]; ok {
+			go handler(evt, r.Client)
+			ishandled = true
+		}
+	case slack.InteractionTypeViewClosed:
+		if handler, ok := r.InteractionViewClosedEventMap[interaction.View.CallbackID]; ok {
+			go handler(evt, r.Client)
 			ishandled = true
 		}
 	}
+
 	return ishandled
 }
 
