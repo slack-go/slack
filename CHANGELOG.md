@@ -111,6 +111,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   have doc comments explaining the two-token requirement: app-level token (`xapp-`) for the
   WebSocket connection and bot token (`xoxb-`) for API calls. ([#941])
 
+### Fixed
+
+- **`UnknownBlock` round-trip data loss** — Unrecognized block types (e.g. new Slack block
+  types not yet supported by this library) now preserve their full JSON through
+  unmarshal/marshal cycles. Previously only `type` and `block_id` were retained, silently
+  discarding all other fields.
+
 ### Changed
 
 - Adjusted some `admin` errors that started with uppercase to be lowercase per go

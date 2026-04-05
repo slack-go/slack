@@ -84,7 +84,12 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 		case "plan":
 			block = &PlanBlock{}
 		default:
-			block = &UnknownBlock{}
+			b := &UnknownBlock{raw: r}
+			if err = json.Unmarshal(r, b); err != nil {
+				return err
+			}
+			blocks.BlockSet = append(blocks.BlockSet, b)
+			continue
 		}
 
 		err = json.Unmarshal(r, block)
