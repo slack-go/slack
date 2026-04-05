@@ -103,6 +103,10 @@ func (u RichTextUnknown) RichTextElementType() RichTextElementType {
 	return u.Type
 }
 
+func (u RichTextUnknown) MarshalJSON() ([]byte, error) {
+	return []byte(u.Raw), nil
+}
+
 type RichTextListElementType string
 
 const (
@@ -490,6 +494,10 @@ type RichTextSectionUnknownElement struct {
 
 func (r RichTextSectionUnknownElement) RichTextSectionElementType() RichTextSectionElementType {
 	return r.Type
+}
+
+func (r RichTextSectionUnknownElement) MarshalJSON() ([]byte, error) {
+	return []byte(r.Raw), nil
 }
 
 // RichTextQuote represents rich_text_quote element type.

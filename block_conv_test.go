@@ -100,6 +100,51 @@ func TestAllBlockElementTypesUnmarshal(t *testing.T) {
 	}
 }
 
+func TestRichTextUnknownRoundTrip(t *testing.T) {
+	input := `{"type":"rich_text","block_id":"b1","elements":[{"type":"rich_text_unknown_type","key":"val"}]}`
+	var block RichTextBlock
+	err := json.Unmarshal([]byte(input), &block)
+	require.NoError(t, err)
+	require.Len(t, block.Elements, 1)
+
+	u, ok := block.Elements[0].(*RichTextUnknown)
+	require.True(t, ok, "expected *RichTextUnknown")
+	assert.Equal(t, RichTextElementType("rich_text_unknown_type"), u.Type)
+
+	out, err := json.Marshal(block)
+	require.NoError(t, err)
+
+	var roundTripped map[string]any
+	err = json.Unmarshal(out, &roundTripped)
+	require.NoError(t, err)
+	elems := roundTripped["elements"].([]any)
+	elem := elems[0].(map[string]any)
+	assert.Equal(t, "rich_text_unknown_type", elem["type"])
+	assert.Equal(t, "val", elem["key"])
+}
+
+func TestRichTextSectionUnknownElementRoundTrip(t *testing.T) {
+	input := `{"type":"rich_text_section","elements":[{"type":"unknown_elem","data":42}]}`
+	var section RichTextSection
+	err := json.Unmarshal([]byte(input), &section)
+	require.NoError(t, err)
+	require.Len(t, section.Elements, 1)
+
+	_, ok := section.Elements[0].(*RichTextSectionUnknownElement)
+	require.True(t, ok, "expected *RichTextSectionUnknownElement")
+
+	out, err := json.Marshal(section)
+	require.NoError(t, err)
+
+	var roundTripped map[string]any
+	err = json.Unmarshal(out, &roundTripped)
+	require.NoError(t, err)
+	elems := roundTripped["elements"].([]any)
+	elem := elems[0].(map[string]any)
+	assert.Equal(t, "unknown_elem", elem["type"])
+	assert.Equal(t, float64(42), elem["data"])
+}
+
 // TestAllAccessoryTypesRoundTrip ensures every Accessory field can survive a
 // marshal→unmarshal round trip. When a new field is added to the Accessory struct
 // and wired into NewAccessory but not into Accessory.UnmarshalJSON, this test
