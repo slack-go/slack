@@ -94,6 +94,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Level 3 handlers that dispatch `shortcut`/`message_action`, `view_submission`, and
   `view_closed` interactions by `CallbackID`, matching the pattern of
   `HandleInteractionBlockAction` and `HandleSlashCommand`. ([#1161])
+- **`BlockFromJSON` / `MustBlockFromJSON`** — Create blocks from raw JSON strings, enabling
+  direct use of output from Slack's [Block Kit Builder](https://app.slack.com/block-kit-builder)
+  or quick adoption of new block types before the library adds typed support. The original
+  JSON is preserved through marshalling. ([#1497])
 
 ### Documentation
 
@@ -424,6 +428,7 @@ for details.
 [#1490]: https://github.com/slack-go/slack/pull/1490
 [#1491]: https://github.com/slack-go/slack/issues/1491
 [#1495]: https://github.com/slack-go/slack/pull/1495
+[#1497]: https://github.com/slack-go/slack/pull/1497
 [#1499]: https://github.com/slack-go/slack/pull/1499
 [#1504]: https://github.com/slack-go/slack/pull/1504
 [#1506]: https://github.com/slack-go/slack/pull/1506
