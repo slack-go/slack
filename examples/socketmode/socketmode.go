@@ -1,3 +1,24 @@
+// This example demonstrates a basic Socket Mode client that listens for
+// Events API events, interactive components, and slash commands.
+//
+// Socket Mode requires two tokens:
+//
+//   - App-level token (xapp-…): opens the WebSocket connection via
+//     apps.connections.open. Generate one in your app settings under
+//     Basic Information → App-Level Tokens with the connections:write scope.
+//
+//   - Bot token (xoxb-…): used for all Web API calls (posting messages,
+//     opening views, etc.). This is the token you get after installing the
+//     app to a workspace.
+//
+// The bot token is passed to slack.New() as the primary credential; the
+// app-level token is passed via slack.OptionAppLevelToken().
+//
+// To run:
+//
+//	export SLACK_APP_TOKEN=xapp-...
+//	export SLACK_BOT_TOKEN=xoxb-...
+//	go run examples/socketmode/socketmode.go
 package main
 
 import (
