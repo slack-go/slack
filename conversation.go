@@ -29,6 +29,7 @@ type Conversation struct {
 	IsPrivate          bool     `json:"is_private"`
 	IsReadOnly         bool     `json:"is_read_only"`
 	IsMpIM             bool     `json:"is_mpim"`
+	IsUserDeleted      bool     `json:"is_user_deleted"`
 	Unlinked           int      `json:"unlinked"`
 	NameNormalized     string   `json:"name_normalized"`
 	NumMembers         int      `json:"num_members"`

@@ -420,8 +420,8 @@ var simpleIM = `{
     "unread_count_display": 0
 }`
 
-func unmarshalIM(j string) (*IM, error) {
-	im := &IM{}
+func unmarshalIM(j string) (*Conversation, error) {
+	im := &Conversation{}
 	if err := json.Unmarshal([]byte(j), &im); err != nil {
 		return nil, err
 	}
@@ -434,7 +434,7 @@ func TestSimpleIM(t *testing.T) {
 	assertSimpleIM(t, im)
 }
 
-func assertSimpleIM(t *testing.T, im *IM) {
+func assertSimpleIM(t *testing.T, im *Conversation) {
 	assert.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
 	assert.Equal(t, true, im.IsIM)
@@ -448,7 +448,7 @@ func assertSimpleIM(t *testing.T, im *IM) {
 }
 
 func TestCreateSimpleIM(t *testing.T) {
-	im := &IM{}
+	im := &Conversation{}
 	im.ID = "D024BFF1M"
 	im.IsIM = true
 	im.User = "U024BE7LH"

@@ -18,6 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **`IM` struct** — Removed the `IM` struct (and unused internal types `imChannel`,
+  `imResponseFull`). The `IsUserDeleted` field has been moved to `Conversation`, where it
+  is populated for IM-type conversations. Code using `IM` should switch to `Conversation`.
+
+  > [!NOTE]
+  > In practice no user should be affected — `IM` was never returned by any public API
+  > method in this library, so there was no way to obtain one outside of manual construction.
+
 - **`Info.GetBotByID`, `GetUserByID`, `GetChannelByID`, `GetGroupByID`, `GetIMByID`** —
   These methods were deprecated and returned `nil` unconditionally. They have been removed.
 
