@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`admin.teams.settings.*` API support** — `AdminTeamsSettingsInfo`,
+  `AdminTeamsSettingsSetDefaultChannels`, `AdminTeamsSettingsSetDescription`,
+  `AdminTeamsSettingsSetDiscoverability`, `AdminTeamsSettingsSetIcon`, and
+  `AdminTeamsSettingsSetName`. Includes `TeamDiscoverability` enum with `Open`,
+  `InviteOnly`, `Closed`, and `Unlisted` variants. ([#960])
 - **`OAuthOptionAPIURL` for package-level OAuth functions** — All package-level OAuth
   functions (`GetOAuthV2Response`, `GetOpenIDConnectToken`, `RefreshOAuthV2Token`, etc.)
   now accept variadic `OAuthOption` arguments. Use `OAuthOptionAPIURL(url)` to override
