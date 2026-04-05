@@ -61,6 +61,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   events** — these events are now mapped in `EventMapping` with dedicated structs
   (`UserStatusChangedEvent`, `UserHuddleChangedEvent`, `UserProfileChangedEvent`).
   Previously they triggered `UnmarshallingErrorEvent`. ([#1541])
+- **RTM support for `sh_room_join`, `sh_room_leave`, `sh_room_update`, `channel_updated`
+  events** — Slack Call/Huddle room events and channel property updates are now mapped with
+  dedicated structs (`SHRoomJoinEvent`, `SHRoomLeaveEvent`, `SHRoomUpdateEvent`,
+  `ChannelUpdatedEvent`). ([#858])
 - **`CacheTS` and `EventTS` fields on `UserChangeEvent`** — these fields were sent by Slack
   but silently dropped during unmarshalling.
 - **`workflows.featured` API support** — add, list, remove, and set featured workflows on

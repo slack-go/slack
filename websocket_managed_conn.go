@@ -611,4 +611,10 @@ var EventMapping = map[string]interface{}{
 
 	"desktop_notification":       DesktopNotificationEvent{},
 	"mobile_in_app_notification": MobileInAppNotificationEvent{},
+
+	"channel_updated": ChannelUpdatedEvent{},
+
+	"sh_room_join":   SHRoomJoinEvent{},
+	"sh_room_leave":  SHRoomLeaveEvent{},
+	"sh_room_update": SHRoomUpdateEvent{},
 }
