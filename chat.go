@@ -375,13 +375,15 @@ func (t sendConfig) BuildRequestContext(ctx context.Context, token, channelID st
 			deleteOriginal:  t.deleteOriginal,
 		}.BuildRequestContext(ctx)
 	default:
-		return formSender{endpoint: t.endpoint, values: t.values}.BuildRequestContext(ctx)
+		return formSender{endpoint: t.endpoint, values: t.values, attachments: t.attachments, blocks: t.blocks}.BuildRequestContext(ctx)
 	}
 }
 
 type formSender struct {
-	endpoint string
-	values   url.Values
+	endpoint    string
+	values      url.Values
+	attachments []Attachment
+	blocks      Blocks
 }
 
 func (t formSender) BuildRequest() (*http.Request, func(*chatResponseFull) responseParser, error) {
@@ -389,6 +391,22 @@ func (t formSender) BuildRequest() (*http.Request, func(*chatResponseFull) respo
 }
 
 func (t formSender) BuildRequestContext(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
+	if t.attachments != nil {
+		attachmentBytes, err := json.Marshal(t.attachments)
+		if err != nil {
+			return nil, nil, err
+		}
+		t.values.Set("attachments", string(attachmentBytes))
+	}
+
+	if t.blocks.BlockSet != nil {
+		blockBytes, err := json.Marshal(t.blocks.BlockSet)
+		if err != nil {
+			return nil, nil, err
+		}
+		t.values.Set("blocks", string(blockBytes))
+	}
+
 	req, err := formReq(ctx, t.endpoint, t.values)
 	return req, func(resp *chatResponseFull) responseParser {
 		return newJSONParser(resp)
@@ -670,16 +688,7 @@ func MsgOptionAttachments(attachments ...Attachment) MsgOption {
 
 		config.attachments = attachments
 
-		// FIXME: We are setting the attachments on the message twice: above for
-		// the json version, and below for the html version.  The marshalled bytes
-		// we put into config.values below don't work directly in the Msg version.
-
-		attachmentBytes, err := json.Marshal(attachments)
-		if err == nil {
-			config.values.Set("attachments", string(attachmentBytes))
-		}
-
-		return err
+		return nil
 	}
 }
 
@@ -688,17 +697,15 @@ func MsgOptionAttachments(attachments ...Attachment) MsgOption {
 // To skip setting blocks entirely, do not include this option.
 func MsgOptionBlocks(blocks ...Block) MsgOption {
 	return func(config *sendConfig) error {
-		if blocks == nil {
-			blocks = []Block{}
+		if len(blocks) == 0 {
+			// Explicitly set to empty slice (not nil) so the sender
+			// knows to marshal "[]" and clear blocks on the message.
+			config.blocks.BlockSet = []Block{}
+		} else {
+			config.blocks.BlockSet = append(config.blocks.BlockSet, blocks...)
 		}
 
-		config.blocks.BlockSet = append(config.blocks.BlockSet, blocks...)
-
-		blocks, err := json.Marshal(blocks)
-		if err == nil {
-			config.values.Set("blocks", string(blocks))
-		}
-		return err
+		return nil
 	}
 }
 
