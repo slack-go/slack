@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`slackevents.ChannelType*` constants and `MessageEvent` helpers** — Added
+  `ChannelTypeChannel`, `ChannelTypeGroup`, `ChannelTypeIM`, `ChannelTypeMPIM` constants
+  and `IsChannel()`, `IsGroup()`, `IsIM()`, `IsMpIM()` methods on `MessageEvent` so
+  callers no longer need to compare raw strings.
+
 ### Fixed
 
 - **Duplicate attachment/block serialization in `MsgOptionAttachments` / `MsgOptionBlocks`** —

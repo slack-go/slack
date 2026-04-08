@@ -285,13 +285,19 @@ type SharedLinks struct {
 	URL    string `json:"url"`
 }
 
+const (
+	ChannelTypeChannel = "channel" // Public channel message
+	ChannelTypeGroup   = "group"   // Private channel message
+	ChannelTypeIM      = "im"      // Direct message
+	ChannelTypeMPIM    = "mpim"    // Multiparty direct message
+)
+
 // MessageEvent occurs when a variety of types of messages has been posted.
 // Parse ChannelType to see which
 // if ChannelType = "group", this is a private channel message
 // if ChannelType = "channel", this message was sent to a channel
 // if ChannelType = "im", this is a private message
-// if ChannelType = "mim", A message was posted in a multiparty direct message channel
-// TODO: Improve this so that it is not required to manually parse ChannelType
+// if ChannelType = "mpim", A message was posted in a multiparty direct message channel
 type MessageEvent struct {
 	// Basic Message Event - https://api.slack.com/events/message
 	ClientMsgID     string       `json:"client_msg_id"`
@@ -340,6 +346,11 @@ type MessageEvent struct {
 	NoNotifications bool              `json:"no_notifications,omitempty"`
 	Permalink       string            `json:"permalink,omitempty"`
 }
+
+func (e *MessageEvent) IsIM() bool      { return e.ChannelType == ChannelTypeIM }
+func (e *MessageEvent) IsChannel() bool { return e.ChannelType == ChannelTypeChannel }
+func (e *MessageEvent) IsGroup() bool   { return e.ChannelType == ChannelTypeGroup }
+func (e *MessageEvent) IsMpIM() bool    { return e.ChannelType == ChannelTypeMPIM }
 
 // UnmarshalJSON implements the json.Unmarshaler interface for MessageEvent.
 // This custom unmarshaler handles both regular messages and message_changed events

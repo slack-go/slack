@@ -468,7 +468,9 @@ func TestMessageEvent(t *testing.T) {
 	if e.Message.Text != "Live long and prospect." {
 		t.Error(fmt.Errorf("expected e.Message.Text Live long and prospect., got %s", e.Message.Text))
 	}
-
+	if !e.IsChannel() {
+		t.Error(fmt.Errorf("expected IsChannelMessage true, got false"))
+	}
 }
 
 func TestMessageEventWithAssistantThread(t *testing.T) {
@@ -507,6 +509,9 @@ func TestMessageEventWithAssistantThread(t *testing.T) {
 	}
 	if e.AssistantThread.ActionToken != "9876543.hijklmnop" {
 		t.Errorf("Expected ActionToken to be '9876543.hijklmnop', got %s", e.AssistantThread.ActionToken)
+	}
+	if !e.IsIM() {
+		t.Error(fmt.Errorf("expected IsIM true, got false"))
 	}
 }
 
@@ -1823,13 +1828,13 @@ func TestDndUpdatedEvent(t *testing.T) {
 func TestDndUpdatedUserEvent(t *testing.T) {
 	rawE := []byte(`
 		{
-    		"type": "dnd_updated_user",
-    		"user": "U1234",
-    		"dnd_status": {
-        		"dnd_enabled": true,
-        		"next_dnd_start_ts": 1450387800,
-        		"next_dnd_end_ts": 1450423800
-    		}
+			"type": "dnd_updated_user",
+			"user": "U1234",
+			"dnd_status": {
+				"dnd_enabled": true,
+				"next_dnd_start_ts": 1450387800,
+				"next_dnd_end_ts": 1450423800
+			}
 		}
 	`)
 
@@ -1881,10 +1886,10 @@ func TestEmailDomainChangedEvent(t *testing.T) {
 func TestGroupHistoryChangedEvent(t *testing.T) {
 	rawE := []byte(`
 		{
-    		"type": "group_history_changed",
-    		"latest": "1358877455.000010",
-    		"ts": "1361482916.000003",
-    		"event_ts": "1361482916.000004"
+			"type": "group_history_changed",
+			"latest": "1358877455.000010",
+			"ts": "1361482916.000003",
+			"event_ts": "1361482916.000004"
 		}
 	`)
 
@@ -1906,9 +1911,9 @@ func TestGroupHistoryChangedEvent(t *testing.T) {
 func TestGroupOpenEvent(t *testing.T) {
 	rawE := []byte(`
 		{
-    		"type": "group_open",
-    		"user": "U024BE7LH",
-    		"channel": "G024BE91L"
+			"type": "group_open",
+			"user": "U024BE7LH",
+			"channel": "G024BE91L"
 		}
 	`)
 
@@ -2004,10 +2009,10 @@ func TestImCreatedEvent(t *testing.T) {
 func TestImHistoryChangedEvent(t *testing.T) {
 	rawE := []byte(`
 		{
-    		"type": "im_history_changed",
-    		"latest": "1358877455.000010",
-    		"ts": "1361482916.000003",
-    		"event_ts": "1361482916.000004"
+			"type": "im_history_changed",
+			"latest": "1358877455.000010",
+			"ts": "1361482916.000003",
+			"event_ts": "1361482916.000004"
 		}
 	`)
 
@@ -2692,7 +2697,7 @@ func TestChannelUnsharedEvent(t *testing.T) {
 		"type": "channel_unshared",
 		"previously_connected_team_id": "E163Q94DX",
 		"channel": "C123ABC456",
-        "is_ext_shared": false,
+		"is_ext_shared": false,
 		"event_ts": "1561064063.001100"
 	}`
 

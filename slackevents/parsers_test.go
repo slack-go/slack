@@ -386,7 +386,7 @@ func TestParseEventAPIMessageMPIMWithAssistantThread(t *testing.T) {
 					if innerEvent.AssistantThread.ActionToken != "xyz789.multiparty" {
 						t.Errorf("Expected ActionToken to be 'xyz789.multiparty', got %s", innerEvent.AssistantThread.ActionToken)
 					}
-					if innerEvent.ChannelType != "mpim" {
+					if !innerEvent.IsMpIM() {
 						t.Errorf("Expected ChannelType to be 'mpim', got %s", innerEvent.ChannelType)
 					}
 				}
