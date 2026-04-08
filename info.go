@@ -431,7 +431,7 @@ type Team struct {
 	Icons  *Icons `json:"icon,omitempty"`
 }
 
-// Icons XXX: needs further investigation
+// Icons contains the image URLs for the team icons in various sizes
 type Icons struct {
 	Image36  string `json:"image_36,omitempty"`
 	Image48  string `json:"image_48,omitempty"`
