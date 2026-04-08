@@ -209,7 +209,14 @@ func TestPost(t *testing.T) {
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
 	assert.Equal(t, "<@U2147483697|tester> shared a file: <https://test.slack.com/files/tester/abc/test_post|test post>", message.Text)
-	// TODO: Assert File
+	assert.Len(t, message.Files, 1)
+	file := message.Files[0]
+	assert.Equal(t, "abc", file.ID)
+	assert.Equal(t, "test_post", file.Name)
+	assert.Equal(t, "test post", file.Title)
+	assert.Equal(t, "post", file.Mode)
+	assert.Equal(t, 14, file.Size)
+	assert.Equal(t, 1, file.CommentsCount)
 	assert.Equal(t, "U2147483697", message.User)
 	assert.False(t, message.Upload)
 	assert.Equal(t, "1433315416.000008", message.Timestamp)
@@ -269,8 +276,21 @@ func TestComment(t *testing.T) {
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileComment, message.SubType)
 	assert.Equal(t, "<@U2147483697|tester> commented on <@U2147483697|tester>'s file <https://test.slack.com/files/tester/abc/test_post|test post>: another comment", message.Text)
-	// TODO: Assert File
-	// TODO: Assert Comment
+	assert.Len(t, message.Files, 1)
+	file := message.Files[0]
+	assert.Equal(t, "abc", file.ID)
+	assert.Equal(t, "test_post", file.Name)
+	assert.Equal(t, "test post", file.Title)
+	assert.Equal(t, "post", file.Mode)
+	assert.Equal(t, 14, file.Size)
+	assert.Equal(t, 2, file.CommentsCount)
+
+	assert.NotNil(t, message.Comment)
+	assert.Equal(t, "xyz", message.Comment.ID)
+	assert.Equal(t, JSONTime(1433316360), message.Comment.Created)
+	assert.Equal(t, "U2147483697", message.Comment.User)
+	assert.Equal(t, "another comment", message.Comment.Comment)
+
 	assert.Equal(t, "1433316360.000009", message.Timestamp)
 }
 
