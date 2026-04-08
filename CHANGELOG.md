@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Duplicate attachment/block serialization in `MsgOptionAttachments` / `MsgOptionBlocks`** —
+  Attachments and blocks were serialized twice: once into typed struct fields (for the JSON
+  response-URL path) and again into `url.Values` (for the form POST path). Serialization for
+  the form path now happens inside `formSender.BuildRequestContext`, so each sender owns its
+  own marshalling. This fixes the long-standing FIXME and eliminates redundant `json.Marshal`
+  calls in the option functions. ([#1547])
+
+  > [!NOTE]
+  > `UnsafeApplyMsgOptions` returns `config.values` directly. After this change,
+  > `attachments` and `blocks` keys are no longer present in those values since
+  > marshalling is deferred to send time. This function is documented as unsupported.
+
 ## [0.21.0] - 2026-04-05
 
 ### Deprecated
@@ -464,6 +478,7 @@ for details.
 [#1076]: https://github.com/slack-go/slack/issues/1076
 [#1157]: https://github.com/slack-go/slack/issues/1157
 [#1196]: https://github.com/slack-go/slack/issues/1196
+[#1547]: https://github.com/slack-go/slack/pull/1547
 
 [Unreleased]: https://github.com/slack-go/slack/compare/v0.21.0...HEAD
 [0.21.0]: https://github.com/slack-go/slack/compare/v0.20.0...v0.21.0
