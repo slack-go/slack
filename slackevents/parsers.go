@@ -10,23 +10,16 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// eventsMap checks both slack.EventsMapping and
-// and slackevents.EventsAPIInnerEventMapping. If the event
-// exists, returns the unmarshalled struct instance of
-// target for the matching event type.
-// TODO: Consider moving all events into its own package?
+// eventsMap checks both slackevents.EventsAPIInnerEventMapping and slack.EventMapping
+// (RTM). EventsAPI mapping is checked first because both define a "message" type, and
+// EventsAPI's MessageEvent is the correct choice for Events API payloads.
 func eventsMap(t string) (interface{}, bool) {
-	// Must parse EventsAPI FIRST as both RTM and EventsAPI
-	// have a type: "Message" event.
-	// TODO: Handle these cases more explicitly.
+	// EventsAPI mapping takes precedence over RTM mapping.
 	v, exists := EventsAPIInnerEventMapping[EventsAPIType(t)]
 	if exists {
 		return v, exists
 	}
 	v, exists = slack.EventMapping[t]
-	if exists {
-		return v, exists
-	}
 	return v, exists
 }
 
