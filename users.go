@@ -730,16 +730,16 @@ func (api *Client) SetUserCustomStatusWithUser(user, statusText, statusEmoji str
 //
 // Slack API docs: https://api.slack.com/methods/users.profile.set
 func (api *Client) SetUserCustomStatusContextWithUser(ctx context.Context, user, statusText, statusEmoji string, statusExpiration int64) error {
-	// XXX(theckman): this anonymous struct is for making requests to the Slack
-	// API for setting and unsetting a User's Custom Status/Emoji. To change
-	// these values we must provide a JSON document as the profile POST field.
+	// This anonymous struct is for making requests to the Slack API for setting and
+	// unsetting a User's Custom Status/Emoji. To change these values we must provide a
+	// JSON document as the profile POST field.
 	//
-	// We use an anonymous struct over UserProfile because to unset the values
-	// on the User's profile we cannot use the `json:"omitempty"` tag. This is
-	// because an empty string ("") is what's used to unset the values. Check
-	// out the API docs for more details:
+	// We use an anonymous struct over UserProfile because to unset the values on the
+	// User's profile we cannot use the `json:"omitempty"` tag. This is because an empty
+	// string ("") is what's used to unset the values. Check out the API docs for more
+	// details:
 	//
-	// - https://api.slack.com/docs/presence-and-status#custom_status
+	// - https://docs.slack.dev/apis/web-api/user-presence-and-status/#custom-status
 	profile, err := json.Marshal(
 		&struct {
 			StatusText       string `json:"status_text"`
