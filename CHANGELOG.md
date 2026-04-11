@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added missing parameters to `assistant.search.context` (`Sort`, `SortDir`, `Before`,
+  `After`, `Highlight`, `IncludeContextMessages`, `IncludeDeletedUsers`,
+  `IncludeMessageBlocks`, `IncludeArchivedChannels`, `DisableSemanticSearch`, `Modifiers`,
+  `TermClauses`) and new response types (`AssistantSearchContextFile`,
+  `AssistantSearchContextChannel`, `AssistantSearchContextMessageContext`) to match the
+  full Real-Time Search API surface.
+
+### Fixed
+
+- `ChannelTypes` and `ContentTypes` now send comma-separated values instead of repeated
+  form keys, matching the convention used by every other method in the library.
+
 ## [0.21.1] - 2026-04-08
 
 ### Added

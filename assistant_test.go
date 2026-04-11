@@ -3,7 +3,6 @@ package slack
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"testing"
 )
 
@@ -178,98 +177,155 @@ func TestSearchAssistantContext(t *testing.T) {
 	}
 }
 
-func assistantSearchContextHandlerWithNewParams(rw http.ResponseWriter, r *http.Request) {
-	query := r.FormValue("query")
-	actionToken := r.FormValue("action_token")
-	contextChannelID := r.FormValue("context_channel_id")
-	includeBots := r.FormValue("include_bots")
-
-	rw.Header().Set("Content-Type", "application/json")
-
-	if query != "" && actionToken != "" && contextChannelID != "" && includeBots == "true" {
-		resp, _ := json.Marshal(&AssistantSearchContextResponse{
-			SlackResponse: SlackResponse{Ok: true},
-			Results: AssistantSearchContextResults{
-				Messages: []AssistantSearchContextMessage{
-					{
-						AuthorUserID: "U1234567890",
-						TeamID:       "T0987654321",
-						ChannelID:    contextChannelID, // Use the provided context channel ID
-						MessageTS:    "1234567890.123456",
-						Content:      "This is a test message with new parameters",
-						IsAuthorBot:  true, // Test with bot message
-						Permalink:    "https://example.slack.com/archives/" + contextChannelID + "/p1234567890123456",
-					},
-				},
-			},
-			ResponseMetadata: struct {
-				NextCursor string `json:"next_cursor"`
-			}{
-				NextCursor: "next_cursor_value_new",
-			},
-		})
-		rw.Write(resp)
-	} else {
-		rw.Write([]byte(`{ "ok": false, "error": "missing_required_parameters" }`))
-	}
-}
-
-func TestSearchAssistantContextWithNewParameters(t *testing.T) {
-	http.HandleFunc("/assistant.search.context.new", assistantSearchContextHandlerWithNewParams)
-	once.Do(startServer)
-
-	// Test with new parameters
-	params := AssistantSearchContextParameters{
-		Query:            "test query with new params",
-		ActionToken:      "action_token_123",
-		ChannelTypes:     []string{"public_channel"},
-		ContentTypes:     []string{"messages"},
-		ContextChannelID: "C0987654321",
-		IncludeBots:      true,
-		Limit:            5,
-	}
-
-	// We need to temporarily change the API method for this test
-	// Since we can't easily override the method, we'll test the parameter building logic
-
-	// Create a custom client to test parameter handling
-	values := url.Values{"token": {"testing-token"}}
-	values.Add("query", params.Query)
-
-	if params.ActionToken != "" {
-		values.Add("action_token", params.ActionToken)
-	}
-	if len(params.ChannelTypes) > 0 {
-		for _, channelType := range params.ChannelTypes {
-			values.Add("channel_types", channelType)
+func TestSearchAssistantContextExpandedResponse(t *testing.T) {
+	raw := `{
+		"ok": true,
+		"results": {
+			"messages": [
+				{
+					"author_user_id": "U111",
+					"author_name": "Test User",
+					"team_id": "T111",
+					"channel_id": "C111",
+					"channel_name": "general",
+					"message_ts": "1234567890.123456",
+					"content": "Hello world",
+					"is_author_bot": false,
+					"permalink": "https://example.slack.com/archives/C111/p1234567890123456",
+					"context_messages": {
+						"before": [
+							{
+								"author_user_id": "U222",
+								"team_id": "T111",
+								"channel_id": "C111",
+								"message_ts": "1234567889.000000",
+								"content": "Before message",
+								"is_author_bot": false,
+								"permalink": "https://example.slack.com/archives/C111/p1234567889000000"
+							}
+						],
+						"after": [
+							{
+								"author_user_id": "U333",
+								"team_id": "T111",
+								"channel_id": "C111",
+								"message_ts": "1234567891.000000",
+								"content": "After message",
+								"is_author_bot": true,
+								"permalink": "https://example.slack.com/archives/C111/p1234567891000000"
+							}
+						]
+					}
+				}
+			],
+			"files": [
+				{
+					"uploader_user_id": "U111",
+					"author_user_id": "U111",
+					"author_name": "Test User",
+					"team_id": "T111",
+					"file_id": "F111",
+					"date_created": 1700000000,
+					"date_updated": 1700001000,
+					"title": "test.pdf",
+					"file_type": "pdf",
+					"permalink": "https://example.slack.com/files/U111/F111/test.pdf",
+					"content": "File content excerpt"
+				}
+			],
+			"channels": [
+				{
+					"team_id": "T111",
+					"creator_user_id": "U111",
+					"creator_name": "Test User",
+					"date_created": 1600000000,
+					"date_updated": 1700000000,
+					"name": "general",
+					"topic": "General discussion",
+					"purpose": "Company-wide announcements",
+					"permalink": "https://example.slack.com/archives/C111"
+				}
+			]
+		},
+		"response_metadata": {
+			"next_cursor": "cursor123"
 		}
-	}
-	if len(params.ContentTypes) > 0 {
-		for _, contentType := range params.ContentTypes {
-			values.Add("content_types", contentType)
-		}
-	}
-	if params.ContextChannelID != "" {
-		values.Add("context_channel_id", params.ContextChannelID)
-	}
-	if params.IncludeBots {
-		values.Add("include_bots", "true")
-	}
-	if params.Limit > 0 {
-		values.Add("limit", "5")
+	}`
+
+	var response AssistantSearchContextResponse
+	if err := json.Unmarshal([]byte(raw), &response); err != nil {
+		t.Fatalf("Unmarshal error: %s", err)
 	}
 
-	// Verify all parameters are set correctly
-	if values.Get("action_token") != "action_token_123" {
-		t.Errorf("Expected action_token to be 'action_token_123', got %s", values.Get("action_token"))
+	if !response.Ok {
+		t.Fatalf("Expected Ok to be true")
 	}
-	if values.Get("context_channel_id") != "C0987654321" {
-		t.Errorf("Expected context_channel_id to be 'C0987654321', got %s", values.Get("context_channel_id"))
+
+	// Verify messages
+	if len(response.Results.Messages) != 1 {
+		t.Fatalf("Expected 1 message, got %d", len(response.Results.Messages))
 	}
-	if values.Get("include_bots") != "true" {
-		t.Errorf("Expected include_bots to be 'true', got %s", values.Get("include_bots"))
+
+	msg := response.Results.Messages[0]
+	if msg.AuthorName != "Test User" {
+		t.Errorf("Expected AuthorName 'Test User', got %q", msg.AuthorName)
 	}
-	if values.Get("limit") != "5" {
-		t.Errorf("Expected limit to be '5', got %s", values.Get("limit"))
+	if msg.ChannelName != "general" {
+		t.Errorf("Expected ChannelName 'general', got %q", msg.ChannelName)
+	}
+
+	// Verify context messages
+	if msg.ContextMessages == nil {
+		t.Fatal("Expected ContextMessages to be non-nil")
+	}
+	if len(msg.ContextMessages.Before) != 1 {
+		t.Fatalf("Expected 1 before context message, got %d", len(msg.ContextMessages.Before))
+	}
+	if msg.ContextMessages.Before[0].Content != "Before message" {
+		t.Errorf("Expected before content 'Before message', got %q", msg.ContextMessages.Before[0].Content)
+	}
+	if len(msg.ContextMessages.After) != 1 {
+		t.Fatalf("Expected 1 after context message, got %d", len(msg.ContextMessages.After))
+	}
+	if !msg.ContextMessages.After[0].IsAuthorBot {
+		t.Errorf("Expected after message IsAuthorBot true")
+	}
+
+	// Verify files
+	if len(response.Results.Files) != 1 {
+		t.Fatalf("Expected 1 file, got %d", len(response.Results.Files))
+	}
+	file := response.Results.Files[0]
+	if file.FileID != "F111" {
+		t.Errorf("Expected FileID 'F111', got %q", file.FileID)
+	}
+	if file.Title != "test.pdf" {
+		t.Errorf("Expected Title 'test.pdf', got %q", file.Title)
+	}
+	if file.FileType != "pdf" {
+		t.Errorf("Expected FileType 'pdf', got %q", file.FileType)
+	}
+	if file.DateCreated != 1700000000 {
+		t.Errorf("Expected DateCreated 1700000000, got %d", file.DateCreated)
+	}
+
+	// Verify channels
+	if len(response.Results.Channels) != 1 {
+		t.Fatalf("Expected 1 channel, got %d", len(response.Results.Channels))
+	}
+	ch := response.Results.Channels[0]
+	if ch.Name != "general" {
+		t.Errorf("Expected Name 'general', got %q", ch.Name)
+	}
+	if ch.Topic != "General discussion" {
+		t.Errorf("Expected Topic 'General discussion', got %q", ch.Topic)
+	}
+	if ch.Purpose != "Company-wide announcements" {
+		t.Errorf("Expected Purpose 'Company-wide announcements', got %q", ch.Purpose)
+	}
+
+	// Verify cursor
+	if response.ResponseMetadata.NextCursor != "cursor123" {
+		t.Errorf("Expected NextCursor 'cursor123', got %q", response.ResponseMetadata.NextCursor)
 	}
 }
