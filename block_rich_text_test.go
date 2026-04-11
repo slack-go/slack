@@ -408,4 +408,51 @@ func TestNewRichTextSectionChannelElement(t *testing.T) {
 	assert.Contains(t, string(data), `"channel_id":"C012345678"`)
 }
 
+func TestRichTextSectionUsergroupStyleExtendedFields(t *testing.T) {
+	raw := `{
+		"type": "rich_text_section",
+		"elements": [
+			{
+				"type": "usergroup",
+				"usergroup_id": "ausergroupid",
+				"style": {
+					"bold": true,
+					"underline": true,
+					"highlight": true,
+					"client_highlight": true,
+					"unlink": true
+				}
+			}
+		]
+	}`
+
+	var section RichTextSection
+	err := json.Unmarshal([]byte(raw), &section)
+	assert.NoError(t, err)
+	assert.Len(t, section.Elements, 1)
+
+	elem, ok := section.Elements[0].(*RichTextSectionUserGroupElement)
+	assert.True(t, ok)
+	assert.Equal(t, "ausergroupid", elem.UsergroupID)
+	assert.NotNil(t, elem.Style)
+	assert.True(t, elem.Style.Bold)
+	assert.True(t, elem.Style.Underline)
+	assert.True(t, elem.Style.Highlight)
+	assert.True(t, elem.Style.ClientHighlight)
+	assert.True(t, elem.Style.Unlink)
+	assert.False(t, elem.Style.Italic)
+	assert.False(t, elem.Style.Strike)
+	assert.False(t, elem.Style.Code)
+
+	// Round-trip: marshal and verify fields survive
+	data, err := json.Marshal(section)
+	assert.NoError(t, err)
+	assert.Contains(t, string(data), `"underline":true`)
+	assert.Contains(t, string(data), `"highlight":true`)
+	assert.Contains(t, string(data), `"client_highlight":true`)
+	assert.Contains(t, string(data), `"unlink":true`)
+	assert.NotContains(t, string(data), `"italic"`)
+	assert.NotContains(t, string(data), `"strike"`)
+}
+
 func strp(in string) *string { return &in }

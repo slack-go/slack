@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `TermClauses`) and new response types (`AssistantSearchContextFile`,
   `AssistantSearchContextChannel`, `AssistantSearchContextMessageContext`) to match the
   full Real-Time Search API surface.
+- Added `Underline`, `Highlight`, `ClientHighlight`, and `Unlink` fields to
+  `RichTextSectionTextStyle`. Added `Style` field to `RichTextSectionUserGroupElement`.
 
 ### Fixed
 
