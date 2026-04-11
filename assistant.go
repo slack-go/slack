@@ -178,13 +178,17 @@ func (api *Client) SetAssistantThreadsSuggestedPromptsContext(ctx context.Contex
 	return response.Err()
 }
 
-// SetAssistantThreadStatus sets the status of a thread
+// SetAssistantThreadsStatus sets the status of a thread.
+// This method accepts either the chat:write or assistant:write scope.
+// Note: the assistant:write scope is being deprecated in favor of chat:write.
 // @see https://api.slack.com/methods/assistant.threads.setStatus
 func (api *Client) SetAssistantThreadsStatus(params AssistantThreadsSetStatusParameters) (err error) {
 	return api.SetAssistantThreadsStatusContext(context.Background(), params)
 }
 
-// SetAssistantThreadStatusContext sets the status of a thread with a custom context
+// SetAssistantThreadsStatusContext sets the status of a thread with a custom context.
+// This method accepts either the chat:write or assistant:write scope.
+// Note: the assistant:write scope is being deprecated in favor of chat:write.
 // @see https://api.slack.com/methods/assistant.threads.setStatus
 func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params AssistantThreadsSetStatusParameters) (err error) {
 
