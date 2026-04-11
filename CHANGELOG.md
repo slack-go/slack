@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   full Real-Time Search API surface.
 - Added `Underline`, `Highlight`, `ClientHighlight`, and `Unlink` fields to
   `RichTextSectionTextStyle`. Added `Style` field to `RichTextSectionUserGroupElement`.
+- Added `BotOptional` and `UserOptional` fields to `OAuthScopes` for app manifests.
 
 ### Fixed
 

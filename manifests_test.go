@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -137,6 +138,43 @@ func getTestManifest() Manifest {
 			Name:        "test",
 			Description: "this is a test",
 		},
+	}
+}
+
+func TestOAuthScopesOptionalFields(t *testing.T) {
+	scopes := OAuthScopes{
+		Bot:          []string{"chat:write", "commands"},
+		User:         []string{"users:read"},
+		BotOptional:  []string{"files:read", "reactions:read"},
+		UserOptional: []string{"channels:read"},
+	}
+
+	data, err := json.Marshal(scopes)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	var roundtrip OAuthScopes
+	if err := json.Unmarshal(data, &roundtrip); err != nil {
+		t.Fatalf("Unmarshal error: %s", err)
+	}
+
+	if !reflect.DeepEqual(scopes, roundtrip) {
+		t.Errorf("Round-trip mismatch: got %+v, want %+v", roundtrip, scopes)
+	}
+
+	// Verify omitempty: empty optional fields should not appear
+	minimal := OAuthScopes{Bot: []string{"chat:write"}}
+	data, err = json.Marshal(minimal)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+	s := string(data)
+	if strings.Contains(s, "bot_optional") {
+		t.Errorf("Expected bot_optional to be omitted from JSON: %s", s)
+	}
+	if strings.Contains(s, "user_optional") {
+		t.Errorf("Expected user_optional to be omitted from JSON: %s", s)
 	}
 }
 
