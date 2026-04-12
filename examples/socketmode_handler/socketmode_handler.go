@@ -90,7 +90,8 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeSlashCommand, middlewareSlashCommand)
 	socketmodeHandler.HandleSlashCommand("/rocket", middlewareSlashCommand)
 
-	// socketmodeHandler.HandleDefault(middlewareDefault)
+	// Handle all other events
+	socketmodeHandler.HandleDefault(middlewareDefault)
 
 	socketmodeHandler.RunEventLoop()
 }
@@ -227,5 +228,5 @@ func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
 }
 
 func middlewareDefault(evt *socketmode.Event, client *socketmode.Client) {
-	// fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
+	fmt.Fprintf(os.Stderr, "Unexpected event type received: %s\n", evt.Type)
 }
