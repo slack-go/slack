@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-04-12
+
 ### Added
 
 - Added missing parameters to `assistant.search.context` (`Sort`, `SortDir`, `Before`,
@@ -512,7 +514,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/slack-go/slack/compare/v0.21.1...0.22.0
 [0.21.1]: https://github.com/slack-go/slack/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/slack-go/slack/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/slack-go/slack/compare/v0.19.0...v0.20.0
