@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Underline`, `Highlight`, `ClientHighlight`, and `Unlink` fields to
   `RichTextSectionTextStyle`. Added `Style` field to `RichTextSectionUserGroupElement`.
 - Added `BotOptional` and `UserOptional` fields to `OAuthScopes` for app manifests.
+- Added PKCE support for OAuth: `OAuthOptionCodeVerifier` option for
+  `GetOAuthV2Response`, `GenerateCodeVerifier()` and `GenerateCodeChallenge()`
+  helper functions (RFC 7636). `client_secret` is now conditionally omitted when
+  empty in both `GetOAuthV2ResponseContext` and `RefreshOAuthV2TokenContext`.
 
 ### Fixed
 

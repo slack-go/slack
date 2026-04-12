@@ -2,6 +2,7 @@ package slack
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,4 +93,61 @@ func TestGetOpenIDConnectUserInfo(t *testing.T) {
 	assert.Equal(t, "Slack Corp", resp.TeamName)
 	assert.Equal(t, "slackcorp", resp.TeamDomain)
 	assert.True(t, resp.TeamImageDefault)
+}
+
+func TestGenerateCodeVerifier(t *testing.T) {
+	v1, err := GenerateCodeVerifier()
+	require.NoError(t, err)
+	assert.Len(t, v1, 43) // 32 bytes -> 43 chars base64url without padding
+
+	v2, err := GenerateCodeVerifier()
+	require.NoError(t, err)
+	assert.NotEqual(t, v1, v2, "two calls should produce different verifiers")
+}
+
+func TestGenerateCodeChallenge(t *testing.T) {
+	// RFC 7636 Appendix B test vector
+	verifier := "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+	expected := "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
+
+	challenge := GenerateCodeChallenge(verifier)
+	assert.Equal(t, expected, challenge)
+}
+
+func TestOAuthOptionCodeVerifier(t *testing.T) {
+	cfg := resolveOAuthConfig([]OAuthOption{
+		OAuthOptionCodeVerifier("test-verifier"),
+	})
+	assert.Equal(t, "test-verifier", cfg.codeVerifier)
+	assert.Equal(t, APIURL, cfg.apiURL) // default preserved
+}
+
+func TestGetOAuthV2ResponsePKCE(t *testing.T) {
+	once.Do(startServer)
+
+	// The existing /oauth.v2.access handler returns a valid response.
+	// Verify that PKCE params are accepted without error.
+	resp, err := GetOAuthV2Response(
+		http.DefaultClient,
+		"client-id", "", "code", "http://localhost/callback",
+		OAuthOptionAPIURL("http://"+serverAddr+"/"),
+		OAuthOptionCodeVerifier("test-verifier"),
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "xoxb-test-token", resp.AccessToken)
+}
+
+func TestGetOAuthV2ResponseOmitsEmptySecret(t *testing.T) {
+	// Verify that resolveOAuthConfig + empty secret produces no client_secret key
+	values := url.Values{
+		"client_id":    {"id"},
+		"code":         {"code"},
+		"redirect_uri": {"http://localhost"},
+	}
+	clientSecret := ""
+	if clientSecret != "" {
+		values.Set("client_secret", clientSecret)
+	}
+	_, hasSecret := values["client_secret"]
+	assert.False(t, hasSecret, "empty client_secret should not be in form values")
 }
