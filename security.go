@@ -42,7 +42,7 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 	}
 
 	hash := hmac.New(sha256.New, []byte(secret))
-	if _, err = hash.Write([]byte(fmt.Sprintf("v0:%s:", stimestamp))); err != nil {
+	if _, err = fmt.Fprintf(hash, "v0:%s:", stimestamp); err != nil {
 		return SecretsVerifier{}, err
 	}
 
@@ -95,7 +95,7 @@ func (v SecretsVerifier) Ensure() error {
 	if v.d != nil && v.d.Debug() {
 		v.d.Debugln(fmt.Sprintf("Expected signing signature: %s, but computed: %s", hex.EncodeToString(v.signature), hex.EncodeToString(computed)))
 	}
-	return fmt.Errorf("Computed unexpected signature of: %s", hex.EncodeToString(computed))
+	return fmt.Errorf("computed unexpected signature of: %s", hex.EncodeToString(computed))
 }
 
 func abs64(n int64) int64 {
