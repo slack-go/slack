@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"time"
 
-	websocket "github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
 
-	slack "github.com/slack-go/slack"
+	"github.com/slack-go/slack"
 )
 
 func contextHandler(server *Server, next http.HandlerFunc) http.Handler {

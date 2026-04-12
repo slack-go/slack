@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	websocket "github.com/gorilla/websocket"
+	"github.com/gorilla/websocket"
 
-	slack "github.com/slack-go/slack"
+	"github.com/slack-go/slack"
 )
 
 func (sts *Server) queueForWebsocket(s, hubname string) {
@@ -146,9 +146,9 @@ func defaultBotInfoJSON(ctx context.Context) string {
 func defaultAppsConnectionsJSON(ctx context.Context) string {
 	url := ServerWSFromContext(ctx)
 	return fmt.Sprintf(`
-               {
-                       "ok":true,
-                       "url": "%s"
-               }
-               `, url)
+			   {
+					   "ok":true,
+					   "url": "%s"
+			   }
+			   `, url)
 }

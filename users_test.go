@@ -637,7 +637,7 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 // contents, and a function that can be called to remove the file.
 func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
 	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
-	draw.Draw(photo, photo.Bounds(), image.Black, image.ZP, draw.Src)
+	draw.Draw(photo, photo.Bounds(), image.Black, image.Point{}, draw.Src)
 
 	f, err := os.CreateTemp(os.TempDir(), "profile.png")
 	if err != nil {

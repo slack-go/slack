@@ -3,7 +3,7 @@ package slacktest
 import (
 	"fmt"
 
-	slack "github.com/slack-go/slack"
+	"github.com/slack-go/slack"
 )
 
 const defaultBotName = "TestSlackBot"
@@ -75,82 +75,82 @@ var defaultUsersInfoJSON = fmt.Sprintf(`
 
 var defaultGeneralChannelJSON = fmt.Sprintf(`
 	{
-        "id": "C024BE91L",
-        "name": "general",
-        "is_channel": true,
-        "created": %d,
-        "creator": "%s",
-        "is_archived": false,
-        "is_general": true,
+		"id": "C024BE91L",
+		"name": "general",
+		"is_channel": true,
+		"created": %d,
+		"creator": "%s",
+		"is_archived": false,
+		"is_general": true,
 
-        "members": [
-            "W012A3CDE"
-        ],
+		"members": [
+			"W012A3CDE"
+		],
 
-        "topic": {
-            "value": "Fun times",
-            "creator": "%s",
-            "last_set": %d
-        },
-        "purpose": {
-            "value": "This channel is for fun",
-            "creator": "%s",
-            "last_set": %d
-        },
+		"topic": {
+			"value": "Fun times",
+			"creator": "%s",
+			"last_set": %d
+		},
+		"purpose": {
+			"value": "This channel is for fun",
+			"creator": "%s",
+			"last_set": %d
+		},
 
-        "is_member": true
-    }
+		"is_member": true
+	}
 `, nowAsJSONTime(), defaultNonBotUserID, defaultNonBotUserID, nowAsJSONTime(), defaultNonBotUserID, nowAsJSONTime())
 
 var defaultExtraChannelJSON = fmt.Sprintf(`
 	{
-        "id": "C024BE92L",
-        "name": "bot-playground",
-        "is_channel": true,
-        "created": %d,
-        "creator": "%s",
-        "is_archived": false,
-        "is_general": true,
+		"id": "C024BE92L",
+		"name": "bot-playground",
+		"is_channel": true,
+		"created": %d,
+		"creator": "%s",
+		"is_archived": false,
+		"is_general": true,
 
-        "members": [
-            "W012A3CDE"
-        ],
+		"members": [
+			"W012A3CDE"
+		],
 
-        "topic": {
-            "value": "Fun times",
-            "creator": "%s",
-            "last_set": %d
-        },
-        "purpose": {
-            "value": "This channel is for fun",
-            "creator": "%s",
-            "last_set": %d
-        },
+		"topic": {
+			"value": "Fun times",
+			"creator": "%s",
+			"last_set": %d
+		},
+		"purpose": {
+			"value": "This channel is for fun",
+			"creator": "%s",
+			"last_set": %d
+		},
 
-        "is_member": true
-    }
+		"is_member": true
+	}
 `, nowAsJSONTime(), defaultNonBotUserID, defaultNonBotUserID, nowAsJSONTime(), defaultNonBotUserID, nowAsJSONTime())
 
 var defaultGroupJSON = fmt.Sprintf(`{
-    "id": "G024BE91L",
-    "name": "secretplans",
-    "is_group": true,
-    "created": %d,
-    "creator": "%s",
-    "is_archived": false,
-    "members": [
-        "W012A3CDE"
-    ],
-    "topic": {
-        "value": "Secret plans on hold",
-        "creator": "%s",
-        "last_set": %d
-    },
-    "purpose": {
-        "value": "Discuss secret plans that no-one else should know",
-        "creator": "%s",
-        "last_set": %d
-    }
+	"id": "G024BE91L",
+	"name": "secretplans",
+	"is_group": true,
+	"created": %d,
+	"creator": "%s",
+	"is_archived": false,
+	"members": [
+		"W012A3CDE"
+	],
+	"topic": {
+		"value": "Secret plans on hold",
+		"creator": "%s",
+		"last_set": %d
+	},
+	"purpose": {
+		"value": "Discuss secret plans that no-one else should know",
+		"creator": "%s",
+		"last_set": %d
+	}
 }`, nowAsJSONTime(), defaultNonBotUserID, defaultNonBotUserID, nowAsJSONTime(), defaultNonBotUserID, nowAsJSONTime())
 
 var defaultNonBotUser = fmt.Sprintf(`
@@ -232,7 +232,7 @@ var templateConversationJSON = `
 			"creator": "%s",
 			"last_set": %d
 		},
-        "num_members": %d,
+		"num_members": %d,
 		"previous_names": [],
 		"priority": 0
 	}
@@ -252,7 +252,7 @@ var inviteConversationJSON = fmt.Sprintf(templateConversationJSON, defaultConver
 	nowAsJSONTime(), defaultBotID, defaultConversationName, "", "", 0, "", "", 0, 1)
 
 const inviteSharedResponseJSON = `{
-    "ok": true,
-    "invite_id": "I02UKAJ6RJA",
-    "is_legacy_shared_channel": false
+	"ok": true,
+	"invite_id": "I02UKAJ6RJA",
+	"is_legacy_shared_channel": false
 }`

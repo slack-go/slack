@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrIncorrectResponse = errors.New("Response is incorrect")
+	ErrIncorrectResponse = errors.New("response is incorrect")
 )
 
 func getTeamInfo(rw http.ResponseWriter, r *http.Request) {
@@ -18,11 +18,11 @@ func getTeamInfo(rw http.ResponseWriter, r *http.Request) {
 			"name": "notalar",
 			"domain": "notalar",
 			"icon": {
-              "image_34": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-34.png",
-              "image_44": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-44.png",
-              "image_55": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-55.png",
-              "image_default": true
-          }
+			  "image_34": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-34.png",
+			  "image_44": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-44.png",
+			  "image_55": "https://slack.global.ssl.fastly.net/66f9/img/avatars-teams/ava_0002-55.png",
+			  "image_default": true
+		  }
 		}}`)
 	rw.Write(response)
 }
@@ -135,11 +135,11 @@ func getTeamAccessLogs(rw http.ResponseWriter, r *http.Request) {
 			"ip": "127.0.0.1",
 			"user_agent": "SlackWeb/3abb0ae2380d48a9ae20c58cc624ebcd Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Slack/1.2.6 Chrome/45.0.2454.85 AtomShell/0.34.3 Safari/537.36 Slack_SSB/1.2.6",
 			"isp": "AT&T U-verse",
-                        "country": "US",
-                        "region": "IN"
-                        },
-                        {
-                        "user_id": "XUHWU0F",
+						"country": "US",
+						"region": "IN"
+						},
+						{
+						"user_id": "XUHWU0F",
 			"username": "ralaton",
 			"date_first": 1447395893,
 			"date_last": 1447395965,
@@ -147,12 +147,12 @@ func getTeamAccessLogs(rw http.ResponseWriter, r *http.Request) {
 			"ip": "192.168.0.1",
 			"user_agent": "com.tinyspeck.chatlyio/2.60 (iPhone; iOS 9.1; Scale/3.00)",
 			"isp": null,
-                        "country": null,
-                        "region": null
-                        }],
-                        "response_metadata": {
-    			"next_cursor": "dGVhbV9pZDo5MDAwMTcw"
-    			}
+						"country": null,
+						"region": null
+						}],
+						"response_metadata": {
+				"next_cursor": "dGVhbV9pZDo5MDAwMTcw"
+				}
   }`)
 	rw.Write(response)
 }
