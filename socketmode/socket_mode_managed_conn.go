@@ -566,13 +566,20 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 			return nil
 		}
 
-		// All other errors from ReadJSON come from NextReader, and should
-		// kill the read loop and force a reconnect.
-		// TODO: Unless it's a JSON unmarshal-type error in which case maybe reconnecting isn't needed...
 		smc.sendEvent(ctx, newEvent(EventTypeIncomingError, &slack.IncomingEventError{
 			ErrorObj: err,
 		}))
 
+		// JSON unmarshal errors indicate a malformed message, not a broken
+		// connection — keep the connection alive.
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			return nil
+		}
+
+		// All other errors from ReadJSON come from NextReader, and should
+		// kill the read loop and force a reconnect.
 		return err
 	}
 

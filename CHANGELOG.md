@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `ChannelTypes` and `ContentTypes` now send comma-separated values instead of repeated
   form keys, matching the convention used by every other method in the library.
+- In `socketmode` malformed JSON messages no longer force an unnecessary reconnect.
+  Instead the error is emitted and the connection continues as normal.
 
 ## [0.21.1] - 2026-04-08
 

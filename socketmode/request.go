@@ -29,7 +29,8 @@ type Request struct {
 
 	// `events_api` type only
 	EnvelopeID string `json:"envelope_id"`
-	// TODO Can it really be a non-object type?
+	// Payload is typed as json.RawMessage because the Slack API sends different
+	// shapes depending on the envelope type (object, array, or string).
 	// See https://github.com/slackapi/python-slack-sdk/blob/3f1c4c6e27bf7ee8af57699b2543e6eb7848bcf9/slack_sdk/socket_mode/request.py#L26-L31
 	Payload                json.RawMessage `json:"payload"`
 	AcceptsResponsePayload bool            `json:"accepts_response_payload"`
