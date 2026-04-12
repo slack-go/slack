@@ -46,6 +46,10 @@ jobs:
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
         with:
           version: v2.10.1
+      - name: staticcheck
+        uses: dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431 # 1.4.1
+        with:
+          version: "2026.1"
       - name: Check 'go mod tidy' makes no changes
         run: |
           go mod tidy
