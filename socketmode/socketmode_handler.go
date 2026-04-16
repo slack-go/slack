@@ -10,12 +10,14 @@ import (
 type SocketmodeHandler struct {
 	Client *Client
 
-	//lvl 1 - the most generic type of event
+	// level 1 - the most generic type of event
 	EventMap map[EventType][]SocketmodeHandlerFunc
-	//lvl 2 - Manage event by inner type
+
+	// level 2 - Manage event by inner type
 	InteractionEventMap map[slack.InteractionType][]SocketmodeHandlerFunc
 	EventApiMap         map[slackevents.EventsAPIType][]SocketmodeHandlerFunc
-	//lvl 3 - the most userfriendly way of managing event
+
+	// level 3 - the most user friendly way of managing event
 	InteractionBlockActionEventMap    map[string]SocketmodeHandlerFunc
 	InteractionShortcutEventMap       map[string]SocketmodeHandlerFunc
 	InteractionViewSubmissionEventMap map[string]SocketmodeHandlerFunc
@@ -187,8 +189,15 @@ func (r *SocketmodeHandler) runEventLoop(ctx context.Context) {
 	}
 }
 
-// Dispatch events to the specialized dispatcher
-func (r *SocketmodeHandler) dispatcher(evt Event) {
+// DispatchEvent routes an event to the appropriate registered handlers. Handlers are
+// invoked asynchronously in goroutines, matching the behavior of RunEventLoop. This
+// method is useful for integration testing handler registrations without a WebSocket
+// connection.
+//
+// NOTE: This method does not implement the same dispatching logic as RunEventLoop. It
+// should only be used for testing purposes, and not as a general-purpose event
+// dispatcher.
+func (r *SocketmodeHandler) DispatchEvent(evt Event) {
 	var ishandled bool
 
 	// Some eventType can be further decomposed
@@ -206,6 +215,10 @@ func (r *SocketmodeHandler) dispatcher(evt Event) {
 	if !ishandled {
 		go r.Default(&evt, r.Client)
 	}
+}
+
+func (r *SocketmodeHandler) dispatcher(evt Event) {
+	r.DispatchEvent(evt)
 }
 
 // Dispatch socketmode events to the registered middleware
