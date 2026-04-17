@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Block Kit: `CardBlock` and `CarouselBlock`** — Support for two of the new
+  agent-UI blocks announced in the
+  [April 16 Slack changelog](https://docs.slack.dev/changelog/2026/04/16/block-kit-new-blocks).
+  `CardBlock` is constructed via `NewCardBlock` with a functional-options
+  pattern and fluent `With*` builders (`WithTitle`, `WithSubtitle`, `WithBody`,
+  `WithIcon`, `WithHeroImage`, `WithActions`). `CarouselBlock` is constructed
+  via `NewCarouselBlock` with a variadic `*CardBlock` list plus `WithBlockID`
+  and `AddCard` helpers. Both blocks wire into `Blocks.UnmarshalJSON` for
+  round-trip fidelity, and reuse existing `ImageBlockElement` /
+  `ButtonBlockElement` / `BlockElements` types rather than introducing new
+  composition objects. The Alert block is deliberately not included in this
+  release pending sandbox-verified rendering.
+- **Streaming-message chunks API** — `chat.startStream` / `chat.appendStream` /
+  `chat.stopStream` now accept a `chunks` parameter. Added `MsgOptionChunks`
+  along with a `StreamChunk` interface and four chunk types:
+  `MarkdownTextChunk`, `TaskUpdateChunk`, `PlanUpdateChunk`, and `BlocksChunk`
+  (each with a `New*Chunk` constructor). This is the supported transport for
+  streaming Block Kit content and the new agent-UI blocks in particular
+  (which `chat.postMessage` rejects as `Unsupported block type`).
+- **`MsgOptionTaskDisplayMode`** — New option for `chat.startStream` controlling
+  whether task chunks render as a sequential timeline or a grouped plan.
+  Accepts `TaskDisplayModeTimeline` or `TaskDisplayModePlan`.
+
 ## [0.22.0] - 2026-04-12
 
 ### Added

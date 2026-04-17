@@ -912,6 +912,24 @@ func MsgOptionMarkdownText(text string) MsgOption {
 	}
 }
 
+// TaskDisplayMode controls how task_card / task_update chunks render in a
+// streamed message. Used with chat.startStream.
+type TaskDisplayMode string
+
+const (
+	TaskDisplayModeTimeline TaskDisplayMode = "timeline"
+	TaskDisplayModePlan     TaskDisplayMode = "plan"
+)
+
+// MsgOptionTaskDisplayMode sets task_display_mode on chat.startStream,
+// controlling whether tasks render as a sequential timeline or a grouped plan.
+func MsgOptionTaskDisplayMode(mode TaskDisplayMode) MsgOption {
+	return func(config *sendConfig) error {
+		config.values.Set("task_display_mode", string(mode))
+		return nil
+	}
+}
+
 // UnsafeMsgOptionEndpoint deliver the message to the specified endpoint.
 // NOTE: USE AT YOUR OWN RISK: No issues relating to the use of this Option
 // will be supported by the library, it is subject to change without notice that
