@@ -14,6 +14,9 @@ type AssistantThreadsSetStatusParameters struct {
 	Status          string   `json:"status"`
 	ThreadTS        string   `json:"thread_ts"`
 	LoadingMessages []string `json:"loading_messages,omitempty"`
+	Username        string   `json:"username,omitempty"`
+	IconURL         string   `json:"icon_url,omitempty"`
+	IconEmoji       string   `json:"icon_emoji,omitempty"`
 }
 
 // AssistantThreadSetTitleParameters are the parameters for AssistantThreadSetTitle
@@ -207,6 +210,18 @@ func (api *Client) SetAssistantThreadsStatusContext(ctx context.Context, params 
 
 	if len(params.LoadingMessages) > 0 {
 		values.Add("loading_messages", strings.Join(params.LoadingMessages, ","))
+	}
+
+	if params.Username != "" {
+		values.Add("username", params.Username)
+	}
+
+	if params.IconURL != "" {
+		values.Add("icon_url", params.IconURL)
+	}
+
+	if params.IconEmoji != "" {
+		values.Add("icon_emoji", params.IconEmoji)
 	}
 
 	response := struct {
