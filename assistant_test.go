@@ -38,6 +38,9 @@ func TestSetAssistantThreadsStatus(t *testing.T) {
 		ThreadTS:        "1234567890.123456",
 		Status:          "updated status",
 		LoadingMessages: []string{"updating status..."},
+		Username:        "custom name",
+		IconURL:         "https://example.com/icon.png",
+		IconEmoji:       ":thinking_face:",
 	}
 
 	err := api.SetAssistantThreadsStatus(params)
