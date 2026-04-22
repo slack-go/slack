@@ -19,8 +19,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `AddCard` helpers. Both blocks wire into `Blocks.UnmarshalJSON` for
   round-trip fidelity, and reuse existing `ImageBlockElement` /
   `ButtonBlockElement` / `BlockElements` types rather than introducing new
-  composition objects. The Alert block is deliberately not included in this
-  release pending sandbox-verified rendering.
+  composition objects.
+- **Block Kit: `AlertBlock`** — Support for the third of the new agent-UI
+  blocks from the
+  [April 16 Slack changelog](https://docs.slack.dev/changelog/2026/04/16/block-kit-new-blocks).
+  `AlertBlock` is constructed via `NewAlertBlock` with a `*TextBlockObject`
+  body and a functional-options pattern. Severity is set via
+  `AlertBlockOptionLevel` (`AlertLevelDefault`, `AlertLevelInfo`,
+  `AlertLevelWarning`, `AlertLevelError`, `AlertLevelSuccess`) and the block
+  ID via `AlertBlockOptionBlockID`. Wires into `Blocks.UnmarshalJSON` for
+  round-trip fidelity. Must be delivered via the streaming chunks API —
+  `chat.postMessage` rejects it as an unsupported block type.
 - **Streaming-message chunks API** — `chat.startStream` / `chat.appendStream` /
   `chat.stopStream` now accept a `chunks` parameter. Added `MsgOptionChunks`
   along with a `StreamChunk` interface and four chunk types:
