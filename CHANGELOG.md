@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-04-22
+
 ### Added
 
 - **Block Kit: `CardBlock` and `CarouselBlock`** — Support for two of the new
@@ -40,6 +42,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`MsgOptionTaskDisplayMode`** — New option for `chat.startStream` controlling
   whether task chunks render as a sequential timeline or a grouped plan.
   Accepts `TaskDisplayModeTimeline` or `TaskDisplayModePlan`.
+- Added `Username`, `IconURL`, and `IconEmoji` fields to
+  `AssistantThreadsSetStatusParameters`, forwarded by
+  `SetAssistantThreadsStatusContext`, matching the new optional parameters on
+  [`assistant.threads.setStatus`](https://docs.slack.dev/reference/methods/assistant.threads.setStatus)
+  for customising the status-update presentation.
+- Exposed `SocketmodeHandler.DispatchEvent` (previously the unexported
+  `dispatcher`), enabling integration tests to exercise registered handlers
+  without a live WebSocket connection. The unexported `dispatcher` is kept as
+  a thin wrapper for backwards compatibility. Closes #1549.
 
 ## [0.22.0] - 2026-04-12
 
@@ -548,7 +559,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/slack-go/slack/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/slack-go/slack/compare/v0.21.1...0.22.0
 [0.21.1]: https://github.com/slack-go/slack/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/slack-go/slack/compare/v0.20.0...v0.21.0
