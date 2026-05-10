@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.23.1] - 2026-05-10
+
+### Fixed
+
+- `NewSecretsVerifier` now rejects empty signing secrets to avoid accepting forged request
+  signatures when applications are misconfigured.
+
 ## [0.23.0] - 2026-04-22
 
 ### Added
@@ -559,7 +566,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.23.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.23.1...HEAD
+[0.23.1]: https://github.com/slack-go/slack/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/slack-go/slack/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/slack-go/slack/compare/v0.21.1...0.22.0
 [0.21.1]: https://github.com/slack-go/slack/compare/v0.21.0...v0.21.1

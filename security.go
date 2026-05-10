@@ -30,6 +30,10 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 		bsignature []byte
 	)
 
+	if secret == "" {
+		return SecretsVerifier{}, ErrInvalidConfiguration
+	}
+
 	signature := header.Get(hSignature)
 	stimestamp := header.Get(hTimestamp)
 

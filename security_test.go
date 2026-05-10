@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -29,6 +30,20 @@ func TestExpiredTimestamp(t *testing.T) {
 	_, err := NewSecretsVerifier(newHeader(true), "abcdefg12345")
 	if err == nil {
 		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestNewSecretsVerifierRejectsEmptySigningSecret(t *testing.T) {
+	_, err := NewSecretsVerifier(newHeader(true), "")
+	if !errors.Is(err, ErrInvalidConfiguration) {
+		t.Fatalf("expected ErrInvalidConfiguration, got %v", err)
+	}
+}
+
+func TestUnsafeSignatureVerifierRejectsEmptySigningSecret(t *testing.T) {
+	_, err := unsafeSignatureVerifier(newHeader(true), "")
+	if !errors.Is(err, ErrInvalidConfiguration) {
+		t.Fatalf("expected ErrInvalidConfiguration, got %v", err)
 	}
 }
 
