@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Block Kit: `DataTableBlock` for the [`data_table`](https://docs.slack.dev/reference/block-kit/blocks/data-table-block/)
+  block, with `NewDataTableBlock`, `AddRow`, raw-text/raw-number/rich-text cell
+  constructors, and `WithPageSize` / `WithRowHeaderColumnIndex` builders.
+
+### Changed
+
+- `NewTaskCardBlock` and `NewPlanBlock` nil-guard their variadic options,
+  matching the other block constructors (#1236).
+
 ## [0.23.1] - 2026-05-10
 
 ### Fixed

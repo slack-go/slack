@@ -19,6 +19,7 @@ const (
 	MBTVideo          MessageBlockType = "video"
 	MBTMarkdown       MessageBlockType = "markdown"
 	MBTTable          MessageBlockType = "table"
+	MBTDataTable      MessageBlockType = "data_table"
 	MBTTaskCard       MessageBlockType = "task_card"
 	MBTPlan           MessageBlockType = "plan"
 	MBTAlert          MessageBlockType = "alert"
