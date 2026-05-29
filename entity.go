@@ -21,7 +21,7 @@ type EntityDetailsMetadata struct {
 	EntityType    string                 `json:"entity_type"`
 	URL           string                 `json:"url,omitempty"`
 	ExternalRef   WorkObjectExternalRef  `json:"external_ref,omitempty"`
-	EntityPayload map[string]interface{} `json:"entity_payload"`
+	EntityPayload map[string]any `json:"entity_payload"`
 }
 
 // EntityDetailsError represents an error response for entity details

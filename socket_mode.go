@@ -9,7 +9,7 @@ import (
 // It is returned by an "apps.connections.open" API call.
 type SocketModeConnection struct {
 	URL  string                 `json:"url,omitempty"`
-	Data map[string]interface{} `json:"-"`
+	Data map[string]any `json:"-"`
 }
 
 type openResponseFull struct {

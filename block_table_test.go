@@ -116,7 +116,7 @@ func TestNewTableBlock(t *testing.T) {
 	marshalled, err := json.Marshal(tableBlock)
 	assert.NoError(t, err)
 
-	var expected, actual map[string]interface{}
+	var expected, actual map[string]any
 	err = json.Unmarshal([]byte(testPayload), &expected)
 	assert.NoError(t, err)
 	err = json.Unmarshal(marshalled, &actual)

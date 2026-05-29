@@ -108,7 +108,7 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Unmarshal both to compare (ignoring whitespace differences)
-		var original, result map[string]interface{}
+		var original, result map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(originalJSON), &original))
 		assert.NoError(t, json.Unmarshal(marshalled, &result))
 
@@ -153,14 +153,14 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		assert.NoError(t, err)
 
 		// Unmarshal both to compare
-		var original, result map[string]interface{}
+		var original, result map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(originalJSON), &original))
 		assert.NoError(t, json.Unmarshal(marshalled, &result))
 
 		assert.Equal(t, original, result, "Complex block should preserve all nested fields")
 
 		// Specifically verify elements array is preserved
-		resultElements, ok := result["elements"].([]interface{})
+		resultElements, ok := result["elements"].([]any)
 		assert.True(t, ok, "elements should be an array")
 		assert.Equal(t, 2, len(resultElements), "should have 2 elements")
 	})
@@ -211,19 +211,19 @@ func TestRawJSONBlockInDeepStructure(t *testing.T) {
 		assert.Equal(t, 3, len(result.Blocks), "should have 3 blocks")
 
 		// Verify the middle block (our RawJSONBlock) has all fields preserved
-		var contextActionsBlock map[string]interface{}
+		var contextActionsBlock map[string]any
 		assert.NoError(t, json.Unmarshal(result.Blocks[1], &contextActionsBlock))
 
 		assert.Equal(t, "context_actions", contextActionsBlock["type"])
 		assert.Equal(t, "feedback_block", contextActionsBlock["block_id"])
 
 		// Verify elements array is present and intact
-		elements, ok := contextActionsBlock["elements"].([]interface{})
+		elements, ok := contextActionsBlock["elements"].([]any)
 		assert.True(t, ok, "elements should be an array")
 		assert.Equal(t, 1, len(elements), "should have 1 element")
 
 		// Verify the nested feedback_buttons element
-		firstElement, ok := elements[0].(map[string]interface{})
+		firstElement, ok := elements[0].(map[string]any)
 		assert.True(t, ok, "first element should be an object")
 		assert.Equal(t, "feedback_buttons", firstElement["type"])
 		assert.Equal(t, "ai_feedback", firstElement["action_id"])

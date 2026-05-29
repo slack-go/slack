@@ -461,9 +461,9 @@ func TestCompleteUploadExternalContext(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.title, func(t *testing.T) {
-			var resBody map[string]interface{}
+			var resBody map[string]any
 			if !tc.wantErr {
-				resBody = map[string]interface{}{
+				resBody = map[string]any{
 					"ok": true,
 				}
 				files := make([]map[string]string, 0)
@@ -478,7 +478,7 @@ func TestCompleteUploadExternalContext(t *testing.T) {
 				}
 				resBody["files"] = files
 			} else {
-				resBody = map[string]interface{}{
+				resBody = map[string]any{
 					"ok":    false,
 					"error": "errored",
 				}

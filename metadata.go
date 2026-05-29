@@ -28,7 +28,7 @@ type WorkObjectEntity struct {
 	URL           string                 `json:"url"`
 	ExternalRef   WorkObjectExternalRef  `json:"external_ref"`
 	EntityType    string                 `json:"entity_type"`
-	EntityPayload map[string]interface{} `json:"entity_payload"`
+	EntityPayload map[string]any `json:"entity_payload"`
 }
 
 // WorkObjectMetadata represents the metadata for Work Objects

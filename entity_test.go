@@ -17,7 +17,7 @@ func TestEntityPresentDetailsParameters(t *testing.T) {
 				ID:   "123",
 				Type: "document",
 			},
-			EntityPayload: map[string]interface{}{
+			EntityPayload: map[string]any{
 				"title":       "Test Document",
 				"description": "A test document for Work Objects",
 				"status":      "active",
@@ -166,7 +166,7 @@ func TestEntityPresentDetailsWithMetadata(t *testing.T) {
 			ID:   "123",
 			Type: "document",
 		},
-		EntityPayload: map[string]interface{}{
+		EntityPayload: map[string]any{
 			"title":       "Test Document",
 			"description": "A test document for Work Objects",
 		},
@@ -308,7 +308,7 @@ func TestEntityPresentDetailsContext(t *testing.T) {
 			ExternalRef: WorkObjectExternalRef{
 				ID: "456",
 			},
-			EntityPayload: map[string]interface{}{
+			EntityPayload: map[string]any{
 				"title":  "Test Task",
 				"status": "in_progress",
 			},

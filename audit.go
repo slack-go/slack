@@ -40,8 +40,8 @@ type AuditEntry struct {
 		IPAddress string `json:"ip_address"`
 	} `json:"context"`
 	Details struct {
-		NewValue      interface{} `json:"new_value"`
-		PreviousValue interface{} `json:"previous_value"`
+		NewValue      any `json:"new_value"`
+		PreviousValue any `json:"previous_value"`
 		MobileOnly    bool        `json:"mobile_only"`
 		WebOnly       bool        `json:"web_only"`
 		NonSSOOnly    bool        `json:"non_sso_only"`

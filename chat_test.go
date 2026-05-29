@@ -151,7 +151,7 @@ func TestPostMessage(t *testing.T) {
 				MsgOptionMetadata(
 					SlackMetadata{
 						EventType: "testing-event",
-						EventPayload: map[string]interface{}{
+						EventPayload: map[string]any{
 							"id":   13,
 							"name": "testing-name",
 						},
@@ -255,7 +255,7 @@ func TestPostMessage(t *testing.T) {
 						URL:           "https://example.com/doc/1",
 						ExternalRef:   WorkObjectExternalRef{ID: "1"},
 						EntityType:    EntityTypeFile,
-						EntityPayload: map[string]interface{}{"title": "Doc"},
+						EntityPayload: map[string]any{"title": "Doc"},
 					}},
 				}),
 			},
@@ -294,7 +294,7 @@ func TestPostMessage(t *testing.T) {
 				MsgOptionPostMessageParameters(PostMessageParameters{
 					MetaData: SlackMetadata{
 						EventType: "testing-event",
-						EventPayload: map[string]interface{}{
+						EventPayload: map[string]any{
 							"id":   13,
 							"name": "testing-name",
 						},
@@ -612,7 +612,7 @@ func TestWorkObjectMetadata(t *testing.T) {
 					Type: "document",
 				},
 				EntityType: "slack#/entities/file",
-				EntityPayload: map[string]interface{}{
+				EntityPayload: map[string]any{
 					"title":       "Test Document",
 					"description": "A test document for Work Objects",
 				},
@@ -661,7 +661,7 @@ func TestMsgOptionWorkObjectMetadata(t *testing.T) {
 					ID: "456",
 				},
 				EntityType: "slack#/entities/task",
-				EntityPayload: map[string]interface{}{
+				EntityPayload: map[string]any{
 					"title":  "Test Task",
 					"status": "in_progress",
 				},
@@ -724,7 +724,7 @@ func TestMsgOptionWorkObjectEntity(t *testing.T) {
 			Type: "incident",
 		},
 		EntityType: "slack#/entities/incident",
-		EntityPayload: map[string]interface{}{
+		EntityPayload: map[string]any{
 			"title":    "Production Outage",
 			"severity": "high",
 		},

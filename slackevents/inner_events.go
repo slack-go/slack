@@ -11,7 +11,7 @@ import (
 // EventsAPIInnerEvent the inner event of a EventsAPI event_callback Event.
 type EventsAPIInnerEvent struct {
 	Type string `json:"type"`
-	Data interface{}
+	Data any
 }
 
 // AssistantThreadMessageEvent is an (inner) EventsAPI subscribable event.
@@ -954,7 +954,7 @@ type AppRequestedEvent struct {
 			Name   string `json:"name"`
 			Domain string `json:"domain"`
 		} `json:"team"`
-		Enterprise interface{} `json:"enterprise"`
+		Enterprise any `json:"enterprise"`
 		Scopes     []struct {
 			Name        string `json:"name"`
 			Description string `json:"description"`
@@ -1042,7 +1042,7 @@ type FunctionExecutedEvent struct {
 		DateUpdated int64  `json:"date_updated"`
 		DateDeleted int64  `json:"date_deleted"`
 	} `json:"function"`
-	Inputs              map[string]interface{} `json:"inputs"`
+	Inputs              map[string]any `json:"inputs"`
 	FunctionExecutionID string                 `json:"function_execution_id"`
 	WorkflowExecutionID string                 `json:"workflow_execution_id"`
 	EventTs             string                 `json:"event_ts"`
@@ -1124,10 +1124,10 @@ type Profile struct {
 	RealNameNormalized     string                 `json:"real_name_normalized"`
 	DisplayName            string                 `json:"display_name"`
 	DisplayNameNormalized  string                 `json:"display_name_normalized"`
-	Fields                 map[string]interface{} `json:"fields"`
+	Fields                 map[string]any `json:"fields"`
 	StatusText             string                 `json:"status_text"`
 	StatusEmoji            string                 `json:"status_emoji"`
-	StatusEmojiDisplayInfo []interface{}          `json:"status_emoji_display_info"`
+	StatusEmojiDisplayInfo []any          `json:"status_emoji_display_info"`
 	StatusExpiration       int                    `json:"status_expiration"`
 	AvatarHash             string                 `json:"avatar_hash"`
 	FirstName              string                 `json:"first_name"`
@@ -1395,7 +1395,7 @@ const (
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var EventsAPIInnerEventMapping = map[EventsAPIType]interface{}{
+var EventsAPIInnerEventMapping = map[EventsAPIType]any{
 	AppDeleted:                    AppDeletedEvent{},
 	AppHomeOpened:                 AppHomeOpenedEvent{},
 	AppInstalled:                  AppInstalledEvent{},

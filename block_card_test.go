@@ -89,7 +89,7 @@ func TestCardBlockJSONRoundTrip(t *testing.T) {
 	marshalled, err := json.Marshal(block)
 	require.NoError(t, err)
 
-	var expected, actual map[string]interface{}
+	var expected, actual map[string]any
 	require.NoError(t, json.Unmarshal([]byte(payload), &expected))
 	require.NoError(t, json.Unmarshal(marshalled, &actual))
 

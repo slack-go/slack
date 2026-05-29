@@ -16,7 +16,7 @@ type TeamInfo struct {
 	Name        string                 `json:"name"`
 	Domain      string                 `json:"domain"`
 	EmailDomain string                 `json:"email_domain"`
-	Icon        map[string]interface{} `json:"icon"`
+	Icon        map[string]any `json:"icon"`
 }
 
 type TeamProfileResponse struct {

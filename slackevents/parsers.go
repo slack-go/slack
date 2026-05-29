@@ -13,7 +13,7 @@ import (
 // eventsMap checks both slackevents.EventsAPIInnerEventMapping and slack.EventMapping
 // (RTM). EventsAPI mapping is checked first because both define a "message" type, and
 // EventsAPI's MessageEvent is the correct choice for Events API payloads.
-func eventsMap(t string) (interface{}, bool) {
+func eventsMap(t string) (any, bool) {
 	// EventsAPI mapping takes precedence over RTM mapping.
 	v, exists := EventsAPIInnerEventMapping[EventsAPIType(t)]
 	if exists {

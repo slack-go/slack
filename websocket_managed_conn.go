@@ -321,7 +321,7 @@ func (rtm *RTM) handleIncomingEvents(events chan json.RawMessage) {
 	}
 }
 
-func (rtm *RTM) sendWithDeadline(msg interface{}) error {
+func (rtm *RTM) sendWithDeadline(msg any) error {
 	// set a write deadline on the connection
 	if err := rtm.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
 		return err
@@ -518,7 +518,7 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 // EventMapping holds a mapping of event names to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var EventMapping = map[string]interface{}{
+var EventMapping = map[string]any{
 	"message":         MessageEvent{},
 	"presence_change": PresenceChangeEvent{},
 	"user_typing":     UserTypingEvent{},
