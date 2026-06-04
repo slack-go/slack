@@ -47,7 +47,7 @@ type Dialog struct {
 }
 
 // DialogElement abstract type for dialogs.
-type DialogElement interface{}
+type DialogElement any
 
 // DialogCallback DEPRECATED use InteractionCallback
 type DialogCallback InteractionCallback

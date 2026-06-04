@@ -174,7 +174,7 @@ func middlewareInteractive(evt *socketmode.Event, client *socketmode.Client) {
 
 	fmt.Printf("Interaction received: %+v\n", callback)
 
-	var payload interface{}
+	var payload any
 
 	switch callback.Type {
 	case slack.InteractionTypeBlockActions:
@@ -204,7 +204,7 @@ func middlewareSlashCommand(evt *socketmode.Event, client *socketmode.Client) {
 
 	client.Debugf("Slash command received: %+v", cmd)
 
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"blocks": []slack.Block{
 			slack.NewSectionBlock(
 				&slack.TextBlockObject{

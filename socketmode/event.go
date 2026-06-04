@@ -5,7 +5,7 @@ import "encoding/json"
 // Event is the event sent to the consumer of Client
 type Event struct {
 	Type EventType
-	Data interface{}
+	Data any
 
 	// Request is the json-decoded raw WebSocket message that is received via the Slack Socket Mode
 	// WebSocket connection.

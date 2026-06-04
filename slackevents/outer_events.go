@@ -13,7 +13,7 @@ type EventsAPIEvent struct {
 	Type         string `json:"type"`
 	APIAppID     string `json:"api_app_id"`
 	EnterpriseID string `json:"enterprise_id"`
-	Data         interface{}
+	Data         any
 	InnerEvent   EventsAPIInnerEvent
 }
 
@@ -65,7 +65,7 @@ const (
 // EventsAPIEventMap maps OUTER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
-var EventsAPIEventMap = map[string]interface{}{
+var EventsAPIEventMap = map[string]any{
 	CallbackEvent:   EventsAPICallbackEvent{},
 	URLVerification: EventsAPIURLVerificationEvent{},
 	AppRateLimited:  EventsAPIAppRateLimited{},

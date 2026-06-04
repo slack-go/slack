@@ -275,7 +275,7 @@ func TestEventParsing(t *testing.T) {
 		})
 }
 
-func testParsing(t *testing.T, raw string, want interface{}) {
+func testParsing(t *testing.T, raw string, want any) {
 	t.Helper()
 
 	got, err := parse(raw)
@@ -288,7 +288,7 @@ func testParsing(t *testing.T, raw string, want interface{}) {
 	}
 }
 
-func dump(t *testing.T, data interface{}) string {
+func dump(t *testing.T, data any) string {
 	t.Helper()
 
 	var buf bytes.Buffer

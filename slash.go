@@ -65,7 +65,7 @@ func (s *SlashCommand) UnmarshalJSON(data []byte) error {
 	type SlashCommandCopy SlashCommand
 	scopy := &struct {
 		*SlashCommandCopy
-		IsEnterpriseInstall interface{} `json:"is_enterprise_install"`
+		IsEnterpriseInstall any `json:"is_enterprise_install"`
 	}{
 		SlashCommandCopy: (*SlashCommandCopy)(s),
 	}

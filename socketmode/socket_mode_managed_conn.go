@@ -448,7 +448,7 @@ func unsafeWriteSocketModeResponse(conn *websocket.Conn, res *Response) error {
 	return conn.WriteJSON(res)
 }
 
-func newEvent(tpe EventType, data interface{}, req ...*Request) Event {
+func newEvent(tpe EventType, data any, req ...*Request) Event {
 	evt := Event{Type: tpe, Data: data}
 
 	if len(req) > 0 {
@@ -466,8 +466,8 @@ func newEvent(tpe EventType, data interface{}, req ...*Request) Event {
 // Returns an error if the serialized response is 20KB or larger, as Slack
 // silently drops oversized Socket Mode responses. Use Web API methods (e.g.
 // chat.PostMessage, views.Push) for large payloads.
-func (smc *Client) Ack(req Request, payload ...interface{}) error {
-	var pld interface{}
+func (smc *Client) Ack(req Request, payload ...any) error {
+	var pld any
 	if len(payload) > 0 {
 		pld = payload[0]
 	}
@@ -482,7 +482,7 @@ func (smc *Client) Ack(req Request, payload ...interface{}) error {
 //
 // Returns an error if the serialized response is 20KB or larger, as Slack
 // silently drops oversized Socket Mode responses.
-func (smc *Client) AckCtx(ctx context.Context, reqID string, payload interface{}) error {
+func (smc *Client) AckCtx(ctx context.Context, reqID string, payload any) error {
 	return smc.SendCtx(ctx, Response{
 		EnvelopeID: reqID,
 		Payload:    payload,
