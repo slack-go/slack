@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+> [!WARNING]
+> **Breaking change.**
+
+- `TableBlock.Rows` is now `[][]TableCell` (was `[][]*RichTextBlock`), so `table`
+  blocks no longer drop `raw_text`, `raw_number`, and `null` cells (#1558).
+
 ## [0.24.0]
 
 ### Added
