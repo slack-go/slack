@@ -20,7 +20,7 @@ type EntityPresentDetailsParameters struct {
 type EntityDetailsMetadata struct {
 	EntityType    string                `json:"entity_type"`
 	URL           string                `json:"url,omitempty"`
-	ExternalRef   WorkObjectExternalRef `json:"external_ref,omitempty"`
+	ExternalRef   WorkObjectExternalRef `json:"external_ref,omitzero"`
 	EntityPayload map[string]any        `json:"entity_payload"`
 }
 
