@@ -1043,10 +1043,10 @@ type FunctionExecutedEvent struct {
 		DateDeleted int64  `json:"date_deleted"`
 	} `json:"function"`
 	Inputs              map[string]any `json:"inputs"`
-	FunctionExecutionID string                 `json:"function_execution_id"`
-	WorkflowExecutionID string                 `json:"workflow_execution_id"`
-	EventTs             string                 `json:"event_ts"`
-	BotAccessToken      string                 `json:"bot_access_token"`
+	FunctionExecutionID string         `json:"function_execution_id"`
+	WorkflowExecutionID string         `json:"workflow_execution_id"`
+	EventTs             string         `json:"event_ts"`
+	BotAccessToken      string         `json:"bot_access_token"`
 }
 
 type InviteRequestedEvent struct {
@@ -1117,29 +1117,29 @@ type User struct {
 }
 
 type Profile struct {
-	Title                  string                 `json:"title"`
-	Phone                  string                 `json:"phone"`
-	Skype                  string                 `json:"skype"`
-	RealName               string                 `json:"real_name"`
-	RealNameNormalized     string                 `json:"real_name_normalized"`
-	DisplayName            string                 `json:"display_name"`
-	DisplayNameNormalized  string                 `json:"display_name_normalized"`
+	Title                  string         `json:"title"`
+	Phone                  string         `json:"phone"`
+	Skype                  string         `json:"skype"`
+	RealName               string         `json:"real_name"`
+	RealNameNormalized     string         `json:"real_name_normalized"`
+	DisplayName            string         `json:"display_name"`
+	DisplayNameNormalized  string         `json:"display_name_normalized"`
 	Fields                 map[string]any `json:"fields"`
-	StatusText             string                 `json:"status_text"`
-	StatusEmoji            string                 `json:"status_emoji"`
+	StatusText             string         `json:"status_text"`
+	StatusEmoji            string         `json:"status_emoji"`
 	StatusEmojiDisplayInfo []any          `json:"status_emoji_display_info"`
-	StatusExpiration       int                    `json:"status_expiration"`
-	AvatarHash             string                 `json:"avatar_hash"`
-	FirstName              string                 `json:"first_name"`
-	LastName               string                 `json:"last_name"`
-	Image24                string                 `json:"image_24"`
-	Image32                string                 `json:"image_32"`
-	Image48                string                 `json:"image_48"`
-	Image72                string                 `json:"image_72"`
-	Image192               string                 `json:"image_192"`
-	Image512               string                 `json:"image_512"`
-	StatusTextCanonical    string                 `json:"status_text_canonical"`
-	Team                   string                 `json:"team"`
+	StatusExpiration       int            `json:"status_expiration"`
+	AvatarHash             string         `json:"avatar_hash"`
+	FirstName              string         `json:"first_name"`
+	LastName               string         `json:"last_name"`
+	Image24                string         `json:"image_24"`
+	Image32                string         `json:"image_32"`
+	Image48                string         `json:"image_48"`
+	Image72                string         `json:"image_72"`
+	Image192               string         `json:"image_192"`
+	Image512               string         `json:"image_512"`
+	StatusTextCanonical    string         `json:"status_text_canonical"`
+	Team                   string         `json:"team"`
 }
 
 type UserStatusChangedEvent struct {

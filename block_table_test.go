@@ -177,7 +177,7 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 	marshalled, err := json.Marshal(&tb)
 	assert.NoError(t, err)
 
-	var expected, actual map[string]interface{}
+	var expected, actual map[string]any
 	assert.NoError(t, json.Unmarshal([]byte(payload), &expected))
 	assert.NoError(t, json.Unmarshal(marshalled, &actual))
 	assert.Equal(t, expected, actual)

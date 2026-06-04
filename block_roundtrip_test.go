@@ -103,7 +103,7 @@ func TestBlockRealPayloadRoundTrip(t *testing.T) {
 			marshalled, err := json.Marshal(block)
 			require.NoError(t, err)
 
-			var want, got interface{}
+			var want, got any
 			require.NoError(t, json.Unmarshal([]byte(tt.payload), &want))
 			require.NoError(t, json.Unmarshal(marshalled, &got))
 			assert.Equal(t, want, got,

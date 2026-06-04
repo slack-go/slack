@@ -8,7 +8,7 @@ import (
 // SocketModeConnection contains various details about the SocketMode connection.
 // It is returned by an "apps.connections.open" API call.
 type SocketModeConnection struct {
-	URL  string                 `json:"url,omitempty"`
+	URL  string         `json:"url,omitempty"`
 	Data map[string]any `json:"-"`
 }
 
