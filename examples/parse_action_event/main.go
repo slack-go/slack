@@ -101,8 +101,7 @@ func main() {
 			innerEvent := eventsAPIEvent.InnerEvent
 			fmt.Printf("[EVENTS] inner type=%q\n", innerEvent.Type)
 
-			switch ev := innerEvent.Data.(type) {
-			case *slackevents.MessageEvent:
+			if ev, ok := innerEvent.Data.(*slackevents.MessageEvent); ok {
 				// Ignore bot messages to avoid loops.
 				if ev.BotID != "" {
 					return

@@ -46,7 +46,7 @@ func main() {
 		switch eventsAPIEvent.Type {
 		case slackevents.URLVerification:
 			var r *slackevents.ChallengeResponse
-			err := json.Unmarshal([]byte(body), &r)
+			err := json.Unmarshal(body, &r)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				return

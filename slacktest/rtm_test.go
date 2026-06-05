@@ -20,8 +20,7 @@ func TestRTMInfo(t *testing.T) {
 	messageChan := make(chan (*slack.ConnectedEvent), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.ConnectedEvent:
+			if ev, ok := msg.Data.(*slack.ConnectedEvent); ok {
 				messageChan <- ev
 			}
 		}
@@ -51,8 +50,7 @@ func TestRTMPing(t *testing.T) {
 	messageChan := make(chan (*slack.LatencyReport), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.LatencyReport:
+			if ev, ok := msg.Data.(*slack.LatencyReport); ok {
 				messageChan <- ev
 			}
 		}
@@ -79,8 +77,7 @@ func TestRTMDirectMessage(t *testing.T) {
 	messageChan := make(chan (*slack.MessageEvent), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.MessageEvent:
+			if ev, ok := msg.Data.(*slack.MessageEvent); ok {
 				messageChan <- ev
 			}
 		}
@@ -108,8 +105,7 @@ func TestRTMChannelMessage(t *testing.T) {
 	messageChan := make(chan (*slack.MessageEvent), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.MessageEvent:
+			if ev, ok := msg.Data.(*slack.MessageEvent); ok {
 				messageChan <- ev
 			}
 		}

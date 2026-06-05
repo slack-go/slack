@@ -102,27 +102,23 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer cancel()
 
 		// The response sender sends Socket Mode responses over the WebSocket conn
 		if err := smc.runResponseSender(ctx, conn); err != nil {
 			sendErr(err)
 		}
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer cancel()
 
 		// The handler reads Socket Mode requests, and enqueues responses for sending by the response sender
 		if err := smc.runRequestHandler(ctx, messages); err != nil {
 			sendErr(err)
 		}
-	}()
+	})
 
 	go func() {
 		defer cancel()
@@ -339,7 +335,8 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 	// We don't need to conn.SetCloseHandler because the default handler is effective enough that
 	// it sends back the CLOSE message to the server and let conn.ReadJSON() fail with CloseError.
 	// The CloseError must be handled normally in our receiveMessagesInto function.
-	//conn.SetCloseHandler(func(code int, text string) error {
+	//
+	// conn.SetCloseHandler(func(code int, text string) error {
 	//  ...
 	// })
 
@@ -354,7 +351,7 @@ func (smc *Client) runResponseSender(ctx context.Context, conn *websocket.Conn) 
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		// 3. listen for messages that need to be sent
+		// listen for messages that need to be sent
 		case res := <-smc.socketModeResponses:
 			smc.Debugf("Sending Socket Mode response with envelope ID %q: %v", res.EnvelopeID, res)
 

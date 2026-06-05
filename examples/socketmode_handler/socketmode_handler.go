@@ -72,15 +72,13 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeConnected, middlewareConnected)
 	socketmodeHandler.Handle(socketmode.EventTypeHello, middlewareHello)
 
-	//\\ EventTypeEventsAPI //\\
-	// Handle all EventsAPI
+	// EventTypeEventsAPI: handle all EventsAPI
 	socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
 
 	// Handle a specific event from EventsAPI
 	socketmodeHandler.HandleEvents(slackevents.AppMention, middlewareAppMentionEvent)
 
-	//\\ EventTypeInteractive //\\
-	// Handle all Interactive Events
+	// EventTypeInteractive: handle all Interactive Events
 	socketmodeHandler.Handle(socketmode.EventTypeInteractive, middlewareInteractive)
 
 	// Handle a specific Interaction

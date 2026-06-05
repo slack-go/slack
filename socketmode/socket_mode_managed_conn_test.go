@@ -1,6 +1,3 @@
-//go:build go1.13
-// +build go1.13
-
 package socketmode
 
 import (
@@ -29,21 +26,21 @@ func Test_passContext(t *testing.T) {
 	defer cancel()
 
 	t.Run("RunWithContext", func(t *testing.T) {
-		// should fail imidiatly.
+		// should fail immediately.
 		assert.EqualError(t, cli.RunContext(ctx), context.DeadlineExceeded.Error())
 	})
 
 	t.Run("openAndDial", func(t *testing.T) {
 		_, _, err := cli.openAndDial(ctx, func(_ string) error { return nil })
 
-		// should fail imidiatly.
+		// should fail immediately.
 		assert.EqualError(t, errors.Unwrap(err), context.DeadlineExceeded.Error())
 	})
 
 	t.Run("OpenWithContext", func(t *testing.T) {
 		_, _, err := cli.OpenContext(ctx)
 
-		// should fail imidiatly.
+		// should fail immediately.
 		assert.EqualError(t, errors.Unwrap(err), context.DeadlineExceeded.Error())
 	})
 }

@@ -114,8 +114,7 @@ func TestSendChannelInvite(t *testing.T) {
 	evChan := make(chan (slack.Channel), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.ChannelJoinedEvent:
+			if ev, ok := msg.Data.(*slack.ChannelJoinedEvent); ok {
 				evChan <- ev.Channel
 			}
 		}
@@ -143,8 +142,7 @@ func TestSendGroupInvite(t *testing.T) {
 	evChan := make(chan (slack.Channel), 1)
 	go func() {
 		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.GroupJoinedEvent:
+			if ev, ok := msg.Data.(*slack.GroupJoinedEvent); ok {
 				evChan <- ev.Channel
 			}
 		}
