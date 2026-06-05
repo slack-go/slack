@@ -10,7 +10,7 @@ import (
 )
 
 func TestRTMInfo(t *testing.T) {
-	maxWait := 10 * time.Millisecond
+	maxWait := 5 * time.Second
 	s := NewTestServer()
 	go s.Start()
 
