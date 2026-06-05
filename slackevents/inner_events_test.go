@@ -957,7 +957,7 @@ func TestMessageMetadataPosted(t *testing.T) {
 		t.Fail()
 	}
 	payload := mmp.Metadata.EventPayload
-	if len(payload) <= 0 {
+	if len(payload) == 0 {
 		t.Fail()
 	}
 	if mmp.EventTimestamp != "1660398079.756349" {
@@ -1009,7 +1009,7 @@ func TestMessageMetadataUpdated(t *testing.T) {
 		t.Fail()
 	}
 	payload := mmp.PreviousMetadata.EventPayload
-	if len(payload) <= 0 {
+	if len(payload) == 0 {
 		t.Fail()
 	}
 	if mmp.AppId != "APPXXX" {
@@ -1031,7 +1031,7 @@ func TestMessageMetadataUpdated(t *testing.T) {
 		t.Fail()
 	}
 	payload = mmp.Metadata.EventPayload
-	if len(payload) <= 0 {
+	if len(payload) == 0 {
 		t.Fail()
 	}
 }
@@ -1074,7 +1074,7 @@ func TestMessageMetadataDeleted(t *testing.T) {
 		t.Fail()
 	}
 	payload := mmp.PreviousMetadata.EventPayload
-	if len(payload) <= 0 {
+	if len(payload) == 0 {
 		t.Fail()
 	}
 	if mmp.AppId != "APPXXX" {

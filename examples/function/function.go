@@ -46,8 +46,7 @@ func main() {
 				switch eventsAPIEvent.Type {
 				case slackevents.CallbackEvent:
 					innerEvent := eventsAPIEvent.InnerEvent
-					switch ev := innerEvent.Data.(type) {
-					case *slackevents.FunctionExecutedEvent:
+					if ev, ok := innerEvent.Data.(*slackevents.FunctionExecutedEvent); ok {
 						callbackID := ev.Function.CallbackID
 						if callbackID == "sample_function" {
 							userId := ev.Inputs["user_id"]

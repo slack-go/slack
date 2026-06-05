@@ -14,11 +14,12 @@ func TestListEventAuthorizations(t *testing.T) {
 
 	authorizations, err := api.ListEventAuthorizations("1-message-T012345678-DR12345678")
 
-	if err != nil {
+	switch {
+	case err != nil:
 		t.Errorf("Failed, but should have succeeded")
-	} else if len(authorizations) != 1 {
+	case len(authorizations) != 1:
 		t.Errorf("Didn't get 1 authorization")
-	} else if authorizations[0].UserID != "U123456789" {
+	case authorizations[0].UserID != "U123456789":
 		t.Errorf("User ID is wrong")
 	}
 }

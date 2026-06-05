@@ -455,9 +455,10 @@ func (rtm *RTM) handleAck(event json.RawMessage) {
 		return
 	}
 
-	if ack.Ok {
+	switch {
+	case ack.Ok:
 		rtm.IncomingEvents <- RTMEvent{"ack", ack}
-	} else if ack.RTMResponse.Error != nil {
+	case ack.RTMResponse.Error != nil:
 		// As there is no documentation for RTM error-codes, this
 		// identification of a rate-limit warning is very brittle.
 		if ack.RTMResponse.Error.Code == -1 && ack.RTMResponse.Error.Msg == "slow down, too many messages..." {
@@ -465,7 +466,7 @@ func (rtm *RTM) handleAck(event json.RawMessage) {
 		} else {
 			rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ack.Error, ack.ReplyTo}}
 		}
-	} else {
+	default:
 		rtm.IncomingEvents <- RTMEvent{"ack_error", &AckErrorEvent{ErrorObj: fmt.Errorf("ack decode failure")}}
 	}
 }

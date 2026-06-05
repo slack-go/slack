@@ -340,8 +340,8 @@ func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
 	if err != nil {
 		return nil, err
 	}
-	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	for _, chn := range chnls {
+	chnls := strings.SplitSeq(prefs.UserPrefs.MutedChannels, ",")
+	for chn := range chnls {
 		if chn == channelID {
 			return nil, nil // noop
 		}

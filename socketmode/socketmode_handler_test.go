@@ -59,39 +59,39 @@ func testing_wrapper(ch chan<- string, f SocketmodeHandlerFunc) SocketmodeHandle
 }
 
 func middleware_interaction(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_interaction_block_action(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_eventapi(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func defaultmiddleware(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_slach_command(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_shortcut(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_view_submission(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func middleware_view_closed(evt *Event, client *Client) {
-	//do nothing
+	// do nothing
 }
 
 func TestSocketmodeHandler_Handle(t *testing.T) {
@@ -102,7 +102,7 @@ func TestSocketmodeHandler_Handle(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string //what is the name of the function we want to be called
+		want string // the name of the function we want to be called
 	}{
 		{
 			name: "Event Match registered function",
@@ -152,7 +152,7 @@ func TestSocketmodeHandler_HandleInteraction(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string //what is the name of the function we want to be called
+		want string // the name of the function we want to be called
 	}{
 		{
 			name: "Event Match registered function",
@@ -240,7 +240,7 @@ func TestSocketmodeHandler_HandleEvents(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string //what is the name of the function we want to be called
+		want string // the name of the function we want to be called
 	}{
 		{
 			name: "Event Match registered function",
@@ -337,7 +337,7 @@ func TestSocketmodeHandler_HandleInteractionBlockAction(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string //what is the name of the function we want to be called
+		want string // the name of the function we want to be called
 	}{
 		{
 			name: "Event Match registered function",
@@ -408,7 +408,7 @@ func TestSocketmodeHandler_HandleSlashCommand(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want string //what is the name of the function we want to be called
+		want string // the name of the function we want to be called
 	}{
 		{
 			name: "Event Match registered function",

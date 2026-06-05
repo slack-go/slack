@@ -899,3 +899,46 @@ func TestStopStream(t *testing.T) {
 		})
 	}
 }
+
+func TestRedactToken(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "bot token",
+			input:    "token=xoxb-1234567890-0987654321-AbCdEfGhIjKlMnOpQrStUvWx&channel=CXXX",
+			expected: "token=xoxb-REDACTED&channel=CXXX",
+		},
+		{
+			name:     "user token",
+			input:    "channel=CXXX&token=xoxp-1234567890-1234567890123-1234567890123-abcdef",
+			expected: "channel=CXXX&token=xoxp-REDACTED",
+		},
+		{
+			name:     "app-level token",
+			input:    "token=xapp-1-A012BCDEF-1234567890123-abcdef0123456789",
+			expected: "token=xapp-REDACTED",
+		},
+		{
+			name:     "rotated token type with dot is preserved",
+			input:    "token=xoxe.xoxp-1-abc123def456&channel=CXXX",
+			expected: "token=xoxe.xoxp-REDACTED&channel=CXXX",
+		},
+		{
+			name:     "no token is left untouched",
+			input:    "channel=CXXX&text=hello+world",
+			expected: "channel=CXXX&text=hello+world",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := string(redactToken([]byte(test.input)))
+			if actual != test.expected {
+				t.Errorf("\nexpected: %s\n  actual: %s", test.expected, actual)
+			}
+		})
+	}
+}
