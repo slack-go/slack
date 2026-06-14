@@ -19,9 +19,9 @@ import (
 func TestRetryOn429ThenSuccess(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := atomic.AddInt32(&callCount, 1)
+		n := callCount.Add(1)
 		if n <= 2 {
 			w.Header().Set("Retry-After", "0")
 			w.WriteHeader(http.StatusTooManyRequests)
@@ -48,7 +48,7 @@ func TestRetryOn429ThenSuccess(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("want 3 calls (2x 429 + 1x 200), got %d", got)
 	}
 }
@@ -57,9 +57,9 @@ func TestRetryOn429ThenSuccess(t *testing.T) {
 func TestRetryOn500ThenSuccess(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := atomic.AddInt32(&callCount, 1)
+		n := callCount.Add(1)
 		if n <= 2 {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -84,7 +84,7 @@ func TestRetryOn500ThenSuccess(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("want 3 calls (2x 500 + 1x 200), got %d", got)
 	}
 }
@@ -94,9 +94,9 @@ func TestRetryOn500ThenSuccess(t *testing.T) {
 func TestRetryExhaustedReturnsLastError(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&callCount, 1)
+		callCount.Add(1)
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
 	defer srv.Close()
@@ -116,7 +116,7 @@ func TestRetryExhaustedReturnsLastError(t *testing.T) {
 	if _, ok := err.(StatusCodeError); !ok {
 		t.Errorf("expected StatusCodeError, got %T: %v", err, err)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("want 3 calls (all 500), got %d", got)
 	}
 }
@@ -205,9 +205,9 @@ func TestRetryExhausted429ResponseBodyReadable(t *testing.T) {
 func TestRetryExhausted429ReturnsError(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		atomic.AddInt32(&callCount, 1)
+		callCount.Add(1)
 		w.Header().Set("Retry-After", "1")
 		w.WriteHeader(http.StatusTooManyRequests)
 	}))
@@ -228,7 +228,7 @@ func TestRetryExhausted429ReturnsError(t *testing.T) {
 	if _, ok := err.(*RateLimitedError); !ok {
 		t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("want 3 calls (all 429), got %d", got)
 	}
 }
@@ -261,9 +261,9 @@ func TestOptionRetryNonPositiveDisablesRetry(t *testing.T) {
 func TestRetryOn503ThenSuccess(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := atomic.AddInt32(&callCount, 1)
+		n := callCount.Add(1)
 		if n <= 2 {
 			w.WriteHeader(http.StatusServiceUnavailable)
 			return
@@ -288,7 +288,7 @@ func TestRetryOn503ThenSuccess(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("want 3 calls (2x 503 + 1x 200), got %d", got)
 	}
 }
@@ -322,7 +322,7 @@ func TestRetryOnConnectionErrorThenSuccess(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&wrapped.attempts); got != 3 {
+	if got := wrapped.attempts.Load(); got != 3 {
 		t.Errorf("want 3 calls (2x connection error + 1x 200), got %d", got)
 	}
 }
@@ -348,7 +348,7 @@ func TestRetryOnConnectionErrorExhausted(t *testing.T) {
 	if resp != nil {
 		t.Errorf("expected nil response when error returned, got %v", resp)
 	}
-	if got := atomic.LoadInt32(&failClient.attempts); got != 3 {
+	if got := failClient.attempts.Load(); got != 3 {
 		t.Errorf("want 3 attempts (MaxRetries+1), got %d", got)
 	}
 }
@@ -376,7 +376,7 @@ func TestNoRetryWhenGetBodyNil(t *testing.T) {
 		t.Fatalf("Do: %v", err)
 	}
 	resp.Body.Close()
-	if got := atomic.LoadInt32(&mock.count); got != 1 {
+	if got := mock.count.Load(); got != 1 {
 		t.Errorf("when body present and GetBody is nil should not retry, got %d calls", got)
 	}
 }
@@ -405,7 +405,7 @@ func TestRetryGetRequestWithNilBody(t *testing.T) {
 		t.Fatalf("Do: %v", err)
 	}
 	resp.Body.Close()
-	if got := atomic.LoadInt32(&wrapped.calls); got != 3 {
+	if got := wrapped.calls.Load(); got != 3 {
 		t.Errorf("GET with nil body should retry on 429 (2x 429 + 1x 200), got %d calls", got)
 	}
 }
@@ -413,11 +413,11 @@ func TestRetryGetRequestWithNilBody(t *testing.T) {
 // contextCancelClient returns context.Canceled when the request context is already cancelled.
 type contextCancelClient struct {
 	httpClient
-	calls int32
+	calls atomic.Int32
 }
 
 func (c *contextCancelClient) Do(req *http.Request) (*http.Response, error) {
-	atomic.AddInt32(&c.calls, 1)
+	c.calls.Add(1)
 	if err := req.Context().Err(); err != nil {
 		return nil, err
 	}
@@ -460,7 +460,7 @@ func TestRetryRespectsContextCancelation(t *testing.T) {
 	if err != context.Canceled {
 		t.Errorf("expected context.Canceled, got %v", err)
 	}
-	if got := atomic.LoadInt32(&wrapped.calls); got != 1 {
+	if got := wrapped.calls.Load(); got != 1 {
 		t.Errorf("expected 1 call, got %d", got)
 	}
 }
@@ -508,7 +508,7 @@ func TestRetryContextCanceledDuringSleep(t *testing.T) {
 	if err != context.Canceled {
 		t.Errorf("expected context.Canceled, got %v", err)
 	}
-	if got := atomic.LoadInt32(&mock.count); got != 1 {
+	if got := mock.count.Load(); got != 1 {
 		t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
 	}
 }
@@ -545,9 +545,9 @@ func TestConnectionOnlyRetryHandlersOnlyRetriesConnection(t *testing.T) {
 
 	t.Run("429_not_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount int32
+		var callCount atomic.Int32
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			atomic.AddInt32(&callCount, 1)
+			callCount.Add(1)
 			w.WriteHeader(http.StatusTooManyRequests)
 		}))
 		defer srv.Close()
@@ -560,16 +560,16 @@ func TestConnectionOnlyRetryHandlersOnlyRetriesConnection(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error on 429 with connection-only handlers")
 		}
-		if got := atomic.LoadInt32(&callCount); got != 1 {
+		if got := callCount.Load(); got != 1 {
 			t.Errorf("429 should not be retried with ConnectionOnlyRetryHandlers, got %d calls", got)
 		}
 	})
 
 	t.Run("5xx_not_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount int32
+		var callCount atomic.Int32
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			atomic.AddInt32(&callCount, 1)
+			callCount.Add(1)
 			w.WriteHeader(http.StatusInternalServerError)
 		}))
 		defer srv.Close()
@@ -582,7 +582,7 @@ func TestConnectionOnlyRetryHandlersOnlyRetriesConnection(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error on 500 with connection-only handlers")
 		}
-		if got := atomic.LoadInt32(&callCount); got != 1 {
+		if got := callCount.Load(); got != 1 {
 			t.Errorf("5xx should not be retried with ConnectionOnlyRetryHandlers, got %d calls", got)
 		}
 	})
@@ -594,9 +594,9 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 
 	t.Run("429_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount int32
+		var callCount atomic.Int32
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			n := atomic.AddInt32(&callCount, 1)
+			n := callCount.Add(1)
 			if n <= 2 {
 				w.Header().Set("Retry-After", "0")
 				w.WriteHeader(http.StatusTooManyRequests)
@@ -612,16 +612,16 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 		if err != nil {
 			t.Fatalf("postMethod: %v", err)
 		}
-		if got := atomic.LoadInt32(&callCount); got != 3 {
+		if got := callCount.Load(); got != 3 {
 			t.Errorf("OptionRetry should retry 429, want 3 calls, got %d", got)
 		}
 	})
 
 	t.Run("5xx_not_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount int32
+		var callCount atomic.Int32
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			atomic.AddInt32(&callCount, 1)
+			callCount.Add(1)
 			w.WriteHeader(http.StatusInternalServerError)
 		}))
 		defer srv.Close()
@@ -631,7 +631,7 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error on 500 with OptionRetry (no 5xx handler)")
 		}
-		if got := atomic.LoadInt32(&callCount); got != 1 {
+		if got := callCount.Load(); got != 1 {
 			t.Errorf("OptionRetry should not retry 5xx by default, got %d calls", got)
 		}
 	})
@@ -642,9 +642,9 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 func TestOptionRetryConfigWithNilHandlersDefaultsTo429Only(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := atomic.AddInt32(&callCount, 1)
+		n := callCount.Add(1)
 		if n <= 2 {
 			w.Header().Set("Retry-After", "0")
 			w.WriteHeader(http.StatusTooManyRequests)
@@ -666,7 +666,7 @@ func TestOptionRetryConfigWithNilHandlersDefaultsTo429Only(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("with nil Handlers default is DefaultRetryHandlers (429 only), 429 should retry; want 3 calls, got %d", got)
 	}
 }
@@ -693,7 +693,7 @@ func TestOptionRetryConfigWithNilHandlersDoesNotRetryConnection(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error when connection fails with default (429-only) handlers")
 	}
-	if got := atomic.LoadInt32(&wrapped.attempts); got != 1 {
+	if got := wrapped.attempts.Load(); got != 1 {
 		t.Errorf("with default (429 only) handlers connection should not be retried, got %d calls", got)
 	}
 }
@@ -702,9 +702,9 @@ func TestOptionRetryConfigWithNilHandlersDoesNotRetryConnection(t *testing.T) {
 func TestServerErrorRetryHandlerOptIn(t *testing.T) {
 	t.Parallel()
 
-	var callCount int32
+	var callCount atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := atomic.AddInt32(&callCount, 1)
+		n := callCount.Add(1)
 		if n <= 2 {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -727,7 +727,7 @@ func TestServerErrorRetryHandlerOptIn(t *testing.T) {
 	if !out.Ok {
 		t.Errorf("want ok=true, got ok=%v", out.Ok)
 	}
-	if got := atomic.LoadInt32(&callCount); got != 3 {
+	if got := callCount.Load(); got != 3 {
 		t.Errorf("with ServerErrorRetryHandler want 3 calls (2x 500 + 1x 200), got %d", got)
 	}
 }
@@ -767,11 +767,11 @@ func TestIsRetryableConnError(t *testing.T) {
 type failingThenOKClient struct {
 	httpClient
 	failAttempts int32
-	attempts     int32
+	attempts     atomic.Int32
 }
 
 func (c *failingThenOKClient) Do(req *http.Request) (*http.Response, error) {
-	n := atomic.AddInt32(&c.attempts, 1)
+	n := c.attempts.Add(1)
 	if n <= c.failAttempts {
 		return nil, &mockErr{msg: "connection reset by peer"}
 	}
@@ -780,12 +780,12 @@ func (c *failingThenOKClient) Do(req *http.Request) (*http.Response, error) {
 
 // countAndRespondClient counts Do calls and returns a fixed HTTP status code.
 type countAndRespondClient struct {
-	count int32
+	count atomic.Int32
 	code  int
 }
 
 func (c *countAndRespondClient) Do(req *http.Request) (*http.Response, error) {
-	atomic.AddInt32(&c.count, 1)
+	c.count.Add(1)
 	return &http.Response{
 		StatusCode: c.code,
 		Body:       io.NopCloser(strings.NewReader("")),
@@ -796,11 +796,11 @@ func (c *countAndRespondClient) Do(req *http.Request) (*http.Response, error) {
 // retryCountThenSuccessClient returns 429 for the first needFail Do calls, then 200.
 type retryCountThenSuccessClient struct {
 	needFail int32
-	calls    int32
+	calls    atomic.Int32
 }
 
 func (c *retryCountThenSuccessClient) Do(req *http.Request) (*http.Response, error) {
-	n := atomic.AddInt32(&c.calls, 1)
+	n := c.calls.Add(1)
 	code := http.StatusTooManyRequests
 	if n > c.needFail {
 		code = http.StatusOK
@@ -814,11 +814,11 @@ func (c *retryCountThenSuccessClient) Do(req *http.Request) (*http.Response, err
 
 // connectionFailingClient always returns a retryable connection error; attempts is incremented each Do.
 type connectionFailingClient struct {
-	attempts int32
+	attempts atomic.Int32
 }
 
 func (c *connectionFailingClient) Do(*http.Request) (*http.Response, error) {
-	atomic.AddInt32(&c.attempts, 1)
+	c.attempts.Add(1)
 	return nil, &mockErr{msg: "connection reset by peer"}
 }
 
