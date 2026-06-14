@@ -33,7 +33,8 @@ func TestCallBackEvent(t *testing.T) {
 				"type": "event_callback",
 				"authed_users": [ "UXXXXXXX1" ],
 				"event_id": "Ev08MFMKH6",
-				"event_time": 1234567890
+				"event_time": 1234567890,
+				"is_ext_shared_channel": true
 		}
 	`)
 	err := json.Unmarshal(rawE, &EventsAPICallbackEvent{})

@@ -8,13 +8,14 @@ import (
 
 // EventsAPIEvent is the base EventsAPIEvent
 type EventsAPIEvent struct {
-	Token        string `json:"token"`
-	TeamID       string `json:"team_id"`
-	Type         string `json:"type"`
-	APIAppID     string `json:"api_app_id"`
-	EnterpriseID string `json:"enterprise_id"`
-	Data         any
-	InnerEvent   EventsAPIInnerEvent
+	Token              string `json:"token"`
+	TeamID             string `json:"team_id"`
+	Type               string `json:"type"`
+	APIAppID           string `json:"api_app_id"`
+	EnterpriseID       string `json:"enterprise_id"`
+	IsExtSharedChannel bool   `json:"is_ext_shared_channel"`
+	Data               any
+	InnerEvent         EventsAPIInnerEvent
 }
 
 // EventsAPIURLVerificationEvent received when configuring a EventsAPI driven app
