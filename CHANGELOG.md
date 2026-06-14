@@ -7,14 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.0]
+
 ### Added
 
-- Block Kit: `HeaderBlock` now supports the optional `level` field (1-4, mapping
-  to H1-H4 heading levels), with a `HeaderBlockOptionLevel` builder (#1563).
-- Block Kit: `CardBlock` now supports the `slack_icon` field via the new
-  `SlackIconObject` composition object (with a `NewSlackIconObject` constructor
-  and `WithSlackIcon` builder) and the `subtext` field (with a `WithSubtext`
-  builder). `slack_icon` is mutually exclusive with `icon` (#1562).
+- `slackevents`: `EventsAPIEvent` now unmarshals the `is_ext_shared_channel` field, and
+  `ParseEvent` propagates it for callback events (#1564 and #1565).
+- Block Kit: `HeaderBlock` now supports the optional `level` field (1-4, mapping to H1-H4
+  heading levels), with a `HeaderBlockOptionLevel` builder (#1563).
+- Block Kit: `CardBlock` now supports the `slack_icon` field via the new `SlackIconObject`
+  composition object (with a `NewSlackIconObject` constructor and `WithSlackIcon` builder)
+  and the `subtext` field (with a `WithSubtext` builder). `slack_icon` is mutually
+  exclusive with `icon` (#1562).
 
 ## [0.25.0]
 
@@ -598,7 +602,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.26.0...HEAD
+[0.25.0]: https://github.com/slack-go/slack/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/slack-go/slack/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/slack-go/slack/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/slack-go/slack/compare/v0.23.0...v0.23.1
