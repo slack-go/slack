@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Block Kit: `HeaderBlock` now supports the optional `level` field (1-4, mapping
+  to H1-H4 heading levels), with a `HeaderBlockOptionLevel` builder (#1563).
+
 ## [0.25.0]
 
 ### Changed

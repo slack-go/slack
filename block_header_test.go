@@ -18,6 +18,14 @@ func TestNewHeaderBlock(t *testing.T) {
 	assert.Contains(t, headerBlock.Text.Text, "quite the header")
 }
 
+func TestNewHeaderBlockWithLevel(t *testing.T) {
+	textInfo := NewTextBlockObject("plain_text", "This is quite the header", false, false)
+	headerBlock := NewHeaderBlock(textInfo, HeaderBlockOptionLevel(2))
+
+	assert.Equal(t, headerBlock.BlockType(), MBTHeader)
+	assert.Equal(t, 2, headerBlock.Level)
+}
+
 // TestNewHeaderBlockWithNilOption reproduces issue #1236: passing nil as an
 // option to NewHeaderBlock causes a nil pointer dereference panic.
 func TestNewHeaderBlockWithNilOption(t *testing.T) {
