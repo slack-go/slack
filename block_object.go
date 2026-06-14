@@ -271,3 +271,27 @@ func NewOptionGroupBlockElement(label *TextBlockObject, options ...*OptionBlockO
 		Options: options,
 	}
 }
+
+// SlackIconObject defines a built-in Slack icon for use in a card block's
+// slack_icon field. It is mutually exclusive with the card block's icon field,
+// as both render in the same location.
+//
+// More Information: https://docs.slack.dev/reference/block-kit/composition-objects/slack-icon-object/
+type SlackIconObject struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+}
+
+// validateType enforces block objects for element and block parameters
+func (s SlackIconObject) validateType() MessageObjectType {
+	return MessageObjectType(s.Type)
+}
+
+// NewSlackIconObject returns an instance of a new Slack icon object. The name
+// must be one of the icon names supported by Slack.
+func NewSlackIconObject(name string) *SlackIconObject {
+	return &SlackIconObject{
+		Type: "icon",
+		Name: name,
+	}
+}

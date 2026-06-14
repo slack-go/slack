@@ -12,6 +12,7 @@ func TestNewCardBlock(t *testing.T) {
 	title := NewTextBlockObject("mrkdwn", "Card title", false, false)
 	subtitle := NewTextBlockObject("mrkdwn", "Card subtitle", false, false)
 	body := NewTextBlockObject("mrkdwn", "Card body text.", false, false)
+	subtext := NewTextBlockObject("mrkdwn", "Card subtext.", false, false)
 
 	iconURL := "https://example.com/icon.png"
 	icon := &ImageBlockElement{Type: METImage, ImageURL: &iconURL, AltText: "icon"}
@@ -25,6 +26,7 @@ func TestNewCardBlock(t *testing.T) {
 		WithTitle(title).
 		WithSubtitle(subtitle).
 		WithBody(body).
+		WithSubtext(subtext).
 		WithIcon(icon).
 		WithHeroImage(hero).
 		WithActions(btn)
@@ -35,10 +37,24 @@ func TestNewCardBlock(t *testing.T) {
 	assert.Equal(t, title, block.Title)
 	assert.Equal(t, subtitle, block.Subtitle)
 	assert.Equal(t, body, block.Body)
+	assert.Equal(t, subtext, block.Subtext)
 	assert.Equal(t, icon, block.Icon)
 	assert.Equal(t, hero, block.HeroImage)
 	require.NotNil(t, block.Actions)
 	require.Len(t, block.Actions.ElementSet, 1)
+}
+
+func TestNewCardBlockWithSlackIcon(t *testing.T) {
+	slackIcon := NewSlackIconObject("rocket")
+
+	block := NewCardBlock().
+		WithTitle(NewTextBlockObject("mrkdwn", "Card title", false, false)).
+		WithSlackIcon(slackIcon)
+
+	require.NotNil(t, block.SlackIcon)
+	assert.Equal(t, "icon", block.SlackIcon.Type)
+	assert.Equal(t, "rocket", block.SlackIcon.Name)
+	assert.Equal(t, slackIcon, block.SlackIcon)
 }
 
 func TestCardBlockJSONRoundTrip(t *testing.T) {
@@ -58,6 +74,7 @@ func TestCardBlockJSONRoundTrip(t *testing.T) {
 		"title": {"type": "mrkdwn", "text": "Lumon Industries"},
 		"subtitle": {"type": "mrkdwn", "text": "Macrodata Refinement"},
 		"body": {"type": "mrkdwn", "text": "The work is mysterious and important."},
+		"subtext": {"type": "mrkdwn", "text": "Praise Kier."},
 		"actions": [
 			{
 				"type": "button",
@@ -79,12 +96,38 @@ func TestCardBlockJSONRoundTrip(t *testing.T) {
 	require.NotNil(t, block.Title)
 	require.NotNil(t, block.Subtitle)
 	require.NotNil(t, block.Body)
+	require.NotNil(t, block.Subtext)
 	require.NotNil(t, block.Actions)
 	require.Len(t, block.Actions.ElementSet, 1)
 
 	btn, ok := block.Actions.ElementSet[0].(*ButtonBlockElement)
 	require.True(t, ok, "expected *ButtonBlockElement, got %T", block.Actions.ElementSet[0])
 	assert.Equal(t, "enter", btn.ActionID)
+
+	marshalled, err := json.Marshal(block)
+	require.NoError(t, err)
+
+	var expected, actual map[string]any
+	require.NoError(t, json.Unmarshal([]byte(payload), &expected))
+	require.NoError(t, json.Unmarshal(marshalled, &actual))
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestCardBlockSlackIconJSONRoundTrip(t *testing.T) {
+	payload := `{
+		"type": "card",
+		"slack_icon": {"type": "icon", "name": "rocket"},
+		"title": {"type": "mrkdwn", "text": "Sample Card Title"}
+	}`
+
+	var block CardBlock
+	require.NoError(t, json.Unmarshal([]byte(payload), &block))
+
+	require.NotNil(t, block.SlackIcon)
+	assert.Equal(t, "icon", block.SlackIcon.Type)
+	assert.Equal(t, "rocket", block.SlackIcon.Name)
+	assert.Nil(t, block.Icon)
 
 	marshalled, err := json.Marshal(block)
 	require.NoError(t, err)

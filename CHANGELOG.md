@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Block Kit: `HeaderBlock` now supports the optional `level` field (1-4, mapping
   to H1-H4 heading levels), with a `HeaderBlockOptionLevel` builder (#1563).
+- Block Kit: `CardBlock` now supports the `slack_icon` field via the new
+  `SlackIconObject` composition object (with a `NewSlackIconObject` constructor
+  and `WithSlackIcon` builder) and the `subtext` field (with a `WithSubtext`
+  builder). `slack_icon` is mutually exclusive with `icon` (#1562).
 
 ## [0.25.0]
 
