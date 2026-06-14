@@ -140,7 +140,7 @@ func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 		e.Type,
 		e.APIAppID,
 		e.EnterpriseID,
-		false,
+		e.IsExtSharedChannel,
 		e,
 		EventsAPIInnerEvent{iE.Type, recvEvent},
 	}, nil

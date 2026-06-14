@@ -10,20 +10,20 @@ import (
 
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
-			{
-				"token": "XXYYZZ",
-				"team_id": "TXXXXXXXX",
-				"api_app_id": "AXXXXXXXXX",
-				"event": {
-								"type": "app_mention",
-								"event_ts": "1234567890.123456",
-								"user": "UXXXXXXX1"
-				},
-				"type": "event_callback",
-				"authed_users": [ "UXXXXXXX1" ],
-				"event_id": "Ev08MFMKH6",
-				"event_time": 1234567890
-		}
+    {
+        "token": "XXYYZZ",
+        "team_id": "TXXXXXXXX",
+        "api_app_id": "AXXXXXXXXX",
+        "event": {
+            "type": "app_mention",
+            "event_ts": "1234567890.123456",
+            "user": "UXXXXXXX1"
+        },
+        "type": "event_callback",
+        "authed_users": [ "UXXXXXXX1" ],
+        "event_id": "Ev08MFMKH6",
+        "event_time": 1234567890
+        }
 	`
 	msg, e := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
 	if e != nil {
@@ -139,6 +139,35 @@ func TestThatOuterCallbackEventHasInnerEvent(t *testing.T) {
 			fmt.Println(outerEvent)
 			t.Fail()
 		}
+	}
+}
+
+func TestParseEventExposesIsExtSharedChannel(t *testing.T) {
+	// is_ext_shared_channel lives on the outer event_callback wrapper. Verify
+	// that it survives all the way through ParseEvent for a callback event that
+	// carries an inner event (the common case), not just on the outer parse.
+	eventsAPIRawCallbackEvent := `
+			{
+				"token": "XXYYZZ",
+				"team_id": "TXXXXXXXX",
+				"api_app_id": "AXXXXXXXXX",
+				"event": {
+								"type": "app_mention",
+								"event_ts": "1234567890.123456",
+								"user": "UXXXXXXX1"
+				},
+				"type": "event_callback",
+				"event_id": "Ev08MFMKH6",
+				"event_time": 1234567890,
+				"is_ext_shared_channel": true
+		}
+	`
+	msg, err := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !msg.IsExtSharedChannel {
+		t.Fatalf("expected IsExtSharedChannel to be true, got false")
 	}
 }
 

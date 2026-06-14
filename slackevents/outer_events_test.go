@@ -37,9 +37,13 @@ func TestCallBackEvent(t *testing.T) {
 				"is_ext_shared_channel": true
 		}
 	`)
-	err := json.Unmarshal(rawE, &EventsAPICallbackEvent{})
+	var cb EventsAPICallbackEvent
+	err := json.Unmarshal(rawE, &cb)
 	if err != nil {
 		t.Error(err)
+	}
+	if !cb.IsExtSharedChannel {
+		t.Errorf("expected IsExtSharedChannel to be true, got false")
 	}
 }
 
