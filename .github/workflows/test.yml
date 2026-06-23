@@ -19,7 +19,7 @@ jobs:
           - "1.26"
     name: test go-${{ matrix.go }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
@@ -39,7 +39,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           cache: false
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: golangci-lint
