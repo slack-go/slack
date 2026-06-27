@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Block Kit: Add support for
+  [`data_visualization`](https://docs.slack.dev/reference/block-kit/blocks/data-visualization-block/) block through `DataVisualizationBlock`.
+
 ## [0.26.0]
 
 ### Added
