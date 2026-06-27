@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.27.0]
+
 ### Added
 
 - Block Kit: Add support for
@@ -609,8 +611,9 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.26.0...HEAD
-[0.25.0]: https://github.com/slack-go/slack/compare/v0.25.0...v0.26.0
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/slack-go/slack/compare/v0.26.0...v0.27.0
+[0.26.0]: https://github.com/slack-go/slack/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/slack-go/slack/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/slack-go/slack/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/slack-go/slack/compare/v0.23.0...v0.23.1
