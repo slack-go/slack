@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Block Kit: Add support for
   [`data_visualization`](https://docs.slack.dev/reference/block-kit/blocks/data-visualization-block/) block through `DataVisualizationBlock`.
+- Interaction payloads: `Team` now preserves `enterprise_id` and `enterprise_name` when
+  Slack includes Enterprise org details in interaction payload `team` objects.
 
 ## [0.26.0]
 

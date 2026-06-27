@@ -425,10 +425,12 @@ func (t *JSONTime) UnmarshalJSON(buf []byte) error {
 
 // Team contains details about a team
 type Team struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Domain string `json:"domain"`
-	Icons  *Icons `json:"icon,omitempty"`
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Domain         string `json:"domain"`
+	EnterpriseID   string `json:"enterprise_id,omitempty"`
+	EnterpriseName string `json:"enterprise_name,omitempty"`
+	Icons          *Icons `json:"icon,omitempty"`
 }
 
 // Icons contains the image URLs for the team icons in various sizes

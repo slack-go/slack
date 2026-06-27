@@ -514,6 +514,37 @@ func TestInteractionCallback_UserUsername(t *testing.T) {
 	assert.Equal(t, "T9TK3CUKW", cb.User.TeamID)
 }
 
+func TestInteractionCallback_BlockSuggestionTeamEnterpriseFields(t *testing.T) {
+	raw := []byte(`{
+		"type": "block_suggestion",
+		"user": {
+			"id": "U123456",
+			"name": "example",
+			"team_id": "T123456"
+		},
+		"team": {
+			"id": "T123456",
+			"name": "example-team",
+			"domain": "example",
+			"enterprise_id": "E123456",
+			"enterprise_name": "Example Enterprise"
+		},
+		"api_app_id": "A123456",
+		"block_id": "enterprise_team",
+		"action_id": "team_lookup",
+		"value": "test"
+	}`)
+
+	var cb InteractionCallback
+	assert.NoError(t, json.Unmarshal(raw, &cb))
+	assert.Equal(t, InteractionTypeBlockSuggestion, cb.Type)
+	assert.Equal(t, "T123456", cb.Team.ID)
+	assert.Equal(t, "example-team", cb.Team.Name)
+	assert.Equal(t, "example", cb.Team.Domain)
+	assert.Equal(t, "E123456", cb.Team.EnterpriseID)
+	assert.Equal(t, "Example Enterprise", cb.Team.EnterpriseName)
+}
+
 func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
 	// Contrived - you generally won't see all of the fields set in a single message
 	raw := []byte(
