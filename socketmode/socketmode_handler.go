@@ -172,7 +172,7 @@ func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
 	return r.Client.RunContext(ctx)
 }
 
-// Call the dispatcher for each incomming event
+// Call the dispatcher for each incoming event
 func (r *SocketmodeHandler) runEventLoop(ctx context.Context) {
 	for {
 		select {
