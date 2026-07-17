@@ -60,6 +60,25 @@ func TestBlockRealPayloadRoundTrip(t *testing.T) {
 			}`,
 		},
 		{
+			// A collapsible container wrapping a section and a divider, with a
+			// plain_text title, mrkdwn subtitle, and an icon.
+			name: "container with title, subtitle, icon and child blocks",
+			payload: `{
+				"type": "container",
+				"block_id": "container-1",
+				"title": {"type": "plain_text", "text": "Deploy status"},
+				"subtitle": {"type": "mrkdwn", "text": "*production*"},
+				"icon": {"type": "image", "image_url": "https://example.com/icon.png", "alt_text": "icon"},
+				"width": "wide",
+				"is_collapsible": true,
+				"default_collapsed": true,
+				"child_blocks": [
+					{"type": "section", "text": {"type": "mrkdwn", "text": "All systems go"}},
+					{"type": "divider"}
+				]
+			}`,
+		},
+		{
 			name: "data_table with raw_text, raw_number and rich_text cells",
 			payload: `{
 				"type": "data_table",
