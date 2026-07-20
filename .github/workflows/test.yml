@@ -20,7 +20,7 @@ jobs:
     name: test go-${{ matrix.go }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
       - name: run test
@@ -35,7 +35,7 @@ jobs:
           - "1.26"
     name: lint go-${{ matrix.go }}
     steps:
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
           cache: false
