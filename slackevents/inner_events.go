@@ -76,6 +76,8 @@ type AppMentionEvent struct {
 
 	// AssistantThread contains action token for Data Access API queries when app is mentioned
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
+	// ActionToken contains the top-level action token for Data Access API queries.
+	ActionToken string `json:"action_token,omitempty"`
 }
 
 // AppHomeOpenedEvent Your Slack app home was opened.
@@ -340,6 +342,8 @@ type MessageEvent struct {
 
 	// AssistantThread contains action token for Data Access API queries in message events
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
+	// ActionToken contains the top-level action token for Data Access API queries.
+	ActionToken string `json:"action_token,omitempty"`
 
 	// Huddle-related fields (subtype "huddle_thread")
 	Room            *slack.HuddleRoom `json:"room,omitempty"`

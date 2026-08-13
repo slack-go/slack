@@ -115,6 +115,28 @@ func TestAppMentionWithAssistantThread(t *testing.T) {
 	}
 }
 
+func TestAppMentionWithActionToken(t *testing.T) {
+	rawE := []byte(`
+			{
+				"type": "app_mention",
+				"user": "U061F7AUR",
+				"text": "<@U0LAN0Z89> search slack",
+				"ts": "1515449522.000016",
+				"channel": "C0LAN2Q65",
+				"event_ts": "1515449522000016",
+				"action_token": "1234567.top-level"
+			}
+	`)
+	var event AppMentionEvent
+	if err := json.Unmarshal(rawE, &event); err != nil {
+		t.Fatal(err)
+	}
+
+	if event.ActionToken != "1234567.top-level" {
+		t.Errorf("Expected ActionToken to be '1234567.top-level', got %s", event.ActionToken)
+	}
+}
+
 func TestAppMentionWithBlocksFilesAttachments(t *testing.T) {
 	rawE := []byte(`{
 		"type": "app_mention",
@@ -512,6 +534,29 @@ func TestMessageEventWithAssistantThread(t *testing.T) {
 	}
 	if !e.IsIM() {
 		t.Error(fmt.Errorf("expected IsIM true, got false"))
+	}
+}
+
+func TestMessageEventWithActionToken(t *testing.T) {
+	rawE := []byte(`
+		{
+			"type": "message",
+			"channel": "D024BE91L",
+			"user": "U2147483697",
+			"text": "Search slack",
+			"ts": "1355517523.000005",
+			"event_ts": "1355517523.000005",
+			"channel_type": "im",
+			"action_token": "9876543.top-level"
+		}
+	`)
+	var event MessageEvent
+	if err := json.Unmarshal(rawE, &event); err != nil {
+		t.Fatal(err)
+	}
+
+	if event.ActionToken != "9876543.top-level" {
+		t.Errorf("Expected ActionToken to be '9876543.top-level', got %s", event.ActionToken)
 	}
 }
 
