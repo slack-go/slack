@@ -414,6 +414,26 @@ func TestCompleteUploadExternalContext(t *testing.T) {
 			},
 		},
 		{
+			title: "Testing with multiple channels",
+			params: CompleteUploadExternalParameters{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+				},
+				Channels:       []string{"test-channel-1", "test-channel-2"},
+				InitialComment: "test-comment",
+			},
+			wantResponse: CompleteUploadExternalResponse{
+				Files: []FileSummary{
+					{
+						ID: "ID1",
+					},
+				},
+				SlackResponse: SlackResponse{Ok: true},
+			},
+		},
+		{
 			title: "Testing with blocks",
 			params: CompleteUploadExternalParameters{
 				Files: []FileSummary{
