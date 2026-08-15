@@ -37,6 +37,46 @@ func TestPostMessageInvalidChannel(t *testing.T) {
 	}
 }
 
+func TestPostMessageWithResponse(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/chat.postMessage", func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Write([]byte(`{
+			"ok": true,
+			"channel": "CXXX",
+			"ts": "1503435956.000247",
+			"message": {
+				"text": "hello",
+				"ts": "1503435956.000247",
+				"thread_ts": "1503435950.000000"
+			}
+		}`))
+	})
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	channel, timestamp, message, err := api.PostMessageWithResponse("CXXX", MsgOptionText("hello", false))
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+	if got, want := channel, "CXXX"; got != want {
+		t.Errorf("unexpected channel: got %s, want %s", got, want)
+	}
+	if got, want := timestamp, "1503435956.000247"; got != want {
+		t.Errorf("unexpected timestamp: got %s, want %s", got, want)
+	}
+	if got, want := message.Text, "hello"; got != want {
+		t.Errorf("unexpected message text: got %s, want %s", got, want)
+	}
+	if got, want := message.Timestamp, "1503435956.000247"; got != want {
+		t.Errorf("unexpected message timestamp: got %s, want %s", got, want)
+	}
+	if got, want := message.ThreadTimestamp, "1503435950.000000"; got != want {
+		t.Errorf("unexpected message thread timestamp: got %s, want %s", got, want)
+	}
+}
+
 func TestGetPermalink(t *testing.T) {
 	channel := "C1H9RESGA"
 	timeStamp := "p135854651500008"
