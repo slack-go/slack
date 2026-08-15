@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-08-15
+
+### Fixed
+
+- `slackevents`: `AppMentionEvent` and `MessageEvent` now expose the Data Access API action
+  token through a new `ActionToken` field, which reads `action_token` from the event object
+  itself. Slack sends the token there on `app_mention` and `message` events, but both types
+  only modelled it nested inside `assistant_thread`, so the token was silently dropped and
+  bot-token calls to `assistant.search.context` failed with `invalid_action_token`. The
+  existing `AssistantThread` field is unchanged (#1577, #1580).
+
 ## [0.28.0] - 2026-08-15
 
 ### Added
@@ -619,7 +630,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/slack-go/slack/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/slack-go/slack/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/slack-go/slack/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/slack-go/slack/compare/v0.25.0...v0.26.0
