@@ -255,6 +255,41 @@ func TestParseEventAPIAppMentionWithAssistantThread(t *testing.T) {
 	}
 }
 
+func TestParseEventAPIAppMentionWithActionToken(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "app_mention",
+				"event_ts": "1234567890.123456",
+				"user": "UXXXXXXX1",
+				"text": "<@U0LAN0Z89> search slack",
+				"ts": "1515449522.000016",
+				"channel": "C0LAN2Q65",
+				"action_token": "1234567.top-level"
+			},
+			"type": "event_callback",
+			"authed_users": [ "UXXXXXXX1" ],
+			"event_id": "Ev08MFMKH6",
+			"event_time": 1234567890
+		}
+	`
+	msg, err := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	innerEvent, ok := msg.InnerEvent.Data.(*AppMentionEvent)
+	if !ok {
+		t.Fatalf("Expected *AppMentionEvent, got %T", msg.InnerEvent.Data)
+	}
+	if innerEvent.ActionToken != "1234567.top-level" {
+		t.Errorf("Expected ActionToken to be '1234567.top-level', got %s", innerEvent.ActionToken)
+	}
+}
+
 func TestParseEventAPIMessageIMWithAssistantThread(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
 		{
@@ -311,6 +346,42 @@ func TestParseEventAPIMessageIMWithAssistantThread(t *testing.T) {
 			fmt.Println(outerEvent)
 			t.Fail()
 		}
+	}
+}
+
+func TestParseEventAPIMessageIMWithActionToken(t *testing.T) {
+	eventsAPIRawCallbackEvent := `
+		{
+			"token": "XXYYZZ",
+			"team_id": "TXXXXXXXX",
+			"api_app_id": "AXXXXXXXXX",
+			"event": {
+				"type": "message",
+				"channel": "D024BE91L",
+				"user": "U2147483697",
+				"text": "Search slack",
+				"ts": "1355517523.000005",
+				"event_ts": "1355517523.000005",
+				"channel_type": "im",
+				"action_token": "9876543.top-level"
+			},
+			"type": "event_callback",
+			"authed_users": [ "U2147483697" ],
+			"event_id": "Ev08MFMKH7",
+			"event_time": 1234567890
+		}
+	`
+	msg, err := ParseEvent(json.RawMessage(eventsAPIRawCallbackEvent), OptionVerifyToken(&TokenComparator{"XXYYZZ"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	innerEvent, ok := msg.InnerEvent.Data.(*MessageEvent)
+	if !ok {
+		t.Fatalf("Expected *MessageEvent, got %T", msg.InnerEvent.Data)
+	}
+	if innerEvent.ActionToken != "9876543.top-level" {
+		t.Errorf("Expected ActionToken to be '9876543.top-level', got %s", innerEvent.ActionToken)
 	}
 }
 
