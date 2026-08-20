@@ -184,7 +184,7 @@ func TestRichTextSection_UnmarshalJSON(t *testing.T) {
 					&RichTextSectionUnknownElement{Type: RTSEUnknown, Raw: `{"type":"unknown","value":10}`},
 					&RichTextSectionTextElement{Type: RTSEText, Text: "hi"},
 					&RichTextSectionDateElement{Type: RTSEDate, Timestamp: JSONTime(1636961629), Format: "{date_short_pretty}"},
-					&RichTextSectionDateElement{Type: RTSEDate, Timestamp: JSONTime(1636961629), Format: "{date_short_pretty}", URL: strp("https://example.com"), Fallback: strp("default")},
+					&RichTextSectionDateElement{Type: RTSEDate, Timestamp: JSONTime(1636961629), Format: "{date_short_pretty}", URL: new("https://example.com"), Fallback: new("default")},
 				},
 			},
 			nil,
@@ -454,5 +454,3 @@ func TestRichTextSectionUsergroupStyleExtendedFields(t *testing.T) {
 	assert.NotContains(t, string(data), `"italic"`)
 	assert.NotContains(t, string(data), `"strike"`)
 }
-
-func strp(in string) *string { return &in }

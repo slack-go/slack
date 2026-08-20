@@ -126,10 +126,8 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		defer close(messages)
 
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
-		// the request handler
-		if err := smc.runMessageReceiver(ctx, conn, messages); err != nil {
-			sendErr(err)
-		}
+		// the request handler. It only ever returns on error.
+		sendErr(smc.runMessageReceiver(ctx, conn, messages))
 	}()
 
 	wg.Add(1)
@@ -235,17 +233,12 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		default:
 		}
 
-		var (
-			actual  slack.StatusCodeError
-			rlError *slack.RateLimitedError
-		)
-
-		if errors.As(err, &actual) && actual.Code == http.StatusNotFound {
+		if codeErr, ok := errors.AsType[slack.StatusCodeError](err); ok && codeErr.Code == http.StatusNotFound {
 			smc.Debugf("invalid auth when connecting with Socket Mode: %s", err)
 			smc.sendEvent(ctx, newEvent(EventTypeInvalidAuth, &slack.InvalidAuthEvent{}))
 
 			return nil, nil, err
-		} else if errors.As(err, &rlError) {
+		} else if rlError, ok := errors.AsType[*slack.RateLimitedError](err); ok {
 			backoff = rlError.RetryAfter
 		}
 
@@ -408,7 +401,7 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 
 // runMessageReceiver monitors the Socket Mode opened WebSocket connection for any incoming
 // messages. It pushes the raw events into the channel.
-// The receiver runs until the context is closed.
+// The receiver runs until a read fails, so it always returns a non-nil error.
 func (smc *Client) runMessageReceiver(ctx context.Context, conn *websocket.Conn, sink chan json.RawMessage) error {
 	for {
 		if err := smc.receiveMessagesInto(ctx, conn, sink); err != nil {
@@ -546,8 +539,7 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 		// This version of the gorilla/websocket package also does a type assertion
 		// on the error, rather than unwrapping it, so we'll do the unwrapping then pass
 		// the unwrapped error
-		var wsErr *websocket.CloseError
-		if errors.As(err, &wsErr) && websocket.IsUnexpectedCloseError(wsErr) {
+		if wsErr, ok := errors.AsType[*websocket.CloseError](err); ok && websocket.IsUnexpectedCloseError(wsErr) {
 			return err
 		}
 
@@ -569,9 +561,9 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 
 		// JSON unmarshal errors indicate a malformed message, not a broken
 		// connection — keep the connection alive.
-		var syntaxErr *json.SyntaxError
-		var typeErr *json.UnmarshalTypeError
-		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+		_, isSyntaxErr := errors.AsType[*json.SyntaxError](err)
+		_, isTypeErr := errors.AsType[*json.UnmarshalTypeError](err)
+		if isSyntaxErr || isTypeErr {
 			return nil
 		}
 

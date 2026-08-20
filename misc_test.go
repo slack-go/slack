@@ -196,10 +196,7 @@ func TestSlackResponseErrorsUnmarshaling(t *testing.T) {
 			name:  "StringError",
 			input: `"failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"`,
 			expected: SlackResponseErrors{
-				Message: func() *string {
-					s := "failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"
-					return &s
-				}(),
+				Message: new("failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"),
 			},
 		},
 	}
@@ -289,16 +286,10 @@ func TestSlackResponseWithErrors(t *testing.T) {
 				Error: "invalid_blocks",
 				Errors: []SlackResponseErrors{
 					{
-						Message: func() *string {
-							s := "failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"
-							return &s
-						}(),
+						Message: new("failed to match all allowed schemas [json-pointer:\\/blocks\\/3\\/text]"),
 					},
 					{
-						Message: func() *string {
-							s := "invalid additional property: emoji [json-pointer:\\/blocks\\/3\\/text]"
-							return &s
-						}(),
+						Message: new("invalid additional property: emoji [json-pointer:\\/blocks\\/3\\/text]"),
 					},
 				},
 			},
