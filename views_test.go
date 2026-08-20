@@ -876,7 +876,7 @@ func TestPublishViewContextRequest_HashOmittedWhenNil(t *testing.T) {
 		},
 		{
 			name:        "non-empty hash includes field",
-			hash:        ptrString("156772938.1827394"),
+			hash:        new("156772938.1827394"),
 			wantHashKey: true,
 			wantHashVal: "156772938.1827394",
 		},
@@ -905,8 +905,4 @@ func TestPublishViewContextRequest_HashOmittedWhenNil(t *testing.T) {
 			}
 		})
 	}
-}
-
-func ptrString(s string) *string {
-	return &s
 }

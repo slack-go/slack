@@ -79,7 +79,7 @@ func getTestUserWithId(id string) User {
 		IsRestricted:      false,
 		IsUltraRestricted: false,
 		Updated:           1555425715,
-		Has2FA:            boolPtr(false),
+		Has2FA:            new(false),
 	}
 }
 
@@ -354,7 +354,7 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 		statusExpiration = 1551619082
 	)
 	if err := api.SetUserCustomStatus(statusText, statusEmoji, statusExpiration); err != nil {
-		t.Fatalf(`SetUserCustomStatus(%q, %q, %q) = %#v, want <nil>`, statusText, statusEmoji, statusExpiration, err)
+		t.Fatalf(`SetUserCustomStatus(%q, %q, %d) = %#v, want <nil>`, statusText, statusEmoji, statusExpiration, err)
 	}
 
 	if up.StatusText != statusText {
@@ -365,7 +365,7 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, statusEmoji)
 	}
 	if up.StatusExpiration != statusExpiration {
-		t.Fatalf(`UserProfile.StatusExpiration = %q, want %q`, up.StatusExpiration, statusExpiration)
+		t.Fatalf(`UserProfile.StatusExpiration = %d, want %d`, up.StatusExpiration, statusExpiration)
 	}
 }
 
@@ -376,7 +376,7 @@ func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, 
 		statusExpiration = 1551619082
 	)
 	if err := api.SetUserCustomStatusWithUser(user, statusText, statusEmoji, statusExpiration); err != nil {
-		t.Fatalf(`SetUserCustomStatusWithUser(%q, %q, %q, %q) = %#v, want <nil>`, user, statusText, statusEmoji, statusExpiration, err)
+		t.Fatalf(`SetUserCustomStatusWithUser(%q, %q, %q, %d) = %#v, want <nil>`, user, statusText, statusEmoji, statusExpiration, err)
 	}
 
 	if up.StatusText != statusText {
@@ -387,7 +387,7 @@ func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, 
 		t.Fatalf(`UserProfile.StatusEmoji = %q, want %q`, up.StatusEmoji, statusEmoji)
 	}
 	if up.StatusExpiration != statusExpiration {
-		t.Fatalf(`UserProfile.StatusExpiration = %q, want %q`, up.StatusExpiration, statusExpiration)
+		t.Fatalf(`UserProfile.StatusExpiration = %d, want %d`, up.StatusExpiration, statusExpiration)
 	}
 }
 

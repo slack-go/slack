@@ -37,8 +37,7 @@ func main() {
 	api := slack.New(userToken)
 	_, err := api.InviteUsersToConversation(*channelID, *userID)
 	if err != nil {
-		var errorResponse slack.SlackErrorResponse
-		if errors.As(err, &errorResponse) {
+		if errorResponse, ok := errors.AsType[slack.SlackErrorResponse](err); ok {
 			for _, e := range errorResponse.Errors {
 				if e.ConversationsInviteResponseError != nil {
 					fmt.Fprintf(os.Stderr, "error inviting user (%s) to conversation: %s\n", e.ConversationsInviteResponseError.User, e.ConversationsInviteResponseError.Error)

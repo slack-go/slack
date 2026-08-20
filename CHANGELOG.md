@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The minimum supported Go version is now 1.26. The library supports the two most recent Go
+  releases, so the test matrix covers Go 1.26 and Go 1.27.
+
 ## [0.29.0] - 2026-08-15
 
 ### Fixed

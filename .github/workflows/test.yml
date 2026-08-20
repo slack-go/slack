@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         go:
-          - "1.25"
           - "1.26"
+          - "1.27"
     name: test go-${{ matrix.go }}
     steps:
       - uses: actions/checkout@v7
@@ -31,8 +31,8 @@ jobs:
     strategy:
       matrix:
         go:
-          - "1.25"
           - "1.26"
+          - "1.27"
     name: lint go-${{ matrix.go }}
     steps:
       - uses: actions/setup-go@v7
@@ -45,11 +45,11 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
-          version: v2.10.1
+          version: v2.13.1
       - name: staticcheck
         uses: dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431 # 1.4.1
         with:
-          version: "2026.1"
+          version: "2026.2"
       - name: Check 'go mod tidy' makes no changes
         run: |
           go mod tidy

@@ -86,8 +86,6 @@ func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
 	assert.IsType(t, StatusCodeError{}, err)
 }
 
-func boolPtr(b bool) *bool { return &b }
-
 func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("nil omits fields", func(t *testing.T) {
 		msg := WebhookMessage{Text: "hello"}
@@ -100,8 +98,8 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("false is preserved", func(t *testing.T) {
 		msg := WebhookMessage{
 			Text:        "hello",
-			UnfurlLinks: boolPtr(false),
-			UnfurlMedia: boolPtr(false),
+			UnfurlLinks: new(false),
+			UnfurlMedia: new(false),
 		}
 		raw, err := json.Marshal(msg)
 		assert.NoError(t, err)
@@ -112,8 +110,8 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("true is preserved", func(t *testing.T) {
 		msg := WebhookMessage{
 			Text:        "hello",
-			UnfurlLinks: boolPtr(true),
-			UnfurlMedia: boolPtr(true),
+			UnfurlLinks: new(true),
+			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(msg)
 		assert.NoError(t, err)
@@ -124,8 +122,8 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("round-trip preserves values", func(t *testing.T) {
 		original := WebhookMessage{
 			Text:        "hello",
-			UnfurlLinks: boolPtr(false),
-			UnfurlMedia: boolPtr(true),
+			UnfurlLinks: new(false),
+			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(original)
 		assert.NoError(t, err)
