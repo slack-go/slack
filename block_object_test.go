@@ -24,7 +24,8 @@ func TestNewTextBlockObject(t *testing.T) {
 	assert.Equal(t, textObject.Type, "plain_text")
 	assert.Equal(t, textObject.Text, "test")
 	assert.True(t, *textObject.Emoji, "Emoji property should be true")
-	assert.False(t, textObject.Verbatim, "Verbatim should be false")
+	assert.NotNil(t, textObject.Verbatim)
+	assert.False(t, *textObject.Verbatim, "Verbatim should be false")
 }
 
 func TestNewConfirmationBlockObject(t *testing.T) {
@@ -81,6 +82,8 @@ func TestValidateTextBlockObject(t *testing.T) {
 	emojiFalse := new(bool)
 	*emojiTrue = true
 	*emojiFalse = false
+	verbatimFalse := new(bool)
+	*verbatimFalse = false
 
 	tests := []struct {
 		input    TextBlockObject
@@ -91,7 +94,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "plain_text",
 				Text:     "testText",
 				Emoji:    emojiFalse,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: nil,
 		},
@@ -100,7 +103,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "plain_text",
 				Text:     "testText",
 				Emoji:    emojiTrue,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: nil,
 		},
@@ -109,7 +112,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "plain_text",
 				Text:     "testText",
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: nil,
 		},
@@ -118,7 +121,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "testText",
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: nil,
 		},
@@ -127,7 +130,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "invalid",
 				Text:     "testText",
 				Emoji:    emojiFalse,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: errors.New("type must be either of plain_text or mrkdwn"),
 		},
@@ -136,7 +139,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "testText",
 				Emoji:    emojiTrue,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: errors.New("emoji cannot be set for mrkdwn type"),
 		},
@@ -145,7 +148,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "testText",
 				Emoji:    emojiFalse,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: errors.New("emoji cannot be set for mrkdwn type"),
 		},
@@ -154,7 +157,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "",
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: errors.New("text must have a minimum length of 1"),
 		},
@@ -163,7 +166,7 @@ func TestValidateTextBlockObject(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     strings.Repeat("a", 3001),
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: verbatimFalse,
 			},
 			expected: errors.New("text cannot be longer than 3000 characters"),
 		},
@@ -192,7 +195,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 				Type:     "plain_text",
 				Text:     "testText",
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: nil,
 			},
 			nil,
 		},
@@ -202,7 +205,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 				Type:     "plain_text",
 				Text:     ":+1:",
 				Emoji:    emojiTrue,
-				Verbatim: false,
+				Verbatim: nil,
 			},
 			nil,
 		},
@@ -212,7 +215,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 				Type:     "plain_text",
 				Text:     "No emojis allowed :(",
 				Emoji:    emojiFalse,
-				Verbatim: false,
+				Verbatim: nil,
 			},
 			nil,
 		},
@@ -222,7 +225,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "testText",
 				Emoji:    nil,
-				Verbatim: false,
+				Verbatim: nil,
 			},
 			nil,
 		},
@@ -232,7 +235,7 @@ func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 				Type:     "mrkdwn",
 				Text:     "No emojis allowed :(",
 				Emoji:    emojiFalse,
-				Verbatim: false,
+				Verbatim: nil,
 			},
 			nil,
 		},

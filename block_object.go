@@ -122,7 +122,7 @@ type TextBlockObject struct {
 	Type     string `json:"type"`
 	Text     string `json:"text"`
 	Emoji    *bool  `json:"emoji,omitempty"`
-	Verbatim bool   `json:"verbatim,omitempty"`
+	Verbatim *bool  `json:"verbatim,omitempty"`
 }
 
 // validateType enforces block objects for element and block parameters
@@ -181,7 +181,7 @@ func NewTextBlockObject(elementType, text string, emoji bool, verbatim bool) *Te
 		Type:     elementType,
 		Text:     text,
 		Emoji:    emojiPtr,
-		Verbatim: verbatim,
+		Verbatim: &verbatim,
 	}
 }
 
