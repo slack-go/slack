@@ -130,9 +130,11 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		sendErr(smc.runMessageReceiver(ctx, conn, messages))
 	}()
 
-	wg.Add(1)
-	go func(pingInterval time.Duration) {
-		defer wg.Done()
+	// OptionPingInterval writes maxPingInterval, so snapshot it here instead of
+	// reading the field from the goroutine below.
+	pingInterval := smc.maxPingInterval
+
+	wg.Go(func() {
 		defer func() {
 			// Detect when the connection is dead and try close connection.
 			if err := conn.Close(); err != nil {
@@ -168,7 +170,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 				}
 			}
 		}
-	}(smc.maxPingInterval)
+	})
 
 	wg.Wait()
 
