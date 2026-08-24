@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -80,6 +81,33 @@ func TestSlack_GetFile(t *testing.T) {
 		} else if test.expectError == true && err == nil {
 			log.Fatalf("Expected error but got none")
 		}
+	}
+}
+
+type htmlFileHTTPClient struct{}
+
+func (m *htmlFileHTTPClient) Do(*http.Request) (*http.Response, error) {
+	body := `<html><body>Browser not supported</body></html>`
+	return &http.Response{
+		StatusCode: 200,
+		Header:     http.Header{"Content-Type": []string{"text/html"}},
+		Body:       io.NopCloser(bytes.NewBufferString(body)),
+	}, nil
+}
+
+func TestSlack_GetFileRejectsHTML(t *testing.T) {
+	api := &Client{
+		endpoint:   "http://" + serverAddr + "/",
+		token:      "testing-token",
+		httpclient: &htmlFileHTTPClient{},
+	}
+
+	err := api.GetFile("https://files.slack.com/files-pri/T99999999-FGGGGGGGG/download/test.csv", &bytes.Buffer{})
+	if err == nil {
+		t.Fatal("expected error for HTML download response")
+	}
+	if !strings.Contains(err.Error(), "HTML instead of file content") {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 

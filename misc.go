@@ -306,8 +306,17 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 		return err
 	}
 
-	_, err = io.Copy(writer, resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
+	contentType := strings.ToLower(resp.Header.Get("Content-Type"))
+	if strings.Contains(contentType, "text/html") || bytes.Contains(bytes.ToLower(body), []byte("browser not supported")) {
+		return fmt.Errorf("file download returned HTML instead of file content (check token type and files:read scope); content-type=%q", resp.Header.Get("Content-Type"))
+	}
+
+	_, err = writer.Write(body)
 	return err
 }
 
