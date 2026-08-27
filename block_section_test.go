@@ -31,7 +31,8 @@ func TestNewBlockSectionContainsAddedTextBlockAndAccessory(t *testing.T) {
 	assert.Equal(t, textBlockInSection.Text, textBlockObject.Text)
 	assert.Equal(t, textBlockInSection.Type, textBlockObject.Type)
 	assert.Nil(t, textBlockInSection.Emoji)
-	assert.False(t, textBlockInSection.Verbatim)
+	assert.NotNil(t, textBlockInSection.Verbatim)
+	assert.False(t, *textBlockInSection.Verbatim)
 	assert.Equal(t, sectionBlock.Accessory.ImageElement, conflictImage)
 }
 
