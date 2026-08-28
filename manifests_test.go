@@ -21,7 +21,7 @@ func TestCreateManifest(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(resp, getTestManifestResponse()) {
+	if !reflect.DeepEqual(resp, getTestCreateManifestResponse()) {
 		t.Fatal(ErrIncorrectResponse)
 	}
 }
@@ -29,7 +29,7 @@ func TestCreateManifest(t *testing.T) {
 func handleCreateManifest(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	response, _ := json.Marshal(getTestManifestResponse())
+	response, _ := json.Marshal(getTestCreateManifestResponse())
 	rw.Write(response)
 }
 
@@ -178,8 +178,16 @@ func TestOAuthScopesOptionalFields(t *testing.T) {
 	}
 }
 
-func getTestManifestResponse() *ManifestResponse {
+func getTestCreateManifestResponse() *ManifestResponse {
 	return &ManifestResponse{
+		AppId: "A012345678",
+		Credentials: &ManifestCredentials{
+			ClientId:          "1234567890.1234567890123",
+			ClientSecret:      "abcdefghijklmnopqrstuvwxyz012345",
+			VerificationToken: "abcdefghijklmnopqrstuvwx",
+			SigningSecret:     "0123456789abcdef0123456789abcdef",
+		},
+		OAuthAuthorizeUrl: "https://slack.com/oauth/v2/authorize?client_id=1234567890.1234567890123&scope=chat:write&user_scope=",
 		SlackResponse: SlackResponse{
 			Ok: true,
 		},
