@@ -38,7 +38,13 @@ func (b *Backoff) Duration() (dur time.Duration) {
 	// calculate this duration
 	if dur = time.Duration(1 << uint(b.attempts)); dur > 0 {
 		dur *= b.Initial
-	} else {
+	}
+
+	// Cap the result at Max. This also covers both overflow paths: 1<<attempts
+	// turning non-positive once attempts is large enough, and the multiplication
+	// above overflowing, either of which would otherwise yield a non-positive
+	// delay and turn a retry loop into a busy loop.
+	if dur <= 0 || dur > b.Max {
 		dur = b.Max
 	}
 
