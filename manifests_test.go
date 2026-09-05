@@ -139,6 +139,15 @@ func getTestManifest() Manifest {
 			Description: "this is a test",
 		},
 		Features: Features{
+			AgentView: &AgentView{
+				AgentDescription: "this is a test agent",
+				SuggestedPrompts: []SuggestedPrompt{
+					{Title: "Test prompt", Message: "This is a test prompt"},
+				},
+				Actions: []AgentViewAction{
+					{Name: "test_action", Description: "This is a test action"},
+				},
+			},
 			AssistantView: &AssistantView{
 				AssistantDescription: "this is a test assistant",
 				SuggestedPrompts: []SuggestedPrompt{
@@ -197,9 +206,6 @@ func TestFeaturesAgentView(t *testing.T) {
 				{Name: "test_action", Description: "This is a test action"},
 			},
 		},
-		BotUser: BotUser{
-			DisplayName: "test bot",
-		},
 	}
 
 	data, err := json.Marshal(features)
@@ -238,9 +244,6 @@ func TestFeaturesAssistantView(t *testing.T) {
 			SuggestedPrompts: []SuggestedPrompt{
 				{Title: "Test prompt", Message: "This is a test prompt"},
 			},
-		},
-		BotUser: BotUser{
-			DisplayName: "test bot",
 		},
 	}
 
@@ -288,6 +291,25 @@ func TestFeaturesAIViewsOmittedWhenNil(t *testing.T) {
 	}
 	if strings.Contains(s, "assistant_view") {
 		t.Errorf("Expected assistant_view to be omitted from JSON: %s", s)
+	}
+
+	// Verify the description fields are always emitted, since Slack requires them
+	withViews := Features{
+		AgentView:     &AgentView{},
+		AssistantView: &AssistantView{},
+	}
+
+	data, err = json.Marshal(withViews)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	s = string(data)
+	if !strings.Contains(s, `"agent_description":""`) {
+		t.Errorf("Expected agent_description to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"assistant_description":""`) {
+		t.Errorf("Expected assistant_description to be present in JSON: %s", s)
 	}
 }
 
