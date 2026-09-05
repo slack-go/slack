@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `AgentView` and `AssistantView` fields to `Features` for app manifests, covering the
+  `features.agent_view` and `features.assistant_view` manifest groups (#1588).
+
 ### Changed
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go

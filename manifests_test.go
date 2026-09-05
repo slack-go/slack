@@ -138,6 +138,23 @@ func getTestManifest() Manifest {
 			Name:        "test",
 			Description: "this is a test",
 		},
+		Features: Features{
+			AgentView: &AgentView{
+				AgentDescription: "this is a test agent",
+				SuggestedPrompts: []SuggestedPrompt{
+					{Title: "Test prompt", Message: "This is a test prompt"},
+				},
+				Actions: []AgentViewAction{
+					{Name: "test_action", Description: "This is a test action"},
+				},
+			},
+			AssistantView: &AssistantView{
+				AssistantDescription: "this is a test assistant",
+				SuggestedPrompts: []SuggestedPrompt{
+					{Title: "Test prompt", Message: "This is a test prompt"},
+				},
+			},
+		},
 	}
 }
 
@@ -175,6 +192,124 @@ func TestOAuthScopesOptionalFields(t *testing.T) {
 	}
 	if strings.Contains(s, "user_optional") {
 		t.Errorf("Expected user_optional to be omitted from JSON: %s", s)
+	}
+}
+
+func TestFeaturesAgentView(t *testing.T) {
+	features := Features{
+		AgentView: &AgentView{
+			AgentDescription: "this is a test agent",
+			SuggestedPrompts: []SuggestedPrompt{
+				{Title: "Test prompt", Message: "This is a test prompt"},
+			},
+			Actions: []AgentViewAction{
+				{Name: "test_action", Description: "This is a test action"},
+			},
+		},
+	}
+
+	data, err := json.Marshal(features)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	s := string(data)
+	if !strings.Contains(s, `"agent_view"`) {
+		t.Errorf("Expected agent_view to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"agent_description"`) {
+		t.Errorf("Expected agent_description to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"suggested_prompts"`) {
+		t.Errorf("Expected suggested_prompts to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"actions"`) {
+		t.Errorf("Expected actions to be present in JSON: %s", s)
+	}
+
+	var roundtrip Features
+	if err := json.Unmarshal(data, &roundtrip); err != nil {
+		t.Fatalf("Unmarshal error: %s", err)
+	}
+
+	if !reflect.DeepEqual(features, roundtrip) {
+		t.Errorf("Round-trip mismatch: got %+v, want %+v", roundtrip, features)
+	}
+}
+
+func TestFeaturesAssistantView(t *testing.T) {
+	features := Features{
+		AssistantView: &AssistantView{
+			AssistantDescription: "this is a test assistant",
+			SuggestedPrompts: []SuggestedPrompt{
+				{Title: "Test prompt", Message: "This is a test prompt"},
+			},
+		},
+	}
+
+	data, err := json.Marshal(features)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	s := string(data)
+	if !strings.Contains(s, `"assistant_view"`) {
+		t.Errorf("Expected assistant_view to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"assistant_description"`) {
+		t.Errorf("Expected assistant_description to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"suggested_prompts"`) {
+		t.Errorf("Expected suggested_prompts to be present in JSON: %s", s)
+	}
+
+	var roundtrip Features
+	if err := json.Unmarshal(data, &roundtrip); err != nil {
+		t.Fatalf("Unmarshal error: %s", err)
+	}
+
+	if !reflect.DeepEqual(features, roundtrip) {
+		t.Errorf("Round-trip mismatch: got %+v, want %+v", roundtrip, features)
+	}
+}
+
+func TestFeaturesAIViewsOmittedWhenNil(t *testing.T) {
+	features := Features{
+		BotUser: BotUser{
+			DisplayName: "bot",
+		},
+	}
+
+	data, err := json.Marshal(features)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	s := string(data)
+	if strings.Contains(s, "agent_view") {
+		t.Errorf("Expected agent_view to be omitted from JSON: %s", s)
+	}
+	if strings.Contains(s, "assistant_view") {
+		t.Errorf("Expected assistant_view to be omitted from JSON: %s", s)
+	}
+
+	// Verify the description fields are always emitted, since Slack requires them
+	withViews := Features{
+		AgentView:     &AgentView{},
+		AssistantView: &AssistantView{},
+	}
+
+	data, err = json.Marshal(withViews)
+	if err != nil {
+		t.Fatalf("Marshal error: %s", err)
+	}
+
+	s = string(data)
+	if !strings.Contains(s, `"agent_description":""`) {
+		t.Errorf("Expected agent_description to be present in JSON: %s", s)
+	}
+	if !strings.Contains(s, `"assistant_description":""`) {
+		t.Errorf("Expected assistant_description to be present in JSON: %s", s)
 	}
 }
 
