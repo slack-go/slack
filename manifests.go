@@ -210,11 +210,38 @@ type Interactivity struct {
 
 // Features is a group of settings corresponding to the Features section of the app config pages
 type Features struct {
+	AgentView     *AgentView             `json:"agent_view,omitempty" yaml:"agent_view,omitempty"`
 	AppHome       AppHome                `json:"app_home,omitempty" yaml:"app_home,omitempty"`
+	AssistantView *AssistantView         `json:"assistant_view,omitempty" yaml:"assistant_view,omitempty"`
 	BotUser       BotUser                `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
 	Shortcuts     []Shortcut             `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
 	SlashCommands []ManifestSlashCommand `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
 	WorkflowSteps []WorkflowStep         `json:"workflow_steps,omitempty" yaml:"workflow_steps,omitempty"`
+}
+
+// AgentView is a group of settings that describe the agent view configuration for apps using AI features
+type AgentView struct {
+	AgentDescription string            `json:"agent_description" yaml:"agent_description"`
+	SuggestedPrompts []SuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
+	Actions          []AgentViewAction `json:"actions,omitempty" yaml:"actions,omitempty"`
+}
+
+// AssistantView is a group of settings that describe the assistant view configuration for apps using AI features
+type AssistantView struct {
+	AssistantDescription string            `json:"assistant_description" yaml:"assistant_description"`
+	SuggestedPrompts     []SuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
+}
+
+// SuggestedPrompt is a hard-coded prompt shown in the agent or assistant container
+type SuggestedPrompt struct {
+	Title   string `json:"title" yaml:"title"`
+	Message string `json:"message" yaml:"message"`
+}
+
+// AgentViewAction is an action available in the agent container
+type AgentViewAction struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
 }
 
 // AppHome is a group of settings that describe the App Home configuration
