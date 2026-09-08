@@ -43,6 +43,7 @@ func TestAttachment_UnmarshalMarshalJSON_WithBlocks(t *testing.T) {
       }
     ],
     "color": "#13A554",
+    "hide_color": true,
     "fallback": "[no preview available]"
   }`
 

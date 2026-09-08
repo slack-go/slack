@@ -61,8 +61,9 @@ type ConfirmationField struct {
 
 // Attachment contains all the information for an attachment
 type Attachment struct {
-	Color    string `json:"color,omitempty"`
-	Fallback string `json:"fallback,omitempty"`
+	Color     string `json:"color,omitempty"`
+	HideColor bool   `json:"hide_color,omitempty"`
+	Fallback  string `json:"fallback,omitempty"`
 
 	CallbackID string `json:"callback_id,omitempty"`
 	ID         int    `json:"id,omitempty"`
