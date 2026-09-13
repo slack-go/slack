@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- User group responses now decode documented string and numeric `user_count`
+  values and expose the remaining documented user group and preference fields.
+
 ### Changed
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
