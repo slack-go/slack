@@ -67,6 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Both methods still ask for it by default. `GetUserInfo` and `GetUserInfoContext` take the new
   option through a variadic `options ...ParamOption`, so an interface or mock that declares their
   old signature needs the new parameter (#1602, #1603).
+- App manifest APIs now expose the complete `apps.manifest.create` response,
+  optional workspace targeting for create requests, and lossless raw JSON
+  variants for the existing create, update, export, and validate methods.
 
 ### Changed
 
