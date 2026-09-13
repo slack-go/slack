@@ -60,18 +60,41 @@ func TestCreateUserGroup(t *testing.T) {
 
 	tests := []struct {
 		userGroup  UserGroup
+		options    []CreateUserGroupOption
 		wantParams map[string]string
 	}{
 		{
-			UserGroup{
+			userGroup: UserGroup{
 				Name:        "Marketing Team",
 				Description: "Marketing gurus, PR experts and product advocates.",
 				Handle:      "marketing-team"},
-			map[string]string{
+			wantParams: map[string]string{
 				"token":       "testing-token",
 				"name":        "Marketing Team",
 				"description": "Marketing gurus, PR experts and product advocates.",
 				"handle":      "marketing-team",
+			},
+		},
+		{
+			userGroup: UserGroup{Name: "Marketing Team"},
+			options: []CreateUserGroupOption{
+				CreateUserGroupOptionAdditionalChannels([]string{"channel1", "channel2"}),
+			},
+			wantParams: map[string]string{
+				"token":               "testing-token",
+				"name":                "Marketing Team",
+				"additional_channels": "channel1,channel2",
+			},
+		},
+		{
+			userGroup: UserGroup{Name: "Marketing Team"},
+			options: []CreateUserGroupOption{
+				CreateUserGroupOptionAdditionalChannels([]string{}),
+			},
+			wantParams: map[string]string{
+				"token":               "testing-token",
+				"name":                "Marketing Team",
+				"additional_channels": "",
 			},
 		},
 	}
@@ -81,7 +104,7 @@ func TestCreateUserGroup(t *testing.T) {
 
 	for i, test := range tests {
 		rh = newUserGroupsHandler()
-		_, err := api.CreateUserGroup(test.userGroup)
+		_, err := api.CreateUserGroup(test.userGroup, test.options...)
 		if err != nil {
 			t.Fatalf("%d: Unexpected error: %s", i, err)
 		}
@@ -242,24 +265,32 @@ func TestUpdateUserGroup(t *testing.T) {
 			[]UpdateUserGroupsOption{
 				UpdateUserGroupsOptionDescription(&presenceDescription),
 				UpdateUserGroupsOptionChannels([]string{"channel1", "channel2"}),
+				UpdateUserGroupsOptionAdditionalChannels([]string{"channel3", "channel4"}),
+				UpdateUserGroupsOptionIncludeCount(true),
 			},
 			map[string]string{
-				"token":       "testing-token",
-				"usergroup":   "S0615G0KT",
-				"description": "Marketing gurus, PR experts and product advocates.",
-				"channels":    "channel1,channel2",
+				"token":               "testing-token",
+				"usergroup":           "S0615G0KT",
+				"description":         "Marketing gurus, PR experts and product advocates.",
+				"channels":            "channel1,channel2",
+				"additional_channels": "channel3,channel4",
+				"include_count":       "true",
 			},
 		},
 		{
 			[]UpdateUserGroupsOption{
 				UpdateUserGroupsOptionDescription(&emptyDescription),
 				UpdateUserGroupsOptionChannels([]string{}),
+				UpdateUserGroupsOptionAdditionalChannels([]string{}),
+				UpdateUserGroupsOptionIncludeCount(false),
 			},
 			map[string]string{
-				"token":       "testing-token",
-				"usergroup":   "S0615G0KT",
-				"description": "",
-				"channels":    "",
+				"token":               "testing-token",
+				"usergroup":           "S0615G0KT",
+				"description":         "",
+				"channels":            "",
+				"additional_channels": "",
+				"include_count":       "false",
 			},
 		},
 	}
