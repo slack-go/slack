@@ -1,7 +1,10 @@
 package slack
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -26,12 +29,70 @@ type UserGroup struct {
 	Prefs       UserGroupPrefs `json:"prefs"`
 	UserCount   int            `json:"user_count"`
 	Users       []string       `json:"users"`
+
+	AutoProvision       bool     `json:"auto_provision,omitempty"`
+	ChannelCount        int      `json:"channel_count,omitempty"`
+	Channels            []string `json:"channels,omitempty"`
+	EnterpriseID        string   `json:"enterprise_id,omitempty"`
+	EnterpriseSubteamID string   `json:"enterprise_subteam_id,omitempty"`
+	IsEditingRestricted bool     `json:"is_editing_restricted,omitempty"`
+	IsIDPGroup          bool     `json:"is_idp_group,omitempty"`
+	IsMembershipLocked  bool     `json:"is_membership_locked,omitempty"`
+	IsOrgLevel          bool     `json:"is_org_level,omitempty"`
+	IsSection           bool     `json:"is_section,omitempty"`
+	IsSubteam           bool     `json:"is_subteam,omitempty"`
+	IsVisible           bool     `json:"is_visible,omitempty"`
+	Teams               []string `json:"teams,omitempty"`
+}
+
+// UnmarshalJSON accepts both documented user_count representations while
+// preserving UserCount as an int.
+func (userGroup *UserGroup) UnmarshalJSON(data []byte) error {
+	type userGroupAlias UserGroup
+	decoded := struct {
+		UserCount json.RawMessage `json:"user_count"`
+		*userGroupAlias
+	}{
+		userGroupAlias: (*userGroupAlias)(userGroup),
+	}
+
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+
+	rawCount := bytes.TrimSpace(decoded.UserCount)
+	if len(rawCount) == 0 || bytes.Equal(rawCount, []byte("null")) {
+		return nil
+	}
+
+	if rawCount[0] == '"' {
+		var value string
+		if err := json.Unmarshal(rawCount, &value); err != nil {
+			return fmt.Errorf("unmarshal user_count: %w", err)
+		}
+
+		count, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("unmarshal user_count: %w", err)
+		}
+		userGroup.UserCount = count
+		return nil
+	}
+
+	var count int
+	if err := json.Unmarshal(rawCount, &count); err != nil {
+		return fmt.Errorf("unmarshal user_count: %w", err)
+	}
+	userGroup.UserCount = count
+	return nil
 }
 
 // UserGroupPrefs contains default channels and groups (private channels)
 type UserGroupPrefs struct {
-	Channels []string `json:"channels"`
-	Groups   []string `json:"groups"`
+	Channels           []string `json:"channels"`
+	Groups             []string `json:"groups"`
+	FileID             string   `json:"file_id,omitempty"`
+	AdditionalChannels []string `json:"additional_channels,omitempty"`
 }
 
 type userGroupResponseFull struct {
