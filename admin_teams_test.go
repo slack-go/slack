@@ -3,11 +3,83 @@ package slack
 import (
 	"context"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestAdminTeamsList(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/admin.teams.list", r.URL.Path)
+		if !assert.NoError(t, r.ParseForm()) {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		assert.Equal(t, "testing-token", r.FormValue("token"))
+		assert.Equal(t, "250", r.FormValue("limit"))
+		assert.Equal(t, "cursor-1", r.FormValue("cursor"))
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{
+			"ok": true,
+			"teams": [{
+				"id": "T1234",
+				"name": "My Team",
+				"discoverability": "hidden",
+				"primary_owner": {
+					"user_id": "W1234",
+					"email": "owner@example.com"
+				},
+				"team_url": "https://example.slack.com/"
+			}],
+			"response_metadata": {
+				"next_cursor": "cursor-2"
+			}
+		}`))
+	}))
+	defer ts.Close()
+
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+	response, err := api.AdminTeamsList(context.Background(), AdminTeamsListParams{
+		Limit:  250,
+		Cursor: "cursor-1",
+	})
+	require.NoError(t, err)
+	require.Len(t, response.Teams, 1)
+
+	team := response.Teams[0]
+	assert.True(t, response.Ok)
+	assert.Equal(t, "T1234", team.ID)
+	assert.Equal(t, "My Team", team.Name)
+	assert.Equal(t, TeamDiscoverability("hidden"), team.Discoverability)
+	assert.Equal(t, "W1234", team.PrimaryOwner.UserID)
+	assert.Equal(t, "owner@example.com", team.PrimaryOwner.Email)
+	assert.Equal(t, "https://example.slack.com/", team.TeamURL)
+	assert.Equal(t, "cursor-2", response.ResponseMetadata.Cursor)
+}
+
+func TestAdminTeamsListError(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if !assert.NoError(t, r.ParseForm()) {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		assert.Empty(t, r.FormValue("limit"))
+		assert.Empty(t, r.FormValue("cursor"))
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": false, "error": "invalid_cursor"}`))
+	}))
+	defer ts.Close()
+
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+	response, err := api.AdminTeamsList(context.Background(), AdminTeamsListParams{})
+	assert.EqualError(t, err, "invalid_cursor")
+	assert.NotNil(t, response)
+}
 
 func getAdminTeamsSettingsInfo(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")

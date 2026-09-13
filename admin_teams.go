@@ -3,8 +3,61 @@ package slack
 import (
 	"context"
 	"net/url"
+	"strconv"
 	"strings"
 )
+
+// AdminTeamsListParams contains arguments for AdminTeamsList.
+type AdminTeamsListParams struct {
+	Limit  int
+	Cursor string
+}
+
+// AdminTeamPrimaryOwner represents the primary owner of a workspace.
+type AdminTeamPrimaryOwner struct {
+	UserID string `json:"user_id"`
+	Email  string `json:"email"`
+}
+
+// AdminTeam represents a workspace in an Enterprise organization.
+type AdminTeam struct {
+	ID              string                `json:"id"`
+	Name            string                `json:"name"`
+	Discoverability TeamDiscoverability   `json:"discoverability"`
+	PrimaryOwner    AdminTeamPrimaryOwner `json:"primary_owner"`
+	TeamURL         string                `json:"team_url"`
+}
+
+// AdminTeamsListResponse represents the response from admin.teams.list.
+type AdminTeamsListResponse struct {
+	SlackResponse
+	Teams []AdminTeam `json:"teams"`
+}
+
+// AdminTeamsList lists all workspaces in an Enterprise organization.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.teams.list
+func (api *Client) AdminTeamsList(ctx context.Context, params AdminTeamsListParams) (*AdminTeamsListResponse, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	if params.Limit > 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
+
+	if params.Cursor != "" {
+		values.Add("cursor", params.Cursor)
+	}
+
+	response := &AdminTeamsListResponse{}
+	err := api.postMethod(ctx, "admin.teams.list", values, response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, response.Err()
+}
 
 // AdminTeamSettings contains workspace settings returned by admin.teams.settings.info.
 type AdminTeamSettings struct {
