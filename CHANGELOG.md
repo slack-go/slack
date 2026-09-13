@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `users.info` and `users.list` callers can configure `include_locale` while
+  existing methods continue to include locale information by default.
+
 ### Changed
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
