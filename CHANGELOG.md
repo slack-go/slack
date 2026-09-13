@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- App manifest APIs now expose the complete `apps.manifest.create` response,
+  optional workspace targeting for create requests, and lossless raw JSON
+  variants for the existing create, update, export, and validate methods.
+
 ### Changed
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
