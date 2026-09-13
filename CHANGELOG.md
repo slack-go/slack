@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UserGroup` now exposes `AutoProvision`, `ChannelCount`, `EnterpriseSubteamID`,
   `IsEditingRestricted`, `IsIDPGroup`, `IsMembershipLocked`, `IsOrgLevel`, `IsSection`,
   `IsSubteam` and `IsVisible` (#1604, #1605).
+- `users.info` and `users.list` callers can configure `include_locale` while
+  existing methods continue to include locale information by default.
 
 ### Changed
 
