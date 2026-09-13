@@ -53,6 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `AdminTeamsList` for the
   [`admin.teams.list`](https://docs.slack.dev/reference/methods/admin.teams.list) method, with
   `AdminTeamsListOptionLimit` and `AdminTeamsListOptionCursor` (#1592, #1593).
+- Added `AdminUsersList` support for the documented `admin.users.list` filters,
+  response fields, and cursor pagination.
 
 ### Changed
 
