@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `slackevents`: Add the Agent messaging events
+  [`app_context_changed`](https://docs.slack.dev/reference/events/app_context_changed)
+  (`AppContextChangedEvent`),
+  [`agent_session_stopped`](https://docs.slack.dev/reference/events/agent_session_stopped)
+  (`AgentSessionStoppedEvent`) and
+  [`agent_session_title_changed`](https://docs.slack.dev/reference/events/agent_session_title_changed)
+  (`AgentSessionTitleChangedEvent`). The shared `AppContext` object is also exposed as
+  `AppHomeOpenedEvent.Context` and `MessageEvent.AppContext`, which Slack populates once
+  the app subscribes to `app_context_changed`.
+- `slackevents`: `EventsAPICallbackEvent` now unmarshals `authorizations`, which is the
+  only place some events (such as `app_context_changed`) identify the acting user.
+- Add `SetAgentSessionStatus` and `RenameAgentSession` (plus `Context` variants) for the
+  [`agents.sessions.setStatus`](https://docs.slack.dev/reference/methods/agents.sessions.setStatus)
+  and [`agents.sessions.rename`](https://docs.slack.dev/reference/methods/agents.sessions.rename)
+  methods, with `AgentSessionStatus*` constants for the accepted statuses.
+
 ### Changed
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
