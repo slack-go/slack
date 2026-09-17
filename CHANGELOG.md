@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`AgentSessionTitleChangedEvent`). The shared `AppContext` object is also exposed as
   `AppHomeOpenedEvent.Context` and `MessageEvent.AppContext`, which Slack populates once
   the app subscribes to `app_context_changed`.
-- `slackevents`: `EventsAPICallbackEvent` now unmarshals `authorizations`, which is the
-  only place some events (such as `app_context_changed`) identify the acting user.
+- `slackevents`: `EventsAPICallbackEvent` now unmarshals `authorizations`, so the
+  installations an event was delivered for can be read without a second request.
 - Add `SetAgentSessionStatus` and `RenameAgentSession` (plus `Context` variants) for the
   [`agents.sessions.setStatus`](https://docs.slack.dev/reference/methods/agents.sessions.setStatus)
   and [`agents.sessions.rename`](https://docs.slack.dev/reference/methods/agents.sessions.rename)

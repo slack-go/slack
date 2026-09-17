@@ -3370,7 +3370,10 @@ func TestAppContextChangedEvent(t *testing.T) {
 					"team_id": "T0ABCDE6543"
 				}
 			]
-		}
+		},
+		"channel": "D0123ABC456",
+		"user": "U123ABC456",
+		"event_ts": "1789656581.933646"
 	}`)
 
 	var event AppContextChangedEvent
@@ -3382,6 +3385,9 @@ func TestAppContextChangedEvent(t *testing.T) {
 	assert.Equal(t, "slack#/types/channel_id", event.Context.Entities[0].Type)
 	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
 	assert.Equal(t, "T0ABCDE6543", event.Context.Entities[0].TeamID)
+	assert.Equal(t, "D0123ABC456", event.Channel)
+	assert.Equal(t, "U123ABC456", event.User)
+	assert.Equal(t, "1789656581.933646", event.EventTimeStamp)
 }
 
 func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
@@ -3399,7 +3405,8 @@ func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
 }
 
 func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
-	// The acting user is only present in the outer authorizations.
+	// Shape as delivered by Slack: the acting user and DM are on the event, and the
+	// authorizations list the bot installation.
 	fullEventJSON := []byte(`{
 		"token": "XXYYZZ",
 		"team_id": "T123ABC456",
@@ -3411,22 +3418,27 @@ func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
 					{
 						"type": "slack#/types/channel_id",
 						"value": "C01234ABDCE",
-						"team_id": "T0ABCDE6543"
+						"team_id": "T123ABC456"
 					}
 				]
-			}
+			},
+			"channel": "D0123ABC456",
+			"user": "U123ABC456",
+			"event_ts": "1789656581.933646"
 		},
 		"type": "event_callback",
+		"event_id": "Ev123ABC456",
+		"event_time": 1789656581,
 		"authorizations": [
 			{
+				"enterprise_id": null,
 				"team_id": "T123ABC456",
-				"user_id": "U123ABC456",
-				"is_bot": false,
+				"user_id": "U0BOT00001",
+				"is_bot": true,
 				"is_enterprise_install": false
 			}
 		],
-		"event_id": "Ev123ABC456",
-		"event_time": 123456789
+		"is_ext_shared_channel": false
 	}`)
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
@@ -3437,13 +3449,14 @@ func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
 	assert.True(t, ok)
 	assert.Len(t, event.Context.Entities, 1)
 	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
+	assert.Equal(t, "D0123ABC456", event.Channel)
+	assert.Equal(t, "U123ABC456", event.User)
 
 	cb, ok := parsedEvent.Data.(*EventsAPICallbackEvent)
 	assert.True(t, ok)
 	assert.Len(t, cb.Authorizations, 1)
-	assert.Equal(t, "U123ABC456", cb.Authorizations[0].UserID)
-	assert.Equal(t, "T123ABC456", cb.Authorizations[0].TeamID)
-	assert.False(t, cb.Authorizations[0].IsBot)
+	assert.Equal(t, "U0BOT00001", cb.Authorizations[0].UserID)
+	assert.True(t, cb.Authorizations[0].IsBot)
 }
 
 func TestAgentSessionStoppedEvent(t *testing.T) {

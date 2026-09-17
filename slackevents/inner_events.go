@@ -62,11 +62,14 @@ type AppContextEntity struct {
 }
 
 // AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the
-// user's active context changes while the app is open. The acting user is not in the
-// event itself; read it from the outer EventsAPICallbackEvent.Authorizations.
+// user's active context changes while the app is open. Channel is the DM between the
+// user and the app.
 type AppContextChangedEvent struct {
-	Type    string     `json:"type"`
-	Context AppContext `json:"context"`
+	Type           string     `json:"type"`
+	Context        AppContext `json:"context"`
+	Channel        string     `json:"channel,omitempty"`
+	User           string     `json:"user,omitempty"`
+	EventTimeStamp string     `json:"event_ts,omitempty"`
 }
 
 // AgentSessionStoppedEvent is an (inner) EventsAPI subscribable event, sent when a
