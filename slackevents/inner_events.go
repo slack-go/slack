@@ -48,6 +48,54 @@ type AssistantThreadContext struct {
 	EnterpriseID string `json:"enterprise_id"`
 }
 
+// AppContext describes what the user currently has open in Slack. Entities are
+// ordered by relevance. Slack sends an empty object when nothing is being viewed.
+type AppContext struct {
+	Entities []AppContextEntity `json:"entities,omitempty"`
+}
+
+// AppContextEntity is a single item the user has open, such as a channel or canvas.
+type AppContextEntity struct {
+	Type   string `json:"type"`
+	Value  string `json:"value"`
+	TeamID string `json:"team_id,omitempty"`
+}
+
+// AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the
+// user's active context changes while the app is open. The acting user is not in the
+// event itself; read it from the outer EventsAPICallbackEvent.Authorizations.
+type AppContextChangedEvent struct {
+	Type    string     `json:"type"`
+	Context AppContext `json:"context"`
+}
+
+// AgentSessionStoppedEvent is an (inner) EventsAPI subscribable event, sent when a
+// user stops an agent session. StreamingMessageTimeStamps lists the in-progress
+// streams that Slack halted.
+type AgentSessionStoppedEvent struct {
+	Type                       string   `json:"type"`
+	Channel                    string   `json:"channel"`
+	ThreadTimeStamp            string   `json:"thread_ts"`
+	User                       string   `json:"user"`
+	StreamingMessageTimeStamps []string `json:"streaming_message_ts,omitempty"`
+	EventTimeStamp             string   `json:"event_ts"`
+}
+
+// AgentSessionTitleChangedEvent is an (inner) EventsAPI subscribable event, sent when
+// a user renames an agent session. PreviousTitle is omitted when the session had no
+// title before.
+type AgentSessionTitleChangedEvent struct {
+	Type            string `json:"type"`
+	Channel         string `json:"channel"`
+	ThreadTimeStamp string `json:"thread_ts"`
+	User            string `json:"user"`
+	TeamID          string `json:"team_id"`
+	EnterpriseID    string `json:"enterprise_id,omitempty"`
+	Title           string `json:"title"`
+	PreviousTitle   string `json:"previous_title,omitempty"`
+	EventTimeStamp  string `json:"event_ts"`
+}
+
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
 	Type            string `json:"type"`
@@ -88,6 +136,8 @@ type AppHomeOpenedEvent struct {
 	EventTimeStamp string      `json:"event_ts"`
 	Tab            string      `json:"tab"`
 	View           *slack.View `json:"view,omitempty"`
+	// Context is only sent when the app subscribes to app_context_changed.
+	Context *AppContext `json:"context,omitempty"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.
@@ -344,6 +394,8 @@ type MessageEvent struct {
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
 	// ActionToken contains the top-level action token for Data Access API queries.
 	ActionToken string `json:"action_token,omitempty"`
+	// AppContext is only sent on message.im when the app subscribes to app_context_changed.
+	AppContext *AppContext `json:"app_context,omitempty"`
 
 	// Huddle-related fields (subtype "huddle_thread")
 	Room            *slack.HuddleRoom `json:"room,omitempty"`
@@ -1230,6 +1282,12 @@ type SharedChannelInviteRequestedEvent struct {
 type EventsAPIType string
 
 const (
+	// AgentSessionStopped is sent when a user stops an agent session
+	AgentSessionStopped = EventsAPIType("agent_session_stopped")
+	// AgentSessionTitleChanged is sent when a user renames an agent session
+	AgentSessionTitleChanged = EventsAPIType("agent_session_title_changed")
+	// AppContextChanged is sent when the user's active context changes while the app is open
+	AppContextChanged = EventsAPIType("app_context_changed")
 	// AppDeleted is an event when an app is deleted from a workspace
 	AppDeleted = EventsAPIType("app_deleted")
 	// AppHomeOpened Your Slack app home was opened
@@ -1400,6 +1458,9 @@ const (
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]any{
+	AgentSessionStopped:           AgentSessionStoppedEvent{},
+	AgentSessionTitleChanged:      AgentSessionTitleChangedEvent{},
+	AppContextChanged:             AppContextChangedEvent{},
 	AppDeleted:                    AppDeletedEvent{},
 	AppHomeOpened:                 AppHomeOpenedEvent{},
 	AppInstalled:                  AppInstalledEvent{},

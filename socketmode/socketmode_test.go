@@ -227,6 +227,14 @@ func TestEventParsing(t *testing.T) {
 					EventID:      "Ev01JZ2T7S3U",
 					EventTime:    1610927831,
 					EventContext: "1-app_mention-redacted-redacted",
+					Authorizations: []slack.EventAuthorization{
+						{
+							TeamID:              "redacted",
+							UserID:              "redacted",
+							IsBot:               true,
+							IsEnterpriseInstall: false,
+						},
+					},
 				},
 				InnerEvent: slackevents.EventsAPIInnerEvent{
 					Type: string(slackevents.AppMention),

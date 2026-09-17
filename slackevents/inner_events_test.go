@@ -3358,3 +3358,326 @@ func TestParseEventAPIEntityDetailsRequested(t *testing.T) {
 		t.Errorf("Expected link.domain to be 'example.com', got %s", innerEvent.Link.Domain)
 	}
 }
+
+func TestAppContextChangedEvent(t *testing.T) {
+	rawE := []byte(`{
+		"type": "app_context_changed",
+		"context": {
+			"entities": [
+				{
+					"type": "slack#/types/channel_id",
+					"value": "C01234ABDCE",
+					"team_id": "T0ABCDE6543"
+				}
+			]
+		}
+	}`)
+
+	var event AppContextChangedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "app_context_changed", event.Type)
+	assert.Len(t, event.Context.Entities, 1)
+	assert.Equal(t, "slack#/types/channel_id", event.Context.Entities[0].Type)
+	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
+	assert.Equal(t, "T0ABCDE6543", event.Context.Entities[0].TeamID)
+}
+
+func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
+	rawE := []byte(`{
+		"type": "app_context_changed",
+		"context": {}
+	}`)
+
+	var event AppContextChangedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "app_context_changed", event.Type)
+	assert.Empty(t, event.Context.Entities)
+}
+
+func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
+	// The acting user is only present in the outer authorizations.
+	fullEventJSON := []byte(`{
+		"token": "XXYYZZ",
+		"team_id": "T123ABC456",
+		"api_app_id": "A123ABC456",
+		"event": {
+			"type": "app_context_changed",
+			"context": {
+				"entities": [
+					{
+						"type": "slack#/types/channel_id",
+						"value": "C01234ABDCE",
+						"team_id": "T0ABCDE6543"
+					}
+				]
+			}
+		},
+		"type": "event_callback",
+		"authorizations": [
+			{
+				"team_id": "T123ABC456",
+				"user_id": "U123ABC456",
+				"is_bot": false,
+				"is_enterprise_install": false
+			}
+		],
+		"event_id": "Ev123ABC456",
+		"event_time": 123456789
+	}`)
+
+	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
+
+	assert.NoError(t, err)
+	assert.Equal(t, "app_context_changed", parsedEvent.InnerEvent.Type)
+	event, ok := parsedEvent.InnerEvent.Data.(*AppContextChangedEvent)
+	assert.True(t, ok)
+	assert.Len(t, event.Context.Entities, 1)
+	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
+
+	cb, ok := parsedEvent.Data.(*EventsAPICallbackEvent)
+	assert.True(t, ok)
+	assert.Len(t, cb.Authorizations, 1)
+	assert.Equal(t, "U123ABC456", cb.Authorizations[0].UserID)
+	assert.Equal(t, "T123ABC456", cb.Authorizations[0].TeamID)
+	assert.False(t, cb.Authorizations[0].IsBot)
+}
+
+func TestAgentSessionStoppedEvent(t *testing.T) {
+	rawE := []byte(`{
+		"channel": "C0123ABC456",
+		"event_ts": "1783536983.783769",
+		"streaming_message_ts": ["1782234987.693923"],
+		"thread_ts": "1782234671.392669",
+		"type": "agent_session_stopped",
+		"user": "U123ABC456"
+	}`)
+
+	var event AgentSessionStoppedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "agent_session_stopped", event.Type)
+	assert.Equal(t, "C0123ABC456", event.Channel)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+	assert.Equal(t, "U123ABC456", event.User)
+	assert.Equal(t, "1783536983.783769", event.EventTimeStamp)
+	assert.Equal(t, []string{"1782234987.693923"}, event.StreamingMessageTimeStamps)
+}
+
+func TestAgentSessionStoppedEvent_NoStreams(t *testing.T) {
+	rawE := []byte(`{
+		"channel": "C0123ABC456",
+		"event_ts": "1783536983.783769",
+		"streaming_message_ts": [],
+		"thread_ts": "1782234671.392669",
+		"type": "agent_session_stopped",
+		"user": "U123ABC456"
+	}`)
+
+	var event AgentSessionStoppedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Empty(t, event.StreamingMessageTimeStamps)
+}
+
+func TestAgentSessionStoppedEvent_FullEventParsing(t *testing.T) {
+	fullEventJSON := []byte(`{
+		"token": "XXYYZZ",
+		"team_id": "T0123ABC456",
+		"api_app_id": "A123ABC456",
+		"event": {
+			"channel": "C0123ABC456",
+			"event_ts": "1783536983.783769",
+			"streaming_message_ts": ["1782234987.693923"],
+			"thread_ts": "1782234671.392669",
+			"type": "agent_session_stopped",
+			"user": "U123ABC456"
+		},
+		"type": "event_callback",
+		"event_id": "Ev123ABC456",
+		"event_time": 1783536983
+	}`)
+
+	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
+
+	assert.NoError(t, err)
+	assert.Equal(t, "agent_session_stopped", parsedEvent.InnerEvent.Type)
+	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionStoppedEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "C0123ABC456", event.Channel)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+}
+
+func TestAgentSessionTitleChangedEvent(t *testing.T) {
+	rawE := []byte(`{
+		"channel": "C0123ABC456",
+		"event_ts": "1783536983.783769",
+		"previous_title": "Scuba diving research",
+		"team_id": "T0123ABC456",
+		"thread_ts": "1782234671.392669",
+		"title": "Bora Bora trip prep",
+		"type": "agent_session_title_changed",
+		"user": "U123ABC456"
+	}`)
+
+	var event AgentSessionTitleChangedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "agent_session_title_changed", event.Type)
+	assert.Equal(t, "C0123ABC456", event.Channel)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+	assert.Equal(t, "U123ABC456", event.User)
+	assert.Equal(t, "T0123ABC456", event.TeamID)
+	assert.Equal(t, "Bora Bora trip prep", event.Title)
+	assert.Equal(t, "Scuba diving research", event.PreviousTitle)
+	assert.Equal(t, "1783536983.783769", event.EventTimeStamp)
+}
+
+func TestAgentSessionTitleChangedEvent_NoPreviousTitle(t *testing.T) {
+	rawE := []byte(`{
+		"channel": "C0123ABC456",
+		"event_ts": "1783536983.783769",
+		"team_id": "T0123ABC456",
+		"thread_ts": "1782234671.392669",
+		"title": "Bora Bora trip prep",
+		"type": "agent_session_title_changed",
+		"user": "U123ABC456"
+	}`)
+
+	var event AgentSessionTitleChangedEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "Bora Bora trip prep", event.Title)
+	assert.Empty(t, event.PreviousTitle)
+}
+
+func TestAgentSessionTitleChangedEvent_FullEventParsing(t *testing.T) {
+	fullEventJSON := []byte(`{
+		"token": "XXYYZZ",
+		"team_id": "T0123ABC456",
+		"api_app_id": "A123ABC456",
+		"event": {
+			"channel": "C0123ABC456",
+			"event_ts": "1783536983.783769",
+			"previous_title": "Scuba diving research",
+			"team_id": "T0123ABC456",
+			"thread_ts": "1782234671.392669",
+			"title": "Bora Bora trip prep",
+			"type": "agent_session_title_changed",
+			"user": "U123ABC456"
+		},
+		"type": "event_callback",
+		"event_id": "Ev123ABC456",
+		"event_time": 1783536983
+	}`)
+
+	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
+
+	assert.NoError(t, err)
+	assert.Equal(t, "agent_session_title_changed", parsedEvent.InnerEvent.Type)
+	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionTitleChangedEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "Bora Bora trip prep", event.Title)
+	assert.Equal(t, "Scuba diving research", event.PreviousTitle)
+}
+
+func TestAppHomeOpenedEvent_WithContext(t *testing.T) {
+	eventJSON := []byte(`{
+		"type": "app_home_opened",
+		"user": "U12345678",
+		"channel": "D12345678",
+		"tab": "home",
+		"event_ts": "1747319568.267214",
+		"context": {
+			"entities": [
+				{
+					"type": "slack#/types/channel_id",
+					"value": "C01234ABDCE",
+					"team_id": "T0ABCDE6543"
+				}
+			]
+		}
+	}`)
+
+	var event AppHomeOpenedEvent
+	err := json.Unmarshal(eventJSON, &event)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "home", event.Tab)
+	assert.NotNil(t, event.Context)
+	assert.Len(t, event.Context.Entities, 1)
+	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
+}
+
+func TestAppHomeOpenedEvent_WithoutContext(t *testing.T) {
+	eventJSON := []byte(`{
+		"type": "app_home_opened",
+		"user": "U12345678",
+		"channel": "D12345678",
+		"tab": "home",
+		"event_ts": "1747319568.267214"
+	}`)
+
+	var event AppHomeOpenedEvent
+	err := json.Unmarshal(eventJSON, &event)
+
+	assert.NoError(t, err)
+	assert.Nil(t, event.Context)
+}
+
+func TestMessageEventWithAppContext(t *testing.T) {
+	rawE := []byte(`{
+		"type": "message",
+		"user": "U123ABC456",
+		"text": "What is this channel about?",
+		"ts": "1355517523.000005",
+		"channel": "D123ABC456",
+		"channel_type": "im",
+		"event_ts": "1355517523.000005",
+		"app_context": {
+			"entities": [
+				{
+					"type": "slack#/types/channel_id",
+					"value": "C01234ABDCE",
+					"team_id": "T0ABCDE6543"
+				}
+			]
+		}
+	}`)
+
+	var event MessageEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.True(t, event.IsIM())
+	assert.NotNil(t, event.AppContext)
+	assert.Len(t, event.AppContext.Entities, 1)
+	assert.Equal(t, "slack#/types/channel_id", event.AppContext.Entities[0].Type)
+	assert.Equal(t, "C01234ABDCE", event.AppContext.Entities[0].Value)
+	assert.Equal(t, "T0ABCDE6543", event.AppContext.Entities[0].TeamID)
+}
+
+func TestMessageEventWithoutAppContext(t *testing.T) {
+	rawE := []byte(`{
+		"type": "message",
+		"user": "U123ABC456",
+		"text": "hello",
+		"ts": "1355517523.000005",
+		"channel": "D123ABC456",
+		"channel_type": "im",
+		"event_ts": "1355517523.000005"
+	}`)
+
+	var event MessageEvent
+	err := json.Unmarshal(rawE, &event)
+
+	assert.NoError(t, err)
+	assert.Nil(t, event.AppContext)
+}
