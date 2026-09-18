@@ -63,7 +63,7 @@ func TestCallBackEventAuthorizations(t *testing.T) {
 						"enterprise_id": null,
 						"team_id": "TXXXXXXXX",
 						"user_id": "UXXXXXXX1",
-						"is_bot": false,
+						"is_bot": true,
 						"is_enterprise_install": false
 					}
 				],
@@ -85,8 +85,8 @@ func TestCallBackEventAuthorizations(t *testing.T) {
 	if cb.Authorizations[0].TeamID != "TXXXXXXXX" {
 		t.Errorf("expected TeamID TXXXXXXXX, got %q", cb.Authorizations[0].TeamID)
 	}
-	if cb.Authorizations[0].IsBot {
-		t.Errorf("expected IsBot to be false, got true")
+	if !cb.Authorizations[0].IsBot {
+		t.Errorf("expected IsBot to be true, got false")
 	}
 }
 

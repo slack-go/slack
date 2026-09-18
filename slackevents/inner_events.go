@@ -54,22 +54,22 @@ type AppContext struct {
 	Entities []AppContextEntity `json:"entities,omitempty"`
 }
 
-// AppContextEntity is a single item the user has open, such as a channel or canvas.
+// AppContextEntity is one item the user has open, such as a channel.
 type AppContextEntity struct {
 	Type   string `json:"type"`
 	Value  string `json:"value"`
-	TeamID string `json:"team_id,omitempty"`
+	TeamID string `json:"team_id"`
 }
 
 // AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the
-// user's active context changes while the app is open. Channel is the DM between the
-// user and the app.
+// user's active context changes while the app is open. Channel is the app's DM with
+// the user.
 type AppContextChangedEvent struct {
 	Type           string     `json:"type"`
 	Context        AppContext `json:"context"`
-	Channel        string     `json:"channel,omitempty"`
-	User           string     `json:"user,omitempty"`
-	EventTimeStamp string     `json:"event_ts,omitempty"`
+	Channel        string     `json:"channel"`
+	User           string     `json:"user"`
+	EventTimeStamp string     `json:"event_ts"`
 }
 
 // AgentSessionStoppedEvent is an (inner) EventsAPI subscribable event, sent when a

@@ -46,8 +46,7 @@ type EventsAPICallbackEvent struct {
 	EventTime          int              `json:"event_time"`
 	EventContext       string           `json:"event_context"`
 	IsExtSharedChannel bool             `json:"is_ext_shared_channel"`
-	// Authorizations lists the installations this event was delivered for. Some events,
-	// such as app_context_changed, only identify the acting user here.
+	// Authorizations lists the installations this event was delivered for.
 	Authorizations []slack.EventAuthorization `json:"authorizations,omitempty"`
 }
 

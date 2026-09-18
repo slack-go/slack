@@ -14,8 +14,7 @@ const (
 )
 
 // AgentSessionSetStatusParameters are the parameters for SetAgentSessionStatus.
-// A session is identified by ChannelID plus an optional ThreadTS and is created if
-// it does not exist yet. Title and InitiatorUserID only apply on creation.
+// Title and InitiatorUserID only apply when the call creates the session.
 type AgentSessionSetStatusParameters struct {
 	Status          string `json:"status"`
 	ChannelID       string `json:"channel_id,omitempty"`
@@ -28,8 +27,7 @@ type AgentSessionSetStatusParameters struct {
 }
 
 // AgentSessionSetStatusResponse is the response from agents.sessions.setStatus.
-// Status is the session-level status derived from every agent in the session;
-// AgentStatus is the calling agent's own status.
+// Status covers every agent in the session; AgentStatus is the caller's own.
 type AgentSessionSetStatusResponse struct {
 	SlackResponse
 	Status      string `json:"status"`
