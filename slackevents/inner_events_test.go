@@ -3387,7 +3387,7 @@ func TestAppContextChangedEvent(t *testing.T) {
 	assert.Equal(t, "T0ABCDE6543", event.Context.Entities[0].TeamID)
 	assert.Equal(t, "D0123ABC456", event.Channel)
 	assert.Equal(t, "U123ABC456", event.User)
-	assert.Equal(t, "1789656581.933646", event.EventTimeStamp)
+	assert.Equal(t, "1789656581.933646", event.EventTimestamp)
 }
 
 func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
@@ -3402,6 +3402,58 @@ func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "app_context_changed", event.Type)
 	assert.Empty(t, event.Context.Entities)
+}
+
+func TestAppContextEntity_ValueShapes(t *testing.T) {
+	rawE := []byte(`{
+		"entities": [
+			{"type": "slack#/types/channel_id", "value": "C0123", "team_id": "T0123", "enterprise_id": "E0123"},
+			{"type": "slack#/types/canvas_id", "value": "F0123"},
+			{"type": "slack#/types/list_id", "value": "F0456"},
+			{"type": "slack#/types/message_context", "value": {"channel_id": "C0123", "message_ts": "1789656581.933646"}},
+			{"type": "slack#/types/something_new", "value": {"id": "X1"}}
+		]
+	}`)
+
+	var ctx AppContext
+	err := json.Unmarshal(rawE, &ctx)
+
+	assert.NoError(t, err)
+	assert.Len(t, ctx.Entities, 5)
+
+	channel := ctx.Entities[0]
+	assert.Equal(t, AppContextEntityChannel, channel.Type)
+	assert.Equal(t, "C0123", channel.Value)
+	assert.Nil(t, channel.Message)
+	assert.Equal(t, "T0123", channel.TeamID)
+	assert.Equal(t, "E0123", channel.EnterpriseID)
+
+	assert.Equal(t, "F0123", ctx.Entities[1].Value)
+	assert.Equal(t, "F0456", ctx.Entities[2].Value)
+
+	message := ctx.Entities[3]
+	assert.Equal(t, AppContextEntityMessageContext, message.Type)
+	assert.Empty(t, message.Value)
+	if assert.NotNil(t, message.Message) {
+		assert.Equal(t, "C0123", message.Message.ChannelID)
+		assert.Equal(t, "1789656581.933646", message.Message.MessageTimeStamp)
+	}
+
+	unknown := ctx.Entities[4]
+	assert.Empty(t, unknown.Value)
+	assert.Nil(t, unknown.Message)
+	assert.JSONEq(t, `{"id": "X1"}`, string(unknown.RawValue))
+}
+
+func TestAppContextEntity_RoundTrip(t *testing.T) {
+	rawE := `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"},"team_id":"T0123"}`
+
+	var entity AppContextEntity
+	assert.NoError(t, json.Unmarshal([]byte(rawE), &entity))
+
+	out, err := json.Marshal(entity)
+	assert.NoError(t, err)
+	assert.JSONEq(t, rawE, string(out))
 }
 
 func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
@@ -3477,8 +3529,8 @@ func TestAgentSessionStoppedEvent(t *testing.T) {
 	assert.Equal(t, "C0123ABC456", event.Channel)
 	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
 	assert.Equal(t, "U123ABC456", event.User)
-	assert.Equal(t, "1783536983.783769", event.EventTimeStamp)
-	assert.Equal(t, []string{"1782234987.693923"}, event.StreamingMessageTimeStamps)
+	assert.Equal(t, "1783536983.783769", event.EventTimestamp)
+	assert.Equal(t, []string{"1782234987.693923"}, event.StreamingMessageTimestamps)
 }
 
 func TestAgentSessionStoppedEvent_NoStreams(t *testing.T) {
@@ -3495,7 +3547,7 @@ func TestAgentSessionStoppedEvent_NoStreams(t *testing.T) {
 	err := json.Unmarshal(rawE, &event)
 
 	assert.NoError(t, err)
-	assert.Empty(t, event.StreamingMessageTimeStamps)
+	assert.Empty(t, event.StreamingMessageTimestamps)
 }
 
 func TestAgentSessionStoppedEvent_FullEventParsing(t *testing.T) {
@@ -3549,7 +3601,7 @@ func TestAgentSessionTitleChangedEvent(t *testing.T) {
 	assert.Equal(t, "T0123ABC456", event.TeamID)
 	assert.Equal(t, "Bora Bora trip prep", event.Title)
 	assert.Equal(t, "Scuba diving research", event.PreviousTitle)
-	assert.Equal(t, "1783536983.783769", event.EventTimeStamp)
+	assert.Equal(t, "1783536983.783769", event.EventTimestamp)
 }
 
 func TestAgentSessionTitleChangedEvent_NoPreviousTitle(t *testing.T) {

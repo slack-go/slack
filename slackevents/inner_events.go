@@ -54,11 +54,56 @@ type AppContext struct {
 	Entities []AppContextEntity `json:"entities,omitempty"`
 }
 
-// AppContextEntity is one item the user has open, such as a channel.
+// Entity types in an AppContext.
+const (
+	AppContextEntityChannel        = "slack#/types/channel_id"
+	AppContextEntityCanvas         = "slack#/types/canvas_id"
+	AppContextEntityList           = "slack#/types/list_id"
+	AppContextEntityMessageContext = "slack#/types/message_context"
+)
+
+// AppContextEntity is one item the user has open. Value holds the ID for channel, canvas
+// and list entities, and Message is set instead for message_context entities. RawValue
+// always holds the value as sent, for entity types this package doesn't model.
 type AppContextEntity struct {
-	Type   string `json:"type"`
-	Value  string `json:"value"`
-	TeamID string `json:"team_id"`
+	Type         string             `json:"type"`
+	Value        string             `json:"-"`
+	Message      *AppContextMessage `json:"-"`
+	RawValue     json.RawMessage    `json:"value,omitempty"`
+	TeamID       string             `json:"team_id,omitempty"`
+	EnterpriseID string             `json:"enterprise_id,omitempty"`
+}
+
+// AppContextMessage is the value of a message_context entity.
+type AppContextMessage struct {
+	ChannelID        string `json:"channel_id"`
+	MessageTimeStamp string `json:"message_ts"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for AppContextEntity. Slack
+// sends value as a string for most entity types and as an object for message_context.
+func (e *AppContextEntity) UnmarshalJSON(data []byte) error {
+	type appContextEntityAlias AppContextEntity
+	var alias appContextEntityAlias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*e = AppContextEntity(alias)
+
+	if len(e.RawValue) == 0 {
+		return nil
+	}
+	switch e.RawValue[0] {
+	case '"':
+		return json.Unmarshal(e.RawValue, &e.Value)
+	case '{':
+		if e.Type == AppContextEntityMessageContext {
+			e.Message = &AppContextMessage{}
+			return json.Unmarshal(e.RawValue, e.Message)
+		}
+	}
+
+	return nil
 }
 
 // AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the
@@ -69,19 +114,19 @@ type AppContextChangedEvent struct {
 	Context        AppContext `json:"context"`
 	Channel        string     `json:"channel"`
 	User           string     `json:"user"`
-	EventTimeStamp string     `json:"event_ts"`
+	EventTimestamp string     `json:"event_ts"`
 }
 
 // AgentSessionStoppedEvent is an (inner) EventsAPI subscribable event, sent when a
-// user stops an agent session. StreamingMessageTimeStamps lists the in-progress
+// user stops an agent session. StreamingMessageTimestamps lists the in-progress
 // streams that Slack halted.
 type AgentSessionStoppedEvent struct {
 	Type                       string   `json:"type"`
 	Channel                    string   `json:"channel"`
 	ThreadTimeStamp            string   `json:"thread_ts"`
 	User                       string   `json:"user"`
-	StreamingMessageTimeStamps []string `json:"streaming_message_ts,omitempty"`
-	EventTimeStamp             string   `json:"event_ts"`
+	StreamingMessageTimestamps []string `json:"streaming_message_ts,omitempty"`
+	EventTimestamp             string   `json:"event_ts"`
 }
 
 // AgentSessionTitleChangedEvent is an (inner) EventsAPI subscribable event, sent when
@@ -96,7 +141,7 @@ type AgentSessionTitleChangedEvent struct {
 	EnterpriseID    string `json:"enterprise_id,omitempty"`
 	Title           string `json:"title"`
 	PreviousTitle   string `json:"previous_title,omitempty"`
-	EventTimeStamp  string `json:"event_ts"`
+	EventTimestamp  string `json:"event_ts"`
 }
 
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
