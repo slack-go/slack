@@ -15,6 +15,10 @@ const (
 
 // AgentSessionSetStatusParameters are the parameters for SetAgentSessionStatus.
 // Title and InitiatorUserID only apply when the call creates the session.
+//
+// IconEmoji, IconURL and Username form one set of overrides that persists across
+// calls. A call that leaves all three empty keeps the current overrides. A call
+// that sets any of them replaces the whole set, so a field left empty is cleared.
 type AgentSessionSetStatusParameters struct {
 	Status          string `json:"status"`
 	ChannelID       string `json:"channel_id,omitempty"`
