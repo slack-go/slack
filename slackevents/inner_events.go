@@ -63,15 +63,23 @@ const (
 )
 
 // AppContextEntity is one item the user has open. Value holds the ID for channel, canvas
-// and list entities, and Message is set instead for message_context entities. RawValue
-// always holds the value as sent, for entity types this package doesn't model.
+// and list entities, and Message is set instead for message_context entities. The value of
+// an entity type this package doesn't model is kept only so it survives re-encoding.
 type AppContextEntity struct {
-	Type         string             `json:"type"`
-	Value        string             `json:"-"`
-	Message      *AppContextMessage `json:"-"`
-	RawValue     json.RawMessage    `json:"value,omitempty"`
-	TeamID       string             `json:"team_id,omitempty"`
-	EnterpriseID string             `json:"enterprise_id,omitempty"`
+	Type         string
+	Value        string
+	Message      *AppContextMessage
+	TeamID       string
+	EnterpriseID string
+	raw          json.RawMessage
+}
+
+// appContextEntityJSON is the wire shape of an AppContextEntity.
+type appContextEntityJSON struct {
+	Type         string          `json:"type"`
+	Value        json.RawMessage `json:"value,omitempty"`
+	TeamID       string          `json:"team_id,omitempty"`
+	EnterpriseID string          `json:"enterprise_id,omitempty"`
 }
 
 // AppContextMessage is the value of a message_context entity.
@@ -83,27 +91,54 @@ type AppContextMessage struct {
 // UnmarshalJSON implements the json.Unmarshaler interface for AppContextEntity. Slack
 // sends value as a string for most entity types and as an object for message_context.
 func (e *AppContextEntity) UnmarshalJSON(data []byte) error {
-	type appContextEntityAlias AppContextEntity
-	var alias appContextEntityAlias
-	if err := json.Unmarshal(data, &alias); err != nil {
+	var wire appContextEntityJSON
+	if err := json.Unmarshal(data, &wire); err != nil {
 		return err
 	}
-	*e = AppContextEntity(alias)
+	*e = AppContextEntity{
+		Type:         wire.Type,
+		TeamID:       wire.TeamID,
+		EnterpriseID: wire.EnterpriseID,
+		raw:          wire.Value,
+	}
 
-	if len(e.RawValue) == 0 {
+	if len(wire.Value) == 0 {
 		return nil
 	}
-	switch e.RawValue[0] {
+	switch wire.Value[0] {
 	case '"':
-		return json.Unmarshal(e.RawValue, &e.Value)
+		return json.Unmarshal(wire.Value, &e.Value)
 	case '{':
 		if e.Type == AppContextEntityMessageContext {
 			e.Message = &AppContextMessage{}
-			return json.Unmarshal(e.RawValue, e.Message)
+			return json.Unmarshal(wire.Value, e.Message)
 		}
 	}
 
 	return nil
+}
+
+// MarshalJSON implements the json.Marshaler interface for AppContextEntity.
+func (e AppContextEntity) MarshalJSON() ([]byte, error) {
+	wire := appContextEntityJSON{
+		Type:         e.Type,
+		TeamID:       e.TeamID,
+		EnterpriseID: e.EnterpriseID,
+		Value:        e.raw,
+	}
+
+	var err error
+	switch {
+	case e.Message != nil:
+		wire.Value, err = json.Marshal(e.Message)
+	case e.Value != "":
+		wire.Value, err = json.Marshal(e.Value)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(wire)
 }
 
 // AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the

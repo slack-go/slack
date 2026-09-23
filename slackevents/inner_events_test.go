@@ -3442,18 +3442,34 @@ func TestAppContextEntity_ValueShapes(t *testing.T) {
 	unknown := ctx.Entities[4]
 	assert.Empty(t, unknown.Value)
 	assert.Nil(t, unknown.Message)
-	assert.JSONEq(t, `{"id": "X1"}`, string(unknown.RawValue))
 }
 
 func TestAppContextEntity_RoundTrip(t *testing.T) {
-	rawE := `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"},"team_id":"T0123"}`
+	for _, rawE := range []string{
+		`{"type":"slack#/types/channel_id","value":"C0123","team_id":"T0123","enterprise_id":"E0123"}`,
+		`{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"},"team_id":"T0123"}`,
+		`{"type":"slack#/types/something_new","value":{"id":"X1"}}`,
+	} {
+		var entity AppContextEntity
+		assert.NoError(t, json.Unmarshal([]byte(rawE), &entity))
 
-	var entity AppContextEntity
-	assert.NoError(t, json.Unmarshal([]byte(rawE), &entity))
+		out, err := json.Marshal(entity)
+		assert.NoError(t, err)
+		assert.JSONEq(t, rawE, string(out))
+	}
+}
 
-	out, err := json.Marshal(entity)
+func TestAppContextEntity_Marshal(t *testing.T) {
+	out, err := json.Marshal(AppContextEntity{Type: AppContextEntityChannel, Value: "C0123"})
 	assert.NoError(t, err)
-	assert.JSONEq(t, rawE, string(out))
+	assert.JSONEq(t, `{"type":"slack#/types/channel_id","value":"C0123"}`, string(out))
+
+	out, err = json.Marshal(AppContextEntity{
+		Type:    AppContextEntityMessageContext,
+		Message: &AppContextMessage{ChannelID: "C0123", MessageTimeStamp: "1.2"},
+	})
+	assert.NoError(t, err)
+	assert.JSONEq(t, `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"}}`, string(out))
 }
 
 func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
