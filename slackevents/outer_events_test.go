@@ -47,6 +47,49 @@ func TestCallBackEvent(t *testing.T) {
 	}
 }
 
+func TestCallBackEventAuthorizations(t *testing.T) {
+	rawE := []byte(`
+			{
+				"token": "XXYYZZ",
+				"team_id": "TXXXXXXXX",
+				"api_app_id": "AXXXXXXXXX",
+				"event": {
+								"type": "app_context_changed",
+								"context": {}
+				},
+				"type": "event_callback",
+				"authorizations": [
+					{
+						"enterprise_id": null,
+						"team_id": "TXXXXXXXX",
+						"user_id": "UXXXXXXX1",
+						"is_bot": true,
+						"is_enterprise_install": false
+					}
+				],
+				"event_id": "Ev08MFMKH6",
+				"event_time": 1234567890
+		}
+	`)
+	var cb EventsAPICallbackEvent
+	err := json.Unmarshal(rawE, &cb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cb.Authorizations) != 1 {
+		t.Fatalf("expected 1 authorization, got %d", len(cb.Authorizations))
+	}
+	if cb.Authorizations[0].UserID != "UXXXXXXX1" {
+		t.Errorf("expected UserID UXXXXXXX1, got %q", cb.Authorizations[0].UserID)
+	}
+	if cb.Authorizations[0].TeamID != "TXXXXXXXX" {
+		t.Errorf("expected TeamID TXXXXXXXX, got %q", cb.Authorizations[0].TeamID)
+	}
+	if !cb.Authorizations[0].IsBot {
+		t.Errorf("expected IsBot to be true, got false")
+	}
+}
+
 func TestAppRateLimitedEvent(t *testing.T) {
 	rawE := []byte(`
 			{

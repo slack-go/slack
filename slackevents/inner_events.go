@@ -48,6 +48,137 @@ type AssistantThreadContext struct {
 	EnterpriseID string `json:"enterprise_id"`
 }
 
+// AppContext describes what the user currently has open in Slack. Entities are
+// ordered by relevance. Slack sends an empty object when nothing is being viewed.
+type AppContext struct {
+	Entities []AppContextEntity `json:"entities,omitempty"`
+}
+
+// Entity types in an AppContext.
+const (
+	AppContextEntityChannel        = "slack#/types/channel_id"
+	AppContextEntityCanvas         = "slack#/types/canvas_id"
+	AppContextEntityList           = "slack#/types/list_id"
+	AppContextEntityMessageContext = "slack#/types/message_context"
+)
+
+// AppContextEntity is one item the user has open. Value holds the ID for channel, canvas
+// and list entities, and Message is set instead for message_context entities. The value of
+// an entity type this package doesn't model is kept only so it survives re-encoding.
+type AppContextEntity struct {
+	Type         string
+	Value        string
+	Message      *AppContextMessage
+	TeamID       string
+	EnterpriseID string
+	raw          json.RawMessage
+}
+
+// appContextEntityJSON is the wire shape of an AppContextEntity.
+type appContextEntityJSON struct {
+	Type         string          `json:"type"`
+	Value        json.RawMessage `json:"value,omitempty"`
+	TeamID       string          `json:"team_id,omitempty"`
+	EnterpriseID string          `json:"enterprise_id,omitempty"`
+}
+
+// AppContextMessage is the value of a message_context entity.
+type AppContextMessage struct {
+	ChannelID        string `json:"channel_id"`
+	MessageTimestamp string `json:"message_ts"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface for AppContextEntity. Slack
+// sends value as a string for most entity types and as an object for message_context.
+func (e *AppContextEntity) UnmarshalJSON(data []byte) error {
+	var wire appContextEntityJSON
+	if err := json.Unmarshal(data, &wire); err != nil {
+		return err
+	}
+	*e = AppContextEntity{
+		Type:         wire.Type,
+		TeamID:       wire.TeamID,
+		EnterpriseID: wire.EnterpriseID,
+		raw:          wire.Value,
+	}
+
+	if len(wire.Value) == 0 {
+		return nil
+	}
+	switch wire.Value[0] {
+	case '"':
+		return json.Unmarshal(wire.Value, &e.Value)
+	case '{':
+		if e.Type == AppContextEntityMessageContext {
+			e.Message = &AppContextMessage{}
+			return json.Unmarshal(wire.Value, e.Message)
+		}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements the json.Marshaler interface for AppContextEntity.
+func (e AppContextEntity) MarshalJSON() ([]byte, error) {
+	wire := appContextEntityJSON{
+		Type:         e.Type,
+		TeamID:       e.TeamID,
+		EnterpriseID: e.EnterpriseID,
+		Value:        e.raw,
+	}
+
+	var err error
+	switch {
+	case e.Message != nil:
+		wire.Value, err = json.Marshal(e.Message)
+	case e.Value != "":
+		wire.Value, err = json.Marshal(e.Value)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(wire)
+}
+
+// AppContextChangedEvent is an (inner) EventsAPI subscribable event, sent when the
+// user's active context changes while the app is open. Channel is the app's DM with
+// the user.
+type AppContextChangedEvent struct {
+	Type           string     `json:"type"`
+	Context        AppContext `json:"context"`
+	Channel        string     `json:"channel"`
+	User           string     `json:"user"`
+	EventTimestamp string     `json:"event_ts"`
+}
+
+// AgentSessionStoppedEvent is an (inner) EventsAPI subscribable event, sent when a
+// user stops an agent session. StreamingMessageTimestamps lists the in-progress
+// streams that Slack halted.
+type AgentSessionStoppedEvent struct {
+	Type                       string   `json:"type"`
+	Channel                    string   `json:"channel"`
+	ThreadTimestamp            string   `json:"thread_ts"`
+	User                       string   `json:"user"`
+	StreamingMessageTimestamps []string `json:"streaming_message_ts,omitempty"`
+	EventTimestamp             string   `json:"event_ts"`
+}
+
+// AgentSessionTitleChangedEvent is an (inner) EventsAPI subscribable event, sent when
+// a user renames an agent session. PreviousTitle is omitted when the session had no
+// title before.
+type AgentSessionTitleChangedEvent struct {
+	Type            string `json:"type"`
+	Channel         string `json:"channel"`
+	ThreadTimestamp string `json:"thread_ts"`
+	User            string `json:"user"`
+	TeamID          string `json:"team_id"`
+	EnterpriseID    string `json:"enterprise_id,omitempty"`
+	Title           string `json:"title"`
+	PreviousTitle   string `json:"previous_title,omitempty"`
+	EventTimestamp  string `json:"event_ts"`
+}
+
 // AppMentionEvent is an (inner) EventsAPI subscribable event.
 type AppMentionEvent struct {
 	Type            string `json:"type"`
@@ -88,6 +219,8 @@ type AppHomeOpenedEvent struct {
 	EventTimeStamp string      `json:"event_ts"`
 	Tab            string      `json:"tab"`
 	View           *slack.View `json:"view,omitempty"`
+	// Context is only sent when the app subscribes to app_context_changed.
+	Context *AppContext `json:"context,omitempty"`
 }
 
 // AppUninstalledEvent Your Slack app was uninstalled.
@@ -344,6 +477,8 @@ type MessageEvent struct {
 	AssistantThread *AssistantThreadActionToken `json:"assistant_thread,omitempty"`
 	// ActionToken contains the top-level action token for Data Access API queries.
 	ActionToken string `json:"action_token,omitempty"`
+	// AppContext is only sent on message.im when the app subscribes to app_context_changed.
+	AppContext *AppContext `json:"app_context,omitempty"`
 
 	// Huddle-related fields (subtype "huddle_thread")
 	Room            *slack.HuddleRoom `json:"room,omitempty"`
@@ -1230,6 +1365,12 @@ type SharedChannelInviteRequestedEvent struct {
 type EventsAPIType string
 
 const (
+	// AgentSessionStopped is sent when a user stops an agent session
+	AgentSessionStopped = EventsAPIType("agent_session_stopped")
+	// AgentSessionTitleChanged is sent when a user renames an agent session
+	AgentSessionTitleChanged = EventsAPIType("agent_session_title_changed")
+	// AppContextChanged is sent when the user's active context changes while the app is open
+	AppContextChanged = EventsAPIType("app_context_changed")
 	// AppDeleted is an event when an app is deleted from a workspace
 	AppDeleted = EventsAPIType("app_deleted")
 	// AppHomeOpened Your Slack app home was opened
@@ -1400,6 +1541,9 @@ const (
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
 var EventsAPIInnerEventMapping = map[EventsAPIType]any{
+	AgentSessionStopped:           AgentSessionStoppedEvent{},
+	AgentSessionTitleChanged:      AgentSessionTitleChangedEvent{},
+	AppContextChanged:             AppContextChangedEvent{},
 	AppDeleted:                    AppDeletedEvent{},
 	AppHomeOpened:                 AppHomeOpenedEvent{},
 	AppInstalled:                  AppInstalledEvent{},
