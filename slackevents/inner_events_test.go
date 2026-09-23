@@ -3436,7 +3436,7 @@ func TestAppContextEntity_ValueShapes(t *testing.T) {
 	assert.Empty(t, message.Value)
 	if assert.NotNil(t, message.Message) {
 		assert.Equal(t, "C0123", message.Message.ChannelID)
-		assert.Equal(t, "1789656581.933646", message.Message.MessageTimeStamp)
+		assert.Equal(t, "1789656581.933646", message.Message.MessageTimestamp)
 	}
 
 	unknown := ctx.Entities[4]
@@ -3466,7 +3466,7 @@ func TestAppContextEntity_Marshal(t *testing.T) {
 
 	out, err = json.Marshal(AppContextEntity{
 		Type:    AppContextEntityMessageContext,
-		Message: &AppContextMessage{ChannelID: "C0123", MessageTimeStamp: "1.2"},
+		Message: &AppContextMessage{ChannelID: "C0123", MessageTimestamp: "1.2"},
 	})
 	assert.NoError(t, err)
 	assert.JSONEq(t, `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"}}`, string(out))
@@ -3543,7 +3543,7 @@ func TestAgentSessionStoppedEvent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "agent_session_stopped", event.Type)
 	assert.Equal(t, "C0123ABC456", event.Channel)
-	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
 	assert.Equal(t, "U123ABC456", event.User)
 	assert.Equal(t, "1783536983.783769", event.EventTimestamp)
 	assert.Equal(t, []string{"1782234987.693923"}, event.StreamingMessageTimestamps)
@@ -3591,7 +3591,7 @@ func TestAgentSessionStoppedEvent_FullEventParsing(t *testing.T) {
 	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionStoppedEvent)
 	assert.True(t, ok)
 	assert.Equal(t, "C0123ABC456", event.Channel)
-	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
 }
 
 func TestAgentSessionTitleChangedEvent(t *testing.T) {
@@ -3612,7 +3612,7 @@ func TestAgentSessionTitleChangedEvent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "agent_session_title_changed", event.Type)
 	assert.Equal(t, "C0123ABC456", event.Channel)
-	assert.Equal(t, "1782234671.392669", event.ThreadTimeStamp)
+	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
 	assert.Equal(t, "U123ABC456", event.User)
 	assert.Equal(t, "T0123ABC456", event.TeamID)
 	assert.Equal(t, "Bora Bora trip prep", event.Title)

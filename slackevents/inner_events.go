@@ -85,7 +85,7 @@ type appContextEntityJSON struct {
 // AppContextMessage is the value of a message_context entity.
 type AppContextMessage struct {
 	ChannelID        string `json:"channel_id"`
-	MessageTimeStamp string `json:"message_ts"`
+	MessageTimestamp string `json:"message_ts"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface for AppContextEntity. Slack
@@ -158,7 +158,7 @@ type AppContextChangedEvent struct {
 type AgentSessionStoppedEvent struct {
 	Type                       string   `json:"type"`
 	Channel                    string   `json:"channel"`
-	ThreadTimeStamp            string   `json:"thread_ts"`
+	ThreadTimestamp            string   `json:"thread_ts"`
 	User                       string   `json:"user"`
 	StreamingMessageTimestamps []string `json:"streaming_message_ts,omitempty"`
 	EventTimestamp             string   `json:"event_ts"`
@@ -170,7 +170,7 @@ type AgentSessionStoppedEvent struct {
 type AgentSessionTitleChangedEvent struct {
 	Type            string `json:"type"`
 	Channel         string `json:"channel"`
-	ThreadTimeStamp string `json:"thread_ts"`
+	ThreadTimestamp string `json:"thread_ts"`
 	User            string `json:"user"`
 	TeamID          string `json:"team_id"`
 	EnterpriseID    string `json:"enterprise_id,omitempty"`
