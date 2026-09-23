@@ -401,13 +401,54 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 	}
 }
 
+// maxConsecutiveIgnoredReads is how many reads in a row may fail with an error that
+// receiveMessagesInto deliberately tolerates before we give up on the connection and
+// let the caller reconnect.
+//
+// Tolerating such a read is the right call for a stray frame: the next read succeeds
+// and the counter resets, so nothing is lost. But nothing tells a stray frame apart
+// from a peer that only ever produces unusable ones, and in that case the loop retries
+// immediately and forever, pinned to a connection that will never deliver a message.
+// Nothing else notices either: the ping watchdog in run() only reacts to a missing
+// PING, which such a peer keeps sending just fine.
+//
+// Ten in a row is far more than a recoverable frame error can plausibly cause, and
+// still orders of magnitude below the 1000 failed reads at which gorilla/websocket
+// panics outright ("repeated read on failed websocket connection") to flag exactly
+// this shape of busy loop.
+const maxConsecutiveIgnoredReads = 10
+
+// ignoredReadError marks a read error that receiveMessagesInto tolerates: the frame is
+// unusable, but the connection itself may still be healthy.
+type ignoredReadError struct{ err error }
+
+func (e ignoredReadError) Error() string { return "ignored read error: " + e.err.Error() }
+
+func (e ignoredReadError) Unwrap() error { return e.err }
+
 // runMessageReceiver monitors the Socket Mode opened WebSocket connection for any incoming
 // messages. It pushes the raw events into the channel.
 // The receiver runs until a read fails, so it always returns a non-nil error.
 func (smc *Client) runMessageReceiver(ctx context.Context, conn *websocket.Conn, sink chan json.RawMessage) error {
+	var ignored int
 	for {
-		if err := smc.receiveMessagesInto(ctx, conn, sink); err != nil {
+		err := smc.receiveMessagesInto(ctx, conn, sink)
+		if err == nil {
+			ignored = 0
+			continue
+		}
+
+		ignorable, ok := errors.AsType[ignoredReadError](err)
+		if !ok {
 			return err
+		}
+
+		ignored++
+		// Left as a breadcrumb on purpose: without it, a connection that only ever
+		// yields unusable frames looks exactly like an idle one from the outside.
+		smc.Debugf("Ignoring unusable frame (%d in a row): %v", ignored, ignorable.err)
+		if ignored >= maxConsecutiveIgnoredReads {
+			return fmt.Errorf("giving up after %d consecutive unreadable frames: %w", ignored, ignorable.err)
 		}
 	}
 }
@@ -554,7 +595,9 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 			// We just continue to the next loop so that we `smc.disconnected` should be received if
 			// this EOF error was actually due to disconnection.
 
-			return nil
+			// Reported as ignorable rather than as success, so that the caller can tell a
+			// stray truncated frame from a connection that fails every single read.
+			return ignoredReadError{err}
 		}
 
 		smc.sendEvent(ctx, newEvent(EventTypeIncomingError, &slack.IncomingEventError{
@@ -566,7 +609,7 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 		_, isSyntaxErr := errors.AsType[*json.SyntaxError](err)
 		_, isTypeErr := errors.AsType[*json.UnmarshalTypeError](err)
 		if isSyntaxErr || isTypeErr {
-			return nil
+			return ignoredReadError{err}
 		}
 
 		// All other errors from ReadJSON come from NextReader, and should
