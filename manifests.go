@@ -275,9 +275,13 @@ type OAuthScopes struct {
 	UserOptional []string `json:"user_optional,omitempty" yaml:"user_optional,omitempty"`
 }
 
-// ManifestResponse is the response returned by the API for apps.manifest.x endpoints
+// ManifestResponse is the response returned by the API for apps.manifest.x endpoints.
+// AppId, Credentials and OAuthAuthorizeUrl are only populated by apps.manifest.create.
 type ManifestResponse struct {
-	Errors []ManifestValidationError `json:"errors,omitempty"`
+	AppId             string                    `json:"app_id,omitempty"`
+	Credentials       *ManifestCredentials      `json:"credentials,omitempty"`
+	OAuthAuthorizeUrl string                    `json:"oauth_authorize_url,omitempty"`
+	Errors            []ManifestValidationError `json:"errors,omitempty"`
 	SlackResponse
 }
 
@@ -285,6 +289,15 @@ type ManifestResponse struct {
 type ManifestValidationError struct {
 	Message string `json:"message"`
 	Pointer string `json:"pointer"`
+}
+
+// ManifestCredentials are the app credentials returned by the apps.manifest.create endpoint.
+// They are only returned on creation and cannot be retrieved afterwards through the API.
+type ManifestCredentials struct {
+	ClientId          string `json:"client_id,omitempty"`
+	ClientSecret      string `json:"client_secret,omitempty"`
+	VerificationToken string `json:"verification_token,omitempty"`
+	SigningSecret     string `json:"signing_secret,omitempty"`
 }
 
 type ExportManifestResponse struct {
