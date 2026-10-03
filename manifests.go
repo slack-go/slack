@@ -187,18 +187,28 @@ type Display struct {
 
 // Settings is a group of settings corresponding to the Settings section of the app config pages.
 type Settings struct {
-	AllowedIPAddressRanges []string            `json:"allowed_ip_address_ranges,omitempty" yaml:"allowed_ip_address_ranges,omitempty"`
-	EventSubscriptions     *EventSubscriptions `json:"event_subscriptions,omitempty" yaml:"event_subscriptions,omitempty"`
-	Interactivity          *Interactivity      `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
-	OrgDeployEnabled       bool                `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
-	SocketModeEnabled      bool                `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
+	AllowedIPAddressRanges []string                  `json:"allowed_ip_address_ranges,omitempty" yaml:"allowed_ip_address_ranges,omitempty"`
+	EventSubscriptions     *EventSubscriptions       `json:"event_subscriptions,omitempty" yaml:"event_subscriptions,omitempty"`
+	FunctionRuntime        ManifestFunctionRuntime   `json:"function_runtime,omitempty" yaml:"function_runtime,omitempty"`
+	IncomingWebhooks       *ManifestIncomingWebhooks `json:"incoming_webhooks,omitempty" yaml:"incoming_webhooks,omitempty"`
+	Interactivity          *Interactivity            `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
+	OrgDeployEnabled       bool                      `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
+	SocketModeEnabled      bool                      `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
+	TokenRotationEnabled   bool                      `json:"token_rotation_enabled,omitempty" yaml:"token_rotation_enabled,omitempty"`
 }
 
 // EventSubscriptions is a group of settings that describe the Events API configuration
 type EventSubscriptions struct {
-	RequestUrl string   `json:"request_url,omitempty" yaml:"request_url,omitempty"`
-	BotEvents  []string `json:"bot_events,omitempty" yaml:"bot_events,omitempty"`
-	UserEvents []string `json:"user_events,omitempty" yaml:"user_events,omitempty"`
+	RequestUrl            string                         `json:"request_url,omitempty" yaml:"request_url,omitempty"`
+	BotEvents             []string                       `json:"bot_events,omitempty" yaml:"bot_events,omitempty"`
+	UserEvents            []string                       `json:"user_events,omitempty" yaml:"user_events,omitempty"`
+	MetadataSubscriptions []ManifestMetadataSubscription `json:"metadata_subscriptions,omitempty" yaml:"metadata_subscriptions,omitempty"`
+}
+
+// ManifestMetadataSubscription is a message metadata event type that the app subscribes to
+type ManifestMetadataSubscription struct {
+	AppID     string `json:"app_id" yaml:"app_id"`
+	EventType string `json:"event_type" yaml:"event_type"`
 }
 
 // Interactivity is a group of settings that describe the interactivity configuration
@@ -208,6 +218,19 @@ type Interactivity struct {
 	MessageMenuOptionsUrl string `json:"message_menu_options_url,omitempty" yaml:"message_menu_options_url,omitempty"`
 }
 
+// ManifestIncomingWebhooks is a group of settings that describe the incoming webhooks configuration
+type ManifestIncomingWebhooks struct {
+	IncomingWebhooksEnabled bool `json:"incoming_webhooks_enabled" yaml:"incoming_webhooks_enabled"`
+}
+
+// ManifestFunctionRuntime is where the functions declared in the manifest run
+type ManifestFunctionRuntime string
+
+const (
+	ManifestFunctionRuntimeRemote ManifestFunctionRuntime = "remote"
+	ManifestFunctionRuntimeSlack  ManifestFunctionRuntime = "slack"
+)
+
 // Features is a group of settings corresponding to the Features section of the app config pages
 type Features struct {
 	AgentView     *AgentView             `json:"agent_view,omitempty" yaml:"agent_view,omitempty"`
@@ -216,6 +239,7 @@ type Features struct {
 	BotUser       BotUser                `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
 	Shortcuts     []Shortcut             `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
 	SlashCommands []ManifestSlashCommand `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
+	UnfurlDomains []string               `json:"unfurl_domains,omitempty" yaml:"unfurl_domains,omitempty"`
 	WorkflowSteps []WorkflowStep         `json:"workflow_steps,omitempty" yaml:"workflow_steps,omitempty"`
 }
 
@@ -292,6 +316,9 @@ type WorkflowStep struct {
 type OAuthConfig struct {
 	RedirectUrls []string    `json:"redirect_urls,omitempty" yaml:"redirect_urls,omitempty"`
 	Scopes       OAuthScopes `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	// A pointer because Slack treats a missing key differently from false: it
+	// accepts false only when settings.org_deploy_enabled is true.
+	TokenManagementEnabled *bool `json:"token_management_enabled,omitempty" yaml:"token_management_enabled,omitempty"`
 }
 
 // OAuthScopes is a group of settings that describe permission scopes configuration
