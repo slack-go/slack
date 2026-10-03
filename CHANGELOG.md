@@ -37,6 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Settings.FunctionRuntime` and `EventSubscriptions.MetadataSubscriptions` for the matching
   [app manifest](https://docs.slack.dev/reference/app-manifest) keys, so a typed export and
   update keeps them (#1588).
+- Add `Attachment.HideColor` (`hide_color`), which removes the color bar from a file unfurl
+  sent with [`chat.unfurl`](https://docs.slack.dev/reference/methods/chat.unfurl) (#1590).
+- Block Kit: Add `TaskCardBlock.HideTitle` (`hide_title`) and `WithHideTitle`, which hide the
+  title of a [`task_card`](https://docs.slack.dev/reference/block-kit/blocks/task-card-block)
+  block so `details` becomes the top element (#1590).
 
 ### Changed
 

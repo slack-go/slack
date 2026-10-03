@@ -50,9 +50,11 @@ func TestTaskCardBlockChainableMethods(t *testing.T) {
 		WithSources(
 			NewTaskCardSource("https://example.com", "Example"),
 			NewTaskCardSource("https://other.com", "Other"),
-		)
+		).
+		WithHideTitle(true)
 
 	assert.Equal(t, TaskCardStatusComplete, block.Status)
+	assert.True(t, block.HideTitle)
 	assert.Equal(t, details, block.Details)
 	assert.Equal(t, output, block.Output)
 	assert.Len(t, block.Sources, 2)
@@ -102,7 +104,8 @@ func TestTaskCardBlockJSONRoundTrip(t *testing.T) {
 				"url": "https://example.com",
 				"text": "Example"
 			}
-		]
+		],
+		"hide_title": true
 	}`
 
 	var block TaskCardBlock
@@ -118,6 +121,7 @@ func TestTaskCardBlockJSONRoundTrip(t *testing.T) {
 	require.NotNil(t, block.Output)
 	require.Len(t, block.Sources, 1)
 	assert.Equal(t, "https://example.com", block.Sources[0].URL)
+	assert.True(t, block.HideTitle)
 
 	marshalled, err := json.Marshal(block)
 	require.NoError(t, err)
