@@ -42,6 +42,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Block Kit: Add `TaskCardBlock.HideTitle` (`hide_title`) and `WithHideTitle`, which hide the
   title of a [`task_card`](https://docs.slack.dev/reference/block-kit/blocks/task-card-block)
   block so `details` becomes the top element (#1590).
+- Add `CreateUserGroupOptionAdditionalChannels`, `UpdateUserGroupsOptionAdditionalChannels`
+  and `UpdateUserGroupsOptionIncludeCount` for the `additional_channels` and `include_count`
+  arguments of [`usergroups.create`](https://docs.slack.dev/reference/methods/usergroups.create)
+  and [`usergroups.update`](https://docs.slack.dev/reference/methods/usergroups.update)
+  (#1598, #1599).
 
 ### Changed
 
