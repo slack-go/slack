@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`agents.sessions.setStatus`](https://docs.slack.dev/reference/methods/agents.sessions.setStatus)
   and [`agents.sessions.rename`](https://docs.slack.dev/reference/methods/agents.sessions.rename)
   methods, with `AgentSessionStatus*` constants for the accepted statuses.
+- `CreateManifest` now returns the new app's `AppId`, `Credentials` and `OAuthAuthorizeUrl`
+  from [`apps.manifest.create`](https://docs.slack.dev/reference/methods/apps.manifest.create).
+  Slack sends the credentials only in this response (#1587).
 
 ### Changed
 
