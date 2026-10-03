@@ -7,10 +7,10 @@ import (
 
 // This one was ripped from https://github.com/jpillora/backoff/blob/master/backoff.go
 
-// Backoff is a time.Duration counter. It starts at Initial. After every
-// call to Duration() it is doubled. It is capped at Max. It returns to
-// Initial on every call to Reset(). Used in conjunction with the time
-// package.
+// Backoff is a time.Duration counter. It starts at Initial. After every call to
+// Duration() it is doubled. It is capped at Max before the optional Jitter is added, so
+// the result is at most Max+Jitter. It returns to Initial on every call to Reset(). Used
+// in conjunction with the time package.
 type Backoff struct {
 	attempts int
 	// Initial value to scale out
@@ -21,9 +21,9 @@ type Backoff struct {
 	Max time.Duration
 }
 
-// Duration returns the current value of the counter, then doubles it for the
-// next call. Optional jitter is added to the returned value, and the result is
-// capped at Max.
+// Duration returns the current value of the counter, then doubles it for the next call.
+// Optional jitter is added to the returned value, and the result is capped at Max before
+// the optional jitter is added, so the result is at most Max+Jitter.
 func (b *Backoff) Duration() (dur time.Duration) {
 	// Zero-values are nonsensical, so we use
 	// them to apply defaults

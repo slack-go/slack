@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
   releases, so the test matrix covers Go 1.26 and Go 1.27.
 
+### Fixed
+
+- `socketmode` and RTM reconnects now wait at most 5 minutes between attempts, and
+  `RetryConfig.BackoffMax` now caps the Web API retry delay. The backoff ignored its
+  maximum and kept doubling, so after a long outage a Socket Mode client could stay asleep
+  long after the network recovered and miss the events sent in that window (#1585, #1586).
+
 ## [0.29.0] - 2026-08-15
 
 ### Fixed
