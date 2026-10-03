@@ -59,7 +59,7 @@ type RetryConfig struct {
 	RetryAfterJitter time.Duration
 	// BackoffInitial is the initial backoff for 5xx and connection errors.
 	BackoffInitial time.Duration
-	// BackoffMax caps the backoff duration.
+	// BackoffMax caps the backoff duration before BackoffJitter is added.
 	BackoffMax time.Duration
 	// BackoffJitter adds random jitter [0, BackoffJitter] to backoff to avoid thundering herd (0 to disable).
 	BackoffJitter time.Duration

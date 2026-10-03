@@ -7,10 +7,10 @@ import (
 
 // This one was ripped from https://github.com/jpillora/backoff/blob/master/backoff.go
 
-// Backoff is a time.Duration counter. It starts at Initial. After every
-// call to Duration() it is doubled. It is capped at Max. It returns to
-// Initial on every call to Reset(). Used in conjunction with the time
-// package.
+// Backoff is a time.Duration counter. It starts at Initial. After every call to
+// Duration() it is doubled. It is capped at Max before the optional Jitter is added, so
+// the result is at most Max+Jitter. It returns to Initial on every call to Reset(). Used
+// in conjunction with the time package.
 type Backoff struct {
 	attempts int
 	// Initial value to scale out
@@ -21,9 +21,9 @@ type Backoff struct {
 	Max time.Duration
 }
 
-// Duration returns the current value of the counter, then doubles it for the
-// next call. Optional jitter is added to the returned value, and the result is
-// capped at Max.
+// Duration returns the current value of the counter, then doubles it for the next call.
+// Optional jitter is added to the returned value, and the result is capped at Max before
+// the optional jitter is added, so the result is at most Max+Jitter.
 func (b *Backoff) Duration() (dur time.Duration) {
 	// Zero-values are nonsensical, so we use
 	// them to apply defaults
@@ -38,7 +38,13 @@ func (b *Backoff) Duration() (dur time.Duration) {
 	// calculate this duration
 	if dur = time.Duration(1 << uint(b.attempts)); dur > 0 {
 		dur *= b.Initial
-	} else {
+	}
+
+	// Cap the result at Max. This also covers both overflow paths: 1<<attempts
+	// turning non-positive once attempts is large enough, and the multiplication
+	// above overflowing, either of which would otherwise yield a non-positive
+	// delay and turn a retry loop into a busy loop.
+	if dur <= 0 || dur > b.Max {
 		dur = b.Max
 	}
 
