@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `AdminTeamsList` for the
   [`admin.teams.list`](https://docs.slack.dev/reference/methods/admin.teams.list) method, with
   `AdminTeamsListOptionLimit` and `AdminTeamsListOptionCursor` (#1592, #1593).
+- Add `AdminUsersList` for the
+  [`admin.users.list`](https://docs.slack.dev/reference/methods/admin.users.list) method, with
+  an `AdminUsersListOption<Field>` option for each argument (#1594, #1595).
 
 ### Changed
 
