@@ -32,9 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `Features.AgentView` and `Features.AssistantView` for the `features.agent_view` and
   `features.assistant_view` [app manifest](https://docs.slack.dev/reference/app-manifest)
   settings, so a typed export and update keeps them (#1588, #1589).
-- Add `Features.UnfurlDomains`, `OAuthConfig.TokenManagementEnabled`,
-  `Settings.TokenRotationEnabled`, `Settings.IncomingWebhooks`, `Settings.FunctionRuntime` and
-  `EventSubscriptions.MetadataSubscriptions` for the matching
+- Add `Features.UnfurlDomains`, `OAuthConfig.PKCEEnabled`, `OAuthConfig.TokenManagementEnabled`,
+  `Settings.IsMCPEnabled`, `Settings.TokenRotationEnabled`, `Settings.IncomingWebhooks`,
+  `Settings.FunctionRuntime` and `EventSubscriptions.MetadataSubscriptions` for the matching
   [app manifest](https://docs.slack.dev/reference/app-manifest) keys, so a typed export and
   update keeps them (#1588).
 

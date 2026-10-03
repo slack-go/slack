@@ -192,6 +192,7 @@ type Settings struct {
 	FunctionRuntime        ManifestFunctionRuntime   `json:"function_runtime,omitempty" yaml:"function_runtime,omitempty"`
 	IncomingWebhooks       *ManifestIncomingWebhooks `json:"incoming_webhooks,omitempty" yaml:"incoming_webhooks,omitempty"`
 	Interactivity          *Interactivity            `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
+	IsMCPEnabled           bool                      `json:"is_mcp_enabled,omitempty" yaml:"is_mcp_enabled,omitempty"`
 	OrgDeployEnabled       bool                      `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
 	SocketModeEnabled      bool                      `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
 	TokenRotationEnabled   bool                      `json:"token_rotation_enabled,omitempty" yaml:"token_rotation_enabled,omitempty"`
@@ -314,6 +315,7 @@ type WorkflowStep struct {
 
 // OAuthConfig is a group of settings that describe OAuth configuration for the app
 type OAuthConfig struct {
+	PKCEEnabled  bool        `json:"pkce_enabled,omitempty" yaml:"pkce_enabled,omitempty"`
 	RedirectUrls []string    `json:"redirect_urls,omitempty" yaml:"redirect_urls,omitempty"`
 	Scopes       OAuthScopes `json:"scopes,omitempty" yaml:"scopes,omitempty"`
 	// A pointer because Slack treats a missing key differently from false: it

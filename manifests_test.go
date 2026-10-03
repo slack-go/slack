@@ -338,6 +338,7 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 		},
 		"function_runtime": "remote",
 		"incoming_webhooks": {"incoming_webhooks_enabled": false},
+		"is_mcp_enabled": true,
 		"org_deploy_enabled": true,
 		"token_rotation_enabled": true
 	}`
@@ -345,7 +346,7 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 	payload := `{
 		"display_information": {"name": "test"},
 		"features": {"unfurl_domains": ["example.com"]},
-		"oauth_config": {"token_management_enabled": false},
+		"oauth_config": {"pkce_enabled": true, "token_management_enabled": false},
 		"settings": ` + settings + `
 	}`
 
@@ -355,6 +356,8 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 	assert.Equal(t, []string{"example.com"}, manifest.Features.UnfurlDomains)
 	require.NotNil(t, manifest.OAuthConfig.TokenManagementEnabled)
 	assert.False(t, *manifest.OAuthConfig.TokenManagementEnabled)
+	assert.True(t, manifest.OAuthConfig.PKCEEnabled)
+	assert.True(t, manifest.Settings.IsMCPEnabled)
 	assert.True(t, manifest.Settings.TokenRotationEnabled)
 	assert.Equal(t, ManifestFunctionRuntimeRemote, manifest.Settings.FunctionRuntime)
 	require.NotNil(t, manifest.Settings.IncomingWebhooks)
@@ -372,6 +375,7 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 
 	assert.Equal(t, []any{"example.com"}, sent["features"]["unfurl_domains"])
 	assert.Equal(t, false, sent["oauth_config"]["token_management_enabled"])
+	assert.Equal(t, true, sent["oauth_config"]["pkce_enabled"])
 	sentSettings, err := json.Marshal(sent["settings"])
 	require.NoError(t, err)
 	assert.JSONEq(t, settings, string(sentSettings))
