@@ -53,7 +53,7 @@ func (api *Client) userGroupRequest(ctx context.Context, path string, values url
 
 // createUserGroupParams contains arguments for CreateUserGroup method call
 type createUserGroupParams struct {
-	additionalChannels *[]string
+	additionalChannels []string
 	enableSection      bool
 	includeCount       bool
 }
@@ -76,10 +76,9 @@ func CreateUserGroupOptionIncludeCount(includeCount bool) CreateUserGroupOption 
 }
 
 // CreateUserGroupOptionAdditionalChannels sets channels where members can add the User Group.
-// Passing an empty slice sends an explicitly empty channel list.
 func CreateUserGroupOptionAdditionalChannels(channels []string) CreateUserGroupOption {
 	return func(params *createUserGroupParams) {
-		params.additionalChannels = &channels
+		params.additionalChannels = channels
 	}
 }
 
@@ -111,8 +110,8 @@ func (api *Client) CreateUserGroupContext(ctx context.Context, userGroup UserGro
 		values["include_count"] = []string{strconv.FormatBool(params.includeCount)}
 	}
 
-	if params.additionalChannels != nil {
-		values["additional_channels"] = []string{strings.Join(*params.additionalChannels, ",")}
+	if len(params.additionalChannels) > 0 {
+		values["additional_channels"] = []string{strings.Join(params.additionalChannels, ",")}
 	}
 
 	if userGroup.TeamID != "" {
@@ -367,17 +366,17 @@ func UpdateUserGroupsOptionChannels(channels []string) UpdateUserGroupsOption {
 }
 
 // UpdateUserGroupsOptionAdditionalChannels changes channels where members can add the User Group.
-// Passing an empty slice sends an explicitly empty channel list.
+// Unlike channels, Slack rejects an empty list, so an empty slice leaves the argument out.
 func UpdateUserGroupsOptionAdditionalChannels(channels []string) UpdateUserGroupsOption {
 	return func(params *UpdateUserGroupsParams) {
-		params.AdditionalChannels = &channels
+		params.AdditionalChannels = channels
 	}
 }
 
 // UpdateUserGroupsOptionIncludeCount includes the number of users in the User Group.
 func UpdateUserGroupsOptionIncludeCount(includeCount bool) UpdateUserGroupsOption {
 	return func(params *UpdateUserGroupsParams) {
-		params.IncludeCount = &includeCount
+		params.IncludeCount = includeCount
 	}
 }
 
@@ -401,8 +400,8 @@ type UpdateUserGroupsParams struct {
 	Handle             string
 	Description        *string
 	Channels           *[]string
-	AdditionalChannels *[]string
-	IncludeCount       *bool
+	AdditionalChannels []string
+	IncludeCount       bool
 	EnableSection      bool
 	TeamID             string
 }
@@ -443,12 +442,12 @@ func (api *Client) UpdateUserGroupContext(ctx context.Context, userGroupID strin
 		values["channels"] = []string{strings.Join(*params.Channels, ",")}
 	}
 
-	if params.AdditionalChannels != nil {
-		values["additional_channels"] = []string{strings.Join(*params.AdditionalChannels, ",")}
+	if len(params.AdditionalChannels) > 0 {
+		values["additional_channels"] = []string{strings.Join(params.AdditionalChannels, ",")}
 	}
 
-	if params.IncludeCount != nil {
-		values["include_count"] = []string{strconv.FormatBool(*params.IncludeCount)}
+	if params.IncludeCount {
+		values["include_count"] = []string{strconv.FormatBool(params.IncludeCount)}
 	}
 
 	if params.EnableSection {

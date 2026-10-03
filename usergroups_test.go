@@ -88,13 +88,13 @@ func TestCreateUserGroup(t *testing.T) {
 		},
 		{
 			userGroup: UserGroup{Name: "Marketing Team"},
+			// Slack rejects an empty additional_channels, so it is left out.
 			options: []CreateUserGroupOption{
 				CreateUserGroupOptionAdditionalChannels([]string{}),
 			},
 			wantParams: map[string]string{
-				"token":               "testing-token",
-				"name":                "Marketing Team",
-				"additional_channels": "",
+				"token": "testing-token",
+				"name":  "Marketing Team",
 			},
 		},
 	}
@@ -284,13 +284,13 @@ func TestUpdateUserGroup(t *testing.T) {
 				UpdateUserGroupsOptionAdditionalChannels([]string{}),
 				UpdateUserGroupsOptionIncludeCount(false),
 			},
+			// An empty channels clears the default channels; Slack rejects an empty
+			// additional_channels, so it is left out.
 			map[string]string{
-				"token":               "testing-token",
-				"usergroup":           "S0615G0KT",
-				"description":         "",
-				"channels":            "",
-				"additional_channels": "",
-				"include_count":       "false",
+				"token":       "testing-token",
+				"usergroup":   "S0615G0KT",
+				"description": "",
+				"channels":    "",
 			},
 		},
 	}
