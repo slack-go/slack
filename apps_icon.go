@@ -7,52 +7,55 @@ import (
 	"net/url"
 )
 
-// SetAppIconParameters contains arguments for SetAppIcon.
+// SetAppIconParameters contains the image for SetAppIcon. Set exactly one of
+// URL or File.
 type SetAppIconParameters struct {
-	AppID    string
 	URL      string
 	File     io.Reader
 	Filename string
 }
 
-// SetAppIcon sets an app icon using a caller-supplied token.
+// SetAppIcon sets the icon of an app.
 // For more details, see SetAppIconContext documentation.
-func (api *Client) SetAppIcon(token string, params SetAppIconParameters) error {
-	return api.SetAppIconContext(context.Background(), token, params)
+func (api *Client) SetAppIcon(token, appID string, icon SetAppIconParameters) error {
+	return api.SetAppIconContext(context.Background(), token, appID, icon)
 }
 
-// SetAppIconContext sets an app icon using a caller-supplied token and a custom context.
-// The token must have the app_configurations:write scope.
+// SetAppIconContext sets the icon of an app with a custom context. An empty token
+// falls back to the configuration token set with OptionConfigToken.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.icon.set
-func (api *Client) SetAppIconContext(ctx context.Context, token string, params SetAppIconParameters) error {
+func (api *Client) SetAppIconContext(ctx context.Context, token, appID string, icon SetAppIconParameters) error {
+	if token == "" {
+		token = api.configToken
+	}
 	if token == "" {
 		return errors.New("apps.icon.set: token cannot be empty")
 	}
-	if params.AppID == "" {
+	if appID == "" {
 		return errors.New("apps.icon.set: app ID cannot be empty")
 	}
-	if (params.URL == "") == (params.File == nil) {
+	if (icon.URL == "") == (icon.File == nil) {
 		return errors.New("apps.icon.set: exactly one of URL or file must be provided")
 	}
 
 	values := url.Values{
-		"app_id": {params.AppID},
+		"app_id": {appID},
 	}
 	response := &SlackResponse{}
 
-	if params.URL != "" {
+	if icon.URL != "" {
 		values.Add("token", token)
-		values.Add("url", params.URL)
+		values.Add("url", icon.URL)
 		if err := api.postMethod(ctx, "apps.icon.set", values, response); err != nil {
 			return err
 		}
 	} else {
-		filename := params.Filename
+		filename := icon.Filename
 		if filename == "" {
 			filename = "icon.png"
 		}
-		if err := postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"apps.icon.set", filename, "file", token, values, params.File, response, api); err != nil {
+		if err := postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"apps.icon.set", filename, "file", token, values, icon.File, response, api); err != nil {
 			return err
 		}
 	}

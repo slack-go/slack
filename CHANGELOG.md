@@ -47,8 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arguments of [`usergroups.create`](https://docs.slack.dev/reference/methods/usergroups.create)
   and [`usergroups.update`](https://docs.slack.dev/reference/methods/usergroups.update)
   (#1598, #1599).
-- Added `SetAppIcon` support for setting an app icon from a public URL or a
-  multipart file upload.
+- Add `SetAppIcon` (plus `Context` variant) for the
+  [`apps.icon.set`](https://docs.slack.dev/reference/methods/apps.icon.set) method, which sets an
+  app's icon from a public URL or an uploaded image (#1596, #1597).
 
 ### Changed
 
