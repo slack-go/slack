@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RetryConfig.BackoffMax` now caps the Web API retry delay. The backoff ignored its
   maximum and kept doubling, so after a long outage a Socket Mode client could stay asleep
   long after the network recovered and miss the events sent in that window (#1585, #1586).
+- `socketmode`: The client now reconnects when the WebSocket stream ends in the middle of a TLS
+  record. Before, it read the failed connection again until gorilla/websocket panicked with
+  `repeated read on failed websocket connection`, which stopped the process. The client also
+  reconnects after 10 empty or malformed frames in a row (#1608).
 
 ## [0.29.0] - 2026-08-15
 
