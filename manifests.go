@@ -221,25 +221,25 @@ type Features struct {
 
 // AgentView is a group of settings that describe the agent view configuration for apps using AI features
 type AgentView struct {
-	AgentDescription string            `json:"agent_description" yaml:"agent_description"`
-	SuggestedPrompts []SuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
-	Actions          []AgentViewAction `json:"actions,omitempty" yaml:"actions,omitempty"`
+	AgentDescription string                    `json:"agent_description" yaml:"agent_description"`
+	SuggestedPrompts []ManifestSuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
+	Actions          []ManifestAgentAction     `json:"actions,omitempty" yaml:"actions,omitempty"`
 }
 
 // AssistantView is a group of settings that describe the assistant view configuration for apps using AI features
 type AssistantView struct {
-	AssistantDescription string            `json:"assistant_description" yaml:"assistant_description"`
-	SuggestedPrompts     []SuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
+	AssistantDescription string                    `json:"assistant_description" yaml:"assistant_description"`
+	SuggestedPrompts     []ManifestSuggestedPrompt `json:"suggested_prompts,omitempty" yaml:"suggested_prompts,omitempty"`
 }
 
-// SuggestedPrompt is a hard-coded prompt shown in the agent or assistant container
-type SuggestedPrompt struct {
+// ManifestSuggestedPrompt is a hard-coded prompt shown in the agent or assistant container
+type ManifestSuggestedPrompt struct {
 	Title   string `json:"title" yaml:"title"`
 	Message string `json:"message" yaml:"message"`
 }
 
-// AgentViewAction is an action available in the agent container
-type AgentViewAction struct {
+// ManifestAgentAction is an action available in the agent container
+type ManifestAgentAction struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
 }

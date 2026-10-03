@@ -151,16 +151,16 @@ func getTestManifest() Manifest {
 		Features: Features{
 			AgentView: &AgentView{
 				AgentDescription: "this is a test agent",
-				SuggestedPrompts: []SuggestedPrompt{
+				SuggestedPrompts: []ManifestSuggestedPrompt{
 					{Title: "Test prompt", Message: "This is a test prompt"},
 				},
-				Actions: []AgentViewAction{
+				Actions: []ManifestAgentAction{
 					{Name: "test_action", Description: "This is a test action"},
 				},
 			},
 			AssistantView: &AssistantView{
 				AssistantDescription: "this is a test assistant",
-				SuggestedPrompts: []SuggestedPrompt{
+				SuggestedPrompts: []ManifestSuggestedPrompt{
 					{Title: "Test prompt", Message: "This is a test prompt"},
 				},
 			},
@@ -209,10 +209,10 @@ func TestFeaturesAgentView(t *testing.T) {
 	features := Features{
 		AgentView: &AgentView{
 			AgentDescription: "this is a test agent",
-			SuggestedPrompts: []SuggestedPrompt{
+			SuggestedPrompts: []ManifestSuggestedPrompt{
 				{Title: "Test prompt", Message: "This is a test prompt"},
 			},
-			Actions: []AgentViewAction{
+			Actions: []ManifestAgentAction{
 				{Name: "test_action", Description: "This is a test action"},
 			},
 		},
@@ -251,7 +251,7 @@ func TestFeaturesAssistantView(t *testing.T) {
 	features := Features{
 		AssistantView: &AssistantView{
 			AssistantDescription: "this is a test assistant",
-			SuggestedPrompts: []SuggestedPrompt{
+			SuggestedPrompts: []ManifestSuggestedPrompt{
 				{Title: "Test prompt", Message: "This is a test prompt"},
 			},
 		},
