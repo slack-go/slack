@@ -61,6 +61,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The minimum supported Go version is now 1.26. The library supports the two most recent Go
   releases, so the test matrix covers Go 1.26 and Go 1.27.
+- `DeleteFileComment` now takes `(fileID, commentID)`, the same order as
+  `DeleteFileCommentContext` (#1591). A call that still passes a comment ID (`Fc…`) first
+  returns an error and sends nothing to Slack.
+
+  > [!WARNING]
+  > **Breaking change.** Swap the arguments of every `DeleteFileComment` call:
+  >
+  > ```go
+  > // Before
+  > err := api.DeleteFileComment(commentID, fileID)
+  > // After
+  > err := api.DeleteFileComment(fileID, commentID)
+  > ```
 
 ### Fixed
 

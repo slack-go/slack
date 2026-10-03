@@ -365,15 +365,22 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 
 // DeleteFileComment deletes a file's comment.
 // For more details, see DeleteFileCommentContext documentation.
-func (api *Client) DeleteFileComment(commentID, fileID string) error {
+func (api *Client) DeleteFileComment(fileID, commentID string) error {
 	return api.DeleteFileCommentContext(context.Background(), fileID, commentID)
 }
 
 // DeleteFileCommentContext deletes a file's comment with a custom context.
-// Slack API docs: https://api.slack.com/methods/files.comments.delete
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/files.comments.delete
 func (api *Client) DeleteFileCommentContext(ctx context.Context, fileID, commentID string) (err error) {
 	if fileID == "" || commentID == "" {
 		return ErrParametersMissing
+	}
+	// DeleteFileComment took (commentID, fileID) until it changed to match this
+	// function. Comment IDs start with "Fc", so reject the old order instead of
+	// sending swapped IDs.
+	if strings.HasPrefix(fileID, "Fc") && !strings.HasPrefix(commentID, "Fc") {
+		return fmt.Errorf("files.comments.delete: %q looks like a comment ID; the arguments are (fileID, commentID)", fileID)
 	}
 
 	values := url.Values{

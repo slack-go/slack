@@ -8,8 +8,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -127,6 +129,17 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 			},
 			expectError: true,
 		},
+		{
+			// A comment ID (Fc...) in the file position is the old argument order:
+			// fail without calling Slack.
+			title: "Testing with swapped IDs",
+			body: url.Values{
+				"file": {"Fc1234567890"},
+				"id":   {"F1234567890"},
+			},
+			wantParams:  map[string]string{},
+			expectError: true,
+		},
 	}
 
 	var fch *fileCommentHandler
@@ -135,17 +148,31 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 	})
 
 	for _, test := range tests {
-		fch = newFileCommentHandler()
-		err := api.DeleteFileComment(test.body["id"][0], test.body["file"][0])
-
-		if !test.expectError && err != nil {
-			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
-		} else if test.expectError == true && err == nil {
-			log.Fatalf("Expected error but got none")
+		// Both functions take the file ID first (#1591).
+		calls := []struct {
+			name string
+			call func() error
+		}{
+			{"DeleteFileComment", func() error {
+				return api.DeleteFileComment(test.body["file"][0], test.body["id"][0])
+			}},
+			{"DeleteFileCommentContext", func() error {
+				return api.DeleteFileCommentContext(context.Background(), test.body["file"][0], test.body["id"][0])
+			}},
 		}
+		for _, c := range calls {
+			fch = newFileCommentHandler()
+			err := c.call()
 
-		if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
-			log.Fatalf("%s: Got params [%#v]\nBut received [%#v]\n", test.title, fch.gotParams, test.wantParams)
+			if !test.expectError && err != nil {
+				log.Fatalf("%s: %s: Unexpected error: %s in test", c.name, test.title, err)
+			} else if test.expectError == true && err == nil {
+				log.Fatalf("%s: Expected error but got none", c.name)
+			}
+
+			if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
+				log.Fatalf("%s: %s: Got params [%#v]\nBut received [%#v]\n", c.name, test.title, fch.gotParams, test.wantParams)
+			}
 		}
 	}
 }
@@ -532,5 +559,18 @@ func TestCompleteUploadExternalContext(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDeleteFileCommentSwappedIDsError(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Error("files.comments.delete must not be called with swapped IDs")
+	}))
+	defer ts.Close()
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+
+	err := api.DeleteFileComment("Fc1234567890", "F1234567890")
+	if err == nil || !strings.Contains(err.Error(), "fileID, commentID") {
+		t.Fatalf("expected an error that names the argument order, got %v", err)
 	}
 }
