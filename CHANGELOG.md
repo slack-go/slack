@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CreateManifest` now returns the new app's `AppId`, `Credentials` and `OAuthAuthorizeUrl`
   from [`apps.manifest.create`](https://docs.slack.dev/reference/methods/apps.manifest.create).
   Slack sends the credentials only in this response (#1587).
+- Add `Features.AgentView` and `Features.AssistantView` for the `features.agent_view` and
+  `features.assistant_view` [app manifest](https://docs.slack.dev/reference/app-manifest)
+  settings, so a typed export and update keeps them (#1588, #1589).
 
 ### Changed
 
