@@ -29,8 +29,18 @@ func TestCreateManifest(t *testing.T) {
 func handleCreateManifest(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	response, _ := json.Marshal(getTestCreateManifestResponse())
-	rw.Write(response)
+	// Shape from https://docs.slack.dev/reference/methods/apps.manifest.create
+	rw.Write([]byte(`{
+		"ok": true,
+		"app_id": "A012ABCD0A0",
+		"credentials": {
+			"client_id": "1234567890.1234567890123",
+			"client_secret": "abcdefghijklmnopqrstuvwxyz012345",
+			"verification_token": "abcdefghijklmnopqrstuvwx",
+			"signing_secret": "0123456789abcdef0123456789abcdef"
+		},
+		"oauth_authorize_url": "https://slack.com/oauth/v2/authorize?client_id=1234567890.1234567890123&scope=commands,workflow.steps:execute"
+	}`))
 }
 
 func TestDeleteManifest(t *testing.T) {
@@ -180,14 +190,14 @@ func TestOAuthScopesOptionalFields(t *testing.T) {
 
 func getTestCreateManifestResponse() *ManifestResponse {
 	return &ManifestResponse{
-		AppId: "A012345678",
+		AppId: "A012ABCD0A0",
 		Credentials: &ManifestCredentials{
 			ClientId:          "1234567890.1234567890123",
 			ClientSecret:      "abcdefghijklmnopqrstuvwxyz012345",
 			VerificationToken: "abcdefghijklmnopqrstuvwx",
 			SigningSecret:     "0123456789abcdef0123456789abcdef",
 		},
-		OAuthAuthorizeUrl: "https://slack.com/oauth/v2/authorize?client_id=1234567890.1234567890123&scope=chat:write&user_scope=",
+		OAuthAuthorizeUrl: "https://slack.com/oauth/v2/authorize?client_id=1234567890.1234567890123&scope=commands,workflow.steps:execute",
 		SlackResponse: SlackResponse{
 			Ok: true,
 		},
