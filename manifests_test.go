@@ -6,6 +6,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateManifest(t *testing.T) {
@@ -321,6 +324,57 @@ func TestFeaturesAIViewsOmittedWhenNil(t *testing.T) {
 	if !strings.Contains(s, `"assistant_description":""`) {
 		t.Errorf("Expected assistant_description to be present in JSON: %s", s)
 	}
+}
+
+// TestManifestKeepsSettingsKeys checks that keys from an export are sent back on
+// update instead of being dropped.
+func TestManifestKeepsSettingsKeys(t *testing.T) {
+	// Shape from https://docs.slack.dev/reference/app-manifest
+	const settings = `{
+		"event_subscriptions": {
+			"metadata_subscriptions": [
+				{"app_id": "A012ABCD0A0", "event_type": "task_created"}
+			]
+		},
+		"function_runtime": "remote",
+		"incoming_webhooks": {"incoming_webhooks_enabled": false},
+		"org_deploy_enabled": true,
+		"token_rotation_enabled": true
+	}`
+	// Slack accepts token_management_enabled=false only with org_deploy_enabled=true.
+	payload := `{
+		"display_information": {"name": "test"},
+		"features": {"unfurl_domains": ["example.com"]},
+		"oauth_config": {"token_management_enabled": false},
+		"settings": ` + settings + `
+	}`
+
+	var manifest Manifest
+	require.NoError(t, json.Unmarshal([]byte(payload), &manifest))
+
+	assert.Equal(t, []string{"example.com"}, manifest.Features.UnfurlDomains)
+	require.NotNil(t, manifest.OAuthConfig.TokenManagementEnabled)
+	assert.False(t, *manifest.OAuthConfig.TokenManagementEnabled)
+	assert.True(t, manifest.Settings.TokenRotationEnabled)
+	assert.Equal(t, ManifestFunctionRuntimeRemote, manifest.Settings.FunctionRuntime)
+	require.NotNil(t, manifest.Settings.IncomingWebhooks)
+	assert.False(t, manifest.Settings.IncomingWebhooks.IncomingWebhooksEnabled)
+	require.NotNil(t, manifest.Settings.EventSubscriptions)
+	assert.Equal(t,
+		[]ManifestMetadataSubscription{{AppID: "A012ABCD0A0", EventType: "task_created"}},
+		manifest.Settings.EventSubscriptions.MetadataSubscriptions,
+	)
+
+	out, err := json.Marshal(manifest)
+	require.NoError(t, err)
+	var sent map[string]map[string]any
+	require.NoError(t, json.Unmarshal(out, &sent))
+
+	assert.Equal(t, []any{"example.com"}, sent["features"]["unfurl_domains"])
+	assert.Equal(t, false, sent["oauth_config"]["token_management_enabled"])
+	sentSettings, err := json.Marshal(sent["settings"])
+	require.NoError(t, err)
+	assert.JSONEq(t, settings, string(sentSettings))
 }
 
 func getTestCreateManifestResponse() *ManifestResponse {
