@@ -4,156 +4,144 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
-	"net/http"
-	"net/http/httptest"
-	"strings"
+	"net"
 	"testing"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slacktest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// dialFrameServer opens a real WebSocket connection to a server that keeps sending the
-// frames produced by send, so tests can drive the receive loop with real gorilla reads.
-func dialFrameServer(t *testing.T, send func(conn *websocket.Conn) error) *websocket.Conn {
-	t.Helper()
-
-	upgrader := websocket.Upgrader{}
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			return
-		}
-		defer conn.Close()
-		for {
-			if err := send(conn); err != nil {
+// sendFrames returns a server that writes frames in order, then closes the WebSocket.
+func sendFrames(frames ...[]byte) func(conn *websocket.Conn) {
+	return func(conn *websocket.Conn) {
+		for _, frame := range frames {
+			if err := conn.WriteMessage(websocket.TextMessage, frame); err != nil {
 				return
 			}
 		}
-	}))
-	t.Cleanup(srv.Close)
+		_ = conn.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseNormalClosure, "done"),
+		)
+	}
+}
 
-	conn, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(srv.URL, "http"), nil)
+func repeatFrame(frame []byte, n int) [][]byte {
+	frames := make([][]byte, n)
+	for i := range frames {
+		frames[i] = frame
+	}
+	return frames
+}
+
+// receive runs the receive loop in the calling goroutine and turns a panic into an
+// error, so a regression fails the test instead of crashing the test binary.
+func receive(conn *websocket.Conn, sink chan json.RawMessage) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("receive loop panicked: %v", r)
+		}
+	}()
+	return New(slack.New("xoxb-test-token")).runMessageReceiver(context.Background(), conn, sink)
+}
+
+// truncatedConn fails every read once truncated is set, as crypto/tls does when the
+// stream ends in the middle of a record. gorilla maps only io.EOF to a CloseError, so
+// this io.ErrUnexpectedEOF becomes a permanent read error.
+type truncatedConn struct {
+	net.Conn
+	truncated bool
+}
+
+func (c *truncatedConn) Read(p []byte) (int, error) {
+	if c.truncated {
+		return 0, io.ErrUnexpectedEOF
+	}
+	return c.Conn.Read(p)
+}
+
+// TestRunMessageReceiverGivesUpOnTruncatedStream is the regression test for the crash:
+// the loop took the permanent error for a stray frame and read again until gorilla
+// panicked with "repeated read on failed websocket connection".
+func TestRunMessageReceiverGivesUpOnTruncatedStream(t *testing.T) {
+	srv := slacktest.NewTestServer(func(c slacktest.Customize) {
+		c.Handle("/ws", slacktest.Websocket(func(*websocket.Conn) {}))
+	})
+	srv.Start()
+	t.Cleanup(srv.Stop)
+
+	var tc *truncatedConn
+	dialer := websocket.Dialer{
+		NetDialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			c, err := (&net.Dialer{}).DialContext(ctx, network, addr)
+			if err != nil {
+				return nil, err
+			}
+			tc = &truncatedConn{Conn: c}
+			return tc, nil
+		},
+	}
+	conn, _, err := dialer.Dial(srv.GetWSURL(), nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = conn.Close() })
+	tc.truncated = true
 
-	return conn
-}
+	err = receive(conn, make(chan json.RawMessage, 1))
 
-// runReceiver runs the receive loop and returns its error, failing the test if it either
-// panics or never returns.
-func runReceiver(t *testing.T, conn *websocket.Conn) error {
-	t.Helper()
-
-	smc := New(slack.New("xoxb-test-token"))
-	// The receive loop reports unusable frames on Events; drain it so nothing blocks.
-	go func() {
-		for range smc.Events { //nolint:revive // draining
-		}
-	}()
-
-	done := make(chan error, 1)
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				done <- errors.New("receive loop panicked")
-			}
-		}()
-		done <- smc.runMessageReceiver(context.Background(), conn, make(chan json.RawMessage, 1))
-	}()
-
-	select {
-	case err := <-done:
-		return err
-	case <-time.After(10 * time.Second):
-		t.Fatal("receive loop never returned: it is spinning on a connection that will never deliver a message")
-		return nil
-	}
-}
-
-// TestRunMessageReceiverGivesUpOnUnusableFrames is the regression test for the busy loop.
-//
-// A frame that carries no JSON value leaves ReadJSON returning io.ErrUnexpectedEOF, which
-// the receive loop deliberately tolerates. Tolerating it *unconditionally* means a peer
-// that only ever sends such frames keeps the client pinned to a connection that will never
-// deliver a message — the loop spins forever and never reconnects.
-func TestRunMessageReceiverGivesUpOnUnusableFrames(t *testing.T) {
-	conn := dialFrameServer(t, func(conn *websocket.Conn) error {
-		return conn.WriteMessage(websocket.TextMessage, nil) // empty frame: no JSON value
-	})
-
-	err := runReceiver(t, conn)
-
-	require.Error(t, err, "receiver must give up instead of spinning")
+	require.Error(t, err)
 	assert.NotContains(t, err.Error(), "panicked")
-	assert.ErrorIs(t, err, io.ErrUnexpectedEOF, "the cause must stay visible to the caller")
-	assert.Contains(t, err.Error(), "giving up after 10 consecutive")
+	assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
 }
 
-// TestRunMessageReceiverGivesUpOnMalformedJSON is the same guarantee for the other
-// tolerated error: a peer that only ever sends malformed JSON.
+func TestRunMessageReceiverGivesUpOnUnusableFrames(t *testing.T) {
+	// Frames with no JSON value make ReadJSON return io.ErrUnexpectedEOF.
+	conn := dialTestWebSocket(t, sendFrames(repeatFrame(nil, maxConsecutiveIgnoredReads)...))
+
+	err := receive(conn, make(chan json.RawMessage, 1))
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
+	assert.Contains(t, err.Error(), fmt.Sprintf("giving up after %d consecutive", maxConsecutiveIgnoredReads))
+}
+
 func TestRunMessageReceiverGivesUpOnMalformedJSON(t *testing.T) {
-	conn := dialFrameServer(t, func(conn *websocket.Conn) error {
-		return conn.WriteMessage(websocket.TextMessage, []byte("}not json{"))
-	})
+	conn := dialTestWebSocket(t, sendFrames(repeatFrame([]byte("}not json{"), maxConsecutiveIgnoredReads)...))
 
-	err := runReceiver(t, conn)
+	err := receive(conn, make(chan json.RawMessage, 1))
 
-	require.Error(t, err, "receiver must give up instead of spinning")
-	assert.Contains(t, err.Error(), "giving up after 10 consecutive")
-
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), fmt.Sprintf("giving up after %d consecutive", maxConsecutiveIgnoredReads))
 	var syntaxErr *json.SyntaxError
-	assert.ErrorAs(t, err, &syntaxErr, "the cause must stay visible to the caller")
+	assert.ErrorAs(t, err, &syntaxErr)
 }
 
-// TestRunMessageReceiverKeepsGoingAfterRecoverableFrame guards the other half of the
-// contract: a *stray* unusable frame must not cost us the connection, so the counter has
-// to reset on the next frame that does carry a value.
+// TestRunMessageReceiverKeepsGoingAfterRecoverableFrame checks that the count resets on
+// the next good frame. Without the reset, the unusable frames below reach the limit.
 func TestRunMessageReceiverKeepsGoingAfterRecoverableFrame(t *testing.T) {
-	// Alternate unusable and usable frames, forever. With a limit but no reset, this
-	// connection would be dropped after ten frames; it must survive instead.
-	var n int
-	conn := dialFrameServer(t, func(conn *websocket.Conn) error {
-		n++
-		if n%2 == 1 {
-			return conn.WriteMessage(websocket.TextMessage, nil)
-		}
-		return conn.WriteMessage(websocket.TextMessage, []byte(`{"type":"hello"}`))
-	})
+	unusable := repeatFrame(nil, maxConsecutiveIgnoredReads-1)
+	var frames [][]byte
+	frames = append(frames, unusable...)
+	frames = append(frames, []byte(`{"type":"hello"}`))
+	frames = append(frames, unusable...)
+	frames = append(frames, []byte(`{"type":"disconnect"}`))
+	conn := dialTestWebSocket(t, sendFrames(frames...))
 
-	smc := New(slack.New("xoxb-test-token"))
-	go func() {
-		for range smc.Events { //nolint:revive // draining
-		}
-	}()
+	sink := make(chan json.RawMessage, 2)
+	err := receive(conn, sink)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	sink := make(chan json.RawMessage, 1)
-	go func() {
-		for range sink { //nolint:revive // draining
-		}
-	}()
-
-	done := make(chan error, 1)
-	go func() { done <- smc.runMessageReceiver(ctx, conn, sink) }()
-
-	select {
-	case err := <-done:
-		t.Fatalf("receiver dropped a healthy connection over stray unusable frames: %v", err)
-	case <-ctx.Done():
-		// Still reading after many alternating frames, which is what we want.
-	}
-	assert.Greater(t, n, maxConsecutiveIgnoredReads, "test did not send enough frames to be meaningful")
+	closeErr, ok := errors.AsType[*websocket.CloseError](err)
+	require.True(t, ok, "the loop must end on the close frame, got: %v", err)
+	assert.Equal(t, websocket.CloseNormalClosure, closeErr.Code)
+	require.Len(t, sink, 2)
+	assert.JSONEq(t, `{"type":"hello"}`, string(<-sink))
+	assert.JSONEq(t, `{"type":"disconnect"}`, string(<-sink))
 }
 
-// TestIgnoredReadErrorUnwraps guards the contract runMessageReceiver relies on: the
-// sentinel must stay transparent to errors.Is/As so callers still see the real cause.
 func TestIgnoredReadErrorUnwraps(t *testing.T) {
 	err := error(ignoredReadError{io.ErrUnexpectedEOF})
 

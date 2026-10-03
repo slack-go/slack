@@ -401,21 +401,13 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 	}
 }
 
-// maxConsecutiveIgnoredReads is how many reads in a row may fail with an error that
-// receiveMessagesInto deliberately tolerates before we give up on the connection and
-// let the caller reconnect.
+// maxConsecutiveIgnoredReads is how many tolerated read errors in a row
+// runMessageReceiver accepts before it gives up and lets the caller reconnect.
 //
-// Tolerating such a read is the right call for a stray frame: the next read succeeds
-// and the counter resets, so nothing is lost. But nothing tells a stray frame apart
-// from a peer that only ever produces unusable ones, and in that case the loop retries
-// immediately and forever, pinned to a connection that will never deliver a message.
-// Nothing else notices either: the ping watchdog in run() only reacts to a missing
-// PING, which such a peer keeps sending just fine.
-//
-// Ten in a row is far more than a recoverable frame error can plausibly cause, and
-// still orders of magnitude below the 1000 failed reads at which gorilla/websocket
-// panics outright ("repeated read on failed websocket connection") to flag exactly
-// this shape of busy loop.
+// A stray empty or malformed frame resets on the next good read. A stream that ends
+// mid-record instead fails every read with the same io.ErrUnexpectedEOF, and after
+// 1000 such reads gorilla/websocket panics ("repeated read on failed websocket
+// connection").
 const maxConsecutiveIgnoredReads = 10
 
 // ignoredReadError marks a read error that receiveMessagesInto tolerates: the frame is
@@ -587,16 +579,9 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 		}
 
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			// EOF's don't seem to signify a failed connection so instead we ignore
-			// them here and detect a failed connection upon attempting to send a
-			// 'PING' message
-
-			// Unlike RTM, we don't ping from the our end as there seem to have no client ping.
-			// We just continue to the next loop so that we `smc.disconnected` should be received if
-			// this EOF error was actually due to disconnection.
-
-			// Reported as ignorable rather than as success, so that the caller can tell a
-			// stray truncated frame from a connection that fails every single read.
+			// Either a frame with no JSON value, which is harmless, or a stream that
+			// ended mid-record, which fails every later read. runMessageReceiver tells
+			// them apart by counting.
 			return ignoredReadError{err}
 		}
 
