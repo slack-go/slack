@@ -43,10 +43,10 @@ func TestAdminTeamsList(t *testing.T) {
 	defer ts.Close()
 
 	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
-	response, err := api.AdminTeamsList(context.Background(), AdminTeamsListParams{
-		Limit:  250,
-		Cursor: "cursor-1",
-	})
+	response, err := api.AdminTeamsList(context.Background(),
+		AdminTeamsListOptionLimit(250),
+		AdminTeamsListOptionCursor("cursor-1"),
+	)
 	require.NoError(t, err)
 	require.Len(t, response.Teams, 1)
 
@@ -76,7 +76,7 @@ func TestAdminTeamsListError(t *testing.T) {
 	defer ts.Close()
 
 	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
-	response, err := api.AdminTeamsList(context.Background(), AdminTeamsListParams{})
+	response, err := api.AdminTeamsList(context.Background())
 	assert.EqualError(t, err, "invalid_cursor")
 	assert.NotNil(t, response)
 }

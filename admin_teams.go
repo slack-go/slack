@@ -7,10 +7,26 @@ import (
 	"strings"
 )
 
-// AdminTeamsListParams contains arguments for AdminTeamsList.
-type AdminTeamsListParams struct {
-	Limit  int
-	Cursor string
+type adminTeamsListParams struct {
+	limit  int
+	cursor string
+}
+
+// AdminTeamsListOption is an option for AdminTeamsList.
+type AdminTeamsListOption func(*adminTeamsListParams)
+
+// AdminTeamsListOptionLimit sets the maximum number of workspaces to return.
+func AdminTeamsListOptionLimit(limit int) AdminTeamsListOption {
+	return func(params *adminTeamsListParams) {
+		params.limit = limit
+	}
+}
+
+// AdminTeamsListOptionCursor sets the cursor for pagination.
+func AdminTeamsListOptionCursor(cursor string) AdminTeamsListOption {
+	return func(params *adminTeamsListParams) {
+		params.cursor = cursor
+	}
 }
 
 // AdminTeamPrimaryOwner represents the primary owner of a workspace.
@@ -37,17 +53,22 @@ type AdminTeamsListResponse struct {
 // AdminTeamsList lists all workspaces in an Enterprise organization.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/admin.teams.list
-func (api *Client) AdminTeamsList(ctx context.Context, params AdminTeamsListParams) (*AdminTeamsListResponse, error) {
+func (api *Client) AdminTeamsList(ctx context.Context, options ...AdminTeamsListOption) (*AdminTeamsListResponse, error) {
+	params := adminTeamsListParams{}
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token": {api.token},
 	}
 
-	if params.Limit > 0 {
-		values.Add("limit", strconv.Itoa(params.Limit))
+	if params.limit > 0 {
+		values.Add("limit", strconv.Itoa(params.limit))
 	}
 
-	if params.Cursor != "" {
-		values.Add("cursor", params.Cursor)
+	if params.cursor != "" {
+		values.Add("cursor", params.cursor)
 	}
 
 	response := &AdminTeamsListResponse{}
