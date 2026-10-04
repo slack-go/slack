@@ -1,9 +1,13 @@
 package slack
 
 import (
+	"encoding/json"
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type userGroupsHandler struct {
@@ -307,5 +311,75 @@ func TestUpdateUserGroup(t *testing.T) {
 		if !reflect.DeepEqual(rh.gotParams, test.wantParams) {
 			t.Errorf("%d: Got params %#v, want %#v", i, rh.gotParams, test.wantParams)
 		}
+	}
+}
+
+// TestUserGroupFields decodes a usergroups.list item with the keys and JSON types of a
+// live response (include_count=true). The values differ so that every field is checked.
+func TestUserGroupFields(t *testing.T) {
+	payload := `{
+		"id": "S123ABC456",
+		"team_id": "T060RNRCH",
+		"is_usergroup": true,
+		"is_subteam": true,
+		"name": "Admins",
+		"description": "A group of all Administrators in your workspace.",
+		"handle": "admins",
+		"is_external": false,
+		"date_create": 1751652905,
+		"date_update": 1786809906,
+		"date_delete": 0,
+		"auto_type": "admin",
+		"auto_provision": true,
+		"enterprise_subteam_id": "S0ENTERPRISE",
+		"created_by": "USLACKBOT",
+		"updated_by": "USLACKBOT",
+		"deleted_by": null,
+		"is_section": true,
+		"is_editing_restricted": true,
+		"is_membership_locked": true,
+		"is_idp_group": true,
+		"is_visible": true,
+		"is_org_level": true,
+		"prefs": {"channels": [], "groups": []},
+		"user_count": 1,
+		"channel_count": 2
+	}`
+
+	var userGroup UserGroup
+	require.NoError(t, json.Unmarshal([]byte(payload), &userGroup))
+
+	assert.Equal(t, 1, userGroup.UserCount)
+	assert.Equal(t, 2, userGroup.ChannelCount)
+	assert.Equal(t, "S0ENTERPRISE", userGroup.EnterpriseSubteamID)
+	assert.True(t, userGroup.AutoProvision)
+	assert.True(t, userGroup.IsEditingRestricted)
+	assert.True(t, userGroup.IsIDPGroup)
+	assert.True(t, userGroup.IsMembershipLocked)
+	assert.True(t, userGroup.IsOrgLevel)
+	assert.True(t, userGroup.IsSection)
+	assert.True(t, userGroup.IsSubteam)
+	assert.True(t, userGroup.IsVisible)
+}
+
+func TestUserGroupNewFieldsOmittedWhenZero(t *testing.T) {
+	encoded, err := json.Marshal(UserGroup{ID: "S123"})
+	require.NoError(t, err)
+
+	var fields map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal(encoded, &fields))
+	for _, field := range []string{
+		"auto_provision",
+		"channel_count",
+		"enterprise_subteam_id",
+		"is_editing_restricted",
+		"is_idp_group",
+		"is_membership_locked",
+		"is_org_level",
+		"is_section",
+		"is_subteam",
+		"is_visible",
+	} {
+		assert.NotContains(t, fields, field)
 	}
 }

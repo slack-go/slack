@@ -26,6 +26,19 @@ type UserGroup struct {
 	Prefs       UserGroupPrefs `json:"prefs"`
 	UserCount   int            `json:"user_count"`
 	Users       []string       `json:"users"`
+
+	// Added later with omitempty, so a UserGroup that does not set them
+	// marshals to the same JSON as before.
+	AutoProvision       bool   `json:"auto_provision,omitempty"`
+	ChannelCount        int    `json:"channel_count,omitempty"`
+	EnterpriseSubteamID string `json:"enterprise_subteam_id,omitempty"`
+	IsEditingRestricted bool   `json:"is_editing_restricted,omitempty"`
+	IsIDPGroup          bool   `json:"is_idp_group,omitempty"`
+	IsMembershipLocked  bool   `json:"is_membership_locked,omitempty"`
+	IsOrgLevel          bool   `json:"is_org_level,omitempty"`
+	IsSection           bool   `json:"is_section,omitempty"`
+	IsSubteam           bool   `json:"is_subteam,omitempty"`
+	IsVisible           bool   `json:"is_visible,omitempty"`
 }
 
 // UserGroupPrefs contains default channels and groups (private channels)
