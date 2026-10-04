@@ -35,33 +35,14 @@ func CreateManifestOptionTeamID(teamID string) CreateManifestOption {
 
 // CreateManifest creates an app from an app manifest.
 // For more details, see CreateManifestContext documentation.
-func (api *Client) CreateManifest(manifest *Manifest, token string) (*ManifestResponse, error) {
-	return api.CreateManifestContext(context.Background(), manifest, token)
+func (api *Client) CreateManifest(manifest *Manifest, token string, options ...CreateManifestOption) (*ManifestResponse, error) {
+	return api.CreateManifestContext(context.Background(), manifest, token, options...)
 }
 
 // CreateManifestContext creates an app from an app manifest with a custom context.
-// Slack API docs: https://api.slack.com/methods/apps.manifest.create
-func (api *Client) CreateManifestContext(ctx context.Context, manifest *Manifest, token string) (*ManifestResponse, error) {
-	jsonBytes, err := json.Marshal(manifest)
-	if err != nil {
-		return nil, err
-	}
-
-	return api.createManifest(ctx, jsonBytes, token)
-}
-
-// CreateManifestWithOptions creates an app from an app manifest with optional
-// request arguments.
-// For more details, see CreateManifestWithOptionsContext documentation.
-func (api *Client) CreateManifestWithOptions(manifest *Manifest, token string, options ...CreateManifestOption) (*ManifestResponse, error) {
-	return api.CreateManifestWithOptionsContext(context.Background(), manifest, token, options...)
-}
-
-// CreateManifestWithOptionsContext creates an app from an app manifest with
-// optional request arguments and a custom context. If token is empty, the
-// configuration token set by OptionConfigToken is used.
+//
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.create
-func (api *Client) CreateManifestWithOptionsContext(ctx context.Context, manifest *Manifest, token string, options ...CreateManifestOption) (*ManifestResponse, error) {
+func (api *Client) CreateManifestContext(ctx context.Context, manifest *Manifest, token string, options ...CreateManifestOption) (*ManifestResponse, error) {
 	jsonBytes, err := json.Marshal(manifest)
 	if err != nil {
 		return nil, err
@@ -80,6 +61,7 @@ func (api *Client) CreateManifestRaw(manifest json.RawMessage, token string, opt
 // CreateManifestRawContext creates an app from a raw JSON app manifest with a
 // custom context. The manifest must be a JSON object. If token is empty, the
 // configuration token set by OptionConfigToken is used.
+//
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.create
 func (api *Client) CreateManifestRawContext(ctx context.Context, manifest json.RawMessage, token string, options ...CreateManifestOption) (*ManifestResponse, error) {
 	if err := validateRawManifest(manifest); err != nil {
@@ -196,6 +178,7 @@ func (api *Client) ExportManifestRaw(token string, appID string) (json.RawMessag
 // Manifest. The returned JSON retains unknown fields and its original
 // representation. If token is empty, the configuration token set by
 // OptionConfigToken is used.
+//
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.export
 func (api *Client) ExportManifestRawContext(ctx context.Context, token string, appID string) (json.RawMessage, error) {
 	if token == "" {
@@ -243,6 +226,7 @@ func (api *Client) UpdateManifestRaw(manifest json.RawMessage, token string, app
 // UpdateManifestRawContext updates an app from a raw JSON app manifest with a
 // custom context. The manifest must be a JSON object. If token is empty, the
 // configuration token set by OptionConfigToken is used.
+//
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.update
 func (api *Client) UpdateManifestRawContext(ctx context.Context, manifest json.RawMessage, token string, appID string) (*UpdateManifestResponse, error) {
 	if err := validateRawManifest(manifest); err != nil {
@@ -273,7 +257,8 @@ func (api *Client) ValidateManifest(manifest *Manifest, token string, appId stri
 
 // ValidateManifestContext sends a request to apps.manifest.validate to validate your app manifest with a custom context.
 // appId is optional; pass an empty string to omit it.
-// Slack API docs: https://api.slack.com/methods/apps.manifest.validate
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.validate
 func (api *Client) ValidateManifestContext(ctx context.Context, manifest *Manifest, token string, appId string) (*ManifestResponse, error) {
 	jsonBytes, err := json.Marshal(manifest)
 	if err != nil {
@@ -294,6 +279,7 @@ func (api *Client) ValidateManifestRaw(manifest json.RawMessage, token string, a
 // context. The manifest must be a JSON object. appID is optional; pass an empty
 // string to omit it. If token is empty, the configuration token set by
 // OptionConfigToken is used.
+//
 // Slack API docs: https://docs.slack.dev/reference/methods/apps.manifest.validate
 func (api *Client) ValidateManifestRawContext(ctx context.Context, manifest json.RawMessage, token string, appID string) (*ManifestResponse, error) {
 	if err := validateRawManifest(manifest); err != nil {

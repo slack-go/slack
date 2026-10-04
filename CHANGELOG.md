@@ -67,9 +67,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Both methods still ask for it by default. `GetUserInfo` and `GetUserInfoContext` take the new
   option through a variadic `options ...ParamOption`, so an interface or mock that declares their
   old signature needs the new parameter (#1602, #1603).
-- App manifest APIs now expose the complete `apps.manifest.create` response,
-  optional workspace targeting for create requests, and lossless raw JSON
-  variants for the existing create, update, export, and validate methods.
+- Add `CreateManifestRaw`, `UpdateManifestRaw`, `ExportManifestRaw` and `ValidateManifestRaw`
+  (plus `Context` variants), which send and return the app manifest as raw JSON, so keys that
+  `Manifest` does not model are kept (#1600, #1601).
+- Add `CreateManifestOptionTeamID` to create an app in a given workspace with an org-level
+  configuration token. `CreateManifest` and `CreateManifestContext` take it through a variadic
+  `options ...CreateManifestOption`, so an interface or mock that declares their old signature
+  needs the new parameter (#1600, #1601).
 
 ### Changed
 
