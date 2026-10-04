@@ -32,11 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `Features.AgentView` and `Features.AssistantView` for the `features.agent_view` and
   `features.assistant_view` [app manifest](https://docs.slack.dev/reference/app-manifest)
   settings, so a typed export and update keeps them (#1588, #1589).
-- Add `Features.UnfurlDomains`, `OAuthConfig.PKCEEnabled`, `OAuthConfig.TokenManagementEnabled`,
-  `Settings.IsMCPEnabled`, `Settings.TokenRotationEnabled`, `Settings.IncomingWebhooks`,
-  `Settings.FunctionRuntime` and `EventSubscriptions.MetadataSubscriptions` for the matching
-  [app manifest](https://docs.slack.dev/reference/app-manifest) keys, so a typed export and
-  update keeps them (#1588).
+- Add `Features.UnfurlDomains`, `Features.RichPreviews`, `Features.Search`,
+  `OAuthConfig.PKCEEnabled`, `OAuthConfig.TokenManagementEnabled`, `Settings.IsMCPEnabled`,
+  `Settings.TokenRotationEnabled`, `Settings.IncomingWebhooks`, `Settings.FunctionRuntime`,
+  `Settings.SIWSLinks`, `EventSubscriptions.MetadataSubscriptions` and `OutgoingDomains` for the
+  matching [app manifest](https://docs.slack.dev/reference/app-manifest) keys, so a typed export
+  and update keeps them. `Features.Search` covers the two callback IDs, not `slackbot_metadata`
+  (#1588).
 - Add `Attachment.HideColor` (`hide_color`), which removes the color bar from a file unfurl
   sent with [`chat.unfurl`](https://docs.slack.dev/reference/methods/chat.unfurl) (#1590).
 - Block Kit: Add `TaskCardBlock.HideTitle` (`hide_title`) and `WithHideTitle`, which hide the
