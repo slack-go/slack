@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"reflect"
 	"strconv"
@@ -965,5 +966,92 @@ func TestGetUsersReturnsServerError(t *testing.T) {
 	expectedErr := "slack server error: 500 Internal Server Error"
 	if err.Error() != expectedErr {
 		t.Errorf("Expected: %s. Got: %s", expectedErr, err.Error())
+	}
+}
+
+// TestGetUsersIncludeLocale checks that include_locale stays true by default, can be
+// set to false, and keeps its value on every page.
+func TestGetUsersIncludeLocale(t *testing.T) {
+	tests := []struct {
+		name       string
+		options    []GetUsersOption
+		wantLocale string
+		wantPages  int32
+	}{
+		{name: "default", wantLocale: "true", wantPages: 1},
+		{name: "false", options: []GetUsersOption{GetUsersOptionIncludeLocale(false)}, wantLocale: "false", wantPages: 2},
+		{name: "true", options: []GetUsersOption{GetUsersOptionIncludeLocale(true)}, wantLocale: "true", wantPages: 1},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var requests atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				n := requests.Add(1)
+				if err := r.ParseForm(); err != nil {
+					t.Errorf("ParseForm() error = %v", err)
+				}
+				if got := r.PostForm.Get("include_locale"); got != tt.wantLocale {
+					t.Errorf("page %d: include_locale = %q, want %q", n, got, tt.wantLocale)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				cursor := ""
+				if n < tt.wantPages {
+					cursor = "next"
+				}
+				_, _ = fmt.Fprintf(w, `{"ok":true,"members":[],"response_metadata":{"next_cursor":%q}}`, cursor)
+			}))
+			defer server.Close()
+
+			api := New("test-token", OptionAPIURL(server.URL+"/"))
+			if _, err := api.GetUsers(tt.options...); err != nil {
+				t.Fatalf("GetUsers() error = %v", err)
+			}
+			if got := requests.Load(); got != tt.wantPages {
+				t.Fatalf("requests = %d, want %d", got, tt.wantPages)
+			}
+		})
+	}
+}
+
+// TestGetUserInfoIncludeLocale checks that include_locale stays true by default and
+// can be set to false.
+func TestGetUserInfoIncludeLocale(t *testing.T) {
+	tests := []struct {
+		name       string
+		options    []ParamOption
+		wantLocale string
+	}{
+		{name: "default", wantLocale: "true"},
+		{name: "false", options: []ParamOption{GetUserInfoOptionIncludeLocale(false)}, wantLocale: "false"},
+		{name: "true", options: []ParamOption{GetUserInfoOptionIncludeLocale(true)}, wantLocale: "true"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if err := r.ParseForm(); err != nil {
+					t.Errorf("ParseForm() error = %v", err)
+				}
+				if got := r.PostForm.Get("include_locale"); got != tt.wantLocale {
+					t.Errorf("include_locale = %q, want %q", got, tt.wantLocale)
+				}
+				if got := r.PostForm.Get("user"); got != "U123" {
+					t.Errorf("user = %q, want %q", got, "U123")
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = fmt.Fprint(w, `{"ok":true,"user":{"id":"U123"}}`)
+			}))
+			defer server.Close()
+
+			api := New("test-token", OptionAPIURL(server.URL+"/"))
+			user, err := api.GetUserInfo("U123", tt.options...)
+			if err != nil {
+				t.Fatalf("GetUserInfo() error = %v", err)
+			}
+			if user.ID != "U123" {
+				t.Fatalf("user.ID = %q, want %q", user.ID, "U123")
+			}
+		})
 	}
 }
