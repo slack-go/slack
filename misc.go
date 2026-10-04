@@ -281,9 +281,54 @@ func fileUploadReq(ctx context.Context, path string, r io.Reader) (*http.Request
 	return req, nil
 }
 
-func downloadFile(ctx context.Context, client httpClient, token string, downloadURL string, writer io.Writer, d Debug) error {
+// slackDomains are the domains whose hosts serve the Slack files that need the token.
+var slackDomains = []string{"slack.com", "slack-gov.com"}
+
+// ensureURLMayReceiveToken returns an error unless rawURL is an https Slack URL or an
+// API endpoint URL. GetFile and UploadToURL attach the token to a URL the caller passes
+// in, and the url_private of a remote file is whatever external_url its creator chose.
+func ensureURLMayReceiveToken(apiEndpoint, rawURL string) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
+	api, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return err
+	}
+	if isHTTPSSlackURL(u) || isAPIEndpointURL(api, u) {
+		return nil
+	}
+	return fmt.Errorf("refusing to send the token to %q: not an https Slack URL or the API URL", rawURL)
+}
+
+// isHTTPSSlackURL reports whether u is an https URL on a host in slackDomains or one of
+// their subdomains.
+func isHTTPSSlackURL(u *url.URL) bool {
+	if u.Scheme != "https" {
+		return false
+	}
+	host := strings.ToLower(u.Hostname())
+	for _, domain := range slackDomains {
+		if host == domain || strings.HasSuffix(host, "."+domain) {
+			return true
+		}
+	}
+	return false
+}
+
+// isAPIEndpointURL reports whether u has the scheme and host of the API endpoint set
+// with OptionAPIURL. Every API call already sends the token there.
+func isAPIEndpointURL(api, u *url.URL) bool {
+	return api.Host != "" && u.Scheme == api.Scheme && strings.EqualFold(u.Host, api.Host)
+}
+
+func downloadFile(ctx context.Context, client httpClient, token, apiEndpoint, downloadURL string, writer io.Writer, d Debug) error {
 	if downloadURL == "" {
 		return fmt.Errorf("received empty download URL")
+	}
+	if err := ensureURLMayReceiveToken(apiEndpoint, downloadURL); err != nil {
+		return err
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, &bytes.Buffer{})

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- `GetFile`, `GetFileContext` and `UploadToURL` now send the token only to https URLs on
+  `slack.com`, `slack-gov.com` and their subdomains, and to the host set with `OptionAPIURL`.
+  Any other URL returns an error before a request is made. The `url_private` of a remote or
+  external file (`File.IsExternal`) points outside Slack, so `GetFile(file.URLPrivate)` sent
+  the token to that host
+  ([GHSA-3q3v-34v2-g88f](https://github.com/slack-go/slack/security/advisories/GHSA-3q3v-34v2-g88f)).
+  A test that points `GetFile` at an `httptest` server must also pass that server to
+  `OptionAPIURL`.
+
 ## [0.30.0] - 2026-10-04
 
 ### Added

@@ -117,7 +117,7 @@ func TestGetFileSignInRedirect(t *testing.T) {
 	for _, path := range []string{downloadPath, inlinePath} {
 		t.Run("token can read "+path, func(t *testing.T) {
 			var buf bytes.Buffer
-			err := New("xoxb-valid").GetFile(ts.URL+path, &buf)
+			err := New("xoxb-valid", OptionAPIURL(ts.URL+"/")).GetFile(ts.URL+path, &buf)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -129,7 +129,7 @@ func TestGetFileSignInRedirect(t *testing.T) {
 
 	t.Run("token cannot read the file", func(t *testing.T) {
 		var buf bytes.Buffer
-		err := New("xoxb-invalid").GetFile(ts.URL+downloadPath, &buf)
+		err := New("xoxb-invalid", OptionAPIURL(ts.URL+"/")).GetFile(ts.URL+downloadPath, &buf)
 		if err == nil || !strings.Contains(err.Error(), "sign-in page") {
 			t.Fatalf("expected a sign-in redirect error, got %v", err)
 		}
@@ -137,6 +137,81 @@ func TestGetFileSignInRedirect(t *testing.T) {
 			t.Fatalf("wrote %d bytes of the sign-in page", buf.Len())
 		}
 	})
+}
+
+// recordingHTTPClient answers every request with 200 and keeps the requests it got.
+type recordingHTTPClient struct {
+	requests []*http.Request
+}
+
+func (c *recordingHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	c.requests = append(c.requests, req)
+	if req.Body != nil {
+		// Let the multipart writer goroutine of UploadToURL finish.
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("OK")), Request: req}, nil
+}
+
+// TestTokenOnlySentToSlack covers GHSA-3q3v-34v2-g88f: GetFile and UploadToURL attach
+// the token to the URL they are given, and a remote file's url_private is the
+// external_url its creator chose. Only https Slack URLs and the API endpoint may get it.
+func TestTokenOnlySentToSlack(t *testing.T) {
+	const endpoint = "http://127.0.0.1:8080/"
+	cases := []struct {
+		url     string
+		allowed bool
+	}{
+		{"https://files.slack.com/files-pri/T1-F1/a.txt", true},
+		{"https://FILES.Slack.com/files-pri/T1-F1/a.txt", true},
+		{"https://files.slack.com:443/files-pri/T1-F1/a.txt", true},
+		{"https://acme.enterprise.slack.com/files-pri/T1-F1/a.txt", true},
+		{"https://files.slack-gov.com/files-pri/T1-F1/a.txt", true},
+		{endpoint + "files-pri/T1-F1/a.txt", true},
+		{"https://evil.example/a.txt", false},
+		{"https://files.slack.com@evil.example/a.txt", false},
+		{"https://files.slack.com.evil.example/a.txt", false},
+		{"https://evilslack.com/a.txt", false},
+		{"http://files.slack.com/files-pri/T1-F1/a.txt", false},
+		{"http://127.0.0.1:8081/files-pri/T1-F1/a.txt", false},
+		{"files.slack.com/files-pri/T1-F1/a.txt", false},
+	}
+	calls := map[string]func(api *Client, u string) error{
+		"GetFile": func(api *Client, u string) error {
+			return api.GetFile(u, io.Discard)
+		},
+		"UploadToURL": func(api *Client, u string) error {
+			return api.UploadToURL(context.Background(), UploadToURLParameters{UploadURL: u, Filename: "a.txt", Content: "a"})
+		},
+	}
+
+	for name, call := range calls {
+		for _, tc := range cases {
+			t.Run(name+" "+tc.url, func(t *testing.T) {
+				rc := &recordingHTTPClient{}
+				api := New("xoxb-secret", OptionHTTPClient(rc), OptionAPIURL(endpoint))
+				err := call(api, tc.url)
+				if !tc.allowed {
+					if err == nil {
+						t.Error("expected an error")
+					}
+					for _, req := range rc.requests {
+						t.Errorf("sent the token to %s", req.URL)
+					}
+					return
+				}
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if len(rc.requests) != 1 {
+					t.Fatalf("sent %d requests, want 1", len(rc.requests))
+				}
+				if got := rc.requests[0].Header.Get("Authorization"); got != "Bearer xoxb-secret" {
+					t.Errorf("Authorization = %q, want the token", got)
+				}
+			})
+		}
+	}
 }
 
 func TestSlack_DeleteFileComment(t *testing.T) {
