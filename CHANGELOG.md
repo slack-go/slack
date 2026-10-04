@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-04
+
 ### Added
 
 - `slackevents`: Add the Agent messaging events
@@ -730,7 +732,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.30.0...HEAD
+[0.30.0]: https://github.com/slack-go/slack/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/slack-go/slack/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/slack-go/slack/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/slack-go/slack/compare/v0.26.0...v0.27.0
