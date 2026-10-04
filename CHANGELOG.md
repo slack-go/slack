@@ -61,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UserGroup` now exposes `AutoProvision`, `ChannelCount`, `EnterpriseSubteamID`,
   `IsEditingRestricted`, `IsIDPGroup`, `IsMembershipLocked`, `IsOrgLevel`, `IsSection`,
   `IsSubteam` and `IsVisible` (#1604, #1605).
+- Add `GetUsersOptionIncludeLocale` and `GetUserInfoOptionIncludeLocale` to choose whether
+  [`users.list`](https://docs.slack.dev/reference/methods/users.list) and
+  [`users.info`](https://docs.slack.dev/reference/methods/users.info) return the user's `locale`.
+  Both methods still ask for it by default. `GetUserInfo` and `GetUserInfoContext` take the new
+  option through a variadic `options ...ParamOption`, so an interface or mock that declares their
+  old signature needs the new parameter (#1602, #1603).
 
 ### Changed
 

@@ -262,19 +262,32 @@ func (api *Client) GetUserPresenceContext(ctx context.Context, user string) (*Us
 	return &response.UserPresence, nil
 }
 
+// GetUserInfoOptionIncludeLocale sets whether users.info returns the user's locale.
+// GetUserInfo sends include_locale=true unless this sets it to false.
+func GetUserInfoOptionIncludeLocale(includeLocale bool) ParamOption {
+	return func(v *url.Values) {
+		v.Set("include_locale", strconv.FormatBool(includeLocale))
+	}
+}
+
 // GetUserInfo will retrieve the complete user information.
 // For more information see the GetUserInfoContext documentation.
-func (api *Client) GetUserInfo(user string) (*User, error) {
-	return api.GetUserInfoContext(context.Background(), user)
+func (api *Client) GetUserInfo(user string, options ...ParamOption) (*User, error) {
+	return api.GetUserInfoContext(context.Background(), user, options...)
 }
 
 // GetUserInfoContext will retrieve the complete user information with a custom context.
-// Slack API docs: https://api.slack.com/methods/users.info
-func (api *Client) GetUserInfoContext(ctx context.Context, user string) (*User, error) {
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/users.info
+func (api *Client) GetUserInfoContext(ctx context.Context, user string, options ...ParamOption) (*User, error) {
 	values := url.Values{
 		"token":          {api.token},
 		"user":           {user},
 		"include_locale": {strconv.FormatBool(true)},
+	}
+
+	for _, opt := range options {
+		opt(&values)
 	}
 
 	response, err := api.userRequest(ctx, "users.info", values)
@@ -323,6 +336,14 @@ func GetUsersOptionPresence(n bool) GetUsersOption {
 	}
 }
 
+// GetUsersOptionIncludeLocale sets whether users.list returns each user's locale.
+// GetUsers sends include_locale=true unless this sets it to false.
+func GetUsersOptionIncludeLocale(includeLocale bool) GetUsersOption {
+	return func(p *UserPagination) {
+		p.includeLocale = includeLocale
+	}
+}
+
 // GetUsersOptionTeamID include team Id
 func GetUsersOptionTeamID(teamId string) GetUsersOption {
 	return func(p *UserPagination) {
@@ -339,8 +360,9 @@ func GetUsersOptionCursor(cursor string) GetUsersOption {
 
 func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination) {
 	up = UserPagination{
-		c:     c,
-		limit: 200, // per slack api documentation.
+		c:             c,
+		limit:         200, // per slack api documentation.
+		includeLocale: true,
 	}
 
 	for _, opt := range options {
@@ -352,13 +374,14 @@ func newUserPagination(c *Client, options ...GetUsersOption) (up UserPagination)
 
 // UserPagination allows for paginating over the users
 type UserPagination struct {
-	Users    []User
-	Cursor   string
-	limit    int
-	presence bool
-	teamId   string
-	complete bool
-	c        *Client
+	Users         []User
+	Cursor        string
+	limit         int
+	presence      bool
+	includeLocale bool
+	teamId        string
+	complete      bool
+	c             *Client
 }
 
 // Done checks if the pagination has completed
@@ -390,7 +413,7 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 		"token":          {t.c.token},
 		"cursor":         {t.Cursor},
 		"team_id":        {t.teamId},
-		"include_locale": {strconv.FormatBool(true)},
+		"include_locale": {strconv.FormatBool(t.includeLocale)},
 	}
 
 	if resp, err = t.c.userRequest(ctx, "users.list", values); err != nil {
