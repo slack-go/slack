@@ -85,31 +85,58 @@ func TestSlack_GetFile(t *testing.T) {
 	}
 }
 
-type htmlFileHTTPClient struct{}
+// TestGetFileSignInRedirect replays files.slack.com (live check, 2026-10-04): with a
+// token that cannot read the file it answers 302 to the workspace sign-in page with
+// redir set to the file path; with access it serves the file, HTML files included.
+func TestGetFileSignInRedirect(t *testing.T) {
+	const (
+		downloadPath = "/files-pri/T1-F1/download/todo.html"
+		inlinePath   = "/files-pri/T1-F1/todo.html"
+		page         = "<!DOCTYPE html><html><body>a real HTML file</body></html>"
+	)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorized := r.Header.Get("Authorization") == "Bearer xoxb-valid"
+		switch {
+		case r.URL.Path == downloadPath && authorized:
+			w.Header().Set("Content-Type", "application/force-download")
+			_, _ = w.Write([]byte(page))
+		case r.URL.Path == inlinePath && authorized:
+			w.Header().Set("Content-Type", "text/html")
+			_, _ = w.Write([]byte(page))
+		case r.URL.Path == downloadPath || r.URL.Path == inlinePath:
+			http.Redirect(w, r, "/?redir="+url.QueryEscape(r.URL.Path), http.StatusFound)
+		case r.URL.Path == "/" && r.URL.Query().Get("redir") != "":
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			_, _ = w.Write([]byte("<!DOCTYPE html><html><body>Sign in to Slack</body></html>"))
+		default:
+			t.Errorf("unexpected request %s", r.URL)
+		}
+	}))
+	defer ts.Close()
 
-func (m *htmlFileHTTPClient) Do(*http.Request) (*http.Response, error) {
-	body := `<html><body>Browser not supported</body></html>`
-	return &http.Response{
-		StatusCode: 200,
-		Header:     http.Header{"Content-Type": []string{"text/html"}},
-		Body:       io.NopCloser(bytes.NewBufferString(body)),
-	}, nil
-}
-
-func TestSlack_GetFileRejectsHTML(t *testing.T) {
-	api := &Client{
-		endpoint:   "http://" + serverAddr + "/",
-		token:      "testing-token",
-		httpclient: &htmlFileHTTPClient{},
+	for _, path := range []string{downloadPath, inlinePath} {
+		t.Run("token can read "+path, func(t *testing.T) {
+			var buf bytes.Buffer
+			err := New("xoxb-valid").GetFile(ts.URL+path, &buf)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if buf.String() != page {
+				t.Fatalf("wrote %q, want the file", buf.String())
+			}
+		})
 	}
 
-	err := api.GetFile("https://files.slack.com/files-pri/T99999999-FGGGGGGGG/download/test.csv", &bytes.Buffer{})
-	if err == nil {
-		t.Fatal("expected error for HTML download response")
-	}
-	if !strings.Contains(err.Error(), "HTML instead of file content") {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	t.Run("token cannot read the file", func(t *testing.T) {
+		var buf bytes.Buffer
+		err := New("xoxb-invalid").GetFile(ts.URL+downloadPath, &buf)
+		if err == nil || !strings.Contains(err.Error(), "sign-in page") {
+			t.Fatalf("expected a sign-in redirect error, got %v", err)
+		}
+		if buf.Len() != 0 {
+			t.Fatalf("wrote %d bytes of the sign-in page", buf.Len())
+		}
+	})
 }
 
 func TestSlack_DeleteFileComment(t *testing.T) {
