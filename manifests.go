@@ -8,11 +8,12 @@ import (
 
 // Manifest is an application manifest schema
 type Manifest struct {
-	Metadata    ManifestMetadata `json:"_metadata,omitempty" yaml:"_metadata,omitempty"`
-	Display     Display          `json:"display_information" yaml:"display_information"`
-	Settings    Settings         `json:"settings,omitempty" yaml:"settings,omitempty"`
-	Features    Features         `json:"features,omitempty" yaml:"features,omitempty"`
-	OAuthConfig OAuthConfig      `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
+	Metadata        ManifestMetadata `json:"_metadata,omitempty" yaml:"_metadata,omitempty"`
+	Display         Display          `json:"display_information" yaml:"display_information"`
+	Settings        Settings         `json:"settings,omitempty" yaml:"settings,omitempty"`
+	Features        Features         `json:"features,omitempty" yaml:"features,omitempty"`
+	OAuthConfig     OAuthConfig      `json:"oauth_config,omitempty" yaml:"oauth_config,omitempty"`
+	OutgoingDomains []string         `json:"outgoing_domains,omitempty" yaml:"outgoing_domains,omitempty"`
 }
 
 // CreateManifest creates an app from an app manifest.
@@ -194,6 +195,7 @@ type Settings struct {
 	Interactivity          *Interactivity            `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
 	IsMCPEnabled           bool                      `json:"is_mcp_enabled,omitempty" yaml:"is_mcp_enabled,omitempty"`
 	OrgDeployEnabled       bool                      `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
+	SIWSLinks              *ManifestSIWSLinks        `json:"siws_links,omitempty" yaml:"siws_links,omitempty"`
 	SocketModeEnabled      bool                      `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
 	TokenRotationEnabled   bool                      `json:"token_rotation_enabled,omitempty" yaml:"token_rotation_enabled,omitempty"`
 }
@@ -224,6 +226,11 @@ type ManifestIncomingWebhooks struct {
 	IncomingWebhooksEnabled bool `json:"incoming_webhooks_enabled" yaml:"incoming_webhooks_enabled"`
 }
 
+// ManifestSIWSLinks is a group of settings that describe Sign in with Slack (SIWS) links
+type ManifestSIWSLinks struct {
+	InitiateURI string `json:"initiate_uri,omitempty" yaml:"initiate_uri,omitempty"`
+}
+
 // ManifestFunctionRuntime is where the functions declared in the manifest run
 type ManifestFunctionRuntime string
 
@@ -238,6 +245,8 @@ type Features struct {
 	AppHome       AppHome                `json:"app_home,omitempty" yaml:"app_home,omitempty"`
 	AssistantView *AssistantView         `json:"assistant_view,omitempty" yaml:"assistant_view,omitempty"`
 	BotUser       BotUser                `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
+	RichPreviews  *ManifestRichPreviews  `json:"rich_previews,omitempty" yaml:"rich_previews,omitempty"`
+	Search        *ManifestSearch        `json:"search,omitempty" yaml:"search,omitempty"`
 	Shortcuts     []Shortcut             `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
 	SlashCommands []ManifestSlashCommand `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
 	UnfurlDomains []string               `json:"unfurl_domains,omitempty" yaml:"unfurl_domains,omitempty"`
@@ -267,6 +276,18 @@ type ManifestSuggestedPrompt struct {
 type ManifestAgentAction struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
+}
+
+// ManifestRichPreviews is a group of settings that describe rich previews
+type ManifestRichPreviews struct {
+	IsActive    bool     `json:"is_active" yaml:"is_active"`
+	EntityTypes []string `json:"entity_types,omitempty" yaml:"entity_types,omitempty"`
+}
+
+// ManifestSearch is a group of settings that describe the enterprise search connector
+type ManifestSearch struct {
+	SearchFunctionCallbackID        string `json:"search_function_callback_id" yaml:"search_function_callback_id"`
+	SearchFiltersFunctionCallbackID string `json:"search_filters_function_callback_id,omitempty" yaml:"search_filters_function_callback_id,omitempty"`
 }
 
 // AppHome is a group of settings that describe the App Home configuration

@@ -381,6 +381,46 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 	assert.JSONEq(t, settings, string(sentSettings))
 }
 
+// TestManifestKeepsFeatureKeys checks that rich_previews, search, siws_links and
+// outgoing_domains from an export are sent back on update.
+func TestManifestKeepsFeatureKeys(t *testing.T) {
+	// Shape from https://docs.slack.dev/reference/app-manifest
+	const richPreviews = `{"is_active": true, "entity_types": ["slack#/entities/task"]}`
+	const search = `{"search_function_callback_id": "search", "search_filters_function_callback_id": "search_filters"}`
+	const siwsLinks = `{"initiate_uri": "https://example.com/siws"}`
+	payload := `{
+		"display_information": {"name": "test"},
+		"features": {"rich_previews": ` + richPreviews + `, "search": ` + search + `},
+		"settings": {"siws_links": ` + siwsLinks + `},
+		"outgoing_domains": ["api.example.com"]
+	}`
+
+	var manifest Manifest
+	require.NoError(t, json.Unmarshal([]byte(payload), &manifest))
+
+	require.NotNil(t, manifest.Features.RichPreviews)
+	assert.True(t, manifest.Features.RichPreviews.IsActive)
+	assert.Equal(t, []string{"slack#/entities/task"}, manifest.Features.RichPreviews.EntityTypes)
+	require.NotNil(t, manifest.Features.Search)
+	assert.Equal(t, "search", manifest.Features.Search.SearchFunctionCallbackID)
+	assert.Equal(t, "search_filters", manifest.Features.Search.SearchFiltersFunctionCallbackID)
+	require.NotNil(t, manifest.Settings.SIWSLinks)
+	assert.Equal(t, "https://example.com/siws", manifest.Settings.SIWSLinks.InitiateURI)
+	assert.Equal(t, []string{"api.example.com"}, manifest.OutgoingDomains)
+
+	out, err := json.Marshal(manifest)
+	require.NoError(t, err)
+	var sent, features, settings map[string]json.RawMessage
+	require.NoError(t, json.Unmarshal(out, &sent))
+	require.NoError(t, json.Unmarshal(sent["features"], &features))
+	require.NoError(t, json.Unmarshal(sent["settings"], &settings))
+
+	assert.JSONEq(t, richPreviews, string(features["rich_previews"]))
+	assert.JSONEq(t, search, string(features["search"]))
+	assert.JSONEq(t, siwsLinks, string(settings["siws_links"]))
+	assert.JSONEq(t, `["api.example.com"]`, string(sent["outgoing_domains"]))
+}
+
 func getTestCreateManifestResponse() *ManifestResponse {
 	return &ManifestResponse{
 		AppId: "A012ABCD0A0",
