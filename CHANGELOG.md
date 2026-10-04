@@ -58,8 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `AdminUsersList` for the
   [`admin.users.list`](https://docs.slack.dev/reference/methods/admin.users.list) method, with
   an `AdminUsersListOption<Field>` option for each argument (#1594, #1595).
-- User group responses now decode documented string and numeric `user_count`
-  values and expose the remaining documented user group and preference fields.
+- `UserGroup` now exposes `AutoProvision`, `ChannelCount`, `EnterpriseSubteamID`,
+  `IsEditingRestricted`, `IsIDPGroup`, `IsMembershipLocked`, `IsOrgLevel`, `IsSection`,
+  `IsSubteam` and `IsVisible` (#1604, #1605).
 
 ### Changed
 
