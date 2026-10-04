@@ -1019,12 +1019,12 @@ func TestGetUsersIncludeLocale(t *testing.T) {
 func TestGetUserInfoIncludeLocale(t *testing.T) {
 	tests := []struct {
 		name       string
-		options    []ParamOption
+		options    []GetUserInfoOption
 		wantLocale string
 	}{
 		{name: "default", wantLocale: "true"},
-		{name: "false", options: []ParamOption{GetUserInfoOptionIncludeLocale(false)}, wantLocale: "false"},
-		{name: "true", options: []ParamOption{GetUserInfoOptionIncludeLocale(true)}, wantLocale: "true"},
+		{name: "false", options: []GetUserInfoOption{GetUserInfoOptionIncludeLocale(false)}, wantLocale: "false"},
+		{name: "true", options: []GetUserInfoOption{GetUserInfoOptionIncludeLocale(true)}, wantLocale: "true"},
 	}
 
 	for _, tt := range tests {

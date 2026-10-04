@@ -262,32 +262,40 @@ func (api *Client) GetUserPresenceContext(ctx context.Context, user string) (*Us
 	return &response.UserPresence, nil
 }
 
+type getUserInfoParams struct {
+	includeLocale bool
+}
+
+// GetUserInfoOption is an option for GetUserInfo.
+type GetUserInfoOption func(*getUserInfoParams)
+
 // GetUserInfoOptionIncludeLocale sets whether users.info returns the user's locale.
 // GetUserInfo sends include_locale=true unless this sets it to false.
-func GetUserInfoOptionIncludeLocale(includeLocale bool) ParamOption {
-	return func(v *url.Values) {
-		v.Set("include_locale", strconv.FormatBool(includeLocale))
+func GetUserInfoOptionIncludeLocale(includeLocale bool) GetUserInfoOption {
+	return func(params *getUserInfoParams) {
+		params.includeLocale = includeLocale
 	}
 }
 
 // GetUserInfo will retrieve the complete user information.
 // For more information see the GetUserInfoContext documentation.
-func (api *Client) GetUserInfo(user string, options ...ParamOption) (*User, error) {
+func (api *Client) GetUserInfo(user string, options ...GetUserInfoOption) (*User, error) {
 	return api.GetUserInfoContext(context.Background(), user, options...)
 }
 
 // GetUserInfoContext will retrieve the complete user information with a custom context.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/users.info
-func (api *Client) GetUserInfoContext(ctx context.Context, user string, options ...ParamOption) (*User, error) {
+func (api *Client) GetUserInfoContext(ctx context.Context, user string, options ...GetUserInfoOption) (*User, error) {
+	params := getUserInfoParams{includeLocale: true}
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token":          {api.token},
 		"user":           {user},
-		"include_locale": {strconv.FormatBool(true)},
-	}
-
-	for _, opt := range options {
-		opt(&values)
+		"include_locale": {strconv.FormatBool(params.includeLocale)},
 	}
 
 	response, err := api.userRequest(ctx, "users.info", values)
