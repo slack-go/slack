@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `AdminAppsApprovedList` and `AdminAppsRestrictedList` for the
+  [`admin.apps.approved.list`](https://docs.slack.dev/reference/methods/admin.apps.approved.list)
+  and [`admin.apps.restricted.list`](https://docs.slack.dev/reference/methods/admin.apps.restricted.list)
+  methods, with typed app, scope and pagination responses.
+- Add `AdminAppsRequestsList` for the
+  [`admin.apps.requests.list`](https://docs.slack.dev/reference/methods/admin.apps.requests.list)
+  method, with typed request and pagination responses.
+
 ## [0.30.1] - 2026-10-04
 
 ### Security
