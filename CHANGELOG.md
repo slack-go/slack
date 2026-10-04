@@ -90,6 +90,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   record. Before, it read the failed connection again until gorilla/websocket panicked with
   `repeated read on failed websocket connection`, which stopped the process. The client also
   reconnects after 10 empty or malformed frames in a row (#1608).
+- `GetFile` now returns an error when the token cannot read the file. Slack then redirects the
+  download to the workspace sign-in page, and `GetFile` used to write that HTML page as the
+  file (#1284, #1582).
 
 ## [0.29.0] - 2026-08-15
 

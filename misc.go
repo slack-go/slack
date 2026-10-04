@@ -306,6 +306,16 @@ func downloadFile(ctx context.Context, client httpClient, token string, download
 		return err
 	}
 
+	// Without access to the file, files.slack.com redirects to the workspace sign-in
+	// page with redir set to the file path, and the client follows it to an HTML
+	// page. Report that instead of writing the page as the file. A file the token
+	// can read, HTML or not, is served without a redirect.
+	if final := resp.Request; final != nil {
+		if redir := final.URL.Query().Get("redir"); redir != "" && redir == req.URL.Path {
+			return fmt.Errorf("file download was redirected to the sign-in page at %s: the token cannot read this file", final.URL.Host)
+		}
+	}
+
 	_, err = io.Copy(writer, resp.Body)
 
 	return err
