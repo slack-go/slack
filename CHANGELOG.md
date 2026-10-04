@@ -65,8 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`users.list`](https://docs.slack.dev/reference/methods/users.list) and
   [`users.info`](https://docs.slack.dev/reference/methods/users.info) return the user's `locale`.
   Both methods still ask for it by default. `GetUserInfo` and `GetUserInfoContext` take the new
-  option through a variadic `options ...ParamOption`, so an interface or mock that declares their
-  old signature needs the new parameter (#1602, #1603).
+  option through a variadic `options ...GetUserInfoOption`, so an interface or mock that
+  declares their old signature needs the new parameter (#1602, #1603).
 - Add `CreateManifestRaw`, `UpdateManifestRaw`, `ExportManifestRaw` and `ValidateManifestRaw`
   (plus `Context` variants), which send and return the app manifest as raw JSON, so keys that
   `Manifest` does not model are kept (#1600, #1601).
