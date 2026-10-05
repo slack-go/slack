@@ -48,6 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [`admin.apps.requests.list`](https://docs.slack.dev/reference/methods/admin.apps.requests.list)
   method, with typed request and pagination responses (#1615).
 
+- `File` now unmarshals the video fields of the
+  [file object](https://docs.slack.dev/reference/objects/file-object): the video
+  thumbnail (`ThumbVideo`, `ThumbVideoW`, `ThumbVideoH` and `ThumbVideoTimestamp`) and
+  `DurationMs`, `HLS`, `HLSEmbed`, `HLSPreview`, `MediaDisplayType`, `MP4`, `MP4Low` and
+  `VTT`.
+
 ## [0.30.1] - 2026-10-04
 
 ### Security
