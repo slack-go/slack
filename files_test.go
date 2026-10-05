@@ -703,3 +703,45 @@ func TestDeleteFileCommentSwappedIDsError(t *testing.T) {
 		t.Fatalf("expected an error that names the argument order, got %v", err)
 	}
 }
+
+func TestFileVideoFields(t *testing.T) {
+	data := `{
+		"id": "F1234567890",
+		"thumb_video": "https://files.slack.com/files-tmb/T1234567890-F1234567890-abcdef/clip_thumb_video.jpeg",
+		"thumb_video_w": 1280,
+		"thumb_video_h": 720,
+		"thumb_video_ts": "0",
+		"duration_ms": 12345,
+		"hls": "https://files.slack.com/files-pri/T1234567890-F1234567890/file.m3u8",
+		"hls_embed": "https://files.slack.com/files-pri/T1234567890-F1234567890/embed.m3u8",
+		"hls_preview": "https://files.slack.com/files-pri/T1234567890-F1234567890/preview.m3u8",
+		"media_display_type": "video",
+		"mp4": "https://files.slack.com/files-pri/T1234567890-F1234567890/clip.mp4",
+		"mp4_low": "https://files.slack.com/files-pri/T1234567890-F1234567890/clip_low.mp4",
+		"vtt": "WEBVTT\n\n00:00.000 --> 00:01.000\nHello"
+	}`
+
+	var got File
+	if err := json.Unmarshal([]byte(data), &got); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	want := File{
+		ID:                  "F1234567890",
+		ThumbVideo:          "https://files.slack.com/files-tmb/T1234567890-F1234567890-abcdef/clip_thumb_video.jpeg",
+		ThumbVideoW:         1280,
+		ThumbVideoH:         720,
+		ThumbVideoTimestamp: "0",
+		DurationMs:          12345,
+		HLS:                 "https://files.slack.com/files-pri/T1234567890-F1234567890/file.m3u8",
+		HLSEmbed:            "https://files.slack.com/files-pri/T1234567890-F1234567890/embed.m3u8",
+		HLSPreview:          "https://files.slack.com/files-pri/T1234567890-F1234567890/preview.m3u8",
+		MediaDisplayType:    "video",
+		MP4:                 "https://files.slack.com/files-pri/T1234567890-F1234567890/clip.mp4",
+		MP4Low:              "https://files.slack.com/files-pri/T1234567890-F1234567890/clip_low.mp4",
+		VTT:                 "WEBVTT\n\n00:00.000 --> 00:01.000\nHello",
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("got %+v, want %+v", got, want)
+	}
+}
