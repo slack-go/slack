@@ -79,6 +79,45 @@ func TestBlockRealPayloadRoundTrip(t *testing.T) {
 			}`,
 		},
 		{
+			name: "data_table with action cells",
+			payload: `{
+				"type": "data_table",
+				"caption": "Tasks",
+				"rows": [
+					[{"type": "raw_text", "text": "Action"}],
+					[{
+						"type": "action_cell",
+						"element": {
+							"type": "button",
+							"text": {"type": "plain_text", "text": "Mark done"},
+							"action_id": "mark_done",
+							"value": "task_123"
+						},
+						"fallback": {"type": "raw_text", "text": "Open"}
+					}],
+					[{
+						"type": "action_cell",
+						"element": {
+							"type": "button",
+							"text": {"type": "plain_text", "text": "View score"},
+							"action_id": "view_score",
+							"value": "task_456"
+						},
+						"fallback": {"type": "raw_number", "value": 0, "text": "No points"}
+					}],
+					[{
+						"type": "action_cell",
+						"element": {
+							"type": "button",
+							"text": {"type": "plain_text", "text": "Mark done"},
+							"action_id": "mark_done",
+							"value": "task_789"
+						}
+					}]
+				]
+			}`,
+		},
+		{
 			name: "data_table with raw_text, raw_number and rich_text cells",
 			payload: `{
 				"type": "data_table",
