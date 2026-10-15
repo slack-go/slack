@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add all 12 [Slack Lists API methods](https://docs.slack.dev/reference/methods/?family=lists),
+  with `Context` variants and scoped options for lists, access, items, and exports.
 - Block Kit: Add `DataTableActionCell` for buttons in
   [`data_table`](https://docs.slack.dev/reference/block-kit/blocks/data-table-block/)
   blocks, with an optional `raw_text` or `raw_number` fallback (#1618).
