@@ -179,3 +179,90 @@ func TestDataTableBlockUnknownCellType(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "mystery_cell")
 }
+
+func TestDataTableActionCellJSON(t *testing.T) {
+	button := NewButtonBlockElement("mark_done", "task_123", &TextBlockObject{Type: PlainTextType, Text: "Mark done"})
+	tests := []struct {
+		name     string
+		fallback DataTableCell
+		payload  string
+	}{
+		{
+			name: "no fallback",
+			payload: `{"type":"action_cell","element":{
+				"type":"button","text":{"type":"plain_text","text":"Mark done"},
+				"action_id":"mark_done","value":"task_123"
+			}}`,
+		},
+		{
+			name:     "text fallback",
+			fallback: NewDataTableRawTextCell("Open"),
+			payload: `{"type":"action_cell","element":{
+				"type":"button","text":{"type":"plain_text","text":"Mark done"},
+				"action_id":"mark_done","value":"task_123"
+			},"fallback":{"type":"raw_text","text":"Open"}}`,
+		},
+		{
+			name:     "number fallback",
+			fallback: NewDataTableRawNumberCell(0).WithText("No points"),
+			payload: `{"type":"action_cell","element":{
+				"type":"button","text":{"type":"plain_text","text":"Mark done"},
+				"action_id":"mark_done","value":"task_123"
+			},"fallback":{"type":"raw_number","value":0,"text":"No points"}}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cell := NewDataTableActionCell(button)
+			assert.Nil(t, cell.Fallback)
+			assert.Same(t, cell, cell.WithFallback(tt.fallback))
+			assert.Equal(t, DataTableCellAction, cell.DataTableCellType())
+
+			encoded, err := json.Marshal(cell)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.payload, string(encoded))
+
+			var decoded DataTableActionCell
+			require.NoError(t, json.Unmarshal([]byte(tt.payload), &decoded))
+			assert.Equal(t, *cell, decoded)
+		})
+	}
+}
+
+func TestDataTableActionCellUnmarshalClearsFallback(t *testing.T) {
+	for _, payload := range []string{
+		`{"type":"action_cell","element":{"type":"button","text":{"type":"plain_text","text":"Done"}}}`,
+		`{"type":"action_cell","element":{"type":"button","text":{"type":"plain_text","text":"Done"}},"fallback":null}`,
+	} {
+		cell := NewDataTableActionCell(nil).WithFallback(NewDataTableRawTextCell("Open"))
+		require.NoError(t, json.Unmarshal([]byte(payload), cell))
+		assert.Nil(t, cell.Fallback)
+	}
+}
+
+func TestDataTableActionCellInvalidFallback(t *testing.T) {
+	tests := []struct {
+		name     string
+		fallback string
+	}{
+		{"rich text", `{"type":"rich_text","elements":[]}`},
+		{"action cell", `{"type":"action_cell"}`},
+		{"unknown type", `{"type":"mystery_cell"}`},
+		{"invalid shape", `"Open"`},
+		{"invalid text", `{"type":"raw_text","text":42}`},
+		{"invalid number", `{"type":"raw_number","value":"zero"}`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload := `[{"type":"data_table","caption":"Tasks","rows":[
+				[{"type":"raw_text","text":"Action"}],
+				[{"type":"action_cell","element":{
+					"type":"button","text":{"type":"plain_text","text":"Mark done"}
+				},"fallback":` + tt.fallback + `}]
+			]}]`
+			var blocks Blocks
+			require.Error(t, json.Unmarshal([]byte(payload), &blocks))
+		})
+	}
+}
