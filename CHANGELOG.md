@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `CreateAgentConversation` and `ArchiveAgentConversation` (plus `Context` variants)
+  for [`agents.conversations.create`](https://docs.slack.dev/reference/methods/agents.conversations.create/)
+  and [`agents.conversations.archive`](https://docs.slack.dev/reference/methods/agents.conversations.archive/).
+- Add `SetAgentConversationCommands` (plus `Context` variant) and `Features.CodeChannels`
+  for [agent slash commands](https://docs.slack.dev/ai/slack-code/agent-slash-commands/).
 - Add all 12 [Slack Lists API methods](https://docs.slack.dev/reference/methods/?family=lists),
   with `Context` variants and scoped options for lists, access, items, and exports.
 - Block Kit: Add `DataTableActionCell` for buttons in

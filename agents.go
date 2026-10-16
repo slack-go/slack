@@ -2,8 +2,210 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
+	"strconv"
 )
+
+// AgentConversationCreateResponse is the response from agents.conversations.create.
+type AgentConversationCreateResponse struct {
+	SlackResponse
+	ChannelID string `json:"channel_id"`
+}
+
+type createAgentConversationParams struct {
+	teamID                 string
+	sessionID              string
+	isPrivate              *bool
+	originChannelID        string
+	originMessageTimestamp string
+}
+
+// CreateAgentConversationOption configures a code channel creation request.
+type CreateAgentConversationOption func(*createAgentConversationParams)
+
+// CreateAgentConversationOptionTeamID sets the workspace for the code channel.
+func CreateAgentConversationOptionTeamID(teamID string) CreateAgentConversationOption {
+	return func(params *createAgentConversationParams) {
+		params.teamID = teamID
+	}
+}
+
+// CreateAgentConversationOptionSessionID sets the session ID used to make creation idempotent.
+func CreateAgentConversationOptionSessionID(sessionID string) CreateAgentConversationOption {
+	return func(params *createAgentConversationParams) {
+		params.sessionID = sessionID
+	}
+}
+
+// CreateAgentConversationOptionIsPrivate overrides the privacy inherited from the origin channel.
+func CreateAgentConversationOptionIsPrivate(isPrivate bool) CreateAgentConversationOption {
+	return func(params *createAgentConversationParams) {
+		params.isPrivate = &isPrivate
+	}
+}
+
+// CreateAgentConversationOptionOriginChannelID sets the channel containing the origin message.
+func CreateAgentConversationOptionOriginChannelID(channelID string) CreateAgentConversationOption {
+	return func(params *createAgentConversationParams) {
+		params.originChannelID = channelID
+	}
+}
+
+// CreateAgentConversationOptionOriginMessageTimestamp sets the origin message timestamp.
+func CreateAgentConversationOptionOriginMessageTimestamp(timestamp string) CreateAgentConversationOption {
+	return func(params *createAgentConversationParams) {
+		params.originMessageTimestamp = timestamp
+	}
+}
+
+// CreateAgentConversation creates a code channel for this agent.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.create
+//
+// Pass an empty name to let Slack name the channel from the origin message.
+// OriginChannelID and OriginMessageTimestamp must be set together.
+func (api *Client) CreateAgentConversation(name string, options ...CreateAgentConversationOption) (*AgentConversationCreateResponse, error) {
+	return api.CreateAgentConversationContext(context.Background(), name, options...)
+}
+
+// CreateAgentConversationContext creates a code channel for this agent with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.create
+//
+// Pass an empty name to let Slack name the channel from the origin message.
+// OriginChannelID and OriginMessageTimestamp must be set together.
+func (api *Client) CreateAgentConversationContext(ctx context.Context, name string, options ...CreateAgentConversationOption) (*AgentConversationCreateResponse, error) {
+	params := createAgentConversationParams{}
+	for _, option := range options {
+		if option != nil {
+			option(&params)
+		}
+	}
+
+	values := url.Values{"token": {api.token}}
+	if name != "" {
+		values.Add("name", name)
+	}
+	if params.teamID != "" {
+		values.Add("team_id", params.teamID)
+	}
+	if params.sessionID != "" {
+		values.Add("session_id", params.sessionID)
+	}
+	if params.isPrivate != nil {
+		values.Add("is_private", strconv.FormatBool(*params.isPrivate))
+	}
+	if params.originChannelID != "" {
+		values.Add("origin_channel_id", params.originChannelID)
+	}
+	if params.originMessageTimestamp != "" {
+		values.Add("origin_message_ts", params.originMessageTimestamp)
+	}
+
+	response := &AgentConversationCreateResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.create", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
+type archiveAgentConversationParams struct {
+	summaryMessageTimestamp string
+}
+
+// ArchiveAgentConversationOption configures a code channel archival request.
+type ArchiveAgentConversationOption func(*archiveAgentConversationParams)
+
+// ArchiveAgentConversationOptionSummaryMessageTimestamp sets the summary to share with the origin thread.
+func ArchiveAgentConversationOptionSummaryMessageTimestamp(timestamp string) ArchiveAgentConversationOption {
+	return func(params *archiveAgentConversationParams) {
+		params.summaryMessageTimestamp = timestamp
+	}
+}
+
+// ArchiveAgentConversation archives a code channel.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.archive
+func (api *Client) ArchiveAgentConversation(channelID string, options ...ArchiveAgentConversationOption) error {
+	return api.ArchiveAgentConversationContext(context.Background(), channelID, options...)
+}
+
+// ArchiveAgentConversationContext archives a code channel with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.archive
+func (api *Client) ArchiveAgentConversationContext(ctx context.Context, channelID string, options ...ArchiveAgentConversationOption) error {
+	params := archiveAgentConversationParams{}
+	for _, option := range options {
+		if option != nil {
+			option(&params)
+		}
+	}
+
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+	}
+	if params.summaryMessageTimestamp != "" {
+		values.Add("summary_message_ts", params.summaryMessageTimestamp)
+	}
+	response := SlackResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.archive", values, &response); err != nil {
+		return err
+	}
+	return response.Err()
+}
+
+// AgentCommand is an agent slash command registered in a code channel.
+// Name does not include a leading slash.
+type AgentCommand struct {
+	Name         string `json:"name"`
+	Description  string `json:"description,omitempty"`
+	ArgumentHint string `json:"argument_hint,omitempty"`
+	ShouldEscape bool   `json:"should_escape,omitempty"`
+}
+
+// AgentConversationSetCommandsResponse is the response from agents.conversations.setCommands.
+type AgentConversationSetCommandsResponse struct {
+	SlackResponse
+	ChannelID    string `json:"channel_id"`
+	CommandCount int    `json:"command_count"`
+}
+
+// SetAgentConversationCommands replaces this agent's slash commands in a code channel.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.setCommands
+//
+// A nil or empty commands slice clears this agent's commands.
+func (api *Client) SetAgentConversationCommands(channelID string, commands []AgentCommand) (*AgentConversationSetCommandsResponse, error) {
+	return api.SetAgentConversationCommandsContext(context.Background(), channelID, commands)
+}
+
+// SetAgentConversationCommandsContext replaces this agent's slash commands with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.setCommands
+//
+// A nil or empty commands slice clears this agent's commands.
+func (api *Client) SetAgentConversationCommandsContext(ctx context.Context, channelID string, commands []AgentCommand) (*AgentConversationSetCommandsResponse, error) {
+	if commands == nil {
+		commands = []AgentCommand{}
+	}
+	commandsJSON, err := json.Marshal(commands)
+	if err != nil {
+		return nil, err
+	}
+
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+		"commands":   {string(commandsJSON)},
+	}
+	response := &AgentConversationSetCommandsResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.setCommands", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
 
 // Lifecycle statuses accepted by agents.sessions.setStatus.
 const (

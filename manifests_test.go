@@ -330,6 +330,38 @@ func TestFeaturesAIViewsOmittedWhenNil(t *testing.T) {
 	}
 }
 
+func TestManifestCodeChannels(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		json string
+	}{
+		{"HTTP", `{"enabled":true,"slash_command_url":"https://example.com/slack/code-channel-commands"}`},
+		{"Socket Mode", `{"enabled":true}`},
+		{"disabled", `{"enabled":false}`},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			// Shape from https://docs.slack.dev/ai/slack-code/agent-slash-commands/
+			payload := `{"features":{"code_channels":` + tt.json + `}}`
+			var manifest Manifest
+			require.NoError(t, json.Unmarshal([]byte(payload), &manifest))
+
+			data, err := json.Marshal(manifest)
+			require.NoError(t, err)
+			var sent map[string]map[string]json.RawMessage
+			require.NoError(t, json.Unmarshal(data, &sent))
+			assert.JSONEq(t, tt.json, string(sent["features"]["code_channels"]))
+		})
+	}
+
+	t.Run("omitted", func(t *testing.T) {
+		data, err := json.Marshal(Features{})
+		require.NoError(t, err)
+		var sent map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(data, &sent))
+		assert.NotContains(t, sent, "code_channels")
+	})
+}
+
 // TestManifestKeepsSettingsKeys checks that keys from an export are sent back on
 // update instead of being dropped.
 func TestManifestKeepsSettingsKeys(t *testing.T) {

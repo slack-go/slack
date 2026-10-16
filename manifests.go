@@ -378,12 +378,19 @@ type Features struct {
 	AppHome       AppHome                `json:"app_home,omitempty" yaml:"app_home,omitempty"`
 	AssistantView *AssistantView         `json:"assistant_view,omitempty" yaml:"assistant_view,omitempty"`
 	BotUser       BotUser                `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
+	CodeChannels  *ManifestCodeChannels  `json:"code_channels,omitempty" yaml:"code_channels,omitempty"`
 	RichPreviews  *ManifestRichPreviews  `json:"rich_previews,omitempty" yaml:"rich_previews,omitempty"`
 	Search        *ManifestSearch        `json:"search,omitempty" yaml:"search,omitempty"`
 	Shortcuts     []Shortcut             `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
 	SlashCommands []ManifestSlashCommand `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
 	UnfurlDomains []string               `json:"unfurl_domains,omitempty" yaml:"unfurl_domains,omitempty"`
 	WorkflowSteps []WorkflowStep         `json:"workflow_steps,omitempty" yaml:"workflow_steps,omitempty"`
+}
+
+// ManifestCodeChannels configures code channels and their agent slash command URL.
+type ManifestCodeChannels struct {
+	Enabled         bool   `json:"enabled" yaml:"enabled"`
+	SlashCommandURL string `json:"slash_command_url,omitempty" yaml:"slash_command_url,omitempty"`
 }
 
 // AgentView is a group of settings that describe the agent view configuration for apps using AI features
