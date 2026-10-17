@@ -77,6 +77,7 @@ type AdminApp struct {
 	AppHomepageURL         string        `json:"app_homepage_url"`
 	AppDirectoryURL        string        `json:"app_directory_url"`
 	IsAppDirectoryApproved bool          `json:"is_app_directory_approved"`
+	IsGranularBotApp       bool          `json:"is_granular_bot_app"`
 	IsInternal             bool          `json:"is_internal"`
 	DeveloperType          string        `json:"developer_type"`
 	SocketModeEnabled      bool          `json:"socket_mode_enabled"`
@@ -141,10 +142,19 @@ func adminAppsListValues(token string, params adminAppsListParams) url.Values {
 // AdminAppsApprovedList lists apps approved for installation on an Enterprise organization or workspace.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.approved.list
-func (api *Client) AdminAppsApprovedList(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsApprovedListResponse, error) {
+func (api *Client) AdminAppsApprovedList(options ...AdminAppsListOption) (*AdminAppsApprovedListResponse, error) {
+	return api.AdminAppsApprovedListContext(context.Background(), options...)
+}
+
+// AdminAppsApprovedListContext lists approved apps with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.approved.list
+func (api *Client) AdminAppsApprovedListContext(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsApprovedListResponse, error) {
 	params := adminAppsListParams{}
 	for _, option := range options {
-		option(&params)
+		if option != nil {
+			option(&params)
+		}
 	}
 
 	response := &AdminAppsApprovedListResponse{}
@@ -157,10 +167,19 @@ func (api *Client) AdminAppsApprovedList(ctx context.Context, options ...AdminAp
 // AdminAppsRestrictedList lists apps restricted from installation on an Enterprise organization or workspace.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.restricted.list
-func (api *Client) AdminAppsRestrictedList(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsRestrictedListResponse, error) {
+func (api *Client) AdminAppsRestrictedList(options ...AdminAppsListOption) (*AdminAppsRestrictedListResponse, error) {
+	return api.AdminAppsRestrictedListContext(context.Background(), options...)
+}
+
+// AdminAppsRestrictedListContext lists restricted apps with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.restricted.list
+func (api *Client) AdminAppsRestrictedListContext(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsRestrictedListResponse, error) {
 	params := adminAppsListParams{}
 	for _, option := range options {
-		option(&params)
+		if option != nil {
+			option(&params)
+		}
 	}
 
 	response := &AdminAppsRestrictedListResponse{}

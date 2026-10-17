@@ -44,6 +44,7 @@ func TestAdminAppsApprovedList(t *testing.T) {
 					"app_homepage_url": "https://example.com",
 					"app_directory_url": "https://example.slack.com/apps/A123",
 					"is_app_directory_approved": true,
+					"is_granular_bot_app": true,
 					"is_internal": false,
 					"developer_type": "third_party",
 					"socket_mode_enabled": true,
@@ -59,7 +60,6 @@ func TestAdminAppsApprovedList(t *testing.T) {
 	})
 
 	response, err := api.AdminAppsApprovedList(
-		context.Background(),
 		AdminAppsListOptionLimit(1000),
 		AdminAppsListOptionCursor("cursor-1"),
 		AdminAppsListOptionEnterpriseID("E123"),
@@ -71,6 +71,7 @@ func TestAdminAppsApprovedList(t *testing.T) {
 	item := response.ApprovedApps[0]
 	assert.Equal(t, "A123", item.App.ID)
 	assert.Equal(t, "Test App", item.App.Name)
+	assert.True(t, item.App.IsGranularBotApp)
 	assert.Equal(t, "https://example.com/32.png", item.App.Icons.Image32)
 	assert.Equal(t, "https://example.com/original.png", item.App.Icons.ImageOriginal)
 	assert.Equal(t, "additional", item.App.AdditionalInfo)
@@ -93,14 +94,13 @@ func TestAdminAppsRestrictedList(t *testing.T) {
 		_, _ = rw.Write([]byte(`{
 			"ok": true,
 			"restricted_apps": [{
-				"app": {"id": "A456", "name": "Restricted App"},
+				"app": {"id": "A456", "name": "Restricted App", "is_granular_bot_app": true},
 				"date_updated": 1700000001
 			}]
 		}`))
 	})
 
 	response, err := api.AdminAppsRestrictedList(
-		context.Background(),
 		AdminAppsListOptionTeamID("T123"),
 		AdminAppsListOptionCertified(true),
 	)
@@ -108,6 +108,7 @@ func TestAdminAppsRestrictedList(t *testing.T) {
 	require.Len(t, response.RestrictedApps, 1)
 	assert.Equal(t, "A456", response.RestrictedApps[0].App.ID)
 	assert.Equal(t, "Restricted App", response.RestrictedApps[0].App.Name)
+	assert.True(t, response.RestrictedApps[0].App.IsGranularBotApp)
 	assert.Equal(t, int64(1700000001), response.RestrictedApps[0].DateUpdated)
 }
 
@@ -119,7 +120,7 @@ func TestAdminAppsListOmitsOptionalArguments(t *testing.T) {
 		_, _ = rw.Write([]byte(`{"ok": true, "approved_apps": []}`))
 	})
 
-	_, err := api.AdminAppsApprovedList(context.Background())
+	_, err := api.AdminAppsApprovedListContext(context.Background())
 	require.NoError(t, err)
 }
 
@@ -128,7 +129,63 @@ func TestAdminAppsApprovedListError(t *testing.T) {
 		_, _ = rw.Write([]byte(`{"ok": false, "error": "invalid_cursor"}`))
 	})
 
-	response, err := api.AdminAppsApprovedList(context.Background())
+	response, err := api.AdminAppsApprovedList()
 	assert.EqualError(t, err, "invalid_cursor")
 	assert.NotNil(t, response)
+}
+
+func TestAdminAppsListNilOptions(t *testing.T) {
+	tests := []struct {
+		method string
+		call   func(*Client, ...AdminAppsListOption) error
+	}{
+		{
+			method: "admin.apps.approved.list",
+			call: func(api *Client, options ...AdminAppsListOption) error {
+				_, err := api.AdminAppsApprovedList(options...)
+				return err
+			},
+		},
+		{
+			method: "admin.apps.restricted.list",
+			call: func(api *Client, options ...AdminAppsListOption) error {
+				_, err := api.AdminAppsRestrictedList(options...)
+				return err
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.method, func(t *testing.T) {
+			api := newAdminAppsTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/"+tt.method, r.URL.Path)
+				assert.NoError(t, r.ParseForm())
+				assert.Equal(t, "50", r.FormValue("limit"))
+				_, _ = rw.Write([]byte(`{"ok": true}`))
+			})
+			var err error
+			require.NotPanics(t, func() {
+				err = tt.call(api, nil, AdminAppsListOptionLimit(50), nil)
+			})
+			require.NoError(t, err)
+		})
+	}
+}
+
+func TestAdminAppsListContextCanceled(t *testing.T) {
+	api := newAdminAppsTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		t.Error("canceled context sent an HTTP request")
+	})
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	t.Run("approved", func(t *testing.T) {
+		response, err := api.AdminAppsApprovedListContext(ctx)
+		require.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, response)
+	})
+	t.Run("restricted", func(t *testing.T) {
+		response, err := api.AdminAppsRestrictedListContext(ctx)
+		require.ErrorIs(t, err, context.Canceled)
+		assert.Nil(t, response)
+	})
 }
