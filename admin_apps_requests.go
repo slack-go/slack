@@ -54,10 +54,19 @@ type AdminAppsRequestsListResponse struct {
 // AdminAppsRequestsList lists pending app installation requests for an Enterprise organization or workspace.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.requests.list
-func (api *Client) AdminAppsRequestsList(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsRequestsListResponse, error) {
+func (api *Client) AdminAppsRequestsList(options ...AdminAppsListOption) (*AdminAppsRequestsListResponse, error) {
+	return api.AdminAppsRequestsListContext(context.Background(), options...)
+}
+
+// AdminAppsRequestsListContext lists pending app installation requests with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.apps.requests.list
+func (api *Client) AdminAppsRequestsListContext(ctx context.Context, options ...AdminAppsListOption) (*AdminAppsRequestsListResponse, error) {
 	params := adminAppsListParams{}
 	for _, option := range options {
-		option(&params)
+		if option != nil {
+			option(&params)
+		}
 	}
 
 	response := &AdminAppsRequestsListResponse{}
