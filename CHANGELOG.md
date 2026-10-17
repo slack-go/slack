@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Block Kit: Add `DataTableActionCell` for buttons in
   [`data_table`](https://docs.slack.dev/reference/block-kit/blocks/data-table-block/)
   blocks, with an optional `raw_text` or `raw_number` fallback (#1618).
+- Add `AdminAppsApprovedList` and `AdminAppsRestrictedList` (plus `Context` variants) for the
+  [`admin.apps.approved.list`](https://docs.slack.dev/reference/methods/admin.apps.approved.list)
+  and [`admin.apps.restricted.list`](https://docs.slack.dev/reference/methods/admin.apps.restricted.list)
+  methods, with typed app, scope and pagination responses (#1614).
 
 ## [0.30.1] - 2026-10-04
 
