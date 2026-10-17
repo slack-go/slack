@@ -329,6 +329,8 @@ func NewRichTextSectionTextElement(text string, style *RichTextSectionTextStyle)
 type RichTextSectionChannelElement struct {
 	Type      RichTextSectionElementType `json:"type"`
 	ChannelID string                     `json:"channel_id"`
+	TabID     string                     `json:"tab_id,omitempty"`
+	FromLLM   *bool                      `json:"from_llm,omitempty"`
 	Style     *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
@@ -345,9 +347,10 @@ func NewRichTextSectionChannelElement(channelID string, style *RichTextSectionTe
 }
 
 type RichTextSectionUserElement struct {
-	Type   RichTextSectionElementType `json:"type"`
-	UserID string                     `json:"user_id"`
-	Style  *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type    RichTextSectionElementType `json:"type"`
+	UserID  string                     `json:"user_id"`
+	FromLLM *bool                      `json:"from_llm,omitempty"`
+	Style   *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionUserElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -367,7 +370,11 @@ type RichTextSectionEmojiElement struct {
 	Name     string                     `json:"name"`
 	SkinTone int                        `json:"skin_tone,omitempty"`
 	Unicode  string                     `json:"unicode,omitempty"`
-	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
+	// URL is used for custom emoji shared across workspaces.
+	// Slack's Node SDK documents this field; the Block Kit reference omits it.
+	// https://docs.slack.dev/tools/node-slack-sdk/reference/types/interfaces/RichTextEmoji/#url
+	URL   string                    `json:"url,omitempty"`
+	Style *RichTextSectionTextStyle `json:"style,omitempty"`
 }
 
 func (r RichTextSectionEmojiElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -384,10 +391,14 @@ func NewRichTextSectionEmojiElement(name string, skinTone int, style *RichTextSe
 }
 
 type RichTextSectionLinkElement struct {
-	Type  RichTextSectionElementType `json:"type"`
-	URL   string                     `json:"url"`
-	Text  string                     `json:"text,omitempty"`
-	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Type       RichTextSectionElementType `json:"type"`
+	URL        string                     `json:"url"`
+	Text       string                     `json:"text,omitempty"`
+	Unsafe     *bool                      `json:"unsafe,omitempty"`
+	FromLLM    *bool                      `json:"from_llm,omitempty"`
+	IsSlackURL *bool                      `json:"is_slack_url,omitempty"`
+	Truncated  *bool                      `json:"truncated,omitempty"`
+	Style      *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionLinkElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -442,8 +453,10 @@ type RichTextSectionDateElement struct {
 	Type      RichTextSectionElementType `json:"type"`
 	Timestamp JSONTime                   `json:"timestamp"`
 	Format    string                     `json:"format"`
+	Timezone  string                     `json:"timezone,omitempty"`
 	URL       *string                    `json:"url,omitempty"`
 	Fallback  *string                    `json:"fallback,omitempty"`
+	Style     *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionDateElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -463,6 +476,7 @@ func NewRichTextSectionDateElement(timestamp int64, format string, url *string, 
 type RichTextSectionBroadcastElement struct {
 	Type  RichTextSectionElementType `json:"type"`
 	Range string                     `json:"range"`
+	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionBroadcastElement) RichTextSectionElementType() RichTextSectionElementType {
@@ -479,6 +493,7 @@ func NewRichTextSectionBroadcastElement(rangeStr string) *RichTextSectionBroadca
 type RichTextSectionColorElement struct {
 	Type  RichTextSectionElementType `json:"type"`
 	Value string                     `json:"value"`
+	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
 }
 
 func (r RichTextSectionColorElement) RichTextSectionElementType() RichTextSectionElementType {

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add missing [element fields](https://docs.slack.dev/reference/block-kit/block-elements/)
+  for button accessibility, agent prompts, visibility, conversation selection, rich-text input
+  sizing, and rich-text styles and metadata, including shared emoji URLs.
+
+  > [!WARNING]
+  > **Breaking change.** `ButtonBlockElement` is no longer comparable. Value comparisons and
+  > map keys using it no longer compile; interface comparisons containing it can panic.
+  > Use comparable identifiers as map keys and compare button contents explicitly:
+  >
+  > ```go
+  > // Before
+  > same := a == b
+  > // After (import "reflect")
+  > same := reflect.DeepEqual(a, b)
+  > ```
+  >
+  > Unkeyed literals for the extended structs must also be updated. Use keyed literals or
+  > the existing constructors.
+
 - Add `IsShare`, `IsMsgUnfurl` and `Files` to `Attachment`, so the files of a forwarded
   message are decoded rather than dropped.
 - Add `CreateAgentConversation` and `ArchiveAgentConversation` (plus `Context` variants)
