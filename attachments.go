@@ -90,6 +90,12 @@ type Attachment struct {
 	FromURL     string `json:"from_url,omitempty"`
 	OriginalURL string `json:"original_url,omitempty"`
 
+	// IsShare is set on the attachment Slack adds to a forwarded message, and
+	// Files holds the forwarded message's files.
+	IsShare     bool   `json:"is_share,omitempty"`
+	IsMsgUnfurl bool   `json:"is_msg_unfurl,omitempty"`
+	Files       []File `json:"files,omitempty"`
+
 	Fields     []AttachmentField  `json:"fields,omitempty"`
 	Actions    []AttachmentAction `json:"actions,omitempty"`
 	MarkdownIn []string           `json:"mrkdwn_in,omitempty"`

@@ -72,3 +72,37 @@ func TestAttachment_UnmarshalMarshalJSON_WithBlocks(t *testing.T) {
 		t.Fatal("actual does not match expected\n", strings.Join(diff, "\n"))
 	}
 }
+
+func TestAttachment_UnmarshalJSON_ForwardedMessage(t *testing.T) {
+	forwardedAttachmentJson := `{
+    "is_share": true,
+    "is_msg_unfurl": true,
+    "from_url": "https://example.slack.com/archives/C123/p1700000000000100",
+    "files": [
+      {
+        "id": "F123",
+        "mimetype": "image/png",
+        "url_private_download": "https://files.slack.com/files-pri/T123-F123/download/a.png"
+      }
+    ]
+  }`
+
+	attachment := new(Attachment)
+	if err := json.Unmarshal([]byte(forwardedAttachmentJson), attachment); err != nil {
+		t.Fatalf("expected no error unmarshaling forwarded attachment, got: %v", err)
+	}
+
+	if !attachment.IsShare || !attachment.IsMsgUnfurl {
+		t.Fatalf("expected IsShare and IsMsgUnfurl, got %v and %v", attachment.IsShare, attachment.IsMsgUnfurl)
+	}
+	if len(attachment.Files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(attachment.Files))
+	}
+	if diff := deep.Equal(attachment.Files[0], File{
+		ID:                 "F123",
+		Mimetype:           "image/png",
+		URLPrivateDownload: "https://files.slack.com/files-pri/T123-F123/download/a.png",
+	}); diff != nil {
+		t.Fatal("file does not match expected\n", strings.Join(diff, "\n"))
+	}
+}

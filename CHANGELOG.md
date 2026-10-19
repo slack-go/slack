@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `IsShare`, `IsMsgUnfurl` and `Files` to `Attachment`, so the files of a forwarded
+  message are decoded rather than dropped.
 - Add `CreateAgentConversation` and `ArchiveAgentConversation` (plus `Context` variants)
   for [`agents.conversations.create`](https://docs.slack.dev/reference/methods/agents.conversations.create/)
   and [`agents.conversations.archive`](https://docs.slack.dev/reference/methods/agents.conversations.archive/).
