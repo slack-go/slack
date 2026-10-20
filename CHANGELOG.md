@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add image alt text, GIF, PDF, 800px and inline thumbnails, audio and transcription
+  metadata, preview truncation, remote file identifiers, canvas and List metadata,
+  title blocks, and sharing and app metadata to
+  [`File`](https://docs.slack.dev/reference/objects/file-object/).
+  Preserve sharing and app metadata in `RemoteFile` responses.
+
 - Block Kit: Add missing [element fields](https://docs.slack.dev/reference/block-kit/block-elements/)
   for button accessibility, agent prompts, visibility, conversation selection, rich-text input
   sizing, and rich-text styles and metadata, including shared emoji URLs.
