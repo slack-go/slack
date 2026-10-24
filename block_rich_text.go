@@ -226,6 +226,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 		switch s.Type {
 		case RTSEText:
 			elem = &RichTextSectionTextElement{}
+		case RTSECanvas:
+			elem = &RichTextSectionCanvasElement{}
 		case RTSEChannel:
 			elem = &RichTextSectionChannelElement{}
 		case RTSECitation:
@@ -286,6 +288,7 @@ type RichTextSectionElementType string
 
 const (
 	RTSEBroadcast      RichTextSectionElementType = "broadcast"
+	RTSECanvas         RichTextSectionElementType = "canvas"
 	RTSEChannel        RichTextSectionElementType = "channel"
 	RTSECitation       RichTextSectionElementType = "citation"
 	RTSEColor          RichTextSectionElementType = "color"
@@ -397,6 +400,29 @@ func NewRichTextSectionEmojiElement(name string, skinTone int, style *RichTextSe
 		SkinTone: skinTone,
 		Style:    style,
 	}
+}
+
+// RichTextSectionCanvasElement references a canvas within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/canvas-element/
+type RichTextSectionCanvasElement struct {
+	Type              RichTextSectionElementType `json:"type"`
+	FileID            string                     `json:"file_id"`
+	Label             *string                    `json:"label,omitempty"` // Slack preserves an explicitly empty label.
+	HideTitle         *bool                      `json:"hide_title,omitempty"`
+	SectionID         string                     `json:"section_id,omitempty"`
+	Style             *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Text              string                     `json:"text,omitempty"`
+	URL               string                     `json:"url,omitempty"`
+	IsSkillInvocation *bool                      `json:"is_skill_invocation,omitempty"`
+}
+
+func (r RichTextSectionCanvasElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionCanvasElement(fileID string, style *RichTextSectionTextStyle) *RichTextSectionCanvasElement {
+	return &RichTextSectionCanvasElement{Type: RTSECanvas, FileID: fileID, Style: style}
 }
 
 // RichTextSectionFileElement references a file within rich text.

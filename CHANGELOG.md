@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [canvas rich-text elements](https://docs.slack.dev/reference/block-kit/block-elements/canvas-element/)
+  with labels, section links, title visibility, styles, and skill metadata. These now decode
+  into `RichTextSectionCanvasElement` instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add `RichTextSectionCitationElement` with typed file, external, web, message,
   and memory details for [rich-text citations](https://docs.slack.dev/reference/block-kit/block-elements/citation-element/).
   Preserve unknown detail variants as raw JSON. Citations now decode into this concrete type
