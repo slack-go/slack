@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add `RichTextSectionCitationElement` with typed file, external, web, message,
+  and memory details for [rich-text citations](https://docs.slack.dev/reference/block-kit/block-elements/citation-element/).
+  Preserve unknown detail variants as raw JSON. Citations now decode into this concrete type
+  instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [file](https://docs.slack.dev/reference/block-kit/block-elements/file-element/)
   and [message mention](https://docs.slack.dev/reference/block-kit/block-elements/message-mention-element/)
   rich-text elements, including styles and optional metadata. These now decode into concrete

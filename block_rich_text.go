@@ -228,6 +228,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionTextElement{}
 		case RTSEChannel:
 			elem = &RichTextSectionChannelElement{}
+		case RTSECitation:
+			elem = &RichTextSectionCitationElement{}
 		case RTSEUser:
 			elem = &RichTextSectionUserElement{}
 		case RTSEEmoji:
@@ -285,6 +287,7 @@ type RichTextSectionElementType string
 const (
 	RTSEBroadcast      RichTextSectionElementType = "broadcast"
 	RTSEChannel        RichTextSectionElementType = "channel"
+	RTSECitation       RichTextSectionElementType = "citation"
 	RTSEColor          RichTextSectionElementType = "color"
 	RTSEDate           RichTextSectionElementType = "date"
 	RTSEEmoji          RichTextSectionElementType = "emoji"
