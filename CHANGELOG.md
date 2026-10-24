@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [file](https://docs.slack.dev/reference/block-kit/block-elements/file-element/)
+  and [message mention](https://docs.slack.dev/reference/block-kit/block-elements/message-mention-element/)
+  rich-text elements, including styles and optional metadata. These now decode into concrete
+  types instead of `RichTextSectionUnknownElement`.
+
 - Add image alt text, GIF, PDF, 800px and inline thumbnails, audio and transcription
   metadata, preview truncation, remote file identifiers, canvas and List metadata,
   title blocks, and sharing and app metadata to

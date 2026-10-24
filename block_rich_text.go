@@ -232,8 +232,12 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionUserElement{}
 		case RTSEEmoji:
 			elem = &RichTextSectionEmojiElement{}
+		case RTSEFile:
+			elem = &RichTextSectionFileElement{}
 		case RTSELink:
 			elem = &RichTextSectionLinkElement{}
+		case RTSEMessageMention:
+			elem = &RichTextSectionMessageMentionElement{}
 		case RTSETeam:
 			elem = &RichTextSectionTeamElement{}
 		case RTSEUserGroup:
@@ -279,16 +283,18 @@ func NewRichTextSection(elements ...RichTextSectionElement) *RichTextSection {
 type RichTextSectionElementType string
 
 const (
-	RTSEBroadcast RichTextSectionElementType = "broadcast"
-	RTSEChannel   RichTextSectionElementType = "channel"
-	RTSEColor     RichTextSectionElementType = "color"
-	RTSEDate      RichTextSectionElementType = "date"
-	RTSEEmoji     RichTextSectionElementType = "emoji"
-	RTSELink      RichTextSectionElementType = "link"
-	RTSETeam      RichTextSectionElementType = "team"
-	RTSEText      RichTextSectionElementType = "text"
-	RTSEUser      RichTextSectionElementType = "user"
-	RTSEUserGroup RichTextSectionElementType = "usergroup"
+	RTSEBroadcast      RichTextSectionElementType = "broadcast"
+	RTSEChannel        RichTextSectionElementType = "channel"
+	RTSEColor          RichTextSectionElementType = "color"
+	RTSEDate           RichTextSectionElementType = "date"
+	RTSEEmoji          RichTextSectionElementType = "emoji"
+	RTSEFile           RichTextSectionElementType = "file"
+	RTSELink           RichTextSectionElementType = "link"
+	RTSEMessageMention RichTextSectionElementType = "message_mention"
+	RTSETeam           RichTextSectionElementType = "team"
+	RTSEText           RichTextSectionElementType = "text"
+	RTSEUser           RichTextSectionElementType = "user"
+	RTSEUserGroup      RichTextSectionElementType = "usergroup"
 
 	RTSEUnknown RichTextSectionElementType = "unknown"
 )
@@ -387,6 +393,50 @@ func NewRichTextSectionEmojiElement(name string, skinTone int, style *RichTextSe
 		Name:     name,
 		SkinTone: skinTone,
 		Style:    style,
+	}
+}
+
+// RichTextSectionFileElement references a file within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/file-element/
+type RichTextSectionFileElement struct {
+	Type              RichTextSectionElementType `json:"type"`
+	FileID            string                     `json:"file_id"`
+	Text              string                     `json:"text,omitempty"`
+	URL               string                     `json:"url,omitempty"`
+	Style             *RichTextSectionTextStyle  `json:"style,omitempty"`
+	IsSkillInvocation *bool                      `json:"is_skill_invocation,omitempty"`
+}
+
+func (r RichTextSectionFileElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionFileElement(fileID string, style *RichTextSectionTextStyle) *RichTextSectionFileElement {
+	return &RichTextSectionFileElement{Type: RTSEFile, FileID: fileID, Style: style}
+}
+
+// RichTextSectionMessageMentionElement references a message within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/message-mention-element/
+type RichTextSectionMessageMentionElement struct {
+	Type             RichTextSectionElementType `json:"type"`
+	ChannelID        string                     `json:"channel_id"`
+	MessageTimestamp string                     `json:"message_ts"`
+	AuthorID         string                     `json:"author_id,omitempty"`
+	ThreadTimestamp  string                     `json:"thread_ts,omitempty"`
+	Text             string                     `json:"text,omitempty"`
+	URL              string                     `json:"url,omitempty"`
+	Style            *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionMessageMentionElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionMessageMentionElement(channelID, messageTimestamp string, style *RichTextSectionTextStyle) *RichTextSectionMessageMentionElement {
+	return &RichTextSectionMessageMentionElement{
+		Type: RTSEMessageMention, ChannelID: channelID, MessageTimestamp: messageTimestamp, Style: style,
 	}
 }
 
