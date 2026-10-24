@@ -226,6 +226,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 		switch s.Type {
 		case RTSEText:
 			elem = &RichTextSectionTextElement{}
+		case RTSETag:
+			elem = &RichTextSectionTagElement{}
 		case RTSECanvas:
 			elem = &RichTextSectionCanvasElement{}
 		case RTSECanvasMessageUnfurl:
@@ -306,6 +308,7 @@ const (
 	RTSELink                RichTextSectionElementType = "link"
 	RTSEListRecord          RichTextSectionElementType = "list_record"
 	RTSEMessageMention      RichTextSectionElementType = "message_mention"
+	RTSETag                 RichTextSectionElementType = "tag"
 	RTSETeam                RichTextSectionElementType = "team"
 	RTSEText                RichTextSectionElementType = "text"
 	RTSEUser                RichTextSectionElementType = "user"
@@ -345,6 +348,39 @@ func NewRichTextSectionTextElement(text string, style *RichTextSectionTextStyle)
 		Text:  text,
 		Style: style,
 	}
+}
+
+// RichTextTagColor specifies a rich-text tag's color.
+type RichTextTagColor string
+
+const (
+	RichTextTagColorGray   RichTextTagColor = "gray"
+	RichTextTagColorBrown  RichTextTagColor = "brown"
+	RichTextTagColorPurple RichTextTagColor = "purple"
+	RichTextTagColorIndigo RichTextTagColor = "indigo"
+	RichTextTagColorBlue   RichTextTagColor = "blue"
+	RichTextTagColorGreen  RichTextTagColor = "green"
+	RichTextTagColorYellow RichTextTagColor = "yellow"
+	RichTextTagColorOrange RichTextTagColor = "orange"
+	RichTextTagColorRed    RichTextTagColor = "red"
+)
+
+// RichTextSectionTagElement represents a tag within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/tag-element/
+type RichTextSectionTagElement struct {
+	Type  RichTextSectionElementType `json:"type"`
+	Text  string                     `json:"text"`
+	Color RichTextTagColor           `json:"color,omitempty"`
+	Style *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionTagElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionTagElement(text string, style *RichTextSectionTextStyle) *RichTextSectionTagElement {
+	return &RichTextSectionTagElement{Type: RTSETag, Text: text, Style: style}
 }
 
 type RichTextSectionChannelElement struct {
