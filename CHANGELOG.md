@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [List record references](https://docs.slack.dev/reference/block-kit/block-elements/list-record-element/)
+  with record and view IDs, display text, URLs, and styles. These now decode into
+  `RichTextSectionListRecordElement` instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [canvas user mentions](https://docs.slack.dev/reference/block-kit/block-elements/canvas-user-mention-element/)
   and [canvas message unfurls](https://docs.slack.dev/reference/block-kit/block-elements/canvas-message-unfurl-element/),
   including thread IDs and styles. These now decode into concrete types instead of `RichTextSectionUnknownElement`.

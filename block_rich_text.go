@@ -244,6 +244,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionFileElement{}
 		case RTSELink:
 			elem = &RichTextSectionLinkElement{}
+		case RTSEListRecord:
+			elem = &RichTextSectionListRecordElement{}
 		case RTSEMessageMention:
 			elem = &RichTextSectionMessageMentionElement{}
 		case RTSETeam:
@@ -302,6 +304,7 @@ const (
 	RTSEEmoji               RichTextSectionElementType = "emoji"
 	RTSEFile                RichTextSectionElementType = "file"
 	RTSELink                RichTextSectionElementType = "link"
+	RTSEListRecord          RichTextSectionElementType = "list_record"
 	RTSEMessageMention      RichTextSectionElementType = "message_mention"
 	RTSETeam                RichTextSectionElementType = "team"
 	RTSEText                RichTextSectionElementType = "text"
@@ -487,6 +490,27 @@ func (r RichTextSectionFileElement) RichTextSectionElementType() RichTextSection
 
 func NewRichTextSectionFileElement(fileID string, style *RichTextSectionTextStyle) *RichTextSectionFileElement {
 	return &RichTextSectionFileElement{Type: RTSEFile, FileID: fileID, Style: style}
+}
+
+// RichTextSectionListRecordElement references a Slack List or item within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/list-record-element/
+type RichTextSectionListRecordElement struct {
+	Type     RichTextSectionElementType `json:"type"`
+	FileID   string                     `json:"file_id"`
+	RecordID string                     `json:"record_id,omitempty"`
+	ViewID   string                     `json:"view_id,omitempty"`
+	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
+	Text     string                     `json:"text,omitempty"`
+	URL      string                     `json:"url,omitempty"`
+}
+
+func (r RichTextSectionListRecordElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionListRecordElement(fileID string, style *RichTextSectionTextStyle) *RichTextSectionListRecordElement {
+	return &RichTextSectionListRecordElement{Type: RTSEListRecord, FileID: fileID, Style: style}
 }
 
 // RichTextSectionMessageMentionElement references a message within rich text.
