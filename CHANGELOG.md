@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [attachment mentions](https://docs.slack.dev/reference/block-kit/block-elements/attachment-mention-element/)
+  with app, entity, icon, message, preview, and product metadata. These now decode into
+  `RichTextSectionAttachmentMentionElement` instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [rich-text tags](https://docs.slack.dev/reference/block-kit/block-elements/tag-element/)
   with styles and constants for all nine colors. Tags now decode into
   `RichTextSectionTagElement` instead of `RichTextSectionUnknownElement`.
