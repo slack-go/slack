@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [canvas user mentions](https://docs.slack.dev/reference/block-kit/block-elements/canvas-user-mention-element/)
+  and [canvas message unfurls](https://docs.slack.dev/reference/block-kit/block-elements/canvas-message-unfurl-element/),
+  including thread IDs and styles. These now decode into concrete types instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [canvas rich-text elements](https://docs.slack.dev/reference/block-kit/block-elements/canvas-element/)
   with labels, section links, title visibility, styles, and skill metadata. These now decode
   into `RichTextSectionCanvasElement` instead of `RichTextSectionUnknownElement`.

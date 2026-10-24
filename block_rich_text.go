@@ -228,6 +228,10 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionTextElement{}
 		case RTSECanvas:
 			elem = &RichTextSectionCanvasElement{}
+		case RTSECanvasMessageUnfurl:
+			elem = &RichTextSectionCanvasMessageUnfurlElement{}
+		case RTSECanvasUserMention:
+			elem = &RichTextSectionCanvasUserMentionElement{}
 		case RTSEChannel:
 			elem = &RichTextSectionChannelElement{}
 		case RTSECitation:
@@ -287,20 +291,22 @@ func NewRichTextSection(elements ...RichTextSectionElement) *RichTextSection {
 type RichTextSectionElementType string
 
 const (
-	RTSEBroadcast      RichTextSectionElementType = "broadcast"
-	RTSECanvas         RichTextSectionElementType = "canvas"
-	RTSEChannel        RichTextSectionElementType = "channel"
-	RTSECitation       RichTextSectionElementType = "citation"
-	RTSEColor          RichTextSectionElementType = "color"
-	RTSEDate           RichTextSectionElementType = "date"
-	RTSEEmoji          RichTextSectionElementType = "emoji"
-	RTSEFile           RichTextSectionElementType = "file"
-	RTSELink           RichTextSectionElementType = "link"
-	RTSEMessageMention RichTextSectionElementType = "message_mention"
-	RTSETeam           RichTextSectionElementType = "team"
-	RTSEText           RichTextSectionElementType = "text"
-	RTSEUser           RichTextSectionElementType = "user"
-	RTSEUserGroup      RichTextSectionElementType = "usergroup"
+	RTSEBroadcast           RichTextSectionElementType = "broadcast"
+	RTSECanvas              RichTextSectionElementType = "canvas"
+	RTSECanvasMessageUnfurl RichTextSectionElementType = "canvas_message_unfurl"
+	RTSECanvasUserMention   RichTextSectionElementType = "canvas_user_mention"
+	RTSEChannel             RichTextSectionElementType = "channel"
+	RTSECitation            RichTextSectionElementType = "citation"
+	RTSEColor               RichTextSectionElementType = "color"
+	RTSEDate                RichTextSectionElementType = "date"
+	RTSEEmoji               RichTextSectionElementType = "emoji"
+	RTSEFile                RichTextSectionElementType = "file"
+	RTSELink                RichTextSectionElementType = "link"
+	RTSEMessageMention      RichTextSectionElementType = "message_mention"
+	RTSETeam                RichTextSectionElementType = "team"
+	RTSEText                RichTextSectionElementType = "text"
+	RTSEUser                RichTextSectionElementType = "user"
+	RTSEUserGroup           RichTextSectionElementType = "usergroup"
 
 	RTSEUnknown RichTextSectionElementType = "unknown"
 )
@@ -423,6 +429,44 @@ func (r RichTextSectionCanvasElement) RichTextSectionElementType() RichTextSecti
 
 func NewRichTextSectionCanvasElement(fileID string, style *RichTextSectionTextStyle) *RichTextSectionCanvasElement {
 	return &RichTextSectionCanvasElement{Type: RTSECanvas, FileID: fileID, Style: style}
+}
+
+// RichTextSectionCanvasUserMentionElement represents a user mention in canvas content.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/canvas-user-mention-element/
+type RichTextSectionCanvasUserMentionElement struct {
+	Type     RichTextSectionElementType `json:"type"`
+	UserID   string                     `json:"user_id"`
+	ThreadID string                     `json:"thread_id,omitempty"`
+	Style    *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionCanvasUserMentionElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionCanvasUserMentionElement(userID string, style *RichTextSectionTextStyle) *RichTextSectionCanvasUserMentionElement {
+	return &RichTextSectionCanvasUserMentionElement{Type: RTSECanvasUserMention, UserID: userID, Style: style}
+}
+
+// RichTextSectionCanvasMessageUnfurlElement represents a message reference in canvas content.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/canvas-message-unfurl-element/
+type RichTextSectionCanvasMessageUnfurlElement struct {
+	Type                 RichTextSectionElementType `json:"type"`
+	RootMessageChannel   string                     `json:"root_message_channel"`
+	RootMessageTimestamp string                     `json:"root_message_ts"`
+	Style                *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionCanvasMessageUnfurlElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionCanvasMessageUnfurlElement(rootMessageChannel, rootMessageTimestamp string, style *RichTextSectionTextStyle) *RichTextSectionCanvasMessageUnfurlElement {
+	return &RichTextSectionCanvasMessageUnfurlElement{
+		Type: RTSECanvasMessageUnfurl, RootMessageChannel: rootMessageChannel, RootMessageTimestamp: rootMessageTimestamp, Style: style,
+	}
 }
 
 // RichTextSectionFileElement references a file within rich text.
