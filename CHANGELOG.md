@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [workflow mentions](https://docs.slack.dev/reference/block-kit/block-elements/workflow-mention-element/)
+  with workflow and trigger IDs, display text, URLs, message locations, and styles. These now decode
+  into `RichTextSectionWorkflowMentionElement` instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [Work Object mentions](https://docs.slack.dev/reference/block-kit/block-elements/work-object-mention-element/)
   with entity and app IDs, display text, URLs, icons, preview settings, product names, and styles.
   These now decode into `RichTextSectionWorkObjectMentionElement` instead of `RichTextSectionUnknownElement`.

@@ -258,6 +258,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionUserGroupElement{}
 		case RTSEWorkObjectMention:
 			elem = &RichTextSectionWorkObjectMentionElement{}
+		case RTSEWorkflowMention:
+			elem = &RichTextSectionWorkflowMentionElement{}
 		case RTSEDate:
 			elem = &RichTextSectionDateElement{}
 		case RTSEBroadcast:
@@ -319,6 +321,7 @@ const (
 	RTSEUser                RichTextSectionElementType = "user"
 	RTSEUserGroup           RichTextSectionElementType = "usergroup"
 	RTSEWorkObjectMention   RichTextSectionElementType = "work_object_mention"
+	RTSEWorkflowMention     RichTextSectionElementType = "workflow_mention"
 
 	RTSEUnknown RichTextSectionElementType = "unknown"
 )
@@ -502,6 +505,30 @@ func (r RichTextSectionWorkObjectMentionElement) RichTextSectionElementType() Ri
 func NewRichTextSectionWorkObjectMentionElement(entityID, appID, text, url string, style *RichTextSectionTextStyle) *RichTextSectionWorkObjectMentionElement {
 	return &RichTextSectionWorkObjectMentionElement{
 		Type: RTSEWorkObjectMention, EntityID: entityID, AppID: appID, Text: text, URL: url, Style: style,
+	}
+}
+
+// RichTextSectionWorkflowMentionElement references a workflow within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/workflow-mention-element/
+type RichTextSectionWorkflowMentionElement struct {
+	Type              RichTextSectionElementType `json:"type"`
+	WorkflowID        string                     `json:"workflow_id"`
+	FunctionTriggerID string                     `json:"function_trigger_id"`
+	Text              string                     `json:"text"`
+	URL               string                     `json:"url,omitempty"`
+	ChannelID         string                     `json:"channel_id,omitempty"`
+	Timestamp         string                     `json:"ts,omitempty"`
+	Style             *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionWorkflowMentionElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionWorkflowMentionElement(workflowID, functionTriggerID, text string, style *RichTextSectionTextStyle) *RichTextSectionWorkflowMentionElement {
+	return &RichTextSectionWorkflowMentionElement{
+		Type: RTSEWorkflowMention, WorkflowID: workflowID, FunctionTriggerID: functionTriggerID, Text: text, Style: style,
 	}
 }
 
