@@ -252,6 +252,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionListRecordElement{}
 		case RTSEMessageMention:
 			elem = &RichTextSectionMessageMentionElement{}
+		case RTSESalesforceDataField:
+			elem = &RichTextSectionSalesforceDataFieldElement{}
 		case RTSETeam:
 			elem = &RichTextSectionTeamElement{}
 		case RTSEUserGroup:
@@ -315,6 +317,7 @@ const (
 	RTSELink                RichTextSectionElementType = "link"
 	RTSEListRecord          RichTextSectionElementType = "list_record"
 	RTSEMessageMention      RichTextSectionElementType = "message_mention"
+	RTSESalesforceDataField RichTextSectionElementType = "salesforce_data_field"
 	RTSETag                 RichTextSectionElementType = "tag"
 	RTSETeam                RichTextSectionElementType = "team"
 	RTSEText                RichTextSectionElementType = "text"
@@ -530,6 +533,28 @@ func NewRichTextSectionWorkflowMentionElement(workflowID, functionTriggerID, tex
 	return &RichTextSectionWorkflowMentionElement{
 		Type: RTSEWorkflowMention, WorkflowID: workflowID, FunctionTriggerID: functionTriggerID, Text: text, Style: style,
 	}
+}
+
+// RichTextSectionSalesforceDataFieldElement references a Salesforce record field within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/salesforce-data-field-element/
+type RichTextSectionSalesforceDataFieldElement struct {
+	Type              RichTextSectionElementType `json:"type"`
+	RecordID          string                     `json:"salesforce_record_id"`
+	FieldLabel        string                     `json:"salesforce_field_label,omitempty"`
+	FieldAPIName      string                     `json:"salesforce_field_api_name,omitempty"`
+	IncludeFieldLabel *bool                      `json:"salesforce_include_field_label,omitempty"`
+	// Observed in live responses; absent from Slack's reference and SDK models.
+	HasWithheldFieldNames *bool                     `json:"has_withheld_salesforce_field_names,omitempty"`
+	Style                 *RichTextSectionTextStyle `json:"style,omitempty"`
+}
+
+func (r RichTextSectionSalesforceDataFieldElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionSalesforceDataFieldElement(recordID string, style *RichTextSectionTextStyle) *RichTextSectionSalesforceDataFieldElement {
+	return &RichTextSectionSalesforceDataFieldElement{Type: RTSESalesforceDataField, RecordID: recordID, Style: style}
 }
 
 // RichTextSectionCanvasElement references a canvas within rich text.

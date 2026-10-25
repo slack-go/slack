@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [Salesforce data fields](https://docs.slack.dev/reference/block-kit/block-elements/salesforce-data-field-element/)
+  with record IDs, field metadata, label visibility, and styles. These now decode into
+  `RichTextSectionSalesforceDataFieldElement` instead of `RichTextSectionUnknownElement`.
+
+  > [!WARNING]
+  > `has_withheld_salesforce_field_names` is based on live Slack responses and is absent from the reference and SDK models.
+
 - Block Kit: Add typed [workflow mentions](https://docs.slack.dev/reference/block-kit/block-elements/workflow-mention-element/)
   with workflow and trigger IDs, display text, URLs, message locations, and styles. These now decode
   into `RichTextSectionWorkflowMentionElement` instead of `RichTextSectionUnknownElement`.
