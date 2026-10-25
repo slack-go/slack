@@ -10,6 +10,31 @@ import (
 	"testing"
 )
 
+func TestSlashCommandValidateToken(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		token  string
+		tokens []string
+		want   bool
+	}{
+		{name: "no configured tokens", token: "valid"},
+		{name: "matching token", token: "valid", tokens: []string{"valid"}, want: true},
+		{name: "first token matches", token: "valid", tokens: []string{"valid", "other"}, want: true},
+		{name: "last token matches", token: "valid", tokens: []string{"other", "valid"}, want: true},
+		{name: "same length mismatch", token: "valie", tokens: []string{"valid"}},
+		{name: "different length mismatch", token: "valid-extra", tokens: []string{"valid"}},
+		{name: "missing request token", tokens: []string{"valid"}},
+		{name: "empty configured token", tokens: []string{""}, want: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			command := SlashCommand{Token: test.token}
+			if got := command.ValidateToken(test.tokens...); got != test.want {
+				t.Fatalf("got %t, want %t", got, test.want)
+			}
+		})
+	}
+}
+
 func TestSlash_ServeHTTP(t *testing.T) {
 	once.Do(startServer)
 	serverURL := fmt.Sprintf("http://%s/slash", serverAddr)

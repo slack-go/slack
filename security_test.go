@@ -48,14 +48,14 @@ func TestNewSecretsVerifierRejectsEmptySigningSecret(t *testing.T) {
 	}
 }
 
-func TestUnsafeSignatureVerifierRejectsEmptySigningSecret(t *testing.T) {
-	_, err := unsafeSignatureVerifier(newHeader(true), "")
+func TestSignatureVerifierWithoutTimestampCheckRejectsEmptySigningSecret(t *testing.T) {
+	_, err := signatureVerifierWithoutTimestampCheck(newHeader(true), "")
 	if !errors.Is(err, ErrInvalidConfiguration) {
 		t.Fatalf("expected ErrInvalidConfiguration, got %v", err)
 	}
 }
 
-func TestUnsafeSignatureVerifier(t *testing.T) {
+func TestSignatureVerifierWithoutTimestampCheck(t *testing.T) {
 	tests := []struct {
 		title         string
 		header        http.Header
@@ -77,7 +77,7 @@ func TestUnsafeSignatureVerifier(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		_, err := unsafeSignatureVerifier(test.header, test.signingSecret)
+		_, err := signatureVerifierWithoutTimestampCheck(test.header, test.signingSecret)
 
 		if !test.expectError && err != nil {
 			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
@@ -119,7 +119,7 @@ func TestEnsure(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		sv, err := unsafeSignatureVerifier(test.header, test.signingSecret)
+		sv, err := signatureVerifierWithoutTimestampCheck(test.header, test.signingSecret)
 		if err != nil {
 			t.Fatalf("unexpected error: %s", err)
 		}
@@ -221,6 +221,43 @@ func TestNewSecretsVerifierSignatureLength(t *testing.T) {
 			_, err := NewSecretsVerifier(header, validSigningSecret)
 			if !errors.Is(err, test.wantErr) {
 				t.Fatalf("expected %v, got %v", test.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestNewSecretsVerifierSignatureVersion(t *testing.T) {
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	mac := hmac.New(sha256.New, []byte(validSigningSecret))
+	io.WriteString(mac, "v0:"+timestamp+":"+validBody)
+	digest := hex.EncodeToString(mac.Sum(nil))
+
+	for _, test := range []struct {
+		name      string
+		signature string
+		wantErr   error
+	}{
+		{name: "v0", signature: "v0=" + digest},
+		{name: "missing version", signature: digest, wantErr: ErrInvalidSignature},
+		{name: "unsupported version", signature: "v1=" + digest, wantErr: ErrInvalidSignature},
+		{name: "uppercase version", signature: "V0=" + digest, wantErr: ErrInvalidSignature},
+		{name: "wrong separator", signature: "v0:" + digest, wantErr: ErrInvalidSignature},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			header := http.Header{}
+			header.Set(hTimestamp, timestamp)
+			header.Set(hSignature, test.signature)
+			verifier, err := NewSecretsVerifier(header, validSigningSecret)
+			if !errors.Is(err, test.wantErr) {
+				t.Fatalf("got %v, want %v", err, test.wantErr)
+			}
+			if err == nil {
+				if _, err := io.WriteString(&verifier, validBody); err != nil {
+					t.Fatal(err)
+				}
+				if err := verifier.Ensure(); err != nil {
+					t.Fatalf("valid v0 signature failed verification: %v", err)
+				}
 			}
 		})
 	}

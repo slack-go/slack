@@ -1,10 +1,10 @@
 package slack
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"slices"
 	"strconv"
 )
 
@@ -50,9 +50,17 @@ func SlashCommandParse(r *http.Request) (s SlashCommand, err error) {
 	return s, nil
 }
 
-// ValidateToken validates verificationTokens
+// ValidateToken reports whether the command's token matches any of verificationTokens.
+//
+// Deprecated: Slack's verification-token authentication is deprecated.
+// Authenticate the original HTTP request using NewSecretsVerifier,
+// the signing secret, and the raw request body instead.
 func (s SlashCommand) ValidateToken(verificationTokens ...string) bool {
-	return slices.Contains(verificationTokens, s.Token)
+	match := 0
+	for _, token := range verificationTokens {
+		match |= subtle.ConstantTimeCompare([]byte(s.Token), []byte(token))
+	}
+	return match == 1
 }
 
 // UnmarshalJSON handles is_enterprise_install being either a boolean or a

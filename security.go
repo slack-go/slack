@@ -25,7 +25,7 @@ type SecretsVerifier struct {
 	hmac      hash.Hash
 }
 
-func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifier, err error) {
+func signatureVerifierWithoutTimestampCheck(header http.Header, secret string) (_ SecretsVerifier, err error) {
 	var (
 		bsignature []byte
 	)
@@ -41,7 +41,11 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 		return SecretsVerifier{}, ErrMissingHeaders
 	}
 
-	if bsignature, err = hex.DecodeString(strings.TrimPrefix(signature, "v0=")); err != nil {
+	signature, ok := strings.CutPrefix(signature, "v0=")
+	if !ok {
+		return SecretsVerifier{}, ErrInvalidSignature
+	}
+	if bsignature, err = hex.DecodeString(signature); err != nil {
 		return SecretsVerifier{}, err
 	}
 	if len(bsignature) != sha256.Size {
@@ -59,7 +63,16 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 	}, nil
 }
 
-// NewSecretsVerifier returns a SecretsVerifier object in exchange for an http.Header object and signing secret
+// NewSecretsVerifier creates a verifier for Slack's v0 request signatures and
+// rejects timestamps more than five minutes from local time. Write the raw request
+// body to the verifier, then call Ensure to check the signature.
+//
+// Verification does not deduplicate requests: the same valid request can pass
+// again within the timestamp window. Events API consumers should deduplicate by
+// event_id before performing side effects. X-Slack-Retry-Num describes a retry
+// attempt; it is not an event identifier.
+//
+// Slack API docs: https://docs.slack.dev/authentication/verifying-requests-from-slack/
 func NewSecretsVerifier(header http.Header, secret string) (sv SecretsVerifier, err error) {
 	var (
 		timestamp int64
@@ -67,7 +80,7 @@ func NewSecretsVerifier(header http.Header, secret string) (sv SecretsVerifier, 
 
 	stimestamp := header.Get(hTimestamp)
 
-	if sv, err = unsafeSignatureVerifier(header, secret); err != nil {
+	if sv, err = signatureVerifierWithoutTimestampCheck(header, secret); err != nil {
 		return SecretsVerifier{}, err
 	}
 
