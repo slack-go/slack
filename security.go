@@ -44,6 +44,9 @@ func unsafeSignatureVerifier(header http.Header, secret string) (_ SecretsVerifi
 	if bsignature, err = hex.DecodeString(strings.TrimPrefix(signature, "v0=")); err != nil {
 		return SecretsVerifier{}, err
 	}
+	if len(bsignature) != sha256.Size {
+		return SecretsVerifier{}, ErrInvalidSignature
+	}
 
 	hash := hmac.New(sha256.New, []byte(secret))
 	if _, err = fmt.Fprintf(hash, "v0:%s:", stimestamp); err != nil {
@@ -89,7 +92,8 @@ func (v *SecretsVerifier) Write(body []byte) (n int, err error) {
 	return v.hmac.Write(body)
 }
 
-// Ensure compares the signature sent from Slack with the actual computed hash to judge validity
+// Ensure compares the signature sent from Slack with the actual computed hash to judge validity.
+// It returns ErrInvalidSignature if the signatures do not match.
 func (v SecretsVerifier) Ensure() error {
 	computed := v.hmac.Sum(nil)
 	// use hmac.Equal prevent leaking timing information.
@@ -97,9 +101,11 @@ func (v SecretsVerifier) Ensure() error {
 		return nil
 	}
 	if v.d != nil && v.d.Debug() {
-		v.d.Debugln(fmt.Sprintf("Expected signing signature: %s, but computed: %s", hex.EncodeToString(v.signature), hex.EncodeToString(computed)))
+		// A full computed signature would allow the rejected request to be replayed.
+		v.d.Debugf("Invalid signature: received prefix=%x (%d bytes), computed prefix=%x (%d bytes)",
+			v.signature[:4], len(v.signature), computed[:4], len(computed))
 	}
-	return fmt.Errorf("computed unexpected signature of: %s", hex.EncodeToString(computed))
+	return ErrInvalidSignature
 }
 
 func abs64(n int64) int64 {
