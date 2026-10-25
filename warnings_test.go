@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -65,6 +66,9 @@ func TestWarn(t *testing.T) {
 func TestOptionOnWarning(t *testing.T) {
 	t.Run("callback fires on warning", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if token := r.FormValue("token"); token != "test-token" {
+				t.Errorf("expected the outgoing request to retain its token, got %q", token)
+			}
 			w.Header().Set("Content-Type", "application/json")
 			w.Write([]byte(`{
 				"ok": true,
@@ -101,8 +105,12 @@ func TestOptionOnWarning(t *testing.T) {
 		if gotPath != "auth.test" {
 			t.Fatalf("expected path auth.test, got %s", gotPath)
 		}
-		if _, ok := gotRequest.(url.Values); !ok {
+		values, ok := gotRequest.(url.Values)
+		if !ok {
 			t.Fatalf("expected url.Values request, got %T", gotRequest)
+		}
+		if _, exists := values["token"]; exists {
+			t.Fatal("warning callback received the token parameter")
 		}
 	})
 
@@ -180,4 +188,48 @@ func TestOptionOnWarning(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	})
+}
+
+func TestCheckWarningsPreservesRequestValues(t *testing.T) {
+	values := url.Values{
+		"token":   {"test-token", "another-test-token"},
+		"channel": {"C123"},
+		"users":   {"U123", "U456"},
+	}
+	want := url.Values{
+		"channel": {"C123"},
+		"users":   {"U123", "U456"},
+	}
+	var gotRequest any
+	api := New("test-token", OptionOnWarning(func(_ string, request any, _ *Warning) {
+		gotRequest = request
+	}))
+
+	api.checkWarnings(&SlackResponse{Warning: "missing_charset"}, "conversations.invite", values)
+
+	if !reflect.DeepEqual(gotRequest, want) {
+		t.Errorf("expected callback parameters %v, got %v", want, gotRequest)
+	}
+	want["token"] = []string{"test-token", "another-test-token"}
+	if !reflect.DeepEqual(values, want) {
+		t.Errorf("original request parameters changed: got %v, want %v", values, want)
+	}
+}
+
+func TestCheckWarningsPreservesJSONRequest(t *testing.T) {
+	const body = `{"channel":"C123","text":"hello"}`
+	var gotRequest any
+	api := New("test-token", OptionOnWarning(func(_ string, request any, _ *Warning) {
+		gotRequest = request
+	}))
+
+	api.checkWarnings(&SlackResponse{Warning: "missing_charset"}, "chat.postMessage", []byte(body))
+
+	got, ok := gotRequest.([]byte)
+	if !ok {
+		t.Fatalf("expected []byte request, got %T", gotRequest)
+	}
+	if string(got) != body {
+		t.Errorf("expected JSON request %q, got %q", body, got)
+	}
 }

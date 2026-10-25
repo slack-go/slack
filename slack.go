@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -103,6 +104,7 @@ func OptionLog(l logger) func(*Client) {
 // "conversations.join"), the request payload ([url.Values] for form-encoded
 // requests or []byte for JSON requests), and a [Warning] with the warning
 // codes and messages.
+// Form and query parameter maps are copied with the token parameter omitted.
 //
 // Example:
 //
@@ -268,6 +270,11 @@ func (api *Client) checkWarnings(intf any, path string, request any) {
 	}
 	if w, ok := intf.(warner); ok {
 		if warning := w.Warn(); warning != nil {
+			if values, ok := request.(url.Values); ok {
+				redacted := maps.Clone(values)
+				redacted.Del("token")
+				request = redacted
+			}
 			api.onWarning(path, request, warning)
 		}
 	}
