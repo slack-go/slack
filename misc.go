@@ -405,9 +405,12 @@ func postLocalWithMultipartResponse(ctx context.Context, client httpClient, meth
 
 func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname, token string, values url.Values, r io.Reader, intf any, d Debug) error {
 	pipeReader, pipeWriter := io.Pipe()
+	// Unblock multipart writes if the request returns before consuming the body.
+	defer pipeReader.Close()
 	wr := multipart.NewWriter(pipeWriter)
 
-	errc := make(chan error)
+	// The writer must be able to report an error after the request has returned.
+	errc := make(chan error, 1)
 	go func() {
 		defer pipeWriter.Close()
 		defer wr.Close()
