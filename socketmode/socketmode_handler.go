@@ -7,6 +7,12 @@ import (
 	"github.com/slack-go/slack/slackevents"
 )
 
+// SocketmodeHandler routes Socket Mode events to registered handlers.
+//
+// Handler registration is not synchronized. Register all handlers sequentially
+// and finish configuring Client, the handler maps, and Default before calling
+// RunEventLoop or RunEventLoopContext. Do not register handlers or modify this
+// configuration while events are being dispatched, including from a handler.
 type SocketmodeHandler struct {
 	Client *Client
 
@@ -33,7 +39,8 @@ type SocketmodeHandlerFunc func(*Event, *Client)
 // Middleware accept SocketmodeHandlerFunc, and return SocketmodeHandlerFunc
 type SocketmodeMiddlewareFunc func(SocketmodeHandlerFunc) SocketmodeHandlerFunc
 
-// Initialization constructor for SocketmodeHandler
+// NewSocketmodeHandler creates a SocketmodeHandler. Register all handlers before
+// starting its event loop; concurrent registration is not supported.
 func NewSocketmodeHandler(client *Client) *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
 	interactionEventMap := make(map[slack.InteractionType][]SocketmodeHandlerFunc)
@@ -158,7 +165,9 @@ func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 	r.Default = f
 }
 
-// RunSlackEventLoop receives the event via the socket
+// RunEventLoop starts dispatching events and runs the Socket Mode client.
+// Register all handlers before calling this method. Registration and direct
+// changes to handler maps or Default are not supported while it is running.
 func (r *SocketmodeHandler) RunEventLoop() error {
 
 	go r.runEventLoop(context.Background())
@@ -166,6 +175,10 @@ func (r *SocketmodeHandler) RunEventLoop() error {
 	return r.Client.Run()
 }
 
+// RunEventLoopContext starts dispatching events and runs the Socket Mode client
+// until ctx is canceled or the client returns an error. Register all handlers
+// before calling this method. Registration and direct changes to handler maps or
+// Default are not supported while it is running.
 func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
 	go r.runEventLoop(ctx)
 
@@ -194,9 +207,8 @@ func (r *SocketmodeHandler) runEventLoop(ctx context.Context) {
 // method is useful for integration testing handler registrations without a WebSocket
 // connection.
 //
-// NOTE: This method does not implement the same dispatching logic as RunEventLoop. It
-// should only be used for testing purposes, and not as a general-purpose event
-// dispatcher.
+// Complete handler registration before calling DispatchEvent. Registration and
+// changes to handler maps or Default must not overlap with dispatch.
 func (r *SocketmodeHandler) DispatchEvent(evt Event) {
 	var ishandled bool
 
