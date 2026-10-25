@@ -256,6 +256,8 @@ func (e *RichTextSection) UnmarshalJSON(b []byte) error {
 			elem = &RichTextSectionTeamElement{}
 		case RTSEUserGroup:
 			elem = &RichTextSectionUserGroupElement{}
+		case RTSEWorkObjectMention:
+			elem = &RichTextSectionWorkObjectMentionElement{}
 		case RTSEDate:
 			elem = &RichTextSectionDateElement{}
 		case RTSEBroadcast:
@@ -316,6 +318,7 @@ const (
 	RTSEText                RichTextSectionElementType = "text"
 	RTSEUser                RichTextSectionElementType = "user"
 	RTSEUserGroup           RichTextSectionElementType = "usergroup"
+	RTSEWorkObjectMention   RichTextSectionElementType = "work_object_mention"
 
 	RTSEUnknown RichTextSectionElementType = "unknown"
 )
@@ -475,6 +478,31 @@ func (r RichTextSectionAttachmentMentionElement) RichTextSectionElementType() Ri
 
 func NewRichTextSectionAttachmentMentionElement(url string, style *RichTextSectionTextStyle) *RichTextSectionAttachmentMentionElement {
 	return &RichTextSectionAttachmentMentionElement{Type: RTSEAttachmentMention, URL: url, Style: style}
+}
+
+// RichTextSectionWorkObjectMentionElement references a Work Object within rich text.
+//
+// Slack API docs: https://docs.slack.dev/reference/block-kit/block-elements/work-object-mention-element/
+type RichTextSectionWorkObjectMentionElement struct {
+	Type                   RichTextSectionElementType `json:"type"`
+	EntityID               string                     `json:"entity_id"`
+	AppID                  string                     `json:"app_id"`
+	Text                   string                     `json:"text"`
+	URL                    string                     `json:"url"`
+	IconURL                string                     `json:"icon_url,omitempty"`
+	FullSizePreviewEnabled *bool                      `json:"full_size_preview_enabled,omitempty"`
+	ProductName            string                     `json:"product_name,omitempty"`
+	Style                  *RichTextSectionTextStyle  `json:"style,omitempty"`
+}
+
+func (r RichTextSectionWorkObjectMentionElement) RichTextSectionElementType() RichTextSectionElementType {
+	return r.Type
+}
+
+func NewRichTextSectionWorkObjectMentionElement(entityID, appID, text, url string, style *RichTextSectionTextStyle) *RichTextSectionWorkObjectMentionElement {
+	return &RichTextSectionWorkObjectMentionElement{
+		Type: RTSEWorkObjectMention, EntityID: entityID, AppID: appID, Text: text, URL: url, Style: style,
+	}
 }
 
 // RichTextSectionCanvasElement references a canvas within rich text.

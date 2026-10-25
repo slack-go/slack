@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add typed [Work Object mentions](https://docs.slack.dev/reference/block-kit/block-elements/work-object-mention-element/)
+  with entity and app IDs, display text, URLs, icons, preview settings, product names, and styles.
+  These now decode into `RichTextSectionWorkObjectMentionElement` instead of `RichTextSectionUnknownElement`.
+
 - Block Kit: Add typed [attachment mentions](https://docs.slack.dev/reference/block-kit/block-elements/attachment-mention-element/)
   with app, entity, icon, message, preview, and product metadata. These now decode into
   `RichTextSectionAttachmentMentionElement` instead of `RichTextSectionUnknownElement`.
