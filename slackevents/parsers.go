@@ -93,7 +93,12 @@ func parseOuterEvent(rawE json.RawMessage) (EventsAPIEvent, error) {
 func parseInnerEvent(e *EventsAPICallbackEvent) (EventsAPIEvent, error) {
 	iE := &slack.Event{}
 	rawInnerJSON := e.InnerEvent
-	err := json.Unmarshal(*rawInnerJSON, iE)
+	var err error
+	if rawInnerJSON == nil {
+		err = errors.New("event_callback has a missing or null event")
+	} else {
+		err = json.Unmarshal(*rawInnerJSON, iE)
+	}
 	if err != nil {
 		return EventsAPIEvent{
 			e.Token,

@@ -6,7 +6,34 @@ import (
 	"testing"
 
 	"github.com/slack-go/slack"
+	"github.com/stretchr/testify/require"
 )
+
+func TestParseEventRejectsMalformedInnerEvent(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		body string
+	}{
+		{name: "missing", body: `{"type":"event_callback"}`},
+		{name: "null", body: `{"type":"event_callback","event":null}`},
+		{name: "empty object", body: `{"type":"event_callback","event":{}}`},
+		{name: "array", body: `{"type":"event_callback","event":[]}`},
+		{name: "string", body: `{"type":"event_callback","event":"invalid"}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var event EventsAPIEvent
+			var err error
+			require.NotPanics(t, func() {
+				event, err = ParseEvent(json.RawMessage(test.body), OptionNoVerifyToken())
+			})
+			require.Error(t, err)
+			require.Equal(t, "unmarshalling_error", event.Type)
+			unmarshalError, ok := event.Data.(*slack.UnmarshallingErrorEvent)
+			require.True(t, ok, "expected *slack.UnmarshallingErrorEvent, got %T", event.Data)
+			require.Equal(t, err, unmarshalError.ErrorObj)
+		})
+	}
+}
 
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
