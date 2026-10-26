@@ -130,7 +130,7 @@ func (h *rateLimitErrorRetryHandler) ShouldRetry(state *RetryState, req *http.Re
 	}
 	dur = max(dur, minRetryAfter429)
 	if h.cfg.RetryAfterJitter > 0 {
-		dur += time.Duration(rand.IntN(int(h.cfg.RetryAfterJitter)))
+		dur += time.Duration(rand.IntN(int(h.cfg.RetryAfterJitter))) // #nosec G404 -- Retry jitter does not need cryptographic randomness.
 	}
 	return true, dur
 }

@@ -6,6 +6,7 @@ linters:
   default: none
   enable:
     - gocritic
+    - gosec
     - govet
     - misspell
     - modernize
@@ -19,6 +20,11 @@ linters:
         - omitzero
   exclusions:
     generated: lax
+    rules:
+      # Test fixtures contain placeholder credentials and local HTTP handlers.
+      - path: _test\.go$
+        linters:
+          - gosec
     presets:
       - comments
       - common-false-positives
@@ -27,7 +33,7 @@ linters:
     paths:
       - third_party$
       - builtin$
-      - examples$
+      - ^examples/
 formatters:
   enable:
     - goimports
@@ -37,4 +43,4 @@ formatters:
     paths:
       - third_party$
       - builtin$
-      - examples$
+      - ^examples/

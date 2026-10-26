@@ -49,7 +49,7 @@ func (b *Backoff) Duration() (dur time.Duration) {
 	}
 
 	if b.Jitter > 0 {
-		dur += time.Duration(rand.Intn(int(b.Jitter)))
+		dur += time.Duration(rand.Intn(int(b.Jitter))) // #nosec G404 -- Retry jitter does not need cryptographic randomness.
 	}
 
 	// bump attempts count
