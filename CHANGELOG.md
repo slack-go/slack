@@ -7,7 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-26
+
+### Breaking changes
+
+- **`ButtonBlockElement` is no longer comparable** because `VisibleToUserIDs` is a slice.
+  Value comparisons and map keys using it no longer compile; interface comparisons
+  containing button values can panic. Use comparable identifiers as map keys and compare
+  button contents explicitly:
+
+  ```go
+  // Before
+  same := a == b
+  // After (import "reflect")
+  same := reflect.DeepEqual(a, b)
+  ```
+
+- **If you create these structs without naming their fields, update that code.** New fields
+  were added to Block Kit elements, `Attachment`, `File`, `RemoteFile` and `Features`.
+  Code that supplies values by position now fails to compile. Include the field names,
+  or use the existing `New...` helper functions where available:
+
+  ```go
+  // Before: values depend on field order.
+  element := slack.RichTextSectionBroadcastElement{slack.RTSEBroadcast, "here"}
+  // After: each value names its field.
+  element := slack.RichTextSectionBroadcastElement{
+      Type:  slack.RTSEBroadcast,
+      Range: "here",
+  }
+  ```
+
+- **Newly supported rich-text elements decode into concrete types** instead of
+  `*RichTextSectionUnknownElement`. Update type assertions and switches for attachment,
+  workflow, Work Object and message mentions; tags; canvas elements; citations; file and
+  List record references; and Salesforce data fields.
+- **Request signature validation is stricter, and mismatch errors have changed.**
+  `NewSecretsVerifier` rejects signatures without the `v0=` prefix or whose decoded length
+  is not 32 bytes. Update any test fixtures that relied on the previous permissive parsing.
+  `SecretsVerifier.Ensure` returns `ErrInvalidSignature` on a mismatch; replace checks of
+  the old error text with `errors.Is(err, slack.ErrInvalidSignature)`.
+- **`UninstallApp` and `RotateTokens` now use POST**, including their `Context` variants.
+  Update mocks or custom transports that expect GET requests or credentials in the URL
+  to accept form-encoded POST bodies.
+- **`OptionOnWarning` callbacks no longer receive the `token` parameter** in form or query
+  parameter maps. Update callbacks that rely on that field.
+
+### Security
+
+- `SecretsVerifier.Ensure` now returns `ErrInvalidSignature` on a signature mismatch
+  without including the computed signature in the error. Debug logs include only short
+  signature prefixes. `NewSecretsVerifier` requires the `v0=` prefix and a 32-byte signature.
+- `SlashCommand.ValidateToken` uses constant-time comparison for each candidate token.
+- `UninstallApp` and `RotateTokens` (including their `Context` variants) send credentials
+  in POST bodies instead of request URLs.
+- `OptionOnWarning` omits the `token` parameter from form and query parameter maps passed
+  to callbacks, without changing the outgoing request.
+- Socket Mode debug logs redact known credential fields in incoming and outgoing payloads
+  and omit credentials from connection URLs. Logs still include message content and other
+  user data.
+
 ### Added
+
+- Add `RTMOptionReadLimit` and `socketmode.OptionReadLimit` to limit incoming WebSocket
+  message sizes on every connection, including reconnects. The default remains unlimited;
+  exceeding a configured limit closes the connection and triggers normal reconnect handling.
+  With compression enabled through a custom dialer, the limit counts compressed bytes and
+  does not bound the size after decompression.
 
 - Block Kit: Add typed [Salesforce data fields](https://docs.slack.dev/reference/block-kit/block-elements/salesforce-data-field-element/)
   with record IDs, field metadata, label visibility, and styles. These now decode into
@@ -64,21 +130,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for button accessibility, agent prompts, visibility, conversation selection, rich-text input
   sizing, and rich-text styles and metadata, including shared emoji URLs.
 
-  > [!WARNING]
-  > **Breaking change.** `ButtonBlockElement` is no longer comparable. Value comparisons and
-  > map keys using it no longer compile; interface comparisons containing it can panic.
-  > Use comparable identifiers as map keys and compare button contents explicitly:
-  >
-  > ```go
-  > // Before
-  > same := a == b
-  > // After (import "reflect")
-  > same := reflect.DeepEqual(a, b)
-  > ```
-  >
-  > Unkeyed literals for the extended structs must also be updated. Use keyed literals or
-  > the existing constructors.
-
 - Add `IsShare`, `IsMsgUnfurl` and `Files` to `Attachment`, so the files of a forwarded
   message are decoded rather than dropped.
 - Add `CreateAgentConversation` and `ArchiveAgentConversation` (plus `Context` variants)
@@ -104,6 +155,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   thumbnail (`ThumbVideo`, `ThumbVideoW`, `ThumbVideoH` and `ThumbVideoTimestamp`) and
   `DurationMs`, `HLS`, `HLSEmbed`, `HLSPreview`, `MediaDisplayType`, `MP4`, `MP4Low` and
   `VTT`.
+
+### Changed
+
+- Add a `Deprecated:` doc comment to `SlashCommand.ValidateToken` to reflect
+  [Slack's existing deprecation of verification tokens](https://docs.slack.dev/authentication/verifying-requests-from-slack/).
+  The helper remains available with the same signature. For HTTP requests, create a verifier
+  with `NewSecretsVerifier`, the request headers and signing secret, write the raw request
+  body to it, and call `Ensure` before handling the command. See the
+  [slash command example](examples/slash/slash.go).
+- Clarify that Socket Mode handlers must be registered before dispatch starts, and
+  `EventMapping` and `slackevents.EventsAPIInnerEventMapping` must be configured sequentially
+  before event processing. Concurrent registration or registry mutation is unsupported.
+
+### Fixed
+
+- RTM: Keep reader errors scoped to their connection and stop the old reader before
+  reconnecting, so stale errors cannot close the next connection.
+- `slackevents.ParseEvent` returns an error for an `event_callback` with a missing or null
+  inner `event` instead of panicking.
+- Release multipart upload writers when a request fails or returns before consuming the
+  request body.
 
 ## [0.30.1] - 2026-10-04
 
@@ -843,7 +915,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.30.1...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.31.0...HEAD
+[0.31.0]: https://github.com/slack-go/slack/compare/v0.30.1...v0.31.0
 [0.30.1]: https://github.com/slack-go/slack/compare/v0.30.0...v0.30.1
 [0.30.0]: https://github.com/slack-go/slack/compare/v0.29.0...v0.30.0
 [0.29.0]: https://github.com/slack-go/slack/compare/v0.28.0...v0.29.0
