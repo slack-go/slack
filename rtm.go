@@ -97,6 +97,18 @@ func RTMOptionDialer(d *websocket.Dialer) RTMOption {
 	}
 }
 
+// RTMOptionReadLimit sets the maximum incoming WebSocket message size in bytes.
+// The default is unlimited; a non-positive limit also disables the limit.
+// The limit applies to each message, including all fragments, on every connection.
+// Exceeding it closes the connection and triggers the normal reconnect handling.
+// With compression enabled through a custom dialer, the limit counts compressed
+// bytes and does not bound the size after decompression.
+func RTMOptionReadLimit(limit int64) RTMOption {
+	return func(rtm *RTM) {
+		rtm.readLimit = limit
+	}
+}
+
 // RTMOptionPingInterval determines how often to deliver a ping message to slack.
 func RTMOptionPingInterval(d time.Duration) RTMOption {
 	return func(rtm *RTM) {

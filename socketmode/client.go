@@ -58,6 +58,8 @@ type Client struct {
 	// Dialer.
 	dialer *websocket.Dialer
 
+	readLimit int64
+
 	debug bool
 	log   ilogger
 }

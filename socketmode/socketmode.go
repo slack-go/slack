@@ -103,6 +103,18 @@ func OptionDialer(d *websocket.Dialer) Option {
 	}
 }
 
+// OptionReadLimit sets the maximum incoming WebSocket message size in bytes.
+// The default is unlimited; a non-positive limit also disables the limit.
+// The limit applies to each message, including all fragments, on every connection.
+// Exceeding it closes the connection and triggers the normal reconnect handling.
+// With compression enabled through a custom dialer, the limit counts compressed
+// bytes and does not bound the size after decompression.
+func OptionReadLimit(limit int64) Option {
+	return func(smc *Client) {
+		smc.readLimit = limit
+	}
+}
+
 // OptionPingInterval determines how often we expect Slack to deliver WebSocket ping to us.
 // If no ping is delivered to us within this interval after the last ping, we assumes the WebSocket connection
 // is dead and needs to be reconnected.

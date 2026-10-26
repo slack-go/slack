@@ -236,6 +236,7 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 		rtm.Debugf("Failed to dial to the websocket: %s", err)
 		return nil, nil, err
 	}
+	conn.SetReadLimit(rtm.readLimit)
 	return info, conn, err
 }
 

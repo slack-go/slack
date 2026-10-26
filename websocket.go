@@ -47,6 +47,8 @@ type RTM struct {
 	// Dialer.
 	dialer *websocket.Dialer
 
+	readLimit int64
+
 	// mu is mutex used to prevent RTM connection race conditions
 	mu *sync.Mutex
 
