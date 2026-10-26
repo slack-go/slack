@@ -112,7 +112,8 @@ func OptionPingInterval(d time.Duration) Option {
 	}
 }
 
-// OptionDebug enable debugging for the client
+// OptionDebug enables debugging for the client. Payload logs redact known
+// credential fields but still include message content and other user data.
 func OptionDebug(b bool) func(*Client) {
 	return func(c *Client) {
 		c.debug = b

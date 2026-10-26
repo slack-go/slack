@@ -1,7 +1,6 @@
 package socketmode
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
+	"github.com/slack-go/slack/internal/redact"
 	"github.com/slack-go/slack/internal/timex"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -289,7 +289,7 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 		return nil, nil, err
 	}
 
-	smc.Debugf("Dialing to websocket on url %s", url)
+	smc.Debugf("Dialing WebSocket endpoint %s", redact.URLOrigin(url))
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
 	upgradeHeader := http.Header{}
 	upgradeHeader.Add("Origin", "https://api.slack.com")
@@ -348,7 +348,7 @@ func (smc *Client) runResponseSender(ctx context.Context, conn *websocket.Conn) 
 			return ctx.Err()
 		// listen for messages that need to be sent
 		case res := <-smc.socketModeResponses:
-			smc.Debugf("Sending Socket Mode response with envelope ID %q: %v", res.EnvelopeID, res)
+			smc.Debugf("Sending Socket Mode response with envelope ID %q", res.EnvelopeID)
 
 			if err := unsafeWriteSocketModeResponse(conn, res); err != nil {
 				smc.Debugf("failed to write Socket Mode response for envelope ID %q: %v", res.EnvelopeID, err)
@@ -379,7 +379,9 @@ func (smc *Client) runRequestHandler(ctx context.Context, websocket chan json.Ra
 				return nil
 			}
 
-			smc.Debugf("Received WebSocket message: %s", message)
+			if smc.debug {
+				smc.Debugf("Received WebSocket message: %s", redact.JSON(message))
+			}
 
 			// listen for incoming messages that need to be parsed
 			evt, err := smc.parseEvent(message)
@@ -544,7 +546,7 @@ func (smc *Client) SendCtx(ctx context.Context, res Response) error {
 	}
 
 	if smc.debug {
-		smc.Debugf("Scheduling Socket Mode response for envelope ID %s: %s", res.EnvelopeID, js)
+		smc.Debugf("Scheduling Socket Mode response for envelope ID %s: %s", res.EnvelopeID, redact.JSON(js))
 	}
 
 	// Store pre-marshaled bytes so unsafeWriteSocketModeResponse can use
@@ -600,18 +602,6 @@ func (smc *Client) receiveMessagesInto(ctx context.Context, conn *websocket.Conn
 		// All other errors from ReadJSON come from NextReader, and should
 		// kill the read loop and force a reconnect.
 		return err
-	}
-
-	if smc.debug {
-		buf := &bytes.Buffer{}
-		d := json.NewEncoder(buf)
-		d.SetIndent("", "  ")
-		if err := d.Encode(event); err != nil {
-			smc.Debugln("Failed encoding decoded json:", err)
-		}
-		reencoded := buf.String()
-
-		smc.Debugln("Incoming WebSocket message:", reencoded)
 	}
 
 	select {
