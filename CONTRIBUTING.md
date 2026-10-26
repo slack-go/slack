@@ -6,7 +6,7 @@ There are a just a few small guidelines you ask everyone to follow to make thing
 
 ## Opening Pull Requests
 
-1. It's generally best to start by opening a new issue describing the bug or feature you're intending to fix. Even if you think it's relatively minor, it's helpful to know what people are working on. Mention in the initial issue that you are planning to work on that bug or feature so that it can be assigned to you.
+1. It's generally best to start by opening a new issue concisely describing the bug you're intending to fix, or the feature you want to add. Even if you think it's relatively minor, it's helpful to know what people are working on. Mention in the initial issue that you are planning to work on that bug or feature so that it can be assigned to you.
 
 2. Follow the normal process of [forking](https://help.github.com/articles/fork-a-repo) the project, and set up a new branch to work in. It's important that each group of changes be done in separate branches in order to ensure that a pull request only includes the commits related to that bug or feature.
 
