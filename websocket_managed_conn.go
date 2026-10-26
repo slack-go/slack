@@ -532,6 +532,14 @@ func (rtm *RTM) handleEvent(typeStr string, event json.RawMessage) {
 // EventMapping holds a mapping of event names to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
+//
+// The map is shared by all RTM clients and is also used as a fallback by
+// slackevents.ParseEvent, including Socket Mode.
+//
+// Changes are not synchronized. Configure the map sequentially during
+// initialization, before any event processing starts. Do not modify or replace
+// it while RTM, Socket Mode, or direct Events API parsing is running, including
+// from event handlers.
 var EventMapping = map[string]any{
 	"message":         MessageEvent{},
 	"presence_change": PresenceChangeEvent{},

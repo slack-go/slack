@@ -183,9 +183,12 @@ func (c TokenComparator) Verify(t string) bool {
 	return subtle.ConstantTimeCompare([]byte(c.VerificationToken), []byte(t)) == 1
 }
 
-// ParseEvent parses the outer and inner events (if applicable) of an events
-// api event returning a EventsAPIEvent type. If the event is a url_verification event,
-// the inner event is empty.
+// ParseEvent parses the outer and inner parts of an Events API event.
+// For a url_verification event, the inner event is empty.
+//
+// Configure EventsAPIInnerEventMapping and slack.EventMapping sequentially
+// before starting event processing. Parsing does not synchronize access to
+// these process-wide registries; keep them unchanged while parsing is running.
 func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error) {
 	e, err := parseOuterEvent(rawEvent)
 	if err != nil {

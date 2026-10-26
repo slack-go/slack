@@ -1540,6 +1540,12 @@ const (
 // EventsAPIInnerEventMapping maps INNER Event API events to their corresponding struct
 // implementations. The structs should be instances of the unmarshalling
 // target for the matching event type.
+//
+// This process-wide map is used by ParseEvent, including Socket Mode.
+// Changes are not synchronized. Configure it sequentially during initialization,
+// before any event processing starts, and leave it unchanged while parsing is
+// running, including from event handlers. These requirements also apply to the
+// fallback registry, slack.EventMapping.
 var EventsAPIInnerEventMapping = map[EventsAPIType]any{
 	AgentSessionStopped:           AgentSessionStoppedEvent{},
 	AgentSessionTitleChanged:      AgentSessionTitleChangedEvent{},
