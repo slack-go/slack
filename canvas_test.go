@@ -10,16 +10,24 @@ import (
 func createCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	documentContent := r.FormValue("document_content")
+	channelID := r.FormValue("channel_id")
 
 	rw.Header().Set("Content-Type", "application/json")
 
 	if title != "" && documentContent != "" {
+		// Channel canvases get their own ID, so the tests can tell whether
+		// channel_id made it into the request.
+		canvasID := "F1234ABCD"
+		if channelID != "" {
+			canvasID = "F5678EFGH"
+		}
+
 		resp, _ := json.Marshal(&struct {
 			SlackResponse
 			CanvasID string `json:"canvas_id"`
 		}{
 			SlackResponse: SlackResponse{Ok: true},
-			CanvasID:      "F1234ABCD",
+			CanvasID:      canvasID,
 		})
 		rw.Write(resp)
 	} else {
@@ -44,6 +52,27 @@ func TestCreateCanvas(t *testing.T) {
 
 	if canvasID != "F1234ABCD" {
 		t.Fatalf("Expected canvas ID to be F1234ABCD, got %s", canvasID)
+	}
+}
+
+func TestCreateCanvasWithChannelID(t *testing.T) {
+	http.DefaultServeMux = new(http.ServeMux)
+	http.HandleFunc("/canvases.create", createCanvasHandler)
+	once.Do(startServer)
+	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
+
+	documentContent := DocumentContent{
+		Type:     "markdown",
+		Markdown: "Test Content",
+	}
+
+	canvasID, err := api.CreateCanvas("Test Canvas", documentContent, CreateCanvasOptionChannelID("C1234ABCD"))
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	if canvasID != "F5678EFGH" {
+		t.Fatalf("Expected canvas ID to be F5678EFGH, got %s", canvasID)
 	}
 }
 

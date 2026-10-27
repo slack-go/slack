@@ -58,20 +58,44 @@ type LookupCanvasSectionsResponse struct {
 	Sections []CanvasSection `json:"sections"`
 }
 
+// CreateCanvasParams contains the optional parameters for the canvases.create method.
+type CreateCanvasParams struct {
+	ChannelID string
+}
+
+// CreateCanvasOption options for the CreateCanvas method call.
+type CreateCanvasOption func(*CreateCanvasParams)
+
+// CreateCanvasOptionChannelID creates the canvas as a channel canvas for the
+// given channel, rather than as a standalone canvas.
+func CreateCanvasOptionChannelID(channelID string) CreateCanvasOption {
+	return func(params *CreateCanvasParams) {
+		params.ChannelID = channelID
+	}
+}
+
 // CreateCanvas creates a new canvas.
 // For more details, see CreateCanvasContext documentation.
-func (api *Client) CreateCanvas(title string, documentContent DocumentContent) (string, error) {
-	return api.CreateCanvasContext(context.Background(), title, documentContent)
+func (api *Client) CreateCanvas(title string, documentContent DocumentContent, options ...CreateCanvasOption) (string, error) {
+	return api.CreateCanvasContext(context.Background(), title, documentContent, options...)
 }
 
 // CreateCanvasContext creates a new canvas with a custom context.
 // Slack API docs: https://api.slack.com/methods/canvases.create
-func (api *Client) CreateCanvasContext(ctx context.Context, title string, documentContent DocumentContent) (string, error) {
+func (api *Client) CreateCanvasContext(ctx context.Context, title string, documentContent DocumentContent, options ...CreateCanvasOption) (string, error) {
+	params := CreateCanvasParams{}
+	for _, opt := range options {
+		opt(&params)
+	}
+
 	values := url.Values{
 		"token": {api.token},
 	}
 	if title != "" {
 		values.Add("title", title)
+	}
+	if params.ChannelID != "" {
+		values.Add("channel_id", params.ChannelID)
 	}
 	if documentContent.Type != "" {
 		documentContentJSON, err := json.Marshal(documentContent)
