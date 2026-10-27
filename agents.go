@@ -207,6 +207,120 @@ func (api *Client) SetAgentConversationCommandsContext(ctx context.Context, chan
 	return response, response.Err()
 }
 
+// AgentContextBarItem is a link, action, or informational item in a code channel's
+// context bar. Key and Label are required. ItemType may be "info" (the default)
+// or "action". Action items should not also specify a URL.
+type AgentContextBarItem struct {
+	Key      string `json:"key"`
+	Label    string `json:"label"`
+	Icon     string `json:"icon,omitempty"`
+	URL      string `json:"url,omitempty"`
+	ItemType string `json:"item_type,omitempty"`
+}
+
+// AgentSummaryMessage identifies the message representing a session's summary.
+// ThreadTS is the parent timestamp when the summary is a thread reply.
+type AgentSummaryMessage struct {
+	MessageTS string `json:"message_ts"`
+	ThreadTS  string `json:"thread_ts,omitempty"`
+}
+
+// AgentCodeChannelProperties contains the writable code channel properties.
+type AgentCodeChannelProperties struct {
+	// ContextBarItems replaces the entire context bar (at most five items).
+	// A nil slice leaves it unchanged; a non-nil empty slice clears it.
+	ContextBarItems []AgentContextBarItem `json:"context_bar_items,omitzero"`
+	SummaryMessage  *AgentSummaryMessage  `json:"summary_message,omitempty"`
+}
+
+// AgentResourceProperties describes the external resource for an agent session.
+// Nil fields are omitted; a pointer to an empty string sends an explicit empty value.
+type AgentResourceProperties struct {
+	URL          *string `json:"url,omitempty"`
+	ResourceType *string `json:"resource_type,omitempty"`
+	Title        *string `json:"title,omitempty"`
+	Provider     *string `json:"provider,omitempty"`
+}
+
+type setAgentConversationPropertiesParams struct {
+	codeChannel   *AgentCodeChannelProperties
+	agentResource *AgentResourceProperties
+}
+
+// SetAgentConversationPropertiesOption configures a code channel property update.
+type SetAgentConversationPropertiesOption func(*setAgentConversationPropertiesParams)
+
+// SetAgentConversationPropertiesOptionCodeChannel sets the context bar or summary
+// message properties to update. Only provided fields are changed.
+func SetAgentConversationPropertiesOptionCodeChannel(properties AgentCodeChannelProperties) SetAgentConversationPropertiesOption {
+	return func(params *setAgentConversationPropertiesParams) {
+		params.codeChannel = &properties
+	}
+}
+
+// SetAgentConversationPropertiesOptionAgentResource sets the external resource
+// properties to update. Only provided fields are changed.
+func SetAgentConversationPropertiesOptionAgentResource(properties AgentResourceProperties) SetAgentConversationPropertiesOption {
+	return func(params *setAgentConversationPropertiesParams) {
+		params.agentResource = &properties
+	}
+}
+
+// AgentConversationSetPropertiesResponse is the response from
+// agents.conversations.setProperties. Check warnings for truncated context bars
+// or action items that Slack converted to informational links.
+type AgentConversationSetPropertiesResponse struct {
+	SlackResponse
+	ChannelID string `json:"channel_id"`
+}
+
+// SetAgentConversationProperties updates the context bar, summary message, or
+// external resource of a code channel. At least one property must be provided.
+// Use SetAgentSessionStatus and RenameAgentSession to change its status and title.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.setProperties
+func (api *Client) SetAgentConversationProperties(channelID string, options ...SetAgentConversationPropertiesOption) (*AgentConversationSetPropertiesResponse, error) {
+	return api.SetAgentConversationPropertiesContext(context.Background(), channelID, options...)
+}
+
+// SetAgentConversationPropertiesContext updates code channel properties with a
+// custom context. At least one property must be provided.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.setProperties
+func (api *Client) SetAgentConversationPropertiesContext(ctx context.Context, channelID string, options ...SetAgentConversationPropertiesOption) (*AgentConversationSetPropertiesResponse, error) {
+	params := setAgentConversationPropertiesParams{}
+	for _, option := range options {
+		if option != nil {
+			option(&params)
+		}
+	}
+
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+	}
+	if params.codeChannel != nil {
+		codeChannelJSON, err := json.Marshal(params.codeChannel)
+		if err != nil {
+			return nil, err
+		}
+		values.Add("code_channel", string(codeChannelJSON))
+	}
+	if params.agentResource != nil {
+		agentResourceJSON, err := json.Marshal(params.agentResource)
+		if err != nil {
+			return nil, err
+		}
+		values.Add("agent_resource", string(agentResourceJSON))
+	}
+
+	response := &AgentConversationSetPropertiesResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.setProperties", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
 // Lifecycle statuses accepted by agents.sessions.setStatus.
 const (
 	AgentSessionStatusActive     = "active"
