@@ -16,9 +16,9 @@ func createCanvasHandler(rw http.ResponseWriter, r *http.Request) {
 
 	if title != "" && documentContent != "" {
 		// Channel canvases get their own ID, so the tests can tell whether
-		// channel_id made it into the request.
+		// the expected channel_id made it into the request.
 		canvasID := "F1234ABCD"
-		if channelID != "" {
+		if channelID == "C1234ABCD" {
 			canvasID = "F5678EFGH"
 		}
 
