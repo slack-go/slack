@@ -63,8 +63,8 @@ func (s SlashCommand) ValidateToken(verificationTokens ...string) bool {
 	return match == 1
 }
 
-// UnmarshalJSON handles is_enterprise_install being either a boolean or a
-// string when parsing JSON from various payloads
+// UnmarshalJSON handles an optional is_enterprise_install boolean or string.
+// An absent or null value leaves the field unchanged, matching encoding/json.
 func (s *SlashCommand) UnmarshalJSON(data []byte) error {
 	type SlashCommandCopy SlashCommand
 	scopy := &struct {
@@ -79,6 +79,8 @@ func (s *SlashCommand) UnmarshalJSON(data []byte) error {
 	}
 
 	switch rawValue := scopy.IsEnterpriseInstall.(type) {
+	case nil:
+		// Some Socket Mode slash-command payloads omit this field.
 	case string:
 		b, err := strconv.ParseBool(rawValue)
 		if err != nil {

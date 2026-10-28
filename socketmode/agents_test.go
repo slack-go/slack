@@ -185,3 +185,44 @@ func TestAgentSlashCommandDispatch(t *testing.T) {
 		t.Fatal("agent slash command was not dispatched")
 	}
 }
+
+func TestCodeChannelContextBarActionDispatch(t *testing.T) {
+	// Based on a live context-bar click captured on 2026-10-28, with IDs and
+	// credentials replaced. Slack delivered a slash command without the
+	// is_enterprise_install field, rather than a code_channel_action event.
+	wire := json.RawMessage(`{
+		"type":"slash_commands","envelope_id":"context-bar-envelope","accepts_response_payload":true,
+		"payload":{"api_app_id":"A123ABC456","channel_id":"C9876543210",
+			"command":"/capture-test","response_url":"https://hooks.slack.com/commands/example",
+			"team_id":"E123ABC456","text":"","trigger_id":"13345224609.738474920",
+			"user_id":"U2345678901"}
+	}`)
+	client := New(slack.New("testing-token"))
+	event, err := client.parseEvent(wire)
+	require.NoError(t, err)
+	require.NotNil(t, event)
+	assert.Equal(t, EventTypeSlashCommand, event.Type)
+	require.NotNil(t, event.Request)
+	assert.Equal(t, "context-bar-envelope", event.Request.EnvelopeID)
+	assert.True(t, event.Request.AcceptsResponsePayload)
+
+	handler := NewSocketmodeHandler(client)
+	received := make(chan *Event, 1)
+	handler.HandleSlashCommand("/capture-test", func(event *Event, _ *Client) { received <- event })
+	handler.HandleDefault(func(_ *Event, _ *Client) { received <- nil })
+	handler.DispatchEvent(*event)
+	select {
+	case dispatched := <-received:
+		require.NotNil(t, dispatched, "context-bar action reached the fallback instead of its slash-command handler")
+		command, ok := dispatched.Data.(slack.SlashCommand)
+		require.True(t, ok)
+		assert.Equal(t, slack.SlashCommand{
+			APIAppID: "A123ABC456", ChannelID: "C9876543210", Command: "/capture-test",
+			ResponseURL: "https://hooks.slack.com/commands/example", TeamID: "E123ABC456",
+			TriggerID: "13345224609.738474920", UserID: "U2345678901",
+		}, command)
+		assert.Equal(t, event.Request, dispatched.Request)
+	case <-time.After(time.Second):
+		t.Fatal("context-bar action was not dispatched")
+	}
+}

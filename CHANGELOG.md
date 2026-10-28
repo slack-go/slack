@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Accept slash-command JSON that omits `is_enterprise_install`, including observed
+  Slack Code context-bar action deliveries over Socket Mode.
 - Omit an empty `WorkflowButtonBlockElement.ActionID` from JSON so workflow buttons
   without an action ID pass Slack's block validation. Populated IDs are preserved.
 

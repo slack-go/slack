@@ -158,6 +158,14 @@ func TestSlash_UnmarshalJSON(t *testing.T) {
 			wantUnmarshalError:      "",
 		},
 		{
+			body:      `{"token":"blahblah"}`,
+			wantToken: "blahblah",
+		},
+		{
+			body:      `{"token":"blahblah","is_enterprise_install":null}`,
+			wantToken: "blahblah",
+		},
+		{
 			body:               `{"token":"blahblah","is_enterprise_install":42}`,
 			wantUnmarshalError: "wrong data type for is_enterprise_install: float64",
 		},
@@ -190,5 +198,19 @@ func TestSlash_UnmarshalJSON(t *testing.T) {
 		if result.Token != test.wantToken {
 			t.Errorf("%d: Got Token %v, want Token %v", i, result.Token, test.wantToken)
 		}
+	}
+}
+
+func TestSlash_UnmarshalJSONAbsentEnterpriseInstallPreservesValue(t *testing.T) {
+	for _, body := range []string{`{}`, `{"is_enterprise_install":null}`} {
+		t.Run(body, func(t *testing.T) {
+			command := SlashCommand{IsEnterpriseInstall: true}
+			if err := json.Unmarshal([]byte(body), &command); err != nil {
+				t.Fatal(err)
+			}
+			if !command.IsEnterpriseInstall {
+				t.Fatal("absent or null boolean should leave an existing value unchanged")
+			}
+		})
 	}
 }
