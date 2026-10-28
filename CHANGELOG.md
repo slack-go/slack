@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add `CreateCanvasOptionChannelID` to pass the optional `channel_id` parameter to
   `CreateCanvas` and `CreateCanvasContext` (#1623).
+- Add `SetAgentConversationProperties`, `SetAgentConversationView`,
+  `ListAgentConversationViews`, `RemoveAgentConversationView`,
+  `GetAgentConversationCanvas`, and `SetAgentConversationCanvasContent`, including
+  their `Context` variants, for Slack Code channel properties, views, and canvases.
+
+### Fixed
+
+- Omit an empty `WorkflowButtonBlockElement.ActionID` from JSON so workflow buttons
+  without an action ID pass Slack's block validation. Populated IDs are preserved.
 
 ## [0.31.0] - 2026-10-26
 
