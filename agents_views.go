@@ -192,3 +192,112 @@ func (api *Client) SetAgentConversationViewContext(ctx context.Context, channelI
 	}
 	return response, response.Err()
 }
+
+// AgentConversationView describes a view returned by agents.conversations.listViews.
+// ViewKey may be absent for a diff view. DateAdded is a Unix timestamp in seconds.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.listViews
+type AgentConversationView struct {
+	ViewID         string `json:"view_id"`
+	ViewKey        string `json:"view_key,omitempty"`
+	FileID         string `json:"file_id"`
+	Label          string `json:"label"`
+	ContentVersion int    `json:"content_version"`
+	DateAdded      int64  `json:"date_added"`
+}
+
+// AgentConversationListViewsResponse is the response from agents.conversations.listViews.
+type AgentConversationListViewsResponse struct {
+	SlackResponse
+	Views []AgentConversationView `json:"views"`
+}
+
+// ListAgentConversationViews lists all views attached to a code channel.
+// Slack returns the complete list without pagination.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.listViews
+func (api *Client) ListAgentConversationViews(channelID string) (*AgentConversationListViewsResponse, error) {
+	return api.ListAgentConversationViewsContext(context.Background(), channelID)
+}
+
+// ListAgentConversationViewsContext lists all code channel views with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.listViews
+func (api *Client) ListAgentConversationViewsContext(ctx context.Context, channelID string) (*AgentConversationListViewsResponse, error) {
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+	}
+	response := &AgentConversationListViewsResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.listViews", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}
+
+type removeAgentConversationViewParams struct {
+	viewKey string
+	viewID  string
+}
+
+// RemoveAgentConversationViewOption identifies the view to remove.
+// Provide exactly one of ViewKey or ViewID.
+type RemoveAgentConversationViewOption func(*removeAgentConversationViewParams)
+
+// RemoveAgentConversationViewOptionViewKey selects a view by its agent-assigned key.
+func RemoveAgentConversationViewOptionViewKey(viewKey string) RemoveAgentConversationViewOption {
+	return func(params *removeAgentConversationViewParams) {
+		params.viewKey = viewKey
+	}
+}
+
+// RemoveAgentConversationViewOptionViewID selects a view by its encoded channel tab ID.
+func RemoveAgentConversationViewOptionViewID(viewID string) RemoveAgentConversationViewOption {
+	return func(params *removeAgentConversationViewParams) {
+		params.viewID = viewID
+	}
+}
+
+// AgentConversationRemoveViewResponse is the response from agents.conversations.removeView.
+type AgentConversationRemoveViewResponse struct {
+	SlackResponse
+	ChannelID string `json:"channel_id"`
+	ViewID    string `json:"view_id"`
+}
+
+// RemoveAgentConversationView removes a view's channel tab and channel properties.
+// Slack also deletes the backing content file for html, diff, and block_kit views.
+// Provide exactly one of the ViewKey or ViewID options to identify the view.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.removeView
+func (api *Client) RemoveAgentConversationView(channelID string, options ...RemoveAgentConversationViewOption) (*AgentConversationRemoveViewResponse, error) {
+	return api.RemoveAgentConversationViewContext(context.Background(), channelID, options...)
+}
+
+// RemoveAgentConversationViewContext removes a code channel view with a custom
+// context. Provide exactly one of the ViewKey or ViewID options.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.removeView
+func (api *Client) RemoveAgentConversationViewContext(ctx context.Context, channelID string, options ...RemoveAgentConversationViewOption) (*AgentConversationRemoveViewResponse, error) {
+	params := removeAgentConversationViewParams{}
+	for _, option := range options {
+		if option != nil {
+			option(&params)
+		}
+	}
+	values := url.Values{
+		"token":      {api.token},
+		"channel_id": {channelID},
+	}
+	if params.viewKey != "" {
+		values.Set("view_key", params.viewKey)
+	}
+	if params.viewID != "" {
+		values.Set("view_id", params.viewID)
+	}
+	response := &AgentConversationRemoveViewResponse{}
+	if err := api.postMethod(ctx, "agents.conversations.removeView", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}

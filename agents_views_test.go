@@ -234,3 +234,224 @@ func TestSetAgentConversationViewErrors(t *testing.T) {
 		assert.Nil(t, response)
 	})
 }
+
+func TestListAgentConversationViews(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		body string
+		want []AgentConversationView
+	}{
+		{
+			name: "views with and without a stable key",
+			body: `{"ok":true,"views":[
+				{"view_id":"T1234567890","view_key":"reports/coverage.html","file_id":"F1234567890","label":"Coverage","content_version":3,"date_added":1717171717},
+				{"view_id":"T0987654321","file_id":"F0987654321","label":"Diff","content_version":5,"date_added":1717171800},
+				{"view_id":"T1111111111","view_key":"plan","file_id":"F1111111111","label":"Plan","content_version":1,"date_added":1717171900}
+			]}`,
+			want: []AgentConversationView{
+				{ViewID: "T1234567890", ViewKey: "reports/coverage.html", FileID: "F1234567890", Label: "Coverage", ContentVersion: 3, DateAdded: 1717171717},
+				{ViewID: "T0987654321", FileID: "F0987654321", Label: "Diff", ContentVersion: 5, DateAdded: 1717171800},
+				{ViewID: "T1111111111", ViewKey: "plan", FileID: "F1111111111", Label: "Plan", ContentVersion: 1, DateAdded: 1717171900},
+			},
+		},
+		{
+			name: "empty channel",
+			body: `{"ok":true,"views":[]}`,
+			want: []AgentConversationView{},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/agents.conversations.listViews", r.URL.Path)
+				require.NoError(t, r.ParseForm())
+				assert.Equal(t, url.Values{
+					"token": {"testing-token"}, "channel_id": {"C9876543210"},
+				}, r.PostForm)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(tt.body))
+			}))
+			defer server.Close()
+			api := New("testing-token", OptionAPIURL(server.URL+"/"))
+			response, err := api.ListAgentConversationViews("C9876543210")
+			require.NoError(t, err)
+			require.NotNil(t, response)
+			assert.True(t, response.Ok)
+			assert.Equal(t, tt.want, response.Views)
+		})
+	}
+}
+
+func TestRemoveAgentConversationView(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		options []RemoveAgentConversationViewOption
+		want    url.Values
+	}{
+		{
+			name:    "by key",
+			options: []RemoveAgentConversationViewOption{RemoveAgentConversationViewOptionViewKey("reports/coverage.html")},
+			want:    url.Values{"view_key": {"reports/coverage.html"}},
+		},
+		{
+			name:    "by ID",
+			options: []RemoveAgentConversationViewOption{RemoveAgentConversationViewOptionViewID("T1234567890")},
+			want:    url.Values{"view_id": {"T1234567890"}},
+		},
+		{
+			name: "nil and empty options",
+			options: []RemoveAgentConversationViewOption{
+				nil,
+				RemoveAgentConversationViewOptionViewKey(""),
+				RemoveAgentConversationViewOptionViewID("T1234567890"),
+			},
+			want: url.Values{"view_id": {"T1234567890"}},
+		},
+		{
+			name: "last option for the same selector wins",
+			options: []RemoveAgentConversationViewOption{
+				RemoveAgentConversationViewOptionViewID("T1234567890"),
+				RemoveAgentConversationViewOptionViewID(""),
+				RemoveAgentConversationViewOptionViewKey("old-key"),
+				RemoveAgentConversationViewOptionViewKey("plan"),
+			},
+			want: url.Values{"view_key": {"plan"}},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/agents.conversations.removeView", r.URL.Path)
+				require.NoError(t, r.ParseForm())
+				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
+				assert.Equal(t, "C9876543210", r.PostForm.Get("channel_id"))
+				r.PostForm.Del("token")
+				r.PostForm.Del("channel_id")
+				assert.Equal(t, tt.want, r.PostForm)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"ok":true,"channel_id":"C9876543210","view_id":"T1234567890"}`))
+			}))
+			defer server.Close()
+			api := New("testing-token", OptionAPIURL(server.URL+"/"))
+			response, err := api.RemoveAgentConversationView("C9876543210", tt.options...)
+			require.NoError(t, err)
+			require.NotNil(t, response)
+			assert.True(t, response.Ok)
+			assert.Equal(t, "C9876543210", response.ChannelID)
+			assert.Equal(t, "T1234567890", response.ViewID)
+		})
+	}
+}
+
+func TestRemoveAgentConversationViewInvalidSelectors(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		options []RemoveAgentConversationViewOption
+		want    url.Values
+	}{
+		{name: "neither", want: url.Values{}},
+		{
+			name: "both",
+			options: []RemoveAgentConversationViewOption{
+				RemoveAgentConversationViewOptionViewKey("plan"),
+				RemoveAgentConversationViewOptionViewID("T1234567890"),
+			},
+			want: url.Values{"view_key": {"plan"}, "view_id": {"T1234567890"}},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.NoError(t, r.ParseForm())
+				r.PostForm.Del("token")
+				r.PostForm.Del("channel_id")
+				assert.Equal(t, tt.want, r.PostForm, "let Slack validate the selector combination")
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"ok":false,"error":"invalid_arguments"}`))
+			}))
+			defer server.Close()
+			api := New("testing-token", OptionAPIURL(server.URL+"/"))
+			response, err := api.RemoveAgentConversationView("C9876543210", tt.options...)
+			require.Error(t, err)
+			var slackErr SlackErrorResponse
+			require.ErrorAs(t, err, &slackErr)
+			assert.Equal(t, "invalid_arguments", slackErr.Err)
+			require.NotNil(t, response)
+			assert.False(t, response.Ok)
+		})
+	}
+}
+
+func TestAgentConversationViewManagementErrors(t *testing.T) {
+	for _, method := range []struct {
+		name       string
+		slackError string
+		call       func(*Client, context.Context) (*SlackResponse, error)
+	}{
+		{
+			name: "list", slackError: "not_agent_channel",
+			call: func(api *Client, ctx context.Context) (*SlackResponse, error) {
+				response, err := api.ListAgentConversationViewsContext(ctx, "C9876543210")
+				if response == nil {
+					return nil, err
+				}
+				return &response.SlackResponse, err
+			},
+		},
+		{
+			name: "remove", slackError: "view_not_found",
+			call: func(api *Client, ctx context.Context) (*SlackResponse, error) {
+				response, err := api.RemoveAgentConversationViewContext(ctx, "C9876543210", RemoveAgentConversationViewOptionViewKey("plan"))
+				if response == nil {
+					return nil, err
+				}
+				return &response.SlackResponse, err
+			},
+		},
+	} {
+		t.Run(method.name, func(t *testing.T) {
+			for _, tt := range []struct {
+				name   string
+				status int
+				body   string
+			}{
+				{"Slack error", http.StatusOK, `{"ok":false,"error":"` + method.slackError + `","response_metadata":{"messages":["Request rejected"]}}`},
+				{"HTTP error", http.StatusInternalServerError, `server error`},
+				{"invalid JSON", http.StatusOK, `{"ok":`},
+			} {
+				t.Run(tt.name, func(t *testing.T) {
+					server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						w.Header().Set("Content-Type", "application/json")
+						w.WriteHeader(tt.status)
+						_, _ = w.Write([]byte(tt.body))
+					}))
+					defer server.Close()
+					api := New("testing-token", OptionAPIURL(server.URL+"/"))
+					response, err := method.call(api, context.Background())
+					require.Error(t, err)
+					if tt.name == "Slack error" {
+						var slackErr SlackErrorResponse
+						require.ErrorAs(t, err, &slackErr)
+						assert.Equal(t, method.slackError, slackErr.Err)
+						assert.Equal(t, []string{"Request rejected"}, slackErr.ResponseMetadata.Messages)
+						require.NotNil(t, response)
+						assert.False(t, response.Ok)
+					} else {
+						assert.Nil(t, response)
+					}
+				})
+			}
+			t.Run("canceled context", func(t *testing.T) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					t.Error("canceled request reached server")
+				}))
+				defer server.Close()
+				api := New("testing-token", OptionAPIURL(server.URL+"/"))
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+				response, err := method.call(api, ctx)
+				require.ErrorIs(t, err, context.Canceled)
+				assert.Nil(t, response)
+			})
+		})
+	}
+}
