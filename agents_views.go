@@ -6,12 +6,14 @@ import (
 	"net/url"
 )
 
-// View types accepted by agents.conversations.setView.
+// View types documented for agents.conversations.setView.
 const (
-	AgentViewTypeHTML        = "html"
-	AgentViewTypeDiff        = "diff"
-	AgentViewTypeBlockKit    = "block_kit"
-	AgentViewTypeCanvas      = "canvas"
+	AgentViewTypeHTML     = "html"
+	AgentViewTypeDiff     = "diff"
+	AgentViewTypeBlockKit = "block_kit"
+	AgentViewTypeCanvas   = "canvas"
+	// AgentViewTypePullRequest is documented by Slack, but has been observed to
+	// return invalid_view_type. Use a diff view when the server rejects it.
 	AgentViewTypePullRequest = "pull_request"
 )
 

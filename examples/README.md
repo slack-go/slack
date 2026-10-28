@@ -2,6 +2,9 @@
 
 This directory contains examples demonstrating how to use the slack-go library for various Slack API operations.
 
+- [Slack Code](slack_code/README.md): create code channels, set properties and
+  commands, publish and remove views, and read or revise canvases.
+
 ## Development Guidelines
 
 ### Environment Variables vs Command Line Arguments
