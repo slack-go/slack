@@ -71,11 +71,13 @@ type Purpose struct {
 
 // Properties contains additional fields that appear based on the context of the conversation
 type Properties struct {
-	Canvas              Canvas        `json:"canvas"`
-	PostingRestrictedTo RestrictedTo  `json:"posting_restricted_to"`
-	Tabs                []Tab         `json:"tabs"`
-	ThreadsRestrictedTo RestrictedTo  `json:"threads_restricted_to"`
-	RecordChannel       RecordChannel `json:"record_channel"`
+	Canvas              Canvas                  `json:"canvas"`
+	PostingRestrictedTo RestrictedTo            `json:"posting_restricted_to"`
+	Tabs                []Tab                   `json:"tabs"`
+	ThreadsRestrictedTo RestrictedTo            `json:"threads_restricted_to"`
+	RecordChannel       RecordChannel           `json:"record_channel"`
+	AgentSession        *AgentSessionProperties `json:"agent_session,omitempty"`
+	CodeChannel         *AgentCodeChannelInfo   `json:"code_channel,omitempty"`
 }
 
 type RestrictedTo struct {

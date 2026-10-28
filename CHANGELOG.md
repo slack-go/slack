@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- **If you initialize `Properties` without field names, switch to keyed literals.**
+  Adding `AgentSession` and `CodeChannel` makes existing positional literals fail
+  to compile. Existing keyed literals and method signatures are unchanged.
+
 ### Added
 
 - Add `CreateCanvasOptionChannelID` to pass the optional `channel_id` parameter to
@@ -15,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `ListAgentConversationViews`, `RemoveAgentConversationView`,
   `GetAgentConversationCanvas`, and `SetAgentConversationCanvasContent`, including
   their `Context` variants, for Slack Code channel properties, views, and canvases.
+- Decode `agent_session` and `code_channel` metadata in conversation properties,
+  including context-bar ownership, summary messages, and managed views.
 
 ### Fixed
 

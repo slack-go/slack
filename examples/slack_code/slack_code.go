@@ -26,7 +26,7 @@ func main() {
 }
 
 func run() error {
-	action := flag.String("action", "", "Action: create, properties, commands, set-view, list-views, remove-view, create-canvas, get-canvas, set-canvas-content, archive")
+	action := flag.String("action", "", "Action: create, info, properties, commands, set-view, list-views, remove-view, create-canvas, get-canvas, set-canvas-content, archive")
 	channelID := flag.String("channel", "", "Code channel ID (required except for create and create-canvas)")
 	name := flag.String("name", "", "Channel/canvas name (required for create and create-canvas), or view tab name")
 	originChannel := flag.String("origin-channel", "", "Source channel containing the message that started this task (create)")
@@ -41,6 +41,7 @@ func run() error {
 	resourceDomain := flag.String("resource-domain", "", "HTTPS origin for HTML scripts/styles/images (set-view)")
 	resourceURL := flag.String("resource-url", "", "External session resource URL (properties)")
 	summaryTS := flag.String("summary-ts", "", "Timestamp of an existing summary message (properties, archive)")
+	summaryThreadTS := flag.String("summary-thread-ts", "", "Parent thread timestamp of a summary reply; requires -summary-ts (properties)")
 	includeResolved := flag.Bool("include-resolved", false, "Include resolved canvas comment threads (get-canvas)")
 	clear := flag.Bool("clear", false, "Clear the agent's registered commands (commands)")
 	timeout := flag.Duration("timeout", 30*time.Second, "Timeout for the API call")
@@ -56,7 +57,7 @@ func run() error {
 		if *name == "" {
 			return errors.New("-name is required for create and create-canvas")
 		}
-	case "properties", "commands", "set-view", "list-views", "remove-view", "get-canvas", "set-canvas-content", "archive":
+	case "info", "properties", "commands", "set-view", "list-views", "remove-view", "get-canvas", "set-canvas-content", "archive":
 		if *channelID == "" {
 			return errors.New("-channel is required for this action")
 		}
@@ -71,6 +72,9 @@ func run() error {
 	}
 	if (*action == "get-canvas" || *action == "set-canvas-content") && *canvasID == "" {
 		return errors.New("-canvas is required for get-canvas and set-canvas-content")
+	}
+	if *summaryThreadTS != "" && (*action != "properties" || *summaryTS == "") {
+		return errors.New("-summary-thread-ts requires -action properties and -summary-ts")
 	}
 
 	var content []byte
@@ -157,6 +161,15 @@ func run() error {
 				slack.CreateAgentConversationOptionOriginMessageTimestamp(*originTS))
 		}
 		response, err = api.CreateAgentConversationContext(ctx, *name, options...)
+	case "info":
+		var channel *slack.Channel
+		channel, err = api.GetConversationInfoContext(ctx, &slack.GetConversationInfoInput{ChannelID: *channelID})
+		if err == nil {
+			response = map[string]any{
+				"channel_id": channel.ID, "name": channel.Name,
+				"is_archived": channel.IsArchived, "properties": channel.Properties,
+			}
+		}
 	case "properties":
 		properties := slack.AgentCodeChannelProperties{
 			ContextBarItems: []slack.AgentContextBarItem{{
@@ -164,7 +177,7 @@ func run() error {
 			}},
 		}
 		if *summaryTS != "" {
-			properties.SummaryMessage = &slack.AgentSummaryMessage{MessageTS: *summaryTS}
+			properties.SummaryMessage = &slack.AgentSummaryMessage{MessageTS: *summaryTS, ThreadTS: *summaryThreadTS}
 		}
 		options := []slack.SetAgentConversationPropertiesOption{slack.SetAgentConversationPropertiesOptionCodeChannel(properties)}
 		if *resourceURL != "" {

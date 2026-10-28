@@ -2,7 +2,8 @@
 
 This CLI demonstrates all nine `agents.conversations.*` methods. Each invocation
 performs one action in a real workspace and prints the decoded response as JSON.
-It also provides `create-canvas` to prepare a canvas for the canvas-view examples.
+It also provides `create-canvas` to prepare a canvas for the canvas-view examples
+and a read-only `info` action to inspect the channel's decoded metadata.
 
 ## Setup
 
@@ -18,6 +19,8 @@ It also provides `create-canvas` to prepare a canvas for the canvas-view example
 
 3. Add `code_channels:manage` to the bot token scopes and install or reinstall
    the app. The optional `create-canvas` action also needs `canvases:write`.
+   The `info` action needs `channels:read` for public channels or `groups:read`
+   for private channels.
 4. Set `SLACK_BOT_TOKEN` to the installed app's bot token in your environment.
 5. Run the commands below from the repository root. Replace `C_CODE`, `F_CANVAS`,
    and `Ct_VIEW` with IDs returned by previous commands.
@@ -50,6 +53,87 @@ The context-bar array replaces the current set. Add `-summary-ts` with the
 timestamp of an existing summary message to record that message as the summary.
 The example uses informational items; typed `code_channel_action` handling is
 pending a documented payload schema.
+
+To read channel metadata with the Go client, call `GetConversationInfo` or
+`GetConversationInfoContext` and inspect `channel.Properties.AgentSession` and
+`channel.Properties.CodeChannel`. These pointers are nil when Slack omits the
+corresponding properties. The received code-channel metadata includes context-bar
+items with their owning bot user IDs, the summary message, and managed views.
+
+## Verify channel metadata live
+
+Inspect an existing code channel:
+
+```sh
+go run ./examples/slack_code -action info -channel C_CODE
+```
+
+The output includes the channel's ID, name, and archive state, followed by its
+decoded `properties`. Use these to check that you are inspecting the intended
+channel. The command reads the channel without changing it.
+
+| JSON path under `properties` | What to verify |
+| --- | --- |
+| `record_channel.record_type` | `agent_channel` identifies a code channel. |
+| `agent_session.status` | The current session status, such as `active`. |
+| `agent_session.title` | The session title shown in Slack. |
+| `agent_session.encoded_agent_bot_user_ids` | The assigned agents' bot user IDs. The older `agent_bot_user_ids` field may be empty or absent. |
+| `agent_session.encoded_initiator_user_id` | The initiator ID, when Slack supplies this observed field. |
+| `agent_session.origin_link` | The source channel and message timestamp, when the channel was created with an origin link. |
+| `code_channel.context_bar_items` | The items displayed at the top of the channel, including their `bot_user_id`, labels, URLs, and action types. |
+| `code_channel.summary_message` | The summary message timestamp and optional parent thread timestamp, after setting a summary. |
+| `code_channel.agent_session_views` | The views attached to the channel, with their IDs, types, names, backing file or canvas IDs, versions, owner IDs, and timestamps when present. |
+
+Some fields only appear after the corresponding feature is used. An omitted
+origin link or summary is expected when neither has been set; it is not a failed
+decode. A newly created code channel can have an empty `code_channel` object.
+
+To verify an origin link, create a test channel from an existing message:
+
+```sh
+go run ./examples/slack_code -action create -name 'Metadata verification' \
+  -origin-channel C_SOURCE -origin-ts SOURCE_MESSAGE_TS
+go run ./examples/slack_code -action info -channel C_NEW_CODE
+```
+
+Replace `C_NEW_CODE` with the returned channel ID. The decoded `origin_link`
+should match the source channel and timestamp you supplied.
+
+To verify a summary, choose an existing message in the code channel and record
+its timestamp:
+
+```sh
+go run ./examples/slack_code -action properties -channel C_CODE \
+  -summary-ts SUMMARY_MESSAGE_TS
+go run ./examples/slack_code -action info -channel C_CODE
+```
+
+The `properties` action also replaces the context bar with the sample repository
+link. Its received `bot_user_id` should identify the app's bot. If the summary
+message is a thread reply, include its parent timestamp:
+
+```sh
+go run ./examples/slack_code -action properties -channel C_CODE \
+  -summary-ts REPLY_MESSAGE_TS -summary-thread-ts PARENT_MESSAGE_TS
+go run ./examples/slack_code -action info -channel C_CODE
+```
+
+Check both `message_ts` and `thread_ts` in `code_channel.summary_message`.
+
+After publishing the views and canvas in the following sections, run both:
+
+```sh
+go run ./examples/slack_code -action info -channel C_CODE
+go run ./examples/slack_code -action list-views -channel C_CODE
+```
+
+Compare `properties.code_channel.agent_session_views` from `info` with
+`session_views` from `list-views`. Both should expose the attached views, including
+the built-in diff view with ID `code`. A canvas's backing ID can appear as
+`canvas_id` in channel properties and `file_id` in the view-list response.
+`date_updated` is an observed channel-property field. Slack may omit
+`content_version` on a canvas's channel-property entry; the decoded integer then
+appears as zero.
 
 ## Publish and list views
 
