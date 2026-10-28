@@ -63,8 +63,13 @@ go run ./examples/slack_code -action list-views -channel C_CODE
 ```
 
 Calls with the same `view_key` update the existing view. Compare its `view_id`
-and `content_version` in the responses. To load resources from an additional
-HTTPS origin in an HTML view, add `-resource-domain https://cdn.example.com`.
+and `content_version` in the responses. Inspect `session_views` for the unified
+view list, and also check the legacy `views` array. Live responses can contain
+views in `session_views` while `views` is empty. Session entries include `type`
+and an optional display `name`; the built-in diff view uses `view_id: "code"`.
+
+To load resources from an additional HTTPS origin in an HTML view, add
+`-resource-domain https://cdn.example.com`.
 
 Publish a Block Kit view or the bundled unified diff:
 
@@ -172,8 +177,8 @@ Alternatively, remove a view by its stable key:
 go run ./examples/slack_code -action remove-view -channel C_CODE -view-key review/report.html
 ```
 
-Remove each view once, using either its ID or its key. An empty `views` array
-means the current token sees no agent views in that channel. Slack returns
+Remove each view once, using either its ID or its key. Check both `session_views`
+and legacy `views` before concluding that the channel has no views. Slack returns
 `view_not_found` when no view matches the supplied selector, including when the
 view has already been removed. Publish another view with `set-view` to continue
 testing removal, then list again to get its current ID.

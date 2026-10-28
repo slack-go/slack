@@ -195,7 +195,8 @@ func (api *Client) SetAgentConversationViewContext(ctx context.Context, channelI
 	return response, response.Err()
 }
 
-// AgentConversationView describes a view returned by agents.conversations.listViews.
+// AgentConversationView describes an entry in the legacy views array returned by
+// agents.conversations.listViews.
 // ViewKey may be absent for a diff view. DateAdded is a Unix timestamp in seconds.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.listViews
@@ -208,14 +209,35 @@ type AgentConversationView struct {
 	DateAdded      int64  `json:"date_added"`
 }
 
+// AgentConversationSessionView describes an entry in the session_views array
+// returned by agents.conversations.listViews. This array has been observed in
+// live Slack responses alongside an empty legacy views array.
+// ViewKey, Name, and OwnerBotUserID may be absent. A diff view's ViewID can be
+// "code" rather than an encoded channel tab ID. DateAdded is a Unix timestamp.
+type AgentConversationSessionView struct {
+	ViewID         string `json:"view_id"`
+	Type           string `json:"type"`
+	ViewKey        string `json:"view_key,omitempty"`
+	FileID         string `json:"file_id"`
+	Name           string `json:"name,omitempty"`
+	ContentVersion int    `json:"content_version"`
+	DateAdded      int64  `json:"date_added"`
+	OwnerBotUserID string `json:"owner_bot_user_id,omitempty"`
+}
+
 // AgentConversationListViewsResponse is the response from agents.conversations.listViews.
 type AgentConversationListViewsResponse struct {
 	SlackResponse
+	// Views contains the legacy view list. An empty list does not imply that
+	// the channel has no views; also check SessionViews.
 	Views []AgentConversationView `json:"views"`
+	// SessionViews contains the unified view list observed in live responses.
+	// Older responses may omit this field.
+	SessionViews []AgentConversationSessionView `json:"session_views"`
 }
 
 // ListAgentConversationViews lists all views attached to a code channel.
-// Slack returns the complete list without pagination.
+// Check both SessionViews and the legacy Views field. No pagination is required.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/agents.conversations.listViews
 func (api *Client) ListAgentConversationViews(channelID string) (*AgentConversationListViewsResponse, error) {

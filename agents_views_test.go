@@ -237,9 +237,10 @@ func TestSetAgentConversationViewErrors(t *testing.T) {
 
 func TestListAgentConversationViews(t *testing.T) {
 	for _, tt := range []struct {
-		name string
-		body string
-		want []AgentConversationView
+		name             string
+		body             string
+		want             []AgentConversationView
+		wantSessionViews []AgentConversationSessionView
 	}{
 		{
 			name: "views with and without a stable key",
@@ -258,6 +259,41 @@ func TestListAgentConversationViews(t *testing.T) {
 			name: "empty channel",
 			body: `{"ok":true,"views":[]}`,
 			want: []AgentConversationView{},
+		},
+		{
+			// Based on a live response captured on 2026-10-28, with IDs replaced.
+			name: "session views with an empty legacy list",
+			body: `{"ok":true,"views":[],"session_views":[
+				{"view_id":"Ct1234567890","type":"block_kit","content_version":1,"date_added":1793197616,"view_key":"review/status","name":"Status","file_id":"F1234567890","owner_bot_user_id":"U123ABC456"},
+				{"view_id":"code","type":"diff","content_version":1,"date_added":1793197642,"file_id":"F2345678901"},
+				{"view_id":"Ct2345678901","type":"canvas","content_version":1,"date_added":1793199493,"name":"Plan","file_id":"F3456789012","owner_bot_user_id":"U123ABC456"}
+			]}`,
+			want: []AgentConversationView{},
+			wantSessionViews: []AgentConversationSessionView{
+				{ViewID: "Ct1234567890", Type: AgentViewTypeBlockKit, ContentVersion: 1, DateAdded: 1793197616, ViewKey: "review/status", Name: "Status", FileID: "F1234567890", OwnerBotUserID: "U123ABC456"},
+				{ViewID: "code", Type: AgentViewTypeDiff, ContentVersion: 1, DateAdded: 1793197642, FileID: "F2345678901"},
+				{ViewID: "Ct2345678901", Type: AgentViewTypeCanvas, ContentVersion: 1, DateAdded: 1793199493, Name: "Plan", FileID: "F3456789012", OwnerBotUserID: "U123ABC456"},
+			},
+		},
+		{
+			name: "both lists retain their own metadata",
+			body: `{"ok":true,
+				"views":[{"view_id":"Ct1234567890","label":"Legacy label","content_version":2}],
+				"session_views":[{"view_id":"Ct1234567890","type":"html","name":"Session name","content_version":3}]
+			}`,
+			want:             []AgentConversationView{{ViewID: "Ct1234567890", Label: "Legacy label", ContentVersion: 2}},
+			wantSessionViews: []AgentConversationSessionView{{ViewID: "Ct1234567890", Type: AgentViewTypeHTML, Name: "Session name", ContentVersion: 3}},
+		},
+		{
+			name:             "session views without the legacy field",
+			body:             `{"ok":true,"session_views":[{"view_id":"code","type":"diff","content_version":1}]}`,
+			wantSessionViews: []AgentConversationSessionView{{ViewID: "code", Type: AgentViewTypeDiff, ContentVersion: 1}},
+		},
+		{
+			name:             "both lists empty",
+			body:             `{"ok":true,"views":[],"session_views":[]}`,
+			want:             []AgentConversationView{},
+			wantSessionViews: []AgentConversationSessionView{},
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -278,6 +314,7 @@ func TestListAgentConversationViews(t *testing.T) {
 			require.NotNil(t, response)
 			assert.True(t, response.Ok)
 			assert.Equal(t, tt.want, response.Views)
+			assert.Equal(t, tt.wantSessionViews, response.SessionViews)
 		})
 	}
 }

@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve `session_views` in `ListAgentConversationViews` responses, including
+  view types, names, and owner IDs, alongside the legacy `views` array.
 - Accept slash-command JSON that omits `is_enterprise_install`, including observed
   Slack Code context-bar action deliveries over Socket Mode.
 - Omit an empty `WorkflowButtonBlockElement.ActionID` from JSON so workflow buttons
