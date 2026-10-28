@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **If you initialize `Properties` without field names, switch to keyed literals.**
   Adding `AgentSession` and `CodeChannel` makes existing positional literals fail
   to compile. Existing keyed literals and method signatures are unchanged.
+- `SlackResponse`, `KickUserFromConversationSlackResponse`, and `SlackErrorResponse`
+  gained `Needed` and `Provided` fields. Switch positional literals for these
+  types to keyed literals as well. Error strings are unchanged.
 
 ### Added
 
@@ -26,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve Slack's `needed` and `provided` scope diagnostics in API responses and
+  `SlackErrorResponse`, including methods that return only an error.
 - Preserve `session_views` in `ListAgentConversationViews` responses, including
   view types, names, and owner IDs, alongside the legacy `views` array.
 - Accept slash-command JSON that omits `is_enterprise_install`, including observed

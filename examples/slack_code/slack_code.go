@@ -18,8 +18,16 @@ func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		var slackErr slack.SlackErrorResponse
-		if errors.As(err, &slackErr) && len(slackErr.ResponseMetadata.Messages) > 0 {
-			fmt.Fprintf(os.Stderr, "Slack response messages: %v\n", slackErr.ResponseMetadata.Messages)
+		if errors.As(err, &slackErr) {
+			if len(slackErr.ResponseMetadata.Messages) > 0 {
+				fmt.Fprintf(os.Stderr, "Slack response messages: %v\n", slackErr.ResponseMetadata.Messages)
+			}
+			if slackErr.Needed != "" {
+				fmt.Fprintf(os.Stderr, "Required scopes: %s\n", slackErr.Needed)
+			}
+			if slackErr.Provided != "" {
+				fmt.Fprintf(os.Stderr, "Token scopes: %s\n", slackErr.Provided)
+			}
 		}
 		os.Exit(1)
 	}

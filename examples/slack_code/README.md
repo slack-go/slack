@@ -32,6 +32,9 @@ Register the appropriate handlers before starting its event loop.
 
 All actions accept `-timeout`, which defaults to `30s`, and stop on Ctrl-C.
 Run `go run ./examples/slack_code -help` for the full flag list.
+When Slack returns scope diagnostics with an error, the CLI also prints the
+required scopes (`needed`) and the token's scopes (`provided`). The Go client
+exposes these as `SlackErrorResponse.Needed` and `.Provided` through `errors.As`.
 
 ## Create a channel and set properties
 
