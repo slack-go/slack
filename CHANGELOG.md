@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Create, inspect, update, list, enable, disable, and delete Slackbot skills with
+  all seven `slackbot.skills.*` methods. Optional fields use variadic options,
+  including explicit empty values for clearing metadata and MCP declarations.
+  The new methods use the existing form transport with JSON-encoded array
+  fields. Existing endpoints' request formatting is unaffected.
+- Manage Enterprise skill inventory, catalog publication, and deployment with
+  all four `admin.slackbot.skills.*` methods. Batch failures and audience
+  validation details remain available alongside returned errors. All eleven
+  methods have `Context` variants.
+  Admin methods use the `AdminSlackbotSkillsList`, `AdminSlackbotSkillsPublish`,
+  `AdminSlackbotSkillsSetAutoEnabled`, and `AdminSlackbotSkillsUnpublish` names.
+- Run individual methods or verify complete groups with
+  [`examples/slackbot_skills`](examples/slackbot_skills/README.md) and
+  [`examples/admin_slackbot_skills`](examples/admin_slackbot_skills/README.md).
+  Group workflows create, verify, and clean up temporary skills.
+
 ## [0.32.0] - 2026-10-28
 
 ### Breaking changes

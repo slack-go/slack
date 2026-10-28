@@ -4,6 +4,10 @@ This directory contains examples demonstrating how to use the slack-go library f
 
 - [Slack Code](slack_code/README.md): create code channels, set properties and
   commands, publish and remove views, and read or revise canvases.
+- [Slackbot Skills](slackbot_skills/README.md): run all seven user skill methods
+  individually or verify the full lifecycle with a temporary skill.
+- [Admin Slackbot Skills](admin_slackbot_skills/README.md): inspect Enterprise
+  inventory, publish, deploy, and unpublish skills, or verify the whole group.
 
 ## Development Guidelines
 
