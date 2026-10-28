@@ -7,36 +7,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-28
+
 ### Breaking changes
 
-- **If you initialize `Properties` without field names, switch to keyed literals.**
-  Adding `AgentSession` and `CodeChannel` makes existing positional literals fail
-  to compile. Existing keyed literals and method signatures are unchanged.
-- `SlackResponse`, `KickUserFromConversationSlackResponse`, and `SlackErrorResponse`
-  gained `Needed` and `Provided` fields. Switch positional literals for these
-  types to keyed literals as well. Error strings are unchanged.
+- **Update interfaces, mocks, and function values that use the old canvas creation
+  signatures.** `CreateCanvas` and `CreateCanvasContext` now accept
+  `options ...CreateCanvasOption`. Existing direct calls still compile, but these
+  methods no longer satisfy interfaces with the old fixed signatures. Add the
+  variadic parameter to interface and mock declarations; adapt stored function
+  values or wrap the call in a function with the old signature.
+- **Use field names when initializing `Properties`, `SlackResponse`,
+  `KickUserFromConversationSlackResponse`, or `SlackErrorResponse`.** New fields
+  make positional literals fail to compile. Existing keyed literals still work.
 
 ### Added
 
-- Add `CreateCanvasOptionChannelID` to pass the optional `channel_id` parameter to
-  `CreateCanvas` and `CreateCanvasContext` (#1623).
-- Add `SetAgentConversationProperties`, `SetAgentConversationView`,
-  `ListAgentConversationViews`, `RemoveAgentConversationView`,
-  `GetAgentConversationCanvas`, and `SetAgentConversationCanvasContent`, including
-  their `Context` variants, for Slack Code channel properties, views, and canvases.
-- Decode `agent_session` and `code_channel` metadata in conversation properties,
-  including context-bar ownership, summary messages, and managed views.
+- **Show code diffs, HTML reports, Block Kit interfaces, and canvases in Slack Code
+  channels.** Use `SetAgentConversationView` to publish or update a view,
+  `ListAgentConversationViews` to discover attached views, and
+  `RemoveAgentConversationView` to remove them. All have `Context` variants.
+  Slack documents pull-request views too, but live requests have returned
+  `invalid_view_type`; publish a unified diff with `AgentViewTypeDiff` if that
+  happens.
+- **Give a code channel useful context.** Set context-bar links, action items,
+  a summary message, and external resource details with
+  `SetAgentConversationProperties` or its `Context` variant. Read session status,
+  title, assigned agents, origin message, context-bar ownership, summary, and
+  managed views through `Properties.AgentSession` and `Properties.CodeChannel`
+  in conversation responses.
+- **Read and revise canvases attached to code channels.**
+  `GetAgentConversationCanvas` retrieves markdown and comment threads, including
+  replies and optional resolved threads. `SetAgentConversationCanvasContent`
+  replaces the markdown while preserving section IDs and comment anchors on
+  unchanged sections. Both have `Context` variants.
+- **Create a canvas directly in a channel**, including in free workspaces that
+  require a channel. Pass `CreateCanvasOptionChannelID(channelID)` to
+  `CreateCanvas` or `CreateCanvasContext` (#1623).
+- Try the new [`examples/slack_code`](examples/slack_code) CLI for channel
+  setup, context bars, views, canvases, commands, metadata inspection, and archival.
+  It includes sample HTML, Block Kit, markdown, and unified-diff files.
 
 ### Fixed
 
-- Preserve Slack's `needed` and `provided` scope diagnostics in API responses and
-  `SlackErrorResponse`, including methods that return only an error.
-- Preserve `session_views` in `ListAgentConversationViews` responses, including
-  view types, names, and owner IDs, alongside the legacy `views` array.
-- Accept slash-command JSON that omits `is_enterprise_install`, including observed
-  Slack Code context-bar action deliveries over Socket Mode.
-- Omit an empty `WorkflowButtonBlockElement.ActionID` from JSON so workflow buttons
-  without an action ID pass Slack's block validation. Populated IDs are preserved.
+- **See which scopes are missing when an API call fails.** Slack's `needed` and
+  `provided` values are now preserved in responses and `SlackErrorResponse`, even
+  for methods that return only an error. Use `errors.As` to inspect `Needed` and
+  `Provided`; the error text is unchanged.
+- **Discover code-channel views even when Slack returns an empty legacy `views`
+  array.** `ListAgentConversationViews` also preserves `session_views`, including
+  view types, names, and owner IDs.
+- **Receive slash commands when Slack omits `is_enterprise_install`.** JSON
+  decoding now accepts absent or null values, including observed Slack Code
+  context-bar action deliveries over Socket Mode.
+- **Send workflow buttons without an action ID.** An empty
+  `WorkflowButtonBlockElement.ActionID` is omitted from JSON so the button passes
+  Slack's block validation. Populated IDs are preserved.
+
+### Documentation and testing
+
+- Clarify that Slack documents `raw_number` table cells for publishing. If a
+  workspace rejects them with `invalid_blocks`, send the number as a
+  `TableRawTextCell`. Null cells remain a received-only representation.
+- Add regression coverage for code-channel lifecycle events, Block Kit view
+  interactions, and agent slash commands through the existing HTTP and Socket
+  Mode parsers and handlers.
 
 ## [0.31.0] - 2026-10-26
 
@@ -946,7 +981,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.31.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.32.0...HEAD
+[0.32.0]: https://github.com/slack-go/slack/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/slack-go/slack/compare/v0.30.1...v0.31.0
 [0.30.1]: https://github.com/slack-go/slack/compare/v0.30.0...v0.30.1
 [0.30.0]: https://github.com/slack-go/slack/compare/v0.29.0...v0.30.0
