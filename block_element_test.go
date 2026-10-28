@@ -456,7 +456,7 @@ func TestWorkflowButtonMinimalConfiguration(t *testing.T) {
 			URL: "https://slack.com/shortcuts/Ft123456/minimal",
 		},
 	}
-	workflowButton := NewWorkflowButtonBlockElement(btnText, workflow, "minimal_workflow")
+	workflowButton := NewWorkflowButtonBlockElement(btnText, workflow, "")
 
 	// Verify no optional fields are set
 	assert.Equal(t, Style(""), workflowButton.Style)
@@ -469,6 +469,7 @@ func TestWorkflowButtonMinimalConfiguration(t *testing.T) {
 
 	// Check that optional fields are omitted from JSON
 	jsonStr := string(jsonData)
+	assert.NotContains(t, jsonStr, "action_id")
 	assert.NotContains(t, jsonStr, "style")
 	assert.NotContains(t, jsonStr, "accessibility_label")
 	assert.NotContains(t, jsonStr, "customizable_input_parameters")

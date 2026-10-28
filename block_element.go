@@ -969,7 +969,7 @@ type WorkflowButtonBlockElement struct {
 	Type               MessageElementType `json:"type"`
 	Text               *TextBlockObject   `json:"text"`
 	Workflow           *Workflow          `json:"workflow"`
-	ActionID           string             `json:"action_id"`
+	ActionID           string             `json:"action_id,omitempty"`
 	Style              Style              `json:"style,omitempty"`
 	AccessibilityLabel string             `json:"accessibility_label,omitempty"`
 }
@@ -979,7 +979,8 @@ func (s WorkflowButtonBlockElement) ElementType() MessageElementType {
 	return s.Type
 }
 
-// NewWorkflowButtonBlockElement returns a new instance of a workflow button element
+// NewWorkflowButtonBlockElement returns a new instance of a workflow button element.
+// Pass an empty actionID to omit the optional action_id field.
 func NewWorkflowButtonBlockElement(text *TextBlockObject, workflow *Workflow, actionID string) *WorkflowButtonBlockElement {
 	return &WorkflowButtonBlockElement{
 		Type:     METWorkflowButton,
