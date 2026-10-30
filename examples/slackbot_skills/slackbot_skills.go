@@ -29,7 +29,7 @@ func main() {
 }
 
 func run() error {
-	action := flag.String("action", "", "Method: create, info, update, list, library-add, library-remove, delete, workflow")
+	action := flag.String("action", "", "Method: create, info, update, list, library-add, library-remove, delete, workflow, mcp-workflow")
 	skill := flag.String("skill", "", "Skill ID (or builtin: reference for info)")
 	name := flag.String("name", "", "Skill display name")
 	instructions := flag.String("instructions", exampleInstructions, "Markdown instructions; create defaults to a built-in example, update changes only when supplied")
@@ -38,6 +38,8 @@ func run() error {
 	category := flag.String("category", "", "Skill category")
 	prompt := flag.String("example-prompt", "", "Example prompt; may contain {skill}")
 	mcpFile := flag.String("mcp-servers-file", "", "JSON array using Slack's MCP request schema; [] clears")
+	mcpJSON := flag.String("mcp-servers", "", "Inline JSON array of MCP declarations; [] clears")
+	mcpApp := flag.String("mcp-app", "", "Installed MCP app ID to verify (mcp-workflow)")
 	filter := flag.String("filter", "library", "List: library, owned, catalog")
 	cursor := flag.String("cursor", "", "List continuation cursor")
 	limit := flag.Int("limit", 100, "List page size")
@@ -50,6 +52,10 @@ func run() error {
 	}
 	switch *action {
 	case "create", "list", "workflow":
+	case "mcp-workflow":
+		if *mcpApp == "" {
+			return errors.New("mcp-workflow requires -mcp-app with an installed, usable MCP app ID")
+		}
 	case "info", "update", "library-add", "library-remove", "delete":
 		if *skill == "" {
 			return errors.New("this action requires -skill")
@@ -63,13 +69,20 @@ func run() error {
 	if provided["instructions"] && provided["canvas"] {
 		return errors.New("provide only one of -instructions or -canvas")
 	}
+	if provided["mcp-servers"] && provided["mcp-servers-file"] {
+		return errors.New("provide only one of -mcp-servers or -mcp-servers-file")
+	}
 	var servers []json.RawMessage
-	if provided["mcp-servers-file"] {
-		body, err := os.ReadFile(*mcpFile)
-		if err != nil {
-			return err
+	if provided["mcp-servers-file"] || provided["mcp-servers"] {
+		body := []byte(*mcpJSON)
+		if provided["mcp-servers-file"] {
+			var err error
+			body, err = os.ReadFile(*mcpFile)
+			if err != nil {
+				return err
+			}
 		}
-		if err = json.Unmarshal(body, &servers); err != nil {
+		if err := json.Unmarshal(body, &servers); err != nil {
 			return err
 		}
 		if servers == nil {
@@ -83,6 +96,9 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	api := slack.New(token, slack.OptionHTTPClient(&http.Client{Timeout: 30 * time.Second}))
+	if *action == "mcp-workflow" {
+		return runMCPWorkflow(ctx, api, *mcpApp, servers)
+	}
 	if *action == "workflow" {
 		return runWorkflow(ctx, api)
 	}
@@ -142,7 +158,7 @@ func run() error {
 		if provided["example-prompt"] {
 			options = append(options, slack.UpdateSlackbotSkillOptionExamplePrompt(*prompt))
 		}
-		if provided["mcp-servers-file"] {
+		if provided["mcp-servers-file"] || provided["mcp-servers"] {
 			options = append(options, slack.UpdateSlackbotSkillOptionMCPServers(servers...))
 		}
 		if len(options) == 0 {
@@ -167,7 +183,7 @@ func run() error {
 	if provided["example-prompt"] {
 		options = append(options, slack.CreateSlackbotSkillOptionExamplePrompt(*prompt))
 	}
-	if provided["mcp-servers-file"] {
+	if provided["mcp-servers-file"] || provided["mcp-servers"] {
 		options = append(options, slack.CreateSlackbotSkillOptionMCPServers(servers...))
 	}
 	response, err := api.CreateSlackbotSkillContext(ctx, *name, options...)
