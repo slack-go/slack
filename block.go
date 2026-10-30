@@ -27,6 +27,7 @@ const (
 	MBTCard              MessageBlockType = "card"
 	MBTCarousel          MessageBlockType = "carousel"
 	MBTContainer         MessageBlockType = "container"
+	MBTLayout            MessageBlockType = "layout"
 )
 
 // Block defines an interface all block types should implement

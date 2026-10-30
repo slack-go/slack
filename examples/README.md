@@ -2,6 +2,9 @@
 
 This directory contains examples demonstrating how to use the slack-go library for various Slack API operations.
 
+- Layout blocks: run `go run ./examples/layout` to preview a message with rows,
+  columns, and fallback content. Set `SLACK_BOT_TOKEN` and add `-channel C_CHANNEL`
+  to post it to Slack.
 - [Slack Code](slack_code/README.md): create code channels, set properties and
   commands, publish and remove views, and read or revise canvases.
 - [Slackbot Skills](slackbot_skills/README.md): run all seven user skill methods

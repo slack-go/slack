@@ -37,6 +37,25 @@ func TestBlockRealPayloadRoundTrip(t *testing.T) {
 		payload string
 	}{
 		{
+			name: "layout with typed child blocks and explicit empty fallback",
+			payload: `{
+				"type": "layout",
+				"block_id": "deal-summary",
+				"label": "Deal summary",
+				"is_label_visible": true,
+				"grid_lines": "rows",
+				"rows": [
+					{"items": [
+						{"width": "wide", "block": {"type": "section", "text": {"type": "mrkdwn", "text": "*Stage*\nNegotiation"}}},
+						{"width": "narrow", "horizontal_alignment": "end", "block": {"type": "actions", "elements": [
+							{"type": "button", "text": {"type": "plain_text", "text": "View"}, "action_id": "view-deal"}
+						]}}
+					]}
+				],
+				"fallback": []
+			}`,
+		},
+		{
 			// A table pasted from a spreadsheet (issue #1558): a bold rich_text header
 			// row, raw_text/raw_number data cells, and a null cell for an empty space.
 			name: "table with mixed cell types and an empty cell",

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Arrange Block Kit content in rows and columns with `LayoutBlock`, including
+  item widths and alignment, grid borders, fallback content for older clients,
+  and decoding of nested child blocks. Run `go run ./examples/layout` to preview
+  an example or add `-channel C_CHANNEL` to post it.
 - Create, inspect, update, list, enable, disable, and delete Slackbot skills with
   all seven `slackbot.skills.*` methods. Optional fields use variadic options,
   including explicit empty values for clearing metadata and MCP declarations.
