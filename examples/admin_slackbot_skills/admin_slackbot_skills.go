@@ -140,7 +140,7 @@ func run() error {
 
 func splitIDs(value string) []string {
 	ids := []string{}
-	for _, id := range strings.Split(value, ",") {
+	for id := range strings.SplitSeq(value, ",") {
 		if id = strings.TrimSpace(id); id != "" {
 			ids = append(ids, id)
 		}
