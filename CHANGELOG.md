@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shows a given canvas can be identified from `conversations.info`. Preserve
   absent `data` and `file_id` fields when marshaling tabs.
 
+### Changed
+
+- Document the undocumented preference endpoints and authentication limits of
+  `GetUserPrefs`, `GetUserPrefsContext`, `MuteChat`, and `UnMuteChat`. The mute
+  helpers use the legacy `muted_channels` preference, which may differ from the
+  current client's notification settings.
+
 ## [0.33.0] - 2026-10-30
 
 ### Added

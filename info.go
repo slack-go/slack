@@ -320,10 +320,18 @@ type UserPrefs struct {
 	TZ                                     string `json:"tz,omitempty"`
 }
 
+// GetUserPrefs retrieves the authenticated user's preferences.
+//
+// This method uses Slack's undocumented users.prefs.get endpoint.
+// Access depends on the token type and authentication method.
 func (api *Client) GetUserPrefs() (*UserPrefsCarrier, error) {
 	return api.GetUserPrefsContext(context.Background())
 }
 
+// GetUserPrefsContext retrieves the authenticated user's preferences using ctx.
+//
+// This method uses Slack's undocumented users.prefs.get endpoint.
+// Access depends on the token type and authentication method.
 func (api *Client) GetUserPrefsContext(ctx context.Context) (*UserPrefsCarrier, error) {
 	response := UserPrefsCarrier{}
 
@@ -335,6 +343,10 @@ func (api *Client) GetUserPrefsContext(ctx context.Context) (*UserPrefsCarrier, 
 	return &response, response.Err()
 }
 
+// MuteChat mutes a channel using the legacy muted_channels preference.
+//
+// It uses Slack's undocumented users.prefs.get and users.prefs.set endpoints.
+// This preference may not reflect the current client's notification settings.
 func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
 	prefs, err := api.GetUserPrefs()
 	if err != nil {
@@ -358,6 +370,10 @@ func (api *Client) MuteChat(channelID string) (*UserPrefsCarrier, error) {
 	return &response, response.Err()
 }
 
+// UnMuteChat unmutes a channel using the legacy muted_channels preference.
+//
+// It uses Slack's undocumented users.prefs.get and users.prefs.set endpoints.
+// This preference may not reflect the current client's notification settings.
 func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
 	prefs, err := api.GetUserPrefs()
 	if err != nil {
