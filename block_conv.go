@@ -135,7 +135,7 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 
 	s := sumtype{}
 	if err := json.Unmarshal(a.Element, &s); err != nil {
-		return nil
+		return err
 	}
 
 	var e BlockElement
