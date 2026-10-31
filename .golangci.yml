@@ -5,11 +5,16 @@ run:
 linters:
   default: none
   enable:
+    - asasalint
+    - bidichk
+    - gocheckcompilerdirectives
     - gocritic
     - gosec
     - govet
+    - makezero
     - misspell
     - modernize
+    - nilnesserr
     - unconvert
     - unused
   settings:
