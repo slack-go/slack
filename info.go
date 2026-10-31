@@ -364,12 +364,14 @@ func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
 		return nil, err
 	}
 	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	newChnls := make([]string, len(chnls)-1)
-	for i, chn := range chnls {
-		if chn == channelID {
-			return nil, nil // noop
+	newChnls := make([]string, 0, len(chnls))
+	for _, chn := range chnls {
+		if chn != channelID {
+			newChnls = append(newChnls, chn)
 		}
-		newChnls[i] = chn
+	}
+	if len(newChnls) == len(chnls) {
+		return nil, nil // noop
 	}
 	values := url.Values{"token": {api.token}, "muted_channels": {strings.Join(newChnls, ",")}, "reason": {"update-muted-channels"}}
 	response := UserPrefsCarrier{}
