@@ -169,10 +169,10 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 	if params.TimestampFrom != DEFAULT_REMOTE_FILES_TS_FROM {
 		values.Add("ts_from", strconv.FormatInt(int64(params.TimestampFrom), 10))
 	}
-	if params.TimestampTo != DEFAULT_REMOTE_FILES_TS_TO {
+	if params.TimestampTo != 0 && params.TimestampTo != DEFAULT_REMOTE_FILES_TS_TO {
 		values.Add("ts_to", strconv.FormatInt(int64(params.TimestampTo), 10))
 	}
-	if params.Limit != DEFAULT_REMOTE_FILES_COUNT {
+	if params.Limit != 0 && params.Limit != DEFAULT_REMOTE_FILES_COUNT {
 		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	if params.Cursor != "" {
