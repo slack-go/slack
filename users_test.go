@@ -335,6 +335,78 @@ func TestUserProfileSet(t *testing.T) {
 	testSetUserProfile(api, up, t)
 }
 
+type customFieldsTestClient func(*http.Request) (*http.Response, error)
+
+func (client customFieldsTestClient) Do(r *http.Request) (*http.Response, error) {
+	return client(r)
+}
+
+func TestSetUserCustomFieldsEndpoint(t *testing.T) {
+	fields := map[string]UserProfileCustomField{
+		"Xf123": {Value: "café + &", Alt: "Alt & +", Label: "Field"},
+	}
+	for _, endpoint := range []string{"", "https://custom-fields.invalid/slack/api/"} {
+		name := "default endpoint"
+		if endpoint != "" {
+			name = "configured endpoint with prefix"
+		}
+		t.Run(name, func(t *testing.T) {
+			for _, method := range []struct {
+				name string
+				call func(*Client) error
+			}{
+				{"wrapper", func(api *Client) error { return api.SetUserCustomFields("U123", fields) }},
+				{"context", func(api *Client) error {
+					return api.SetUserCustomFieldsContext(context.Background(), "U123", fields)
+				}},
+			} {
+				t.Run(method.name, func(t *testing.T) {
+					var request *http.Request
+					calls := 0
+					client := customFieldsTestClient(func(r *http.Request) (*http.Response, error) {
+						calls++
+						request = r
+						if err := r.ParseForm(); err != nil {
+							return nil, err
+						}
+						return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(`{"ok":true}`))}, nil
+					})
+					opts := []Option{OptionHTTPClient(client)}
+					baseURL := APIURL
+					if endpoint != "" {
+						opts = append(opts, OptionAPIURL(endpoint))
+						baseURL = endpoint
+					}
+					if err := method.call(New("testing-token", opts...)); err != nil {
+						t.Fatal(err)
+					}
+					if calls != 1 {
+						t.Fatalf("request count = %d, want 1", calls)
+					}
+					if got, want := request.URL.String(), baseURL+"users.profile.set"; got != want {
+						t.Errorf("request URL = %q, want %q", got, want)
+					}
+					if request.Method != http.MethodPost {
+						t.Errorf("request method = %q, want POST", request.Method)
+					}
+					if len(request.PostForm) != 3 || !reflect.DeepEqual(request.PostForm["token"], []string{"testing-token"}) || !reflect.DeepEqual(request.PostForm["user"], []string{"U123"}) || len(request.PostForm["profile"]) != 1 {
+						t.Fatalf("unexpected form values: %v", request.PostForm)
+					}
+					var profile struct {
+						Fields map[string]UserProfileCustomField `json:"fields"`
+					}
+					if err := json.Unmarshal([]byte(request.PostForm.Get("profile")), &profile); err != nil {
+						t.Fatal(err)
+					}
+					if !reflect.DeepEqual(profile.Fields, fields) {
+						t.Errorf("profile fields = %#v, want %#v", profile.Fields, fields)
+					}
+				})
+			}
+		})
+	}
+}
+
 func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
 	const (
 		realName = "Real Name Test"
