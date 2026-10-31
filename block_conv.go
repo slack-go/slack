@@ -133,9 +133,14 @@ func (b *InputBlock) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	// Preserve compatibility with partial blocks and null input.
+	if len(a.Element) == 0 {
+		return nil
+	}
+
 	s := sumtype{}
 	if err := json.Unmarshal(a.Element, &s); err != nil {
-		return nil
+		return err
 	}
 
 	var e BlockElement

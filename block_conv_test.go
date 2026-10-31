@@ -9,6 +9,62 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestInputBlockUnmarshalJSONElementErrors(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		element string
+	}{
+		{"array", `,"element":[]`},
+		{"string", `,"element":"invalid"`},
+		{"number", `,"element":42`},
+		{"boolean", `,"element":false`},
+		{"numeric type", `,"element":{"type":42}`},
+		{"array type", `,"element":{"type":[]}`},
+		{"object type", `,"element":{"type":{}}`},
+		{"boolean type", `,"element":{"type":true}`},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			inputJSON := fmt.Sprintf(`{"type":"input","label":{"type":"plain_text","text":"Name"}%s}`, tt.element)
+			for _, decoder := range []struct {
+				name    string
+				payload string
+				target  any
+			}{
+				{"InputBlock", inputJSON, &InputBlock{}},
+				{"Blocks", "[" + inputJSON + "]", &Blocks{}},
+			} {
+				t.Run(decoder.name, func(t *testing.T) {
+					err := json.Unmarshal([]byte(decoder.payload), decoder.target)
+					require.Error(t, err)
+					var typeErr *json.UnmarshalTypeError
+					assert.ErrorAs(t, err, &typeErr)
+				})
+			}
+		})
+	}
+}
+
+func TestInputBlockUnmarshalJSONWithoutElement(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		payload string
+	}{
+		{"null", `null`},
+		{"empty object", `{}`},
+		{"missing element", `{"type":"input","label":{"type":"plain_text","text":"Name"}}`},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			var input InputBlock
+			require.NoError(t, json.Unmarshal([]byte(tt.payload), &input))
+			assert.Nil(t, input.Element)
+
+			var blocks Blocks
+			require.NoError(t, json.Unmarshal([]byte("["+tt.payload+"]"), &blocks))
+			require.Len(t, blocks.BlockSet, 1)
+		})
+	}
+}
+
 func TestWorkflowButtonBlockElementUnmarshal(t *testing.T) {
 	workflowButtonJSON := `{
 		"type": "workflow_button",
