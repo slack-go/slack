@@ -86,16 +86,16 @@ type RestrictedTo struct {
 }
 
 type Tab struct {
-	ID    string  `json:"id"`
-	Label string  `json:"label"`
-	Type  string  `json:"type"`
-	Data  TabData `json:"data"`
+	ID    string   `json:"id"`
+	Label string   `json:"label"`
+	Type  string   `json:"type"`
+	Data  *TabData `json:"data,omitempty"`
 }
 
 // TabData contains type-specific data for a channel tab. For a canvas tab,
 // FileID is the ID of the canvas the tab shows.
 type TabData struct {
-	FileID string `json:"file_id"`
+	FileID string `json:"file_id,omitempty"`
 }
 
 type Canvas struct {

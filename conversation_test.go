@@ -780,9 +780,37 @@ func TestGetConversationInfoTabs(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, channel.Properties)
 	assert.Equal(t, []Tab{
-		{ID: "Ct0CD2AQBDBR", Type: "canvas", Label: "Runbook", Data: TabData{FileID: "F0CD2AQ7XBR"}},
+		{ID: "Ct0CD2AQBDBR", Type: "canvas", Label: "Runbook", Data: &TabData{FileID: "F0CD2AQ7XBR"}},
 		{ID: "files", Type: "files"},
 	}, channel.Properties.Tabs)
+}
+
+func TestTabJSONRoundTrip(t *testing.T) {
+	for _, tt := range []struct {
+		name string
+		body string
+	}{
+		{
+			name: "canvas data",
+			body: `{"id":"Ct0CD2AQBDBR","type":"canvas","label":"Runbook","data":{"file_id":"F0CD2AQ7XBR"}}`,
+		},
+		{
+			name: "absent data",
+			body: `{"id":"files","type":"files","label":""}`,
+		},
+		{
+			name: "empty data",
+			body: `{"id":"Ct123ABC456","type":"canvas","label":"","data":{}}`,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			var tab Tab
+			require.NoError(t, json.Unmarshal([]byte(tt.body), &tab))
+			encoded, err := json.Marshal(tab)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.body, string(encoded))
+		})
+	}
 }
 
 func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {

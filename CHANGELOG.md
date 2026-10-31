@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Decode `data.file_id` on channel tabs as `Tab.Data.FileID`, so the tab that
-  shows a given canvas can be identified from `conversations.info`.
+  shows a given canvas can be identified from `conversations.info`. Preserve
+  absent `data` and `file_id` fields when marshaling tabs.
 
 ## [0.33.0] - 2026-10-30
 
