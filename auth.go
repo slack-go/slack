@@ -65,6 +65,9 @@ func (api *Client) ListTeamsContext(ctx context.Context, params ListTeamsParamet
 	values := url.Values{
 		"token": {api.token},
 	}
+	if params.Limit != 0 {
+		values.Add("limit", strconv.Itoa(params.Limit))
+	}
 	if params.Cursor != "" {
 		values.Add("cursor", params.Cursor)
 	}
