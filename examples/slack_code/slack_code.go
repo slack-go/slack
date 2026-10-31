@@ -17,8 +17,7 @@ import (
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
-		var slackErr slack.SlackErrorResponse
-		if errors.As(err, &slackErr) {
+		if slackErr, ok := errors.AsType[slack.SlackErrorResponse](err); ok {
 			if len(slackErr.ResponseMetadata.Messages) > 0 {
 				fmt.Fprintf(os.Stderr, "Slack response messages: %v\n", slackErr.ResponseMetadata.Messages)
 			}
