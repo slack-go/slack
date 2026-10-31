@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> [!WARNING]
+> BREAKING CHANGES:
+>
+> - Malformed input elements that were previously accepted now fail decoding of
+>   the input block and its containing `Blocks`. Missing elements remain accepted.
+
 ### Added
 
 - Decode `data.file_id` on channel tabs as `Tab.Data.FileID`, so the tab that
@@ -19,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `GetUserPrefs`, `GetUserPrefsContext`, `MuteChat`, and `UnMuteChat`. The mute
   helpers use the legacy `muted_channels` preference, which may differ from the
   current client's notification settings.
+
+### Fixed
+
+- Return decoding errors for malformed input elements from
+  `InputBlock.UnmarshalJSON` and `Blocks.UnmarshalJSON`. Missing elements and
+  JSON `null` input retain their previous decoding behavior.
 
 ## [0.33.0] - 2026-10-30
 
