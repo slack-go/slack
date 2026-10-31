@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strconv"
 	"sync/atomic"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Channel
@@ -758,6 +760,29 @@ func TestGetConversationInfo(t *testing.T) {
 		t.Errorf("Unexpected pass where there should have been missing channel error")
 		return
 	}
+}
+
+func TestGetConversationInfoTabs(t *testing.T) {
+	const body = `{"ok":true,"channel":{"id":"C123ABC456","name":"general","properties":{
+		"tabs":[
+			{"id":"Ct0CD2AQBDBR","type":"canvas","label":"Runbook","data":{"file_id":"F0CD2AQ7XBR"}},
+			{"id":"files","type":"files","label":""}
+		]
+	}}}`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/conversations.info", r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(body))
+	}))
+	defer server.Close()
+	api := New("testing-token", OptionAPIURL(server.URL+"/"))
+	channel, err := api.GetConversationInfo(&GetConversationInfoInput{ChannelID: "C123ABC456"})
+	require.NoError(t, err)
+	require.NotNil(t, channel.Properties)
+	assert.Equal(t, []Tab{
+		{ID: "Ct0CD2AQBDBR", Type: "canvas", Label: "Runbook", Data: TabData{FileID: "F0CD2AQ7XBR"}},
+		{ID: "files", Type: "files"},
+	}, channel.Properties.Tabs)
 }
 
 func leaveConversationHandler(rw http.ResponseWriter, r *http.Request) {
