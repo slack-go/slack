@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTableBlock(t *testing.T) {
@@ -153,21 +154,24 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 	err := json.Unmarshal([]byte(payload), &tb)
 	assert.NoError(t, err)
 	assert.Equal(t, MBTTable, tb.BlockType())
-	assert.Len(t, tb.Rows, 3)
+	require.Len(t, tb.Rows, 3)
+	for _, row := range tb.Rows {
+		require.Len(t, row, 2)
+	}
 
 	// Header row: rich_text cells.
 	header, ok := tb.Rows[0][0].(*TableRichTextCell)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, TableCellRichText, header.TableCellType())
 	assert.Len(t, header.Elements, 1)
 
 	// Data row: raw_text + raw_number must keep their values.
 	rawText, ok := tb.Rows[1][0].(*TableRawTextCell)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "Alice", rawText.Text)
 
 	rawNumber, ok := tb.Rows[1][1].(*TableRawNumberCell)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, float64(42), rawNumber.Value)
 
 	// Empty cell decodes as nil.

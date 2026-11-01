@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewContextActionsBlock(t *testing.T) {
@@ -134,6 +135,6 @@ func TestContextActionsBlockInBlocks(t *testing.T) {
 	var blocks Blocks
 	err := json.Unmarshal(jsonData, &blocks)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(blocks.BlockSet))
+	require.Len(t, blocks.BlockSet, 1)
 	assert.Equal(t, MBTContextActions, blocks.BlockSet[0].BlockType())
 }

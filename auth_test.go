@@ -44,7 +44,7 @@ func TestListTeams(t *testing.T) {
 		return
 	}
 
-	assert.Len(t, teams, 2)
+	require.Len(t, teams, 2)
 	assert.Equal(t, "T12345678", teams[0].ID)
 	assert.Equal(t, "Shinichi's workspace", teams[0].Name)
 

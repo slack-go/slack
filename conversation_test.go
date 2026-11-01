@@ -59,7 +59,7 @@ func TestSimpleChannel(t *testing.T) {
 }
 
 func assertSimpleChannel(t *testing.T, channel *Channel) {
-	assert.NotNil(t, channel)
+	require.NotNil(t, channel)
 	assert.Equal(t, "C024BE91L", channel.ID)
 	assert.Equal(t, "fun", channel.Name)
 	assert.Equal(t, true, channel.IsChannel)
@@ -222,7 +222,7 @@ func TestSimpleGroup(t *testing.T) {
 }
 
 func assertSimpleGroup(t *testing.T, group *Group) {
-	assert.NotNil(t, group)
+	require.NotNil(t, group)
 	assert.Equal(t, "G024BE91L", group.ID)
 	assert.Equal(t, "secretplans", group.Name)
 	assert.Equal(t, true, group.IsGroup)
@@ -299,6 +299,7 @@ func TestChannelWithCanvas(t *testing.T) {
 
 func assertChannelWithCanvas(t *testing.T, channel *Channel) {
 	assertSimpleChannel(t, channel)
+	require.NotNil(t, channel.Properties)
 	assert.Equal(t, "F05RQ01LJU0", channel.Properties.Canvas.FileId)
 	assert.Equal(t, true, channel.Properties.Canvas.IsEmpty)
 	assert.Equal(t, "XFB9AAlvIyJ", channel.Properties.Canvas.QuipThreadId)
@@ -379,6 +380,7 @@ func TestChannelWithRecordChannel(t *testing.T) {
 
 func assertChannelWithRecordChannel(t *testing.T, channel *Channel) {
 	assertSimpleChannel(t, channel)
+	require.NotNil(t, channel.Properties)
 	assert.Equal(t, "S:00D0000000000000EAU:0010000000000000AA2", channel.Properties.RecordChannel.RecordID)
 	assert.Equal(t, "Account", channel.Properties.RecordChannel.RecordType)
 	assert.Equal(t, "Account", channel.Properties.RecordChannel.RecordLabel)
@@ -437,7 +439,7 @@ func TestSimpleIM(t *testing.T) {
 }
 
 func assertSimpleIM(t *testing.T, im *Conversation) {
-	assert.NotNil(t, im)
+	require.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
 	assert.Equal(t, true, im.IsIM)
 	assert.Equal(t, "U024BE7LH", im.User)

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var simpleMessage = `{
@@ -27,7 +28,7 @@ func unmarshalMessage(j string) (*Message, error) {
 func TestSimpleMessage(t *testing.T) {
 	message, err := unmarshalMessage(simpleMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "C2147483705", message.Channel)
 	assert.Equal(t, "U2147483697", message.User)
@@ -47,7 +48,7 @@ var starredMessage = `{
 func TestStarredMessage(t *testing.T) {
 	message, err := unmarshalMessage(starredMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "is testing", message.Text)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMeMessage, message.SubType)
@@ -70,11 +71,11 @@ var editedMessage = `{
 func TestEditedMessage(t *testing.T) {
 	message, err := unmarshalMessage(editedMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U2147483697", message.User)
 	assert.Equal(t, "hello edited", message.Text)
-	assert.NotNil(t, message.Edited)
+	require.NotNil(t, message.Edited)
 	assert.Equal(t, "U2147483697", message.Edited.User)
 	assert.Equal(t, "1433314416.000000", message.Edited.Timestamp)
 	assert.Equal(t, "1433314408.000004", message.Timestamp)
@@ -134,11 +135,11 @@ var uploadedFile = `{
 func TestUploadedFile(t *testing.T) {
 	message, err := unmarshalMessage(uploadedFile)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
 	assert.Equal(t, "<@U2147483697|tester> uploaded a file: <https://test.slack.com/files/tester/abc/test.txt|test.txt> and commented: test comment here", message.Text)
-	assert.Len(t, message.Files, 1)
+	require.Len(t, message.Files, 1)
 	file := message.Files[0]
 	assert.Equal(t, "abc", file.ID)
 	assert.Equal(t, JSONTime(1433314757), file.Created)
@@ -205,11 +206,11 @@ var testPost = `{
 func TestPost(t *testing.T) {
 	message, err := unmarshalMessage(testPost)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
 	assert.Equal(t, "<@U2147483697|tester> shared a file: <https://test.slack.com/files/tester/abc/test_post|test post>", message.Text)
-	assert.Len(t, message.Files, 1)
+	require.Len(t, message.Files, 1)
 	file := message.Files[0]
 	assert.Equal(t, "abc", file.ID)
 	assert.Equal(t, "test_post", file.Name)
@@ -272,11 +273,11 @@ func TestComment(t *testing.T) {
 	message, err := unmarshalMessage(testComment)
 	fmt.Println(err)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileComment, message.SubType)
 	assert.Equal(t, "<@U2147483697|tester> commented on <@U2147483697|tester>'s file <https://test.slack.com/files/tester/abc/test_post|test post>: another comment", message.Text)
-	assert.Len(t, message.Files, 1)
+	require.Len(t, message.Files, 1)
 	file := message.Files[0]
 	assert.Equal(t, "abc", file.ID)
 	assert.Equal(t, "test_post", file.Name)
@@ -285,7 +286,7 @@ func TestComment(t *testing.T) {
 	assert.Equal(t, 14, file.Size)
 	assert.Equal(t, 2, file.CommentsCount)
 
-	assert.NotNil(t, message.Comment)
+	require.NotNil(t, message.Comment)
 	assert.Equal(t, "xyz", message.Comment.ID)
 	assert.Equal(t, JSONTime(1433316360), message.Comment.Created)
 	assert.Equal(t, "U2147483697", message.Comment.User)
@@ -338,7 +339,7 @@ var workflowBotMessage = `{
 func TestWorkflowBotMessage(t *testing.T) {
 	message, err := unmarshalMessage(workflowBotMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeBotMessage, message.SubType)
 	assert.Equal(t, "BB12033", message.BotID)
@@ -352,14 +353,14 @@ func TestWorkflowBotMessage(t *testing.T) {
 func TestBotMessage(t *testing.T) {
 	message, err := unmarshalMessage(botMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeBotMessage, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
 	assert.Equal(t, "Pushing is the answer", message.Text)
 	assert.Equal(t, "BB12033", message.BotID)
 	assert.Equal(t, "github", message.Username)
-	assert.NotNil(t, message.Icons)
+	require.NotNil(t, message.Icons)
 	assert.Empty(t, message.Icons.IconURL)
 	assert.Empty(t, message.Icons.IconEmoji)
 	assert.Equal(t, "github", message.BotProfile.Name)
@@ -387,7 +388,7 @@ var meMessage = `{
 func TestMeMessage(t *testing.T) {
 	message, err := unmarshalMessage(meMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMeMessage, message.SubType)
 	assert.Equal(t, "C2147483705", message.Channel)
@@ -417,17 +418,17 @@ var messageChangedMessage = `{
 func TestMessageChangedMessage(t *testing.T) {
 	message, err := unmarshalMessage(messageChangedMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMessageChanged, message.SubType)
 	assert.True(t, message.Hidden)
 	assert.Equal(t, "C2147483705", message.Channel)
-	assert.NotNil(t, message.SubMessage)
+	require.NotNil(t, message.SubMessage)
 	assert.Equal(t, "message", message.SubMessage.Type)
 	assert.Equal(t, "U2147483697", message.SubMessage.User)
 	assert.Equal(t, "Hello, world!", message.SubMessage.Text)
 	assert.Equal(t, "1355517523.000005", message.SubMessage.Timestamp)
-	assert.NotNil(t, message.SubMessage.Edited)
+	require.NotNil(t, message.SubMessage.Edited)
 	assert.Equal(t, "U2147483697", message.SubMessage.Edited.User)
 	assert.Equal(t, "1358878755.000001", message.SubMessage.Edited.Timestamp)
 	assert.Equal(t, "1358878755.000001", message.Timestamp)
@@ -445,7 +446,7 @@ var messageDeletedMessage = `{
 func TestMessageDeletedMessage(t *testing.T) {
 	message, err := unmarshalMessage(messageDeletedMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMessageDeleted, message.SubType)
 	assert.True(t, message.Hidden)
@@ -465,7 +466,7 @@ var channelJoinMessage = `{
 func TestChannelJoinMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelJoinMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelJoin, message.SubType)
 	assert.Equal(t, "1358877458.000011", message.Timestamp)
@@ -485,7 +486,7 @@ var channelJoinInvitedMessage = `{
 func TestChannelJoinInvitedMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelJoinInvitedMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelJoin, message.SubType)
 	assert.Equal(t, "1358877458.000011", message.Timestamp)
@@ -505,7 +506,7 @@ var channelLeaveMessage = `{
 func TestChannelLeaveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelLeaveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelLeave, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -525,7 +526,7 @@ var channelTopicMessage = `{
 func TestChannelTopicMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelTopicMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelTopic, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -546,7 +547,7 @@ var channelPurposeMessage = `{
 func TestChannelPurposeMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelPurposeMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelPurpose, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -568,7 +569,7 @@ var channelNameMessage = `{
 func TestChannelNameMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelNameMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelName, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -590,7 +591,7 @@ var channelArchiveMessage = `{
 func TestChannelArchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelArchiveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelArchive, message.SubType)
 	assert.Equal(t, "1361482916.000003", message.Timestamp)
@@ -611,7 +612,7 @@ var channelUnarchiveMessage = `{
 func TestChannelUnarchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelUnarchiveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelUnarchive, message.SubType)
 	assert.Equal(t, "1361482916.000003", message.Timestamp)
@@ -644,7 +645,7 @@ var channelRepliesParentMessage = `{
 func TestChannelRepliesParentMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelRepliesParentMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U1234", message.User)
 	assert.Equal(t, "test", message.Text)
@@ -669,7 +670,7 @@ var channelRepliesChildMessage = `{
 func TestChannelRepliesChildMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelRepliesChildMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U5678", message.User)
 	assert.Equal(t, "foo", message.Text)
@@ -689,7 +690,7 @@ var groupJoinMessage = `{
 func TestGroupJoinMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupJoinMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupJoin, message.SubType)
 	assert.Equal(t, "1358877458.000011", message.Timestamp)
@@ -709,7 +710,7 @@ var groupJoinInvitedMessage = `{
 func TestGroupJoinInvitedMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupJoinInvitedMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupJoin, message.SubType)
 	assert.Equal(t, "1358877458.000011", message.Timestamp)
@@ -729,7 +730,7 @@ var groupLeaveMessage = `{
 func TestGroupLeaveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupLeaveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupLeave, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -749,7 +750,7 @@ var groupTopicMessage = `{
 func TestGroupTopicMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupTopicMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupTopic, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -770,7 +771,7 @@ var groupPurposeMessage = `{
 func TestGroupPurposeMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupPurposeMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupPurpose, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -792,7 +793,7 @@ var groupNameMessage = `{
 func TestGroupNameMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupNameMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupName, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
@@ -814,7 +815,7 @@ var groupArchiveMessage = `{
 func TestGroupArchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupArchiveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupArchive, message.SubType)
 	assert.Equal(t, "1361482916.000003", message.Timestamp)
@@ -835,7 +836,7 @@ var groupUnarchiveMessage = `{
 func TestGroupUnarchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupUnarchiveMessage)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupUnarchive, message.SubType)
 	assert.Equal(t, "1361482916.000003", message.Timestamp)
@@ -896,12 +897,12 @@ func TestFileShareMessage(t *testing.T) {
 	message, err := unmarshalMessage(fileShareMessage)
 	fmt.Println(err)
 	assert.Nil(t, err)
-	assert.NotNil(t, message)
+	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
 	assert.Equal(t, "1358877455.000010", message.Timestamp)
 	assert.Equal(t, "<@cal> uploaded a file: <https:...7.png|7.png>", message.Text)
 	assert.Equal(t, "U2147483697", message.User)
 	assert.True(t, message.Upload)
-	assert.NotNil(t, message.Files[0])
+	require.Len(t, message.Files, 1)
 }

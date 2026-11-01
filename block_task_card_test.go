@@ -57,7 +57,7 @@ func TestTaskCardBlockChainableMethods(t *testing.T) {
 	assert.True(t, block.HideTitle)
 	assert.Equal(t, details, block.Details)
 	assert.Equal(t, output, block.Output)
-	assert.Len(t, block.Sources, 2)
+	require.Len(t, block.Sources, 2)
 	assert.Equal(t, "url", block.Sources[0].Type)
 	assert.Equal(t, "https://example.com", block.Sources[0].URL)
 	assert.Equal(t, "Example", block.Sources[0].Text)

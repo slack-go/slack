@@ -79,7 +79,7 @@ func TestWorkflowButtonBlockElementUnmarshal(t *testing.T) {
 		err := json.Unmarshal([]byte(elementsJSON), &elements)
 		require.NoError(t, err)
 		require.Len(t, elements.ElementSet, 1)
-		assert.IsType(t, &WorkflowButtonBlockElement{}, elements.ElementSet[0])
+		require.IsType(t, &WorkflowButtonBlockElement{}, elements.ElementSet[0])
 
 		wb := elements.ElementSet[0].(*WorkflowButtonBlockElement)
 		assert.Equal(t, METWorkflowButton, wb.Type)

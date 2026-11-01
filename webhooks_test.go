@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPostWebhook_OK(t *testing.T) {
@@ -132,9 +133,9 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 		err = json.Unmarshal(raw, &decoded)
 		assert.NoError(t, err)
 		assert.Equal(t, original.Text, decoded.Text)
-		assert.NotNil(t, decoded.UnfurlLinks)
+		require.NotNil(t, decoded.UnfurlLinks)
 		assert.False(t, *decoded.UnfurlLinks)
-		assert.NotNil(t, decoded.UnfurlMedia)
+		require.NotNil(t, decoded.UnfurlMedia)
 		assert.True(t, *decoded.UnfurlMedia)
 	})
 }

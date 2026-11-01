@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func selectOptionsFromArray(options ...string) []DialogSelectOption {
@@ -35,7 +36,7 @@ func selectOptionsFromMap(options map[string]string) []DialogSelectOption {
 func TestSelectOptionsFromArray(t *testing.T) {
 	options := []string{"opt 1"}
 	expectedOptions := selectOptionsFromArray(options...)
-	assert.Equal(t, len(options), len(expectedOptions))
+	require.Len(t, expectedOptions, len(options))
 
 	firstOption := expectedOptions[0]
 	assert.Equal(t, "opt 1", firstOption.Label)
@@ -47,7 +48,7 @@ func TestOptionsFromMap(t *testing.T) {
 	options["key"] = "myValue"
 
 	selectOptions := selectOptionsFromMap(options)
-	assert.Equal(t, 1, len(selectOptions))
+	require.Len(t, selectOptions, 1)
 
 	firstOption := selectOptions[0]
 	assert.Equal(t, "key", firstOption.Label)

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestAdminRolesAddAssignments(t *testing.T) {
@@ -77,9 +79,7 @@ func TestAdminRolesListAssignments(t *testing.T) {
 		t.Errorf("expected Ok to be true")
 	}
 
-	if len(resp.RoleAssignments) != 1 {
-		t.Errorf("expected 1 role assignment, got %d", len(resp.RoleAssignments))
-	}
+	require.Len(t, resp.RoleAssignments, 1)
 
 	if resp.RoleAssignments[0].RoleID != "Rl0L" {
 		t.Errorf("expected role ID Rl0L, got %s", resp.RoleAssignments[0].RoleID)

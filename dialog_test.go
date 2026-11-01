@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Dialogs
@@ -119,7 +120,7 @@ func TestCreateSimpleDialog(t *testing.T) {
 }
 
 func assertSimpleDialog(t *testing.T, dialog *Dialog) {
-	assert.NotNil(t, dialog)
+	require.NotNil(t, dialog)
 
 	// Test the main dialog fields
 	assert.Equal(t, "ryde-46e2b0", dialog.CallbackID)
@@ -200,7 +201,7 @@ func TestSimpleCallback(t *testing.T) {
 }
 
 func assertSimpleCallback(t *testing.T, callback *DialogCallback) {
-	assert.NotNil(t, callback)
+	require.NotNil(t, callback)
 	assert.Equal(t, InteractionTypeDialogSubmission, callback.Type)
 	assert.Equal(t, "employee_offsite_1138b", callback.CallbackID)
 	assert.Equal(t, "T1ABCD2E12", callback.Team.ID)
@@ -258,7 +259,7 @@ func TestSimpleSuggestionCallback(t *testing.T) {
 }
 
 func assertSimpleSuggestionCallback(t *testing.T, callback *InteractionCallback) {
-	assert.NotNil(t, callback)
+	require.NotNil(t, callback)
 	assert.Equal(t, InteractionTypeDialogSuggestion, callback.Type)
 	assert.Equal(t, "W3VDvuzi2nRLsiaDOsmJranO", callback.Token)
 	assert.Equal(t, "1528203589.238335", callback.ActionTs)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAssistantThreadStartedEvent(t *testing.T) {
@@ -183,18 +184,14 @@ func TestAppMentionWithBlocksFilesAttachments(t *testing.T) {
 	if len(event.Blocks.BlockSet) != 1 {
 		t.Errorf("Expected 1 block, got %d", len(event.Blocks.BlockSet))
 	}
-	if len(event.Files) != 1 {
-		t.Errorf("Expected 1 file, got %d", len(event.Files))
-	}
+	require.Len(t, event.Files, 1)
 	if event.Files[0].ID != "F12345" {
 		t.Errorf("Expected file ID 'F12345', got %s", event.Files[0].ID)
 	}
 	if !event.Upload {
 		t.Error("Expected Upload to be true")
 	}
-	if len(event.Attachments) != 1 {
-		t.Errorf("Expected 1 attachment, got %d", len(event.Attachments))
-	}
+	require.Len(t, event.Attachments, 1)
 	if event.Attachments[0].Text != "attachment text" {
 		t.Errorf("Expected attachment text 'attachment text', got %s", event.Attachments[0].Text)
 	}
@@ -3083,7 +3080,7 @@ func TestAppHomeOpenedEvent_WithView(t *testing.T) {
 	assert.Equal(t, "D12345678", event.Channel)
 	assert.Equal(t, "home", event.Tab)
 	assert.Equal(t, "1747319568.267214", event.EventTimeStamp)
-	assert.NotNil(t, event.View)
+	require.NotNil(t, event.View)
 	assert.Equal(t, "V12345678", event.View.ID)
 	assert.Equal(t, "T12345678", event.View.TeamID)
 	assert.Equal(t, slack.ViewType("home"), event.View.Type)
@@ -3168,13 +3165,13 @@ func TestAppHomeOpenedEvent_FullEventParsing_WithView(t *testing.T) {
 	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
 	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
 	appHomeEvent, ok := parsedEvent.InnerEvent.Data.(*AppHomeOpenedEvent)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "app_home_opened", appHomeEvent.Type)
 	assert.Equal(t, "U12345678", appHomeEvent.User)
 	assert.Equal(t, "D12345678", appHomeEvent.Channel)
 	assert.Equal(t, "home", appHomeEvent.Tab)
 	assert.Equal(t, "1747319568.267214", appHomeEvent.EventTimeStamp)
-	assert.NotNil(t, appHomeEvent.View)
+	require.NotNil(t, appHomeEvent.View)
 	assert.Equal(t, "V12345678", appHomeEvent.View.ID)
 	assert.Equal(t, "T12345678", appHomeEvent.View.TeamID)
 }
@@ -3211,7 +3208,7 @@ func TestAppHomeOpenedEvent_FullEventParsing_WithoutView(t *testing.T) {
 	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
 	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
 	appHomeEvent, ok := parsedEvent.InnerEvent.Data.(*AppHomeOpenedEvent)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "app_home_opened", appHomeEvent.Type)
 	assert.Equal(t, "U12345678", appHomeEvent.User)
 	assert.Equal(t, "D12345678", appHomeEvent.Channel)
@@ -3381,7 +3378,7 @@ func TestAppContextChangedEvent(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, "app_context_changed", event.Type)
-	assert.Len(t, event.Context.Entities, 1)
+	require.Len(t, event.Context.Entities, 1)
 	assert.Equal(t, "slack#/types/channel_id", event.Context.Entities[0].Type)
 	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
 	assert.Equal(t, "T0ABCDE6543", event.Context.Entities[0].TeamID)
@@ -3419,7 +3416,7 @@ func TestAppContextEntity_ValueShapes(t *testing.T) {
 	err := json.Unmarshal(rawE, &ctx)
 
 	assert.NoError(t, err)
-	assert.Len(t, ctx.Entities, 5)
+	require.Len(t, ctx.Entities, 5)
 
 	channel := ctx.Entities[0]
 	assert.Equal(t, AppContextEntityChannel, channel.Type)
@@ -3514,15 +3511,15 @@ func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "app_context_changed", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AppContextChangedEvent)
-	assert.True(t, ok)
-	assert.Len(t, event.Context.Entities, 1)
+	require.True(t, ok)
+	require.Len(t, event.Context.Entities, 1)
 	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
 	assert.Equal(t, "D0123ABC456", event.Channel)
 	assert.Equal(t, "U123ABC456", event.User)
 
 	cb, ok := parsedEvent.Data.(*EventsAPICallbackEvent)
-	assert.True(t, ok)
-	assert.Len(t, cb.Authorizations, 1)
+	require.True(t, ok)
+	require.Len(t, cb.Authorizations, 1)
 	assert.Equal(t, "U0BOT00001", cb.Authorizations[0].UserID)
 	assert.True(t, cb.Authorizations[0].IsBot)
 }
@@ -3589,7 +3586,7 @@ func TestAgentSessionStoppedEvent_FullEventParsing(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "agent_session_stopped", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionStoppedEvent)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "C0123ABC456", event.Channel)
 	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
 }
@@ -3664,7 +3661,7 @@ func TestAgentSessionTitleChangedEvent_FullEventParsing(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "agent_session_title_changed", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionTitleChangedEvent)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "Bora Bora trip prep", event.Title)
 	assert.Equal(t, "Scuba diving research", event.PreviousTitle)
 }
@@ -3692,8 +3689,8 @@ func TestAppHomeOpenedEvent_WithContext(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, "home", event.Tab)
-	assert.NotNil(t, event.Context)
-	assert.Len(t, event.Context.Entities, 1)
+	require.NotNil(t, event.Context)
+	require.Len(t, event.Context.Entities, 1)
 	assert.Equal(t, "C01234ABDCE", event.Context.Entities[0].Value)
 }
 
@@ -3738,8 +3735,8 @@ func TestMessageEventWithAppContext(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.True(t, event.IsIM())
-	assert.NotNil(t, event.AppContext)
-	assert.Len(t, event.AppContext.Entities, 1)
+	require.NotNil(t, event.AppContext)
+	require.Len(t, event.AppContext.Entities, 1)
 	assert.Equal(t, "slack#/types/channel_id", event.AppContext.Entities[0].Type)
 	assert.Equal(t, "C01234ABDCE", event.AppContext.Entities[0].Value)
 	assert.Equal(t, "T0ABCDE6543", event.AppContext.Entities[0].TeamID)
