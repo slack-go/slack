@@ -57,8 +57,8 @@ func TestBotDirectMessageBotHandler(t *testing.T) {
 
 func TestGetSeenOutboundMessages(t *testing.T) {
 	s := NewTestServer()
-	s.Start()
 	t.Cleanup(s.Stop)
+	s.Start()
 
 	s.SendMessageToChannel("foo", "should see this message")
 
@@ -165,14 +165,14 @@ func TestSendGroupInvite(t *testing.T) {
 
 func TestServerSawMessage(t *testing.T) {
 	s := NewTestServer()
-	s.Start()
 	t.Cleanup(s.Stop)
+	s.Start()
 	assert.False(t, s.SawMessage("foo"), "should not have seen any message")
 }
 
 func TestServerSawOutgoingMessage(t *testing.T) {
 	s := NewTestServer()
-	s.Start()
 	t.Cleanup(s.Stop)
+	s.Start()
 	assert.False(t, s.SawOutgoingMessage("foo"), "should not have seen any message")
 }
