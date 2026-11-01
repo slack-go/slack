@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBlockFromJSON(t *testing.T) {
@@ -65,7 +66,7 @@ func TestBlockFromJSON(t *testing.T) {
 				assert.Nil(t, block)
 			} else {
 				assert.NoError(t, err)
-				assert.NotNil(t, block)
+				require.NotNil(t, block)
 				assert.Equal(t, tt.wantType, block.BlockType())
 			}
 		})
@@ -76,7 +77,7 @@ func TestMustBlockFromJSON(t *testing.T) {
 	t.Run("valid JSON does not panic", func(t *testing.T) {
 		assert.NotPanics(t, func() {
 			block := MustBlockFromJSON(`{"type": "divider"}`)
-			assert.NotNil(t, block)
+			require.NotNil(t, block)
 			assert.Equal(t, MBTDivider, block.BlockType())
 		})
 	})
@@ -208,7 +209,7 @@ func TestRawJSONBlockInDeepStructure(t *testing.T) {
 			Blocks []json.RawMessage `json:"blocks"`
 		}
 		assert.NoError(t, json.Unmarshal(marshalled, &result))
-		assert.Equal(t, 3, len(result.Blocks), "should have 3 blocks")
+		require.Len(t, result.Blocks, 3, "should have 3 blocks")
 
 		// Verify the middle block (our RawJSONBlock) has all fields preserved
 		var contextActionsBlock map[string]any
@@ -220,7 +221,7 @@ func TestRawJSONBlockInDeepStructure(t *testing.T) {
 		// Verify elements array is present and intact
 		elements, ok := contextActionsBlock["elements"].([]any)
 		assert.True(t, ok, "elements should be an array")
-		assert.Equal(t, 1, len(elements), "should have 1 element")
+		require.Len(t, elements, 1, "should have 1 element")
 
 		// Verify the nested feedback_buttons element
 		firstElement, ok := elements[0].(map[string]any)

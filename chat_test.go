@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
@@ -674,9 +676,7 @@ func TestWorkObjectMetadata(t *testing.T) {
 	}
 
 	// Verify the data
-	if len(unmarshaled.Entities) != 1 {
-		t.Errorf("Expected 1 entity, got %d", len(unmarshaled.Entities))
-	}
+	require.Len(t, unmarshaled.Entities, 1)
 
 	entity := unmarshaled.Entities[0]
 	if entity.URL != "https://example.com/document/123" {

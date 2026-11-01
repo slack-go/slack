@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -667,7 +668,7 @@ func TestInteractionCallback_Parser(t *testing.T) {
 	// create new request
 	req, err := http.NewRequest(http.MethodPost, "http://slack.example.org/interactions", strings.NewReader(body.Encode()))
 	assert.NoError(t, err)
-	assert.NotNil(t, req)
+	require.NotNil(t, req)
 
 	// without this header, the parser will not decode the payload
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -675,16 +676,16 @@ func TestInteractionCallback_Parser(t *testing.T) {
 	// parse payload from request
 	ic, err := InteractionCallbackParse(req)
 	assert.NoError(t, err)
-	assert.NotNil(t, ic)
+	require.NotNil(t, ic)
 
 	// test parsed InteractionCallback payload
 	assert.Equal(t, ic.Type, InteractionTypeBlockActions)
 
-	assert.Equal(t, len(ic.ActionCallback.BlockActions), 1)
+	require.Len(t, ic.ActionCallback.BlockActions, 1)
 	assert.Equal(t, ic.ActionCallback.BlockActions[0].ActionID, "multi_convos")
 	assert.Equal(t, ic.ActionCallback.BlockActions[0].BlockID, "test123")
 	assert.Equal(t, ic.ActionCallback.BlockActions[0].Type, ActionType(MultiOptTypeConversations))
-	assert.Equal(t, len(ic.ActionCallback.BlockActions[0].SelectedConversations), 1)
+	require.Len(t, ic.ActionCallback.BlockActions[0].SelectedConversations, 1)
 	assert.Equal(t, ic.ActionCallback.BlockActions[0].SelectedConversations[0], "G12345")
 
 	assert.Equal(t, ic.Container.Type, "view")
@@ -692,7 +693,7 @@ func TestInteractionCallback_Parser(t *testing.T) {
 
 	assert.Equal(t, len(ic.BlockActionState.Values), 2)
 	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].Type, ActionType(MultiOptTypeConversations))
-	assert.Equal(t, len(ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations), 1)
+	require.Len(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations, 1)
 	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations[0], "G12345")
 	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Type, ActionType(METPlainTextInput))
 	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Value, "test123")

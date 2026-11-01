@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -429,12 +430,12 @@ func TestRichTextSectionUsergroupStyleExtendedFields(t *testing.T) {
 	var section RichTextSection
 	err := json.Unmarshal([]byte(raw), &section)
 	assert.NoError(t, err)
-	assert.Len(t, section.Elements, 1)
+	require.Len(t, section.Elements, 1)
 
 	elem, ok := section.Elements[0].(*RichTextSectionUserGroupElement)
-	assert.True(t, ok)
+	require.True(t, ok)
 	assert.Equal(t, "ausergroupid", elem.UsergroupID)
-	assert.NotNil(t, elem.Style)
+	require.NotNil(t, elem.Style)
 	assert.True(t, elem.Style.Bold)
 	assert.True(t, elem.Style.Underline)
 	assert.True(t, elem.Style.Highlight)

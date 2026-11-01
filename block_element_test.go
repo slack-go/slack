@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewImageBlockElement(t *testing.T) {
@@ -340,7 +341,7 @@ func TestIconButtonFluentMethods(t *testing.T) {
 	denyText := NewTextBlockObject("plain_text", "No", false, false)
 	confirmObj := NewConfirmationBlockObject(titleText, messageText, confirmText, denyText)
 	iconButton.WithConfirm(confirmObj)
-	assert.NotNil(t, iconButton.Confirm)
+	require.NotNil(t, iconButton.Confirm)
 	assert.Equal(t, iconButton.Confirm.Title.Text, "Are you sure?")
 }
 
@@ -378,9 +379,9 @@ func TestNewWorkflowButtonBlockElement(t *testing.T) {
 	assert.Equal(t, string(workflowButton.Type), "workflow_button")
 	assert.Equal(t, "workflow_action_1", workflowButton.ActionID)
 	assert.Equal(t, "Run Workflow", workflowButton.Text.Text)
-	assert.NotNil(t, workflowButton.Workflow)
+	require.NotNil(t, workflowButton.Workflow)
 	assert.Equal(t, "https://slack.com/shortcuts/Ft123456/xyz123", workflowButton.Workflow.Trigger.URL)
-	assert.Equal(t, 2, len(workflowButton.Workflow.Trigger.CustomizableInputParameters))
+	require.Len(t, workflowButton.Workflow.Trigger.CustomizableInputParameters, 2)
 	assert.Equal(t, "input_param_a", workflowButton.Workflow.Trigger.CustomizableInputParameters[0].Name)
 	assert.Equal(t, "Value for input param A", workflowButton.Workflow.Trigger.CustomizableInputParameters[0].Value)
 }
@@ -441,9 +442,9 @@ func TestWorkflowButtonJSONMarshalling(t *testing.T) {
 	assert.Equal(t, "Start Process", unmarshalled.Text.Text)
 	assert.Equal(t, StylePrimary, unmarshalled.Style)
 	assert.Equal(t, "Start the approval process", unmarshalled.AccessibilityLabel)
-	assert.NotNil(t, unmarshalled.Workflow)
+	require.NotNil(t, unmarshalled.Workflow)
 	assert.Equal(t, "https://slack.com/shortcuts/Ft123456/abc789", unmarshalled.Workflow.Trigger.URL)
-	assert.Equal(t, 2, len(unmarshalled.Workflow.Trigger.CustomizableInputParameters))
+	require.Len(t, unmarshalled.Workflow.Trigger.CustomizableInputParameters, 2)
 	assert.Equal(t, "user_id", unmarshalled.Workflow.Trigger.CustomizableInputParameters[0].Name)
 	assert.Equal(t, "U123456", unmarshalled.Workflow.Trigger.CustomizableInputParameters[0].Value)
 }
