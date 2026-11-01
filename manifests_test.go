@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -753,19 +752,13 @@ func TestValidateManifestRawAppIDAndErrors(t *testing.T) {
 		})
 
 		response, err := api.ValidateManifestRaw(rawManifest, "token", "A123")
-		if err == nil {
-			t.Fatal("ValidateManifestRaw() error = nil, want Slack error")
-		}
 		var slackErr SlackErrorResponse
-		if !errors.As(err, &slackErr) || slackErr.Err != "invalid_manifest" {
-			t.Fatalf("error = %#v, want SlackErrorResponse for invalid_manifest", err)
-		}
+		require.ErrorAs(t, err, &slackErr)
+		require.Equal(t, "invalid_manifest", slackErr.Err)
 		wantErrors := []ManifestValidationError{{
 			Message: "Interactivity requires a Request URL",
 			Pointer: "/settings/interactivity",
 		}}
-		if !reflect.DeepEqual(response.Errors, wantErrors) {
-			t.Fatalf("Errors = %#v, want %#v", response.Errors, wantErrors)
-		}
+		require.Equal(t, wantErrors, response.Errors)
 	})
 }

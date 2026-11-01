@@ -13,6 +13,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type fileCommentHandler struct {
@@ -130,9 +132,7 @@ func TestGetFileSignInRedirect(t *testing.T) {
 	t.Run("token cannot read the file", func(t *testing.T) {
 		var buf bytes.Buffer
 		err := New("xoxb-invalid", OptionAPIURL(ts.URL+"/")).GetFile(ts.URL+downloadPath, &buf)
-		if err == nil || !strings.Contains(err.Error(), "sign-in page") {
-			t.Fatalf("expected a sign-in redirect error, got %v", err)
-		}
+		require.ErrorContains(t, err, "sign-in page")
 		if buf.Len() != 0 {
 			t.Fatalf("wrote %d bytes of the sign-in page", buf.Len())
 		}

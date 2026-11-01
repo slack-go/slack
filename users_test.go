@@ -17,6 +17,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func getTestUserProfileCustomField() UserProfileCustomField {
@@ -957,16 +959,7 @@ func TestGetUsersReturnsServerError(t *testing.T) {
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
 	_, err := api.GetUsers()
-
-	if err == nil {
-		t.Errorf("Expected error but got nil")
-		return
-	}
-
-	expectedErr := "slack server error: 500 Internal Server Error"
-	if err.Error() != expectedErr {
-		t.Errorf("Expected: %s. Got: %s", expectedErr, err.Error())
-	}
+	require.EqualError(t, err, "slack server error: 500 Internal Server Error")
 }
 
 // TestGetUsersIncludeLocale checks that include_locale stays true by default, can be
