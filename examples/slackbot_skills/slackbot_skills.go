@@ -20,8 +20,7 @@ const exampleInstructions = "# Release review\n\nReview the supplied release pla
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
-		var slackErr slack.SlackErrorResponse
-		if errors.As(err, &slackErr) && slackErr.Err == "token_revoked" {
+		if slackErr, ok := errors.AsType[slack.SlackErrorResponse](err); ok && slackErr.Err == "token_revoked" {
 			fmt.Fprintln(os.Stderr, "SLACK_USER_TOKEN was rejected as revoked. Reauthorize the app and export its current User OAuth Token with skills:read and skills:write, then retry.")
 		}
 		os.Exit(1)
