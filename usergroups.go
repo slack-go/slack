@@ -582,7 +582,7 @@ func (api *Client) UpdateUserGroupMembers(userGroup string, members string, opti
 }
 
 // UpdateUserGroupMembersContext will update the members of an existing user group with a custom context.
-// Slack API docs: https://api.slack.com/methods/usergroups.update
+// Slack API docs: https://docs.slack.dev/reference/methods/usergroups.users.update
 func (api *Client) UpdateUserGroupMembersContext(ctx context.Context, userGroup string, members string, options ...UpdateUserGroupMembersOption) (UserGroup, error) {
 	params := UpdateUserGroupMembersParams{}
 

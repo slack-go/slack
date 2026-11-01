@@ -416,14 +416,17 @@ func (api *Client) GetFilesContext(ctx context.Context, params GetFilesParameter
 	return response.Files, &response.Paging, nil
 }
 
-// ListFiles retrieves all files according to the parameters given. Uses cursor based pagination.
-// For more details, see ListFilesContext documentation.
+// ListFiles retrieves a page of files using cursor-based pagination.
+// For pagination caveats, see [Client.ListFilesContext].
 func (api *Client) ListFiles(params ListFilesParameters) ([]File, *ListFilesParameters, error) {
 	return api.ListFilesContext(context.Background(), params)
 }
 
-// ListFilesContext retrieves all files according to the parameters given with a custom context.
-// Slack API docs: https://api.slack.com/methods/files.list
+// ListFilesContext retrieves a page of files with a custom context.
+// Its cursor and limit parameters are not documented in Slack's files.list reference.
+// [Client.GetFilesContext] uses the documented count/page parameters.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/files.list
 func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParameters) ([]File, *ListFilesParameters, error) {
 	values := url.Values{
 		"token": {api.token},

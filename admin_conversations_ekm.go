@@ -61,10 +61,10 @@ type AdminConversationsEKMListOriginalConnectedChannelInfoResponse struct {
 	Channels []AdminConversationsEKMOriginalConnectedChannelInfo `json:"channels"`
 }
 
-// AdminConversationsEKMListOriginalConnectedChannelInfo lists the original connected channel
-// information for Slack Connect channels.
-// For more information see the admin.conversations.ekm.listOriginalConnectedChannelInfo docs:
-// https://api.slack.com/methods/admin.conversations.ekm.listOriginalConnectedChannelInfo
+// AdminConversationsEKMListOriginalConnectedChannelInfo lists the original channel
+// information for disconnected Slack Connect channels.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.conversations.ekm.listOriginalConnectedChannelInfo
 func (api *Client) AdminConversationsEKMListOriginalConnectedChannelInfo(ctx context.Context, options ...AdminConversationsEKMListOriginalConnectedChannelInfoOption) (*AdminConversationsEKMListOriginalConnectedChannelInfoResponse, error) {
 	params := adminConversationsEKMListOriginalConnectedChannelInfoParams{}
 	for _, opt := range options {
