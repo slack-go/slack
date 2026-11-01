@@ -174,34 +174,31 @@ func TestEditBookmark(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	smileEmoji := ":smile:"
-	empty := ""
-	title := "hello, world!"
 	changes := []struct {
 		ID     string
 		Params EditBookmarkParameters
 	}{
 		{ // add emoji
 			ID:     "Bk001",
-			Params: EditBookmarkParameters{Emoji: &smileEmoji},
+			Params: EditBookmarkParameters{Emoji: new(":smile:")},
 		},
 		{ // delete emoji
 			ID:     "Bk001",
-			Params: EditBookmarkParameters{Emoji: &empty},
+			Params: EditBookmarkParameters{Emoji: new("")},
 		},
 		{ // add title
 			ID:     "Bk002",
-			Params: EditBookmarkParameters{Title: &title},
+			Params: EditBookmarkParameters{Title: new("hello, world!")},
 		},
 		{ // delete title
 			ID:     "Bk002",
-			Params: EditBookmarkParameters{Title: &empty},
+			Params: EditBookmarkParameters{Title: new("")},
 		},
 		{ // Change multiple fields at once
 			ID: "Bk003",
 			Params: EditBookmarkParameters{
-				Title: &title,
-				Emoji: &empty,
+				Title: new("hello, world!"),
+				Emoji: new(""),
 				Link:  "https://example.com/changed",
 			},
 		},

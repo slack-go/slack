@@ -487,8 +487,7 @@ func unmarshalExample() {
 				case slack.MixedElementImage:
 					// Assert the block's type to manipulate/extract values
 					imageBlockElem := elem.(*slack.ImageBlockElement)
-					imageURL := "https://api.slack.com/img/blocks/bkb_template_images/profile_1.png"
-					imageBlockElem.ImageURL = &imageURL
+					imageBlockElem.ImageURL = new("https://api.slack.com/img/blocks/bkb_template_images/profile_1.png")
 					imageBlockElem.AltText = "MichaelScott"
 					respMixedElements = append(respMixedElements, imageBlockElem)
 				case slack.MixedElementText:

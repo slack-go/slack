@@ -29,14 +29,11 @@ func TestAdminConversationsSetTeams(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	orgChannel := true
-	teamID := "T789"
-
 	err := api.AdminConversationsSetTeams(context.Background(), AdminConversationsSetTeamsParams{
 		ChannelID:     "C1234567890",
-		OrgChannel:    &orgChannel,
+		OrgChannel:    new(true),
 		TargetTeamIDs: []string{"T123", "T456"},
-		TeamID:        &teamID,
+		TeamID:        new("T789"),
 	})
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)

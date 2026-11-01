@@ -14,10 +14,8 @@ func TestNewCardBlock(t *testing.T) {
 	body := NewTextBlockObject("mrkdwn", "Card body text.", false, false)
 	subtext := NewTextBlockObject("mrkdwn", "Card subtext.", false, false)
 
-	iconURL := "https://example.com/icon.png"
-	icon := &ImageBlockElement{Type: METImage, ImageURL: &iconURL, AltText: "icon"}
-	heroURL := "https://example.com/hero.png"
-	hero := &ImageBlockElement{Type: METImage, ImageURL: &heroURL, AltText: "hero"}
+	icon := &ImageBlockElement{Type: METImage, ImageURL: new("https://example.com/icon.png"), AltText: "icon"}
+	hero := &ImageBlockElement{Type: METImage, ImageURL: new("https://example.com/hero.png"), AltText: "hero"}
 
 	btnText := NewTextBlockObject("plain_text", "Open", false, false)
 	btn := NewButtonBlockElement("open_action", "go", btnText)

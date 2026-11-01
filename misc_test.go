@@ -136,7 +136,7 @@ func TestSlackResponseErrorsMarshaling(t *testing.T) {
 		{
 			name: "StringError",
 			errors: SlackResponseErrors{
-				Message: func() *string { s := "failed to match all allowed schemas"; return &s }(),
+				Message: new("failed to match all allowed schemas"),
 			},
 			expected: `"failed to match all allowed schemas"`,
 		},
