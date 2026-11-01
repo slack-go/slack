@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Decode `internal_team_ids` in EKM original connected channel responses instead
+  of looking for `internal_team_ids_count`.
+  [Slack API reference](https://docs.slack.dev/reference/methods/admin.conversations.ekm.listOriginalConnectedChannelInfo/).
+
 - Honor the `Types` filter in `ListFiles` and `ListFilesContext` requests.
   [Slack API reference](https://docs.slack.dev/reference/methods/files.list/).
 
