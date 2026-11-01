@@ -2,8 +2,9 @@ package slack
 
 import (
 	"context"
-	"encoding/json"
+	"io"
 	"net/http"
+	"slices"
 	"testing"
 )
 
@@ -32,6 +33,9 @@ func TestAdminConversationsEKMListOriginalConnectedChannelInfo(t *testing.T) {
 		t.Errorf("unexpected channel ID: %s", response.Channels[0].ID)
 		return
 	}
+	if got := response.Channels[0].InternalTeamIDs; !slices.Equal(got, []string{"T001", "T002"}) {
+		t.Errorf("unexpected internal team IDs: %v", got)
+	}
 }
 
 func mockEKMListHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
@@ -41,18 +45,11 @@ func mockEKMListHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Reque
 		}
 
 		rw.Header().Set("Content-Type", "application/json")
-		response, _ := json.Marshal(AdminConversationsEKMListOriginalConnectedChannelInfoResponse{
-			SlackResponse: SlackResponse{Ok: true},
-			Channels: []AdminConversationsEKMOriginalConnectedChannelInfo{
-				{
-					ID:                         "C1234567890",
-					OriginalConnectedHostID:    "T123",
-					OriginalConnectedChannelID: "C9876543210",
-					InternalTeamIDs:            []string{"T001", "T002"},
-				},
-			},
-		})
-
-		_, _ = rw.Write(response)
+		_, _ = io.WriteString(rw, `{"ok":true,"channels":[{
+			"id":"C1234567890",
+			"original_connected_host_id":"T123",
+			"original_connected_channel_id":"C9876543210",
+			"internal_team_ids":["T001","T002"]
+		}]}`)
 	}
 }

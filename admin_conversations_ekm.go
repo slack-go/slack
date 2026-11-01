@@ -51,7 +51,7 @@ type AdminConversationsEKMOriginalConnectedChannelInfo struct {
 	ID                         string   `json:"id"`
 	OriginalConnectedHostID    string   `json:"original_connected_host_id"`
 	OriginalConnectedChannelID string   `json:"original_connected_channel_id"`
-	InternalTeamIDs            []string `json:"internal_team_ids_count"`
+	InternalTeamIDs            []string `json:"internal_team_ids"`
 }
 
 // AdminConversationsEKMListOriginalConnectedChannelInfoResponse represents the response from
