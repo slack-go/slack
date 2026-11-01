@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -797,12 +799,9 @@ func TestSocketmodeHandler_Handle_errors(t *testing.T) {
 
 			c := make(chan string)
 
-			defer func() { recover() }()
-
-			tt.args.register(r, c)
-
-			t.Errorf("should have panicked")
-
+			require.Panics(t, func() {
+				tt.args.register(r, c)
+			})
 		})
 	}
 }
