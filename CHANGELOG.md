@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- **Breaking:** Remove `SetUserAsActive` and `SetUserAsActiveContext`, which called
+  the non-functional `users.setActive` endpoint. Remove these calls from clients;
+  `SetUserPresence` still supports `away` and `auto`, but neither forces a user active.
+  Slack retired this endpoint in 2018; see its
+  [retirement notice](https://docs.slack.dev/changelog/2018-01-presence-present-and-future/).
+
 - **Breaking:** Remove `GetUsersOptionPresence` and stop sending the retired
   `presence` parameter on `users.list` requests. Remove that option from `GetUsers`,
   `GetUsersContext`, and `GetUsersPaginated` calls. Use `GetUserPresence` or

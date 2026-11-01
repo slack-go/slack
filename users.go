@@ -478,23 +478,6 @@ func (api *Client) GetUserByEmailContext(ctx context.Context, email string) (*Us
 	return &response.User, nil
 }
 
-// SetUserAsActive marks the currently authenticated user as active.
-// For more information see the SetUserAsActiveContext documentation.
-func (api *Client) SetUserAsActive() error {
-	return api.SetUserAsActiveContext(context.Background())
-}
-
-// SetUserAsActiveContext marks the currently authenticated user as active with a custom context.
-// Slack API docs: https://api.slack.com/methods/users.setActive
-func (api *Client) SetUserAsActiveContext(ctx context.Context) (err error) {
-	values := url.Values{
-		"token": {api.token},
-	}
-
-	_, err = api.userRequest(ctx, "users.setActive", values)
-	return err
-}
-
 // SetUserPresence changes the currently authenticated user presence.
 // For more information see the SetUserPresenceContext documentation.
 func (api *Client) SetUserPresence(presence string) error {
