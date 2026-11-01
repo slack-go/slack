@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Synchronize RTM connection-info reads with reconnect updates.
 
+- Reconnect RTM connections on permanent WebSocket read errors instead of
+  retrying until Gorilla WebSocket panics on a truncated stream. Continue
+  tolerating empty or incomplete JSON messages on healthy connections.
+
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.
 
