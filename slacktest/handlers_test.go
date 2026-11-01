@@ -10,7 +10,8 @@ import (
 
 func TestAuthTestHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	user, err := client.AuthTest()
@@ -23,7 +24,8 @@ func TestAuthTestHandler(t *testing.T) {
 
 func TestPostMessageHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	channel, tstamp, err := client.PostMessage("foo", slack.MsgOptionText("some text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
@@ -34,7 +36,8 @@ func TestPostMessageHandler(t *testing.T) {
 
 func TestPostEphemeralHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	tstamp, err := client.PostEphemeral("fake_channel", "fake_user", slack.MsgOptionText("some ephemeral text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
@@ -46,7 +49,8 @@ func TestPostEphemeralHandler(t *testing.T) {
 
 func TestServerCreateConversationHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	conversation, err := client.CreateConversation(slack.CreateConversationParams{ChannelName: "test"})
@@ -58,7 +62,8 @@ func TestServerCreateConversationHandler(t *testing.T) {
 
 func TestServerSetConversationTopicHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	response, err := client.SetTopicOfConversation("test", "Apply topically for best effects")
@@ -70,7 +75,8 @@ func TestServerSetConversationTopicHandler(t *testing.T) {
 
 func TestServerSetConversationPurposeHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	response, err := client.SetPurposeOfConversation("test", "I didn't set this purpose on purpose!")
@@ -82,7 +88,8 @@ func TestServerSetConversationPurposeHandler(t *testing.T) {
 
 func TestServerRenameConversationHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	response, err := client.RenameConversation("ID", "newName")
@@ -92,7 +99,8 @@ func TestServerRenameConversationHandler(t *testing.T) {
 
 func TestServerInviteConversationHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	response, err := client.InviteUsersToConversation("conversationID", "username")
@@ -102,7 +110,8 @@ func TestServerInviteConversationHandler(t *testing.T) {
 
 func TestUserInfoHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	user, err := client.GetUserInfo("123456")
@@ -114,7 +123,8 @@ func TestUserInfoHandler(t *testing.T) {
 
 func TestUserLookUpByEmailHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	user, err := client.GetUserByEmail("user@email.com")
@@ -126,7 +136,8 @@ func TestUserLookUpByEmailHandler(t *testing.T) {
 
 func TestBotInfoHandler(t *testing.T) {
 	s := NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	bot, err := client.GetBotInfo(slack.GetBotInfoParameters{Bot: s.BotID})

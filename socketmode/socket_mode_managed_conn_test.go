@@ -17,7 +17,8 @@ import (
 
 func Test_passContext(t *testing.T) {
 	s := slacktest.NewTestServer()
-	go s.Start()
+	t.Cleanup(s.Stop)
+	s.Start()
 
 	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	cli := New(api)
