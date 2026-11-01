@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/slack-go/slack/internal/errorsx"
 )
@@ -223,9 +224,11 @@ func TestSlack_OpenView(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
+			if c.expectedResp == nil {
+				require.Nil(t, resp)
 				return
 			}
+			require.NotNil(t, resp)
 			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
 				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
 			}
@@ -386,9 +389,11 @@ func TestSlack_View_PublishView(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
+			if c.expectedResp == nil {
+				require.Nil(t, resp)
 				return
 			}
+			require.NotNil(t, resp)
 			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
 				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
 			}
@@ -562,9 +567,11 @@ func TestSlack_PushView(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
+			if c.expectedResp == nil {
+				require.Nil(t, resp)
 				return
 			}
+			require.NotNil(t, resp)
 			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
 				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
 			}
@@ -742,9 +749,11 @@ func TestSlack_UpdateView(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
+			if c.expectedResp == nil {
+				require.Nil(t, resp)
 				return
 			}
+			require.NotNil(t, resp)
 			if !reflect.DeepEqual(resp.ResponseMetadata.Messages, c.expectedResp.ResponseMetadata.Messages) {
 				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp.ResponseMetadata.Messages, resp.ResponseMetadata.Messages)
 			}

@@ -3,8 +3,9 @@ package slack
 import (
 	"context"
 	"net/http"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type workflowsHandler struct {
@@ -71,12 +72,7 @@ func TestSlack_WorkflowsTriggersPermissionsAdd(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
-				return
-			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp, resp)
-			}
+			require.Equal(t, c.expectedResp, resp)
 		})
 	}
 }
@@ -132,12 +128,7 @@ func TestSlack_WorkflowsTriggersPermissionsList(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
-				return
-			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp, resp)
-			}
+			require.Equal(t, c.expectedResp, resp)
 		})
 	}
 }
@@ -197,12 +188,7 @@ func TestSlack_WorkflowsTriggersPermissionsRemove(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
-				return
-			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp, resp)
-			}
+			require.Equal(t, c.expectedResp, resp)
 		})
 	}
 }
@@ -263,12 +249,7 @@ func TestSlack_WorkflowsTriggersPermissionsSet(t *testing.T) {
 			if c.expectedErr != nil && err != nil && c.expectedErr.Error() != err.Error() {
 				t.Fatalf("expected %s as error but got %s\n", c.expectedErr, err)
 			}
-			if resp == nil || c.expectedResp == nil {
-				return
-			}
-			if !reflect.DeepEqual(resp, c.expectedResp) {
-				t.Fatalf("expected:\n\t%v\n but got:\n\t%v\n", c.expectedResp, resp)
-			}
+			require.Equal(t, c.expectedResp, resp)
 		})
 	}
 }
