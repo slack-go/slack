@@ -338,13 +338,6 @@ func GetUsersOptionLimit(n int) GetUsersOption {
 	}
 }
 
-// GetUsersOptionPresence include user presence
-func GetUsersOptionPresence(n bool) GetUsersOption {
-	return func(p *UserPagination) {
-		p.presence = n
-	}
-}
-
 // GetUsersOptionIncludeLocale sets whether users.list returns each user's locale.
 // GetUsers sends include_locale=true unless this sets it to false.
 func GetUsersOptionIncludeLocale(includeLocale bool) GetUsersOption {
@@ -386,7 +379,6 @@ type UserPagination struct {
 	Users         []User
 	Cursor        string
 	limit         int
-	presence      bool
 	includeLocale bool
 	teamId        string
 	complete      bool
@@ -418,7 +410,6 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 
 	values := url.Values{
 		"limit":          {strconv.Itoa(t.limit)},
-		"presence":       {strconv.FormatBool(t.presence)},
 		"token":          {t.c.token},
 		"cursor":         {t.Cursor},
 		"team_id":        {t.teamId},
