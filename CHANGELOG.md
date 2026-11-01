@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Honor the configured API endpoint in `SetUserCustomFields` and
+  `SetUserCustomFieldsContext`.
+
 - Accept valid non-ASCII text in `TextBlockObject.Validate` by counting Unicode
   code points for the 3000-character limit.
 

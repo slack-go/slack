@@ -2,7 +2,10 @@ package slack
 
 import (
 	"encoding/json"
+	"maps"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -40,20 +43,67 @@ func TestAddRemoteFileWithoutTitle(t *testing.T) {
 	}
 }
 
-func listRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(remoteFileResponseFull{
-		SlackResponse: SlackResponse{Ok: true}})
-	rw.Write(response)
-}
-
 func TestListRemoteFile(t *testing.T) {
-	http.HandleFunc("/files.remote.list", listRemoteFileHandler)
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	params := ListRemoteFilesParameters{}
-	if _, err := api.ListRemoteFiles(params); err != nil {
-		t.Errorf("Unexpected error: %s", err)
+	tests := []struct {
+		name   string
+		params ListRemoteFilesParameters
+		want   url.Values
+	}{
+		{name: "empty"},
+		{name: "channel only", params: ListRemoteFilesParameters{Channel: "C123"}, want: url.Values{"channel": {"C123"}}},
+		{
+			name: "sentinel defaults",
+			params: ListRemoteFilesParameters{
+				TimestampTo: DEFAULT_REMOTE_FILES_TS_TO,
+				Limit:       DEFAULT_REMOTE_FILES_COUNT,
+			},
+		},
+		{
+			name: "explicit filters",
+			params: ListRemoteFilesParameters{
+				Channel: "C123", Cursor: "next+/=", Limit: 7, TimestampFrom: 12, TimestampTo: 34,
+			},
+			want: url.Values{
+				"channel": {"C123"}, "cursor": {"next+/="}, "limit": {"7"}, "ts_from": {"12"}, "ts_to": {"34"},
+			},
+		},
+	}
+	methods := []struct {
+		name string
+		call func(*Client, ListRemoteFilesParameters) ([]RemoteFile, error)
+	}{
+		{"ListRemoteFiles", (*Client).ListRemoteFiles},
+		{"ListRemoteFilesContext", func(api *Client, params ListRemoteFilesParameters) ([]RemoteFile, error) {
+			return api.ListRemoteFilesContext(t.Context(), params)
+		}},
+	}
+	for _, method := range methods {
+		t.Run(method.name, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					want := url.Values{"token": {"testing-token"}}
+					maps.Copy(want, tt.want)
+					server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						if err := r.ParseForm(); err != nil {
+							t.Error(err)
+							http.Error(w, err.Error(), http.StatusBadRequest)
+							return
+						}
+						if got := r.PostForm.Encode(); got != want.Encode() {
+							t.Errorf("form = %q, want %q", got, want.Encode())
+						}
+						w.Header().Set("Content-Type", "application/json")
+						_, _ = w.Write([]byte(`{"ok":true,"files":[]}`))
+					}))
+					defer server.Close()
+
+					api := New("testing-token", OptionAPIURL(server.URL+"/"))
+					if _, err := method.call(api, tt.params); err != nil {
+						t.Fatal(err)
+					}
+				})
+			}
+		})
 	}
 }
 
