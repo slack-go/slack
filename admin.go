@@ -86,7 +86,7 @@ func (api *Client) InviteRestrictedContext(ctx context.Context, teamName, channe
 
 	err := api.adminRequest(ctx, "invite", teamName, values)
 	if err != nil {
-		return fmt.Errorf("failed to restricted account: %w", err)
+		return fmt.Errorf("failed to invite restricted account: %w", err)
 	}
 
 	return nil
