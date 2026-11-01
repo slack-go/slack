@@ -2,9 +2,14 @@ package slack
 
 import (
 	"log"
+	"net/http"
 	"net/http/httptest"
 	"sync"
 )
+
+type httpClientFunc func(*http.Request) (*http.Response, error)
+
+func (f httpClientFunc) Do(r *http.Request) (*http.Response, error) { return f(r) }
 
 const (
 	validToken = "testing-token"

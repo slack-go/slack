@@ -23,14 +23,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type profileTestClient func(*http.Request) (*http.Response, error)
-
-func (f profileTestClient) Do(r *http.Request) (*http.Response, error) { return f(r) }
-
 func TestGetUserProfileDeliversWarnings(t *testing.T) {
 	var warnings int
 	api := New("test-token",
-		OptionHTTPClient(profileTestClient(func(r *http.Request) (*http.Response, error) {
+		OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusOK,
 				Body:       io.NopCloser(strings.NewReader(`{"ok":true,"warning":"test_warning","profile":{"real_name":"Ada"}}`)),

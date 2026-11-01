@@ -14,7 +14,7 @@ func TestListEventAuthorizationsDeliversWarnings(t *testing.T) {
 	var warnings int
 	api := New("test-token",
 		OptionAppLevelToken("test-app-token"),
-		OptionHTTPClient(profileTestClient(func(r *http.Request) (*http.Response, error) {
+		OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: http.StatusOK,
 				Body:       io.NopCloser(strings.NewReader(`{"ok":true,"warning":"test_warning","authorizations":[{"team_id":"T1","user_id":"U1"}]}`)),
