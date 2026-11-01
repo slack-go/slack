@@ -134,11 +134,10 @@ func run() error {
 
 	switch *action {
 	case "create":
-		primary := true
 		response, err := api.CreateListContext(ctx, *name,
 			slack.CreateListOptionDescriptionBlocks(richText("Tasks created with slack-go")),
 			slack.CreateListOptionSchema([]slack.ListColumn{
-				{Key: "task", Name: "Task", Type: slack.ListColumnText, IsPrimaryColumn: &primary},
+				{Key: "task", Name: "Task", Type: slack.ListColumnText, IsPrimaryColumn: new(true)},
 				{Key: "done", Name: "Done", Type: slack.ListColumnCheckbox},
 			}),
 		)

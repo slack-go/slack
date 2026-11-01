@@ -246,9 +246,6 @@ func TestUpdateUserGroup(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	emptyDescription := ""
-	presenceDescription := "Marketing gurus, PR experts and product advocates."
-
 	tests := []struct {
 		options    []UpdateUserGroupsOption
 		wantParams map[string]string
@@ -267,7 +264,7 @@ func TestUpdateUserGroup(t *testing.T) {
 		},
 		{
 			[]UpdateUserGroupsOption{
-				UpdateUserGroupsOptionDescription(&presenceDescription),
+				UpdateUserGroupsOptionDescription(new("Marketing gurus, PR experts and product advocates.")),
 				UpdateUserGroupsOptionChannels([]string{"channel1", "channel2"}),
 				UpdateUserGroupsOptionAdditionalChannels([]string{"channel3", "channel4"}),
 				UpdateUserGroupsOptionIncludeCount(true),
@@ -283,7 +280,7 @@ func TestUpdateUserGroup(t *testing.T) {
 		},
 		{
 			[]UpdateUserGroupsOption{
-				UpdateUserGroupsOptionDescription(&emptyDescription),
+				UpdateUserGroupsOptionDescription(new("")),
 				UpdateUserGroupsOptionChannels([]string{}),
 				UpdateUserGroupsOptionAdditionalChannels([]string{}),
 				UpdateUserGroupsOptionIncludeCount(false),
