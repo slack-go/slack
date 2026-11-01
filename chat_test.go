@@ -734,9 +734,7 @@ func TestMsgOptionWorkObjectMetadata(t *testing.T) {
 		t.Errorf("Failed to unmarshal metadata JSON: %v", err)
 	}
 
-	if len(result.Entities) != 1 {
-		t.Errorf("Expected 1 entity, got %d", len(result.Entities))
-	}
+	require.Len(t, result.Entities, 1)
 }
 
 func TestMsgOptionWorkObjectMetadataNilEntities(t *testing.T) {
