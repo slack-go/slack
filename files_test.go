@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -79,10 +78,10 @@ func TestSlack_GetFile(t *testing.T) {
 	for _, test := range tests {
 		err := api.GetFile(test.downloadURL, &bytes.Buffer{})
 
-		if !test.expectError && err != nil {
-			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
-		} else if test.expectError == true && err == nil {
-			log.Fatalf("Expected error but got none")
+		if test.expectError {
+			require.Error(t, err, test.title)
+		} else {
+			require.NoError(t, err, test.title)
 		}
 	}
 }
@@ -293,15 +292,13 @@ func TestSlack_DeleteFileComment(t *testing.T) {
 			fch = newFileCommentHandler()
 			err := c.call()
 
-			if !test.expectError && err != nil {
-				log.Fatalf("%s: %s: Unexpected error: %s in test", c.name, test.title, err)
-			} else if test.expectError == true && err == nil {
-				log.Fatalf("%s: Expected error but got none", c.name)
+			if test.expectError {
+				require.Error(t, err, "%s: %s", c.name, test.title)
+			} else {
+				require.NoError(t, err, "%s: %s", c.name, test.title)
 			}
 
-			if !reflect.DeepEqual(fch.gotParams, test.wantParams) {
-				log.Fatalf("%s: %s: Got params [%#v]\nBut received [%#v]\n", c.name, test.title, fch.gotParams, test.wantParams)
-			}
+			require.Equal(t, test.wantParams, fch.gotParams, "%s: %s", c.name, test.title)
 		}
 	}
 }
