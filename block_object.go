@@ -94,13 +94,13 @@ func getBlockObjectType(obj map[string]any) string {
 	if t, ok := obj["type"].(string); ok {
 		return t
 	}
-	if _, ok := obj["confirm"].(string); ok {
+	if _, ok := obj["confirm"]; ok {
 		return "confirm"
 	}
-	if _, ok := obj["options"].(string); ok {
+	if _, ok := obj["options"]; ok {
 		return "option_group"
 	}
-	if _, ok := obj["text"].(string); ok {
+	if _, ok := obj["text"]; ok {
 		if _, ok := obj["value"].(string); ok {
 			return "option"
 		}

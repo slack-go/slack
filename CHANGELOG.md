@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Decode confirmation dialogs, options, and option groups in `BlockObjects`
+  using their documented object and array fields instead of silently dropping them.
+  [Slack composition objects](https://docs.slack.dev/reference/block-kit/composition-objects/).
+
 - Decode `internal_team_ids` in EKM original connected channel responses instead
   of looking for `internal_team_ids_count`.
   [Slack API reference](https://docs.slack.dev/reference/methods/admin.conversations.ekm.listOriginalConnectedChannelInfo/).
