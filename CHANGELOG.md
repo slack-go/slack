@@ -26,6 +26,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helpers use the legacy `muted_channels` preference, which may differ from the
   current client's notification settings.
 
+### Removed
+
+- **Breaking:** Remove `GetUsersOptionPresence` and stop sending the retired
+  `presence` parameter on `users.list` requests. Remove that option from `GetUsers`,
+  `GetUsersContext`, and `GetUsersPaginated` calls. Use `GetUserPresence` or
+  `GetUserPresenceContext` when individual presence information is needed.
+  Slack retired these features in 2018; see its
+  [retirement notice](https://docs.slack.dev/changelog/2018-01-presence-present-and-future/).
+
 ### Fixed
 
 - Send the requested Y crop coordinate in user photo uploads.
