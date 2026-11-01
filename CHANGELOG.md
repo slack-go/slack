@@ -31,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+- Deprecate `RTMOptionUseStart`; `NewRTM` uses `rtm.connect` by default. Correct
+  the `StartRTM` documentation to describe Slack's compact connection response.
+
 - Deprecate legacy Sign in with Slack identity helpers in favor of
   `GetOpenIDConnectToken` and `GetOpenIDConnectUserInfo` and their context variants.
   Migration requires the OpenID Connect authorization flow and scopes.
