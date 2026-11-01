@@ -176,6 +176,8 @@ const (
 )
 
 func assertInteractionCallback(t *testing.T, callback InteractionCallback, encoded string) {
+	t.Helper()
+
 	var decoded InteractionCallback
 	assert.Nil(t, json.Unmarshal([]byte(encoded), &decoded))
 	assert.Equal(t, decoded, callback)

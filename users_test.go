@@ -326,16 +326,16 @@ func TestUserProfileSet(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
 
-	testSetUserCustomStatus(api, up, t)
-	testUnsetUserCustomStatus(api, up, t)
+	testSetUserCustomStatus(t, api, up)
+	testUnsetUserCustomStatus(t, api, up)
 
 	up.RealName = "Test User"
-	testSetUserCustomStatusWithUser(api, "Test User", up, t)
+	testSetUserCustomStatusWithUser(t, api, "Test User", up)
 
 	up.RealName = "Real Name Test"
-	testSetUserRealName(api, up, t)
+	testSetUserRealName(t, api, up)
 
-	testSetUserProfile(api, up, t)
+	testSetUserProfile(t, api, up)
 }
 
 type customFieldsTestClient func(*http.Request) (*http.Response, error)
@@ -410,7 +410,9 @@ func TestSetUserCustomFieldsEndpoint(t *testing.T) {
 	}
 }
 
-func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
+func testSetUserRealName(t *testing.T, api *Client, up *UserProfile) {
+	t.Helper()
+
 	const (
 		realName = "Real Name Test"
 	)
@@ -423,7 +425,9 @@ func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
 	}
 }
 
-func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
+func testSetUserCustomStatus(t *testing.T, api *Client, up *UserProfile) {
+	t.Helper()
+
 	const (
 		statusText       = "testStatus"
 		statusEmoji      = ":construction:"
@@ -445,7 +449,9 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 	}
 }
 
-func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, t *testing.T) {
+func testSetUserCustomStatusWithUser(t *testing.T, api *Client, user string, up *UserProfile) {
+	t.Helper()
+
 	const (
 		statusText       = "testStatus"
 		statusEmoji      = ":construction:"
@@ -467,7 +473,9 @@ func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, 
 	}
 }
 
-func testSetUserProfile(api *Client, up *UserProfile, t *testing.T) {
+func testSetUserProfile(t *testing.T, api *Client, up *UserProfile) {
+	t.Helper()
+
 	profile := &UserProfile{
 		RealName:    "Set Profile Test",
 		DisplayName: "setprofile",
@@ -489,7 +497,9 @@ func testSetUserProfile(api *Client, up *UserProfile, t *testing.T) {
 	}
 }
 
-func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
+func testUnsetUserCustomStatus(t *testing.T, api *Client, up *UserProfile) {
+	t.Helper()
+
 	if err := api.UnsetUserCustomStatus(); err != nil {
 		t.Fatalf(`UnsetUserCustomStatus() = %#v, want <nil>`, err)
 	}
