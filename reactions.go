@@ -135,14 +135,17 @@ func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {
 	return items
 }
 
-// AddReaction adds a reaction emoji to a message, file or file comment.
+// AddReaction adds a reaction emoji to a message.
 // For more details, see AddReactionContext documentation.
 func (api *Client) AddReaction(name string, item ItemRef) error {
 	return api.AddReactionContext(context.Background(), name, item)
 }
 
-// AddReactionContext adds a reaction emoji to a message, file or file comment with a custom context.
-// Slack API docs: https://api.slack.com/methods/reactions.add
+// AddReactionContext adds a reaction emoji to a message with a custom context.
+// Set item.Channel and item.Timestamp. Slack deprecated the file and file_comment
+// arguments; react to the file's channel message instead.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/reactions.add
 func (api *Client) AddReactionContext(ctx context.Context, name string, item ItemRef) error {
 	values := url.Values{
 		"token": {api.token},

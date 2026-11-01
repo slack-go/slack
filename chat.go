@@ -1098,7 +1098,7 @@ func (api *Client) GetScheduledMessages(params *GetScheduledMessagesParameters) 
 }
 
 // GetScheduledMessagesContext returns the list of scheduled messages based on params with a custom context.
-// Slack API docs: https://api.slack.com/methods/chat.getScheduledMessages.list
+// Slack API docs: https://docs.slack.dev/reference/methods/chat.scheduledMessages.list
 func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetScheduledMessagesParameters) (channels []ScheduledMessage, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
