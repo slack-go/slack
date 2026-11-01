@@ -772,12 +772,12 @@ func (t ConversationPagination) Next(ctx context.Context) (_ ConversationPaginat
 		return t, errPaginationComplete
 	}
 
-	t.previousResp = t.previousResp.initialize()
+	previousResp := t.previousResp.initialize()
 
 	values := url.Values{
 		"token":  {t.c.token},
 		"limit":  {strconv.Itoa(t.limit)},
-		"cursor": {t.previousResp.Cursor},
+		"cursor": {previousResp.Cursor},
 	}
 	if t.excludeArchived {
 		values.Add("exclude_archived", strconv.FormatBool(t.excludeArchived))
