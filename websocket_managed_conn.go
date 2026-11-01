@@ -379,7 +379,16 @@ func (rtm *RTM) ping() error {
 // If the read from the websocket results in a fatal error, this function will return non-nil.
 func (rtm *RTM) receiveIncomingEvent(ctx context.Context, conn *websocket.Conn, events chan json.RawMessage) error {
 	event := json.RawMessage{}
-	err := conn.ReadJSON(&event)
+	// NextReader errors are permanent. Keep them separate from JSON errors,
+	// since an empty message also decodes as io.ErrUnexpectedEOF.
+	_, reader, readErr := conn.NextReader()
+	err := readErr
+	if readErr == nil {
+		err = json.NewDecoder(reader).Decode(&event)
+		if err == io.EOF {
+			err = io.ErrUnexpectedEOF
+		}
+	}
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -390,10 +399,8 @@ func (rtm *RTM) receiveIncomingEvent(ctx context.Context, conn *websocket.Conn, 
 	}
 
 	switch {
-	case err == io.ErrUnexpectedEOF:
-		// EOF's don't seem to signify a failed connection so instead we ignore
-		// them here and detect a failed connection upon attempting to send a
-		// 'PING' message
+	case readErr == nil && err == io.ErrUnexpectedEOF:
+		// An empty or incomplete JSON frame need not signify a failed connection.
 
 		// trigger a 'PING' to detect potential websocket disconnect
 		select {
@@ -404,8 +411,7 @@ func (rtm *RTM) receiveIncomingEvent(ctx context.Context, conn *websocket.Conn, 
 			return ErrRTMDisconnected
 		}
 	case err != nil:
-		// All other errors from ReadJSON come from NextReader, and should
-		// kill the read loop and force a reconnect.
+		// Failed WebSocket reads and other JSON errors force a reconnect.
 		select {
 		case rtm.IncomingEvents <- RTMEvent{"incoming_error", &IncomingEventError{ErrorObj: err}}:
 		case <-ctx.Done():
