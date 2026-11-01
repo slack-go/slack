@@ -250,12 +250,12 @@ func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPaginatio
 		return t, errPaginationComplete
 	}
 
-	t.previousResp = t.previousResp.initialize()
+	previousResp := t.previousResp.initialize()
 
 	values := url.Values{
 		"limit":  {strconv.Itoa(t.limit)},
 		"token":  {t.c.token},
-		"cursor": {t.previousResp.Cursor},
+		"cursor": {previousResp.Cursor},
 	}
 
 	if err = t.c.postMethod(ctx, "stars.list", values, &resp); err != nil {

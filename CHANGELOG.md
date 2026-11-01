@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Send the requested Y crop coordinate in user photo uploads.
 
+- Preserve the initial pagination state after failed conversations and stars
+  requests, so a rate-limited first page is retried instead of reporting an
+  empty successful result.
+
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.
 
