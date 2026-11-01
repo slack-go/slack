@@ -643,7 +643,7 @@ func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *
 func TestSetUserPhoto(t *testing.T) {
 	photoPath, fileContent := createUserPhoto(t)
 
-	params := UserSetPhotoParams{CropX: 0, CropY: 0, CropW: 32}
+	params := UserSetPhotoParams{CropX: 1, CropY: 2, CropW: 32}
 
 	http.HandleFunc("/users.setPhoto", setUserPhotoHandler(fileContent, params))
 
