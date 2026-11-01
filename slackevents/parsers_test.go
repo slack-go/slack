@@ -36,6 +36,17 @@ func TestParseEventRejectsMalformedInnerEvent(t *testing.T) {
 	}
 }
 
+func TestParseEventPreservesInnerJSONError(t *testing.T) {
+	event, err := ParseEvent(json.RawMessage(`{"type":"event_callback","event":{"type":"app_mention","user":123}}`), OptionNoVerifyToken())
+	require.Error(t, err)
+	var typeError *json.UnmarshalTypeError
+	require.ErrorAs(t, err, &typeError)
+	require.Equal(t, "user", typeError.Field)
+	unmarshalError, ok := event.Data.(*slack.UnmarshallingErrorEvent)
+	require.True(t, ok)
+	require.ErrorAs(t, unmarshalError.ErrorObj, &typeError)
+}
+
 func TestParserOuterCallBackEvent(t *testing.T) {
 	eventsAPIRawCallbackEvent := `
     {

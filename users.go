@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -394,7 +395,7 @@ type UserPagination struct {
 
 // Done checks if the pagination has completed
 func (UserPagination) Done(err error) bool {
-	return err == errPaginationComplete
+	return errors.Is(err, errPaginationComplete)
 }
 
 // Failure checks if pagination failed.
@@ -453,7 +454,7 @@ func (api *Client) GetUsersContext(ctx context.Context, options ...GetUsersOptio
 		p, err = p.Next(ctx)
 		if err == nil {
 			results = append(results, p.Users...)
-		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+		} else if rateLimitedError, ok := errors.AsType[*RateLimitedError](err); ok {
 			select {
 			case <-ctx.Done():
 				err = ctx.Err()

@@ -2,6 +2,7 @@ package slack_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -353,7 +354,7 @@ func TestRTMUnmappedError(t *testing.T) {
 	testServer.Stop()
 
 	// Verify that we got the expected error with details
-	unmappedErr, ok := gotUnmarshallingError.ErrorObj.(*slack.UnmappedError)
+	unmappedErr, ok := errors.AsType[*slack.UnmappedError](gotUnmarshallingError.ErrorObj)
 	require.True(t, ok)
 	assert.Equal(t, unmappedEventName, unmappedErr.EventType)
 }

@@ -8,6 +8,7 @@ linters:
     - asasalint
     - bidichk
     - errcheck
+    - errorlint
     - gocheckcompilerdirectives
     - gocritic
     - gosec

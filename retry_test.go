@@ -3,6 +3,7 @@ package slack
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -113,7 +114,7 @@ func TestRetryExhaustedReturnsLastError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error after exhausting retries")
 	}
-	if _, ok := err.(StatusCodeError); !ok {
+	if _, ok := errors.AsType[StatusCodeError](err); !ok {
 		t.Errorf("expected StatusCodeError, got %T: %v", err, err)
 	}
 	if got := callCount.Load(); got != 3 {
@@ -151,7 +152,7 @@ func TestRetryExhausted5xxResponseBodyReadable(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error after exhausting retries")
 	}
-	if _, ok := err.(StatusCodeError); !ok {
+	if _, ok := errors.AsType[StatusCodeError](err); !ok {
 		t.Errorf("expected StatusCodeError, got %T: %v", err, err)
 	}
 	logged := buf.String()
@@ -191,7 +192,7 @@ func TestRetryExhausted429ResponseBodyReadable(t *testing.T) {
 		t.Fatal("expected error after exhausting 429 retries")
 	}
 	// 429 without Retry-After returns StatusCodeError and calls logResponse
-	if _, ok := err.(StatusCodeError); !ok {
+	if _, ok := errors.AsType[StatusCodeError](err); !ok {
 		t.Errorf("expected StatusCodeError (429 without Retry-After), got %T: %v", err, err)
 	}
 	logged := buf.String()
@@ -225,7 +226,7 @@ func TestRetryExhausted429ReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error after exhausting 429 retries")
 	}
-	if _, ok := err.(*RateLimitedError); !ok {
+	if _, ok := errors.AsType[*RateLimitedError](err); !ok {
 		t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
 	}
 	if got := callCount.Load(); got != 3 {
@@ -457,7 +458,7 @@ func TestRetryRespectsContextCancelation(t *testing.T) {
 		resp.Body.Close()
 		t.Errorf("expected nil response when context cancelled, got %v", resp)
 	}
-	if err != context.Canceled {
+	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context.Canceled, got %v", err)
 	}
 	if got := wrapped.calls.Load(); got != 1 {
@@ -505,7 +506,7 @@ func TestRetryContextCanceledDuringSleep(t *testing.T) {
 		resp.Body.Close()
 		t.Errorf("expected nil response when context cancelled, got %v", resp)
 	}
-	if err != context.Canceled {
+	if !errors.Is(err, context.Canceled) {
 		t.Errorf("expected context.Canceled, got %v", err)
 	}
 	if got := mock.count.Load(); got != 1 {
