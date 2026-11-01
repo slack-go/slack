@@ -115,12 +115,18 @@ func resolveOAuthAPIURL(opts []OAuthOption) string {
 
 // GetOAuthToken retrieves an AccessToken.
 // For more details, see GetOAuthTokenContext documentation.
+//
+// Deprecated: Use [GetOAuthV2Response] for granular-permission Slack apps.
+// This function uses the classic OAuth flow and response format.
 func GetOAuthToken(client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (accessToken string, scope string, err error) {
 	return GetOAuthTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI, opts...)
 }
 
 // GetOAuthTokenContext retrieves an AccessToken with a custom context.
 // For more details, see GetOAuthResponseContext documentation.
+//
+// Deprecated: Use [GetOAuthV2ResponseContext] for granular-permission Slack apps.
+// This function uses the classic OAuth flow and response format.
 func GetOAuthTokenContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (accessToken string, scope string, err error) {
 	response, err := GetOAuthResponseContext(ctx, client, clientID, clientSecret, code, redirectURI, opts...)
 	if err != nil {
@@ -131,12 +137,18 @@ func GetOAuthTokenContext(ctx context.Context, client httpClient, clientID, clie
 
 // GetBotOAuthToken retrieves top-level and bot AccessToken - https://api.slack.com/legacy/oauth#bot_user_access_tokens
 // For more details, see GetBotOAuthTokenContext documentation.
+//
+// Deprecated: Use [GetOAuthV2Response] for granular-permission Slack apps.
+// Its top-level AccessToken is the bot token; user tokens are in AuthedUser.
 func GetBotOAuthToken(client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (accessToken string, scope string, bot OAuthResponseBot, err error) {
 	return GetBotOAuthTokenContext(context.Background(), client, clientID, clientSecret, code, redirectURI, opts...)
 }
 
 // GetBotOAuthTokenContext retrieves top-level and bot AccessToken with a custom context.
 // For more details, see GetOAuthResponseContext documentation.
+//
+// Deprecated: Use [GetOAuthV2ResponseContext] for granular-permission Slack apps.
+// Its top-level AccessToken is the bot token; user tokens are in AuthedUser.
 func GetBotOAuthTokenContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (accessToken string, scope string, bot OAuthResponseBot, err error) {
 	response, err := GetOAuthResponseContext(ctx, client, clientID, clientSecret, code, redirectURI, opts...)
 	if err != nil {
@@ -147,12 +159,19 @@ func GetBotOAuthTokenContext(ctx context.Context, client httpClient, clientID, c
 
 // GetOAuthResponse retrieves OAuth response.
 // For more details, see GetOAuthResponseContext documentation.
+//
+// Deprecated: Use [GetOAuthV2Response] for granular-permission Slack apps.
+// This function uses the classic OAuth flow and response format.
 func GetOAuthResponse(client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (resp *OAuthResponse, err error) {
 	return GetOAuthResponseContext(context.Background(), client, clientID, clientSecret, code, redirectURI, opts...)
 }
 
 // GetOAuthResponseContext retrieves OAuth response with custom context.
-// Slack API docs: https://api.slack.com/methods/oauth.access
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/oauth.access
+//
+// Deprecated: Use [GetOAuthV2ResponseContext] for granular-permission Slack apps.
+// This function uses the classic OAuth flow and response format.
 func GetOAuthResponseContext(ctx context.Context, client httpClient, clientID, clientSecret, code, redirectURI string, opts ...OAuthOption) (resp *OAuthResponse, err error) {
 	values := url.Values{
 		"client_id":     {clientID},

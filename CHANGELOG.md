@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+- Deprecate classic OAuth helpers in favor of `GetOAuthV2Response` and
+  `GetOAuthV2ResponseContext` for granular-permission apps. The OAuth V2 response
+  exposes the bot token in `AccessToken` and user tokens in `AuthedUser`.
+
 - Deprecate stars API helpers and `StarredItemPagination` and remove the legacy
   stars example. These APIs do not manage Slack's Later items; Slack recommends
   retiring features that use them. See
