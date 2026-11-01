@@ -19,8 +19,29 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestGetUserProfileDeliversWarnings(t *testing.T) {
+	var warnings int
+	api := New("test-token",
+		OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(strings.NewReader(`{"ok":true,"warning":"test_warning","profile":{"real_name":"Ada"}}`)),
+			}, nil
+		})),
+		OptionOnWarning(func(path string, request any, warning *Warning) {
+			warnings++
+			assert.Equal(t, "users.profile.get", path)
+		}),
+	)
+	profile, err := api.GetUserProfile(&GetUserProfileParameters{UserID: "U1"})
+	require.NoError(t, err)
+	require.Equal(t, "Ada", profile.RealName)
+	require.Equal(t, 1, warnings)
+}
 
 func getTestUserProfileCustomField() UserProfileCustomField {
 	return UserProfileCustomField{
