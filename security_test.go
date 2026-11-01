@@ -14,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -79,10 +81,10 @@ func TestSignatureVerifierWithoutTimestampCheck(t *testing.T) {
 	for _, test := range tests {
 		_, err := signatureVerifierWithoutTimestampCheck(test.header, test.signingSecret)
 
-		if !test.expectError && err != nil {
-			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
-		} else if test.expectError == true && err == nil {
-			log.Fatalf("Expected error but got none")
+		if test.expectError {
+			require.Error(t, err, test.title)
+		} else {
+			require.NoError(t, err, test.title)
 		}
 	}
 }
@@ -127,10 +129,10 @@ func TestEnsure(t *testing.T) {
 
 		err = sv.Ensure()
 
-		if !test.expectError && err != nil {
-			log.Fatalf("%s: Unexpected error: %s in test", test.title, err)
-		} else if test.expectError && !errors.Is(err, ErrInvalidSignature) {
-			t.Fatalf("%s: expected ErrInvalidSignature, got %v", test.title, err)
+		if test.expectError {
+			require.ErrorIs(t, err, ErrInvalidSignature, test.title)
+		} else {
+			require.NoError(t, err, test.title)
 		}
 	}
 
