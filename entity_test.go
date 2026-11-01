@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestEntityPresentDetailsParameters(t *testing.T) {
@@ -95,19 +97,11 @@ func TestEntityDetailsError(t *testing.T) {
 		t.Errorf("Expected custom_title '%s', got '%s'", errorObj.CustomTitle, unmarshaled.CustomTitle)
 	}
 
-	if len(unmarshaled.Actions) != 1 {
-		t.Errorf("Expected 1 action, got %d", len(unmarshaled.Actions))
-	}
-
-	if len(unmarshaled.Actions) > 0 {
-		action := unmarshaled.Actions[0]
-		if action.Text != "Request Access" {
-			t.Errorf("Expected action text 'Request Access', got '%s'", action.Text)
-		}
-		if action.ProcessingState == nil || !action.ProcessingState.Enabled {
-			t.Error("Expected processing state to be enabled")
-		}
-	}
+	require.Len(t, unmarshaled.Actions, 1)
+	action := unmarshaled.Actions[0]
+	require.Equal(t, "Request Access", action.Text)
+	require.NotNil(t, action.ProcessingState)
+	require.True(t, action.ProcessingState.Enabled)
 }
 
 func TestEntityPresentDetailsWithMetadata(t *testing.T) {

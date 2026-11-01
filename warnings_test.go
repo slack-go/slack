@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestWarn(t *testing.T) {
@@ -161,15 +163,9 @@ func TestOptionOnWarning(t *testing.T) {
 		)
 
 		_, err := api.AuthTestContext(t.Context())
-		if err == nil {
-			t.Fatal("expected error")
-		}
-		if gotWarning == nil {
-			t.Fatal("expected warning, got nil")
-		}
-		if len(gotWarning.Codes) != 1 || gotWarning.Codes[0] != "missing_charset" {
-			t.Fatalf("expected codes [missing_charset], got %v", gotWarning.Codes)
-		}
+		require.Error(t, err)
+		require.NotNil(t, gotWarning)
+		require.Equal(t, []string{"missing_charset"}, gotWarning.Codes)
 	})
 
 	t.Run("no callback registered is safe", func(t *testing.T) {
