@@ -224,8 +224,13 @@ func (rtm *RTM) startRTMAndDial(useRTMStart bool) (info *Info, _ *websocket.Conn
 
 	rtm.Debugf("Dialing to websocket on url %s", url)
 	// Only use HTTPS for connections to prevent MITM attacks on the connection.
-	upgradeHeader := http.Header{}
-	upgradeHeader.Add("Origin", "https://api.slack.com")
+	upgradeHeader := rtm.dialHeaders.Clone()
+	if upgradeHeader == nil {
+		upgradeHeader = http.Header{}
+	}
+	if upgradeHeader.Get("Origin") == "" {
+		upgradeHeader.Set("Origin", "https://api.slack.com")
+	}
 	dialer := websocket.DefaultDialer
 	if rtm.dialer != nil {
 		dialer = rtm.dialer

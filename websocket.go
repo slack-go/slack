@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -46,6 +47,8 @@ type RTM struct {
 	// dialer is a gorilla/websocket Dialer. If nil, use the default
 	// Dialer.
 	dialer *websocket.Dialer
+
+	dialHeaders http.Header
 
 	readLimit int64
 

@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -94,6 +95,15 @@ func RTMOptionUseStart(b bool) RTMOption {
 func RTMOptionDialer(d *websocket.Dialer) RTMOption {
 	return func(rtm *RTM) {
 		rtm.dialer = d
+	}
+}
+
+// RTMOptionDialHeaders sets HTTP headers for the initial WebSocket handshake and
+// every reconnect. Headers are copied when the option is applied and before each
+// dial. The default Origin is used unless a non-empty Origin header is supplied.
+func RTMOptionDialHeaders(headers http.Header) RTMOption {
+	return func(rtm *RTM) {
+		rtm.dialHeaders = headers.Clone()
 	}
 }
 
