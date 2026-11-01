@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Deliver warnings from user-profile and event-authorization requests.
 
+- Avoid a nil-pointer panic when decoding a `null` conversation-kick response.
+
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.
 
