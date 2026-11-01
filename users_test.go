@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -630,8 +631,7 @@ func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *
 }
 
 func TestSetUserPhoto(t *testing.T) {
-	file, fileContent, teardown := createUserPhoto(t)
-	defer teardown()
+	photoPath, fileContent := createUserPhoto(t)
 
 	params := UserSetPhotoParams{CropX: 0, CropY: 0, CropW: 32}
 
@@ -640,7 +640,7 @@ func TestSetUserPhoto(t *testing.T) {
 	once.Do(startServer)
 	api := New(validToken, OptionAPIURL("http://"+serverAddr+"/"))
 
-	err := api.SetUserPhoto(file.Name(), params)
+	err := api.SetUserPhoto(photoPath, params)
 	if err != nil {
 		t.Fatalf("unexpected error: %+v\n", err)
 	}
@@ -708,29 +708,24 @@ func setUserPhotoHandler(wantBytes []byte, wantParams UserSetPhotoParams) http.H
 	}
 }
 
-// createUserPhoto generates a temp photo for testing. It returns the file handle, the file
-// contents, and a function that can be called to remove the file.
-func createUserPhoto(t *testing.T) (*os.File, []byte, func()) {
+// createUserPhoto returns the path and contents of an automatically cleaned-up test photo.
+func createUserPhoto(t *testing.T) (string, []byte) {
+	t.Helper()
+
 	photo := image.NewRGBA(image.Rect(0, 0, 64, 64))
 	draw.Draw(photo, photo.Bounds(), image.Black, image.Point{}, draw.Src)
 
-	f, err := os.CreateTemp(os.TempDir(), "profile.png")
-	if err != nil {
-		t.Fatalf("failed to create test photo: %+v\n", err)
-	}
-
 	var buf bytes.Buffer
-	if err := png.Encode(io.MultiWriter(&buf, f), photo); err != nil {
-		t.Fatalf("failed to write test photo: %+v\n", err)
+	if err := png.Encode(&buf, photo); err != nil {
+		t.Fatalf("failed to encode test photo: %v", err)
 	}
 
-	teardown := func() {
-		if err := os.Remove(f.Name()); err != nil {
-			t.Fatalf("failed to remove test photo: %+v\n", err)
-		}
+	photoPath := filepath.Join(t.TempDir(), "profile.png")
+	if err := os.WriteFile(photoPath, buf.Bytes(), 0o600); err != nil {
+		t.Fatalf("failed to write test photo: %v", err)
 	}
 
-	return f, buf.Bytes(), teardown
+	return photoPath, buf.Bytes()
 }
 
 func getUserProfileHandler(rw http.ResponseWriter, r *http.Request) {
