@@ -11,18 +11,18 @@ import (
 func TestNewImageBlockElement(t *testing.T) {
 	imageElement := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/tripAgentLocationMarker.png", "Location Pin Icon")
 
-	assert.Equal(t, string(imageElement.Type), "image")
+	assert.Equal(t, "image", string(imageElement.Type))
 	assert.Contains(t, *imageElement.ImageURL, "tripAgentLocationMarker")
-	assert.Equal(t, imageElement.AltText, "Location Pin Icon")
+	assert.Equal(t, "Location Pin Icon", imageElement.AltText)
 }
 
 func TestNewImageBlockElementSlackFile(t *testing.T) {
 	slackFile := &SlackFileObject{URL: "https://api.slack.com/img/blocks/bkb_template_images/tripAgentLocationMarker.png"}
 	imageElement := NewImageBlockElementSlackFile(slackFile, "Location Pin Icon")
 
-	assert.Equal(t, string(imageElement.Type), "image")
+	assert.Equal(t, "image", string(imageElement.Type))
 	assert.Contains(t, imageElement.SlackFile.URL, "tripAgentLocationMarker")
-	assert.Equal(t, imageElement.AltText, "Location Pin Icon")
+	assert.Equal(t, "Location Pin Icon", imageElement.AltText)
 	assert.Nil(t, imageElement.ImageURL, "ImageURL should be nil when SlackFile is provided")
 }
 
@@ -30,10 +30,10 @@ func TestNewButtonBlockElement(t *testing.T) {
 	btnTxt := NewTextBlockObject("plain_text", "Next 2 Results", false, false)
 	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
 
-	assert.Equal(t, string(btnElement.Type), "button")
-	assert.Equal(t, btnElement.ActionID, "test")
-	assert.Equal(t, btnElement.Value, "click_me_123")
-	assert.Equal(t, btnElement.Text.Text, "Next 2 Results")
+	assert.Equal(t, "button", string(btnElement.Type))
+	assert.Equal(t, "test", btnElement.ActionID)
+	assert.Equal(t, "click_me_123", btnElement.Value)
+	assert.Equal(t, "Next 2 Results", btnElement.Text.Text)
 }
 
 func TestWithStyleForButtonElement(t *testing.T) {
@@ -54,7 +54,7 @@ func TestWithURLForButtonElement(t *testing.T) {
 	btnElement := NewButtonBlockElement("test", "click_me_123", btnTxt)
 
 	btnElement.WithURL("https://foo.bar")
-	assert.Equal(t, btnElement.URL, "https://foo.bar")
+	assert.Equal(t, "https://foo.bar", btnElement.URL)
 }
 
 func TestNewOptionsSelectBlockElement(t *testing.T) {
@@ -62,8 +62,8 @@ func TestNewOptionsSelectBlockElement(t *testing.T) {
 	testOption := NewOptionBlockObject("test", testOptionText, nil)
 
 	option := NewOptionsSelectBlockElement("static_select", nil, "test", testOption)
-	assert.Equal(t, option.Type, "static_select")
-	assert.Equal(t, len(option.Options), 1)
+	assert.Equal(t, "static_select", option.Type)
+	assert.Equal(t, 1, len(option.Options))
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -75,9 +75,9 @@ func TestNewOptionsGroupSelectBlockElement(t *testing.T) {
 
 	optGroup := NewOptionsGroupSelectBlockElement("static_select", nil, "test", testGroupOption)
 
-	assert.Equal(t, optGroup.Type, "static_select")
-	assert.Equal(t, optGroup.ActionID, "test")
-	assert.Equal(t, len(optGroup.OptionGroups), 1)
+	assert.Equal(t, "static_select", optGroup.Type)
+	assert.Equal(t, "test", optGroup.ActionID)
+	assert.Equal(t, 1, len(optGroup.OptionGroups))
 }
 
 func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
@@ -86,8 +86,8 @@ func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
 	testOption := NewOptionBlockObject("test", testOptionText, testDescriptionText)
 
 	option := NewOptionsMultiSelectBlockElement("static_select", nil, "test", testOption)
-	assert.Equal(t, option.Type, "static_select")
-	assert.Equal(t, len(option.Options), 1)
+	assert.Equal(t, "static_select", option.Type)
+	assert.Equal(t, 1, len(option.Options))
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -100,9 +100,9 @@ func TestNewOptionsGroupMultiSelectBlockElement(t *testing.T) {
 
 	optGroup := NewOptionsGroupMultiSelectBlockElement("static_select", nil, "test", testGroupOption)
 
-	assert.Equal(t, optGroup.Type, "static_select")
-	assert.Equal(t, optGroup.ActionID, "test")
-	assert.Equal(t, len(optGroup.OptionGroups), 1)
+	assert.Equal(t, "static_select", optGroup.Type)
+	assert.Equal(t, "test", optGroup.ActionID)
+	assert.Equal(t, 1, len(optGroup.OptionGroups))
 
 }
 func TestNewOverflowBlockElement(t *testing.T) {
@@ -120,9 +120,9 @@ func TestNewOverflowBlockElement(t *testing.T) {
 	// Build overflow section
 	overflowElement := NewOverflowBlockElement("test", overflowOptionOne, overflowOptionTwo, overflowOptionThree)
 
-	assert.Equal(t, string(overflowElement.Type), "overflow")
-	assert.Equal(t, overflowElement.ActionID, "test")
-	assert.Equal(t, len(overflowElement.Options), 3)
+	assert.Equal(t, "overflow", string(overflowElement.Type))
+	assert.Equal(t, "test", overflowElement.ActionID)
+	assert.Equal(t, 3, len(overflowElement.Options))
 
 }
 
@@ -130,50 +130,50 @@ func TestNewDatePickerBlockElement(t *testing.T) {
 
 	datepickerElement := NewDatePickerBlockElement("test")
 
-	assert.Equal(t, string(datepickerElement.Type), "datepicker")
-	assert.Equal(t, datepickerElement.ActionID, "test")
+	assert.Equal(t, "datepicker", string(datepickerElement.Type))
+	assert.Equal(t, "test", datepickerElement.ActionID)
 
 }
 
 func TestNewTimePickerBlockElement(t *testing.T) {
 	timepickerElement := NewTimePickerBlockElement("test")
-	assert.Equal(t, string(timepickerElement.Type), "timepicker")
-	assert.Equal(t, timepickerElement.ActionID, "test")
+	assert.Equal(t, "timepicker", string(timepickerElement.Type))
+	assert.Equal(t, "test", timepickerElement.ActionID)
 }
 
 func TestNewDateTimePickerBlockElement(t *testing.T) {
 	datetimepickerElement := NewDateTimePickerBlockElement("test")
-	assert.Equal(t, string(datetimepickerElement.Type), "datetimepicker")
-	assert.Equal(t, datetimepickerElement.ActionID, "test")
+	assert.Equal(t, "datetimepicker", string(datetimepickerElement.Type))
+	assert.Equal(t, "test", datetimepickerElement.ActionID)
 }
 
 func TestNewPlainTextInputBlockElement(t *testing.T) {
 
 	plainTextInputElement := NewPlainTextInputBlockElement(nil, "test")
 
-	assert.Equal(t, string(plainTextInputElement.Type), "plain_text_input")
-	assert.Equal(t, plainTextInputElement.ActionID, "test")
+	assert.Equal(t, "plain_text_input", string(plainTextInputElement.Type))
+	assert.Equal(t, "test", plainTextInputElement.ActionID)
 
 }
 
 func TestNewRichTextInputBlockElement(t *testing.T) {
 	richTextInputElement := NewRichTextInputBlockElement(nil, "test")
-	assert.Equal(t, string(richTextInputElement.Type), "rich_text_input")
-	assert.Equal(t, richTextInputElement.ActionID, "test")
+	assert.Equal(t, "rich_text_input", string(richTextInputElement.Type))
+	assert.Equal(t, "test", richTextInputElement.ActionID)
 }
 
 func TestNewEmailTextInputBlockElement(t *testing.T) {
 	emailTextInputElement := NewEmailTextInputBlockElement(nil, "example@example.com")
 
-	assert.Equal(t, string(emailTextInputElement.Type), "email_text_input")
-	assert.Equal(t, emailTextInputElement.ActionID, "example@example.com")
+	assert.Equal(t, "email_text_input", string(emailTextInputElement.Type))
+	assert.Equal(t, "example@example.com", emailTextInputElement.ActionID)
 }
 
 func TestNewURLTextInputBlockElement(t *testing.T) {
 	urlTextInputElement := NewURLTextInputBlockElement(nil, "www.example.com")
 
-	assert.Equal(t, string(urlTextInputElement.Type), "url_text_input")
-	assert.Equal(t, urlTextInputElement.ActionID, "www.example.com")
+	assert.Equal(t, "url_text_input", string(urlTextInputElement.Type))
+	assert.Equal(t, "www.example.com", urlTextInputElement.ActionID)
 }
 
 func TestNewCheckboxGroupsBlockElement(t *testing.T) {
@@ -194,9 +194,9 @@ func TestNewCheckboxGroupsBlockElement(t *testing.T) {
 	// Build checkbox-group element
 	checkBoxGroupElement := NewCheckboxGroupsBlockElement("test", checkBoxOptionOne, checkBoxOptionTwo, checkBoxOptionThree)
 
-	assert.Equal(t, string(checkBoxGroupElement.Type), "checkboxes")
-	assert.Equal(t, checkBoxGroupElement.ActionID, "test")
-	assert.Equal(t, len(checkBoxGroupElement.Options), 3)
+	assert.Equal(t, "checkboxes", string(checkBoxGroupElement.Type))
+	assert.Equal(t, "test", checkBoxGroupElement.ActionID)
+	assert.Equal(t, 3, len(checkBoxGroupElement.Options))
 }
 
 func TestNewRadioButtonsBlockElement(t *testing.T) {
@@ -214,9 +214,9 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 	// Build radio button element
 	radioButtonsElement := NewRadioButtonsBlockElement("test", radioButtonsOptionOne, radioButtonsOptionTwo, radioButtonsOptionThree)
 
-	assert.Equal(t, string(radioButtonsElement.Type), "radio_buttons")
-	assert.Equal(t, radioButtonsElement.ActionID, "test")
-	assert.Equal(t, len(radioButtonsElement.Options), 3)
+	assert.Equal(t, "radio_buttons", string(radioButtonsElement.Type))
+	assert.Equal(t, "test", radioButtonsElement.ActionID)
+	assert.Equal(t, 3, len(radioButtonsElement.Options))
 
 }
 
@@ -224,9 +224,9 @@ func TestNewNumberInputBlockElement(t *testing.T) {
 
 	numberInputElement := NewNumberInputBlockElement(nil, "test", true)
 
-	assert.Equal(t, string(numberInputElement.Type), "number_input")
-	assert.Equal(t, numberInputElement.ActionID, "test")
-	assert.Equal(t, numberInputElement.IsDecimalAllowed, true)
+	assert.Equal(t, "number_input", string(numberInputElement.Type))
+	assert.Equal(t, "test", numberInputElement.ActionID)
+	assert.Equal(t, true, numberInputElement.IsDecimalAllowed)
 
 }
 
@@ -234,28 +234,28 @@ func TestNewFileInputBlockElement(t *testing.T) {
 
 	fileInputElement := NewFileInputBlockElement("test")
 
-	assert.Equal(t, string(fileInputElement.Type), "file_input")
-	assert.Equal(t, fileInputElement.ActionID, "test")
+	assert.Equal(t, "file_input", string(fileInputElement.Type))
+	assert.Equal(t, "test", fileInputElement.ActionID)
 
 	fileInputElement.WithFileTypes("jpg", "png")
-	assert.Equal(t, len(fileInputElement.FileTypes), 2)
+	assert.Equal(t, 2, len(fileInputElement.FileTypes))
 	assert.Contains(t, fileInputElement.FileTypes, "jpg")
 	assert.Contains(t, fileInputElement.FileTypes, "png")
 
 	fileInputElement.WithMaxFiles(10)
-	assert.Equal(t, fileInputElement.MaxFiles, 10)
+	assert.Equal(t, 10, fileInputElement.MaxFiles)
 }
 
 func TestNewFeedbackButton(t *testing.T) {
 	btnText := NewTextBlockObject("plain_text", "Good", false, false)
 	feedbackButton := NewFeedbackButton(btnText, "positive_feedback")
 
-	assert.Equal(t, feedbackButton.Text.Text, "Good")
-	assert.Equal(t, feedbackButton.Value, "positive_feedback")
-	assert.Equal(t, feedbackButton.AccessibilityLabel, "")
+	assert.Equal(t, "Good", feedbackButton.Text.Text)
+	assert.Equal(t, "positive_feedback", feedbackButton.Value)
+	assert.Equal(t, "", feedbackButton.AccessibilityLabel)
 
 	feedbackButton.WithAccessibilityLabel("Mark as good")
-	assert.Equal(t, feedbackButton.AccessibilityLabel, "Mark as good")
+	assert.Equal(t, "Mark as good", feedbackButton.AccessibilityLabel)
 }
 
 func TestNewFeedbackButtonsBlockElement(t *testing.T) {
@@ -266,10 +266,10 @@ func TestNewFeedbackButtonsBlockElement(t *testing.T) {
 
 	feedbackElement := NewFeedbackButtonsBlockElement("feedback_1", positiveBtn, negativeBtn)
 
-	assert.Equal(t, string(feedbackElement.Type), "feedback_buttons")
-	assert.Equal(t, feedbackElement.ActionID, "feedback_1")
-	assert.Equal(t, feedbackElement.PositiveButton.Value, "positive")
-	assert.Equal(t, feedbackElement.NegativeButton.Value, "negative")
+	assert.Equal(t, "feedback_buttons", string(feedbackElement.Type))
+	assert.Equal(t, "feedback_1", feedbackElement.ActionID)
+	assert.Equal(t, "positive", feedbackElement.PositiveButton.Value)
+	assert.Equal(t, "negative", feedbackElement.NegativeButton.Value)
 }
 
 func TestFeedbackButtonsFluentMethods(t *testing.T) {
@@ -283,12 +283,12 @@ func TestFeedbackButtonsFluentMethods(t *testing.T) {
 	newPositiveText := NewTextBlockObject("plain_text", "Excellent", false, false)
 	newPositiveBtn := NewFeedbackButton(newPositiveText, "excellent")
 	feedbackElement.WithPositiveButton(newPositiveBtn)
-	assert.Equal(t, feedbackElement.PositiveButton.Value, "excellent")
+	assert.Equal(t, "excellent", feedbackElement.PositiveButton.Value)
 
 	newNegativeText := NewTextBlockObject("plain_text", "Poor", false, false)
 	newNegativeBtn := NewFeedbackButton(newNegativeText, "poor")
 	feedbackElement.WithNegativeButton(newNegativeBtn)
-	assert.Equal(t, feedbackElement.NegativeButton.Value, "poor")
+	assert.Equal(t, "poor", feedbackElement.NegativeButton.Value)
 }
 
 func TestFeedbackButtonsJSONMarshalling(t *testing.T) {
@@ -315,10 +315,10 @@ func TestNewIconButtonBlockElement(t *testing.T) {
 	btnText := NewTextBlockObject("plain_text", "Delete", false, false)
 	iconButton := NewIconButtonBlockElement("trash", btnText, "delete_action")
 
-	assert.Equal(t, string(iconButton.Type), "icon_button")
-	assert.Equal(t, iconButton.Icon, "trash")
-	assert.Equal(t, iconButton.Text.Text, "Delete")
-	assert.Equal(t, iconButton.ActionID, "delete_action")
+	assert.Equal(t, "icon_button", string(iconButton.Type))
+	assert.Equal(t, "trash", iconButton.Icon)
+	assert.Equal(t, "Delete", iconButton.Text.Text)
+	assert.Equal(t, "delete_action", iconButton.ActionID)
 }
 
 func TestIconButtonFluentMethods(t *testing.T) {
@@ -326,13 +326,13 @@ func TestIconButtonFluentMethods(t *testing.T) {
 	iconButton := NewIconButtonBlockElement("trash", btnText, "delete_action")
 
 	iconButton.WithValue("item_123")
-	assert.Equal(t, iconButton.Value, "item_123")
+	assert.Equal(t, "item_123", iconButton.Value)
 
 	iconButton.WithAccessibilityLabel("Delete this item")
-	assert.Equal(t, iconButton.AccessibilityLabel, "Delete this item")
+	assert.Equal(t, "Delete this item", iconButton.AccessibilityLabel)
 
 	iconButton.WithVisibleToUserIDs([]string{"U123", "U456"})
-	assert.Equal(t, len(iconButton.VisibleToUserIDs), 2)
+	assert.Equal(t, 2, len(iconButton.VisibleToUserIDs))
 	assert.Contains(t, iconButton.VisibleToUserIDs, "U123")
 
 	titleText := NewTextBlockObject("plain_text", "Are you sure?", false, false)
@@ -342,7 +342,7 @@ func TestIconButtonFluentMethods(t *testing.T) {
 	confirmObj := NewConfirmationBlockObject(titleText, messageText, confirmText, denyText)
 	iconButton.WithConfirm(confirmObj)
 	require.NotNil(t, iconButton.Confirm)
-	assert.Equal(t, iconButton.Confirm.Title.Text, "Are you sure?")
+	assert.Equal(t, "Are you sure?", iconButton.Confirm.Title.Text)
 }
 
 func TestIconButtonJSONMarshalling(t *testing.T) {
@@ -376,7 +376,7 @@ func TestNewWorkflowButtonBlockElement(t *testing.T) {
 	}
 	workflowButton := NewWorkflowButtonBlockElement(btnText, workflow, "workflow_action_1")
 
-	assert.Equal(t, string(workflowButton.Type), "workflow_button")
+	assert.Equal(t, "workflow_button", string(workflowButton.Type))
 	assert.Equal(t, "workflow_action_1", workflowButton.ActionID)
 	assert.Equal(t, "Run Workflow", workflowButton.Text.Text)
 	require.NotNil(t, workflowButton.Workflow)

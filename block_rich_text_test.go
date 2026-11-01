@@ -88,10 +88,10 @@ const (
 func TestNewRichTextBlock(t *testing.T) {
 	richTextBlock := NewRichTextBlock("test_block")
 
-	assert.Equal(t, richTextBlock.BlockType(), MBTRichText)
-	assert.Equal(t, string(richTextBlock.Type), "rich_text")
-	assert.Equal(t, richTextBlock.BlockID, "test_block")
-	assert.Equal(t, richTextBlock.ID(), "test_block")
+	assert.Equal(t, MBTRichText, richTextBlock.BlockType())
+	assert.Equal(t, "rich_text", string(richTextBlock.Type))
+	assert.Equal(t, "test_block", richTextBlock.BlockID)
+	assert.Equal(t, "test_block", richTextBlock.ID())
 }
 
 func TestRichTextBlock_UnmarshalJSON(t *testing.T) {

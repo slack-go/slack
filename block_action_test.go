@@ -11,9 +11,9 @@ func TestNewActionBlock(t *testing.T) {
 	approveBtn := NewButtonBlockElement("", "click_me_123", approveBtnTxt)
 	actionBlock := NewActionBlock("test", approveBtn)
 
-	assert.Equal(t, actionBlock.BlockType(), MBTAction)
-	assert.Equal(t, string(actionBlock.Type), "actions")
-	assert.Equal(t, actionBlock.BlockID, "test")
-	assert.Equal(t, actionBlock.ID(), "test")
-	assert.Equal(t, len(actionBlock.Elements.ElementSet), 1)
+	assert.Equal(t, MBTAction, actionBlock.BlockType())
+	assert.Equal(t, "actions", string(actionBlock.Type))
+	assert.Equal(t, "test", actionBlock.BlockID)
+	assert.Equal(t, "test", actionBlock.ID())
+	assert.Equal(t, 1, len(actionBlock.Elements.ElementSet))
 }

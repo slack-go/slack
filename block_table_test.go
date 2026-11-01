@@ -106,12 +106,12 @@ func TestNewTableBlock(t *testing.T) {
 		},
 	))
 
-	assert.Equal(t, tableBlock.BlockType(), MBTTable)
-	assert.Equal(t, string(tableBlock.Type), "table")
-	assert.Equal(t, tableBlock.BlockID, "test1")
-	assert.Equal(t, tableBlock.ID(), "test1")
-	assert.Equal(t, len(tableBlock.Rows), 2)
-	assert.Equal(t, len(tableBlock.ColumnSettings), 0)
+	assert.Equal(t, MBTTable, tableBlock.BlockType())
+	assert.Equal(t, "table", string(tableBlock.Type))
+	assert.Equal(t, "test1", tableBlock.BlockID)
+	assert.Equal(t, "test1", tableBlock.ID())
+	assert.Equal(t, 2, len(tableBlock.Rows))
+	assert.Equal(t, 0, len(tableBlock.ColumnSettings))
 
 	// Check if marshalled payload matches expected JSON
 	marshalled, err := json.Marshal(tableBlock)
