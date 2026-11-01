@@ -1,4 +1,4 @@
 [tools]
 go = "1.26.7"
-golangci-lint = "2.14.0"
+golangci-lint = "2.15.0"
 "go:honnef.co/go/tools/cmd/staticcheck" = "2026.2.2"
