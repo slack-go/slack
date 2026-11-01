@@ -29,6 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helpers use the legacy `muted_channels` preference, which may differ from the
   current client's notification settings.
 
+### Deprecated
+
+- Deprecate stars API helpers and `StarredItemPagination` and remove the legacy
+  stars example. These APIs do not manage Slack's Later items; Slack recommends
+  retiring features that use them. See
+  [Slack's guidance](https://docs.slack.dev/reference/methods/stars.list/).
+
 ### Removed
 
 - **Breaking:** Remove `SetUserAsActive` and `SetUserAsActiveContext`, which called

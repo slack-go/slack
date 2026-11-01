@@ -36,12 +36,19 @@ func NewStarsParameters() StarsParameters {
 
 // AddStar stars an item in a channel.
 // For more information see the AddStarContext documentation.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) AddStar(channel string, item ItemRef) error {
 	return api.AddStarContext(context.Background(), channel, item)
 }
 
 // AddStarContext stars an item in a channel with a custom context.
-// Slack API docs: https://api.slack.com/methods/stars.add
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/stars.add
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) AddStarContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
@@ -67,12 +74,19 @@ func (api *Client) AddStarContext(ctx context.Context, channel string, item Item
 
 // RemoveStar removes a starred item from a channel.
 // For more information see the RemoveStarContext documentation.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) RemoveStar(channel string, item ItemRef) error {
 	return api.RemoveStarContext(context.Background(), channel, item)
 }
 
 // RemoveStarContext removes a starred item from a channel with a custom context.
-// Slack API docs: https://api.slack.com/methods/stars.remove
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/stars.remove
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) RemoveStarContext(ctx context.Context, channel string, item ItemRef) error {
 	values := url.Values{
 		"channel": {channel},
@@ -98,12 +112,19 @@ func (api *Client) RemoveStarContext(ctx context.Context, channel string, item I
 
 // ListStars returns information about the stars a user added.
 // For more information see the ListStarsContext documentation.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) ListStars(params StarsParameters) ([]Item, string, error) {
 	return api.ListStarsContext(context.Background(), params)
 }
 
 // ListStarsContext returns information about the stars a user added with a custom context.
-// Slack API docs: https://api.slack.com/methods/stars.list
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/stars.list
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) ListStarsContext(ctx context.Context, params StarsParameters) ([]Item, string, error) {
 	values := url.Values{
 		"token": {api.token},
@@ -149,12 +170,18 @@ func (api *Client) ListStarsContext(ctx context.Context, params StarsParameters)
 //
 // This function still exists to maintain backwards compatibility.
 // I exposed it as returning []StarredItem, so it shall stay as StarredItem.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) GetStarred(params StarsParameters) ([]StarredItem, string, error) {
 	return api.GetStarredContext(context.Background(), params)
 }
 
 // GetStarredContext returns a list of StarredItem items with a custom context
 // For more details see GetStarred
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) GetStarredContext(ctx context.Context, params StarsParameters) ([]StarredItem, string, error) {
 	items, nextCursor, err := api.ListStarsContext(ctx, params)
 	if err != nil {
@@ -173,7 +200,10 @@ type listResponsePaginated struct {
 	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
-// StarredItemPagination allows for paginating over the starred items
+// StarredItemPagination allows for paginating over legacy starred items.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 type StarredItemPagination struct {
 	Items        []Item
 	limit        int
@@ -181,15 +211,21 @@ type StarredItemPagination struct {
 	c            *Client
 }
 
-// ListStarsOption options for the GetUsers method call.
+// ListStarsOption configures [Client.ListStarsPaginated].
 type ListStarsOption func(*StarredItemPagination)
 
-// ListAllStars returns the complete list of starred items
+// ListAllStars returns the complete list of legacy starred items.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) ListAllStars() ([]Item, error) {
 	return api.ListAllStarsContext(context.Background())
 }
 
-// ListAllStarsContext returns the list of users (with their detailed information) with a custom context
+// ListAllStarsContext returns all legacy starred items with a custom context.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err error) {
 	p := api.ListStarsPaginated()
 	for err == nil {
@@ -209,7 +245,10 @@ func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err
 	return results, p.failure(err)
 }
 
-// ListStarsPaginated fetches users in a paginated fashion, see ListStarsPaginationContext for usage.
+// ListStarsPaginated initializes pagination over legacy starred items.
+//
+// Deprecated: Slack's stars APIs do not manage Later items. Stars are no longer
+// visible to end-users, and Slack recommends retiring features that use them.
 func (api *Client) ListStarsPaginated(options ...ListStarsOption) StarredItemPagination {
 	return newStarPagination(api, options...)
 }
