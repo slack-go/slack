@@ -438,6 +438,9 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 	if params.TeamID != "" {
 		values.Add("team_id", params.TeamID)
 	}
+	if params.Types != "" {
+		values.Add("types", params.Types)
+	}
 	if params.Limit != DEFAULT_FILES_COUNT {
 		values.Add("limit", strconv.Itoa(params.Limit))
 	}

@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Honor the `Types` filter in `ListFiles` and `ListFilesContext` requests.
+  [Slack API reference](https://docs.slack.dev/reference/methods/files.list/).
+
 - Send the requested Y crop coordinate in user photo uploads.
 
 - Preserve the initial pagination state after failed conversations and stars

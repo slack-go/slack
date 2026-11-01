@@ -47,6 +47,27 @@ func (h *fileCommentHandler) handler(w http.ResponseWriter, r *http.Request) {
 
 type mockHTTPClient struct{}
 
+func TestListFilesTypeFilter(t *testing.T) {
+	for _, types := range []string{"images", "spaces,snippets", ""} {
+		t.Run(types, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/files.list" {
+					t.Errorf("unexpected endpoint: %s", r.URL.Path)
+				}
+				if got := r.FormValue("types"); got != types {
+					t.Errorf("types = %q, want %q", got, types)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"ok":true,"files":[]}`)
+			}))
+			t.Cleanup(server.Close)
+			api := New("test-token", OptionAPIURL(server.URL+"/"))
+			_, _, err := api.ListFiles(ListFilesParameters{Types: types})
+			require.NoError(t, err)
+		})
+	}
+}
+
 func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
 	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
