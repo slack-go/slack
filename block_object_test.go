@@ -175,6 +175,38 @@ func TestValidateTextBlockObject(t *testing.T) {
 	}
 }
 
+func TestValidateTextBlockObjectTextLength(t *testing.T) {
+	tests := []struct {
+		name    string
+		text    string
+		wantErr bool
+	}{
+		{name: "ASCII at limit", text: strings.Repeat("a", 3000)},
+		{name: "ASCII over limit", text: strings.Repeat("a", 3001), wantErr: true},
+		{name: "accented text over 3000 bytes", text: strings.Repeat("é", 1501)},
+		{name: "CJK at limit", text: strings.Repeat("界", 3000)},
+		{name: "CJK over limit", text: strings.Repeat("界", 3001), wantErr: true},
+		{name: "emoji at limit", text: strings.Repeat("😀", 3000)},
+		{name: "emoji over limit", text: strings.Repeat("😀", 3001), wantErr: true},
+	}
+
+	for _, blockType := range []string{"plain_text", "mrkdwn"} {
+		t.Run(blockType, func(t *testing.T) {
+			for _, tt := range tests {
+				t.Run(tt.name, func(t *testing.T) {
+					block := TextBlockObject{Type: blockType, Text: tt.text}
+					err := block.Validate()
+					if tt.wantErr {
+						assert.EqualError(t, err, "text cannot be longer than 3000 characters")
+					} else {
+						assert.NoError(t, err)
+					}
+				})
+			}
+		})
+	}
+}
+
 func TestTextBlockObject_UnmarshalJSON(t *testing.T) {
 	emojiTrue := new(bool)
 	emojiFalse := new(bool)
