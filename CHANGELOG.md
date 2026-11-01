@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Return Slack API errors from starred-item pagination rather than silently
   treating them as the end of the list.
 
+- Synchronize RTM connection-info reads with reconnect updates.
+
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.
 
