@@ -6,7 +6,7 @@ help:
 	@echo "The following commands are available:"
 	@echo ""
 	@echo "    make deps              : Fetch all dependencies"
-	@echo "    make fmt               : Run go fmt to fix any formatting issues"
+	@echo "    make fmt               : Format Go code and organize imports"
 	@echo "    make vet               : Run go vet on all packages"
 	@echo "    make lint              : Run golangci-lint for linting issues"
 	@echo "    make staticcheck       : Run Staticcheck, including examples"
@@ -22,13 +22,13 @@ deps:
 	@go mod tidy
 
 fmt:
-	@go fmt ./...
+	@golangci-lint fmt
 
 vet:
 	@go vet ./...
 
 lint:
-	@command -v golangci-lint >/dev/null 2>&1 && golangci-lint run ./... || go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0 run ./...
+	@golangci-lint run ./...
 
 staticcheck:
 	@staticcheck ./...

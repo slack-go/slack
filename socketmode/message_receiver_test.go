@@ -10,10 +10,11 @@ import (
 	"testing"
 
 	"github.com/gorilla/websocket"
-	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slacktest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slacktest"
 )
 
 // sendFrames returns a server that writes frames in order, then closes the WebSocket.
