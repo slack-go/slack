@@ -92,7 +92,9 @@ func TestSetAgentConversationProperties(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.setProperties", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
 				assert.Equal(t, "C9876543210", r.PostForm.Get("channel_id"))
 				assert.Len(t, r.PostForm, 2+len(tt.want))
@@ -119,9 +121,13 @@ func TestSetAgentConversationPropertiesWarnings(t *testing.T) {
 		items[i] = AgentContextBarItem{Key: fmt.Sprintf("item-%d", i), Label: "Context"}
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.NoError(t, r.ParseForm())
+		if !assert.NoError(t, r.ParseForm()) {
+			return
+		}
 		var properties AgentCodeChannelProperties
-		require.NoError(t, json.Unmarshal([]byte(r.PostForm.Get("code_channel")), &properties))
+		if !assert.NoError(t, json.Unmarshal([]byte(r.PostForm.Get("code_channel")), &properties)) {
+			return
+		}
 		assert.Len(t, properties.ContextBarItems, 6, "let Slack enforce limits and return warnings")
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"ok":true,"channel_id":"C9876543210","warning":"too_many_context_bar_items"}`))

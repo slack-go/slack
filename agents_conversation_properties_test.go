@@ -35,7 +35,9 @@ func TestGetConversationInfoAgentProperties(t *testing.T) {
 	}}}`
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/conversations.info", r.URL.Path)
-		require.NoError(t, r.ParseForm())
+		if !assert.NoError(t, r.ParseForm()) {
+			return
+		}
 		assert.Equal(t, "C123ABC456", r.PostForm.Get("channel"))
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(body))

@@ -55,7 +55,9 @@ func TestGetAgentConversationCanvas(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.getCanvas", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
 				assert.Equal(t, "C9876543210", r.PostForm.Get("channel"))
 				assert.Equal(t, "F1234567890", r.PostForm.Get("canvas_id"))
@@ -138,7 +140,9 @@ func TestSetAgentConversationCanvasContent(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.setCanvasContent", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, url.Values{
 					"token": {"testing-token"}, "channel": {"C9876543210"},
 					"canvas_id": {"F1234567890"}, "content": {tt.content},
