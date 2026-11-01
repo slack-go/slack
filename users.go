@@ -728,7 +728,7 @@ func (api *Client) SetUserCustomFieldsContext(ctx context.Context, userID string
 	}
 
 	response := &userResponseFull{}
-	if _, err := postForm(ctx, api.httpclient, APIURL+"users.profile.set", values, response, api); err != nil {
+	if err := api.postMethod(ctx, "users.profile.set", values, response); err != nil {
 		return err
 	}
 
