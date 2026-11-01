@@ -209,7 +209,7 @@ func ParseEvent(rawEvent json.RawMessage, opts ...Option) (EventsAPIEvent, error
 		cbEvent := e.Data.(*EventsAPICallbackEvent)
 		innerEvent, err := parseInnerEvent(cbEvent)
 		if err != nil {
-			err := fmt.Errorf("EventsAPI Error parsing inner event: %s, %s", innerEvent.Type, err)
+			err := fmt.Errorf("EventsAPI Error parsing inner event: %s, %w", innerEvent.Type, err)
 			return EventsAPIEvent{
 				"",
 				"",

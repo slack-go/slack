@@ -829,7 +829,7 @@ func (api *Client) GetAllConversationsContext(ctx context.Context, options ...Ge
 		p, err = p.Next(ctx)
 		if err == nil {
 			results = append(results, p.Conversations...)
-		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+		} else if rateLimitedError, ok := errors.AsType[*RateLimitedError](err); ok {
 			select {
 			case <-ctx.Done():
 				err = ctx.Err()

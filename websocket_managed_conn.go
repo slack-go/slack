@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -155,16 +156,14 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		default:
 		}
 
-		switch actual := err.(type) {
-		case StatusCodeError:
+		if actual, ok := errors.AsType[StatusCodeError](err); ok {
 			if actual.Code == http.StatusNotFound {
 				rtm.Debugf("invalid auth when connecting with RTM: %s", err)
 				rtm.IncomingEvents <- RTMEvent{"invalid_auth", &InvalidAuthEvent{}}
 				return nil, nil, err
 			}
-		case *RateLimitedError:
+		} else if actual, ok := errors.AsType[*RateLimitedError](err); ok {
 			backoff = actual.RetryAfter
-		default:
 		}
 
 		backoff = timex.Max(backoff, boff.Duration())
@@ -385,7 +384,7 @@ func (rtm *RTM) receiveIncomingEvent(ctx context.Context, conn *websocket.Conn, 
 	err := readErr
 	if readErr == nil {
 		err = json.NewDecoder(reader).Decode(&event)
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			err = io.ErrUnexpectedEOF
 		}
 	}
@@ -399,7 +398,7 @@ func (rtm *RTM) receiveIncomingEvent(ctx context.Context, conn *websocket.Conn, 
 	}
 
 	switch {
-	case readErr == nil && err == io.ErrUnexpectedEOF:
+	case readErr == nil && errors.Is(err, io.ErrUnexpectedEOF):
 		// An empty or incomplete JSON frame need not signify a failed connection.
 
 		// trigger a 'PING' to detect potential websocket disconnect

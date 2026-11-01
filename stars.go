@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"strconv"
 	"time"
@@ -195,7 +196,7 @@ func (api *Client) ListAllStarsContext(ctx context.Context) (results []Item, err
 		p, err = p.next(ctx)
 		if err == nil {
 			results = append(results, p.Items...)
-		} else if rateLimitedError, ok := err.(*RateLimitedError); ok {
+		} else if rateLimitedError, ok := errors.AsType[*RateLimitedError](err); ok {
 			select {
 			case <-ctx.Done():
 				err = ctx.Err()
@@ -228,7 +229,7 @@ func newStarPagination(c *Client, options ...ListStarsOption) (sip StarredItemPa
 
 // done checks if the pagination has completed
 func (StarredItemPagination) done(err error) bool {
-	return err == errPaginationComplete
+	return errors.Is(err, errPaginationComplete)
 }
 
 // done checks if pagination failed.

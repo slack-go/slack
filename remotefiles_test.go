@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"errors"
 	"maps"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestAddRemoteFileWithoutTitle(t *testing.T) {
 		ExternalID:  "externalID",
 		ExternalURL: "http://example.com/",
 	}
-	if _, err := api.AddRemoteFile(params); err != ErrParametersMissing {
+	if _, err := api.AddRemoteFile(params); !errors.Is(err, ErrParametersMissing) {
 		t.Errorf("Expected ErrParametersMissing. got %s", err)
 	}
 }
@@ -166,7 +167,7 @@ func TestShareRemoteFile(t *testing.T) {
 func TestShareRemoteFileWithoutChannels(t *testing.T) {
 	once.Do(startServer)
 	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-	if _, err := api.ShareRemoteFile([]string{}, "ExternalID", ""); err != ErrParametersMissing {
+	if _, err := api.ShareRemoteFile([]string{}, "ExternalID", ""); !errors.Is(err, ErrParametersMissing) {
 		t.Errorf("Expected ErrParametersMissing. got %s", err)
 	}
 }
