@@ -11,6 +11,7 @@ linters:
     - gocritic
     - gosec
     - govet
+    - ineffassign
     - makezero
     - misspell
     - modernize
