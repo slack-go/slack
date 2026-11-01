@@ -465,7 +465,7 @@ func unsafeWriteSocketModeResponse(conn *websocket.Conn, res *Response) error {
 	}
 
 	// Remove write deadline regardless of write succeeding or not
-	defer conn.SetWriteDeadline(time.Time{})
+	defer func() { _ = conn.SetWriteDeadline(time.Time{}) }()
 
 	// Use pre-marshaled bytes from SendCtx when available to avoid
 	// marshaling twice. Fall back to WriteJSON for responses that

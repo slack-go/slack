@@ -186,7 +186,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 		case <-time.After(backoff): // retry after the backoff.
 		case intentional := <-rtm.killChannel:
 			if intentional {
-				rtm.killConnection(intentional, ErrRTMDisconnected)
+				_ = rtm.killConnection(intentional, ErrRTMDisconnected)
 				return nil, nil, ErrRTMDisconnected
 			}
 		case <-rtm.disconnected:
