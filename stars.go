@@ -242,9 +242,7 @@ func (t StarredItemPagination) failure(err error) error {
 
 // next gets the next list of starred items based on the cursor value
 func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPagination, err error) {
-	var (
-		resp *listResponsePaginated
-	)
+	var resp listResponsePaginated
 
 	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
 		return t, errPaginationComplete
@@ -259,6 +257,9 @@ func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPaginatio
 	}
 
 	if err = t.c.postMethod(ctx, "stars.list", values, &resp); err != nil {
+		return t, err
+	}
+	if err = resp.Err(); err != nil {
 		return t, err
 	}
 

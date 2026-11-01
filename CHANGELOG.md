@@ -34,6 +34,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   requests, so a rate-limited first page is retried instead of reporting an
   empty successful result.
 
+- Return Slack API errors from starred-item pagination rather than silently
+  treating them as the end of the list.
+
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.
 
