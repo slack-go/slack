@@ -13,16 +13,16 @@ import (
 func TestNewImageBlockObject(t *testing.T) {
 	imageObject := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/beagle.png", "Beagle")
 
-	assert.Equal(t, string(imageObject.Type), "image")
-	assert.Equal(t, imageObject.AltText, "Beagle")
+	assert.Equal(t, "image", string(imageObject.Type))
+	assert.Equal(t, "Beagle", imageObject.AltText)
 	assert.Contains(t, *imageObject.ImageURL, "beagle.png")
 }
 
 func TestNewTextBlockObject(t *testing.T) {
 	textObject := NewTextBlockObject("plain_text", "test", true, false)
 
-	assert.Equal(t, textObject.Type, "plain_text")
-	assert.Equal(t, textObject.Text, "test")
+	assert.Equal(t, "plain_text", textObject.Type)
+	assert.Equal(t, "test", textObject.Text)
 	assert.True(t, *textObject.Emoji, "Emoji property should be true")
 	assert.False(t, textObject.Verbatim, "Verbatim should be false")
 }
@@ -34,9 +34,9 @@ func TestNewConfirmationBlockObject(t *testing.T) {
 
 	confirmation := NewConfirmationBlockObject(titleObj, textObj, confirmObj, nil)
 
-	assert.Equal(t, confirmation.Title.Text, "testTitle")
-	assert.Equal(t, confirmation.Text.Text, "testText")
-	assert.Equal(t, confirmation.Confirm.Text, "testConfirm")
+	assert.Equal(t, "testTitle", confirmation.Title.Text)
+	assert.Equal(t, "testText", confirmation.Text.Text)
+	assert.Equal(t, "testConfirm", confirmation.Confirm.Text)
 	assert.Nil(t, confirmation.Deny, "Deny should be nil")
 }
 
@@ -60,9 +60,9 @@ func TestNewOptionBlockObject(t *testing.T) {
 	valDescriptionObj := NewTextBlockObject("plain_text", "testDescription", false, false)
 	optObj := NewOptionBlockObject("testOpt", valTextObj, valDescriptionObj)
 
-	assert.Equal(t, optObj.Text.Text, "testText")
-	assert.Equal(t, optObj.Description.Text, "testDescription")
-	assert.Equal(t, optObj.Value, "testOpt")
+	assert.Equal(t, "testText", optObj.Text.Text)
+	assert.Equal(t, "testDescription", optObj.Description.Text)
+	assert.Equal(t, "testOpt", optObj.Value)
 }
 
 func TestNewOptionGroupBlockElement(t *testing.T) {
@@ -72,7 +72,7 @@ func TestNewOptionGroupBlockElement(t *testing.T) {
 
 	optGroup := NewOptionGroupBlockElement(labelObj, optObj)
 
-	assert.Equal(t, optGroup.Label.Text, "testLabel")
+	assert.Equal(t, "testLabel", optGroup.Label.Text)
 	assert.Len(t, optGroup.Options, 1, "Options should contain one element")
 }
 

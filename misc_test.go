@@ -14,6 +14,15 @@ import (
 	"github.com/slack-go/slack/slackutilsx"
 )
 
+func TestKickResponseNullDoesNotPanic(t *testing.T) {
+	response := KickUserFromConversationSlackResponse{Ok: true}
+	require.NotPanics(t, func() {
+		require.NoError(t, json.Unmarshal([]byte("null"), &response))
+	})
+	// Like unmarshalling null into any struct, leave the existing value intact.
+	require.True(t, response.Ok)
+}
+
 var (
 	parseResponseOnce sync.Once
 )

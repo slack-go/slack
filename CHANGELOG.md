@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of looking for `internal_team_ids_count`.
   [Slack API reference](https://docs.slack.dev/reference/methods/admin.conversations.ekm.listOriginalConnectedChannelInfo/).
 
+- Honor the `Types` filter in `ListFiles` and `ListFilesContext` requests.
+  [Slack API reference](https://docs.slack.dev/reference/methods/files.list/).
+
 - Send the requested Y crop coordinate in user photo uploads.
 
 - Preserve the initial pagination state after failed conversations and stars
@@ -48,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   tolerating empty or incomplete JSON messages on healthy connections.
 
 - Deliver warnings from user-profile and event-authorization requests.
+
+- Avoid a nil-pointer panic when decoding a `null` conversation-kick response.
 
 - Honor the configured API endpoint in `SetUserCustomFields` and
   `SetUserCustomFieldsContext`.

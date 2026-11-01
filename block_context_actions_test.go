@@ -17,11 +17,11 @@ func TestNewContextActionsBlock(t *testing.T) {
 
 	contextActionsBlock := NewContextActionsBlock("test_block", feedbackElement)
 
-	assert.Equal(t, contextActionsBlock.BlockType(), MBTContextActions)
-	assert.Equal(t, string(contextActionsBlock.Type), "context_actions")
-	assert.Equal(t, contextActionsBlock.BlockID, "test_block")
-	assert.Equal(t, contextActionsBlock.ID(), "test_block")
-	assert.Equal(t, len(contextActionsBlock.Elements.ElementSet), 1)
+	assert.Equal(t, MBTContextActions, contextActionsBlock.BlockType())
+	assert.Equal(t, "context_actions", string(contextActionsBlock.Type))
+	assert.Equal(t, "test_block", contextActionsBlock.BlockID)
+	assert.Equal(t, "test_block", contextActionsBlock.ID())
+	assert.Equal(t, 1, len(contextActionsBlock.Elements.ElementSet))
 }
 
 func TestContextActionsBlockWithIconButton(t *testing.T) {
@@ -30,10 +30,10 @@ func TestContextActionsBlockWithIconButton(t *testing.T) {
 
 	contextActionsBlock := NewContextActionsBlock("icon_block", iconButton)
 
-	assert.Equal(t, contextActionsBlock.BlockType(), MBTContextActions)
-	assert.Equal(t, string(contextActionsBlock.Type), "context_actions")
-	assert.Equal(t, contextActionsBlock.BlockID, "icon_block")
-	assert.Equal(t, len(contextActionsBlock.Elements.ElementSet), 1)
+	assert.Equal(t, MBTContextActions, contextActionsBlock.BlockType())
+	assert.Equal(t, "context_actions", string(contextActionsBlock.Type))
+	assert.Equal(t, "icon_block", contextActionsBlock.BlockID)
+	assert.Equal(t, 1, len(contextActionsBlock.Elements.ElementSet))
 }
 
 func TestContextActionsBlockWithMultipleElements(t *testing.T) {
@@ -50,8 +50,8 @@ func TestContextActionsBlockWithMultipleElements(t *testing.T) {
 
 	contextActionsBlock := NewContextActionsBlock("multi_block", feedbackElement, iconButton)
 
-	assert.Equal(t, contextActionsBlock.BlockType(), MBTContextActions)
-	assert.Equal(t, len(contextActionsBlock.Elements.ElementSet), 2)
+	assert.Equal(t, MBTContextActions, contextActionsBlock.BlockType())
+	assert.Equal(t, 2, len(contextActionsBlock.Elements.ElementSet))
 }
 
 func TestContextActionsBlockJSONMarshalling(t *testing.T) {

@@ -12,10 +12,10 @@ func TestNewInputBlock(t *testing.T) {
 	hint := NewTextBlockObject("plain_text", "hint", false, false)
 	inputBlock := NewInputBlock("test", label, hint, element)
 
-	assert.Equal(t, inputBlock.BlockType(), MBTInput)
-	assert.Equal(t, string(inputBlock.Type), "input")
-	assert.Equal(t, inputBlock.ID(), "test")
-	assert.Equal(t, inputBlock.BlockID, "test")
+	assert.Equal(t, MBTInput, inputBlock.BlockType())
+	assert.Equal(t, "input", string(inputBlock.Type))
+	assert.Equal(t, "test", inputBlock.ID())
+	assert.Equal(t, "test", inputBlock.BlockID)
 	assert.Equal(t, inputBlock.Label, label)
 	assert.Equal(t, inputBlock.Element, element)
 }
