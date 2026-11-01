@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
+- Deprecate legacy Sign in with Slack identity helpers in favor of
+  `GetOpenIDConnectToken` and `GetOpenIDConnectUserInfo` and their context variants.
+  Migration requires the OpenID Connect authorization flow and scopes.
+
 - Deprecate classic OAuth helpers in favor of `GetOAuthV2Response` and
   `GetOAuthV2ResponseContext` for granular-permission apps. The OAuth V2 response
   exposes the bot token in `AccessToken` and user tokens in `AuthedUser`.
