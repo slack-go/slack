@@ -3,16 +3,16 @@ package socketmode
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slacktest"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_passContext(t *testing.T) {
@@ -28,21 +28,21 @@ func Test_passContext(t *testing.T) {
 
 	t.Run("RunWithContext", func(t *testing.T) {
 		// should fail immediately.
-		assert.EqualError(t, cli.RunContext(ctx), context.DeadlineExceeded.Error())
+		require.ErrorIs(t, cli.RunContext(ctx), context.DeadlineExceeded)
 	})
 
 	t.Run("openAndDial", func(t *testing.T) {
 		_, _, err := cli.openAndDial(ctx, func(_ string) error { return nil })
 
 		// should fail immediately.
-		assert.EqualError(t, errors.Unwrap(err), context.DeadlineExceeded.Error())
+		require.ErrorIs(t, err, context.DeadlineExceeded)
 	})
 
 	t.Run("OpenWithContext", func(t *testing.T) {
 		_, _, err := cli.OpenContext(ctx)
 
 		// should fail immediately.
-		assert.EqualError(t, errors.Unwrap(err), context.DeadlineExceeded.Error())
+		require.ErrorIs(t, err, context.DeadlineExceeded)
 	})
 }
 
@@ -83,8 +83,7 @@ func TestSendCtx_PayloadAtLimit(t *testing.T) {
 		EnvelopeID: envelope,
 		Payload:    padding,
 	})
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "silently dropped")
+	require.ErrorContains(t, err, "silently dropped")
 }
 
 func TestSendCtx_PayloadJustUnderLimit(t *testing.T) {
@@ -122,8 +121,7 @@ func TestSendCtx_MarshalError(t *testing.T) {
 		Payload:    func() {},
 	})
 
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "marshalling socket mode response")
+	require.ErrorContains(t, err, "marshalling socket mode response")
 }
 
 func TestAck_ReturnsNoError(t *testing.T) {
@@ -148,8 +146,7 @@ func TestAck_ReturnsErrorWhenPayloadTooLarge(t *testing.T) {
 	largePayload := strings.Repeat("x", maxResponseSize)
 	err := cli.Ack(Request{EnvelopeID: "test-envelope"}, largePayload)
 
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "silently dropped")
+	require.ErrorContains(t, err, "silently dropped")
 }
 
 // dialTestWebSocket starts a slacktest.Server with a custom /ws handler,

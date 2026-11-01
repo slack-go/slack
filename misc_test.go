@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/slack-go/slack/slackutilsx"
 )
 
@@ -240,13 +242,7 @@ func TestSlackResponseErrorsUnmarshalingUnknownStructure(t *testing.T) {
 	input := `{"unknown_field":"value","other_field":123}`
 	var errors SlackResponseErrors
 	err := json.Unmarshal([]byte(input), &errors)
-	if err == nil {
-		t.Error("expected error for unknown structure, got nil")
-	}
-	expectedError := "unknown error structure: " + input
-	if err.Error() != expectedError {
-		t.Errorf("got error %q; want %q", err.Error(), expectedError)
-	}
+	require.EqualError(t, err, "unknown error structure: "+input)
 }
 
 func TestSlackResponseWithErrors(t *testing.T) {
