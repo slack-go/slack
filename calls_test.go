@@ -47,7 +47,9 @@ func addCallHandler(t *testing.T) http.HandlerFunc {
 		json.Unmarshal([]byte(r.FormValue("users")), &call.Participants)
 		if start := r.FormValue("date_start"); start != "" {
 			dateStart, err := strconv.ParseInt(start, 10, 64)
-			require.NoError(t, err)
+			if !assert.NoError(t, err) {
+				return
+			}
 			call.DateStart = JSONTime(dateStart)
 		}
 		resp, _ := json.Marshal(callResponse{Call: call, SlackResponse: SlackResponse{Ok: true}})

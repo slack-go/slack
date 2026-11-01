@@ -133,7 +133,9 @@ func TestSetAgentConversationView(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.setView", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
 				assert.Equal(t, "C9876543210", r.PostForm.Get("channel_id"))
 				r.PostForm.Del("token")
@@ -300,7 +302,9 @@ func TestListAgentConversationViews(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.listViews", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, url.Values{
 					"token": {"testing-token"}, "channel_id": {"C9876543210"},
 				}, r.PostForm)
@@ -359,7 +363,9 @@ func TestRemoveAgentConversationView(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
 				assert.Equal(t, "/agents.conversations.removeView", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
 				assert.Equal(t, "C9876543210", r.PostForm.Get("channel_id"))
 				r.PostForm.Del("token")
@@ -398,7 +404,9 @@ func TestRemoveAgentConversationViewInvalidSelectors(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				r.PostForm.Del("token")
 				r.PostForm.Del("channel_id")
 				assert.Equal(t, tt.want, r.PostForm, "let Slack validate the selector combination")
