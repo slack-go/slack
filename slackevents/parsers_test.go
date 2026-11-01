@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
 
 func TestParseEventRejectsMalformedInnerEvent(t *testing.T) {

@@ -47,6 +47,10 @@ linters:
 formatters:
   enable:
     - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/slack-go/slack
   exclusions:
     generated: lax
     warn-unused: true

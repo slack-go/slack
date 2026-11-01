@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
 
 func TestRunRequestHandlerContinuesAfterMalformedCallback(t *testing.T) {

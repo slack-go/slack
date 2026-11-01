@@ -7,9 +7,10 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/stretchr/testify/require"
+
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slacktest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestRTMReconnectKeepsReplacementConnection(t *testing.T) {
