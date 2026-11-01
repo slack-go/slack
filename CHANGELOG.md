@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Decode confirmation dialogs, options, and option groups in `BlockObjects`
+  using their documented object and array fields instead of silently dropping them.
+  [Slack composition objects](https://docs.slack.dev/reference/block-kit/composition-objects/).
+
 - Send the requested Y crop coordinate in user photo uploads.
 
 - Preserve the initial pagination state after failed conversations and stars

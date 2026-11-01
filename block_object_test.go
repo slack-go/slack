@@ -8,7 +8,59 @@ import (
 
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
+	cases := []struct {
+		name string
+		raw  string
+	}{
+		{"plain_text", `{"type":"plain_text","text":"Hello","emoji":true}`},
+		{"mrkdwn", `{"type":"mrkdwn","text":"*Hello*","verbatim":true}`},
+		{"confirm", `{"title":{"type":"plain_text","text":"Delete?"},"text":{"type":"plain_text","text":"This removes the item."},"confirm":{"type":"plain_text","text":"Delete"},"deny":{"type":"plain_text","text":"Cancel"},"style":"danger"}`},
+		{"option", `{"text":{"type":"plain_text","text":"Documentation"},"value":"docs","description":{"type":"plain_text","text":"Read more"},"url":"https://example.com/docs"}`},
+		{"option_group", `{"label":{"type":"plain_text","text":"Locations"},"options":[{"text":{"type":"plain_text","text":"Office"},"value":"office"}]}`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var objects BlockObjects
+			require.NoError(t, json.Unmarshal([]byte("["+tc.raw+"]"), &objects))
+			require.Equal(t, 1, len(objects.TextObjects)+len(objects.ConfirmationObjects)+len(objects.OptionObjects)+len(objects.OptionGroupObjects))
+			var decoded any
+			switch tc.name {
+			case "plain_text", "mrkdwn":
+				require.Len(t, objects.TextObjects, 1)
+				decoded = objects.TextObjects[0]
+			case "confirm":
+				require.Len(t, objects.ConfirmationObjects, 1)
+				decoded = objects.ConfirmationObjects[0]
+			case "option":
+				require.Len(t, objects.OptionObjects, 1)
+				decoded = objects.OptionObjects[0]
+			case "option_group":
+				require.Len(t, objects.OptionGroupObjects, 1)
+				decoded = objects.OptionGroupObjects[0]
+			}
+			encoded, err := json.Marshal(decoded)
+			require.NoError(t, err)
+			require.JSONEq(t, tc.raw, string(encoded))
+		})
+	}
+}
+
+func TestBlockObjectsUnmarshalMalformedCompositionObjects(t *testing.T) {
+	for _, raw := range []string{
+		`[{"confirm":"invalid"}]`,
+		`[{"options":"invalid"}]`,
+		`[{"text":"invalid","value":"option"}]`,
+	} {
+		t.Run(raw, func(t *testing.T) {
+			var objects BlockObjects
+			require.Error(t, json.Unmarshal([]byte(raw), &objects))
+		})
+	}
+}
 
 func TestNewImageBlockObject(t *testing.T) {
 	imageObject := NewImageBlockElement("https://api.slack.com/img/blocks/bkb_template_images/beagle.png", "Beagle")
