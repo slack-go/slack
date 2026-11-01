@@ -411,6 +411,8 @@ func TestSetUserCustomFieldsEndpoint(t *testing.T) {
 }
 
 func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
+	t.Helper()
+
 	const (
 		realName = "Real Name Test"
 	)
@@ -424,6 +426,8 @@ func testSetUserRealName(api *Client, up *UserProfile, t *testing.T) {
 }
 
 func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
+	t.Helper()
+
 	const (
 		statusText       = "testStatus"
 		statusEmoji      = ":construction:"
@@ -446,6 +450,8 @@ func testSetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
 }
 
 func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, t *testing.T) {
+	t.Helper()
+
 	const (
 		statusText       = "testStatus"
 		statusEmoji      = ":construction:"
@@ -468,6 +474,8 @@ func testSetUserCustomStatusWithUser(api *Client, user string, up *UserProfile, 
 }
 
 func testSetUserProfile(api *Client, up *UserProfile, t *testing.T) {
+	t.Helper()
+
 	profile := &UserProfile{
 		RealName:    "Set Profile Test",
 		DisplayName: "setprofile",
@@ -490,6 +498,8 @@ func testSetUserProfile(api *Client, up *UserProfile, t *testing.T) {
 }
 
 func testUnsetUserCustomStatus(api *Client, up *UserProfile, t *testing.T) {
+	t.Helper()
+
 	if err := api.UnsetUserCustomStatus(); err != nil {
 		t.Fatalf(`UnsetUserCustomStatus() = %#v, want <nil>`, err)
 	}

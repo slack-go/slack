@@ -59,6 +59,8 @@ func TestSimpleChannel(t *testing.T) {
 }
 
 func assertSimpleChannel(t *testing.T, channel *Channel) {
+	t.Helper()
+
 	require.NotNil(t, channel)
 	assert.Equal(t, "C024BE91L", channel.ID)
 	assert.Equal(t, "fun", channel.Name)
@@ -146,6 +148,8 @@ func TestSharedChannel(t *testing.T) {
 }
 
 func assertSharedChannel(t *testing.T, channel *Channel) {
+	t.Helper()
+
 	assertSimpleChannel(t, channel)
 	assert.Equal(t, true, channel.IsShared)
 	assert.Equal(t, true, channel.IsExtShared)
@@ -222,6 +226,8 @@ func TestSimpleGroup(t *testing.T) {
 }
 
 func assertSimpleGroup(t *testing.T, group *Group) {
+	t.Helper()
+
 	require.NotNil(t, group)
 	assert.Equal(t, "G024BE91L", group.ID)
 	assert.Equal(t, "secretplans", group.Name)
@@ -298,6 +304,8 @@ func TestChannelWithCanvas(t *testing.T) {
 }
 
 func assertChannelWithCanvas(t *testing.T, channel *Channel) {
+	t.Helper()
+
 	assertSimpleChannel(t, channel)
 	require.NotNil(t, channel.Properties)
 	assert.Equal(t, "F05RQ01LJU0", channel.Properties.Canvas.FileId)
@@ -379,6 +387,8 @@ func TestChannelWithRecordChannel(t *testing.T) {
 }
 
 func assertChannelWithRecordChannel(t *testing.T, channel *Channel) {
+	t.Helper()
+
 	assertSimpleChannel(t, channel)
 	require.NotNil(t, channel.Properties)
 	assert.Equal(t, "S:00D0000000000000EAU:0010000000000000AA2", channel.Properties.RecordChannel.RecordID)
@@ -439,6 +449,8 @@ func TestSimpleIM(t *testing.T) {
 }
 
 func assertSimpleIM(t *testing.T, im *Conversation) {
+	t.Helper()
+
 	require.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
 	assert.Equal(t, true, im.IsIM)

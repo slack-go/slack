@@ -120,6 +120,8 @@ func TestCreateSimpleDialog(t *testing.T) {
 }
 
 func assertSimpleDialog(t *testing.T, dialog *Dialog) {
+	t.Helper()
+
 	require.NotNil(t, dialog)
 
 	// Test the main dialog fields
@@ -201,6 +203,8 @@ func TestSimpleCallback(t *testing.T) {
 }
 
 func assertSimpleCallback(t *testing.T, callback *DialogCallback) {
+	t.Helper()
+
 	require.NotNil(t, callback)
 	assert.Equal(t, InteractionTypeDialogSubmission, callback.Type)
 	assert.Equal(t, "employee_offsite_1138b", callback.CallbackID)
@@ -259,6 +263,8 @@ func TestSimpleSuggestionCallback(t *testing.T) {
 }
 
 func assertSimpleSuggestionCallback(t *testing.T, callback *InteractionCallback) {
+	t.Helper()
+
 	require.NotNil(t, callback)
 	assert.Equal(t, InteractionTypeDialogSuggestion, callback.Type)
 	assert.Equal(t, "W3VDvuzi2nRLsiaDOsmJranO", callback.Token)

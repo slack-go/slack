@@ -765,6 +765,8 @@ func TestSlack_UpdateView(t *testing.T) {
 }
 
 func assertViewSubmissionResponse(t *testing.T, resp *ViewSubmissionResponse, encoded string) {
+	t.Helper()
+
 	var decoded *ViewSubmissionResponse
 	assert.Nil(t, json.Unmarshal([]byte(encoded), &decoded))
 	assert.Equal(t, decoded, resp)
