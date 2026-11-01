@@ -848,7 +848,7 @@ func (api *Client) GetUserProfileContext(ctx context.Context, params *GetUserPro
 	}
 	resp := &getUserProfileResponse{}
 
-	err := api.postMethod(ctx, "users.profile.get", values, &resp)
+	err := api.postMethod(ctx, "users.profile.get", values, resp)
 	if err != nil {
 		return nil, err
 	}
