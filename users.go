@@ -562,7 +562,7 @@ func (api *Client) SetUserPhotoContext(ctx context.Context, image string, params
 		values.Add("crop_x", strconv.Itoa(params.CropX))
 	}
 	if params.CropY != DEFAULT_USER_PHOTO_CROP_Y {
-		values.Add("crop_y", strconv.Itoa(params.CropX))
+		values.Add("crop_y", strconv.Itoa(params.CropY))
 	}
 	if params.CropW != DEFAULT_USER_PHOTO_CROP_W {
 		values.Add("crop_w", strconv.Itoa(params.CropW))
