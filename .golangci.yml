@@ -25,6 +25,7 @@ linters:
     testifylint:
       disable-all: true
       enable:
+        - expected-actual
         - go-require
     modernize:
       # omitempty on nested struct fields has no effect, but switching to

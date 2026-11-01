@@ -489,13 +489,12 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 	}`)
 	var cb InteractionCallback
 	assert.NoError(t, json.Unmarshal(raw, &cb))
-	assert.Equal(t, cb.State, "")
+	assert.Equal(t, "", cb.State)
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
 		ActionType(MultiOptTypeConversations))
 	assert.Equal(t,
-		cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations,
-		[]string{"G12345"})
+		[]string{"G12345"}, cb.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations)
 }
 
 func TestInteractionCallback_UserUsername(t *testing.T) {
@@ -681,22 +680,22 @@ func TestInteractionCallback_Parser(t *testing.T) {
 	require.NotNil(t, ic)
 
 	// test parsed InteractionCallback payload
-	assert.Equal(t, ic.Type, InteractionTypeBlockActions)
+	assert.Equal(t, InteractionTypeBlockActions, ic.Type)
 
 	require.Len(t, ic.ActionCallback.BlockActions, 1)
-	assert.Equal(t, ic.ActionCallback.BlockActions[0].ActionID, "multi_convos")
-	assert.Equal(t, ic.ActionCallback.BlockActions[0].BlockID, "test123")
+	assert.Equal(t, "multi_convos", ic.ActionCallback.BlockActions[0].ActionID)
+	assert.Equal(t, "test123", ic.ActionCallback.BlockActions[0].BlockID)
 	assert.Equal(t, ic.ActionCallback.BlockActions[0].Type, ActionType(MultiOptTypeConversations))
 	require.Len(t, ic.ActionCallback.BlockActions[0].SelectedConversations, 1)
-	assert.Equal(t, ic.ActionCallback.BlockActions[0].SelectedConversations[0], "G12345")
+	assert.Equal(t, "G12345", ic.ActionCallback.BlockActions[0].SelectedConversations[0])
 
-	assert.Equal(t, ic.Container.Type, "view")
-	assert.Equal(t, ic.Container.ViewID, "V12345")
+	assert.Equal(t, "view", ic.Container.Type)
+	assert.Equal(t, "V12345", ic.Container.ViewID)
 
-	assert.Equal(t, len(ic.BlockActionState.Values), 2)
+	assert.Equal(t, 2, len(ic.BlockActionState.Values))
 	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].Type, ActionType(MultiOptTypeConversations))
 	require.Len(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations, 1)
-	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations[0], "G12345")
+	assert.Equal(t, "G12345", ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations[0])
 	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Type, ActionType(METPlainTextInput))
-	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Value, "test123")
+	assert.Equal(t, "test123", ic.BlockActionState.Values["other_block_id"]["other_action_id"].Value)
 }

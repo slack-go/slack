@@ -106,8 +106,8 @@ func TestRTMGoodbye(t *testing.T) {
 	select {
 	case <-done:
 		// magic numbers from empirical testing.
-		assert.Equal(t, connected <= 7, true)
-		assert.Equal(t, disconnected <= 12, true)
+		assert.Equal(t, true, connected <= 7)
+		assert.Equal(t, true, disconnected <= 12)
 	case <-time.After(5 * time.Second):
 		t.Error("timed out waiting for disconnect")
 		t.Fail()
@@ -163,8 +163,8 @@ func TestRTMDeadConnection(t *testing.T) {
 	select {
 	case <-done:
 		// magic numbers from empirical testing.
-		assert.Equal(t, connected <= 7, true)
-		assert.Equal(t, disconnected <= 7, true)
+		assert.Equal(t, true, connected <= 7)
+		assert.Equal(t, true, disconnected <= 7)
 	case <-time.After(5 * time.Second):
 		t.Error("timed out waiting for disconnect")
 		t.Fail()

@@ -12,9 +12,9 @@ func TestNewContextBlock(t *testing.T) {
 	elements := []MixedElement{locationPinImage, textExample}
 	contextBlock := NewContextBlock("test", elements...)
 
-	assert.Equal(t, contextBlock.BlockType(), MBTContext)
-	assert.Equal(t, string(contextBlock.Type), "context")
-	assert.Equal(t, contextBlock.BlockID, "test")
-	assert.Equal(t, contextBlock.ID(), "test")
-	assert.Equal(t, len(contextBlock.ContextElements.Elements), 2)
+	assert.Equal(t, MBTContext, contextBlock.BlockType())
+	assert.Equal(t, "context", string(contextBlock.Type))
+	assert.Equal(t, "test", contextBlock.BlockID)
+	assert.Equal(t, "test", contextBlock.ID())
+	assert.Equal(t, 2, len(contextBlock.ContextElements.Elements))
 }
