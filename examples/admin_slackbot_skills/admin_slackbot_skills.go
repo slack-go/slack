@@ -19,8 +19,7 @@ import (
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
-		var slackErr slack.SlackErrorResponse
-		if errors.As(err, &slackErr) && slackErr.Err == "token_revoked" {
+		if slackErr, ok := errors.AsType[slack.SlackErrorResponse](err); ok && slackErr.Err == "token_revoked" {
 			fmt.Fprintln(os.Stderr, "SLACK_ADMIN_TOKEN was rejected as revoked. Reauthorize the org-level app installation and export its current org admin/owner user token, then retry.")
 		}
 		os.Exit(1)

@@ -80,8 +80,7 @@ func runWorkflow(ctx context.Context, api *slack.Client) (result error) {
 	}
 	deleted = true
 	_, err = api.GetSlackbotSkillInfoContext(ctx, id)
-	var slackErr slack.SlackErrorResponse
-	if !errors.As(err, &slackErr) || slackErr.Err != "skill_not_found" {
+	if slackErr, ok := errors.AsType[slack.SlackErrorResponse](err); !ok || slackErr.Err != "skill_not_found" {
 		return fmt.Errorf("expected skill_not_found after deletion; got %v", err)
 	}
 	fmt.Println("PASS: all seven slackbot.skills methods verified; temporary skill deleted")
