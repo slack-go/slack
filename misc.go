@@ -187,7 +187,7 @@ func (s *KickUserFromConversationSlackResponse) UnmarshalJSON(data []byte) error
 		Alias: (*Alias)(s),
 	}
 
-	if err := json.Unmarshal(data, &aux); err != nil {
+	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
 
