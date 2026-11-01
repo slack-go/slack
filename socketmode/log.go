@@ -25,27 +25,27 @@ type internalLog struct {
 
 // Println replicates the behaviour of the standard logger.
 func (t internalLog) Println(v ...any) {
-	t.Output(2, fmt.Sprintln(v...))
+	_ = t.Output(2, fmt.Sprintln(v...))
 }
 
 // Printf replicates the behaviour of the standard logger.
 func (t internalLog) Printf(format string, v ...any) {
-	t.Output(2, fmt.Sprintf(format, v...))
+	_ = t.Output(2, fmt.Sprintf(format, v...))
 }
 
 // Print replicates the behaviour of the standard logger.
 func (t internalLog) Print(v ...any) {
-	t.Output(2, fmt.Sprint(v...))
+	_ = t.Output(2, fmt.Sprint(v...))
 }
 
 func (smc *Client) Debugf(format string, v ...any) {
 	if smc.debug {
-		smc.log.Output(2, fmt.Sprintf(format, v...))
+		_ = smc.log.Output(2, fmt.Sprintf(format, v...))
 	}
 }
 
 func (smc *Client) Debugln(v ...any) {
 	if smc.debug {
-		smc.log.Output(2, fmt.Sprintln(v...))
+		_ = smc.log.Output(2, fmt.Sprintln(v...))
 	}
 }

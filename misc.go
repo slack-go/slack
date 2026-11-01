@@ -563,7 +563,7 @@ func okJSONHandler(rw http.ResponseWriter, r *http.Request) {
 	response, _ := json.Marshal(SlackResponse{
 		Ok: true,
 	})
-	rw.Write(response)
+	_, _ = rw.Write(response)
 }
 
 func checkStatusCode(resp *http.Response, d Debug) error {
@@ -577,7 +577,7 @@ func checkStatusCode(resp *http.Response, d Debug) error {
 
 	// Slack seems to send an HTML body along with 5xx error codes. Don't parse it.
 	if resp.StatusCode != http.StatusOK {
-		logResponse(resp, d)
+		_ = logResponse(resp, d)
 		return StatusCodeError{Code: resp.StatusCode, Status: resp.Status}
 	}
 

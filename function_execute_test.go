@@ -3,10 +3,23 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
+
+func TestFunctionCompleteSuccessOptionError(t *testing.T) {
+	wantErr := errors.New("invalid function output")
+	// A request would fail on this invalid URL if the option error were ignored.
+	api := New("testing-token", OptionAPIURL(":"))
+	err := api.FunctionCompleteSuccess("function-success", func(*FunctionCompleteSuccessRequest) error {
+		return wantErr
+	})
+	require.ErrorIs(t, err, wantErr)
+}
 
 func postHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {

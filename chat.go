@@ -506,7 +506,7 @@ func MsgOptionPost() MsgOption {
 func MsgOptionPostEphemeral(userID string) MsgOption {
 	return func(config *sendConfig) error {
 		config.endpoint = config.apiurl + string(chatPostEphemeral)
-		MsgOptionUser(userID)(config)
+		_ = MsgOptionUser(userID)(config)
 		config.values.Del("ts")
 
 		return nil
@@ -991,7 +991,7 @@ func MsgOptionPostMessageParameters(params PostMessageParameters) MsgOption {
 		}
 
 		// never generates an error.
-		MsgOptionAsUser(params.AsUser)(config)
+		_ = MsgOptionAsUser(params.AsUser)(config)
 
 		if params.Parse != DEFAULT_MESSAGE_PARSE {
 			config.values.Set("parse", params.Parse)

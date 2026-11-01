@@ -7,6 +7,7 @@ linters:
   enable:
     - asasalint
     - bidichk
+    - errcheck
     - gocheckcompilerdirectives
     - gocritic
     - gosec
@@ -32,6 +33,10 @@ linters:
   exclusions:
     generated: lax
     rules:
+      # Apply errcheck to production code; legacy fixtures omit error checks.
+      - path: _test\.go$
+        linters:
+          - errcheck
       # Test fixtures contain placeholder credentials and local HTTP handlers.
       - path: _test\.go$
         linters:
