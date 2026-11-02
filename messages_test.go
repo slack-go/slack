@@ -54,7 +54,7 @@ func TestStarredMessage(t *testing.T) {
 	assert.Equal(t, MsgSubTypeMeMessage, message.SubType)
 	assert.Equal(t, "U2147483697", message.User)
 	assert.Equal(t, "1433314126.000003", message.Timestamp)
-	assert.Equal(t, true, message.IsStarred)
+	assert.True(t, message.IsStarred)
 }
 
 var editedMessage = `{
@@ -365,7 +365,7 @@ func TestBotMessage(t *testing.T) {
 	assert.Empty(t, message.Icons.IconEmoji)
 	assert.Equal(t, "github", message.BotProfile.Name)
 	assert.Equal(t, "BB12033", message.BotProfile.ID)
-	assert.Equal(t, false, message.BotProfile.Deleted)
+	assert.False(t, message.BotProfile.Deleted)
 	assert.Equal(t, int64(1599574335), message.BotProfile.Updated)
 	assert.Equal(t, "A6DB2SWUW", message.BotProfile.AppID)
 	assert.Equal(t, "https://slack-files2.s3-us-west-2.amazonaws.com/avatars/2017-10-24/261138718469_ada58732a18da119678d_36.png", message.BotProfile.Icons.Image36)

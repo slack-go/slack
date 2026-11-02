@@ -226,7 +226,7 @@ func TestNewNumberInputBlockElement(t *testing.T) {
 
 	assert.Equal(t, "number_input", string(numberInputElement.Type))
 	assert.Equal(t, "test", numberInputElement.ActionID)
-	assert.Equal(t, true, numberInputElement.IsDecimalAllowed)
+	assert.True(t, numberInputElement.IsDecimalAllowed)
 
 }
 
