@@ -43,6 +43,24 @@ func TestExpiredTimestamp(t *testing.T) {
 	}
 }
 
+func TestNewSecretsVerifierRejectsDistantTimestamps(t *testing.T) {
+	now := time.Now()
+	for _, years := range []int{-1000, 1000} {
+		t.Run(strconv.Itoa(years)+" years", func(t *testing.T) {
+			timestamp := strconv.FormatInt(now.AddDate(years, 0, 0).Unix(), 10)
+			mac := hmac.New(sha256.New, []byte(validSigningSecret))
+			_, err := io.WriteString(mac, "v0:"+timestamp+":"+validBody)
+			require.NoError(t, err)
+
+			header := http.Header{}
+			header.Set(hTimestamp, timestamp)
+			header.Set(hSignature, "v0="+hex.EncodeToString(mac.Sum(nil)))
+			_, err = NewSecretsVerifier(header, validSigningSecret)
+			require.ErrorIs(t, err, ErrExpiredTimestamp)
+		})
+	}
+}
+
 func TestNewSecretsVerifierRejectsEmptySigningSecret(t *testing.T) {
 	_, err := NewSecretsVerifier(newHeader(true), "")
 	if !errors.Is(err, ErrInvalidConfiguration) {

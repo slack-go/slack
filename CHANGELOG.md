@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Reject request timestamps so far in the future that the duration difference
+  overflows, instead of allowing them to pass the five-minute timestamp check.
+
 - Decode confirmation dialogs, options, and option groups in `BlockObjects`
   using their documented object and array fields instead of silently dropping them.
   [Slack composition objects](https://docs.slack.dev/reference/block-kit/composition-objects/).

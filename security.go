@@ -88,7 +88,7 @@ func NewSecretsVerifier(header http.Header, secret string) (sv SecretsVerifier, 
 		return SecretsVerifier{}, err
 	}
 
-	diff := absDuration(time.Since(time.Unix(timestamp, 0)))
+	diff := time.Since(time.Unix(timestamp, 0)).Abs()
 	if diff > 5*time.Minute {
 		return SecretsVerifier{}, ErrExpiredTimestamp
 	}
@@ -119,13 +119,4 @@ func (v SecretsVerifier) Ensure() error {
 			v.signature[:4], len(v.signature), computed[:4], len(computed))
 	}
 	return ErrInvalidSignature
-}
-
-func abs64(n int64) int64 {
-	y := n >> 63
-	return (n ^ y) - y
-}
-
-func absDuration(n time.Duration) time.Duration {
-	return time.Duration(abs64(int64(n)))
 }
