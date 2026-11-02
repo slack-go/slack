@@ -7,6 +7,7 @@ linters:
   enable:
     - asasalint
     - bidichk
+    - canonicalheader
     - errcheck
     - errorlint
     - gocheckcompilerdirectives
