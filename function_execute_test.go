@@ -22,6 +22,7 @@ func TestFunctionCompleteSuccessOptionError(t *testing.T) {
 }
 
 func postHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		defer r.Body.Close()

@@ -29,6 +29,7 @@ func testClient(api string, f http.HandlerFunc) *Client {
 var callTestId = 999
 
 func addCallHandler(t *testing.T) http.HandlerFunc {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 		if err := r.ParseForm(); err != nil {
