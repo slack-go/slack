@@ -296,6 +296,7 @@ func TestAdminConversationsDisconnectShared(t *testing.T) {
 // mockAdminChannelIDHandler returns a handler which expects a channel_id to be present
 // in the request, and will fail the test if it isn't present.
 func mockAdminChannelIDHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -321,6 +322,7 @@ func mockAdminChannelIDHandler(t *testing.T) func(rw http.ResponseWriter, r *htt
 }
 
 func mockAdminInviteHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -351,6 +353,7 @@ func mockAdminInviteHandler(t *testing.T) func(rw http.ResponseWriter, r *http.R
 }
 
 func mockAdminRenameHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -381,6 +384,7 @@ func mockAdminRenameHandler(t *testing.T) func(rw http.ResponseWriter, r *http.R
 }
 
 func mockAdminCreateHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -412,6 +416,7 @@ func mockAdminCreateHandler(t *testing.T) func(rw http.ResponseWriter, r *http.R
 }
 
 func mockAdminGetTeamsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -441,6 +446,7 @@ func mockAdminGetTeamsHandler(t *testing.T) func(rw http.ResponseWriter, r *http
 }
 
 func mockAdminSearchHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -465,6 +471,7 @@ func mockAdminSearchHandler(t *testing.T) func(rw http.ResponseWriter, r *http.R
 }
 
 func mockAdminChannelIDsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -490,6 +497,7 @@ func mockAdminChannelIDsHandler(t *testing.T) func(rw http.ResponseWriter, r *ht
 }
 
 func mockAdminBulkMoveHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -520,6 +528,7 @@ func mockAdminBulkMoveHandler(t *testing.T) func(rw http.ResponseWriter, r *http
 }
 
 func mockAdminGetConversationPrefsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -548,6 +557,7 @@ func mockAdminGetConversationPrefsHandler(t *testing.T) func(rw http.ResponseWri
 }
 
 func mockAdminRetentionHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)

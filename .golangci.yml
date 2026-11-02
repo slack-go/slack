@@ -19,6 +19,7 @@ linters:
     - modernize
     - nilnesserr
     - testifylint
+    - thelper
     - unconvert
     - unused
   settings:

@@ -31,6 +31,7 @@ func TestAdminRolesAddAssignments(t *testing.T) {
 }
 
 func mockAdminRolesAddAssignmentsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -87,6 +88,7 @@ func TestAdminRolesListAssignments(t *testing.T) {
 }
 
 func mockAdminRolesListAssignmentsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -134,6 +136,7 @@ func TestAdminRolesRemoveAssignments(t *testing.T) {
 }
 
 func mockAdminRolesRemoveAssignmentsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)

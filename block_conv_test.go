@@ -214,18 +214,54 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 		element BlockElement
 		check   func(t *testing.T, a *Accessory)
 	}{
-		{"image", &ImageBlockElement{Type: METImage}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.ImageElement) }},
-		{"button", &ButtonBlockElement{Type: METButton}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.ButtonElement) }},
-		{"overflow", &OverflowBlockElement{Type: METOverflow}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.OverflowElement) }},
-		{"datepicker", &DatePickerBlockElement{Type: METDatepicker}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.DatePickerElement) }},
-		{"timepicker", &TimePickerBlockElement{Type: METTimepicker}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.TimePickerElement) }},
-		{"plain_text_input", &PlainTextInputBlockElement{Type: METPlainTextInput}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.PlainTextInputElement) }},
-		{"rich_text_input", &RichTextInputBlockElement{Type: METRichTextInput}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.RichTextInputElement) }},
-		{"radio_buttons", &RadioButtonsBlockElement{Type: METRadioButtons}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.RadioButtonsElement) }},
-		{"static_select", &SelectBlockElement{Type: OptTypeStatic}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.SelectElement) }},
-		{"multi_static_select", &MultiSelectBlockElement{Type: MultiOptTypeStatic}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.MultiSelectElement) }},
-		{"checkboxes", &CheckboxGroupsBlockElement{Type: METCheckboxGroups}, func(t *testing.T, a *Accessory) { assert.NotNil(t, a.CheckboxGroupsBlockElement) }},
-		{"workflow_button", NewWorkflowButtonBlockElement(text, workflow, "action1"), func(t *testing.T, a *Accessory) { assert.NotNil(t, a.WorkflowButtonElement) }},
+		{"image", &ImageBlockElement{Type: METImage}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.ImageElement)
+		}},
+		{"button", &ButtonBlockElement{Type: METButton}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.ButtonElement)
+		}},
+		{"overflow", &OverflowBlockElement{Type: METOverflow}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.OverflowElement)
+		}},
+		{"datepicker", &DatePickerBlockElement{Type: METDatepicker}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.DatePickerElement)
+		}},
+		{"timepicker", &TimePickerBlockElement{Type: METTimepicker}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.TimePickerElement)
+		}},
+		{"plain_text_input", &PlainTextInputBlockElement{Type: METPlainTextInput}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.PlainTextInputElement)
+		}},
+		{"rich_text_input", &RichTextInputBlockElement{Type: METRichTextInput}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.RichTextInputElement)
+		}},
+		{"radio_buttons", &RadioButtonsBlockElement{Type: METRadioButtons}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.RadioButtonsElement)
+		}},
+		{"static_select", &SelectBlockElement{Type: OptTypeStatic}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.SelectElement)
+		}},
+		{"multi_static_select", &MultiSelectBlockElement{Type: MultiOptTypeStatic}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.MultiSelectElement)
+		}},
+		{"checkboxes", &CheckboxGroupsBlockElement{Type: METCheckboxGroups}, func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.CheckboxGroupsBlockElement)
+		}},
+		{"workflow_button", NewWorkflowButtonBlockElement(text, workflow, "action1"), func(t *testing.T, a *Accessory) {
+			t.Helper()
+			assert.NotNil(t, a.WorkflowButtonElement)
+		}},
 	}
 
 	for _, tc := range cases {

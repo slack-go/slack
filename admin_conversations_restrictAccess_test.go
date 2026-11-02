@@ -63,6 +63,7 @@ func TestAdminConversationsRestrictAccessRemoveGroup(t *testing.T) {
 }
 
 func mockRestrictAccessHandler(t *testing.T, requiredField string) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
@@ -93,6 +94,7 @@ func mockRestrictAccessHandler(t *testing.T, requiredField string) func(rw http.
 }
 
 func mockRestrictAccessListGroupsHandler(t *testing.T) func(rw http.ResponseWriter, r *http.Request) {
+	t.Helper()
 	return func(rw http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			t.Errorf("expected POST request, got %s", r.Method)
