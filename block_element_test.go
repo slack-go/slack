@@ -63,7 +63,7 @@ func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	option := NewOptionsSelectBlockElement("static_select", nil, "test", testOption)
 	assert.Equal(t, "static_select", option.Type)
-	assert.Equal(t, 1, len(option.Options))
+	assert.Len(t, option.Options, 1)
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -77,7 +77,7 @@ func TestNewOptionsGroupSelectBlockElement(t *testing.T) {
 
 	assert.Equal(t, "static_select", optGroup.Type)
 	assert.Equal(t, "test", optGroup.ActionID)
-	assert.Equal(t, 1, len(optGroup.OptionGroups))
+	assert.Len(t, optGroup.OptionGroups, 1)
 }
 
 func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
@@ -87,7 +87,7 @@ func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
 
 	option := NewOptionsMultiSelectBlockElement("static_select", nil, "test", testOption)
 	assert.Equal(t, "static_select", option.Type)
-	assert.Equal(t, 1, len(option.Options))
+	assert.Len(t, option.Options, 1)
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -102,7 +102,7 @@ func TestNewOptionsGroupMultiSelectBlockElement(t *testing.T) {
 
 	assert.Equal(t, "static_select", optGroup.Type)
 	assert.Equal(t, "test", optGroup.ActionID)
-	assert.Equal(t, 1, len(optGroup.OptionGroups))
+	assert.Len(t, optGroup.OptionGroups, 1)
 
 }
 func TestNewOverflowBlockElement(t *testing.T) {
@@ -122,7 +122,7 @@ func TestNewOverflowBlockElement(t *testing.T) {
 
 	assert.Equal(t, "overflow", string(overflowElement.Type))
 	assert.Equal(t, "test", overflowElement.ActionID)
-	assert.Equal(t, 3, len(overflowElement.Options))
+	assert.Len(t, overflowElement.Options, 3)
 
 }
 
@@ -196,7 +196,7 @@ func TestNewCheckboxGroupsBlockElement(t *testing.T) {
 
 	assert.Equal(t, "checkboxes", string(checkBoxGroupElement.Type))
 	assert.Equal(t, "test", checkBoxGroupElement.ActionID)
-	assert.Equal(t, 3, len(checkBoxGroupElement.Options))
+	assert.Len(t, checkBoxGroupElement.Options, 3)
 }
 
 func TestNewRadioButtonsBlockElement(t *testing.T) {
@@ -216,7 +216,7 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 
 	assert.Equal(t, "radio_buttons", string(radioButtonsElement.Type))
 	assert.Equal(t, "test", radioButtonsElement.ActionID)
-	assert.Equal(t, 3, len(radioButtonsElement.Options))
+	assert.Len(t, radioButtonsElement.Options, 3)
 
 }
 
@@ -238,7 +238,7 @@ func TestNewFileInputBlockElement(t *testing.T) {
 	assert.Equal(t, "test", fileInputElement.ActionID)
 
 	fileInputElement.WithFileTypes("jpg", "png")
-	assert.Equal(t, 2, len(fileInputElement.FileTypes))
+	assert.Len(t, fileInputElement.FileTypes, 2)
 	assert.Contains(t, fileInputElement.FileTypes, "jpg")
 	assert.Contains(t, fileInputElement.FileTypes, "png")
 
@@ -332,7 +332,7 @@ func TestIconButtonFluentMethods(t *testing.T) {
 	assert.Equal(t, "Delete this item", iconButton.AccessibilityLabel)
 
 	iconButton.WithVisibleToUserIDs([]string{"U123", "U456"})
-	assert.Equal(t, 2, len(iconButton.VisibleToUserIDs))
+	assert.Len(t, iconButton.VisibleToUserIDs, 2)
 	assert.Contains(t, iconButton.VisibleToUserIDs, "U123")
 
 	titleText := NewTextBlockObject("plain_text", "Are you sure?", false, false)

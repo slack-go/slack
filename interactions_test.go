@@ -444,10 +444,8 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 	assert.Equal(t, cb.Value, jsonCB.Value)
 	assert.Equal(t, cb.MessageTs, jsonCB.MessageTs)
 	assert.Equal(t, cb.AttachmentID, jsonCB.AttachmentID)
-	assert.Equal(t, len(cb.ActionCallback.AttachmentActions),
-		len(jsonCB.ActionCallback.AttachmentActions))
-	assert.Equal(t, len(cb.ActionCallback.BlockActions),
-		len(jsonCB.ActionCallback.BlockActions))
+	assert.Len(t, jsonCB.ActionCallback.AttachmentActions, len(cb.ActionCallback.AttachmentActions))
+	assert.Len(t, jsonCB.ActionCallback.BlockActions, len(cb.ActionCallback.BlockActions))
 	assert.Equal(t, cb.View.Type, jsonCB.View.Type)
 	assert.Equal(t, cb.View.Title, jsonCB.View.Title)
 	assert.Equal(t, cb.View.Blocks, jsonCB.View.Blocks)
@@ -692,7 +690,7 @@ func TestInteractionCallback_Parser(t *testing.T) {
 	assert.Equal(t, "view", ic.Container.Type)
 	assert.Equal(t, "V12345", ic.Container.ViewID)
 
-	assert.Equal(t, 2, len(ic.BlockActionState.Values))
+	assert.Len(t, ic.BlockActionState.Values, 2)
 	assert.Equal(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].Type, ActionType(MultiOptTypeConversations))
 	require.Len(t, ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations, 1)
 	assert.Equal(t, "G12345", ic.BlockActionState.Values["section_block_id"]["multi_convos"].SelectedConversations[0])

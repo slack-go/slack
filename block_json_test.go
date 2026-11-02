@@ -163,7 +163,7 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		// Specifically verify elements array is preserved
 		resultElements, ok := result["elements"].([]any)
 		assert.True(t, ok, "elements should be an array")
-		assert.Equal(t, 2, len(resultElements), "should have 2 elements")
+		assert.Len(t, resultElements, 2, "should have 2 elements")
 	})
 }
 

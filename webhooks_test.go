@@ -147,13 +147,13 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	twoBlocks := &Blocks{BlockSet: []Block{sectionBlock, sectionBlock}}
 
 	msgSingleBlock := WebhookMessage{Blocks: singleBlock}
-	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
+	assert.Len(t, msgSingleBlock.Blocks.BlockSet, 1)
 
 	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
 	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
 
 	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
-	assert.Equal(t, 2, len(msgTwoBlocks.Blocks.BlockSet))
+	assert.Len(t, msgTwoBlocks.Blocks.BlockSet, 2)
 
 	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
 	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))

@@ -110,7 +110,7 @@ func TestNewTableBlock(t *testing.T) {
 	assert.Equal(t, "table", string(tableBlock.Type))
 	assert.Equal(t, "test1", tableBlock.BlockID)
 	assert.Equal(t, "test1", tableBlock.ID())
-	assert.Equal(t, 2, len(tableBlock.Rows))
+	assert.Len(t, tableBlock.Rows, 2)
 	assert.Empty(t, tableBlock.ColumnSettings)
 
 	// Check if marshalled payload matches expected JSON

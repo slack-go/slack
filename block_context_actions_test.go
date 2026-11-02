@@ -21,7 +21,7 @@ func TestNewContextActionsBlock(t *testing.T) {
 	assert.Equal(t, "context_actions", string(contextActionsBlock.Type))
 	assert.Equal(t, "test_block", contextActionsBlock.BlockID)
 	assert.Equal(t, "test_block", contextActionsBlock.ID())
-	assert.Equal(t, 1, len(contextActionsBlock.Elements.ElementSet))
+	assert.Len(t, contextActionsBlock.Elements.ElementSet, 1)
 }
 
 func TestContextActionsBlockWithIconButton(t *testing.T) {
@@ -33,7 +33,7 @@ func TestContextActionsBlockWithIconButton(t *testing.T) {
 	assert.Equal(t, MBTContextActions, contextActionsBlock.BlockType())
 	assert.Equal(t, "context_actions", string(contextActionsBlock.Type))
 	assert.Equal(t, "icon_block", contextActionsBlock.BlockID)
-	assert.Equal(t, 1, len(contextActionsBlock.Elements.ElementSet))
+	assert.Len(t, contextActionsBlock.Elements.ElementSet, 1)
 }
 
 func TestContextActionsBlockWithMultipleElements(t *testing.T) {
@@ -51,7 +51,7 @@ func TestContextActionsBlockWithMultipleElements(t *testing.T) {
 	contextActionsBlock := NewContextActionsBlock("multi_block", feedbackElement, iconButton)
 
 	assert.Equal(t, MBTContextActions, contextActionsBlock.BlockType())
-	assert.Equal(t, 2, len(contextActionsBlock.Elements.ElementSet))
+	assert.Len(t, contextActionsBlock.Elements.ElementSet, 2)
 }
 
 func TestContextActionsBlockJSONMarshalling(t *testing.T) {
@@ -74,7 +74,7 @@ func TestContextActionsBlockJSONMarshalling(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "context_actions", string(unmarshalled.Type))
 	assert.Equal(t, "test_block", unmarshalled.BlockID)
-	assert.Equal(t, 1, len(unmarshalled.Elements.ElementSet))
+	assert.Len(t, unmarshalled.Elements.ElementSet, 1)
 }
 
 func TestContextActionsBlockUnmarshalJSON(t *testing.T) {
@@ -108,7 +108,7 @@ func TestContextActionsBlockUnmarshalJSON(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "context_actions", string(block.Type))
 	assert.Equal(t, "test_block", block.BlockID)
-	assert.Equal(t, 1, len(block.Elements.ElementSet))
+	assert.Len(t, block.Elements.ElementSet, 1)
 }
 
 func TestContextActionsBlockInBlocks(t *testing.T) {

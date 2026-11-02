@@ -106,7 +106,7 @@ func TestStaticGroupedSelect(t *testing.T) {
 	assert.Equal(t, "User Label", groupSelect.Label)
 	assert.Nil(t, groupSelect.Options)
 	assert.NotNil(t, groupSelect.OptionGroups)
-	assert.Equal(t, 2, len(groupSelect.OptionGroups))
+	assert.Len(t, groupSelect.OptionGroups, 2)
 }
 
 func TestConversationSelect(t *testing.T) {

@@ -598,7 +598,7 @@ func TestChannelArchiveMessage(t *testing.T) {
 	assert.Equal(t, "<U1234|@cal> archived the channel", message.Text)
 	assert.Equal(t, "U1234", message.User)
 	assert.NotNil(t, message.Members)
-	assert.Equal(t, 2, len(message.Members))
+	assert.Len(t, message.Members, 2)
 }
 
 var channelUnarchiveMessage = `{
@@ -822,7 +822,7 @@ func TestGroupArchiveMessage(t *testing.T) {
 	assert.Equal(t, "<U1234|@cal> archived the group", message.Text)
 	assert.Equal(t, "U1234", message.User)
 	assert.NotNil(t, message.Members)
-	assert.Equal(t, 2, len(message.Members))
+	assert.Len(t, message.Members, 2)
 }
 
 var groupUnarchiveMessage = `{

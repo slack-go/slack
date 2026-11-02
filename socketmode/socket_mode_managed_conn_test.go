@@ -77,7 +77,7 @@ func TestSendCtx_PayloadAtLimit(t *testing.T) {
 
 	// Verify we hit exactly the limit.
 	exact, _ := json.Marshal(Response{EnvelopeID: envelope, Payload: padding})
-	assert.Equal(t, maxResponseSize, len(exact), "test setup: payload should serialize to exactly %d bytes", maxResponseSize)
+	assert.Len(t, exact, maxResponseSize, "test setup: payload should serialize to exactly %d bytes", maxResponseSize)
 
 	err := cli.SendCtx(context.Background(), Response{
 		EnvelopeID: envelope,
@@ -96,7 +96,7 @@ func TestSendCtx_PayloadJustUnderLimit(t *testing.T) {
 
 	// Verify we're one byte under.
 	under, _ := json.Marshal(Response{EnvelopeID: envelope, Payload: padding})
-	assert.Equal(t, maxResponseSize-1, len(under), "test setup: payload should serialize to exactly %d bytes", maxResponseSize-1)
+	assert.Len(t, under, maxResponseSize-1, "test setup: payload should serialize to exactly %d bytes", maxResponseSize-1)
 
 	err := cli.SendCtx(context.Background(), Response{
 		EnvelopeID: envelope,
