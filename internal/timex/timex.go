@@ -5,14 +5,14 @@ import "time"
 // Max returns the maximum duration
 func Max(values ...time.Duration) time.Duration {
 	var (
-		max time.Duration
+		maxDuration time.Duration
 	)
 
 	for _, v := range values {
-		if v > max {
-			max = v
+		if v > maxDuration {
+			maxDuration = v
 		}
 	}
 
-	return max
+	return maxDuration
 }

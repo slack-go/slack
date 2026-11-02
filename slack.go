@@ -204,7 +204,7 @@ func New(token string, options ...Option) *Client {
 }
 
 // AuthTest tests if the user is able to do authenticated requests or not
-func (api *Client) AuthTest() (response *AuthTestResponse, error error) {
+func (api *Client) AuthTest() (response *AuthTestResponse, err error) {
 	return api.AuthTestContext(context.Background())
 }
 

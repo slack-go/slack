@@ -19,6 +19,7 @@ linters:
     - misspell
     - modernize
     - nilnesserr
+    - predeclared
     - testifylint
     - thelper
     - unconvert
