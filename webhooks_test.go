@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,8 +91,8 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 		msg := WebhookMessage{Text: "hello"}
 		raw, err := json.Marshal(msg)
 		assert.NoError(t, err)
-		assert.False(t, strings.Contains(string(raw), "unfurl_links"))
-		assert.False(t, strings.Contains(string(raw), "unfurl_media"))
+		assert.NotContains(t, string(raw), "unfurl_links")
+		assert.NotContains(t, string(raw), "unfurl_media")
 	})
 
 	t.Run("false is preserved", func(t *testing.T) {
