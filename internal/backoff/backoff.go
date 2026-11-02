@@ -36,8 +36,8 @@ func (b *Backoff) Duration() (dur time.Duration) {
 	}
 
 	// calculate this duration
-	if dur = time.Duration(1 << uint(b.attempts)); dur > 0 {
-		dur *= b.Initial
+	if multiplier := int64(1) << uint(b.attempts); multiplier > 0 {
+		dur = time.Duration(multiplier * b.Initial.Nanoseconds())
 	}
 
 	// Cap the result at Max. This also covers both overflow paths: 1<<attempts
