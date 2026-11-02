@@ -580,7 +580,7 @@ func TestGetUsers(t *testing.T) {
 }
 
 // returns n pages users.
-func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
+func getUserPage(pageCount int64) func(rw http.ResponseWriter, r *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		var (
 			n   int64
@@ -591,7 +591,7 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 		if cursor := r.FormValue("cursor"); cursor != "" {
 			n, err = strconv.ParseInt(cursor, 10, 64)
 		}
-		if err != nil || n >= max { // invalid cursor
+		if err != nil || n >= pageCount { // invalid cursor
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -605,7 +605,7 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 
 		nextPage := n + 1
-		if nextPage == max {
+		if nextPage == pageCount {
 			response, _ := json.Marshal(userResponseFull{
 				SlackResponse: sresp,
 				Members:       members,
@@ -624,7 +624,7 @@ func getUserPage(max int64) func(rw http.ResponseWriter, r *http.Request) {
 }
 
 // returns n pages of users and sends rate limited errors in between successful pages.
-func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *http.Request) {
+func getUserPagesWithRateLimitErrors(pageCount int64) func(rw http.ResponseWriter, r *http.Request) {
 	var n int64
 	doRateLimit := false
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -644,7 +644,7 @@ func getUserPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *
 			getTestUserWithId(fmt.Sprintf("U%03d", n)),
 		}
 		rw.Header().Set("Content-Type", "application/json")
-		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+		if cpage = atomic.AddInt64(&n, 1); cpage == pageCount {
 			response, _ := json.Marshal(userResponseFull{
 				SlackResponse: sresp,
 				Members:       members,

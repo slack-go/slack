@@ -18,6 +18,7 @@ linters:
     - misspell
     - modernize
     - nilnesserr
+    - predeclared
     - testifylint
     - unconvert
     - unused

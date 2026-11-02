@@ -1097,7 +1097,7 @@ func getTestChannelWithId(id string) Channel {
 }
 
 // returns n pages of conversations and sends rate limited errors in between successful pages.
-func getConversationPagesWithRateLimitErrors(max int64) func(rw http.ResponseWriter, r *http.Request) {
+func getConversationPagesWithRateLimitErrors(pageCount int64) func(rw http.ResponseWriter, r *http.Request) {
 	var n int64
 	doRateLimit := false
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -1117,7 +1117,7 @@ func getConversationPagesWithRateLimitErrors(max int64) func(rw http.ResponseWri
 			getTestChannelWithId(fmt.Sprintf("C%03d", n)),
 		}
 		rw.Header().Set("Content-Type", "application/json")
-		if cpage = atomic.AddInt64(&n, 1); cpage == max {
+		if cpage = atomic.AddInt64(&n, 1); cpage == pageCount {
 			response, _ := json.Marshal(struct {
 				SlackResponse
 				Channels []Channel `json:"channels"`

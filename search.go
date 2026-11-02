@@ -89,7 +89,7 @@ func NewSearchParameters() SearchParameters {
 	}
 }
 
-func (api *Client) _search(ctx context.Context, path, query string, params SearchParameters) (response *searchResponseFull, error error) {
+func (api *Client) _search(ctx context.Context, path, query string, params SearchParameters) (response *searchResponseFull, err error) {
 	values := url.Values{
 		"token": {api.token},
 		"query": {query},
@@ -114,7 +114,7 @@ func (api *Client) _search(ctx context.Context, path, query string, params Searc
 	}
 
 	response = &searchResponseFull{}
-	err := api.postMethod(ctx, path, values, response)
+	err = api.postMethod(ctx, path, values, response)
 	if err != nil {
 		return nil, err
 	}
