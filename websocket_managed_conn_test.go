@@ -253,7 +253,7 @@ func TestRTMConnectRateLimit(t *testing.T) {
 
 	previous := time.Duration(0)
 	for ev := range connectionFailure {
-		assert.LessOrEqual(t, previous, ev.Backoff, fmt.Sprintf("backoff should increase during rate limits: %v <= %v", previous, ev.Backoff))
+		assert.LessOrEqual(t, previous, ev.Backoff, "backoff should increase during rate limits: %v <= %v", previous, ev.Backoff)
 		previous = ev.Backoff
 	}
 	testServer.Stop()
