@@ -404,7 +404,7 @@ func TestNewRichTextSectionChannelElement(t *testing.T) {
 
 	// Test JSON marshaling to ensure correct type
 	data, err := json.Marshal(element)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(data), `"type":"channel"`)
 	assert.Contains(t, string(data), `"channel_id":"C012345678"`)
 }
@@ -429,7 +429,7 @@ func TestRichTextSectionUsergroupStyleExtendedFields(t *testing.T) {
 
 	var section RichTextSection
 	err := json.Unmarshal([]byte(raw), &section)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.Len(t, section.Elements, 1)
 
 	elem, ok := section.Elements[0].(*RichTextSectionUserGroupElement)
@@ -447,7 +447,7 @@ func TestRichTextSectionUsergroupStyleExtendedFields(t *testing.T) {
 
 	// Round-trip: marshal and verify fields survive
 	data, err := json.Marshal(section)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(data), `"underline":true`)
 	assert.Contains(t, string(data), `"highlight":true`)
 	assert.Contains(t, string(data), `"client_highlight":true`)

@@ -130,7 +130,7 @@ func TestAdminAppsApprovedListError(t *testing.T) {
 	})
 
 	response, err := api.AdminAppsApprovedList()
-	assert.EqualError(t, err, "invalid_cursor")
+	require.EqualError(t, err, "invalid_cursor")
 	assert.NotNil(t, response)
 }
 

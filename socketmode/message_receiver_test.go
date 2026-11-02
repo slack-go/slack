@@ -106,7 +106,7 @@ func TestRunMessageReceiverGivesUpOnUnusableFrames(t *testing.T) {
 	err := receive(conn, make(chan json.RawMessage, 1))
 
 	require.Error(t, err)
-	assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
+	require.ErrorIs(t, err, io.ErrUnexpectedEOF)
 	assert.Contains(t, err.Error(), fmt.Sprintf("giving up after %d consecutive", maxConsecutiveIgnoredReads))
 }
 
@@ -146,7 +146,7 @@ func TestRunMessageReceiverKeepsGoingAfterRecoverableFrame(t *testing.T) {
 func TestIgnoredReadErrorUnwraps(t *testing.T) {
 	err := error(ignoredReadError{io.ErrUnexpectedEOF})
 
-	assert.ErrorIs(t, err, io.ErrUnexpectedEOF)
+	require.ErrorIs(t, err, io.ErrUnexpectedEOF)
 
 	ignorable, ok := errors.AsType[ignoredReadError](err)
 	require.True(t, ok)

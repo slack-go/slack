@@ -106,8 +106,8 @@ func TestRTMGoodbye(t *testing.T) {
 	select {
 	case <-done:
 		// magic numbers from empirical testing.
-		assert.Equal(t, true, connected <= 7)
-		assert.Equal(t, true, disconnected <= 12)
+		assert.LessOrEqual(t, connected, 7)
+		assert.LessOrEqual(t, disconnected, 12)
 	case <-time.After(5 * time.Second):
 		t.Error("timed out waiting for disconnect")
 		t.Fail()
@@ -163,8 +163,8 @@ func TestRTMDeadConnection(t *testing.T) {
 	select {
 	case <-done:
 		// magic numbers from empirical testing.
-		assert.Equal(t, true, connected <= 7)
-		assert.Equal(t, true, disconnected <= 7)
+		assert.LessOrEqual(t, connected, 7)
+		assert.LessOrEqual(t, disconnected, 7)
 	case <-time.After(5 * time.Second):
 		t.Error("timed out waiting for disconnect")
 		t.Fail()
@@ -253,7 +253,7 @@ func TestRTMConnectRateLimit(t *testing.T) {
 
 	previous := time.Duration(0)
 	for ev := range connectionFailure {
-		assert.True(t, previous <= ev.Backoff, fmt.Sprintf("backoff should increase during rate limits: %v <= %v", previous, ev.Backoff))
+		assert.LessOrEqual(t, previous, ev.Backoff, "backoff should increase during rate limits: %v <= %v", previous, ev.Backoff)
 		previous = ev.Backoff
 	}
 	testServer.Stop()

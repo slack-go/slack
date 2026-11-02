@@ -130,7 +130,7 @@ func TestSlackbotSkillsFormWarningRedactsToken(t *testing.T) {
 			return
 		}
 		assert.Equal(t, "testing-token", r.PostForm.Get("token"))
-		assert.Equal(t, "", r.PostForm.Get("description"))
+		assert.Empty(t, r.PostForm.Get("description"))
 		assert.Contains(t, r.PostForm, "description")
 		assert.NotContains(t, r.PostForm, "instructions")
 		assert.Equal(t, "[]", r.PostForm.Get("mcp_servers"))

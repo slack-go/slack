@@ -55,7 +55,7 @@ func TestSendCtx_PayloadQueued(t *testing.T) {
 		Payload:    "small payload",
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -77,7 +77,7 @@ func TestSendCtx_PayloadAtLimit(t *testing.T) {
 
 	// Verify we hit exactly the limit.
 	exact, _ := json.Marshal(Response{EnvelopeID: envelope, Payload: padding})
-	assert.Equal(t, maxResponseSize, len(exact), "test setup: payload should serialize to exactly %d bytes", maxResponseSize)
+	assert.Len(t, exact, maxResponseSize, "test setup: payload should serialize to exactly %d bytes", maxResponseSize)
 
 	err := cli.SendCtx(context.Background(), Response{
 		EnvelopeID: envelope,
@@ -96,13 +96,13 @@ func TestSendCtx_PayloadJustUnderLimit(t *testing.T) {
 
 	// Verify we're one byte under.
 	under, _ := json.Marshal(Response{EnvelopeID: envelope, Payload: padding})
-	assert.Equal(t, maxResponseSize-1, len(under), "test setup: payload should serialize to exactly %d bytes", maxResponseSize-1)
+	assert.Len(t, under, maxResponseSize-1, "test setup: payload should serialize to exactly %d bytes", maxResponseSize-1)
 
 	err := cli.SendCtx(context.Background(), Response{
 		EnvelopeID: envelope,
 		Payload:    padding,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -129,7 +129,7 @@ func TestAck_ReturnsNoError(t *testing.T) {
 	cli := New(api)
 
 	err := cli.Ack(Request{EnvelopeID: "test-envelope"}, "payload")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -235,7 +235,7 @@ func TestRunMessageReceiver_SurvivesMalformedJSON(t *testing.T) {
 	}
 
 	// The loop should exit with an error (WebSocket close triggers reconnect).
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	// Both valid messages should have been forwarded.
 	assert.Equal(t, []string{`{"type":"hello"}`, `{"type":"disconnect"}`}, messages)

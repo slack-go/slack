@@ -768,7 +768,7 @@ func assertViewSubmissionResponse(t *testing.T, resp *ViewSubmissionResponse, en
 	t.Helper()
 
 	var decoded *ViewSubmissionResponse
-	assert.Nil(t, json.Unmarshal([]byte(encoded), &decoded))
+	require.NoError(t, json.Unmarshal([]byte(encoded), &decoded))
 	assert.Equal(t, decoded, resp)
 }
 
@@ -902,11 +902,11 @@ func TestPublishViewContextRequest_HashOmittedWhenNil(t *testing.T) {
 			}
 
 			data, err := json.Marshal(req)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var decoded map[string]any
 			err = json.Unmarshal(data, &decoded)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			_, hasHash := decoded["hash"]
 			assert.Equal(t, tt.wantHashKey, hasHash, "hash key presence mismatch")

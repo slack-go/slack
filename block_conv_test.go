@@ -198,7 +198,7 @@ func TestRichTextSectionUnknownElementRoundTrip(t *testing.T) {
 	elems := roundTripped["elements"].([]any)
 	elem := elems[0].(map[string]any)
 	assert.Equal(t, "unknown_elem", elem["type"])
-	assert.Equal(t, float64(42), elem["data"])
+	assert.Equal(t, float64(42), elem["data"]) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 }
 
 // TestAllAccessoryTypesRoundTrip ensures every Accessory field can survive a

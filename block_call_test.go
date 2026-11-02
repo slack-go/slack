@@ -14,8 +14,8 @@ func TestNewCallBlock(t *testing.T) {
 	assert.Equal(t, MBTCall, callBlock.BlockType())
 	assert.Equal(t, "call", string(callBlock.Type))
 	assert.Equal(t, "ACallID", callBlock.CallID)
-	assert.Equal(t, "", callBlock.BlockID)
-	assert.Equal(t, "", callBlock.ID())
+	assert.Empty(t, callBlock.BlockID)
+	assert.Empty(t, callBlock.ID())
 }
 
 func TestNewCallBlockWithBlockID(t *testing.T) {

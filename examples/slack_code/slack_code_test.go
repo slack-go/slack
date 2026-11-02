@@ -7,9 +7,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
 
 func TestSetViewPullRequestAvailability(t *testing.T) {
@@ -43,7 +44,9 @@ func TestSetViewPullRequestAvailability(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
 				assert.Equal(t, "/agents.conversations.setView", r.URL.Path)
-				require.NoError(t, r.ParseForm())
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
 				assert.Equal(t, tt.viewType, r.PostForm.Get("type"))
 				if tt.viewType == slack.AgentViewTypePullRequest {
 					assert.Equal(t, "https://github.com/slack-go/slack/pull/1623", r.PostForm.Get("pr_url"))

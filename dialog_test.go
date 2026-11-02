@@ -74,7 +74,7 @@ func unmarshalDialog() (*Dialog, error) {
 
 func TestSimpleDialog(t *testing.T) {
 	dialog, err := unmarshalDialog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleDialog(t, dialog)
 }
 
@@ -128,7 +128,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.Equal(t, "ryde-46e2b0", dialog.CallbackID)
 	assert.Equal(t, "Request a Ride", dialog.Title)
 	assert.Equal(t, "Request", dialog.SubmitLabel)
-	assert.Equal(t, true, dialog.NotifyOnCancel)
+	assert.True(t, dialog.NotifyOnCancel)
 
 	// Test the text element is correctly parsed
 	textElement := dialog.Elements[0].(*TextInputElement)
@@ -136,7 +136,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.Equal(t, "testing name", textElement.Name)
 	assert.Equal(t, InputTypeText, textElement.Type)
 	assert.Equal(t, "testing placeholder", textElement.Placeholder)
-	assert.Equal(t, true, textElement.Optional)
+	assert.True(t, textElement.Optional)
 	assert.Equal(t, "testing value", textElement.Value)
 	assert.Equal(t, 1000, textElement.MaxLength)
 	assert.Equal(t, 10, textElement.MinLength)
@@ -149,13 +149,13 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.Equal(t, "testing name", selectElement.Name)
 	assert.Equal(t, InputTypeSelect, selectElement.Type)
 	assert.Equal(t, "testing placeholder", selectElement.Placeholder)
-	assert.Equal(t, true, selectElement.Optional)
+	assert.True(t, selectElement.Optional)
 	assert.Equal(t, "testing value", selectElement.Value)
 	assert.Equal(t, DialogDataSourceUsers, selectElement.DataSource)
 	assert.Equal(t, []DialogSelectOption{}, selectElement.SelectedOptions)
 	assert.Equal(t, "option 1", selectElement.Options[0].Label)
 	assert.Equal(t, "1", selectElement.Options[0].Value)
-	assert.Equal(t, 0, len(selectElement.OptionGroups))
+	assert.Empty(t, selectElement.OptionGroups)
 }
 
 // Callbacks
@@ -198,7 +198,7 @@ func unmarshalCallback(j string) (*DialogCallback, error) {
 
 func TestSimpleCallback(t *testing.T) {
 	callback, err := unmarshalCallback(simpleCallback)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleCallback(t, callback)
 }
 
@@ -258,7 +258,7 @@ func unmarshalSuggestionCallback(j string) (*InteractionCallback, error) {
 
 func TestSimpleSuggestionCallback(t *testing.T) {
 	callback, err := unmarshalSuggestionCallback(simpleSuggestionCallback)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleSuggestionCallback(t, callback)
 }
 

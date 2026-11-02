@@ -3075,7 +3075,7 @@ func TestAppHomeOpenedEvent_WithView(t *testing.T) {
 	var event AppHomeOpenedEvent
 	err := json.Unmarshal(eventJSON, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "app_home_opened", event.Type)
 	assert.Equal(t, "U12345678", event.User)
 	assert.Equal(t, "D12345678", event.Channel)
@@ -3099,7 +3099,7 @@ func TestAppHomeOpenedEvent_WithoutView(t *testing.T) {
 	var event AppHomeOpenedEvent
 	err := json.Unmarshal(eventJSON, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "app_home_opened", event.Type)
 	assert.Equal(t, "U12345678", event.User)
 	assert.Equal(t, "D12345678", event.Channel)
@@ -3161,7 +3161,7 @@ func TestAppHomeOpenedEvent_FullEventParsing_WithView(t *testing.T) {
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "T12345678", parsedEvent.TeamID)
 	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
 	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
@@ -3204,7 +3204,7 @@ func TestAppHomeOpenedEvent_FullEventParsing_WithoutView(t *testing.T) {
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "T12345678", parsedEvent.TeamID)
 	assert.Equal(t, "A12345678", parsedEvent.APIAppID)
 	assert.Equal(t, "app_home_opened", parsedEvent.InnerEvent.Type)
@@ -3377,7 +3377,7 @@ func TestAppContextChangedEvent(t *testing.T) {
 	var event AppContextChangedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "app_context_changed", event.Type)
 	require.Len(t, event.Context.Entities, 1)
 	assert.Equal(t, "slack#/types/channel_id", event.Context.Entities[0].Type)
@@ -3397,7 +3397,7 @@ func TestAppContextChangedEvent_EmptyContext(t *testing.T) {
 	var event AppContextChangedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "app_context_changed", event.Type)
 	assert.Empty(t, event.Context.Entities)
 }
@@ -3416,7 +3416,7 @@ func TestAppContextEntity_ValueShapes(t *testing.T) {
 	var ctx AppContext
 	err := json.Unmarshal(rawE, &ctx)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.Len(t, ctx.Entities, 5)
 
 	channel := ctx.Entities[0]
@@ -3449,24 +3449,24 @@ func TestAppContextEntity_RoundTrip(t *testing.T) {
 		`{"type":"slack#/types/something_new","value":{"id":"X1"}}`,
 	} {
 		var entity AppContextEntity
-		assert.NoError(t, json.Unmarshal([]byte(rawE), &entity))
+		require.NoError(t, json.Unmarshal([]byte(rawE), &entity))
 
 		out, err := json.Marshal(entity)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.JSONEq(t, rawE, string(out))
 	}
 }
 
 func TestAppContextEntity_Marshal(t *testing.T) {
 	out, err := json.Marshal(AppContextEntity{Type: AppContextEntityChannel, Value: "C0123"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.JSONEq(t, `{"type":"slack#/types/channel_id","value":"C0123"}`, string(out))
 
 	out, err = json.Marshal(AppContextEntity{
 		Type:    AppContextEntityMessageContext,
 		Message: &AppContextMessage{ChannelID: "C0123", MessageTimestamp: "1.2"},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.JSONEq(t, `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"}}`, string(out))
 }
 
@@ -3509,7 +3509,7 @@ func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "app_context_changed", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AppContextChangedEvent)
 	require.True(t, ok)
@@ -3538,7 +3538,7 @@ func TestAgentSessionStoppedEvent(t *testing.T) {
 	var event AgentSessionStoppedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "agent_session_stopped", event.Type)
 	assert.Equal(t, "C0123ABC456", event.Channel)
 	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
@@ -3560,7 +3560,7 @@ func TestAgentSessionStoppedEvent_NoStreams(t *testing.T) {
 	var event AgentSessionStoppedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, event.StreamingMessageTimestamps)
 }
 
@@ -3584,7 +3584,7 @@ func TestAgentSessionStoppedEvent_FullEventParsing(t *testing.T) {
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "agent_session_stopped", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionStoppedEvent)
 	require.True(t, ok)
@@ -3607,7 +3607,7 @@ func TestAgentSessionTitleChangedEvent(t *testing.T) {
 	var event AgentSessionTitleChangedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "agent_session_title_changed", event.Type)
 	assert.Equal(t, "C0123ABC456", event.Channel)
 	assert.Equal(t, "1782234671.392669", event.ThreadTimestamp)
@@ -3632,7 +3632,7 @@ func TestAgentSessionTitleChangedEvent_NoPreviousTitle(t *testing.T) {
 	var event AgentSessionTitleChangedEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "Bora Bora trip prep", event.Title)
 	assert.Empty(t, event.PreviousTitle)
 }
@@ -3659,7 +3659,7 @@ func TestAgentSessionTitleChangedEvent_FullEventParsing(t *testing.T) {
 
 	parsedEvent, err := ParseEvent(fullEventJSON, OptionNoVerifyToken())
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "agent_session_title_changed", parsedEvent.InnerEvent.Type)
 	event, ok := parsedEvent.InnerEvent.Data.(*AgentSessionTitleChangedEvent)
 	require.True(t, ok)
@@ -3688,7 +3688,7 @@ func TestAppHomeOpenedEvent_WithContext(t *testing.T) {
 	var event AppHomeOpenedEvent
 	err := json.Unmarshal(eventJSON, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "home", event.Tab)
 	require.NotNil(t, event.Context)
 	require.Len(t, event.Context.Entities, 1)
@@ -3707,7 +3707,7 @@ func TestAppHomeOpenedEvent_WithoutContext(t *testing.T) {
 	var event AppHomeOpenedEvent
 	err := json.Unmarshal(eventJSON, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, event.Context)
 }
 
@@ -3734,7 +3734,7 @@ func TestMessageEventWithAppContext(t *testing.T) {
 	var event MessageEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, event.IsIM())
 	require.NotNil(t, event.AppContext)
 	require.Len(t, event.AppContext.Entities, 1)
@@ -3757,6 +3757,6 @@ func TestMessageEventWithoutAppContext(t *testing.T) {
 	var event MessageEvent
 	err := json.Unmarshal(rawE, &event)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, event.AppContext)
 }

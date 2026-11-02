@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/slack-go/slack"
 )
@@ -69,7 +70,7 @@ func TestGetSeenOutboundMessages(t *testing.T) {
 	for _, msg := range seenOutbound {
 		var m = slack.Message{}
 		jerr := json.Unmarshal([]byte(msg), &m)
-		assert.NoError(t, jerr, "messages should decode as slack.Message")
+		require.NoError(t, jerr, "messages should decode as slack.Message")
 		if m.Text == "should see this message" {
 			hadMessage = true
 			break
@@ -92,12 +93,12 @@ func TestGetSeenInboundMessages(t *testing.T) {
 	})
 	time.Sleep(maxWait)
 	seenInbound := s.GetSeenInboundMessages()
-	assert.True(t, len(seenInbound) > 0)
+	assert.NotEmpty(t, seenInbound)
 	hadMessage := false
 	for _, msg := range seenInbound {
 		var m = slack.Message{}
 		jerr := json.Unmarshal([]byte(msg), &m)
-		assert.NoError(t, jerr, "messages should decode as slack.Message")
+		require.NoError(t, jerr, "messages should decode as slack.Message")
 		if m.Text == "should see this inbound message" {
 			hadMessage = true
 			break

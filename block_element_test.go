@@ -63,7 +63,7 @@ func TestNewOptionsSelectBlockElement(t *testing.T) {
 
 	option := NewOptionsSelectBlockElement("static_select", nil, "test", testOption)
 	assert.Equal(t, "static_select", option.Type)
-	assert.Equal(t, 1, len(option.Options))
+	assert.Len(t, option.Options, 1)
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -77,7 +77,7 @@ func TestNewOptionsGroupSelectBlockElement(t *testing.T) {
 
 	assert.Equal(t, "static_select", optGroup.Type)
 	assert.Equal(t, "test", optGroup.ActionID)
-	assert.Equal(t, 1, len(optGroup.OptionGroups))
+	assert.Len(t, optGroup.OptionGroups, 1)
 }
 
 func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
@@ -87,7 +87,7 @@ func TestNewOptionsMultiSelectBlockElement(t *testing.T) {
 
 	option := NewOptionsMultiSelectBlockElement("static_select", nil, "test", testOption)
 	assert.Equal(t, "static_select", option.Type)
-	assert.Equal(t, 1, len(option.Options))
+	assert.Len(t, option.Options, 1)
 	assert.Nil(t, option.OptionGroups)
 }
 
@@ -102,7 +102,7 @@ func TestNewOptionsGroupMultiSelectBlockElement(t *testing.T) {
 
 	assert.Equal(t, "static_select", optGroup.Type)
 	assert.Equal(t, "test", optGroup.ActionID)
-	assert.Equal(t, 1, len(optGroup.OptionGroups))
+	assert.Len(t, optGroup.OptionGroups, 1)
 
 }
 func TestNewOverflowBlockElement(t *testing.T) {
@@ -122,7 +122,7 @@ func TestNewOverflowBlockElement(t *testing.T) {
 
 	assert.Equal(t, "overflow", string(overflowElement.Type))
 	assert.Equal(t, "test", overflowElement.ActionID)
-	assert.Equal(t, 3, len(overflowElement.Options))
+	assert.Len(t, overflowElement.Options, 3)
 
 }
 
@@ -196,7 +196,7 @@ func TestNewCheckboxGroupsBlockElement(t *testing.T) {
 
 	assert.Equal(t, "checkboxes", string(checkBoxGroupElement.Type))
 	assert.Equal(t, "test", checkBoxGroupElement.ActionID)
-	assert.Equal(t, 3, len(checkBoxGroupElement.Options))
+	assert.Len(t, checkBoxGroupElement.Options, 3)
 }
 
 func TestNewRadioButtonsBlockElement(t *testing.T) {
@@ -216,7 +216,7 @@ func TestNewRadioButtonsBlockElement(t *testing.T) {
 
 	assert.Equal(t, "radio_buttons", string(radioButtonsElement.Type))
 	assert.Equal(t, "test", radioButtonsElement.ActionID)
-	assert.Equal(t, 3, len(radioButtonsElement.Options))
+	assert.Len(t, radioButtonsElement.Options, 3)
 
 }
 
@@ -226,7 +226,7 @@ func TestNewNumberInputBlockElement(t *testing.T) {
 
 	assert.Equal(t, "number_input", string(numberInputElement.Type))
 	assert.Equal(t, "test", numberInputElement.ActionID)
-	assert.Equal(t, true, numberInputElement.IsDecimalAllowed)
+	assert.True(t, numberInputElement.IsDecimalAllowed)
 
 }
 
@@ -238,7 +238,7 @@ func TestNewFileInputBlockElement(t *testing.T) {
 	assert.Equal(t, "test", fileInputElement.ActionID)
 
 	fileInputElement.WithFileTypes("jpg", "png")
-	assert.Equal(t, 2, len(fileInputElement.FileTypes))
+	assert.Len(t, fileInputElement.FileTypes, 2)
 	assert.Contains(t, fileInputElement.FileTypes, "jpg")
 	assert.Contains(t, fileInputElement.FileTypes, "png")
 
@@ -252,7 +252,7 @@ func TestNewFeedbackButton(t *testing.T) {
 
 	assert.Equal(t, "Good", feedbackButton.Text.Text)
 	assert.Equal(t, "positive_feedback", feedbackButton.Value)
-	assert.Equal(t, "", feedbackButton.AccessibilityLabel)
+	assert.Empty(t, feedbackButton.AccessibilityLabel)
 
 	feedbackButton.WithAccessibilityLabel("Mark as good")
 	assert.Equal(t, "Mark as good", feedbackButton.AccessibilityLabel)
@@ -299,12 +299,12 @@ func TestFeedbackButtonsJSONMarshalling(t *testing.T) {
 	feedbackElement := NewFeedbackButtonsBlockElement("feedback_buttons_1", positiveBtn, negativeBtn)
 
 	data, err := json.Marshal(feedbackElement)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, data)
 
 	var unmarshalled FeedbackButtonsBlockElement
 	err = json.Unmarshal(data, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "feedback_buttons", string(unmarshalled.Type))
 	assert.Equal(t, "feedback_buttons_1", unmarshalled.ActionID)
 	assert.Equal(t, "positive_feedback", unmarshalled.PositiveButton.Value)
@@ -332,7 +332,7 @@ func TestIconButtonFluentMethods(t *testing.T) {
 	assert.Equal(t, "Delete this item", iconButton.AccessibilityLabel)
 
 	iconButton.WithVisibleToUserIDs([]string{"U123", "U456"})
-	assert.Equal(t, 2, len(iconButton.VisibleToUserIDs))
+	assert.Len(t, iconButton.VisibleToUserIDs, 2)
 	assert.Contains(t, iconButton.VisibleToUserIDs, "U123")
 
 	titleText := NewTextBlockObject("plain_text", "Are you sure?", false, false)
@@ -351,12 +351,12 @@ func TestIconButtonJSONMarshalling(t *testing.T) {
 	iconButton.WithValue("delete_item")
 
 	data, err := json.Marshal(iconButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, data)
 
 	var unmarshalled IconButtonBlockElement
 	err = json.Unmarshal(data, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "icon_button", string(unmarshalled.Type))
 	assert.Equal(t, "trash", unmarshalled.Icon)
 	assert.Equal(t, "delete_button_1", unmarshalled.ActionID)
@@ -431,11 +431,11 @@ func TestWorkflowButtonJSONMarshalling(t *testing.T) {
 		WithAccessibilityLabel("Start the approval process")
 
 	jsonData, err := json.Marshal(workflowButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var unmarshalled WorkflowButtonBlockElement
 	err = json.Unmarshal(jsonData, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "workflow_button", string(unmarshalled.Type))
 	assert.Equal(t, "start_workflow", unmarshalled.ActionID)
@@ -461,12 +461,12 @@ func TestWorkflowButtonMinimalConfiguration(t *testing.T) {
 
 	// Verify no optional fields are set
 	assert.Equal(t, Style(""), workflowButton.Style)
-	assert.Equal(t, "", workflowButton.AccessibilityLabel)
+	assert.Empty(t, workflowButton.AccessibilityLabel)
 	assert.Nil(t, workflowButton.Workflow.Trigger.CustomizableInputParameters)
 
 	// Ensure it marshals correctly without optional fields
 	jsonData, err := json.Marshal(workflowButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Check that optional fields are omitted from JSON
 	jsonStr := string(jsonData)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -84,16 +83,17 @@ func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected to receive error")
 	}
-	assert.IsType(t, StatusCodeError{}, err)
+	var statusErr StatusCodeError
+	assert.ErrorAs(t, err, &statusErr)
 }
 
 func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("nil omits fields", func(t *testing.T) {
 		msg := WebhookMessage{Text: "hello"}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
-		assert.False(t, strings.Contains(string(raw), "unfurl_links"))
-		assert.False(t, strings.Contains(string(raw), "unfurl_media"))
+		require.NoError(t, err)
+		assert.NotContains(t, string(raw), "unfurl_links")
+		assert.NotContains(t, string(raw), "unfurl_media")
 	})
 
 	t.Run("false is preserved", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(false),
 		}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, string(raw), `"unfurl_links":false`)
 		assert.Contains(t, string(raw), `"unfurl_media":false`)
 	})
@@ -115,7 +115,7 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, string(raw), `"unfurl_links":true`)
 		assert.Contains(t, string(raw), `"unfurl_media":true`)
 	})
@@ -127,11 +127,11 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(original)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var decoded WebhookMessage
 		err = json.Unmarshal(raw, &decoded)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, original.Text, decoded.Text)
 		require.NotNil(t, decoded.UnfurlLinks)
 		assert.False(t, *decoded.UnfurlLinks)
@@ -148,18 +148,18 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	twoBlocks := &Blocks{BlockSet: []Block{sectionBlock, sectionBlock}}
 
 	msgSingleBlock := WebhookMessage{Blocks: singleBlock}
-	assert.Equal(t, 1, len(msgSingleBlock.Blocks.BlockSet))
+	assert.Len(t, msgSingleBlock.Blocks.BlockSet, 1)
 
 	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
+	assert.JSONEq(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
 
 	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
-	assert.Equal(t, 2, len(msgTwoBlocks.Blocks.BlockSet))
+	assert.Len(t, msgTwoBlocks.Blocks.BlockSet, 2)
 
 	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
+	assert.JSONEq(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
 
 	msgNoBlocks := WebhookMessage{Text: "foo"}
 	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)
-	assert.Equal(t, `{"text":"foo","replace_original":false,"delete_original":false}`, string(msgJsonNoBlocks))
+	assert.JSONEq(t, `{"text":"foo","replace_original":false,"delete_original":false}`, string(msgJsonNoBlocks))
 }

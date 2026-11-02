@@ -8,9 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
 
 func TestMCPWorkflow(t *testing.T) {
@@ -38,7 +39,9 @@ func TestMCPWorkflow(t *testing.T) {
 				id := r.PostForm.Get("skill_id")
 				declared := []slack.SlackbotSkillMCPServer{}
 				if raw, present := r.PostForm["mcp_servers"]; present {
-					require.Len(t, raw, 1)
+					if !assert.Len(t, raw, 1) {
+						return
+					}
 					var entries []json.RawMessage
 					if !assert.NoError(t, json.Unmarshal([]byte(raw[0]), &entries)) {
 						return

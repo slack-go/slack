@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
 
 func TestWorkflow(t *testing.T) {
@@ -94,7 +94,7 @@ func TestWorkflowRevokedToken(t *testing.T) {
 	defer server.Close()
 	err := runWorkflow(context.Background(), slack.New("revoked", slack.OptionAPIURL(server.URL+"/")))
 	var slackErr slack.SlackErrorResponse
-	require.True(t, errors.As(err, &slackErr))
+	require.ErrorAs(t, err, &slackErr)
 	assert.Equal(t, "token_revoked", slackErr.Err)
 	assert.Equal(t, 1, calls, "no fixture ID means no subsequent API or cleanup calls")
 }

@@ -62,10 +62,10 @@ func TestBlockFromJSON(t *testing.T) {
 			block, err := BlockFromJSON(tt.json)
 
 			if tt.wantError {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, block)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				require.NotNil(t, block)
 				assert.Equal(t, tt.wantType, block.BlockType())
 			}
@@ -100,7 +100,7 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		originalJSON := `{"type": "section", "text": {"type": "mrkdwn", "text": "Hello World"}, "block_id": "section1"}`
 
 		block, err := BlockFromJSON(originalJSON)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, MBTSection, block.BlockType())
 		assert.Equal(t, "section1", block.ID())
 
@@ -145,7 +145,7 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		}`
 
 		block, err := BlockFromJSON(originalJSON)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, MessageBlockType("context_actions"), block.BlockType())
 		assert.Equal(t, "feedback_block", block.ID())
 
@@ -163,7 +163,7 @@ func TestRawJSONBlockRoundTrip(t *testing.T) {
 		// Specifically verify elements array is preserved
 		resultElements, ok := result["elements"].([]any)
 		assert.True(t, ok, "elements should be an array")
-		assert.Equal(t, 2, len(resultElements), "should have 2 elements")
+		assert.Len(t, resultElements, 2, "should have 2 elements")
 	})
 }
 
@@ -213,7 +213,7 @@ func TestRawJSONBlockInDeepStructure(t *testing.T) {
 
 		// Verify the middle block (our RawJSONBlock) has all fields preserved
 		var contextActionsBlock map[string]any
-		assert.NoError(t, json.Unmarshal(result.Blocks[1], &contextActionsBlock))
+		require.NoError(t, json.Unmarshal(result.Blocks[1], &contextActionsBlock))
 
 		assert.Equal(t, "context_actions", contextActionsBlock["type"])
 		assert.Equal(t, "feedback_block", contextActionsBlock["block_id"])

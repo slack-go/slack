@@ -54,7 +54,7 @@ func unmarshalChannel(j string) (*Channel, error) {
 
 func TestSimpleChannel(t *testing.T) {
 	channel, err := unmarshalChannel(simpleChannel)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleChannel(t, channel)
 }
 
@@ -64,12 +64,12 @@ func assertSimpleChannel(t *testing.T, channel *Channel) {
 	require.NotNil(t, channel)
 	assert.Equal(t, "C024BE91L", channel.ID)
 	assert.Equal(t, "fun", channel.Name)
-	assert.Equal(t, true, channel.IsChannel)
+	assert.True(t, channel.IsChannel)
 	assert.Equal(t, JSONTime(1360782804), channel.Created)
 	assert.Equal(t, "U024BE7LH", channel.Creator)
-	assert.Equal(t, false, channel.IsArchived)
-	assert.Equal(t, false, channel.IsGeneral)
-	assert.Equal(t, true, channel.IsMember)
+	assert.False(t, channel.IsArchived)
+	assert.False(t, channel.IsGeneral)
+	assert.True(t, channel.IsMember)
 	assert.Equal(t, "1401383885.000061", channel.LastRead)
 	assert.Equal(t, 0, channel.UnreadCount)
 	assert.Equal(t, 0, channel.UnreadCountDisplay)
@@ -143,7 +143,7 @@ func unmarshalSharedChannel(j string) (*Channel, error) {
 
 func TestSharedChannel(t *testing.T) {
 	channel, err := unmarshalSharedChannel(sharedChannel)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSharedChannel(t, channel)
 }
 
@@ -151,8 +151,8 @@ func assertSharedChannel(t *testing.T, channel *Channel) {
 	t.Helper()
 
 	assertSimpleChannel(t, channel)
-	assert.Equal(t, true, channel.IsShared)
-	assert.Equal(t, true, channel.IsExtShared)
+	assert.True(t, channel.IsShared)
+	assert.True(t, channel.IsExtShared)
 	assert.Equal(t, "T1ABCD2E12", channel.ContextTeamID)
 	assert.Equal(t, "T07XY8FPJ5C", channel.ConversationHostID)
 	if !reflect.DeepEqual([]string{"T07XY8FPJ5C"}, channel.SharedTeamIDs) {
@@ -221,7 +221,7 @@ func unmarshalGroup(j string) (*Group, error) {
 
 func TestSimpleGroup(t *testing.T) {
 	group, err := unmarshalGroup(simpleGroup)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleGroup(t, group)
 }
 
@@ -231,10 +231,10 @@ func assertSimpleGroup(t *testing.T, group *Group) {
 	require.NotNil(t, group)
 	assert.Equal(t, "G024BE91L", group.ID)
 	assert.Equal(t, "secretplans", group.Name)
-	assert.Equal(t, true, group.IsGroup)
+	assert.True(t, group.IsGroup)
 	assert.Equal(t, JSONTime(1360782804), group.Created)
 	assert.Equal(t, "U024BE7LH", group.Creator)
-	assert.Equal(t, false, group.IsArchived)
+	assert.False(t, group.IsArchived)
 	assert.Equal(t, "1401383885.000061", group.LastRead)
 	assert.Equal(t, 0, group.UnreadCount)
 	assert.Equal(t, 0, group.UnreadCountDisplay)
@@ -299,7 +299,7 @@ func unmarshalChannelWithCanvas(j string) (*Channel, error) {
 
 func TestChannelWithCanvas(t *testing.T) {
 	channel, err := unmarshalChannelWithCanvas(channelWithCanvas)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertChannelWithCanvas(t, channel)
 }
 
@@ -309,7 +309,7 @@ func assertChannelWithCanvas(t *testing.T, channel *Channel) {
 	assertSimpleChannel(t, channel)
 	require.NotNil(t, channel.Properties)
 	assert.Equal(t, "F05RQ01LJU0", channel.Properties.Canvas.FileId)
-	assert.Equal(t, true, channel.Properties.Canvas.IsEmpty)
+	assert.True(t, channel.Properties.Canvas.IsEmpty)
 	assert.Equal(t, "XFB9AAlvIyJ", channel.Properties.Canvas.QuipThreadId)
 }
 
@@ -382,7 +382,7 @@ func unmarshalChannelWithRecordChannel(j string) (*Channel, error) {
 
 func TestChannelWithRecordChannel(t *testing.T) {
 	channel, err := unmarshalChannelWithRecordChannel(channelWithRecordChannel)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertChannelWithRecordChannel(t, channel)
 }
 
@@ -444,7 +444,7 @@ func unmarshalIM(j string) (*Conversation, error) {
 
 func TestSimpleIM(t *testing.T) {
 	im, err := unmarshalIM(simpleIM)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assertSimpleIM(t, im)
 }
 
@@ -453,11 +453,11 @@ func assertSimpleIM(t *testing.T, im *Conversation) {
 
 	require.NotNil(t, im)
 	assert.Equal(t, "D024BFF1M", im.ID)
-	assert.Equal(t, true, im.IsIM)
+	assert.True(t, im.IsIM)
 	assert.Equal(t, "U024BE7LH", im.User)
 	assert.Equal(t, JSONTime(1360782804), im.Created)
-	assert.Equal(t, false, im.IsUserDeleted)
-	assert.Equal(t, true, im.IsOpen)
+	assert.False(t, im.IsUserDeleted)
+	assert.True(t, im.IsOpen)
 	assert.Equal(t, "1401383885.000061", im.LastRead)
 	assert.Equal(t, 0, im.UnreadCount)
 	assert.Equal(t, 0, im.UnreadCountDisplay)

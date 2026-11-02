@@ -110,18 +110,18 @@ func TestNewTableBlock(t *testing.T) {
 	assert.Equal(t, "table", string(tableBlock.Type))
 	assert.Equal(t, "test1", tableBlock.BlockID)
 	assert.Equal(t, "test1", tableBlock.ID())
-	assert.Equal(t, 2, len(tableBlock.Rows))
-	assert.Equal(t, 0, len(tableBlock.ColumnSettings))
+	assert.Len(t, tableBlock.Rows, 2)
+	assert.Empty(t, tableBlock.ColumnSettings)
 
 	// Check if marshalled payload matches expected JSON
 	marshalled, err := json.Marshal(tableBlock)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var expected, actual map[string]any
 	err = json.Unmarshal([]byte(testPayload), &expected)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = json.Unmarshal(marshalled, &actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, expected, actual)
 }
@@ -152,7 +152,7 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 
 	var tb TableBlock
 	err := json.Unmarshal([]byte(payload), &tb)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, MBTTable, tb.BlockType())
 	require.Len(t, tb.Rows, 3)
 	for _, row := range tb.Rows {
@@ -172,7 +172,7 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 
 	rawNumber, ok := tb.Rows[1][1].(*TableRawNumberCell)
 	require.True(t, ok)
-	assert.Equal(t, float64(42), rawNumber.Value)
+	assert.Equal(t, float64(42), rawNumber.Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 
 	// Empty cell decodes as nil.
 	assert.Nil(t, tb.Rows[2][1])

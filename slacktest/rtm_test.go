@@ -58,7 +58,7 @@ func TestRTMPing(t *testing.T) {
 	select {
 	case m := <-messageChan:
 		assert.NotEmpty(t, m.Value, "latency report should value a value")
-		assert.True(t, m.Value > 0, "latency report should be greater than 0")
+		assert.Positive(t, m.Value, "latency report should be greater than 0")
 		break
 	case <-time.After(maxWait):
 		assert.FailNow(t, "did not get latency report in time")
