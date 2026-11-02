@@ -47,7 +47,7 @@ func TestDataTableBlockAddRow(t *testing.T) {
 
 	num, ok := block.Rows[1][1].(*DataTableRawNumberCell)
 	require.True(t, ok)
-	assert.Equal(t, float64(42), num.Value)
+	assert.Equal(t, float64(42), num.Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 	assert.Equal(t, "forty-two", num.Text)
 }
 
@@ -112,7 +112,7 @@ func TestDataTableBlockJSONRoundTrip(t *testing.T) {
 
 	num, ok := block.Rows[2][1].(*DataTableRawNumberCell)
 	require.True(t, ok)
-	assert.Equal(t, float64(7), num.Value)
+	assert.Equal(t, float64(7), num.Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 	assert.Equal(t, "seven", num.Text)
 
 	rich, ok := block.Rows[1][2].(*DataTableRichTextCell)
@@ -160,7 +160,7 @@ func TestDataTableBlockUnmarshalViaBlocks(t *testing.T) {
 
 	num, ok := dt.Rows[1][0].(*DataTableRawNumberCell)
 	require.True(t, ok)
-	assert.Equal(t, float64(1), num.Value)
+	assert.Equal(t, float64(1), num.Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 	assert.Empty(t, num.Text)
 }
 

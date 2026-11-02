@@ -172,7 +172,7 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 
 	rawNumber, ok := tb.Rows[1][1].(*TableRawNumberCell)
 	require.True(t, ok)
-	assert.Equal(t, float64(42), rawNumber.Value)
+	assert.Equal(t, float64(42), rawNumber.Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 
 	// Empty cell decodes as nil.
 	assert.Nil(t, tb.Rows[2][1])

@@ -57,7 +57,7 @@ func TestDataVisualizationBlockPieJSONRoundTrip(t *testing.T) {
 	require.True(t, ok)
 	require.Len(t, pie.Segments, 4)
 	assert.Equal(t, "Kit Kat", pie.Segments[0].Label)
-	assert.Equal(t, float64(45), pie.Segments[0].Value)
+	assert.Equal(t, float64(45), pie.Segments[0].Value) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 
 	marshalled, err := json.Marshal(block)
 	require.NoError(t, err)
