@@ -10,8 +10,8 @@ func TestResponseHeaders(t *testing.T) {
 	t.Run("AuthTest captures headers", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-OAuth-Scopes", "users:read,channels:read")
-			w.Header().Set("X-Accepted-OAuth-Scopes", "users:read")
+			w.Header().Set("X-Oauth-Scopes", "users:read,channels:read")
+			w.Header().Set("X-Accepted-Oauth-Scopes", "users:read")
 			w.Write([]byte(`{"ok":true,"url":"https://example.slack.com","team":"T","user":"U","team_id":"T1","user_id":"U1"}`))
 		}))
 		defer ts.Close()
@@ -21,10 +21,10 @@ func TestResponseHeaders(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
-		if got := resp.Header.Get("X-OAuth-Scopes"); got != "users:read,channels:read" {
+		if got := resp.Header.Get("X-Oauth-Scopes"); got != "users:read,channels:read" {
 			t.Fatalf("expected X-OAuth-Scopes=users:read,channels:read, got %q", got)
 		}
-		if got := resp.Header.Get("X-Accepted-OAuth-Scopes"); got != "users:read" {
+		if got := resp.Header.Get("X-Accepted-Oauth-Scopes"); got != "users:read" {
 			t.Fatalf("expected X-Accepted-OAuth-Scopes=users:read, got %q", got)
 		}
 	})
@@ -32,7 +32,7 @@ func TestResponseHeaders(t *testing.T) {
 	t.Run("SlackResponse embeds headers via callback", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-OAuth-Scopes", "admin")
+			w.Header().Set("X-Oauth-Scopes", "admin")
 			w.Write([]byte(`{"ok":true,"url":"https://example.slack.com","team":"T","user":"U","team_id":"T1","user_id":"U1"}`))
 		}))
 		defer ts.Close()
@@ -52,7 +52,7 @@ func TestResponseHeaders(t *testing.T) {
 		if gotHeaders == nil {
 			t.Fatal("expected headers from SlackResponse, got nil")
 		}
-		if got := gotHeaders.Get("X-OAuth-Scopes"); got != "admin" {
+		if got := gotHeaders.Get("X-Oauth-Scopes"); got != "admin" {
 			t.Fatalf("expected X-OAuth-Scopes=admin, got %q", got)
 		}
 	})
@@ -62,7 +62,7 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 	t.Run("callback fires", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-OAuth-Scopes", "users:read")
+			w.Header().Set("X-Oauth-Scopes", "users:read")
 			w.Write([]byte(`{"ok":true,"url":"https://example.slack.com","team":"T","user":"U","team_id":"T1","user_id":"U1"}`))
 		}))
 		defer ts.Close()
@@ -87,7 +87,7 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 		if gotHeaders == nil {
 			t.Fatal("expected headers, got nil")
 		}
-		if got := gotHeaders.Get("X-OAuth-Scopes"); got != "users:read" {
+		if got := gotHeaders.Get("X-Oauth-Scopes"); got != "users:read" {
 			t.Fatalf("expected X-OAuth-Scopes=users:read, got %q", got)
 		}
 	})
@@ -95,7 +95,7 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 	t.Run("no callback is safe", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-OAuth-Scopes", "users:read")
+			w.Header().Set("X-Oauth-Scopes", "users:read")
 			w.Write([]byte(`{"ok":true,"url":"https://example.slack.com","team":"T","user":"U","team_id":"T1","user_id":"U1"}`))
 		}))
 		defer ts.Close()
@@ -110,7 +110,7 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 	t.Run("callback fires on error", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-OAuth-Scopes", "users:read")
+			w.Header().Set("X-Oauth-Scopes", "users:read")
 			w.Write([]byte(`{"ok":false,"error":"invalid_auth"}`))
 		}))
 		defer ts.Close()
@@ -130,7 +130,7 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 		if gotHeaders == nil {
 			t.Fatal("expected headers even on error response, got nil")
 		}
-		if got := gotHeaders.Get("X-OAuth-Scopes"); got != "users:read" {
+		if got := gotHeaders.Get("X-Oauth-Scopes"); got != "users:read" {
 			t.Fatalf("expected X-OAuth-Scopes=users:read, got %q", got)
 		}
 	})
