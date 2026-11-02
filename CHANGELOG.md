@@ -46,6 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve optional `display_as_bot` values in messages, including thread
+  broadcasts, as `Msg.DisplayAsBot`. Use a pointer to distinguish false from an
+  absent field. The remaining thread-broadcast fields already decode through
+  `slackevents.MessageEvent.Message`.
+  [Node SDK change](https://github.com/slackapi/node-slack-sdk/commit/e02e7feeb500bfde1f947401a639633e42ce2f91).
+
 - Reject request timestamps so far in the future that the duration difference
   overflows, instead of allowing them to pass the five-minute timestamp check.
 
