@@ -489,7 +489,7 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 	}`)
 	var cb InteractionCallback
 	assert.NoError(t, json.Unmarshal(raw, &cb))
-	assert.Equal(t, "", cb.State)
+	assert.Empty(t, cb.State)
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
 		ActionType(MultiOptTypeConversations))

@@ -155,7 +155,7 @@ func assertSimpleDialog(t *testing.T, dialog *Dialog) {
 	assert.Equal(t, []DialogSelectOption{}, selectElement.SelectedOptions)
 	assert.Equal(t, "option 1", selectElement.Options[0].Label)
 	assert.Equal(t, "1", selectElement.Options[0].Value)
-	assert.Equal(t, 0, len(selectElement.OptionGroups))
+	assert.Empty(t, selectElement.OptionGroups)
 }
 
 // Callbacks

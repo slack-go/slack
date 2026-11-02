@@ -92,7 +92,7 @@ func TestGetSeenInboundMessages(t *testing.T) {
 	})
 	time.Sleep(maxWait)
 	seenInbound := s.GetSeenInboundMessages()
-	assert.Positive(t, len(seenInbound))
+	assert.NotEmpty(t, seenInbound)
 	hadMessage := false
 	for _, msg := range seenInbound {
 		var m = slack.Message{}

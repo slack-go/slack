@@ -14,7 +14,7 @@ func TestNewSectionBlock(t *testing.T) {
 	assert.Equal(t, "section", string(sectionBlock.Type))
 	assert.Equal(t, "test_block", sectionBlock.BlockID)
 	assert.Equal(t, "test_block", sectionBlock.ID())
-	assert.Equal(t, 0, len(sectionBlock.Fields))
+	assert.Empty(t, sectionBlock.Fields)
 	assert.Nil(t, sectionBlock.Accessory)
 	assert.Equal(t, "mrkdwn", sectionBlock.Text.Type)
 	assert.Contains(t, sectionBlock.Text.Text, "New Orleans")
@@ -26,7 +26,7 @@ func TestNewBlockSectionContainsAddedTextBlockAndAccessory(t *testing.T) {
 	sectionBlock := NewSectionBlock(textBlockObject, nil, NewAccessory(conflictImage))
 
 	assert.Equal(t, MBTSection, sectionBlock.BlockType())
-	assert.Equal(t, 0, len(sectionBlock.BlockID))
+	assert.Empty(t, sectionBlock.BlockID)
 	textBlockInSection := sectionBlock.Text
 	assert.Equal(t, textBlockInSection.Text, textBlockObject.Text)
 	assert.Equal(t, textBlockInSection.Type, textBlockObject.Type)

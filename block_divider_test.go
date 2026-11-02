@@ -11,6 +11,6 @@ func TestNewDividerBlock(t *testing.T) {
 
 	assert.Equal(t, MBTDivider, dividerBlock.BlockType())
 	assert.Equal(t, "divider", string(dividerBlock.Type))
-	assert.Equal(t, "", dividerBlock.BlockID)
-	assert.Equal(t, "", dividerBlock.ID())
+	assert.Empty(t, dividerBlock.BlockID)
+	assert.Empty(t, dividerBlock.ID())
 }

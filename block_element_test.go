@@ -252,7 +252,7 @@ func TestNewFeedbackButton(t *testing.T) {
 
 	assert.Equal(t, "Good", feedbackButton.Text.Text)
 	assert.Equal(t, "positive_feedback", feedbackButton.Value)
-	assert.Equal(t, "", feedbackButton.AccessibilityLabel)
+	assert.Empty(t, feedbackButton.AccessibilityLabel)
 
 	feedbackButton.WithAccessibilityLabel("Mark as good")
 	assert.Equal(t, "Mark as good", feedbackButton.AccessibilityLabel)
@@ -461,7 +461,7 @@ func TestWorkflowButtonMinimalConfiguration(t *testing.T) {
 
 	// Verify no optional fields are set
 	assert.Equal(t, Style(""), workflowButton.Style)
-	assert.Equal(t, "", workflowButton.AccessibilityLabel)
+	assert.Empty(t, workflowButton.AccessibilityLabel)
 	assert.Nil(t, workflowButton.Workflow.Trigger.CustomizableInputParameters)
 
 	// Ensure it marshals correctly without optional fields
