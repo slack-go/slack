@@ -498,12 +498,21 @@ func (api *Client) SetUserPresenceContext(ctx context.Context, presence string) 
 
 // GetUserIdentity will retrieve user info available per identity scopes.
 // For more information see the GetUserIdentityContext documentation.
+//
+// Deprecated: For new Sign in with Slack integrations, use
+// [Client.GetOpenIDConnectUserInfo] with a token from [GetOpenIDConnectToken].
+// The replacement requires the OpenID Connect authorization flow and scopes.
 func (api *Client) GetUserIdentity() (*UserIdentityResponse, error) {
 	return api.GetUserIdentityContext(context.Background())
 }
 
 // GetUserIdentityContext will retrieve user info available per identity scopes with a custom context.
-// Slack API docs: https://api.slack.com/methods/users.identity
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/users.identity
+//
+// Deprecated: For new Sign in with Slack integrations, use
+// [Client.GetOpenIDConnectUserInfoContext] with a token from [GetOpenIDConnectTokenContext].
+// The replacement requires the OpenID Connect authorization flow and scopes.
 func (api *Client) GetUserIdentityContext(ctx context.Context) (response *UserIdentityResponse, err error) {
 	values := url.Values{
 		"token": {api.token},

@@ -23,7 +23,8 @@ const (
 	rtmEventTypeDesktopNotification = "desktop_notification"
 )
 
-// StartRTM calls the "rtm.start" endpoint and returns the provided URL and the full Info block.
+// StartRTM calls the legacy "rtm.start" endpoint and returns the provided URL and Info.
+// Slack now returns the compact "rtm.connect" response from this endpoint.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 //
@@ -36,7 +37,8 @@ func (api *Client) StartRTM() (info *Info, websocketURL string, err error) {
 	return api.StartRTMContext(ctx)
 }
 
-// StartRTMContext calls the "rtm.start" endpoint and returns the provided URL and the full Info block with a custom context.
+// StartRTMContext calls the legacy "rtm.start" endpoint with a custom context.
+// Slack now returns the compact "rtm.connect" response from this endpoint.
 //
 // To have a fully managed Websocket connection, use `NewRTM`, and call `ManageConnection()` on it.
 //
@@ -84,6 +86,8 @@ type RTMOption func(*RTM)
 
 // RTMOptionUseStart as of 11th July 2017 you should prefer setting this to false, see:
 // https://api.slack.com/changelog/2017-04-start-using-rtm-connect-and-stop-using-rtm-start
+//
+// Deprecated: rtm.start is deprecated. [Client.NewRTM] uses rtm.connect by default.
 func RTMOptionUseStart(b bool) RTMOption {
 	return func(rtm *RTM) {
 		rtm.useRTMStart = b

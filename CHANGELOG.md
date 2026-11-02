@@ -29,6 +29,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   helpers use the legacy `muted_channels` preference, which may differ from the
   current client's notification settings.
 
+### Deprecated
+
+- Deprecate `RTMOptionUseStart`; `NewRTM` uses `rtm.connect` by default. Correct
+  the `StartRTM` documentation to describe Slack's compact connection response.
+
+- Deprecate legacy Sign in with Slack identity helpers in favor of
+  `GetOpenIDConnectToken` and `GetOpenIDConnectUserInfo` and their context variants.
+  Migration requires the OpenID Connect authorization flow and scopes.
+
+- Deprecate classic OAuth helpers in favor of `GetOAuthV2Response` and
+  `GetOAuthV2ResponseContext` for granular-permission apps. The OAuth V2 response
+  exposes the bot token in `AccessToken` and user tokens in `AuthedUser`.
+
+- Deprecate stars API helpers and `StarredItemPagination` and remove the legacy
+  stars example. These APIs do not manage Slack's Later items; Slack recommends
+  retiring features that use them. See
+  [Slack's guidance](https://docs.slack.dev/reference/methods/stars.list/).
+
 ### Removed
 
 - **Breaking:** Remove `SetUserAsActive` and `SetUserAsActiveContext`, which called
