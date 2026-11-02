@@ -1,10 +1,16 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func createCanvasHandler(rw http.ResponseWriter, r *http.Request) {
@@ -241,5 +247,90 @@ func TestLookupCanvasSections(t *testing.T) {
 
 	if !reflect.DeepEqual(expectedSections, sections) {
 		t.Fatalf("Expected sections %v, got %v", expectedSections, sections)
+	}
+}
+
+func TestGetCanvasContent(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		options []GetCanvasContentOption
+		want    url.Values
+		content string
+	}{
+		{"default", nil, url.Values{}, "# Plan\n\n- Item"},
+		{"markdown", []GetCanvasContentOption{GetCanvasContentOptionContentType("markdown")}, url.Values{"content_type": {"markdown"}}, "# Plan"},
+		{"html", []GetCanvasContentOption{GetCanvasContentOptionContentType("html")}, url.Values{"content_type": {"html"}}, "<h1>Plan</h1>"},
+		{"nil and empty", []GetCanvasContentOption{nil, GetCanvasContentOptionContentType("")}, url.Values{}, ""},
+		{"last option wins", []GetCanvasContentOption{GetCanvasContentOptionContentType("markdown"), GetCanvasContentOptionContentType("html")}, url.Values{"content_type": {"html"}}, "<p>Plan</p>"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/canvases.getContent", r.URL.Path)
+				if !assert.NoError(t, r.ParseForm()) {
+					return
+				}
+				assert.Equal(t, "testing-token", r.PostForm.Get("token"))
+				assert.Equal(t, "F123", r.PostForm.Get("canvas_id"))
+				r.PostForm.Del("token")
+				r.PostForm.Del("canvas_id")
+				assert.Equal(t, tt.want, r.PostForm)
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(map[string]any{"ok": true, "content": tt.content})
+			}))
+			defer server.Close()
+			api := New("testing-token", OptionAPIURL(server.URL+"/"))
+			content, err := api.GetCanvasContent("F123", tt.options...)
+			require.NoError(t, err)
+			assert.Equal(t, tt.content, content)
+		})
+	}
+}
+
+func TestGetCanvasContentErrors(t *testing.T) {
+	for _, method := range []struct {
+		name string
+		call func(*Client, context.Context) error
+	}{
+		{"canvas content", func(api *Client, ctx context.Context) error {
+			_, err := api.GetCanvasContentContext(ctx, "F123", nil)
+			return err
+		}},
+	} {
+		t.Run(method.name, func(t *testing.T) {
+			for _, tt := range []struct {
+				name, body string
+				status     int
+			}{
+				{"Slack error", `{"ok":false,"error":"access_denied","response_metadata":{"messages":["Request rejected"]}}`, http.StatusOK},
+				{"invalid JSON", `{"ok":`, http.StatusOK},
+				{"HTTP error", `server error`, http.StatusInternalServerError},
+			} {
+				t.Run(tt.name, func(t *testing.T) {
+					server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						w.WriteHeader(tt.status)
+						_, _ = w.Write([]byte(tt.body))
+					}))
+					defer server.Close()
+					api := New("testing-token", OptionAPIURL(server.URL+"/"))
+					err := method.call(api, context.Background())
+					require.Error(t, err)
+					if tt.name == "Slack error" {
+						var slackErr SlackErrorResponse
+						require.ErrorAs(t, err, &slackErr)
+						assert.Equal(t, "access_denied", slackErr.Err)
+						assert.Equal(t, []string{"Request rejected"}, slackErr.ResponseMetadata.Messages)
+					}
+				})
+			}
+			t.Run("canceled context", func(t *testing.T) {
+				server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { t.Error("canceled request reached server") }))
+				defer server.Close()
+				api := New("testing-token", OptionAPIURL(server.URL+"/"))
+				ctx, cancel := context.WithCancel(context.Background())
+				cancel()
+				require.ErrorIs(t, method.call(api, ctx), context.Canceled)
+			})
+		})
 	}
 }

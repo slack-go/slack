@@ -58,6 +58,17 @@ type LookupCanvasSectionsResponse struct {
 	Sections []CanvasSection `json:"sections"`
 }
 
+type getCanvasContentParams struct{ contentType string }
+
+// GetCanvasContentOption configures canvas content retrieval.
+type GetCanvasContentOption func(*getCanvasContentParams)
+
+// GetCanvasContentOptionContentType selects markdown or html output.
+// Slack defaults to markdown when omitted.
+func GetCanvasContentOptionContentType(contentType string) GetCanvasContentOption {
+	return func(params *getCanvasContentParams) { params.contentType = contentType }
+}
+
 // createCanvasParams contains the optional parameters for the canvases.create method.
 type createCanvasParams struct {
 	channelID string
@@ -116,6 +127,37 @@ func (api *Client) CreateCanvasContext(ctx context.Context, title string, docume
 	}
 
 	return response.CanvasID, response.Err()
+}
+
+// GetCanvasContent returns the full content of a canvas visible to the caller.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/canvases.getContent
+func (api *Client) GetCanvasContent(canvasID string, options ...GetCanvasContentOption) (string, error) {
+	return api.GetCanvasContentContext(context.Background(), canvasID, options...)
+}
+
+// GetCanvasContentContext returns canvas content with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/canvases.getContent
+func (api *Client) GetCanvasContentContext(ctx context.Context, canvasID string, options ...GetCanvasContentOption) (string, error) {
+	params := getCanvasContentParams{}
+	for _, option := range options {
+		if option != nil {
+			option(&params)
+		}
+	}
+	values := url.Values{"token": {api.token}, "canvas_id": {canvasID}}
+	if params.contentType != "" {
+		values.Set("content_type", params.contentType)
+	}
+	response := struct {
+		SlackResponse
+		Content string `json:"content"`
+	}{}
+	if err := api.postMethod(ctx, "canvases.getContent", values, &response); err != nil {
+		return "", err
+	}
+	return response.Content, response.Err()
 }
 
 // DeleteCanvas deletes an existing canvas.

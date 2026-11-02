@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `GetCanvasContent` and `GetCanvasContentContext`, with optional Markdown or
+  HTML output. [Slack API reference](https://docs.slack.dev/reference/methods/canvases.getContent/).
+
 - Configure RTM WebSocket handshake headers with `RTMOptionDialHeaders`.
   Headers are copied and reused on reconnect; existing defaults remain unchanged.
 
