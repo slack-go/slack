@@ -83,7 +83,8 @@ func TestPostWebhook_MessageLimitExceeded(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected to receive error")
 	}
-	assert.IsType(t, StatusCodeError{}, err)
+	var statusErr StatusCodeError
+	assert.ErrorAs(t, err, &statusErr)
 }
 
 func TestWebhookMessage_UnfurlFields(t *testing.T) {
