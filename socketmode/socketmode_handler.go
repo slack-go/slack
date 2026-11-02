@@ -310,6 +310,9 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 	}
 
 	innerEventType := slackevents.EventsAPIType(eventsAPIEvent.InnerEvent.Type)
+	if innerEventType == "" {
+		innerEventType = slackevents.EventsAPIType(eventsAPIEvent.Type)
+	}
 
 	// Level 1 - socketmode EventType
 	ishandled := r.socketmodeDispatcher(evt)
