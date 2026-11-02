@@ -59,7 +59,7 @@ func (e SlackResponseErrors) MarshalJSON() ([]byte, error) {
 	if e.Message != nil {
 		return json.Marshal(*e.Message)
 	}
-	return json.Marshal(nil)
+	return []byte("null"), nil
 }
 
 // UnmarshalJSON implements custom unmarshaling for SlackResponseErrors
