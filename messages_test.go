@@ -27,7 +27,7 @@ func unmarshalMessage(j string) (*Message, error) {
 
 func TestSimpleMessage(t *testing.T) {
 	message, err := unmarshalMessage(simpleMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "C2147483705", message.Channel)
@@ -47,7 +47,7 @@ var starredMessage = `{
 
 func TestStarredMessage(t *testing.T) {
 	message, err := unmarshalMessage(starredMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "is testing", message.Text)
 	assert.Equal(t, "message", message.Type)
@@ -70,7 +70,7 @@ var editedMessage = `{
 
 func TestEditedMessage(t *testing.T) {
 	message, err := unmarshalMessage(editedMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U2147483697", message.User)
@@ -134,7 +134,7 @@ var uploadedFile = `{
 
 func TestUploadedFile(t *testing.T) {
 	message, err := unmarshalMessage(uploadedFile)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
@@ -205,7 +205,7 @@ var testPost = `{
 
 func TestPost(t *testing.T) {
 	message, err := unmarshalMessage(testPost)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)
@@ -272,7 +272,7 @@ var testComment = `{
 func TestComment(t *testing.T) {
 	message, err := unmarshalMessage(testComment)
 	fmt.Println(err)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileComment, message.SubType)
@@ -338,7 +338,7 @@ var workflowBotMessage = `{
 
 func TestWorkflowBotMessage(t *testing.T) {
 	message, err := unmarshalMessage(workflowBotMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeBotMessage, message.SubType)
@@ -352,7 +352,7 @@ func TestWorkflowBotMessage(t *testing.T) {
 
 func TestBotMessage(t *testing.T) {
 	message, err := unmarshalMessage(botMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeBotMessage, message.SubType)
@@ -387,7 +387,7 @@ var meMessage = `{
 
 func TestMeMessage(t *testing.T) {
 	message, err := unmarshalMessage(meMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMeMessage, message.SubType)
@@ -417,7 +417,7 @@ var messageChangedMessage = `{
 
 func TestMessageChangedMessage(t *testing.T) {
 	message, err := unmarshalMessage(messageChangedMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMessageChanged, message.SubType)
@@ -445,7 +445,7 @@ var messageDeletedMessage = `{
 
 func TestMessageDeletedMessage(t *testing.T) {
 	message, err := unmarshalMessage(messageDeletedMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeMessageDeleted, message.SubType)
@@ -465,7 +465,7 @@ var channelJoinMessage = `{
 
 func TestChannelJoinMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelJoinMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelJoin, message.SubType)
@@ -485,7 +485,7 @@ var channelJoinInvitedMessage = `{
 
 func TestChannelJoinInvitedMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelJoinInvitedMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelJoin, message.SubType)
@@ -505,7 +505,7 @@ var channelLeaveMessage = `{
 
 func TestChannelLeaveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelLeaveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelLeave, message.SubType)
@@ -525,7 +525,7 @@ var channelTopicMessage = `{
 
 func TestChannelTopicMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelTopicMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelTopic, message.SubType)
@@ -546,7 +546,7 @@ var channelPurposeMessage = `{
 
 func TestChannelPurposeMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelPurposeMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelPurpose, message.SubType)
@@ -568,7 +568,7 @@ var channelNameMessage = `{
 
 func TestChannelNameMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelNameMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelName, message.SubType)
@@ -590,7 +590,7 @@ var channelArchiveMessage = `{
 
 func TestChannelArchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelArchiveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelArchive, message.SubType)
@@ -611,7 +611,7 @@ var channelUnarchiveMessage = `{
 
 func TestChannelUnarchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelUnarchiveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeChannelUnarchive, message.SubType)
@@ -644,7 +644,7 @@ var channelRepliesParentMessage = `{
 
 func TestChannelRepliesParentMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelRepliesParentMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U1234", message.User)
@@ -669,7 +669,7 @@ var channelRepliesChildMessage = `{
 
 func TestChannelRepliesChildMessage(t *testing.T) {
 	message, err := unmarshalMessage(channelRepliesChildMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, "U5678", message.User)
@@ -689,7 +689,7 @@ var groupJoinMessage = `{
 
 func TestGroupJoinMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupJoinMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupJoin, message.SubType)
@@ -709,7 +709,7 @@ var groupJoinInvitedMessage = `{
 
 func TestGroupJoinInvitedMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupJoinInvitedMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupJoin, message.SubType)
@@ -729,7 +729,7 @@ var groupLeaveMessage = `{
 
 func TestGroupLeaveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupLeaveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupLeave, message.SubType)
@@ -749,7 +749,7 @@ var groupTopicMessage = `{
 
 func TestGroupTopicMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupTopicMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupTopic, message.SubType)
@@ -770,7 +770,7 @@ var groupPurposeMessage = `{
 
 func TestGroupPurposeMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupPurposeMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupPurpose, message.SubType)
@@ -792,7 +792,7 @@ var groupNameMessage = `{
 
 func TestGroupNameMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupNameMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupName, message.SubType)
@@ -814,7 +814,7 @@ var groupArchiveMessage = `{
 
 func TestGroupArchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupArchiveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupArchive, message.SubType)
@@ -835,7 +835,7 @@ var groupUnarchiveMessage = `{
 
 func TestGroupUnarchiveMessage(t *testing.T) {
 	message, err := unmarshalMessage(groupUnarchiveMessage)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeGroupUnarchive, message.SubType)
@@ -896,7 +896,7 @@ var fileShareMessage = `{
 func TestFileShareMessage(t *testing.T) {
 	message, err := unmarshalMessage(fileShareMessage)
 	fmt.Println(err)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	require.NotNil(t, message)
 	assert.Equal(t, "message", message.Type)
 	assert.Equal(t, MsgSubTypeFileShare, message.SubType)

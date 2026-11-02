@@ -54,7 +54,7 @@ func unmarshalChannel(j string) (*Channel, error) {
 
 func TestSimpleChannel(t *testing.T) {
 	channel, err := unmarshalChannel(simpleChannel)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleChannel(t, channel)
 }
 
@@ -143,7 +143,7 @@ func unmarshalSharedChannel(j string) (*Channel, error) {
 
 func TestSharedChannel(t *testing.T) {
 	channel, err := unmarshalSharedChannel(sharedChannel)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSharedChannel(t, channel)
 }
 
@@ -221,7 +221,7 @@ func unmarshalGroup(j string) (*Group, error) {
 
 func TestSimpleGroup(t *testing.T) {
 	group, err := unmarshalGroup(simpleGroup)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleGroup(t, group)
 }
 
@@ -299,7 +299,7 @@ func unmarshalChannelWithCanvas(j string) (*Channel, error) {
 
 func TestChannelWithCanvas(t *testing.T) {
 	channel, err := unmarshalChannelWithCanvas(channelWithCanvas)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertChannelWithCanvas(t, channel)
 }
 
@@ -382,7 +382,7 @@ func unmarshalChannelWithRecordChannel(j string) (*Channel, error) {
 
 func TestChannelWithRecordChannel(t *testing.T) {
 	channel, err := unmarshalChannelWithRecordChannel(channelWithRecordChannel)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertChannelWithRecordChannel(t, channel)
 }
 
@@ -444,7 +444,7 @@ func unmarshalIM(j string) (*Conversation, error) {
 
 func TestSimpleIM(t *testing.T) {
 	im, err := unmarshalIM(simpleIM)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleIM(t, im)
 }
 

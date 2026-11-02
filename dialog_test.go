@@ -74,7 +74,7 @@ func unmarshalDialog() (*Dialog, error) {
 
 func TestSimpleDialog(t *testing.T) {
 	dialog, err := unmarshalDialog()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleDialog(t, dialog)
 }
 
@@ -198,7 +198,7 @@ func unmarshalCallback(j string) (*DialogCallback, error) {
 
 func TestSimpleCallback(t *testing.T) {
 	callback, err := unmarshalCallback(simpleCallback)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleCallback(t, callback)
 }
 
@@ -258,7 +258,7 @@ func unmarshalSuggestionCallback(j string) (*InteractionCallback, error) {
 
 func TestSimpleSuggestionCallback(t *testing.T) {
 	callback, err := unmarshalSuggestionCallback(simpleSuggestionCallback)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assertSimpleSuggestionCallback(t, callback)
 }
 

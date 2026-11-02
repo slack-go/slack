@@ -179,7 +179,7 @@ func assertInteractionCallback(t *testing.T, callback InteractionCallback, encod
 	t.Helper()
 
 	var decoded InteractionCallback
-	assert.Nil(t, json.Unmarshal([]byte(encoded), &decoded))
+	assert.NoError(t, json.Unmarshal([]byte(encoded), &decoded))
 	assert.Equal(t, decoded, callback)
 }
 
