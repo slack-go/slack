@@ -15,7 +15,6 @@ import (
 
 	"github.com/slack-go/slack/internal/backoff"
 	"github.com/slack-go/slack/internal/errorsx"
-	"github.com/slack-go/slack/internal/timex"
 )
 
 // UnmappedError represents error occurred when there is no mapping between given event name
@@ -166,7 +165,7 @@ func (rtm *RTM) connect(connectionCount int, useRTMStart bool) (*Info, *websocke
 			backoff = actual.RetryAfter
 		}
 
-		backoff = timex.Max(backoff, boff.Duration())
+		backoff = max(0, backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the IncomingEvents channel
 		rtm.IncomingEvents <- RTMEvent{"connection_error", &ConnectionErrorEvent{

@@ -15,7 +15,6 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/internal/backoff"
 	"github.com/slack-go/slack/internal/redact"
-	"github.com/slack-go/slack/internal/timex"
 	"github.com/slack-go/slack/slackevents"
 )
 
@@ -248,7 +247,7 @@ func (smc *Client) connect(ctx context.Context, connectionCount int, additionalP
 		// return early then we don't send the Event below that some users
 		// may already rely on; ie a behavior change.
 
-		backoff = timex.Max(backoff, boff.Duration())
+		backoff = max(0, backoff, boff.Duration())
 		// any other errors are treated as recoverable and we try again after
 		// sending the event along the Events channel
 		smc.sendEvent(ctx, newEvent(EventTypeConnectionError, &slack.ConnectionErrorEvent{
