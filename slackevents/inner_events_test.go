@@ -3465,6 +3465,12 @@ func TestAppContextEntity_ValueShapes(t *testing.T) {
 
 func TestAppContextEntity_RoundTrip(t *testing.T) {
 	for _, rawE := range []string{
+		`{"type":"slack#/types/something_new"}`,
+		`{"type":"slack#/types/something_new","value":null}`,
+		`{"type":"slack#/types/something_new","value":""}`,
+		`{"type":"slack#/types/something_new","value":[]}`,
+		`{"type":"slack#/types/something_new","value":9007199254740993}`,
+		`{"type":"slack#/types/something_new","value":{"id":9007199254740993}}`,
 		`{"type":"slack#/types/channel_id","value":"C0123","team_id":"T0123","enterprise_id":"E0123"}`,
 		`{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"},"team_id":"T0123"}`,
 		`{"type":"slack#/types/something_new","value":{"id":"X1"}}`,
@@ -3474,7 +3480,7 @@ func TestAppContextEntity_RoundTrip(t *testing.T) {
 
 		out, err := json.Marshal(entity)
 		require.NoError(t, err)
-		assert.JSONEq(t, rawE, string(out))
+		assert.Equal(t, rawE, string(out))
 	}
 }
 
@@ -3489,6 +3495,20 @@ func TestAppContextEntity_Marshal(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.JSONEq(t, `{"type":"slack#/types/message_context","value":{"channel_id":"C0123","message_ts":"1.2"}}`, string(out))
+}
+
+func TestAppContextEntity_MarshalValuePriority(t *testing.T) {
+	var entity AppContextEntity
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"future","value":{"id":9007199254740993}}`), &entity))
+	entity.Value = "C0123"
+	out, err := json.Marshal(entity)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"type":"future","value":"C0123"}`, string(out))
+
+	entity.Message = &AppContextMessage{ChannelID: "C0456", MessageTimestamp: "1.2"}
+	out, err = json.Marshal(entity)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"type":"future","value":{"channel_id":"C0456","message_ts":"1.2"}}`, string(out))
 }
 
 func TestAppContextChangedEvent_FullEventParsing(t *testing.T) {
