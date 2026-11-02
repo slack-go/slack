@@ -1004,6 +1004,25 @@ func TestGetConversationHistory(t *testing.T) {
 	}
 }
 
+func TestGetConversationHistoryTimeWindow(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/conversations.history", r.URL.Path)
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, []string{"1700000200.000000"}, r.PostForm["latest"])
+		assert.Equal(t, []string{"1700000100.000000"}, r.PostForm["oldest"])
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"ok":true}`))
+	}))
+	defer server.Close()
+	api := New("testing-token", OptionAPIURL(server.URL+"/"))
+	_, err := api.GetConversationHistory(&GetConversationHistoryParameters{
+		ChannelID: "C123ABC456",
+		Latest:    "1700000200.000000",
+		Oldest:    "1700000100.000000",
+	})
+	require.NoError(t, err)
+}
+
 func markConversationHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(GetConversationHistoryResponse{
