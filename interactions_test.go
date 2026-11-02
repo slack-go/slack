@@ -582,7 +582,7 @@ func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
 	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
 	actualJSON, err := json.Marshal(actual.Container)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedJSON, actualJSON)
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
 func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testing.T) {
@@ -624,7 +624,7 @@ func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testin
 	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","thread_ts":"threadTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
 	actualJSON, err := json.Marshal(actual.Container)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedJSON, actualJSON)
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
 func TestInteractionCallback_Parser(t *testing.T) {

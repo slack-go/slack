@@ -150,15 +150,15 @@ func TestWebhookMessage_WithBlocks(t *testing.T) {
 	assert.Len(t, msgSingleBlock.Blocks.BlockSet, 1)
 
 	msgJsonSingleBlock, _ := json.Marshal(msgSingleBlock)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
+	assert.JSONEq(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonSingleBlock))
 
 	msgTwoBlocks := WebhookMessage{Blocks: twoBlocks}
 	assert.Len(t, msgTwoBlocks.Blocks.BlockSet, 2)
 
 	msgJsonTwoBlocks, _ := json.Marshal(msgTwoBlocks)
-	assert.Equal(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
+	assert.JSONEq(t, `{"blocks":[{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}},{"type":"section","text":{"type":"plain_text","text":"text","emoji":false}}],"replace_original":false,"delete_original":false}`, string(msgJsonTwoBlocks))
 
 	msgNoBlocks := WebhookMessage{Text: "foo"}
 	msgJsonNoBlocks, _ := json.Marshal(msgNoBlocks)
-	assert.Equal(t, `{"text":"foo","replace_original":false,"delete_original":false}`, string(msgJsonNoBlocks))
+	assert.JSONEq(t, `{"text":"foo","replace_original":false,"delete_original":false}`, string(msgJsonNoBlocks))
 }

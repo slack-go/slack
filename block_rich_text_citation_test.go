@@ -95,12 +95,12 @@ func TestRichTextCitationUnknownDetails(t *testing.T) {
 			unknown, ok := citation.Details.(*RichTextCitationUnknownDetails)
 			require.True(t, ok)
 			assert.Equal(t, tt.kind, unknown.CitationType())
-			assert.Equal(t, json.RawMessage(tt.raw), unknown.Raw)
+			assert.Equal(t, json.RawMessage(tt.raw), unknown.Raw) //nolint:testifylint // Preserve raw bytes, including integers beyond float64 precision.
 			encoded, err := json.Marshal(citation)
 			require.NoError(t, err)
 			var envelope map[string]json.RawMessage
 			require.NoError(t, json.Unmarshal(encoded, &envelope))
-			assert.Equal(t, json.RawMessage(tt.raw), envelope["details"])
+			assert.Equal(t, json.RawMessage(tt.raw), envelope["details"]) //nolint:testifylint // Detect precision loss when re-encoding unknown details.
 		})
 	}
 }
