@@ -55,6 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `slackevents.MessageEvent.Message`.
   [Node SDK change](https://github.com/slackapi/node-slack-sdk/commit/e02e7feeb500bfde1f947401a639633e42ce2f91).
 
+- Route Events API envelopes without an inner event, such as `app_rate_limited`,
+  to handlers registered for the outer event type in Socket Mode.
+
 - Reject request timestamps so far in the future that the duration difference
   overflows, instead of allowing them to pass the five-minute timestamp check.
 
