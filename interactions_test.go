@@ -222,6 +222,64 @@ func TestActionCallback(t *testing.T) {
 	assertInteractionCallback(t, InteractionCallback{}, actionCallback)
 }
 
+func TestActionCallbacksMarshalJSON(t *testing.T) {
+	type wireAction struct {
+		Name     string `json:"name"`
+		ActionID string `json:"action_id"`
+		Value    string `json:"value"`
+	}
+	attachment := &AttachmentAction{Name: "approve", Value: "<go> & \"Slack\"\n世界"}
+	block := &BlockAction{ActionID: "select", Value: "C123"}
+	wantAttachment := &wireAction{Name: attachment.Name, Value: attachment.Value}
+	wantBlock := &wireAction{ActionID: block.ActionID, Value: block.Value}
+	for _, tt := range []struct {
+		name     string
+		callback ActionCallbacks
+		want     []*wireAction
+	}{
+		{"nil slices", ActionCallbacks{}, []*wireAction{}},
+		{"empty slices", ActionCallbacks{AttachmentActions: []*AttachmentAction{}, BlockActions: []*BlockAction{}}, []*wireAction{}},
+		{
+			"attachments",
+			ActionCallbacks{AttachmentActions: []*AttachmentAction{attachment, nil, attachment}},
+			[]*wireAction{wantAttachment, nil, wantAttachment},
+		},
+		{
+			"blocks",
+			ActionCallbacks{BlockActions: []*BlockAction{block, nil, block}},
+			[]*wireAction{wantBlock, nil, wantBlock},
+		},
+		{
+			"mixed",
+			ActionCallbacks{AttachmentActions: []*AttachmentAction{attachment, nil}, BlockActions: []*BlockAction{nil, block}},
+			[]*wireAction{wantAttachment, nil, nil, wantBlock},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			data, err := json.Marshal(tt.callback)
+			require.NoError(t, err)
+			var actions []*wireAction
+			require.NoError(t, json.Unmarshal(data, &actions))
+			assert.Equal(t, tt.want, actions)
+		})
+	}
+}
+
+func TestActionCallbacksMarshalJSONError(t *testing.T) {
+	invalid := &BlockAction{RichTextValue: RichTextBlock{Elements: []RichTextElement{
+		RichTextUnknown{Raw: "{"},
+	}}}
+	for _, attachments := range [][]*AttachmentAction{nil, {{Name: "approve"}}} {
+		callback := ActionCallbacks{
+			AttachmentActions: attachments,
+			BlockActions:      []*BlockAction{invalid},
+		}
+		data, err := callback.MarshalJSON()
+		require.Error(t, err)
+		assert.Nil(t, data)
+	}
+}
+
 func TestInteractionCallbackMarshalJSONState(t *testing.T) {
 	for _, tt := range []struct {
 		name     string

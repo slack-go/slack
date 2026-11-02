@@ -1,7 +1,6 @@
 package slack
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -167,46 +166,25 @@ type ActionCallbacks struct {
 	BlockActions      []*BlockAction
 }
 
-// MarshalJSON implements the Marshaller interface in order to combine both
-// action callback types back into a single array, like how the api responds.
-// This makes Marshaling and Unmarshaling an InteractionCallback symmetrical
+// MarshalJSON encodes attachment actions followed by block actions as one array.
 func (a ActionCallbacks) MarshalJSON() ([]byte, error) {
-	count := 0
-	length := len(a.AttachmentActions) + len(a.BlockActions)
-	buffer := bytes.NewBufferString("[")
-
-	f := func(obj any) error {
-		js, err := json.Marshal(obj)
-		if err != nil {
-			return err
-		}
-		_, err = buffer.Write(js)
-		if err != nil {
-			return err
-		}
-
-		count++
-		if count < length {
-			_, err = buffer.WriteString(",")
-			return err
-		}
-		return nil
+	switch {
+	case len(a.AttachmentActions) == 0 && len(a.BlockActions) == 0:
+		return []byte("[]"), nil
+	case len(a.AttachmentActions) == 0:
+		return json.Marshal(a.BlockActions)
+	case len(a.BlockActions) == 0:
+		return json.Marshal(a.AttachmentActions)
 	}
 
+	actions := make([]action, 0, len(a.AttachmentActions)+len(a.BlockActions))
 	for _, act := range a.AttachmentActions {
-		err := f(act)
-		if err != nil {
-			return nil, err
-		}
+		actions = append(actions, act)
 	}
 	for _, blk := range a.BlockActions {
-		err := f(blk)
-		if err != nil {
-			return nil, err
-		}
+		actions = append(actions, blk)
 	}
-	buffer.WriteString("]")
-	return buffer.Bytes(), nil
+	return json.Marshal(actions)
 }
 
 // UnmarshalJSON implements the Marshaller interface in order to delegate
