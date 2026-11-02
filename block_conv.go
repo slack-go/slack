@@ -87,6 +87,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &TaskCardBlock{}
 		case "alert":
 			block = &AlertBlock{}
+		case "auth_provider":
+			block = &AuthProviderBlock{}
 		case "plan":
 			block = &PlanBlock{}
 		case "card":

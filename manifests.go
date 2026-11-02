@@ -374,17 +374,26 @@ const (
 
 // Features is a group of settings corresponding to the Features section of the app config pages
 type Features struct {
-	AgentView     *AgentView             `json:"agent_view,omitempty" yaml:"agent_view,omitempty"`
-	AppHome       AppHome                `json:"app_home,omitempty" yaml:"app_home,omitempty"`
-	AssistantView *AssistantView         `json:"assistant_view,omitempty" yaml:"assistant_view,omitempty"`
-	BotUser       BotUser                `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
-	CodeChannels  *ManifestCodeChannels  `json:"code_channels,omitempty" yaml:"code_channels,omitempty"`
-	RichPreviews  *ManifestRichPreviews  `json:"rich_previews,omitempty" yaml:"rich_previews,omitempty"`
-	Search        *ManifestSearch        `json:"search,omitempty" yaml:"search,omitempty"`
-	Shortcuts     []Shortcut             `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
-	SlashCommands []ManifestSlashCommand `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
-	UnfurlDomains []string               `json:"unfurl_domains,omitempty" yaml:"unfurl_domains,omitempty"`
-	WorkflowSteps []WorkflowStep         `json:"workflow_steps,omitempty" yaml:"workflow_steps,omitempty"`
+	AgentView       *AgentView               `json:"agent_view,omitempty" yaml:"agent_view,omitempty"`
+	AppHome         AppHome                  `json:"app_home,omitempty" yaml:"app_home,omitempty"`
+	AssistantView   *AssistantView           `json:"assistant_view,omitempty" yaml:"assistant_view,omitempty"`
+	BotUser         BotUser                  `json:"bot_user,omitempty" yaml:"bot_user,omitempty"`
+	CodeChannels    *ManifestCodeChannels    `json:"code_channels,omitempty" yaml:"code_channels,omitempty"`
+	RichPreviews    *ManifestRichPreviews    `json:"rich_previews,omitempty" yaml:"rich_previews,omitempty"`
+	Search          *ManifestSearch          `json:"search,omitempty" yaml:"search,omitempty"`
+	Shortcuts       []Shortcut               `json:"shortcuts,omitempty" yaml:"shortcuts,omitempty"`
+	SlashCommands   []ManifestSlashCommand   `json:"slash_commands,omitempty" yaml:"slash_commands,omitempty"`
+	UnfurlDomains   []string                 `json:"unfurl_domains,omitempty" yaml:"unfurl_domains,omitempty"`
+	UserConnections *ManifestUserConnections `json:"user_connections,omitempty" yaml:"user_connections,omitempty"`
+	WorkflowSteps   []WorkflowStep           `json:"workflow_steps,omitempty" yaml:"workflow_steps,omitempty"`
+}
+
+// ManifestUserConnections configures standardized app authentication.
+// AuthHosts lists permitted hosts without a scheme, including their subdomains.
+// Hosts remain configured when IsEnabled is false.
+type ManifestUserConnections struct {
+	IsEnabled bool     `json:"is_enabled" yaml:"is_enabled"`
+	AuthHosts []string `json:"auth_hosts" yaml:"auth_hosts"`
 }
 
 // ManifestCodeChannels configures code channels and their agent slash command URL.
