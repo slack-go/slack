@@ -94,23 +94,24 @@ func InteractionCallbackParse(r *http.Request) (InteractionCallback, error) {
 	return ic, nil
 }
 
+// MarshalJSON encodes state according to the callback's interaction type.
 func (ic *InteractionCallback) MarshalJSON() ([]byte, error) {
 	type alias InteractionCallback
 	tmp := alias(*ic)
-	if tmp.Type == InteractionTypeBlockActions {
+	switch tmp.Type {
+	case InteractionTypeBlockActions:
 		if tmp.BlockActionState == nil {
 			tmp.RawState = []byte(`{}`)
 		} else {
-			state, err := json.Marshal(tmp.BlockActionState.Values)
+			state, err := json.Marshal(tmp.BlockActionState)
 			if err != nil {
 				return nil, err
 			}
-			tmp.RawState = []byte(`{"values":` + string(state) + `}`)
+			tmp.RawState = state
 		}
-	} else if ic.Type == InteractionTypeDialogSubmission {
+	case InteractionTypeDialogSubmission:
 		tmp.RawState = []byte(tmp.State)
 	}
-	// Use pointer for go1.7
 	return json.Marshal(&tmp)
 }
 

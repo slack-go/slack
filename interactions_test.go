@@ -222,6 +222,43 @@ func TestActionCallback(t *testing.T) {
 	assertInteractionCallback(t, InteractionCallback{}, actionCallback)
 }
 
+func TestInteractionCallbackMarshalJSONState(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		callback InteractionCallback
+		want     string
+	}{
+		{"omitted", InteractionCallback{}, ""},
+		{"block missing", InteractionCallback{Type: InteractionTypeBlockActions}, `{}`},
+		{
+			"block nil values",
+			InteractionCallback{Type: InteractionTypeBlockActions, BlockActionState: &BlockActionStates{}},
+			`{"values":null}`,
+		},
+		{
+			"block empty values",
+			InteractionCallback{Type: InteractionTypeBlockActions, BlockActionState: &BlockActionStates{Values: map[string]map[string]BlockAction{}}},
+			`{"values":{}}`,
+		},
+		{
+			"dialog",
+			InteractionCallback{Type: InteractionTypeDialogSubmission, DialogSubmissionCallback: DialogSubmissionCallback{State: `{"id":9007199254740993}`}},
+			`{"id":9007199254740993}`,
+		},
+		{"other", InteractionCallback{RawState: json.RawMessage(`{"id":9007199254740993}`)}, `{"id":9007199254740993}`},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			rawState := string(tt.callback.RawState)
+			data, err := json.Marshal(&tt.callback)
+			require.NoError(t, err)
+			var fields map[string]json.RawMessage
+			require.NoError(t, json.Unmarshal(data, &fields))
+			assert.Equal(t, tt.want, string(fields["state"]))
+			assert.Equal(t, rawState, string(tt.callback.RawState))
+		})
+	}
+}
+
 func TestViewClosedck(t *testing.T) {
 	expected := InteractionCallback{
 		Type: InteractionTypeViewClosed,
