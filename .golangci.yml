@@ -8,6 +8,7 @@ linters:
     - asasalint
     - bidichk
     - canonicalheader
+    - durationcheck
     - errcheck
     - errorlint
     - gocheckcompilerdirectives
