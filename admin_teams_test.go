@@ -77,7 +77,7 @@ func TestAdminTeamsListError(t *testing.T) {
 
 	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
 	response, err := api.AdminTeamsList(context.Background())
-	assert.EqualError(t, err, "invalid_cursor")
+	require.EqualError(t, err, "invalid_cursor")
 	assert.NotNil(t, response)
 }
 

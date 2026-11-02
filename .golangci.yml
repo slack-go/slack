@@ -22,11 +22,6 @@ linters:
     - unconvert
     - unused
   settings:
-    testifylint:
-      disable-all: true
-      enable:
-        - expected-actual
-        - go-require
     modernize:
       # omitempty on nested struct fields has no effect, but switching to
       # omitzero would change JSON output for a public API. Keep the tags as-is.

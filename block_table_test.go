@@ -115,13 +115,13 @@ func TestNewTableBlock(t *testing.T) {
 
 	// Check if marshalled payload matches expected JSON
 	marshalled, err := json.Marshal(tableBlock)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var expected, actual map[string]any
 	err = json.Unmarshal([]byte(testPayload), &expected)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = json.Unmarshal(marshalled, &actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, expected, actual)
 }
@@ -152,7 +152,7 @@ func TestTableBlockHeterogeneousCells(t *testing.T) {
 
 	var tb TableBlock
 	err := json.Unmarshal([]byte(payload), &tb)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, MBTTable, tb.BlockType())
 	require.Len(t, tb.Rows, 3)
 	for _, row := range tb.Rows {

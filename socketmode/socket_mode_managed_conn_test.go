@@ -55,7 +55,7 @@ func TestSendCtx_PayloadQueued(t *testing.T) {
 		Payload:    "small payload",
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -102,7 +102,7 @@ func TestSendCtx_PayloadJustUnderLimit(t *testing.T) {
 		EnvelopeID: envelope,
 		Payload:    padding,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -129,7 +129,7 @@ func TestAck_ReturnsNoError(t *testing.T) {
 	cli := New(api)
 
 	err := cli.Ack(Request{EnvelopeID: "test-envelope"}, "payload")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	select {
 	case res := <-cli.socketModeResponses:
@@ -235,7 +235,7 @@ func TestRunMessageReceiver_SurvivesMalformedJSON(t *testing.T) {
 	}
 
 	// The loop should exit with an error (WebSocket close triggers reconnect).
-	assert.Error(t, err)
+	require.Error(t, err)
 
 	// Both valid messages should have been forwarded.
 	assert.Equal(t, []string{`{"type":"hello"}`, `{"type":"disconnect"}`}, messages)

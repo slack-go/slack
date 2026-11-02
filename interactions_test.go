@@ -179,7 +179,7 @@ func assertInteractionCallback(t *testing.T, callback InteractionCallback, encod
 	t.Helper()
 
 	var decoded InteractionCallback
-	assert.NoError(t, json.Unmarshal([]byte(encoded), &decoded))
+	require.NoError(t, json.Unmarshal([]byte(encoded), &decoded))
 	assert.Equal(t, decoded, callback)
 }
 
@@ -415,11 +415,11 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 	}
 
 	cbJSONBytes, err := json.Marshal(cb)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	jsonCB := new(InteractionCallback)
 	err = json.Unmarshal(cbJSONBytes, jsonCB)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, cb.Type, jsonCB.Type)
 	assert.Equal(t, cb.Token, jsonCB.Token)
@@ -486,7 +486,7 @@ func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T)
 		}
 	}`)
 	var cb InteractionCallback
-	assert.NoError(t, json.Unmarshal(raw, &cb))
+	require.NoError(t, json.Unmarshal(raw, &cb))
 	assert.Empty(t, cb.State)
 	assert.Equal(t,
 		cb.BlockActionState.Values["section_block_id"]["multi_convos"].actionType(),
@@ -507,7 +507,7 @@ func TestInteractionCallback_UserUsername(t *testing.T) {
 		"actions": []
 	}`)
 	var cb InteractionCallback
-	assert.NoError(t, json.Unmarshal(raw, &cb))
+	require.NoError(t, json.Unmarshal(raw, &cb))
 	assert.Equal(t, "UA8RXUSPL", cb.User.ID)
 	assert.Equal(t, "jtorrance", cb.User.Username)
 	assert.Equal(t, "jtorrance", cb.User.Name)
@@ -536,7 +536,7 @@ func TestInteractionCallback_BlockSuggestionTeamEnterpriseFields(t *testing.T) {
 	}`)
 
 	var cb InteractionCallback
-	assert.NoError(t, json.Unmarshal(raw, &cb))
+	require.NoError(t, json.Unmarshal(raw, &cb))
 	assert.Equal(t, InteractionTypeBlockSuggestion, cb.Type)
 	assert.Equal(t, "T123456", cb.Team.ID)
 	assert.Equal(t, "example-team", cb.Team.Name)
@@ -576,12 +576,12 @@ func TestInteractionCallback_Container_Marshal_And_Unmarshal(t *testing.T) {
 
 	actual := new(InteractionCallback)
 	err := json.Unmarshal(raw, actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected.Container, actual.Container)
 
 	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
 	actualJSON, err := json.Marshal(actual.Container)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
@@ -618,12 +618,12 @@ func TestInteractionCallback_In_Thread_Container_Marshal_And_Unmarshal(t *testin
 
 	actual := new(InteractionCallback)
 	err := json.Unmarshal(raw, actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected.Container, actual.Container)
 
 	expectedJSON := []byte(`{"type":"message","view_id":"viewID","message_ts":"messageTS","thread_ts":"threadTS","attachment_id":123,"channel_id":"channelID","is_ephemeral":false,"is_app_unfurl":false}`)
 	actualJSON, err := json.Marshal(actual.Container)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 }
 
@@ -666,7 +666,7 @@ func TestInteractionCallback_Parser(t *testing.T) {
 
 	// create new request
 	req, err := http.NewRequest(http.MethodPost, "http://slack.example.org/interactions", strings.NewReader(body.Encode()))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.NotNil(t, req)
 
 	// without this header, the parser will not decode the payload
@@ -674,7 +674,7 @@ func TestInteractionCallback_Parser(t *testing.T) {
 
 	// parse payload from request
 	ic, err := InteractionCallbackParse(req)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	require.NotNil(t, ic)
 
 	// test parsed InteractionCallback payload

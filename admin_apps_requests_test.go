@@ -78,7 +78,7 @@ func TestAdminAppsRequestsListError(t *testing.T) {
 	})
 
 	response, err := api.AdminAppsRequestsList()
-	assert.EqualError(t, err, "invalid_cursor")
+	require.EqualError(t, err, "invalid_cursor")
 	assert.NotNil(t, response)
 }
 

@@ -91,7 +91,7 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 	t.Run("nil omits fields", func(t *testing.T) {
 		msg := WebhookMessage{Text: "hello"}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotContains(t, string(raw), "unfurl_links")
 		assert.NotContains(t, string(raw), "unfurl_media")
 	})
@@ -103,7 +103,7 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(false),
 		}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, string(raw), `"unfurl_links":false`)
 		assert.Contains(t, string(raw), `"unfurl_media":false`)
 	})
@@ -115,7 +115,7 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(msg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Contains(t, string(raw), `"unfurl_links":true`)
 		assert.Contains(t, string(raw), `"unfurl_media":true`)
 	})
@@ -127,11 +127,11 @@ func TestWebhookMessage_UnfurlFields(t *testing.T) {
 			UnfurlMedia: new(true),
 		}
 		raw, err := json.Marshal(original)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var decoded WebhookMessage
 		err = json.Unmarshal(raw, &decoded)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, original.Text, decoded.Text)
 		require.NotNil(t, decoded.UnfurlLinks)
 		assert.False(t, *decoded.UnfurlLinks)

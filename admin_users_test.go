@@ -144,7 +144,7 @@ func TestAdminUsersListError(t *testing.T) {
 	})
 
 	response, err := api.AdminUsersList(context.Background())
-	assert.EqualError(t, err, "invalid_arguments")
+	require.EqualError(t, err, "invalid_arguments")
 	assert.NotNil(t, response)
 }
 

@@ -299,12 +299,12 @@ func TestFeedbackButtonsJSONMarshalling(t *testing.T) {
 	feedbackElement := NewFeedbackButtonsBlockElement("feedback_buttons_1", positiveBtn, negativeBtn)
 
 	data, err := json.Marshal(feedbackElement)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, data)
 
 	var unmarshalled FeedbackButtonsBlockElement
 	err = json.Unmarshal(data, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "feedback_buttons", string(unmarshalled.Type))
 	assert.Equal(t, "feedback_buttons_1", unmarshalled.ActionID)
 	assert.Equal(t, "positive_feedback", unmarshalled.PositiveButton.Value)
@@ -351,12 +351,12 @@ func TestIconButtonJSONMarshalling(t *testing.T) {
 	iconButton.WithValue("delete_item")
 
 	data, err := json.Marshal(iconButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, data)
 
 	var unmarshalled IconButtonBlockElement
 	err = json.Unmarshal(data, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "icon_button", string(unmarshalled.Type))
 	assert.Equal(t, "trash", unmarshalled.Icon)
 	assert.Equal(t, "delete_button_1", unmarshalled.ActionID)
@@ -431,11 +431,11 @@ func TestWorkflowButtonJSONMarshalling(t *testing.T) {
 		WithAccessibilityLabel("Start the approval process")
 
 	jsonData, err := json.Marshal(workflowButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var unmarshalled WorkflowButtonBlockElement
 	err = json.Unmarshal(jsonData, &unmarshalled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "workflow_button", string(unmarshalled.Type))
 	assert.Equal(t, "start_workflow", unmarshalled.ActionID)
@@ -466,7 +466,7 @@ func TestWorkflowButtonMinimalConfiguration(t *testing.T) {
 
 	// Ensure it marshals correctly without optional fields
 	jsonData, err := json.Marshal(workflowButton)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Check that optional fields are omitted from JSON
 	jsonStr := string(jsonData)

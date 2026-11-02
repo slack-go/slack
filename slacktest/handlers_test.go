@@ -31,7 +31,7 @@ func TestPostMessageHandler(t *testing.T) {
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	channel, tstamp, err := client.PostMessage("foo", slack.MsgOptionText("some text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
-	assert.NoError(t, err, "should not error out")
+	require.NoError(t, err, "should not error out")
 	assert.Equal(t, "foo", channel, "channel should be correct")
 	assert.NotEmpty(t, tstamp, "timestamp should not be empty")
 }
@@ -43,7 +43,7 @@ func TestPostEphemeralHandler(t *testing.T) {
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
 	tstamp, err := client.PostEphemeral("fake_channel", "fake_user", slack.MsgOptionText("some ephemeral text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
-	assert.NoError(t, err, "should not error out")
+	require.NoError(t, err, "should not error out")
 	assert.NotEmpty(t, tstamp, "timestamp should not be empty")
 
 	assert.True(t, s.SawOutgoingMessage("some ephemeral text"))

@@ -206,7 +206,7 @@ func TestListMethodErrors(t *testing.T) {
 						assert.Equal(t, []string{"List is unavailable"}, slackErr.ResponseMetadata.Messages)
 						if response, ok := result.(interface{ Err() error }); ok {
 							require.NotNil(t, response)
-							assert.EqualError(t, response.Err(), "list_not_found")
+							require.EqualError(t, response.Err(), "list_not_found")
 						}
 					case "rate limit":
 						var rateErr *RateLimitedError
