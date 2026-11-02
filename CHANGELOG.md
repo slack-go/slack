@@ -12,11 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >
 > - Malformed input elements that were previously accepted now fail decoding of
 >   the input block and its containing `Blocks`. Missing elements remain accepted.
+> - The team-info methods now take variadic `GetTeamInfoOption` arguments. Direct
+>   calls remain valid; update interfaces, mocks, and assigned function types to
+>   include `...GetTeamInfoOption`.
 
 ### Added
 
 - Add `GetCanvasContent` and `GetCanvasContentContext`, with optional Markdown or
   HTML output. [Slack API reference](https://docs.slack.dev/reference/methods/canvases.getContent/).
+
+- Add `GetTeamInfoOptionIncludeSlackbotAvailability` and
+  `TeamInfo.SlackbotAvailability` for advisory workspace availability.
+  [Slack API reference](https://docs.slack.dev/reference/methods/team.info/).
 
 - Configure RTM WebSocket handshake headers with `RTMOptionDialHeaders`.
   Headers are copied and reused on reconnect; existing defaults remain unchanged.
