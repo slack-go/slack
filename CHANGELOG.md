@@ -15,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > - The team-info methods now take variadic `GetTeamInfoOption` arguments. Direct
 >   calls remain valid; update interfaces, mocks, and assigned function types to
 >   include `...GetTeamInfoOption`.
+> - Blocks with type `auth_provider` now decode as `*AuthProviderBlock` instead of
+>   `*UnknownBlock`. Update type assertions for these blocks.
+>   Typed decoding rejects malformed known fields, such as `"name":42`. A malformed
+>   block fails decoding of its containing `Blocks` and can cause
+>   `slackevents.ParseEvent` to reject the whole event.
+> - `auth_provider` blocks no longer preserve the original raw JSON. Marshaling
+>   drops unknown fields, adds zero values for absent required fields, and can omit
+>   explicit nulls or empty optional values. Keep the original payload if you need
+>   an unchanged JSON round trip.
+> - `features.user_connections` now uses typed JSON and YAML decoding. Invalid
+>   values that were previously ignored now fail manifest decoding. Use keyed
+>   `Features` literals; adding `UserConnections` breaks positional literals.
+> - The built-in `user_connection` and `user_connection_status_requested` decoders
+>   take precedence over custom entries in `slack.EventMapping`. Register custom
+>   decoders in `slackevents.EventsAPIInnerEventMapping`.
 
 ### Added
 
@@ -24,6 +39,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `GetTeamInfoOptionIncludeSlackbotAvailability` and
   `TeamInfo.SlackbotAvailability` for advisory workspace availability.
   [Slack API reference](https://docs.slack.dev/reference/methods/team.info/).
+
+- Add `RequestUserConnectionAuth`, `BulkUpdateUserConnections`, their context
+  variants, and per-user bulk-update failures. Add `AuthProviderBlock`, the
+  `user_connection` and `user_connection_status_requested` events, and manifest
+  `features.user_connections`. The authentication APIs, status-requested event,
+  and manifest configuration follow the official Node SDK schemas; their standalone
+  reference pages were unavailable when added.
+  `AuthProviderBlock` support is experimental: `auth_provider` is not live in Slack
+  yet. This implementation uses the official Node SDK as a guide. Its schema and
+  behavior may change when Slack releases the block.
+  [Node SDK release](https://github.com/slackapi/node-slack-sdk/releases/tag/%40slack/web-api%408.3.0),
+  [auth provider schema](https://docs.slack.dev/tools/node-slack-sdk/reference/types/interfaces/AuthProviderBlock/),
+  [user connection event](https://docs.slack.dev/reference/events/user_connection/).
 
 - Configure RTM WebSocket handshake headers with `RTMOptionDialHeaders`.
   Headers are copied and reused on reconnect; existing defaults remain unchanged.

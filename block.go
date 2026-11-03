@@ -24,6 +24,7 @@ const (
 	MBTTaskCard          MessageBlockType = "task_card"
 	MBTPlan              MessageBlockType = "plan"
 	MBTAlert             MessageBlockType = "alert"
+	MBTAuthProvider      MessageBlockType = "auth_provider"
 	MBTCard              MessageBlockType = "card"
 	MBTCarousel          MessageBlockType = "carousel"
 	MBTContainer         MessageBlockType = "container"

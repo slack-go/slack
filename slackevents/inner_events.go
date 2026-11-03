@@ -1037,6 +1037,28 @@ type UserChangeEvent struct {
 	EventTS string `json:"event_ts"`
 }
 
+// UserConnectionEvent requests a connection or disconnection from an app.
+// Connect requests include TriggerID; disconnect requests may include EnterpriseID.
+//
+// Slack event docs: https://docs.slack.dev/reference/events/user_connection
+type UserConnectionEvent struct {
+	Type           string `json:"type"`
+	Subtype        string `json:"subtype"`
+	User           string `json:"user"`
+	TriggerID      string `json:"trigger_id,omitempty"`
+	EnterpriseID   string `json:"enterprise_id,omitempty"`
+	EventTimestamp string `json:"event_ts"`
+}
+
+// UserConnectionStatusRequestedEvent asks an app to report a user's connection status.
+//
+// Slack event docs: https://docs.slack.dev/reference/events/user_connection_status_requested
+type UserConnectionStatusRequestedEvent struct {
+	Type           string `json:"type"`
+	User           string `json:"user"`
+	EventTimestamp string `json:"event_ts"`
+}
+
 type AppDeletedEvent struct {
 	Type       string `json:"type"`
 	AppID      string `json:"app_id"`
@@ -1525,6 +1547,10 @@ const (
 	TokensRevoked = EventsAPIType("tokens_revoked")
 	// UserChange A user object has changed
 	UserChange = EventsAPIType("user_change")
+	// UserConnection requests an app connection or disconnection.
+	UserConnection = EventsAPIType("user_connection")
+	// UserConnectionStatusRequested requests a user's app connection status.
+	UserConnectionStatusRequested = EventsAPIType("user_connection_status_requested")
 	// UserHuddleChanged is an event when a user's huddle status changes
 	UserHuddleChanged = EventsAPIType("user_huddle_changed")
 	// UserProfileChanged is sent if a user's profile information has changed.
@@ -1627,6 +1653,8 @@ var EventsAPIInnerEventMapping = map[EventsAPIType]any{
 	TeamRename:                    TeamRenameEvent{},
 	TokensRevoked:                 TokensRevokedEvent{},
 	UserChange:                    UserChangeEvent{},
+	UserConnection:                UserConnectionEvent{},
+	UserConnectionStatusRequested: UserConnectionStatusRequestedEvent{},
 	UserHuddleChanged:             UserHuddleChangedEvent{},
 	UserProfileChanged:            UserProfileChangedEvent{},
 	UserStatusChanged:             UserStatusChangedEvent{},
