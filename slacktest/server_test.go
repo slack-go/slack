@@ -46,12 +46,11 @@ func TestServerSendMessageToBot(t *testing.T) {
 
 func TestBotDirectMessageBotHandler(t *testing.T) {
 	s := NewTestServer()
+	t.Cleanup(s.Stop)
 	s.Start()
 	s.SendDirectMessageToBot("some text")
 	expectedMsg := "some text"
-	time.Sleep(2 * time.Second)
 	assert.True(t, s.SawOutgoingMessage(expectedMsg))
-	s.Stop()
 }
 
 func TestGetSeenOutboundMessages(t *testing.T) {
