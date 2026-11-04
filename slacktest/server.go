@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -118,19 +119,10 @@ func (sts *Server) GetSeenOutboundMessages() []string {
 
 // SawOutgoingMessage checks if a message was sent to connected websocket clients
 func (sts *Server) SawOutgoingMessage(msg string) bool {
-	for _, m := range sts.seenOutboundMessages.get() {
+	return slices.ContainsFunc(sts.seenOutboundMessages.get(), func(m string) bool {
 		evt := &slack.MessageEvent{}
-		err := json.Unmarshal([]byte(m), evt)
-		if err != nil {
-			continue
-		}
-
-		if evt.Text == msg {
-			return true
-		}
-	}
-
-	return false
+		return json.Unmarshal([]byte(m), evt) == nil && evt.Text == msg
+	})
 }
 
 // SawMessage checks if an incoming message was seen
