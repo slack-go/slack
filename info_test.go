@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnMuteChat(t *testing.T) {
@@ -103,6 +105,24 @@ func TestJSONTime_UnmarshalJSON(t *testing.T) {
 			false,
 		},
 		{
+			"timestamp beyond int32 range",
+			args{[]byte(`2147483648`)},
+			JSONTime(2147483648),
+			false,
+		},
+		{
+			"string timestamp beyond int32 range",
+			args{[]byte(`"2147483648"`)},
+			JSONTime(2147483648),
+			false,
+		},
+		{
+			"timestamp beyond int64 range",
+			args{[]byte(`9223372036854775808`)},
+			JSONTime(0),
+			true,
+		},
+		{
 			"null",
 			args{[]byte(`null`)},
 			JSONTime(0),
@@ -112,9 +132,13 @@ func TestJSONTime_UnmarshalJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var tr JSONTime
-			if err := tr.UnmarshalJSON(tt.args.buf); (err != nil) != tt.wantErr {
-				t.Errorf("JSONTime.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+			err := tr.UnmarshalJSON(tt.args.buf)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
+			require.Equal(t, tt.wantTr, tr)
 		})
 	}
 }

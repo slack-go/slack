@@ -432,12 +432,12 @@ func (t *JSONTime) UnmarshalJSON(buf []byte) error {
 		return nil
 	}
 
-	v, err := strconv.Atoi(string(s))
+	v, err := strconv.ParseInt(string(s), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	*t = JSONTime(int64(v))
+	*t = JSONTime(v)
 	return nil
 }
 

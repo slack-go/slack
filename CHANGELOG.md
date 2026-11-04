@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix retry jitter panics for large durations on 32-bit platforms.
+- Decode JSONTime timestamps outside the 32-bit integer range on 32-bit platforms.
 
 ## [0.34.0] - 2026-11-03
 
