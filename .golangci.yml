@@ -19,6 +19,7 @@ linters:
     - makezero
     - misspell
     - modernize
+    - nakedret
     - nilnesserr
     - predeclared
     - testifylint
