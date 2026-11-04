@@ -1,4 +1,4 @@
-.PHONY: help deps fmt lint tidy-check test test-race test-integration pr-prep
+.PHONY: help deps fmt lint tidy-check test test-race pr-prep
 
 help:
 	@echo ""
@@ -9,9 +9,8 @@ help:
 	@echo "    make fmt               : Format Go code and organize imports"
 	@echo "    make lint              : Run golangci-lint"
 	@echo "    make tidy-check        : Check module files without modifying them"
-	@echo "    make test              : Run all short tests"
+	@echo "    make test              : Run all tests"
 	@echo "    make test-race         : Run all tests with race condition checking"
-	@echo "    make test-integration  : Run all tests without limiting to short"
 	@echo ""
 	@echo "    make pr-prep           : Format code and run all PR checks"
 	@echo ""
@@ -29,13 +28,10 @@ tidy-check:
 	@go mod tidy -diff
 
 test:
-	@go test -v -count=1 -timeout 300s -short ./...
+	@go test -v -count=1 -timeout 300s ./...
 
 test-race:
 	@go test -v -count=1 -timeout 300s -race ./...
-
-test-integration:
-	@go test -v -count=1 -timeout 600s ./...
 
 pr-prep: fmt lint test-race tidy-check
 	@git diff --check
