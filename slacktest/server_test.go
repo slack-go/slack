@@ -108,31 +108,14 @@ func TestGetSeenInboundMessages(t *testing.T) {
 }
 
 func TestSendChannelInvite(t *testing.T) {
-	maxWait := 5 * time.Second
 	s := NewTestServer()
+	t.Cleanup(s.Stop)
 	s.Start()
-	rtm := s.GetTestRTMInstance()
-	go rtm.ManageConnection()
-	evChan := make(chan (slack.Channel), 1)
-	go func() {
-		for msg := range rtm.IncomingEvents {
-			if ev, ok := msg.Data.(*slack.ChannelJoinedEvent); ok {
-				evChan <- ev.Channel
-			}
-		}
-	}()
+	rtm := startTestRTM(t, s)
 	s.SendBotChannelInvite()
-	time.Sleep(maxWait)
-	select {
-	case m := <-evChan:
-		assert.Equal(t, "C024BE92L", m.ID, "channel id should match")
-		assert.Equal(t, "Fun times", m.Topic.Value, "topic should match")
-		s.Stop()
-		break
-	case <-time.After(maxWait):
-		assert.FailNow(t, "did not get channel joined event in time")
-	}
-
+	m := waitForRTMEvent[*slack.ChannelJoinedEvent](t, rtm)
+	assert.Equal(t, "C024BE92L", m.Channel.ID, "channel id should match")
+	assert.Equal(t, "Fun times", m.Channel.Topic.Value, "topic should match")
 }
 
 func TestSendGroupInvite(t *testing.T) {
