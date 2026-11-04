@@ -69,7 +69,7 @@ func TestListFilesTypeFilter(t *testing.T) {
 }
 
 func (m *mockHTTPClient) Do(*http.Request) (*http.Response, error) {
-	return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
+	return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewBufferString(`OK`))}, nil
 }
 
 func TestSlack_GetFile(t *testing.T) {
