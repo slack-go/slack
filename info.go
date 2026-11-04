@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -380,12 +381,9 @@ func (api *Client) UnMuteChat(channelID string) (*UserPrefsCarrier, error) {
 		return nil, err
 	}
 	chnls := strings.Split(prefs.UserPrefs.MutedChannels, ",")
-	newChnls := make([]string, 0, len(chnls))
-	for _, chn := range chnls {
-		if chn != channelID {
-			newChnls = append(newChnls, chn)
-		}
-	}
+	newChnls := slices.DeleteFunc(chnls, func(chn string) bool {
+		return chn == channelID
+	})
 	if len(newChnls) == len(chnls) {
 		return nil, nil // noop
 	}
