@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Use the lowercase `challenge` JSON key in Events API URL-verification responses.
 - Preserve call and user identifiers when parsing `call_rejected` Events API events.
 - Replace previous actions, context elements, and composition objects when decoding into reused values.
 - Replace stale accessory and API error variants when decoding into reused values.
