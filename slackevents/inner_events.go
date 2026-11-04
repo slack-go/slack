@@ -1301,6 +1301,10 @@ type Profile struct {
 	Image512               string         `json:"image_512"`
 	StatusTextCanonical    string         `json:"status_text_canonical"`
 	Team                   string         `json:"team"`
+
+	HuddleState             string `json:"huddle_state,omitempty"`
+	HuddleStateExpirationTS int64  `json:"huddle_state_expiration_ts,omitempty"`
+	HuddleStateCallID       string `json:"huddle_state_call_id,omitempty"`
 }
 
 type UserStatusChangedEvent struct {
