@@ -2416,6 +2416,27 @@ func TestTeamRenameEvent(t *testing.T) {
 	}
 }
 
+func TestUserHuddleChangedEvent(t *testing.T) {
+	// Huddle profile fields from https://docs.slack.dev/reference/events/user_huddle_changed/.
+	event, err := ParseEvent(json.RawMessage(`{
+		"type": "event_callback",
+		"event": {
+			"type": "user_huddle_changed",
+			"user": {"id": "U1234567", "profile": {
+				"huddle_state": "in_a_huddle",
+				"huddle_state_expiration_ts": 1746217265,
+				"huddle_state_call_id": "R017QJ4PEN7"
+			}}
+		}
+	}`), OptionNoVerifyToken())
+	require.NoError(t, err)
+	huddle, ok := event.InnerEvent.Data.(*UserHuddleChangedEvent)
+	require.True(t, ok)
+	require.Equal(t, "in_a_huddle", huddle.User.Profile.HuddleState)
+	require.Equal(t, int64(1746217265), huddle.User.Profile.HuddleStateExpirationTS)
+	require.Equal(t, "R017QJ4PEN7", huddle.User.Profile.HuddleStateCallID)
+}
+
 func TestUserChangeEvent(t *testing.T) {
 	jsonStr := `{
 		"user": {
