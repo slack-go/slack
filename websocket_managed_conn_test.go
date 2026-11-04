@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -172,44 +173,47 @@ func TestRTMDeadConnection(t *testing.T) {
 }
 
 func TestRTMDisconnect(t *testing.T) {
-	// actually connect to slack here w/ an invalid token
-	api := slack.New(testToken)
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
-
-	// Observe incoming messages.
-	done := make(chan struct{})
-	connectingReceived := false
-	disconnectedReceived := false
-
-	go func() {
-		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.InvalidAuthEvent:
-				t.Log("invalid auth event received")
-				disconnectedReceived = true
-				close(done)
-			case *slack.ConnectingEvent:
-				connectingReceived = true
-			case *slack.ConnectedEvent:
-				t.Error("received connected events on an invalid connection")
-				t.Fail()
-			default:
-				t.Logf("discarded event of type '%s' with content '%#v'", msg.Type, ev)
-			}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/rtm.connect" {
+			t.Errorf("unexpected endpoint: %s", r.URL.Path)
 		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprintln(w, `{"ok":false,"error":"invalid_auth"}`)
+	}))
+	t.Cleanup(server.Close)
+
+	api := slack.New(testToken, slack.OptionAPIURL(server.URL+"/"))
+	rtm := api.NewRTM()
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		rtm.ManageConnection()
 	}()
+	t.Cleanup(func() {
+		_ = rtm.Disconnect()
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			t.Error("connection manager did not stop during cleanup")
+		}
+	})
+
+	timer := time.NewTimer(5 * time.Second)
+	defer timer.Stop()
+	for _, want := range []any{&slack.ConnectingEvent{}, &slack.InvalidAuthEvent{}} {
+		select {
+		case event := <-rtm.IncomingEvents:
+			require.IsType(t, want, event.Data)
+		case <-timer.C:
+			t.Fatalf("timed out waiting for %T", want)
+		}
+	}
 
 	select {
 	case <-done:
-	case <-time.After(5 * time.Second):
-		t.Error("timed out waiting for disconnect")
-		t.Fail()
+	case <-timer.C:
+		t.Fatal("connection manager did not stop after invalid auth")
 	}
-
-	// Verify that all expected events have been received by the RTM client.
-	assert.True(t, connectingReceived, "Should have received a connecting event from the RTM instance.")
-	assert.True(t, disconnectedReceived, "Should have received a disconnected event from the RTM instance.")
 }
 
 func TestRTMConnectRateLimit(t *testing.T) {
