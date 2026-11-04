@@ -9,31 +9,56 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func TestRTMInfo(t *testing.T) {
-	maxWait := 5 * time.Second
-	s := NewTestServer()
-	go s.Start()
-
+func startTestRTM(t *testing.T, s *Server, options ...slack.RTMOption) *slack.RTM {
+	t.Helper()
 	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
-	messageChan := make(chan (*slack.ConnectedEvent), 1)
+	rtm := api.NewRTM(options...)
+	done := make(chan struct{})
 	go func() {
-		for msg := range rtm.IncomingEvents {
-			if ev, ok := msg.Data.(*slack.ConnectedEvent); ok {
-				messageChan <- ev
-			}
-		}
+		defer close(done)
+		rtm.ManageConnection()
 	}()
-	select {
-	case m := <-messageChan:
-		assert.Equal(t, s.BotID, m.Info.User.ID, "bot id did not match")
-		assert.Equal(t, s.BotName, m.Info.User.Name, "bot name did not match")
-		break
-	case <-time.After(maxWait):
-		assert.FailNow(t, "did not get connected event in time")
+	t.Cleanup(func() {
+		stopped := make(chan struct{})
+		go func() {
+			_ = rtm.Disconnect()
+			<-done
+			close(stopped)
+		}()
+		select {
+		case <-stopped:
+		case <-time.After(5 * time.Second):
+			t.Error("connection manager did not stop")
+		}
+	})
+	return rtm
+}
 
+func waitForRTMEvent[E any](t *testing.T, rtm *slack.RTM) E {
+	t.Helper()
+	timer := time.NewTimer(5 * time.Second)
+	defer timer.Stop()
+	for {
+		select {
+		case event := <-rtm.IncomingEvents:
+			if data, ok := event.Data.(E); ok {
+				return data
+			}
+		case <-timer.C:
+			var want E
+			t.Fatalf("timed out waiting for %T", want)
+		}
 	}
+}
+
+func TestRTMInfo(t *testing.T) {
+	s := NewTestServer()
+	t.Cleanup(s.Stop)
+	s.Start()
+	rtm := startTestRTM(t, s)
+	m := waitForRTMEvent[*slack.ConnectedEvent](t, rtm)
+	assert.Equal(t, s.BotID, m.Info.User.ID, "bot id did not match")
+	assert.Equal(t, s.BotName, m.Info.User.Name, "bot name did not match")
 }
 
 func TestRTMPing(t *testing.T) {
