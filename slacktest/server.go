@@ -127,19 +127,10 @@ func (sts *Server) SawOutgoingMessage(msg string) bool {
 
 // SawMessage checks if an incoming message was seen
 func (sts *Server) SawMessage(msg string) bool {
-	for _, m := range sts.seenInboundMessages.get() {
+	return slices.ContainsFunc(sts.seenInboundMessages.get(), func(m string) bool {
 		evt := &slack.MessageEvent{}
-		err := json.Unmarshal([]byte(m), evt)
-		if err != nil {
-			// This event isn't a message event so we'll skip it
-			continue
-		}
-		if evt.Text == msg {
-			return true
-		}
-	}
-
-	return false
+		return json.Unmarshal([]byte(m), evt) == nil && evt.Text == msg
+	})
 }
 
 // GetAPIURL returns the api url you can pass to slack.SLACK_API
