@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"io"
@@ -51,10 +52,7 @@ func (api *Client) SetAppIconContext(ctx context.Context, token, appID string, i
 			return err
 		}
 	} else {
-		filename := icon.Filename
-		if filename == "" {
-			filename = "icon.png"
-		}
+		filename := cmp.Or(icon.Filename, "icon.png")
 		if err := postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"apps.icon.set", filename, "file", token, values, icon.File, response, api); err != nil {
 			return err
 		}
