@@ -83,29 +83,12 @@ func TestRTMDirectMessage(t *testing.T) {
 }
 
 func TestRTMChannelMessage(t *testing.T) {
-	maxWait := 5 * time.Second
 	s := NewTestServer()
-	go s.Start()
-
-	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
-	messageChan := make(chan (*slack.MessageEvent), 1)
-	go func() {
-		for msg := range rtm.IncomingEvents {
-			if ev, ok := msg.Data.(*slack.MessageEvent); ok {
-				messageChan <- ev
-			}
-		}
-	}()
+	t.Cleanup(s.Stop)
+	s.Start()
+	rtm := startTestRTM(t, s)
 	s.SendMessageToChannel("#foochan", "some text")
-	select {
-	case m := <-messageChan:
-		assert.Equal(t, "#foochan", m.Channel)
-		assert.Equal(t, "some text", m.Text)
-		break
-	case <-time.After(maxWait):
-		assert.FailNow(t, "did not get channel message in time")
-	}
-
+	m := waitForRTMEvent[*slack.MessageEvent](t, rtm)
+	assert.Equal(t, "#foochan", m.Channel)
+	assert.Equal(t, "some text", m.Text)
 }
