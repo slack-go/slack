@@ -169,15 +169,8 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	attachments := values.Get("attachments")
 	if attachments != "" {
-		decoded, err := url.QueryUnescape(attachments)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to decode attachments: %s", err.Error())
-			log.Printf("%s", msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
 		var attaches []slack.Attachment
-		aJErr := json.Unmarshal([]byte(decoded), &attaches)
+		aJErr := json.Unmarshal([]byte(attachments), &attaches)
 		if aJErr != nil {
 			msg := fmt.Sprintf("Unable to decode attachments string to json: %s", aJErr.Error())
 			log.Printf("%s", msg)
@@ -188,15 +181,8 @@ func (sts *Server) postMessageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	blocks := values.Get("blocks")
 	if blocks != "" {
-		decoded, err := url.QueryUnescape(blocks)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to decode blocks: %s", err.Error())
-			log.Printf("%s", msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
 		var decodedBlocks slack.Blocks
-		dbJErr := json.Unmarshal([]byte(decoded), &decodedBlocks)
+		dbJErr := json.Unmarshal([]byte(blocks), &decodedBlocks)
 		if dbJErr != nil {
 			msg := fmt.Sprintf("Unable to decode blocks string to json: %s", dbJErr.Error())
 			log.Printf("%s", msg)
@@ -260,15 +246,8 @@ func (sts *Server) postEphemeralHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	attachments := values.Get("attachments")
 	if attachments != "" {
-		decoded, err := url.QueryUnescape(attachments)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to decode attachments: %s", err.Error())
-			log.Printf("%s", msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
 		var attaches []slack.Attachment
-		aJErr := json.Unmarshal([]byte(decoded), &attaches)
+		aJErr := json.Unmarshal([]byte(attachments), &attaches)
 		if aJErr != nil {
 			msg := fmt.Sprintf("Unable to decode attachments string to json: %s", aJErr.Error())
 			log.Printf("%s", msg)
@@ -279,15 +258,8 @@ func (sts *Server) postEphemeralHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	blocks := values.Get("blocks")
 	if blocks != "" {
-		decoded, err := url.QueryUnescape(blocks)
-		if err != nil {
-			msg := fmt.Sprintf("Unable to decode blocks: %s", err.Error())
-			log.Printf("%s", msg)
-			http.Error(w, msg, http.StatusInternalServerError)
-			return
-		}
 		var decodedBlocks slack.Blocks
-		dbJErr := json.Unmarshal([]byte(decoded), &decodedBlocks)
+		dbJErr := json.Unmarshal([]byte(blocks), &decodedBlocks)
 		if dbJErr != nil {
 			msg := fmt.Sprintf("Unable to decode blocks string to json: %s", dbJErr.Error())
 			log.Printf("%s", msg)
