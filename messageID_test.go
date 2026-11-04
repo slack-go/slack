@@ -22,7 +22,7 @@ func BenchmarkNewSafeID(b *testing.B) {
 	b.ReportAllocs()
 
 	idgen := NewSafeID(1)
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		id = idgen.Next()
 	}
 }
