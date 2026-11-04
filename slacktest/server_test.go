@@ -77,18 +77,20 @@ func TestGetSeenOutboundMessages(t *testing.T) {
 }
 
 func TestGetSeenInboundMessages(t *testing.T) {
-	maxWait := 5 * time.Second
 	s := NewTestServer()
+	t.Cleanup(s.Stop)
 	s.Start()
 
-	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
+	rtm := startTestRTM(t, s)
 	rtm.SendMessage(&slack.OutgoingMessage{
 		Channel: "foo",
 		Text:    "should see this inbound message",
 	})
-	time.Sleep(maxWait)
+	select {
+	case <-s.SeenFeed:
+	case <-time.After(5 * time.Second):
+		t.Fatal("did not observe the inbound message")
+	}
 	seenInbound := s.GetSeenInboundMessages()
 	assert.NotEmpty(t, seenInbound)
 	hadMessage := false
