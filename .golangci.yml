@@ -6,28 +6,47 @@ linters:
   default: none
   enable:
     - asasalint
+    - asciicheck
     - bidichk
     - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
     - durationcheck
     - errcheck
     - errorlint
+    - exptostd
+    - fatcontext
     - gocheckcompilerdirectives
     - gocritic
+    - gomoddirectives
+    - goprintffuncname
     - gosec
     - govet
     - ineffassign
+    - iotamixing
     - makezero
+    - mirror
     - misspell
     - modernize
     - nakedret
+    - nilerr
     - nilnesserr
+    - nolintlint
+    - nosprintfhostport
     - predeclared
+    - reassign
     - staticcheck
+    - testableexamples
     - testifylint
     - thelper
+    - tparallel
     - unconvert
+    - unparam
     - unused
     - usestdlibvars
+    - usetesting
+    - wastedassign
   settings:
     govet:
       enable:
