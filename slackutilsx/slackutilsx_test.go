@@ -30,7 +30,7 @@ func TestEscapeMessage(t *testing.T) {
 }
 
 func BenchmarkEscapeMessage(b *testing.B) {
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		EscapeMessage("A & B")
 	}
 }
