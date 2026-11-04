@@ -13,6 +13,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestRetryOn429ThenSuccess verifies that 429 responses are retried (using Retry-After or config)
@@ -512,6 +514,20 @@ func TestRetryContextCanceledDuringSleep(t *testing.T) {
 	if got := mock.count.Load(); got != 1 {
 		t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
 	}
+}
+
+func TestRateLimitRetryWithLargeJitter(t *testing.T) {
+	const jitter = 3 * time.Second
+	handler := NewRateLimitErrorRetryHandler(RetryConfig{
+		RetryAfterDuration: time.Second,
+		RetryAfterJitter:   jitter,
+	})
+
+	retry, wait := handler.ShouldRetry(&RetryState{MaxRetries: 1}, &http.Request{},
+		&http.Response{StatusCode: http.StatusTooManyRequests}, nil)
+	require.True(t, retry)
+	require.GreaterOrEqual(t, wait, time.Second)
+	require.Less(t, wait, time.Second+jitter)
 }
 
 // TestDefaultRetryConfig verifies DefaultRetryConfig returns the documented defaults.

@@ -53,7 +53,8 @@ func TestBackoffDurationAppliesDefaults(t *testing.T) {
 }
 
 func TestBackoffDurationWithJitter(t *testing.T) {
-	b := &Backoff{Initial: 100 * time.Millisecond, Max: 200 * time.Millisecond, Jitter: 50 * time.Millisecond}
+	// Three seconds in nanoseconds exceeds a 32-bit int.
+	b := &Backoff{Initial: 100 * time.Millisecond, Max: 200 * time.Millisecond, Jitter: 3 * time.Second}
 
 	// Jitter is added after the cap, so the upper bound is Max+Jitter.
 	for i := range 50 {

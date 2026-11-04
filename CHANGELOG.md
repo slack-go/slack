@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix retry jitter panics for large durations on 32-bit platforms.
+
 ## [0.34.0] - 2026-11-03
 
 Huge thank you to Michal Mazurek (@akfaew) for submitting a bunch of patches for this
