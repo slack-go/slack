@@ -36,13 +36,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		var blockType string
-		if s.TypeVal != "" {
-			blockType = s.TypeVal
-		}
-
 		var block Block
-		switch blockType {
+		switch s.TypeVal {
 		case "actions":
 			block = &ActionBlock{}
 		case "context":
@@ -94,12 +89,7 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 		case "layout":
 			block = &LayoutBlock{}
 		default:
-			b := &UnknownBlock{raw: r}
-			if err = json.Unmarshal(r, b); err != nil {
-				return err
-			}
-			blocks.BlockSet = append(blocks.BlockSet, b)
-			continue
+			block = &UnknownBlock{raw: r}
 		}
 
 		err = json.Unmarshal(r, block)
@@ -214,13 +204,8 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		var blockElementType string
-		if s.TypeVal != "" {
-			blockElementType = s.TypeVal
-		}
-
 		var blockElement BlockElement
-		switch blockElementType {
+		switch s.TypeVal {
 		case "image":
 			blockElement = &ImageBlockElement{}
 		case "button":
@@ -260,7 +245,7 @@ func (b *BlockElements) UnmarshalJSON(data []byte) error {
 		case "workflow_button":
 			blockElement = &WorkflowButtonBlockElement{}
 		default:
-			return fmt.Errorf("unsupported block element type %v", blockElementType)
+			return fmt.Errorf("unsupported block element type %v", s.TypeVal)
 		}
 
 		err = json.Unmarshal(r, blockElement)
@@ -301,12 +286,7 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	var blockElementType string
-	if s.TypeVal != "" {
-		blockElementType = s.TypeVal
-	}
-
-	switch blockElementType {
+	switch s.TypeVal {
 	case "image":
 		element, err := unmarshalBlockElement(r, &ImageBlockElement{})
 		if err != nil {
@@ -465,12 +445,7 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 			return err
 		}
 
-		var contextElementType string
-		if s.TypeVal != "" {
-			contextElementType = s.TypeVal
-		}
-
-		switch contextElementType {
+		switch s.TypeVal {
 		case PlainTextType, MarkdownType:
 			elem, err := unmarshalBlockObject(r, &TextBlockObject{})
 			if err != nil {
@@ -486,7 +461,7 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 
 			e.Elements = append(e.Elements, elem.(*ImageBlockElement))
 		default:
-			return fmt.Errorf("unsupported context element type %v", contextElementType)
+			return fmt.Errorf("unsupported context element type %v", s.TypeVal)
 		}
 	}
 
