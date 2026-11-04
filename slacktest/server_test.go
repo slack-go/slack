@@ -37,12 +37,11 @@ func TestServerSendMessageToChannel(t *testing.T) {
 
 func TestServerSendMessageToBot(t *testing.T) {
 	s := NewTestServer()
+	t.Cleanup(s.Stop)
 	s.Start()
 	s.SendMessageToBot("C123456789", "some text")
 	expectedMsg := fmt.Sprintf("<@%s> %s", s.BotID, "some text")
-	time.Sleep(2 * time.Second)
 	assert.True(t, s.SawOutgoingMessage(expectedMsg))
-	s.Stop()
 }
 
 func TestBotDirectMessageBotHandler(t *testing.T) {
