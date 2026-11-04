@@ -62,33 +62,12 @@ func TestRTMInfo(t *testing.T) {
 }
 
 func TestRTMPing(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping timered test")
-	}
-	maxWait := 45 * time.Second
 	s := NewTestServer()
-	go s.Start()
-
-	api := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
-	messageChan := make(chan (*slack.LatencyReport), 1)
-	go func() {
-		for msg := range rtm.IncomingEvents {
-			if ev, ok := msg.Data.(*slack.LatencyReport); ok {
-				messageChan <- ev
-			}
-		}
-	}()
-	select {
-	case m := <-messageChan:
-		assert.NotEmpty(t, m.Value, "latency report should value a value")
-		assert.Positive(t, m.Value, "latency report should be greater than 0")
-		break
-	case <-time.After(maxWait):
-		assert.FailNow(t, "did not get latency report in time")
-
-	}
+	t.Cleanup(s.Stop)
+	s.Start()
+	rtm := startTestRTM(t, s, slack.RTMOptionPingInterval(50*time.Millisecond))
+	m := waitForRTMEvent[*slack.LatencyReport](t, rtm)
+	assert.Positive(t, m.Value, "latency report should have a positive value")
 }
 
 func TestRTMDirectMessage(t *testing.T) {
