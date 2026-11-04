@@ -33,35 +33,9 @@ func (e *RichTextBlock) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
-	elems := make([]RichTextElement, 0, len(raw.RawElements))
-	for _, r := range raw.RawElements {
-		var s struct {
-			Type RichTextElementType `json:"type"`
-		}
-		if err := json.Unmarshal(r, &s); err != nil {
-			return err
-		}
-		var elem RichTextElement
-		switch s.Type {
-		case RTESection:
-			elem = &RichTextSection{}
-		case RTEList:
-			elem = &RichTextList{}
-		case RTEQuote:
-			elem = &RichTextQuote{}
-		case RTEPreformatted:
-			elem = &RichTextPreformatted{}
-		default:
-			elems = append(elems, &RichTextUnknown{
-				Type: s.Type,
-				Raw:  string(r),
-			})
-			continue
-		}
-		if err := json.Unmarshal(r, &elem); err != nil {
-			return err
-		}
-		elems = append(elems, elem)
+	elems, err := unmarshalRichTextElements(raw.RawElements)
+	if err != nil {
+		return err
 	}
 	*e = RichTextBlock{
 		Type:     raw.Type,
@@ -152,13 +126,29 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
-	elems := make([]RichTextElement, 0, len(raw.RawElements))
-	for _, r := range raw.RawElements {
+	elems, err := unmarshalRichTextElements(raw.RawElements)
+	if err != nil {
+		return err
+	}
+	*e = RichTextList{
+		Type:     RTEList,
+		Elements: elems,
+		Style:    raw.Style,
+		Indent:   raw.Indent,
+		Border:   raw.Border,
+		Offset:   raw.Offset,
+	}
+	return nil
+}
+
+func unmarshalRichTextElements(raw []json.RawMessage) ([]RichTextElement, error) {
+	elems := make([]RichTextElement, 0, len(raw))
+	for _, r := range raw {
 		var s struct {
 			Type RichTextElementType `json:"type"`
 		}
 		if err := json.Unmarshal(r, &s); err != nil {
-			return err
+			return nil, err
 		}
 		var elem RichTextElement
 		switch s.Type {
@@ -178,19 +168,11 @@ func (e *RichTextList) UnmarshalJSON(b []byte) error {
 			continue
 		}
 		if err := json.Unmarshal(r, elem); err != nil {
-			return err
+			return nil, err
 		}
 		elems = append(elems, elem)
 	}
-	*e = RichTextList{
-		Type:     RTEList,
-		Elements: elems,
-		Style:    raw.Style,
-		Indent:   raw.Indent,
-		Border:   raw.Border,
-		Offset:   raw.Offset,
-	}
-	return nil
+	return elems, nil
 }
 
 type RichTextSection struct {
