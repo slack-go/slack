@@ -25,6 +25,7 @@ linters:
     - thelper
     - unconvert
     - unused
+    - usestdlibvars
   settings:
     modernize:
       # omitempty on nested struct fields has no effect, but switching to

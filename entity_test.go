@@ -110,7 +110,7 @@ func TestEntityPresentDetailsWithMetadata(t *testing.T) {
 		rw.Header().Set("Content-Type", "application/json")
 
 		// Verify the request
-		if r.Method != "POST" {
+		if r.Method != http.MethodPost {
 			t.Errorf("Expected POST request, got %s", r.Method)
 		}
 

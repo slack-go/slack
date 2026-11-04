@@ -62,7 +62,7 @@ func postFailure(rw http.ResponseWriter) {
 			"error": "function_execution_not_found"
 	}`)
 	rw.Write(response)
-	rw.WriteHeader(500)
+	rw.WriteHeader(http.StatusInternalServerError)
 }
 
 func TestFunctionComplete(t *testing.T) {
