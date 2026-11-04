@@ -22,9 +22,9 @@ Before submitting a code or example change, run:
 make pr-prep
 ```
 
-This formats code and runs vet, both linters (including Staticcheck on examples), the full
-race suite, and module and whitespace checks. The tidy check reports required changes
-without modifying `go.mod` or `go.sum`.
+This formats code and runs lint checks, the full race suite,
+and module and whitespace checks. Use `make lint` to run the lint checks alone.
+The tidy check reports required changes without modifying `go.mod` or `go.sum`.
 
 Supported Go releases are listed in the CI matrix. Tool versions live in `mise.toml`,
 `go.mod`, `.github/workflows/test.yml`, and the `Makefile`; keep relevant pins aligned when

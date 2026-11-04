@@ -310,7 +310,7 @@ func (smc *Client) openAndDial(ctx context.Context, additionalPingHandler func(s
 		return nil, nil, err
 	}
 	if resp != nil && resp.Body != nil {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 	conn.SetReadLimit(smc.readLimit)
 	if additionalPingHandler == nil {

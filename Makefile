@@ -1,4 +1,4 @@
-.PHONY: help deps fmt vet lint staticcheck tidy-check test test-race test-integration pr-prep
+.PHONY: help deps fmt lint tidy-check test test-race test-integration pr-prep
 
 help:
 	@echo ""
@@ -7,9 +7,7 @@ help:
 	@echo ""
 	@echo "    make deps              : Fetch all dependencies"
 	@echo "    make fmt               : Format Go code and organize imports"
-	@echo "    make vet               : Run go vet on all packages"
-	@echo "    make lint              : Run golangci-lint for linting issues"
-	@echo "    make staticcheck       : Run Staticcheck, including examples"
+	@echo "    make lint              : Run golangci-lint"
 	@echo "    make tidy-check        : Check module files without modifying them"
 	@echo "    make test              : Run all short tests"
 	@echo "    make test-race         : Run all tests with race condition checking"
@@ -24,14 +22,8 @@ deps:
 fmt:
 	@golangci-lint fmt
 
-vet:
-	@go vet ./...
-
 lint:
 	@golangci-lint run ./...
-
-staticcheck:
-	@staticcheck ./...
 
 tidy-check:
 	@go mod tidy -diff
@@ -45,5 +37,5 @@ test-race:
 test-integration:
 	@go test -v -count=1 -timeout 600s ./...
 
-pr-prep: fmt vet lint staticcheck test-race tidy-check
+pr-prep: fmt lint test-race tidy-check
 	@git diff --check
