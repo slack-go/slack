@@ -29,11 +29,10 @@ func TestCustomNewServer(t *testing.T) {
 
 func TestServerSendMessageToChannel(t *testing.T) {
 	s := NewTestServer()
+	t.Cleanup(s.Stop)
 	s.Start()
 	s.SendMessageToChannel("C123456789", "some text")
-	time.Sleep(2 * time.Second)
 	assert.True(t, s.SawOutgoingMessage("some text"))
-	s.Stop()
 }
 
 func TestServerSendMessageToBot(t *testing.T) {
