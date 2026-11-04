@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Use the lowercase `challenge` JSON key in Events API URL-verification responses.
+
 ## [0.35.0] - 2026-11-05
 
 A big thank you to @jjiang-stripe for the security find and fix!

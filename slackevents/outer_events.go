@@ -29,7 +29,7 @@ type EventsAPIURLVerificationEvent struct {
 
 // ChallengeResponse is a response to a EventsAPIEvent URLVerification challenge
 type ChallengeResponse struct {
-	Challenge string
+	Challenge string `json:"challenge"`
 }
 
 // EventsAPICallbackEvent is the main (outer) EventsAPI event.
