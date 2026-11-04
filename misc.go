@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -317,12 +318,9 @@ func isHTTPSSlackURL(u *url.URL) bool {
 		return false
 	}
 	host := strings.ToLower(u.Hostname())
-	for _, domain := range slackDomains {
-		if host == domain || strings.HasSuffix(host, "."+domain) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(slackDomains, func(domain string) bool {
+		return host == domain || strings.HasSuffix(host, "."+domain)
+	})
 }
 
 // isAPIEndpointURL reports whether u has the scheme and host of the API endpoint set
