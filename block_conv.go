@@ -412,7 +412,7 @@ func toBlockElement(element *Accessory) BlockElement {
 }
 
 // MarshalJSON encodes the underlying context element slice.
-func (e *ContextElements) MarshalJSON() ([]byte, error) {
+func (e ContextElements) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.Elements)
 }
 
