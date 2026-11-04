@@ -1,6 +1,7 @@
 package socketmode
 
 import (
+	"cmp"
 	"context"
 
 	"github.com/slack-go/slack"
@@ -309,10 +310,7 @@ func (r *SocketmodeHandler) eventAPIDispatcher(evt *Event) bool {
 		return false
 	}
 
-	innerEventType := slackevents.EventsAPIType(eventsAPIEvent.InnerEvent.Type)
-	if innerEventType == "" {
-		innerEventType = slackevents.EventsAPIType(eventsAPIEvent.Type)
-	}
+	innerEventType := slackevents.EventsAPIType(cmp.Or(eventsAPIEvent.InnerEvent.Type, eventsAPIEvent.Type))
 
 	// Level 1 - socketmode EventType
 	ishandled := r.socketmodeDispatcher(evt)
