@@ -707,10 +707,10 @@ func MsgOptionUsername(username string) MsgOption {
 // MsgOptionText provide the text for the message, optionally escape the provided
 // text.
 func MsgOptionText(text string, escape bool) MsgOption {
+	if escape {
+		text = slackutilsx.EscapeMessage(text)
+	}
 	return func(config *sendConfig) error {
-		if escape {
-			text = slackutilsx.EscapeMessage(text)
-		}
 		config.values.Add("text", text)
 		return nil
 	}
