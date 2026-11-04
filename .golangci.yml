@@ -29,6 +29,11 @@ linters:
     - unused
     - usestdlibvars
   settings:
+    govet:
+      enable:
+        - nilness
+        - reflectvaluecompare
+        - unusedwrite
     staticcheck:
       # Match the standalone command's default checks, without quick fixes.
       checks:
