@@ -87,30 +87,30 @@ type AssistantSearchContextMessageContext struct {
 
 // AssistantSearchContextFile represents a search result file
 type AssistantSearchContextFile struct {
-	UploaderUserID string `json:"uploader_user_id"`
-	AuthorUserID   string `json:"author_user_id"`
-	AuthorName     string `json:"author_name"`
-	TeamID         string `json:"team_id"`
-	FileID         string `json:"file_id"`
-	DateCreated    int64  `json:"date_created"`
-	DateUpdated    int64  `json:"date_updated"`
-	Title          string `json:"title"`
-	FileType       string `json:"file_type"`
-	Permalink      string `json:"permalink"`
-	Content        string `json:"content"`
+	UploaderUserID string   `json:"uploader_user_id"`
+	AuthorUserID   string   `json:"author_user_id"`
+	AuthorName     string   `json:"author_name"`
+	TeamID         string   `json:"team_id"`
+	FileID         string   `json:"file_id"`
+	DateCreated    JSONTime `json:"date_created"`
+	DateUpdated    int64    `json:"date_updated"`
+	Title          string   `json:"title"`
+	FileType       string   `json:"file_type"`
+	Permalink      string   `json:"permalink"`
+	Content        string   `json:"content"`
 }
 
 // AssistantSearchContextChannel represents a search result channel
 type AssistantSearchContextChannel struct {
-	TeamID        string `json:"team_id"`
-	CreatorUserID string `json:"creator_user_id"`
-	CreatorName   string `json:"creator_name"`
-	DateCreated   int64  `json:"date_created"`
-	DateUpdated   int64  `json:"date_updated"`
-	Name          string `json:"name"`
-	Topic         string `json:"topic"`
-	Purpose       string `json:"purpose"`
-	Permalink     string `json:"permalink"`
+	TeamID        string   `json:"team_id"`
+	CreatorUserID string   `json:"creator_user_id"`
+	CreatorName   string   `json:"creator_name"`
+	DateCreated   JSONTime `json:"date_created"`
+	DateUpdated   int64    `json:"date_updated"`
+	Name          string   `json:"name"`
+	Topic         string   `json:"topic"`
+	Purpose       string   `json:"purpose"`
+	Permalink     string   `json:"permalink"`
 }
 
 // AssistantSearchContextResults contains the search results

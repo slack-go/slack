@@ -92,7 +92,7 @@ type AdminUser struct {
 	Username             string   `json:"username"`
 	FullName             string   `json:"full_name"`
 	IsActive             bool     `json:"is_active"`
-	DateCreated          int64    `json:"date_created"`
+	DateCreated          JSONTime `json:"date_created"`
 	DeactivatedTimestamp int64    `json:"deactivated_ts"`
 	ExpirationTimestamp  int64    `json:"expiration_ts"`
 	LastActiveTimestamp  int64    `json:"last_active_ts"`

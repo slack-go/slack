@@ -9,11 +9,11 @@ type ChannelCreatedEvent struct {
 
 // ChannelCreatedInfo represents the information associated with the Channel created event
 type ChannelCreatedInfo struct {
-	ID        string `json:"id"`
-	IsChannel bool   `json:"is_channel"`
-	Name      string `json:"name"`
-	Created   int    `json:"created"`
-	Creator   string `json:"creator"`
+	ID        string   `json:"id"`
+	IsChannel bool     `json:"is_channel"`
+	Name      string   `json:"name"`
+	Created   JSONTime `json:"created"`
+	Creator   string   `json:"creator"`
 }
 
 // ChannelJoinedEvent represents the Channel joined event
@@ -43,9 +43,9 @@ type ChannelRenameEvent struct {
 
 // ChannelRenameInfo represents the information associated with a Channel rename event
 type ChannelRenameInfo struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Created int    `json:"created"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Created JSONTime `json:"created"`
 }
 
 // ChannelHistoryChangedEvent represents the Channel history changed event

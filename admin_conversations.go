@@ -364,7 +364,7 @@ type AdminConversation struct {
 	Name                      string                  `json:"name,omitempty"`
 	Purpose                   string                  `json:"purpose,omitempty"`
 	MemberCount               int                     `json:"member_count,omitempty"`
-	Created                   int64                   `json:"created,omitempty"`
+	Created                   JSONTime                `json:"created,omitempty"`
 	CreatorID                 string                  `json:"creator_id,omitempty"`
 	IsPrivate                 bool                    `json:"is_private,omitempty"`
 	IsArchived                bool                    `json:"is_archived,omitempty"`

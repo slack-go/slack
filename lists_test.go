@@ -155,7 +155,7 @@ func TestListMethods(t *testing.T) {
 					assert.Equal(t, "https://files.slack.com/export.csv", response.DownloadURL)
 				case *CreateListItemResponse:
 					assert.Equal(t, "Rec018ALE9718", response.Item.ID)
-					assert.Equal(t, int64(1758744345), response.Item.DateCreated)
+					assert.Equal(t, JSONTime(1758744345), response.Item.DateCreated)
 					assert.Equal(t, "1758744345", response.Item.UpdatedTimestamp)
 				case *GetListItemInfoResponse:
 					assert.Equal(t, "F1234ABCD", response.List.ID)

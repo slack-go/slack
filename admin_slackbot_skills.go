@@ -16,7 +16,7 @@ type AdminSlackbotSkill struct {
 	Description  string                   `json:"description"`
 	Category     string                   `json:"category"`
 	CreatorID    string                   `json:"creator_id"`
-	DateCreated  int64                    `json:"date_created"`
+	DateCreated  JSONTime                 `json:"date_created"`
 	DateUpdated  *int64                   `json:"date_updated"`
 	Visibility   string                   `json:"visibility"`
 	IsOfficial   bool                     `json:"is_official"`

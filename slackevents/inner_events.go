@@ -282,18 +282,18 @@ type ChannelIDChangedEvent struct {
 
 // ChannelCreatedInfo represents the information associated with the Channel created event
 type ChannelCreatedInfo struct {
-	ID        string `json:"id"`
-	IsChannel bool   `json:"is_channel"`
-	Name      string `json:"name"`
-	Created   int    `json:"created"`
-	Creator   string `json:"creator"`
+	ID        string   `json:"id"`
+	IsChannel bool     `json:"is_channel"`
+	Name      string   `json:"name"`
+	Created   JSONTime `json:"created"`
+	Creator   string   `json:"creator"`
 }
 
 // ChannelRenameInfo represents the information associated with the Channel rename event
 type ChannelRenameInfo struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Created int    `json:"created"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Created JSONTime `json:"created"`
 }
 
 // ChannelUnsharedEvent represents a channel has been unshared with an external workspace event
@@ -342,9 +342,9 @@ type GroupRenameEvent struct {
 
 // GroupRenameInfo represents the information associated with the Group rename event
 type GroupRenameInfo struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Created int    `json:"created"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Created JSONTime `json:"created"`
 }
 
 // FileChangeEvent represents the information associated with the File change
@@ -656,8 +656,8 @@ type MessageMetadataDeletedEvent struct {
 	DeletedTimestamp string               `json:"deleted_ts"`
 }
 
-// JSONTime exists so that we can have a String method converting the date
-type JSONTime int64
+// JSONTime is an alias for slack.JSONTime, a Unix timestamp in seconds.
+type JSONTime = slack.JSONTime
 
 // Comment contains all the information relative to a comment
 type Comment struct {
@@ -670,53 +670,53 @@ type Comment struct {
 
 // File is a file upload
 type File struct {
-	ID                 string `json:"id"`
-	Created            int    `json:"created"`
-	Timestamp          int    `json:"timestamp"`
-	Name               string `json:"name"`
-	Title              string `json:"title"`
-	Mimetype           string `json:"mimetype"`
-	Filetype           string `json:"filetype"`
-	PrettyType         string `json:"pretty_type"`
-	User               string `json:"user"`
-	Editable           bool   `json:"editable"`
-	Size               int    `json:"size"`
-	Mode               string `json:"mode"`
-	IsExternal         bool   `json:"is_external"`
-	ExternalType       string `json:"external_type"`
-	IsPublic           bool   `json:"is_public"`
-	PublicURLShared    bool   `json:"public_url_shared"`
-	DisplayAsBot       bool   `json:"display_as_bot"`
-	Username           string `json:"username"`
-	URLPrivate         string `json:"url_private"`
-	FileAccess         string `json:"file_access"`
-	URLPrivateDownload string `json:"url_private_download"`
-	Thumb64            string `json:"thumb_64"`
-	Thumb80            string `json:"thumb_80"`
-	Thumb360           string `json:"thumb_360"`
-	Thumb360W          int    `json:"thumb_360_w"`
-	Thumb360H          int    `json:"thumb_360_h"`
-	Thumb480           string `json:"thumb_480"`
-	Thumb480W          int    `json:"thumb_480_w"`
-	Thumb480H          int    `json:"thumb_480_h"`
-	Thumb160           string `json:"thumb_160"`
-	Thumb720           string `json:"thumb_720"`
-	Thumb720W          int    `json:"thumb_720_w"`
-	Thumb720H          int    `json:"thumb_720_h"`
-	Thumb800           string `json:"thumb_800"`
-	Thumb800W          int    `json:"thumb_800_w"`
-	Thumb800H          int    `json:"thumb_800_h"`
-	Thumb960           string `json:"thumb_960"`
-	Thumb960W          int    `json:"thumb_960_w"`
-	Thumb960H          int    `json:"thumb_960_h"`
-	Thumb1024          string `json:"thumb_1024"`
-	Thumb1024W         int    `json:"thumb_1024_w"`
-	Thumb1024H         int    `json:"thumb_1024_h"`
-	ImageExifRotation  int    `json:"image_exif_rotation"`
-	OriginalW          int    `json:"original_w"`
-	OriginalH          int    `json:"original_h"`
-	Permalink          string `json:"permalink"`
-	PermalinkPublic    string `json:"permalink_public"`
+	ID                 string   `json:"id"`
+	Created            JSONTime `json:"created"`
+	Timestamp          JSONTime `json:"timestamp"`
+	Name               string   `json:"name"`
+	Title              string   `json:"title"`
+	Mimetype           string   `json:"mimetype"`
+	Filetype           string   `json:"filetype"`
+	PrettyType         string   `json:"pretty_type"`
+	User               string   `json:"user"`
+	Editable           bool     `json:"editable"`
+	Size               int      `json:"size"`
+	Mode               string   `json:"mode"`
+	IsExternal         bool     `json:"is_external"`
+	ExternalType       string   `json:"external_type"`
+	IsPublic           bool     `json:"is_public"`
+	PublicURLShared    bool     `json:"public_url_shared"`
+	DisplayAsBot       bool     `json:"display_as_bot"`
+	Username           string   `json:"username"`
+	URLPrivate         string   `json:"url_private"`
+	FileAccess         string   `json:"file_access"`
+	URLPrivateDownload string   `json:"url_private_download"`
+	Thumb64            string   `json:"thumb_64"`
+	Thumb80            string   `json:"thumb_80"`
+	Thumb360           string   `json:"thumb_360"`
+	Thumb360W          int      `json:"thumb_360_w"`
+	Thumb360H          int      `json:"thumb_360_h"`
+	Thumb480           string   `json:"thumb_480"`
+	Thumb480W          int      `json:"thumb_480_w"`
+	Thumb480H          int      `json:"thumb_480_h"`
+	Thumb160           string   `json:"thumb_160"`
+	Thumb720           string   `json:"thumb_720"`
+	Thumb720W          int      `json:"thumb_720_w"`
+	Thumb720H          int      `json:"thumb_720_h"`
+	Thumb800           string   `json:"thumb_800"`
+	Thumb800W          int      `json:"thumb_800_w"`
+	Thumb800H          int      `json:"thumb_800_h"`
+	Thumb960           string   `json:"thumb_960"`
+	Thumb960W          int      `json:"thumb_960_w"`
+	Thumb960H          int      `json:"thumb_960_h"`
+	Thumb1024          string   `json:"thumb_1024"`
+	Thumb1024W         int      `json:"thumb_1024_w"`
+	Thumb1024H         int      `json:"thumb_1024_h"`
+	ImageExifRotation  int      `json:"image_exif_rotation"`
+	OriginalW          int      `json:"original_w"`
+	OriginalH          int      `json:"original_h"`
+	Permalink          string   `json:"permalink"`
+	PermalinkPublic    string   `json:"permalink_public"`
 }
 
 // Edited is included when a Message is edited
@@ -828,7 +828,7 @@ type SlackEventTeam struct {
 	AvatarBaseURL       string          `json:"avatar_base_url,omitempty"`
 	IsVerified          bool            `json:"is_verified"`
 	Domain              string          `json:"domain"`
-	DateCreated         int             `json:"date_created"`
+	DateCreated         JSONTime        `json:"date_created"`
 	RequiresSponsorship bool            `json:"requires_sponsorship,omitempty"`
 	// TeamID              string          `json:"team_id,omitempty"`
 }
@@ -866,7 +866,7 @@ type SharedChannel struct {
 // SharedInvite is a struct for shared invites in ShareChannel events
 type SharedInvite struct {
 	ID                string          `json:"id"`
-	DateCreated       int             `json:"date_created"`
+	DateCreated       JSONTime        `json:"date_created"`
 	DateInvalid       int             `json:"date_invalid"`
 	InvitingTeam      *SlackEventTeam `json:"inviting_team,omitempty"`
 	InvitingUser      *SlackEventUser `json:"inviting_user,omitempty"`
@@ -963,20 +963,20 @@ type ImOpenEvent struct {
 }
 
 type SubTeam struct {
-	ID          string `json:"id"`
-	TeamID      string `json:"team_id"`
-	IsUsergroup bool   `json:"is_usergroup"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Handle      string `json:"handle"`
-	IsExternal  bool   `json:"is_external"`
-	DateCreate  int64  `json:"date_create"`
-	DateUpdate  int64  `json:"date_update"`
-	DateDelete  int64  `json:"date_delete"`
-	AutoType    string `json:"auto_type"`
-	CreatedBy   string `json:"created_by"`
-	UpdatedBy   string `json:"updated_by"`
-	DeletedBy   string `json:"deleted_by"`
+	ID          string   `json:"id"`
+	TeamID      string   `json:"team_id"`
+	IsUsergroup bool     `json:"is_usergroup"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Handle      string   `json:"handle"`
+	IsExternal  bool     `json:"is_external"`
+	DateCreate  JSONTime `json:"date_create"`
+	DateUpdate  int64    `json:"date_update"`
+	DateDelete  int64    `json:"date_delete"`
+	AutoType    string   `json:"auto_type"`
+	CreatedBy   string   `json:"created_by"`
+	UpdatedBy   string   `json:"updated_by"`
+	DeletedBy   string   `json:"deleted_by"`
 	Prefs       struct {
 		Channels []string `json:"channels"`
 		Groups   []string `json:"groups"`
@@ -1198,10 +1198,10 @@ type FunctionExecutedEvent struct {
 			Title       string `json:"title"`
 			IsRequired  bool   `json:"is_required"`
 		} `json:"output_parameters"`
-		AppID       string `json:"app_id"`
-		DateCreated int64  `json:"date_created"`
-		DateUpdated int64  `json:"date_updated"`
-		DateDeleted int64  `json:"date_deleted"`
+		AppID       string   `json:"app_id"`
+		DateCreated JSONTime `json:"date_created"`
+		DateUpdated int64    `json:"date_updated"`
+		DateDeleted int64    `json:"date_deleted"`
 	} `json:"function"`
 	Inputs              map[string]any `json:"inputs"`
 	FunctionExecutionID string         `json:"function_execution_id"`
@@ -1215,7 +1215,7 @@ type InviteRequestedEvent struct {
 	InviteRequest struct {
 		ID            string   `json:"id"`
 		Email         string   `json:"email"`
-		DateCreated   int64    `json:"date_created"`
+		DateCreated   JSONTime `json:"date_created"`
 		RequesterIDs  []string `json:"requester_ids"`
 		ChannelIDs    []string `json:"channel_ids"`
 		InviteType    string   `json:"invite_type"`
@@ -1370,7 +1370,7 @@ type Team struct {
 	Name                string   `json:"name"`
 	Domain              string   `json:"domain"`
 	IsVerified          bool     `json:"is_verified"`
-	DateCreated         int64    `json:"date_created"`
+	DateCreated         JSONTime `json:"date_created"`
 	AvatarBaseURL       string   `json:"avatar_base_url"`
 	RequiresSponsorship bool     `json:"requires_sponsorship"`
 }
@@ -1384,7 +1384,7 @@ type SharedChannelInviteRequestedEvent struct {
 	TargetUsers                 []TargetUser `json:"target_users"`
 	TeamsInChannel              []Team       `json:"teams_in_channel"`
 	IsExternalLimited           bool         `json:"is_external_limited"`
-	ChannelDateCreated          int64        `json:"channel_date_created"`
+	ChannelDateCreated          JSONTime     `json:"channel_date_created"`
 	ChannelMessageLatestCounted int64        `json:"channel_message_latest_counted_timestamp"`
 }
 

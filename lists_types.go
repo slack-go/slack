@@ -236,7 +236,7 @@ type ListItemCanvasReference struct {
 type ListItem struct {
 	ID               string                      `json:"id"`
 	ListID           string                      `json:"list_id"`
-	DateCreated      int64                       `json:"date_created"`
+	DateCreated      JSONTime                    `json:"date_created"`
 	CreatedBy        string                      `json:"created_by,omitempty"`
 	UpdatedBy        string                      `json:"updated_by,omitempty"`
 	UpdatedTimestamp string                      `json:"updated_timestamp,omitempty"`
@@ -316,7 +316,7 @@ type ListView struct {
 	IsLocked           bool             `json:"is_locked"`
 	Position           string           `json:"position"`
 	Columns            []ListViewColumn `json:"columns"`
-	DateCreated        int64            `json:"date_created"`
+	DateCreated        JSONTime         `json:"date_created"`
 	CreatedBy          string           `json:"created_by"`
 	StickColumnLeft    bool             `json:"stick_column_left"`
 	IsAllItemsView     bool             `json:"is_all_items_view"`
