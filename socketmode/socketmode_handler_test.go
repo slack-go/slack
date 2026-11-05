@@ -1,17 +1,49 @@
 package socketmode
 
 import (
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
+	"testing/synctest"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
+
+type invalidAuthHTTPClient struct{}
+
+func (invalidAuthHTTPClient) Do(*http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(strings.NewReader(`{"ok":false,"error":"invalid_auth"}`)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestRunEventLoopContextStopsDispatcherOnError(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		client := New(slack.New("token", slack.OptionHTTPClient(invalidAuthHTTPClient{})))
+		client.Events = make(chan Event)
+		defer close(client.Events)
+		handler := NewSocketmodeHandler(client)
+		handler.HandleDefault(func(*Event, *Client) {})
+
+		require.EqualError(t, handler.RunEventLoopContext(t.Context()), "invalid_auth")
+		synctest.Wait()
+		select {
+		case client.Events <- Event{}:
+			t.Fatal("dispatcher is still receiving events after RunEventLoopContext returned")
+		default:
+		}
+	})
+}
 
 func init_SocketmodeHandler() *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)

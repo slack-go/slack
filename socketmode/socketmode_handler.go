@@ -3,6 +3,7 @@ package socketmode
 import (
 	"cmp"
 	"context"
+	"sync"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -170,10 +171,7 @@ func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 // Register all handlers before calling this method. Registration and direct
 // changes to handler maps or Default are not supported while it is running.
 func (r *SocketmodeHandler) RunEventLoop() error {
-
-	go r.runEventLoop(context.Background())
-
-	return r.Client.Run()
+	return r.RunEventLoopContext(context.Background())
 }
 
 // RunEventLoopContext starts dispatching events and runs the Socket Mode client
@@ -181,7 +179,13 @@ func (r *SocketmodeHandler) RunEventLoop() error {
 // before calling this method. Registration and direct changes to handler maps or
 // Default are not supported while it is running.
 func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
-	go r.runEventLoop(ctx)
+	ctx, cancel := context.WithCancel(ctx)
+	var wg sync.WaitGroup
+	wg.Go(func() { r.runEventLoop(ctx) })
+	defer func() {
+		cancel()
+		wg.Wait()
+	}()
 
 	return r.Client.RunContext(ctx)
 }
