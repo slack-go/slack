@@ -9,10 +9,60 @@ import (
 	"net/url"
 	"reflect"
 	"regexp"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestMsgOptionTextReuse(t *testing.T) {
+	tests := []struct {
+		name   string
+		text   string
+		escape bool
+		want   string
+	}{
+		{name: "escape special characters", text: "A & B < C > D", escape: true, want: "A &amp; B &lt; C &gt; D"},
+		{name: "keep literal text", text: "A & B < C > D", escape: false, want: "A & B < C > D"},
+		{name: "plain text", text: "hello", escape: true, want: "hello"},
+		{name: "empty text", text: "", escape: true, want: ""},
+		{name: "escape existing entity once", text: "&amp;", escape: true, want: "&amp;amp;"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			option := MsgOptionText(test.text, test.escape)
+			for i := range 3 {
+				config, err := applyMsgOptions("testing-token", "CXXX", "https://example.com/", option)
+				require.NoError(t, err)
+				require.Equal(t, []string{test.want}, config.values["text"], "use %d", i+1)
+			}
+		})
+	}
+}
+
+func TestMsgOptionTextConcurrentReuse(t *testing.T) {
+	option := MsgOptionText("A & B < C > D", true)
+	const workers = 32
+	configs := make([]sendConfig, workers)
+	errors := make([]error, workers)
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+
+	for i := range workers {
+		wg.Go(func() {
+			<-start
+			configs[i], errors[i] = applyMsgOptions("testing-token", "CXXX", "https://example.com/", option)
+		})
+	}
+	close(start)
+	wg.Wait()
+
+	for i, config := range configs {
+		require.NoError(t, errors[i], "worker %d", i)
+		require.Equal(t, []string{"A &amp; B &lt; C &gt; D"}, config.values["text"], "worker %d", i)
+	}
+}
 
 func postMessageInvalidChannelHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
