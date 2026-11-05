@@ -82,7 +82,10 @@ type BlockActionStates struct {
 //
 // See https://github.com/slack-go/slack/issues/660 for context.
 func InteractionCallbackParse(r *http.Request) (InteractionCallback, error) {
-	payload := r.FormValue("payload")
+	if err := r.ParseForm(); err != nil {
+		return InteractionCallback{}, err
+	}
+	payload := r.PostForm.Get("payload")
 	if len(payload) == 0 {
 		return InteractionCallback{}, errors.New("payload is empty")
 	}

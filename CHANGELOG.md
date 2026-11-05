@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- `InteractionCallbackParse` no longer falls back to the URL query string for the
+  `payload` field. A request's signature only covers its POST body, so the fallback
+  let a validly-signed request be replayed with an attacker-controlled payload
+  smuggled in via the query string.
+
 ### Fixed
 
 - Prevent repeated escaping and data races when reusing a `MsgOptionText` option.

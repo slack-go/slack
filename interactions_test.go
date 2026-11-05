@@ -734,3 +734,18 @@ func TestInteractionCallback_Parser(t *testing.T) {
 	assert.Equal(t, ic.BlockActionState.Values["other_block_id"]["other_action_id"].Type, ActionType(METPlainTextInput))
 	assert.Equal(t, "test123", ic.BlockActionState.Values["other_block_id"]["other_action_id"].Value)
 }
+
+// A signature check authenticates only the raw POST body. If the "payload"
+// field is missing from that body, parsing must not fall back to the query
+// string: a signed request for one event could otherwise be replayed with
+// an attacker-controlled "payload" smuggled in via the URL.
+// See https://github.com/slack-go/slack/blob/6065d7ddad41ae0fffe26e32a4a9259118df8ba4/interactions.go#L85.
+func TestInteractionCallback_Parser_IgnoresQueryStringPayload(t *testing.T) {
+	req, err := http.NewRequest(http.MethodPost, "http://slack.example.org/interactions?payload=%7B%22type%22%3A%22view_submission%22%7D", strings.NewReader(""))
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	_, err = InteractionCallbackParse(req)
+	assert.EqualError(t, err, "payload is empty")
+}
