@@ -431,6 +431,7 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	e.Elements = nil
 
 	for _, r := range raw {
 		s := sumtype{}

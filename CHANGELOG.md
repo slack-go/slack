@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Replace previous actions, context elements, and composition objects when decoding into reused values.
 - Replace stale accessory and API error variants when decoding into reused values.
 - Stop the Socket Mode handler's event dispatcher when its client returns an error,
   preserving queued events before returning.

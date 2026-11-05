@@ -195,6 +195,7 @@ func (a *ActionCallbacks) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	*a = ActionCallbacks{}
 
 	for _, r := range raw {
 		var obj map[string]any

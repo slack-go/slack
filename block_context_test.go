@@ -28,4 +28,9 @@ func TestNewContextBlock(t *testing.T) {
 	assert.Equal(t, "test", contextBlock.BlockID)
 	assert.Equal(t, "test", contextBlock.ID())
 	assert.Len(t, contextBlock.ContextElements.Elements, 2)
+	require.NoError(t, json.Unmarshal([]byte(`[{"type":"plain_text","text":"replacement"}]`), &contextBlock.ContextElements))
+	require.Len(t, contextBlock.ContextElements.Elements, 1)
+	assert.Equal(t, "replacement", contextBlock.ContextElements.Elements[0].(*TextBlockObject).Text)
+	require.NoError(t, json.Unmarshal([]byte(`[]`), &contextBlock.ContextElements))
+	assert.Empty(t, contextBlock.ContextElements.Elements)
 }
