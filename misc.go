@@ -215,29 +215,12 @@ func (s *KickUserFromConversationSlackResponse) UnmarshalJSON(data []byte) error
 // Warn returns warning information from the API response, or nil if there
 // are no warnings.
 func (s KickUserFromConversationSlackResponse) Warn() *Warning {
-	if s.Warning == "" && len(s.ResponseMetadata.Warnings) == 0 {
-		return nil
-	}
-	return &Warning{
-		Codes:    strings.Split(s.Warning, ","),
-		Warnings: s.ResponseMetadata.Warnings,
-	}
+	return SlackResponse(s).Warn()
 }
 
 // Err returns any API error present in the response.
 func (s KickUserFromConversationSlackResponse) Err() error {
-	if s.Ok {
-		return nil
-	}
-
-	// handle pure text based responses like chat.post
-	// which while they have a slack response in their data structure
-	// it doesn't actually get set during parsing.
-	if strings.TrimSpace(s.Error) == "" {
-		return nil
-	}
-
-	return SlackErrorResponse{Err: s.Error, Errors: s.Errors, ResponseMetadata: s.ResponseMetadata, Needed: s.Needed, Provided: s.Provided}
+	return SlackResponse(s).Err()
 }
 
 func (t SlackResponse) Err() error {
