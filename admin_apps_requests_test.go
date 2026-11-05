@@ -68,7 +68,7 @@ func TestAdminAppsRequestsList(t *testing.T) {
 	assert.False(t, *request.Scopes[0].IsApproved)
 	assert.Equal(t, "Please approve", request.Message)
 	assert.True(t, request.IsUserAppCollaborator)
-	assert.Equal(t, int64(1700000002), request.DateCreated)
+	assert.Equal(t, JSONTime(1700000002), request.DateCreated)
 	assert.Equal(t, "cursor-2", response.ResponseMetadata.Cursor)
 }
 

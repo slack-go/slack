@@ -42,7 +42,7 @@ type AdminAppRequest struct {
 	Scopes                []AdminAppRequestScope      `json:"scopes"`
 	Message               string                      `json:"message"`
 	IsUserAppCollaborator bool                        `json:"is_user_app_collaborator"`
-	DateCreated           int64                       `json:"date_created"`
+	DateCreated           JSONTime                    `json:"date_created"`
 }
 
 // AdminAppsRequestsListResponse represents the response from admin.apps.requests.list.
