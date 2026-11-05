@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Prevent repeated escaping and data races when reusing a `MsgOptionText` option.
 - Preserve plus signs and percent signs in slacktest message blocks and attachments.
 - Keep slacktest bot identities independent when generating RTM connection information.
 - Preserve huddle state, expiration, and call ID in Events API user profiles.
