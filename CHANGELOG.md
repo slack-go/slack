@@ -7,12 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-05
+
+A big thank you to @jjiang-stripe for the security find and fix!
+
+### Breaking changes (but mostly shouldn't affect anyone)
+
+> [!WARNING]
+> **`slackevents.Profile` now includes three huddle fields.** Positional struct
+> literals no longer compile. Use keyed literals when constructing a profile:
+
+```go
+profile := slackevents.Profile{
+  DisplayName: "Alex",
+  Team:        "T123ABC456",
+}
+```
+
 ### Security
 
 - `InteractionCallbackParse` no longer falls back to the URL query string for the
   `payload` field. A request's signature only covers its POST body, so the fallback
   let a validly-signed request be replayed with an attacker-controlled payload
   smuggled in via the query string.
+  Callers must supply `payload` in an `application/x-www-form-urlencoded` request
+  body. Form parsing errors are now returned to the caller.
 
 ### Fixed
 
@@ -20,7 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Preserve plus signs and percent signs in slacktest message blocks and attachments.
 - Encode context block elements as an array when a block is passed by value.
 - Keep slacktest bot identities independent when generating RTM connection information.
-- Preserve huddle state, expiration, and call ID in Events API user profiles.
+- Preserve huddle state, expiration, and call ID in Events API user profiles as
+  `slackevents.Profile.HuddleState`, `HuddleStateExpirationTS`, and `HuddleStateCallID`.
+  These fields follow Slack's documented
+  [`user_huddle_changed` payload](https://docs.slack.dev/reference/events/user_huddle_changed/).
 - Fix retry jitter panics for large durations on 32-bit platforms.
 - Decode JSONTime timestamps outside the 32-bit integer range on 32-bit platforms.
 
@@ -1227,7 +1249,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.34.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.35.0...HEAD
+[0.35.0]: https://github.com/slack-go/slack/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/slack-go/slack/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/slack-go/slack/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/slack-go/slack/compare/v0.31.0...v0.32.0
