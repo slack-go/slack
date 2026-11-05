@@ -2713,21 +2713,18 @@ func TestCallRejectedEvent(t *testing.T) {
 		"authed_users": ["U123ABC456"]
 	}`
 
-	var event CallRejectedEvent
-	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
-		t.Errorf("Failed to unmarshal CallRejectedEvent: %v", err)
-	}
-
-	if event.Event.Type != "call_rejected" {
-		t.Errorf("Expected event type to be 'call_rejected', got %s", event.Event.Type)
-	}
-	if event.TeamID != "T123ABC456" {
-		t.Errorf("Expected team_id to be 'T123ABC456', got %s", event.TeamID)
-	}
-	if event.Event.CallID != "R123ABC456" {
-		t.Fail()
-	}
-
+	parsed, err := ParseEvent([]byte(jsonStr), OptionNoVerifyToken())
+	require.NoError(t, err)
+	require.Equal(t, "T123ABC456", parsed.TeamID)
+	inner, ok := parsed.InnerEvent.Data.(*CallRejectedEvent)
+	require.True(t, ok)
+	require.Equal(t, &CallRejectedEvent{
+		Type:             "call_rejected",
+		CallID:           "R123ABC456",
+		UserID:           "U123ABC456",
+		ChannelID:        "D123ABC456",
+		ExternalUniqueID: "123-456-7890",
+	}, inner)
 }
 
 func TestChannelSharedEvent(t *testing.T) {
