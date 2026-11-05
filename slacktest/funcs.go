@@ -105,10 +105,11 @@ func ServerWSFromContext(ctx context.Context) string {
 
 // generate a full rtminfo response for initial rtm connections
 func generateRTMInfo(ctx context.Context, wsurl string) *fullInfoSlackResponse {
+	user := *defaultBotInfo
 	rtmInfo := slack.Info{
 		URL:  wsurl,
 		Team: defaultTeam,
-		User: defaultBotInfo,
+		User: &user,
 	}
 	rtmInfo.User.ID = BotIDFromContext(ctx)
 	rtmInfo.User.Name = BotNameFromContext(ctx)
