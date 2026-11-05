@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Prevent repeated escaping and data races when reusing a `MsgOptionText` option.
 - Preserve plus signs and percent signs in slacktest message blocks and attachments.
+- Encode context block elements as an array when a block is passed by value.
 - Keep slacktest bot identities independent when generating RTM connection information.
 - Preserve huddle state, expiration, and call ID in Events API user profiles.
 - Fix retry jitter panics for large durations on 32-bit platforms.
