@@ -308,94 +308,86 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 
 	switch blockElementType {
 	case "image":
-		element, err := unmarshalBlockElement(r, &ImageBlockElement{})
-		if err != nil {
+		element := &ImageBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.ImageElement = element.(*ImageBlockElement)
+		a.ImageElement = element
 	case "button":
-		element, err := unmarshalBlockElement(r, &ButtonBlockElement{})
-		if err != nil {
+		element := &ButtonBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.ButtonElement = element.(*ButtonBlockElement)
+		a.ButtonElement = element
 	case "overflow":
-		element, err := unmarshalBlockElement(r, &OverflowBlockElement{})
-		if err != nil {
+		element := &OverflowBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.OverflowElement = element.(*OverflowBlockElement)
+		a.OverflowElement = element
 	case "datepicker":
-		element, err := unmarshalBlockElement(r, &DatePickerBlockElement{})
-		if err != nil {
+		element := &DatePickerBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.DatePickerElement = element.(*DatePickerBlockElement)
+		a.DatePickerElement = element
 	case "timepicker":
-		element, err := unmarshalBlockElement(r, &TimePickerBlockElement{})
-		if err != nil {
+		element := &TimePickerBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.TimePickerElement = element.(*TimePickerBlockElement)
+		a.TimePickerElement = element
 	case "plain_text_input":
-		element, err := unmarshalBlockElement(r, &PlainTextInputBlockElement{})
-		if err != nil {
+		element := &PlainTextInputBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.PlainTextInputElement = element.(*PlainTextInputBlockElement)
+		a.PlainTextInputElement = element
 	case "rich_text_input":
-		element, err := unmarshalBlockElement(r, &RichTextInputBlockElement{})
-		if err != nil {
+		element := &RichTextInputBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.RichTextInputElement = element.(*RichTextInputBlockElement)
+		a.RichTextInputElement = element
 	case "radio_buttons":
-		element, err := unmarshalBlockElement(r, &RadioButtonsBlockElement{})
-		if err != nil {
+		element := &RadioButtonsBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.RadioButtonsElement = element.(*RadioButtonsBlockElement)
+		a.RadioButtonsElement = element
 	case "static_select", "external_select", "users_select", "conversations_select", "channels_select":
-		element, err := unmarshalBlockElement(r, &SelectBlockElement{})
-		if err != nil {
+		element := &SelectBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.SelectElement = element.(*SelectBlockElement)
+		a.SelectElement = element
 	case "multi_static_select", "multi_external_select", "multi_users_select", "multi_conversations_select", "multi_channels_select":
-		element, err := unmarshalBlockElement(r, &MultiSelectBlockElement{})
-		if err != nil {
+		element := &MultiSelectBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.MultiSelectElement = element.(*MultiSelectBlockElement)
+		a.MultiSelectElement = element
 	case "checkboxes":
-		element, err := unmarshalBlockElement(r, &CheckboxGroupsBlockElement{})
-		if err != nil {
+		element := &CheckboxGroupsBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.CheckboxGroupsBlockElement = element.(*CheckboxGroupsBlockElement)
+		a.CheckboxGroupsBlockElement = element
 	case "workflow_button":
-		element, err := unmarshalBlockElement(r, &WorkflowButtonBlockElement{})
-		if err != nil {
+		element := &WorkflowButtonBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.WorkflowButtonElement = element.(*WorkflowButtonBlockElement)
+		a.WorkflowButtonElement = element
 	default:
-		element, err := unmarshalBlockElement(r, &UnknownBlockElement{})
-		if err != nil {
+		element := &UnknownBlockElement{}
+		if err := json.Unmarshal(r, element); err != nil {
 			return err
 		}
-		a.UnknownElement = element.(*UnknownBlockElement)
+		a.UnknownElement = element
 	}
 
 	return nil
-}
-
-func unmarshalBlockElement(r json.RawMessage, element BlockElement) (BlockElement, error) {
-	err := json.Unmarshal(r, element)
-	if err != nil {
-		return nil, err
-	}
-	return element, nil
 }
 
 func toBlockElement(element *Accessory) BlockElement {
@@ -472,19 +464,19 @@ func (e *ContextElements) UnmarshalJSON(data []byte) error {
 
 		switch contextElementType {
 		case PlainTextType, MarkdownType:
-			elem, err := unmarshalBlockObject(r, &TextBlockObject{})
-			if err != nil {
+			elem := &TextBlockObject{}
+			if err := json.Unmarshal(r, elem); err != nil {
 				return err
 			}
 
-			e.Elements = append(e.Elements, elem.(*TextBlockObject))
+			e.Elements = append(e.Elements, elem)
 		case "image":
-			elem, err := unmarshalBlockElement(r, &ImageBlockElement{})
-			if err != nil {
+			elem := &ImageBlockElement{}
+			if err := json.Unmarshal(r, elem); err != nil {
 				return err
 			}
 
-			e.Elements = append(e.Elements, elem.(*ImageBlockElement))
+			e.Elements = append(e.Elements, elem)
 		default:
 			return fmt.Errorf("unsupported context element type %v", contextElementType)
 		}
