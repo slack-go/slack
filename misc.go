@@ -78,7 +78,7 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 		// https://github.com/slack-go/slack/issues/1446.
 		var stringError string
 		if stringErr := json.Unmarshal(data, &stringError); stringErr == nil {
-			e.Message = &stringError
+			*e = SlackResponseErrors{Message: &stringError}
 			return nil
 		}
 		return err
@@ -90,7 +90,7 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 			if err := json.Unmarshal(data, &amc); err != nil {
 				return err
 			}
-			e.AppsManifestCreateResponseError = &amc
+			*e = SlackResponseErrors{AppsManifestCreateResponseError: &amc}
 			return nil
 		}
 	}
@@ -102,7 +102,7 @@ func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 				if err := json.Unmarshal(data, &ci); err != nil {
 					return err
 				}
-				e.ConversationsInviteResponseError = &ci
+				*e = SlackResponseErrors{ConversationsInviteResponseError: &ci}
 				return nil
 			}
 		}

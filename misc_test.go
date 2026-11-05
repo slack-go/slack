@@ -247,6 +247,21 @@ func TestSlackResponseErrorsUnmarshaling(t *testing.T) {
 	}
 }
 
+func TestSlackResponseErrorsReuse(t *testing.T) {
+	var responseError SlackResponseErrors
+	for _, input := range []string{
+		`{"pointer":"/old","message":"old error"}`,
+		`"new error"`,
+		`{"error":"invalid_user","ok":false,"user":"U12345678"}`,
+		`{"pointer":"/new","message":"new error"}`,
+	} {
+		require.NoError(t, json.Unmarshal([]byte(input), &responseError))
+		encoded, err := json.Marshal(responseError)
+		require.NoError(t, err)
+		require.JSONEq(t, input, string(encoded))
+	}
+}
+
 func TestSlackResponseErrorsUnmarshalingUnknownStructure(t *testing.T) {
 	input := `{"unknown_field":"value","other_field":123}`
 	var errors SlackResponseErrors

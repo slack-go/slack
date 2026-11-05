@@ -264,6 +264,7 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 		}},
 	}
 
+	var unmarshalled Accessory
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			accessory := NewAccessory(tc.element)
@@ -271,11 +272,13 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 			data, err := json.Marshal(accessory)
 			require.NoError(t, err, "Marshal failed for %s", tc.name)
 
-			var unmarshalled Accessory
 			err = json.Unmarshal(data, &unmarshalled)
 			require.NoError(t, err, "Unmarshal failed for %s", tc.name)
 
 			tc.check(t, &unmarshalled)
+			encoded, err := json.Marshal(&unmarshalled)
+			require.NoError(t, err)
+			require.JSONEq(t, string(data), string(encoded))
 		})
 	}
 }

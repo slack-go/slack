@@ -286,6 +286,7 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	*a = Accessory{}
 	switch s.TypeVal {
 	case "image":
 		element := &ImageBlockElement{}
