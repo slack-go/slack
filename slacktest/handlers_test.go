@@ -30,7 +30,12 @@ func TestPostMessageHandler(t *testing.T) {
 	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	channel, tstamp, err := client.PostMessage("foo", slack.MsgOptionText("some text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
+	channel, tstamp, err := client.PostMessage("foo",
+		slack.MsgOptionText("some text", false),
+		slack.MsgOptionAttachments(slack.Attachment{Text: "C++ 100%"}),
+		slack.MsgOptionBlocks(slack.NewSectionBlock(slack.NewTextBlockObject(slack.PlainTextType, "C++ 100%", false, false), nil, nil)),
+		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}),
+	)
 	require.NoError(t, err, "should not error out")
 	assert.Equal(t, "foo", channel, "channel should be correct")
 	assert.NotEmpty(t, tstamp, "timestamp should not be empty")
@@ -42,7 +47,12 @@ func TestPostEphemeralHandler(t *testing.T) {
 	s.Start()
 
 	client := slack.New("ABCDEFG", slack.OptionAPIURL(s.GetAPIURL()))
-	tstamp, err := client.PostEphemeral("fake_channel", "fake_user", slack.MsgOptionText("some ephemeral text", false), slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}))
+	tstamp, err := client.PostEphemeral("fake_channel", "fake_user",
+		slack.MsgOptionText("some ephemeral text", false),
+		slack.MsgOptionAttachments(slack.Attachment{Text: "C++ 100%"}),
+		slack.MsgOptionBlocks(slack.NewSectionBlock(slack.NewTextBlockObject(slack.PlainTextType, "C++ 100%", false, false), nil, nil)),
+		slack.MsgOptionPostMessageParameters(slack.PostMessageParameters{}),
+	)
 	require.NoError(t, err, "should not error out")
 	assert.NotEmpty(t, tstamp, "timestamp should not be empty")
 
