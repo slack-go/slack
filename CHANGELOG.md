@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** Flatten `slackevents.CallRejectedEvent` to match the inner
+  `call_rejected` event. Replace `event.Event.CallID` with `event.CallID`, and
+  likewise for `Type`, `UserID`, `ChannelID`, and `ExternalUniqueID`. Decode full
+  callback payloads with `slackevents.ParseEvent`; envelope metadata belongs to the
+  returned `EventsAPIEvent` and its `*EventsAPICallbackEvent` data, rather than
+  `CallRejectedEvent`.
+
+### Fixed
+
+- Preserve call and user identifiers when parsing `call_rejected` Events API events.
+
 ## [0.35.0] - 2026-11-05
 
 A big thank you to @jjiang-stripe for the security find and fix!
