@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Replace previous actions, context elements, and composition objects when decoding into reused values.
+
 ## [0.35.0] - 2026-11-05
 
 A big thank you to @jjiang-stripe for the security find and fix!

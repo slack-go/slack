@@ -26,6 +26,7 @@ func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var objects BlockObjects
 			require.NoError(t, json.Unmarshal([]byte("["+tc.raw+"]"), &objects))
+			require.NoError(t, json.Unmarshal([]byte("["+tc.raw+"]"), &objects))
 			require.Equal(t, 1, len(objects.TextObjects)+len(objects.ConfirmationObjects)+len(objects.OptionObjects)+len(objects.OptionGroupObjects))
 			var decoded any
 			switch tc.name {
@@ -45,6 +46,8 @@ func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
 			encoded, err := json.Marshal(decoded)
 			require.NoError(t, err)
 			require.JSONEq(t, tc.raw, string(encoded))
+			require.NoError(t, json.Unmarshal([]byte(`[]`), &objects))
+			require.Equal(t, BlockObjects{}, objects)
 		})
 	}
 }
