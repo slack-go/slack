@@ -2695,6 +2695,19 @@ func TestAppUninstalledTeamEvent(t *testing.T) {
 	}
 }
 
+func TestGroupRenameCreated(t *testing.T) {
+	const innerJSON = `{"type":"group_rename","channel":{"id":"G02ELGNBH","name":"new_name","created":2147483648},"event_ts":"2147483648.000000"}`
+	parsed, err := ParseEvent([]byte(`{"type":"event_callback","event":`+innerJSON+`}`), OptionNoVerifyToken())
+	require.NoError(t, err)
+	event, ok := parsed.InnerEvent.Data.(*GroupRenameEvent)
+	require.True(t, ok)
+	require.Equal(t, int64(2147483648), event.Channel.Created.Time().Unix())
+
+	encoded, err := json.Marshal(event)
+	require.NoError(t, err)
+	require.JSONEq(t, innerJSON, string(encoded))
+}
+
 func TestCallRejectedEvent(t *testing.T) {
 	jsonStr := `{
 		"token": "12345FVmRUzNDOAu12345h",
@@ -3050,6 +3063,7 @@ func TestSharedChannelInviteRequested_UnmarshalJSON(t *testing.T) {
 	if event.ChannelID != "C0123ABCDEF" {
 		t.Errorf("Expected ChannelID to be 'C0123ABCDEF', got '%s'", event.ChannelID)
 	}
+	assert.Equal(t, int64(1718725442), event.ChannelDateCreated.Time().Unix())
 	if len(event.TargetUsers) != 1 || event.TargetUsers[0].Email != "user@some-corp.com" {
 		t.Errorf("Expected one TargetUser with Email 'user@some-corp.com', got '%v'", event.TargetUsers)
 	}

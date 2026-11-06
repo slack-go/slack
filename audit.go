@@ -12,9 +12,9 @@ type AuditLogResponse struct {
 }
 
 type AuditEntry struct {
-	ID         string `json:"id"`
-	DateCreate int    `json:"date_create"`
-	Action     string `json:"action"`
+	ID         string   `json:"id"`
+	DateCreate JSONTime `json:"date_create"`
+	Action     string   `json:"action"`
 	Actor      struct {
 		Type string    `json:"type"`
 		User AuditUser `json:"user"`

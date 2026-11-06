@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** Standardize creation timestamps (`Created`, `DateCreated`,
+  `DateCreate`, and `ChannelDateCreated`) on `slack.JSONTime` across Web API, RTM,
+  and Events API models.
+  `slackevents.JSONTime` is now an alias of that type, with the same decoding and
+  time helpers. `slackevents.File.Timestamp` also uses it, matching `slack.File`.
+  Convert typed numeric variables with `slack.JSONTime(seconds)` and use `.Time()`
+  for `time.Time` values. Use `int64(timestamp)` or `%d` for Unix seconds; default
+  string formatting uses `JSONTime.String()`'s date representation. Decoding
+  accepts numeric and quoted integers, with JSON `null` resetting the value to
+  zero. Marshaling remains numeric; `GroupRenameInfo.Created` changes from a JSON
+  string to a number.
+
+### Fixed
+
+- Decode RTM `group_rename` events with numeric creation timestamps instead of
+  rejecting them as unmarshalling errors.
+
 ## [0.35.0] - 2026-11-05
 
 A big thank you to @jjiang-stripe for the security find and fix!

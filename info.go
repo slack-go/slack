@@ -407,7 +407,7 @@ type UserDetails struct {
 	Prefs          UserPrefs `json:"prefs"`
 }
 
-// JSONTime exists so that we can have a String method converting the date
+// JSONTime is a Unix timestamp in seconds. It accepts JSON numbers and quoted integers.
 type JSONTime int64
 
 // String converts the unix timestamp into a string

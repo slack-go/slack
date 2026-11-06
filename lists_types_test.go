@@ -240,7 +240,7 @@ func TestListMetadata(t *testing.T) {
 	require.Len(t, metadata.Views, 1)
 	view := metadata.Views[0]
 	assert.Equal(t, "1758744342", view.Position)
-	assert.Equal(t, int64(1758744342), view.DateCreated)
+	assert.Equal(t, JSONTime(1758744342), view.DateCreated)
 	assert.Equal(t, "U123", view.CreatedBy)
 	assert.True(t, view.IsAllItemsView)
 	assert.Equal(t, "all_items", view.DefaultViewKey)

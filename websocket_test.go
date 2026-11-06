@@ -42,6 +42,32 @@ func TestRTMGetInfoConcurrent(t *testing.T) {
 	wg.Wait()
 }
 
+func TestRTMGroupRenameCreated(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		created string
+		want    JSONTime
+	}{
+		{"number", `1360782804`, 1360782804},
+		{"quoted number", `"1360782804"`, 1360782804},
+		{"beyond int32", `2147483648`, 2147483648},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rtm := New("test-token").NewRTM()
+			defer rtm.pingDeadman.Stop()
+			rtm.handleRawEvent(json.RawMessage(`{"type":"group_rename","channel":{"id":"G02ELGNBH","name":"new_name","created":` + test.created + `}}`))
+
+			event := <-rtm.IncomingEvents
+			require.Equal(t, "group_rename", event.Type)
+			rename, ok := event.Data.(*GroupRenameEvent)
+			require.True(t, ok)
+			require.Equal(t, "G02ELGNBH", rename.Group.ID)
+			require.Equal(t, "new_name", rename.Group.Name)
+			require.Equal(t, test.want, rename.Group.Created)
+		})
+	}
+}
+
 func TestRTMIncomingEventsTruncatedStream(t *testing.T) {
 	upgrader := websocket.Upgrader{}
 	truncate := make(chan struct{})
