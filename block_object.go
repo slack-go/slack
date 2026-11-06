@@ -38,6 +38,7 @@ func (b *BlockObjects) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
+	*b = BlockObjects{}
 
 	for _, r := range raw {
 		var obj map[string]any

@@ -457,6 +457,7 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 	jsonCB := new(InteractionCallback)
 	err = json.Unmarshal(cbJSONBytes, jsonCB)
 	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(cbJSONBytes, jsonCB))
 
 	assert.Equal(t, cb.Type, jsonCB.Type)
 	assert.Equal(t, cb.Token, jsonCB.Token)
@@ -488,6 +489,9 @@ func TestInteractionCallbackJSONMarshalAndUnmarshal(t *testing.T) {
 	assert.Equal(t, cb.View.Blocks, jsonCB.View.Blocks)
 	assert.Equal(t, cb.DialogSubmissionCallback.State,
 		jsonCB.DialogSubmissionCallback.State)
+	require.NoError(t, json.Unmarshal([]byte(`{"actions":[]}`), jsonCB))
+	assert.Empty(t, jsonCB.ActionCallback.AttachmentActions)
+	assert.Empty(t, jsonCB.ActionCallback.BlockActions)
 }
 
 func TestInteractionCallback_InteractionTypeBlockActions_Unmarshal(t *testing.T) {
