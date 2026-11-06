@@ -1137,20 +1137,15 @@ type AppUninstalledTeamEvent struct {
 	EventTs    string `json:"event_ts"`
 }
 
+// CallRejectedEvent is sent when a user rejects a call shared in a direct message.
+//
+// Slack API docs: https://docs.slack.dev/reference/events/call_rejected
 type CallRejectedEvent struct {
-	Token    string `json:"token"`
-	TeamID   string `json:"team_id"`
-	APIAppID string `json:"api_app_id"`
-	Event    struct {
-		Type             string `json:"type"`
-		CallID           string `json:"call_id"`
-		UserID           string `json:"user_id"`
-		ChannelID        string `json:"channel_id"`
-		ExternalUniqueID string `json:"external_unique_id"`
-	} `json:"event"`
-	Type        string   `json:"type"`
-	EventID     string   `json:"event_id"`
-	AuthedUsers []string `json:"authed_users"`
+	Type             string `json:"type"`
+	CallID           string `json:"call_id"`
+	UserID           string `json:"user_id"`
+	ChannelID        string `json:"channel_id"`
+	ExternalUniqueID string `json:"external_unique_id"`
 }
 
 type ChannelSharedEvent struct {
