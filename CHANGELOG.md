@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** Decoding into reused `ActionCallbacks`, `ContextElements`, or
+  `BlockObjects` replaces previous entries instead of appending. Decoding `[A, B]`
+  followed by `[C]` now leaves `[C]`; `[]` and JSON `null` clear all entries. The
+  legacy `{"elements":null}` wrapper remains a no-op for `ContextElements`.
+  Failed decodes may clear or partially replace the destination; do not use it
+  after a decoding error. To retain previous data on failure, decode into a
+  separate value and assign it only after success. To accumulate entries,
+  decode separately and explicitly append the relevant slices.
 - **Breaking:** Successful decoding into a reused `Accessory` or
   `SlackResponseErrors` replaces all previous variants instead of retaining
   fields from earlier decodes. Keep previous values separately if needed, for
@@ -21,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Replace previous actions, context elements, and composition objects when decoding into reused values.
 - Replace stale accessory and API error variants when decoding into reused values.
 - Stop the Socket Mode handler's event dispatcher when its client returns an error,
   preserving queued events before returning.
