@@ -170,6 +170,7 @@ func (r *SocketmodeHandler) HandleDefault(f SocketmodeHandlerFunc) {
 // RunEventLoop starts dispatching events and runs the Socket Mode client.
 // Register all handlers before calling this method. Registration and direct
 // changes to handler maps or Default are not supported while it is running.
+// Queued events are dispatched before returning; handlers run asynchronously.
 func (r *SocketmodeHandler) RunEventLoop() error {
 	return r.RunEventLoopContext(context.Background())
 }
@@ -178,6 +179,7 @@ func (r *SocketmodeHandler) RunEventLoop() error {
 // until ctx is canceled or the client returns an error. Register all handlers
 // before calling this method. Registration and direct changes to handler maps or
 // Default are not supported while it is running.
+// Queued events are dispatched before returning; handlers run asynchronously.
 func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	var wg sync.WaitGroup
@@ -185,6 +187,20 @@ func (r *SocketmodeHandler) RunEventLoopContext(ctx context.Context) error {
 	defer func() {
 		cancel()
 		wg.Wait()
+
+		// The client has stopped producing events. Finish its queue after the
+		// dispatcher exits so cancellation cannot discard buffered events.
+		for {
+			select {
+			case event, ok := <-r.Client.Events:
+				if !ok {
+					return
+				}
+				r.dispatcher(event)
+			default:
+				return
+			}
+		}
 	}()
 
 	return r.Client.RunContext(ctx)

@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Stop the Socket Mode handler's event dispatcher when its client returns an error.
+- Stop the Socket Mode handler's event dispatcher when its client returns an error,
+  preserving queued events before returning.
 
 ## [0.35.0] - 2026-11-05
 
