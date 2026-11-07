@@ -63,7 +63,8 @@ func (e SlackResponseErrors) MarshalJSON() ([]byte, error) {
 	return []byte("null"), nil
 }
 
-// UnmarshalJSON implements custom unmarshaling for SlackResponseErrors
+// UnmarshalJSON replaces e with the decoded error variant on success. JSON null
+// leaves e unchanged. After a decoding error, callers must not rely on its contents.
 func (e *SlackResponseErrors) UnmarshalJSON(data []byte) error {
 	if bytes.Equal(data, []byte("null")) {
 		return nil

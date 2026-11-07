@@ -276,9 +276,59 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 			require.NoError(t, err, "Unmarshal failed for %s", tc.name)
 
 			tc.check(t, &unmarshalled)
+			require.Equal(t, *accessory, unmarshalled)
 			encoded, err := json.Marshal(&unmarshalled)
 			require.NoError(t, err)
 			require.JSONEq(t, string(data), string(encoded))
+		})
+	}
+}
+
+func TestAccessoryUnmarshalInvalidInput(t *testing.T) {
+	const original = `{"type":"image","image_url":"https://example.com/old.png","alt_text":"old image"}`
+	for _, test := range []struct {
+		name  string
+		input string
+	}{
+		{"invalid JSON", `{"type":`},
+		{"invalid type", `{"type":42}`},
+		{"image", `{"type":"image","alt_text":"new image","image_url":42}`},
+		{"button", `{"type":"button","text":42}`},
+		{"overflow", `{"type":"overflow","options":42}`},
+		{"datepicker", `{"type":"datepicker","initial_date":42}`},
+		{"timepicker", `{"type":"timepicker","initial_time":42}`},
+		{"plain text input", `{"type":"plain_text_input","action_id":42}`},
+		{"rich text input", `{"type":"rich_text_input","action_id":42}`},
+		{"radio buttons", `{"type":"radio_buttons","options":42}`},
+		{"select", `{"type":"static_select","options":42}`},
+		{"multi select", `{"type":"multi_static_select","options":42}`},
+		{"checkboxes", `{"type":"checkboxes","options":42}`},
+		{"workflow button", `{"type":"workflow_button","workflow":42}`},
+		{"unknown", `{"type":"future","elements":42}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var accessory Accessory
+			require.NoError(t, json.Unmarshal([]byte(original), &accessory))
+
+			require.Error(t, json.Unmarshal([]byte(test.input), &accessory))
+		})
+	}
+}
+
+func TestAccessoryUnmarshalNullAndUnknown(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		input string
+		want  Accessory
+	}{
+		{"null", `null`, Accessory{UnknownElement: &UnknownBlockElement{}}},
+		{"legacy wrapper", `{"accessory":null}`, Accessory{ButtonElement: &ButtonBlockElement{Type: METButton}}},
+		{"unknown", `{"type":"future"}`, Accessory{UnknownElement: &UnknownBlockElement{Type: "future"}}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			accessory := Accessory{ButtonElement: &ButtonBlockElement{Type: METButton}}
+			require.NoError(t, json.Unmarshal([]byte(test.input), &accessory))
+			require.Equal(t, test.want, accessory)
 		})
 	}
 }
