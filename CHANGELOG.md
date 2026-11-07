@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** Flatten `slackevents.CallRejectedEvent` to match the inner
+  `call_rejected` event. Replace `event.Event.CallID` with `event.CallID`, and
+  likewise for `Type`, `UserID`, `ChannelID`, and `ExternalUniqueID`. Decode full
+  callback payloads with `slackevents.ParseEvent`; envelope metadata belongs to the
+  returned `EventsAPIEvent` and its `*EventsAPICallbackEvent` data, rather than
+  `CallRejectedEvent`. The fields `Token`, `TeamID`, `APIAppID`, `EventID`, and
+  `AuthedUsers` are removed from `CallRejectedEvent`. Its `Type` now contains
+  `call_rejected`, rather than the outer `event_callback` type, and marshaling
+  produces the inner event object instead of the complete callback envelope.
 - **Breaking:** Decoding into reused `ActionCallbacks`, `ContextElements`, or
   `BlockObjects` replaces previous entries instead of appending. Decoding `[A, B]`
   followed by `[C]` now leaves `[C]`; `[]` and JSON `null` clear all entries. The
@@ -29,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve call and user identifiers when parsing `call_rejected` Events API events.
 - Replace previous actions, context elements, and composition objects when decoding into reused values.
 - Replace stale accessory and API error variants when decoding into reused values.
 - Stop the Socket Mode handler's event dispatcher when its client returns an error,

@@ -2710,24 +2710,63 @@ func TestCallRejectedEvent(t *testing.T) {
 		"type": "event_callback",
 		"event_id": "Ev123ABC456",
 		"event_time": 1563448153,
-		"authed_users": ["U123ABC456"]
+		"authed_users": ["U123ABC456"],
+		"authorizations": [{
+			"team_id": "T123ABC456",
+			"user_id": "U123ABC456",
+			"is_bot": false,
+			"is_enterprise_install": false
+		}]
 	}`
 
-	var event CallRejectedEvent
-	if err := json.Unmarshal([]byte(jsonStr), &event); err != nil {
-		t.Errorf("Failed to unmarshal CallRejectedEvent: %v", err)
-	}
+	parsed, err := ParseEvent([]byte(jsonStr), OptionNoVerifyToken())
+	require.NoError(t, err)
+	require.Equal(t, CallbackEvent, parsed.Type)
+	require.Equal(t, "12345FVmRUzNDOAu12345h", parsed.Token)
+	require.Equal(t, "T123ABC456", parsed.TeamID)
+	require.Equal(t, "BBBU04BB4", parsed.APIAppID)
+	require.Equal(t, string(CallRejected), parsed.InnerEvent.Type)
+	callback, ok := parsed.Data.(*EventsAPICallbackEvent)
+	require.True(t, ok)
+	require.Equal(t, parsed.Type, callback.Type)
+	require.Equal(t, parsed.Token, callback.Token)
+	require.Equal(t, parsed.TeamID, callback.TeamID)
+	require.Equal(t, parsed.APIAppID, callback.APIAppID)
+	require.Equal(t, "Ev123ABC456", callback.EventID)
+	require.Equal(t, 1563448153, callback.EventTime)
+	require.Equal(t, []string{"U123ABC456"}, callback.AuthedUsers)
+	require.Equal(t, []slack.EventAuthorization{{TeamID: "T123ABC456", UserID: "U123ABC456"}}, callback.Authorizations)
+	inner, ok := parsed.InnerEvent.Data.(*CallRejectedEvent)
+	require.True(t, ok)
+	require.Equal(t, &CallRejectedEvent{
+		Type:             "call_rejected",
+		CallID:           "R123ABC456",
+		UserID:           "U123ABC456",
+		ChannelID:        "D123ABC456",
+		ExternalUniqueID: "123-456-7890",
+	}, inner)
+	require.NotNil(t, callback.InnerEvent)
+	encoded, err := json.Marshal(inner)
+	require.NoError(t, err)
+	require.JSONEq(t, string(*callback.InnerEvent), string(encoded))
+}
 
-	if event.Event.Type != "call_rejected" {
-		t.Errorf("Expected event type to be 'call_rejected', got %s", event.Event.Type)
+func TestCallRejectedEventInvalidIdentifiers(t *testing.T) {
+	for _, field := range []string{"call_id", "user_id", "channel_id", "external_unique_id"} {
+		t.Run(field, func(t *testing.T) {
+			payload, err := json.Marshal(map[string]any{
+				"type": CallbackEvent,
+				"event": map[string]any{
+					"type": string(CallRejected),
+					field:  42,
+				},
+			})
+			require.NoError(t, err)
+			parsed, err := ParseEvent(payload, OptionNoVerifyToken())
+			require.Error(t, err)
+			require.Equal(t, "unmarshalling_error", parsed.Type)
+		})
 	}
-	if event.TeamID != "T123ABC456" {
-		t.Errorf("Expected team_id to be 'T123ABC456', got %s", event.TeamID)
-	}
-	if event.Event.CallID != "R123ABC456" {
-		t.Fail()
-	}
-
 }
 
 func TestChannelSharedEvent(t *testing.T) {
