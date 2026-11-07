@@ -5,6 +5,46 @@ import (
 	"testing"
 )
 
+func TestChallengeResponseMarshalJSON(t *testing.T) {
+	tests := []struct {
+		name     string
+		response any
+		want     string
+	}{
+		{
+			name:     "value",
+			response: ChallengeResponse{Challenge: "verification-token"},
+			want:     `{"challenge":"verification-token"}`,
+		},
+		{
+			name:     "pointer",
+			response: &ChallengeResponse{Challenge: "verification-token"},
+			want:     `{"challenge":"verification-token"}`,
+		},
+		{
+			name:     "empty challenge",
+			response: ChallengeResponse{},
+			want:     `{"challenge":""}`,
+		},
+		{
+			name:     "escaped challenge",
+			response: ChallengeResponse{Challenge: "quote: \" slash: \\ newline: \n"},
+			want:     `{"challenge":"quote: \" slash: \\ newline: \n"}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := json.Marshal(tt.response)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(got) != tt.want {
+				t.Fatalf("json.Marshal() = %s, want %s", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestURLVerificationEvent(t *testing.T) {
 	rawE := []byte(`
 			{
