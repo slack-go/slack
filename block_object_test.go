@@ -12,6 +12,12 @@ import (
 )
 
 func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
+	const original = `[
+		{"type":"plain_text","text":"old"},
+		{"confirm":{"type":"plain_text","text":"Confirm"}},
+		{"text":{"type":"plain_text","text":"Old option"},"value":"old"},
+		{"options":[{"text":{"type":"plain_text","text":"Old group option"},"value":"old"}]}
+	]`
 	cases := []struct {
 		name string
 		raw  string
@@ -25,6 +31,7 @@ func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			var objects BlockObjects
+			require.NoError(t, json.Unmarshal([]byte(original), &objects))
 			require.NoError(t, json.Unmarshal([]byte("["+tc.raw+"]"), &objects))
 			require.NoError(t, json.Unmarshal([]byte("["+tc.raw+"]"), &objects))
 			require.Equal(t, 1, len(objects.TextObjects)+len(objects.ConfirmationObjects)+len(objects.OptionObjects)+len(objects.OptionGroupObjects))
@@ -46,20 +53,27 @@ func TestBlockObjectsUnmarshalCompositionObjects(t *testing.T) {
 			encoded, err := json.Marshal(decoded)
 			require.NoError(t, err)
 			require.JSONEq(t, tc.raw, string(encoded))
-			require.NoError(t, json.Unmarshal([]byte(`[]`), &objects))
-			require.Equal(t, BlockObjects{}, objects)
+			for _, empty := range []string{`[]`, `null`} {
+				require.NoError(t, json.Unmarshal([]byte(original), &objects))
+				require.NoError(t, json.Unmarshal([]byte(empty), &objects))
+				require.Equal(t, BlockObjects{}, objects)
+			}
 		})
 	}
 }
 
 func TestBlockObjectsUnmarshalMalformedCompositionObjects(t *testing.T) {
 	for _, raw := range []string{
+		`[`, `42`, `[42]`,
+		`[{"type":"plain_text","text":42}]`,
 		`[{"confirm":"invalid"}]`,
 		`[{"options":"invalid"}]`,
 		`[{"text":"invalid","value":"option"}]`,
+		`[{"type":"plain_text","text":"valid first object"},{"confirm":42}]`,
 	} {
 		t.Run(raw, func(t *testing.T) {
 			var objects BlockObjects
+			require.NoError(t, json.Unmarshal([]byte(`[{"type":"plain_text","text":"old"}]`), &objects))
 			require.Error(t, json.Unmarshal([]byte(raw), &objects))
 		})
 	}

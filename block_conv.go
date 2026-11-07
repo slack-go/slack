@@ -418,8 +418,10 @@ func (e ContextElements) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.Elements)
 }
 
-// UnmarshalJSON implements the Unmarshaller interface for ContextElements, so that any JSON
-// unmarshalling is delegated and proper type determination can be made before unmarshal
+// UnmarshalJSON replaces e.Elements with the decoded elements on success.
+// Empty arrays and JSON null clear previous elements. The legacy
+// {"elements":null} wrapper leaves e unchanged. After a decoding error, callers
+// must not rely on its contents, which may be cleared or partially replaced.
 func (e *ContextElements) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 

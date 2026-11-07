@@ -222,6 +222,46 @@ func TestActionCallback(t *testing.T) {
 	assertInteractionCallback(t, InteractionCallback{}, actionCallback)
 }
 
+func TestActionCallbacksUnmarshalReuse(t *testing.T) {
+	const original = `[{"name":"old attachment","type":"button","value":"old"},{"block_id":"old block","action_id":"old action","type":"button","value":"old"}]`
+	for _, input := range []string{
+		`[{"name":"new attachment","type":"button","value":"new"}]`,
+		`[{"block_id":"new block","action_id":"new action","type":"button","value":"new"}]`,
+		`[{"name":"new attachment","type":"button","value":"new"},{"block_id":"new block","action_id":"new action","type":"button","value":"new"}]`,
+		`[]`,
+		`null`,
+	} {
+		t.Run(input, func(t *testing.T) {
+			var reused, fresh ActionCallbacks
+			require.NoError(t, json.Unmarshal([]byte(original), &reused))
+			require.NoError(t, json.Unmarshal([]byte(input), &reused))
+			require.NoError(t, json.Unmarshal([]byte(input), &fresh))
+			require.Equal(t, fresh, reused)
+			if input == `[]` || input == `null` {
+				require.Equal(t, ActionCallbacks{}, reused)
+				encoded, err := json.Marshal(reused)
+				require.NoError(t, err)
+				require.JSONEq(t, `[]`, string(encoded))
+			}
+		})
+	}
+}
+
+func TestActionCallbacksUnmarshalInvalidInput(t *testing.T) {
+	for _, input := range []string{
+		`[`, `42`, `[42]`,
+		`[{"name":42}]`,
+		`[{"block_id":"new block","action_id":42}]`,
+		`[{"name":"valid first action"},{"block_id":"new block","action_id":42}]`,
+	} {
+		t.Run(input, func(t *testing.T) {
+			var actions ActionCallbacks
+			require.NoError(t, json.Unmarshal([]byte(`[{"name":"old","type":"button","value":"old"}]`), &actions))
+			require.Error(t, json.Unmarshal([]byte(input), &actions))
+		})
+	}
+}
+
 func TestActionCallbacksMarshalJSON(t *testing.T) {
 	type wireAction struct {
 		Name     string `json:"name"`

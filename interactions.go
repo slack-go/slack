@@ -187,8 +187,9 @@ func (a ActionCallbacks) MarshalJSON() ([]byte, error) {
 	return json.Marshal(actions)
 }
 
-// UnmarshalJSON implements the Marshaller interface in order to delegate
-// marshalling and allow for proper type assertion when decoding the response
+// UnmarshalJSON replaces both action collections in a on success. Empty arrays
+// and JSON null clear previous actions. After a decoding error, callers must
+// not rely on its contents, which may be cleared or partially replaced.
 func (a *ActionCallbacks) UnmarshalJSON(data []byte) error {
 	var raw []json.RawMessage
 	err := json.Unmarshal(data, &raw)
