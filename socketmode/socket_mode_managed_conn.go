@@ -119,7 +119,9 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		}
 	})
 
-	go func() {
+	// The receiver can emit an incoming-error event during shutdown, so wait
+	// for it alongside the other event producers before returning.
+	wg.Go(func() {
 		defer cancel()
 		// We close messages here as it is the producer for the channel.
 		defer close(messages)
@@ -127,7 +129,7 @@ func (smc *Client) run(ctx context.Context, connectionCount int) error {
 		// The receiver reads WebSocket messages, and enqueues parsed Socket Mode requests to be handled by
 		// the request handler. It only ever returns on error.
 		sendErr(smc.runMessageReceiver(ctx, conn, messages))
-	}()
+	})
 
 	// OptionPingInterval writes maxPingInterval, so snapshot it here instead of
 	// reading the field from the goroutine below.

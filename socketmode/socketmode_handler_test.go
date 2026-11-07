@@ -1,17 +1,73 @@
 package socketmode
 
 import (
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
+	"testing/synctest"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
+
+type invalidAuthHTTPClient struct {
+	statusCode int
+}
+
+func (c invalidAuthHTTPClient) Do(*http.Request) (*http.Response, error) {
+	statusCode := c.statusCode
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+	return &http.Response{
+		StatusCode: statusCode,
+		Body:       io.NopCloser(strings.NewReader(`{"ok":false,"error":"invalid_auth"}`)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func TestRunEventLoopContextDispatchesBufferedEventsOnError(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		client := New(slack.New("token", slack.OptionHTTPClient(invalidAuthHTTPClient{statusCode: http.StatusNotFound})))
+		defer close(client.Events)
+		handler := NewSocketmodeHandler(client)
+		received := make(chan EventType, 2)
+		handler.HandleDefault(func(event *Event, _ *Client) { received <- event.Type })
+
+		var statusError slack.StatusCodeError
+		require.ErrorAs(t, handler.RunEventLoopContext(t.Context()), &statusError)
+		require.Equal(t, http.StatusNotFound, statusError.Code)
+		synctest.Wait()
+		require.Len(t, received, 2)
+		require.ElementsMatch(t, []EventType{EventTypeConnecting, EventTypeInvalidAuth}, []EventType{<-received, <-received})
+		require.Empty(t, client.Events)
+	})
+}
+
+func TestRunEventLoopContextStopsDispatcherOnError(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		client := New(slack.New("token", slack.OptionHTTPClient(invalidAuthHTTPClient{})))
+		client.Events = make(chan Event)
+		defer close(client.Events)
+		handler := NewSocketmodeHandler(client)
+		handler.HandleDefault(func(*Event, *Client) {})
+
+		require.EqualError(t, handler.RunEventLoopContext(t.Context()), "invalid_auth")
+		synctest.Wait()
+		select {
+		case client.Events <- Event{}:
+			t.Fatal("dispatcher is still receiving events after RunEventLoopContext returned")
+		default:
+		}
+	})
+}
 
 func init_SocketmodeHandler() *SocketmodeHandler {
 	eventMap := make(map[EventType][]SocketmodeHandlerFunc)
