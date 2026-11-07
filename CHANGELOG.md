@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** Successful decoding into a reused `Accessory` or
+  `SlackResponseErrors` replaces all previous variants instead of retaining
+  fields from earlier decodes. Keep previous values separately if needed, for
+  example with `previous := accessory` before decoding. JSON `null` clears the
+  previous accessory variants; it remains a no-op for `SlackResponseErrors` and
+  for the legacy `{"accessory":null}` wrapper. Failed decodes may change the
+  destination, including clearing an accessory. Do not use the destination after
+  a decoding error. To retain the previous value, decode into a separate value
+  and assign it only after success.
+
 ### Fixed
 
+- Replace stale accessory and API error variants when decoding into reused values.
 - Stop the Socket Mode handler's event dispatcher when its client returns an error,
   preserving queued events before returning.
 

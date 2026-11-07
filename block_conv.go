@@ -265,9 +265,10 @@ func (a *Accessory) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toBlockElement(a))
 }
 
-// UnmarshalJSON implements the Unmarshaller interface for Accessory, so that any JSON
-// unmarshalling is delegated and proper type determination can be made before unmarshal
-// Note: datetimepicker is not supported in Accessory
+// UnmarshalJSON replaces a with the decoded accessory on success. On error, a
+// may be cleared; callers must not rely on its contents. JSON null clears
+// previous variants; the legacy {"accessory":null} wrapper leaves a unchanged.
+// Note: datetimepicker is not supported in Accessory.
 func (a *Accessory) UnmarshalJSON(data []byte) error {
 	var r json.RawMessage
 
@@ -286,6 +287,7 @@ func (a *Accessory) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	*a = Accessory{}
 	switch s.TypeVal {
 	case "image":
 		element := &ImageBlockElement{}

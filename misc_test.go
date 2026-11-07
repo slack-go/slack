@@ -247,6 +247,59 @@ func TestSlackResponseErrorsUnmarshaling(t *testing.T) {
 	}
 }
 
+func TestSlackResponseErrorsReuse(t *testing.T) {
+	var responseError SlackResponseErrors
+	for _, input := range []string{
+		`{"pointer":"/old","message":"old error"}`,
+		`"new error"`,
+		`{"error":"invalid_user","ok":false,"user":"U12345678"}`,
+		`{"pointer":"/new","message":"new error"}`,
+	} {
+		require.NoError(t, json.Unmarshal([]byte(input), &responseError))
+		var expected SlackResponseErrors
+		require.NoError(t, json.Unmarshal([]byte(input), &expected))
+		require.Equal(t, expected, responseError)
+		encoded, err := json.Marshal(responseError)
+		require.NoError(t, err)
+		require.JSONEq(t, input, string(encoded))
+	}
+}
+
+func TestSlackResponseErrorsUnmarshalNullAndInvalidInput(t *testing.T) {
+	for _, original := range []string{
+		`{"pointer":"/old","message":"old error"}`,
+		`{"error":"invalid_user","ok":false,"user":"U12345678"}`,
+		`"old error"`,
+	} {
+		for _, input := range []string{
+			`null`,
+			`{"pointer":`,
+			`{"pointer":"/new","message":42}`,
+			`{"error":"new_error","ok":42,"user":"U87654321"}`,
+			`{"unknown":true}`,
+			`42`,
+			`[]`,
+		} {
+			t.Run(original+"/"+input, func(t *testing.T) {
+				var responseError SlackResponseErrors
+				require.NoError(t, json.Unmarshal([]byte(original), &responseError))
+				previous := responseError
+
+				err := json.Unmarshal([]byte(input), &responseError)
+				if input == "null" {
+					require.NoError(t, err)
+					require.Equal(t, previous, responseError)
+					encoded, err := json.Marshal(responseError)
+					require.NoError(t, err)
+					require.JSONEq(t, original, string(encoded))
+				} else {
+					require.Error(t, err)
+				}
+			})
+		}
+	}
+}
+
 func TestSlackResponseErrorsUnmarshalingUnknownStructure(t *testing.T) {
 	input := `{"unknown_field":"value","other_field":123}`
 	var errors SlackResponseErrors
