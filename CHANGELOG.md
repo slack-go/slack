@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   likewise for `Type`, `UserID`, `ChannelID`, and `ExternalUniqueID`. Decode full
   callback payloads with `slackevents.ParseEvent`; envelope metadata belongs to the
   returned `EventsAPIEvent` and its `*EventsAPICallbackEvent` data, rather than
-  `CallRejectedEvent`.
+  `CallRejectedEvent`. The fields `Token`, `TeamID`, `APIAppID`, `EventID`, and
+  `AuthedUsers` are removed from `CallRejectedEvent`. Its `Type` now contains
+  `call_rejected`, rather than the outer `event_callback` type, and marshaling
+  produces the inner event object instead of the complete callback envelope.
 - **Breaking:** Decoding into reused `ActionCallbacks`, `ContextElements`, or
   `BlockObjects` replaces previous entries instead of appending. Decoding `[A, B]`
   followed by `[C]` now leaves `[C]`; `[]` and JSON `null` clear all entries. The
