@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** `slackevents.ChallengeResponse` now marshals as `{"challenge":"..."}`
+  instead of `{"Challenge":"..."}`, matching Slack's documented URL-verification
+  response. Its `Challenge` field now has a JSON tag; assignments from untagged
+  anonymous structs must use `slackevents.ChallengeResponse{Challenge: value}` instead.
 - **Breaking:** Flatten `slackevents.CallRejectedEvent` to match the inner
   `call_rejected` event. Replace `event.Event.CallID` with `event.CallID`, and
   likewise for `Type`, `UserID`, `ChannelID`, and `ExternalUniqueID`. Decode full
