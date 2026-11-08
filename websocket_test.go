@@ -74,6 +74,39 @@ func TestRTMGroupRenameCreated(t *testing.T) {
 	}
 }
 
+// Slack API docs: https://docs.slack.dev/apis/events-api/#event-type-structure
+func TestRTMGroupRenameEventTimestamp(t *testing.T) {
+	const base = `{"type":"group_rename","channel":{"id":"G02ELGNBH","name":"new_name","created":1360782804}`
+	for _, test := range []struct {
+		name           string
+		fields         string
+		timestamp      string
+		eventTimestamp string
+		wantFields     string
+	}{
+		{"both timestamps", `,"ts":"1654751900.000001","event_ts":"1654751965.000300"`, "1654751900.000001", "1654751965.000300", `,"ts":"1654751900.000001","event_ts":"1654751965.000300"`},
+		{"legacy timestamp only", `,"ts":"1654751900.000001"`, "1654751900.000001", "", `,"ts":"1654751900.000001"`},
+		{"event timestamp only", `,"event_ts":"1654751965.000300"`, "", "1654751965.000300", `,"ts":"","event_ts":"1654751965.000300"`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rtm := New("test-token").NewRTM()
+			defer rtm.pingDeadman.Stop()
+			rtm.handleRawEvent(json.RawMessage(base + test.fields + `}`))
+
+			event := <-rtm.IncomingEvents
+			require.Equal(t, "group_rename", event.Type)
+			rename, ok := event.Data.(*GroupRenameEvent)
+			require.True(t, ok)
+			require.Equal(t, test.timestamp, rename.Timestamp)
+			require.Equal(t, test.eventTimestamp, rename.EventTimestamp)
+
+			encoded, err := json.Marshal(rename)
+			require.NoError(t, err)
+			require.JSONEq(t, base+test.wantFields+`}`, string(encoded))
+		})
+	}
+}
+
 func TestRTMIncomingEventsTruncatedStream(t *testing.T) {
 	upgrader := websocket.Upgrader{}
 	truncate := make(chan struct{})

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** `slack.GroupRenameEvent` gains `EventTimestamp string` for
+  `event_ts`. Replace positional struct literals with keyed literals, such as
+  `slack.GroupRenameEvent{Type: "group_rename", Group: info, Timestamp: ts}`.
+  `Timestamp` retains its `ts` JSON key. The new key is omitted when empty.
 - **Breaking:** `slack.GroupRenameInfo.Created` changes from `string` to `int64`.
   Replace literals such as `Created: "1360782804"` with `Created: 1360782804`.
   Parse input strings with `strconv.ParseInt(value, 10, 64)` before assigning;
@@ -47,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Expose `event_ts` in RTM `group_rename` events as `EventTimestamp`, preserving
+  `Timestamp` for the separate `ts` field.
 - Decode numeric creation timestamps in RTM
   [`group_rename`](https://docs.slack.dev/reference/events/group_rename/) events
   instead of dispatching `unmarshalling_error`.
