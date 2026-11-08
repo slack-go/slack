@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** `slack.GroupRenameInfo.Created` changes from `string` to `int64`.
+  Replace literals such as `Created: "1360782804"` with `Created: 1360782804`.
+  Parse input strings with `strconv.ParseInt(value, 10, 64)` before assigning;
+  use `strconv.FormatInt(info.Created, 10)` when a consumer still needs a string.
+  Marshaling now emits a JSON number, and decoding rejects quoted timestamps.
 - **Breaking:** `slackevents.ChallengeResponse` now marshals as `{"challenge":"..."}`
   instead of `{"Challenge":"..."}`, matching Slack's documented URL-verification
   response. Its `Challenge` field now has a JSON tag; assignments from untagged
@@ -42,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Decode numeric creation timestamps in RTM
+  [`group_rename`](https://docs.slack.dev/reference/events/group_rename/) events
+  instead of dispatching `unmarshalling_error`.
 - Use the lowercase `challenge` JSON key in Events API URL-verification responses.
 - Preserve call and user identifiers when parsing `call_rejected` Events API events.
 - Replace previous actions, context elements, and composition objects when decoding into reused values.
