@@ -42,6 +42,38 @@ func TestRTMGetInfoConcurrent(t *testing.T) {
 	wg.Wait()
 }
 
+// Slack API docs: https://docs.slack.dev/reference/events/group_rename/
+func TestRTMGroupRenameCreated(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		created string
+		want    int64
+	}{
+		{"documented timestamp", `1360782804`, 1360782804},
+		{"observed live timestamp", `1794131905`, 1794131905},
+		{"beyond int32", `2147483648`, 2147483648},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rtm := New("test-token").NewRTM()
+			defer rtm.pingDeadman.Stop()
+			channelJSON := `{"id":"G02ELGNBH","name":"new_name","created":` + test.created + `}`
+			rtm.handleRawEvent(json.RawMessage(`{"type":"group_rename","channel":` + channelJSON + `}`))
+
+			event := <-rtm.IncomingEvents
+			require.Equal(t, "group_rename", event.Type)
+			rename, ok := event.Data.(*GroupRenameEvent)
+			require.True(t, ok)
+			require.Equal(t, "G02ELGNBH", rename.Group.ID)
+			require.Equal(t, "new_name", rename.Group.Name)
+			require.Equal(t, test.want, rename.Group.Created)
+
+			encoded, err := json.Marshal(rename.Group)
+			require.NoError(t, err)
+			require.JSONEq(t, channelJSON, string(encoded))
+		})
+	}
+}
+
 func TestRTMIncomingEventsTruncatedStream(t *testing.T) {
 	upgrader := websocket.Upgrader{}
 	truncate := make(chan struct{})
