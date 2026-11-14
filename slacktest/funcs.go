@@ -30,7 +30,7 @@ func handlePendingMessages(c *websocket.Conn, hubname string) {
 		err := c.WriteMessage(websocket.TextMessage, []byte(m))
 		if err != nil {
 			log.Printf("error writing message to websocket: %s", err.Error())
-			continue
+			return
 		}
 	}
 }

@@ -85,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `files.revokePublicURL`, `files.sharedPublicURL`, `reactions.list`, and `stars.list`.
   Errors now keep Slack's diagnostic messages, and `OptionOnWarning` now receives
   `response_metadata.warnings`.
+- Stop failed slacktest WebSocket writers from consuming messages queued for later connections.
 
 ## [0.36.0] - 2026-11-14
 

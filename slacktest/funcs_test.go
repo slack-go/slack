@@ -2,11 +2,52 @@ package slacktest
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestHandlePendingMessagesStopsOnWriteError(t *testing.T) {
+	closedConnections := make(chan *websocket.Conn, 1)
+	server := httptest.NewServer(http.HandlerFunc(Websocket(func(conn *websocket.Conn) {
+		_ = conn.Close()
+		closedConnections <- conn
+	})))
+	defer server.Close()
+	client, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
+	require.NoError(t, err)
+	defer client.Close()
+
+	channels := newMessageChannels()
+	require.NoError(t, addServerToHub(&Server{ServerAddr: t.Name()}, channels))
+	defer func() {
+		masterHub.Lock()
+		delete(masterHub.serverChannels, t.Name())
+		masterHub.Unlock()
+	}()
+	conn := <-closedConnections
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		handlePendingMessages(conn, t.Name())
+	}()
+	defer func() {
+		close(channels.sent)
+		<-done
+	}()
+
+	channels.sent <- "first message"
+	select {
+	case channels.sent <- "second message":
+		t.Fatal("failed writer consumed another message after its write error")
+	case <-done:
+	}
+}
 
 func TestGenerateDefaultRTMInfo(t *testing.T) {
 	wsurl := "ws://127.0.0.1:5555/ws"
