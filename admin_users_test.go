@@ -329,3 +329,226 @@ func TestAdminUsersSetExpirationError(t *testing.T) {
 	err := api.AdminUsersSetExpiration("W123", 1767225600)
 	require.EqualError(t, err, "user_is_not_a_guest")
 }
+
+// adminUsersMethodPathCase calls one wrapper that should post to method.
+type adminUsersMethodPathCase struct {
+	name   string
+	method string
+	call   func(*Client) error
+}
+
+// testAdminUsersMethodPaths checks that each wrapper and its Context variant call
+// the expected Slack method.
+func testAdminUsersMethodPaths(t *testing.T, tests []adminUsersMethodPathCase) {
+	t.Helper()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/"+tt.method, r.URL.Path)
+
+				rw.Header().Set("Content-Type", "application/json")
+				_, _ = rw.Write([]byte(`{"ok": true}`))
+			})
+
+			require.NoError(t, tt.call(api))
+		})
+	}
+}
+
+func TestAdminUsersMethodPaths(t *testing.T) {
+	ctx := context.Background()
+	testAdminUsersMethodPaths(t, []adminUsersMethodPathCase{
+		{"Assign", "admin.users.assign", func(api *Client) error {
+			return api.AdminUsersAssign("T123", "W123")
+		}},
+		{"AssignContext", "admin.users.assign", func(api *Client) error {
+			return api.AdminUsersAssignContext(ctx, "T123", "W123")
+		}},
+		{"Invite", "admin.users.invite", func(api *Client) error {
+			return api.AdminUsersInvite("T123", "guest@example.com", []string{"C123"})
+		}},
+		{"InviteContext", "admin.users.invite", func(api *Client) error {
+			return api.AdminUsersInviteContext(ctx, "T123", "guest@example.com", []string{"C123"})
+		}},
+		{"Remove", "admin.users.remove", func(api *Client) error {
+			return api.AdminUsersRemove("T123", "W123")
+		}},
+		{"RemoveContext", "admin.users.remove", func(api *Client) error {
+			return api.AdminUsersRemoveContext(ctx, "T123", "W123")
+		}},
+		{"UnsupportedVersionsExport", "admin.users.unsupportedVersions.export", func(api *Client) error {
+			return api.AdminUsersUnsupportedVersionsExport()
+		}},
+		{"UnsupportedVersionsExportContext", "admin.users.unsupportedVersions.export", func(api *Client) error {
+			return api.AdminUsersUnsupportedVersionsExportContext(ctx)
+		}},
+	})
+}
+
+func TestAdminUsersAssign(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "testing-token", r.FormValue("token"))
+		assert.Equal(t, "T123", r.FormValue("team_id"))
+		assert.Equal(t, "W123", r.FormValue("user_id"))
+		assert.Equal(t, "C123,C456", r.FormValue("channel_ids"))
+		assert.Equal(t, "true", r.FormValue("is_restricted"))
+		assert.Equal(t, "true", r.FormValue("is_ultra_restricted"))
+		assert.Len(t, r.Form, 6)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	err := api.AdminUsersAssign("T123", "W123",
+		nil,
+		AdminUsersAssignOptionChannelIDs("C123", "C456"),
+		AdminUsersAssignOptionIsRestricted(true),
+		AdminUsersAssignOptionIsUltraRestricted(true),
+	)
+	require.NoError(t, err)
+}
+
+func TestAdminUsersAssignSendsExplicitFalse(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		// Slack documents no default for the guest flags, so false must be sent.
+		assert.Equal(t, "false", r.FormValue("is_restricted"))
+		assert.Equal(t, "false", r.FormValue("is_ultra_restricted"))
+		assert.Len(t, r.Form, 5)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	err := api.AdminUsersAssign("T123", "W123",
+		AdminUsersAssignOptionIsRestricted(false),
+		AdminUsersAssignOptionIsUltraRestricted(false),
+	)
+	require.NoError(t, err)
+}
+
+func TestAdminUsersAssignOmitsOptionalArguments(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Len(t, r.Form, 3)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	require.NoError(t, api.AdminUsersAssign("T123", "W123"))
+}
+
+func TestAdminUsersInvite(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "testing-token", r.FormValue("token"))
+		assert.Equal(t, "T123", r.FormValue("team_id"))
+		assert.Equal(t, "guest@example.com", r.FormValue("email"))
+		assert.Equal(t, "C123,C456", r.FormValue("channel_ids"))
+		assert.Equal(t, "Welcome!", r.FormValue("custom_message"))
+		assert.Equal(t, "Alex Example", r.FormValue("real_name"))
+		assert.Equal(t, "true", r.FormValue("resend"))
+		assert.Equal(t, "true", r.FormValue("is_ultra_restricted"))
+		assert.Equal(t, "1767225600", r.FormValue("guest_expiration_ts"))
+		assert.Equal(t, "true", r.FormValue("email_password_policy_enabled"))
+		assert.NotContains(t, r.Form, "is_restricted")
+		assert.Len(t, r.Form, 10)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	err := api.AdminUsersInvite("T123", "guest@example.com", []string{"C123", "C456"},
+		nil,
+		AdminUsersInviteOptionCustomMessage("Welcome!"),
+		AdminUsersInviteOptionRealName("Alex Example"),
+		AdminUsersInviteOptionResend(true),
+		AdminUsersInviteOptionIsRestricted(false),
+		AdminUsersInviteOptionIsUltraRestricted(true),
+		AdminUsersInviteOptionGuestExpirationTS("1767225600"),
+		AdminUsersInviteOptionEmailPasswordPolicyEnabled(true),
+	)
+	require.NoError(t, err)
+}
+
+func TestAdminUsersInviteOmitsOptionalArguments(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Len(t, r.Form, 4)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	require.NoError(t, api.AdminUsersInvite("T123", "guest@example.com", []string{"C123"}))
+}
+
+func TestAdminUsersInviteRestrictedGuest(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "true", r.FormValue("is_restricted"))
+		assert.NotContains(t, r.Form, "is_ultra_restricted")
+		assert.Len(t, r.Form, 5)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	err := api.AdminUsersInvite("T123", "guest@example.com", []string{"C123"},
+		AdminUsersInviteOptionIsRestricted(true),
+	)
+	require.NoError(t, err)
+}
+
+func TestAdminUsersRemove(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "testing-token", r.FormValue("token"))
+		assert.Equal(t, "T123", r.FormValue("team_id"))
+		assert.Equal(t, "W123", r.FormValue("user_id"))
+		assert.Len(t, r.Form, 3)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": false, "error": "user_already_deleted"}`))
+	})
+
+	err := api.AdminUsersRemove("T123", "W123")
+	require.EqualError(t, err, "user_already_deleted")
+}
+
+func TestAdminUsersUnsupportedVersionsExport(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "testing-token", r.FormValue("token"))
+		assert.Equal(t, "1767225600", r.FormValue("date_end_of_support"))
+		// Omitting date_sessions_started means six months ago, so zero must be sent.
+		assert.Equal(t, "0", r.FormValue("date_sessions_started"))
+		assert.Len(t, r.Form, 3)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	err := api.AdminUsersUnsupportedVersionsExport(
+		nil,
+		AdminUsersUnsupportedVersionsExportOptionDateEndOfSupport(1767225600),
+		AdminUsersUnsupportedVersionsExportOptionDateSessionsStarted(0),
+	)
+	require.NoError(t, err)
+}
+
+func TestAdminUsersUnsupportedVersionsExportOmitsOptionalArguments(t *testing.T) {
+	api := newAdminUsersListTestClient(t, func(rw http.ResponseWriter, r *http.Request) {
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, []string{"testing-token"}, r.Form["token"])
+		assert.Len(t, r.Form, 1)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true}`))
+	})
+
+	require.NoError(t, api.AdminUsersUnsupportedVersionsExport())
+}
