@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-14
+
+### Breaking changes
+
+> [!WARNING]
+> **v0.36.0 changes RTM, Events API, and JSON decoding types and behavior.**
+> Positional `slack.GroupRenameEvent` literals, string `slack.GroupRenameInfo.Created`
+> values, and `slackevents.CallRejectedEvent` envelope fields no longer compile.
+> `slackevents.ChallengeResponse` now marshals a lowercase `challenge` key, and decoding
+> into reused block and response values replaces their previous contents.
+>
+> See the **Breaking** entries under Changed for migration steps.
+
 ### Added
 
 - Add `AdminUsersSetAdmin`, `AdminUsersSetOwner`, and `AdminUsersSetRegular`, with
@@ -1333,7 +1346,8 @@ for details.
 [#1196]: https://github.com/slack-go/slack/issues/1196
 [#1547]: https://github.com/slack-go/slack/pull/1547
 
-[Unreleased]: https://github.com/slack-go/slack/compare/v0.35.0...HEAD
+[Unreleased]: https://github.com/slack-go/slack/compare/v0.36.0...HEAD
+[0.36.0]: https://github.com/slack-go/slack/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/slack-go/slack/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/slack-go/slack/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/slack-go/slack/compare/v0.32.0...v0.33.0
