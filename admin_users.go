@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type adminUsersListParams struct {
@@ -319,6 +320,278 @@ func (api *Client) adminUsersSetAccountType(ctx context.Context, method, teamID,
 
 	response := &SlackResponse{}
 	if err := api.postMethod(ctx, method, values, response); err != nil {
+		return err
+	}
+	return response.Err()
+}
+
+type adminUsersAssignParams struct {
+	channelIDs        []string
+	isRestricted      *bool
+	isUltraRestricted *bool
+}
+
+// AdminUsersAssignOption is an option for AdminUsersAssign.
+type AdminUsersAssignOption func(*adminUsersAssignParams)
+
+// AdminUsersAssignOptionChannelIDs adds the user to channels in the workspace.
+func AdminUsersAssignOptionChannelIDs(channelIDs ...string) AdminUsersAssignOption {
+	return func(params *adminUsersAssignParams) {
+		params.channelIDs = append([]string{}, channelIDs...)
+	}
+}
+
+// AdminUsersAssignOptionIsRestricted sets whether the user is added as a
+// multi-channel guest. Slack documents no default, so false is sent too.
+func AdminUsersAssignOptionIsRestricted(isRestricted bool) AdminUsersAssignOption {
+	return func(params *adminUsersAssignParams) {
+		params.isRestricted = &isRestricted
+	}
+}
+
+// AdminUsersAssignOptionIsUltraRestricted sets whether the user is added as a
+// single-channel guest. Slack documents no default, so false is sent too.
+func AdminUsersAssignOptionIsUltraRestricted(isUltraRestricted bool) AdminUsersAssignOption {
+	return func(params *adminUsersAssignParams) {
+		params.isUltraRestricted = &isUltraRestricted
+	}
+}
+
+// AdminUsersAssign adds an org member to a workspace, or reinstates them if they
+// were removed or left.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.users.assign
+func (api *Client) AdminUsersAssign(teamID, userID string, options ...AdminUsersAssignOption) error {
+	return api.AdminUsersAssignContext(context.Background(), teamID, userID, options...)
+}
+
+// AdminUsersAssignContext adds a user to a workspace with a custom context.
+func (api *Client) AdminUsersAssignContext(ctx context.Context, teamID, userID string, options ...AdminUsersAssignOption) error {
+	params := adminUsersAssignParams{}
+	for _, opt := range options {
+		if opt != nil {
+			opt(&params)
+		}
+	}
+
+	values := url.Values{
+		"token":   {api.token},
+		"team_id": {teamID},
+		"user_id": {userID},
+	}
+	if len(params.channelIDs) > 0 {
+		values.Add("channel_ids", strings.Join(params.channelIDs, ","))
+	}
+	if params.isRestricted != nil {
+		values.Add("is_restricted", strconv.FormatBool(*params.isRestricted))
+	}
+	if params.isUltraRestricted != nil {
+		values.Add("is_ultra_restricted", strconv.FormatBool(*params.isUltraRestricted))
+	}
+
+	response := &SlackResponse{}
+	if err := api.postMethod(ctx, "admin.users.assign", values, response); err != nil {
+		return err
+	}
+	return response.Err()
+}
+
+type adminUsersInviteParams struct {
+	customMessage              string
+	realName                   string
+	resend                     bool
+	isRestricted               bool
+	isUltraRestricted          bool
+	guestExpirationTS          string
+	emailPasswordPolicyEnabled bool
+}
+
+// AdminUsersInviteOption is an option for AdminUsersInvite.
+type AdminUsersInviteOption func(*adminUsersInviteParams)
+
+// AdminUsersInviteOptionCustomMessage adds a message to the invite email.
+func AdminUsersInviteOptionCustomMessage(message string) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.customMessage = message
+	}
+}
+
+// AdminUsersInviteOptionRealName sets the invited person's full name.
+func AdminUsersInviteOptionRealName(realName string) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.realName = realName
+	}
+}
+
+// AdminUsersInviteOptionResend allows the invite to be resent from the Slack UI.
+func AdminUsersInviteOptionResend(resend bool) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.resend = resend
+	}
+}
+
+// AdminUsersInviteOptionIsRestricted invites the person as a multi-channel guest.
+func AdminUsersInviteOptionIsRestricted(isRestricted bool) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.isRestricted = isRestricted
+	}
+}
+
+// AdminUsersInviteOptionIsUltraRestricted invites the person as a single-channel guest.
+func AdminUsersInviteOptionIsUltraRestricted(isUltraRestricted bool) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.isUltraRestricted = isUltraRestricted
+	}
+}
+
+// AdminUsersInviteOptionGuestExpirationTS sets when an invited guest's account is
+// disabled, as a Unix timestamp.
+func AdminUsersInviteOptionGuestExpirationTS(expirationTS string) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.guestExpirationTS = expirationTS
+	}
+}
+
+// AdminUsersInviteOptionEmailPasswordPolicyEnabled allows the invited person to
+// sign in with an email and password.
+func AdminUsersInviteOptionEmailPasswordPolicyEnabled(enabled bool) AdminUsersInviteOption {
+	return func(params *adminUsersInviteParams) {
+		params.emailPasswordPolicyEnabled = enabled
+	}
+}
+
+// AdminUsersInvite invites a person to a workspace and at least one channel.
+//
+// Unlike InviteToTeam, InviteGuest, and InviteRestricted, this calls the
+// documented Admin API method.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.users.invite
+func (api *Client) AdminUsersInvite(teamID, email string, channelIDs []string, options ...AdminUsersInviteOption) error {
+	return api.AdminUsersInviteContext(context.Background(), teamID, email, channelIDs, options...)
+}
+
+// AdminUsersInviteContext invites a person to a workspace with a custom context.
+func (api *Client) AdminUsersInviteContext(ctx context.Context, teamID, email string, channelIDs []string, options ...AdminUsersInviteOption) error {
+	params := adminUsersInviteParams{}
+	for _, opt := range options {
+		if opt != nil {
+			opt(&params)
+		}
+	}
+
+	values := url.Values{
+		"token":       {api.token},
+		"team_id":     {teamID},
+		"email":       {email},
+		"channel_ids": {strings.Join(channelIDs, ",")},
+	}
+	if params.customMessage != "" {
+		values.Add("custom_message", params.customMessage)
+	}
+	if params.realName != "" {
+		values.Add("real_name", params.realName)
+	}
+	if params.resend {
+		values.Add("resend", "true")
+	}
+	if params.isRestricted {
+		values.Add("is_restricted", "true")
+	}
+	if params.isUltraRestricted {
+		values.Add("is_ultra_restricted", "true")
+	}
+	if params.guestExpirationTS != "" {
+		values.Add("guest_expiration_ts", params.guestExpirationTS)
+	}
+	if params.emailPasswordPolicyEnabled {
+		values.Add("email_password_policy_enabled", "true")
+	}
+
+	response := &SlackResponse{}
+	if err := api.postMethod(ctx, "admin.users.invite", values, response); err != nil {
+		return err
+	}
+	return response.Err()
+}
+
+// AdminUsersRemove removes a user from a workspace.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.users.remove
+func (api *Client) AdminUsersRemove(teamID, userID string) error {
+	return api.AdminUsersRemoveContext(context.Background(), teamID, userID)
+}
+
+// AdminUsersRemoveContext removes a user from a workspace with a custom context.
+func (api *Client) AdminUsersRemoveContext(ctx context.Context, teamID, userID string) error {
+	values := url.Values{
+		"token":   {api.token},
+		"team_id": {teamID},
+		"user_id": {userID},
+	}
+
+	response := &SlackResponse{}
+	if err := api.postMethod(ctx, "admin.users.remove", values, response); err != nil {
+		return err
+	}
+	return response.Err()
+}
+
+type adminUsersUnsupportedVersionsExportParams struct {
+	dateEndOfSupport    *int64
+	dateSessionsStarted *int64
+}
+
+// AdminUsersUnsupportedVersionsExportOption is an option for
+// AdminUsersUnsupportedVersionsExport.
+type AdminUsersUnsupportedVersionsExportOption func(*adminUsersUnsupportedVersionsExportParams)
+
+// AdminUsersUnsupportedVersionsExportOptionDateEndOfSupport limits the export to
+// the end of support cycle at this Unix timestamp. Slack includes every
+// announced cycle when it is not set.
+func AdminUsersUnsupportedVersionsExportOptionDateEndOfSupport(timestamp int64) AdminUsersUnsupportedVersionsExportOption {
+	return func(params *adminUsersUnsupportedVersionsExportParams) {
+		params.dateEndOfSupport = &timestamp
+	}
+}
+
+// AdminUsersUnsupportedVersionsExportOptionDateSessionsStarted sets the Unix
+// timestamp to look for sessions from. Slack starts six months ago when it is
+// not set.
+func AdminUsersUnsupportedVersionsExportOptionDateSessionsStarted(timestamp int64) AdminUsersUnsupportedVersionsExportOption {
+	return func(params *adminUsersUnsupportedVersionsExportParams) {
+		params.dateSessionsStarted = &timestamp
+	}
+}
+
+// AdminUsersUnsupportedVersionsExport asks Slackbot to send the caller a zipped
+// CSV of members using unsupported Slack clients.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/admin.users.unsupportedVersions.export
+func (api *Client) AdminUsersUnsupportedVersionsExport(options ...AdminUsersUnsupportedVersionsExportOption) error {
+	return api.AdminUsersUnsupportedVersionsExportContext(context.Background(), options...)
+}
+
+// AdminUsersUnsupportedVersionsExportContext requests the export with a custom context.
+func (api *Client) AdminUsersUnsupportedVersionsExportContext(ctx context.Context, options ...AdminUsersUnsupportedVersionsExportOption) error {
+	params := adminUsersUnsupportedVersionsExportParams{}
+	for _, opt := range options {
+		if opt != nil {
+			opt(&params)
+		}
+	}
+
+	values := url.Values{
+		"token": {api.token},
+	}
+	if params.dateEndOfSupport != nil {
+		values.Add("date_end_of_support", strconv.FormatInt(*params.dateEndOfSupport, 10))
+	}
+	if params.dateSessionsStarted != nil {
+		values.Add("date_sessions_started", strconv.FormatInt(*params.dateSessionsStarted, 10))
+	}
+
+	response := &SlackResponse{}
+	if err := api.postMethod(ctx, "admin.users.unsupportedVersions.export", values, response); err != nil {
 		return err
 	}
 	return response.Err()

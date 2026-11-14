@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   select a workspace in the org. Slack API reference:
   [`admin.users.getExpiration`](https://docs.slack.dev/reference/methods/admin.users.getExpiration),
   [`admin.users.setExpiration`](https://docs.slack.dev/reference/methods/admin.users.setExpiration).
+- Add `AdminUsersAssign`, `AdminUsersInvite`, and `AdminUsersRemove`, with `Context`
+  variants and options for guest access, channels, and invite details, to manage
+  workspace membership in an Enterprise org. `InviteToTeam`, `InviteGuest`, and
+  `InviteRestricted` still call the legacy `users.admin.invite` endpoint.
+- Add `AdminUsersSessionList`, `AdminUsersSessionReset`, `AdminUsersSessionResetBulk`,
+  `AdminUsersSessionGetSettings`, `AdminUsersSessionSetSettings`, and
+  `AdminUsersSessionClearSettings`, with `Context` variants, to list and reset
+  member sessions and manage their session settings.
+- Add `AdminUsersUnsupportedVersionsExport` and its `Context` variant to have
+  Slackbot send a CSV of members on unsupported Slack clients.
 
 ### Changed
 
