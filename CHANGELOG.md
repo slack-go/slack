@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   member sessions and manage their session settings.
 - Add `AdminUsersUnsupportedVersionsExport` and its `Context` variant to have
   Slackbot send a CSV of members on unsupported Slack clients.
+- Add `AdminUsersAccessPause` and `AdminUsersAccessResume`, with `Context` variants
+  and a `reason` option, to queue pausing or resuming org-wide access for frontline
+  members. On `failed_for_some_users`, the returned response lists the rejected
+  users in `InvalidUsers`; Slack still queues the others.
 
 ### Changed
 
