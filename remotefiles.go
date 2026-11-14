@@ -149,14 +149,17 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 	return &response.RemoteFile, response.Err()
 }
 
-// ListRemoteFiles retrieves all remote files according to the parameters given. Uses cursor based pagination.
-// For more details see the ListRemoteFilesContext documentation.
+// ListRemoteFiles retrieves all remote files according to the parameters given.
+// For pagination behavior, see [Client.ListRemoteFilesContext].
 func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	return api.ListRemoteFilesContext(context.Background(), params)
 }
 
-// ListRemoteFilesContext retrieves all remote files according to the parameters given with a custom context. Uses cursor based pagination.
-// Slack API docs: https://api.slack.com/methods/files.remote.list
+// ListRemoteFilesContext retrieves all matching remote files with a custom context.
+// It follows cursors starting at params.Cursor; params.Limit applies to each page.
+// If a request fails, it returns the error without partial results.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/files.remote.list
 func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) ([]RemoteFile, error) {
 	values := url.Values{
 		"token": {api.token},
@@ -182,9 +185,17 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 		return nil, err
 	}
 
-	params.Cursor = response.SlackResponse.ResponseMetadata.Cursor
+	files := response.Files
+	for response.ResponseMetadata.Cursor != "" {
+		values.Set("cursor", response.ResponseMetadata.Cursor)
+		response, err = api.remoteFileRequest(ctx, "files.remote.list", values)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, response.Files...)
+	}
 
-	return response.Files, nil
+	return files, nil
 }
 
 // GetRemoteFileInfo retrieves the complete remote file information.

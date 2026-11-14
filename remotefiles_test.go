@@ -1,14 +1,19 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"maps"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
@@ -104,6 +109,111 @@ func TestListRemoteFile(t *testing.T) {
 					}
 				})
 			}
+		})
+	}
+}
+
+func TestListRemoteFilesPagination(t *testing.T) {
+	methods := []struct {
+		name string
+		call func(*Client, ListRemoteFilesParameters) ([]RemoteFile, error)
+	}{
+		{"ListRemoteFiles", (*Client).ListRemoteFiles},
+		{"ListRemoteFilesContext", func(api *Client, params ListRemoteFilesParameters) ([]RemoteFile, error) {
+			return api.ListRemoteFilesContext(t.Context(), params)
+		}},
+	}
+	for _, method := range methods {
+		t.Run(method.name, func(t *testing.T) {
+			for _, initialCursor := range []string{"", "start+/="} {
+				t.Run("cursor="+initialCursor, func(t *testing.T) {
+					cursors := []string{initialCursor, "next+/=", "last+/="}
+					responses := []string{
+						`{"ok":true,"files":[{"id":"F1"}],"response_metadata":{"next_cursor":"next+/="}}`,
+						`{"ok":true,"files":[],"response_metadata":{"next_cursor":"last+/="}}`,
+						`{"ok":true,"files":[{"id":"F2"},{"id":"F3"}],"response_metadata":{"next_cursor":""}}`,
+					}
+					var requests int
+					api := New("testing-token", OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
+						if requests >= len(responses) {
+							return nil, errors.New("unexpected extra remote-file list request")
+						}
+						if err := r.ParseForm(); err != nil {
+							return nil, err
+						}
+						want := url.Values{
+							"token": {"testing-token"}, "channel": {"C123"}, "limit": {"2"}, "ts_from": {"12"}, "ts_to": {"34"},
+						}
+						if cursors[requests] != "" {
+							want.Set("cursor", cursors[requests])
+						}
+						assert.Equal(t, "/api/files.remote.list", r.URL.Path)
+						assert.Equal(t, want, r.PostForm)
+						body := responses[requests]
+						requests++
+						return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(body))}, nil
+					})))
+					files, err := method.call(api, ListRemoteFilesParameters{
+						Channel: "C123", Cursor: initialCursor, Limit: 2, TimestampFrom: 12, TimestampTo: 34,
+					})
+					require.NoError(t, err)
+					ids := make([]string, len(files))
+					for i, file := range files {
+						ids[i] = file.ID
+					}
+					assert.Equal(t, []string{"F1", "F2", "F3"}, ids)
+					assert.Equal(t, len(responses), requests)
+				})
+			}
+		})
+	}
+}
+
+func TestListRemoteFilesPaginationError(t *testing.T) {
+	transportErr := errors.New("transport failed")
+	for _, test := range []struct {
+		name              string
+		body              string
+		err               error
+		want              error
+		cancelOnFirstPage bool
+	}{
+		{name: "Slack error", body: `{"ok":false,"error":"invalid_cursor"}`, want: errors.New("invalid_cursor")},
+		{name: "transport error", err: transportErr, want: transportErr},
+		{name: "context cancellation", want: context.Canceled, cancelOnFirstPage: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+			var requests int
+			api := New("testing-token", OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
+				requests++
+				if requests == 1 {
+					if test.cancelOnFirstPage {
+						cancel()
+					}
+					return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(
+						`{"ok":true,"files":[{"id":"F1"}],"response_metadata":{"next_cursor":"next"}}`,
+					))}, nil
+				}
+				if err := r.Context().Err(); err != nil {
+					return nil, err
+				}
+				if test.err != nil {
+					return nil, test.err
+				}
+				return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(test.body))}, nil
+			})))
+			files, err := api.ListRemoteFilesContext(ctx, ListRemoteFilesParameters{})
+			require.ErrorContains(t, err, test.want.Error())
+			if test.err != nil {
+				require.ErrorIs(t, err, test.err)
+			}
+			if test.cancelOnFirstPage {
+				require.ErrorIs(t, err, context.Canceled)
+			}
+			assert.Nil(t, files)
+			assert.Equal(t, 2, requests)
 		})
 	}
 }

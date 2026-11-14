@@ -87,6 +87,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `response_metadata.warnings`.
 - Stop slacktest from dropping queued WebSocket messages after a client reconnects. The
   writer for a closed connection no longer takes messages meant for the new one.
+- Follow continuation cursors in `ListRemoteFiles` and `ListRemoteFilesContext`
+  instead of returning only the first page. `Limit` applies to each page, and
+  listing all matching files may now make multiple requests.
 
 ## [0.36.0] - 2026-11-14
 
