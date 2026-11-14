@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `AdminUsersSetAdmin`, `AdminUsersSetOwner`, and `AdminUsersSetRegular`, with
+  `Context` variants, to change a user's account type on a workspace or Enterprise org.
+  With an org ID, `admin.users.setRegular` also removes the user's Workspace Owner
+  roles ([Slack changelog](https://docs.slack.dev/changelog/2026/11/13/admin-users-set-regular-org-demotion)).
+  The existing `SetRegular` still calls the legacy `users.admin.setRegular` endpoint.
+- Add `AdminUsersGetExpiration` and `AdminUsersSetExpiration`, with `Context`
+  variants, to read and set when a guest account is disabled.
+  `AdminUsersGetExpirationOptionTargetTeam` and `AdminUsersSetExpirationOptionTeamID`
+  select a workspace in the org. Slack API reference:
+  [`admin.users.getExpiration`](https://docs.slack.dev/reference/methods/admin.users.getExpiration),
+  [`admin.users.setExpiration`](https://docs.slack.dev/reference/methods/admin.users.setExpiration).
+
 ### Changed
 
 - **Breaking:** `slack.GroupRenameEvent` gains `EventTimestamp string` for
