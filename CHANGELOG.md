@@ -10,9 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking changes
 
 > [!WARNING]
-> **`slack.AssistantSearchContextResponse` and `slack.GetConversationHistoryResponse`
-> change how they expose the next page cursor.** `resp.ResponseMetadata.NextCursor` and
-> `resp.ResponseMetaData.NextCursor` no longer compile; use `resp.ResponseMetadata.Cursor`.
+> **Five response types drop their own response metadata fields and use
+> `SlackResponse.ResponseMetadata`.** `resp.ResponseMetadata.NextCursor` on
+> `slack.AssistantSearchContextResponse` and `resp.ResponseMetaData.NextCursor` on
+> `slack.GetConversationHistoryResponse` no longer compile; use
+> `resp.ResponseMetadata.Cursor`. `slack.DialogOpenResponse` loses its
+> `DialogResponseMetadata` field, and the `slack.DialogResponseMetadata` type is removed.
+> Struct literals of `slack.AdminRolesListAssignmentsResponse` and `slack.LoginResponse`
+> that set `ResponseMetadata`, and promoted fields such as `LoginResponse.Cursor`, no
+> longer compile.
 >
 > See the **Breaking** entries under Changed for migration steps.
 
@@ -38,6 +44,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   literals, set the cursor with
   `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
   Marshaling now also writes the `messages` and `warnings` keys in `response_metadata`.
+- **Breaking:** `slack.DialogOpenResponse` drops its `DialogResponseMetadata` field and
+  uses `ResponseMetadata` from `SlackResponse`; the `slack.DialogResponseMetadata` type
+  is removed. Errors from `OpenDialog` now keep Slack's diagnostic messages in
+  `SlackErrorResponse.ResponseMetadata.Messages`; the error string is unchanged.
+  `OptionOnWarning` now receives `response_metadata.warnings`.
+  Replace `resp.DialogResponseMetadata.Messages` with `resp.ResponseMetadata.Messages`.
+  Marshaling now also writes the `next_cursor` and `warnings` keys in
+  `response_metadata`.
+- **Breaking:** `slack.AdminRolesListAssignmentsResponse` and `slack.LoginResponse` drop
+  their own `ResponseMetadata` field and use the one from `SlackResponse`. Errors from
+  `AdminRolesListAssignments` and `GetAccessLogs` now keep Slack's diagnostic messages,
+  and `OptionOnWarning` now receives `response_metadata.warnings`.
+  `resp.ResponseMetadata.Cursor` still compiles. On `LoginResponse`, replace the
+  promoted `resp.Cursor`, `resp.Messages`, and `resp.Warnings` with
+  `resp.ResponseMetadata.Cursor`, `resp.ResponseMetadata.Messages`, and
+  `resp.ResponseMetadata.Warnings`. In struct literals of either type, set metadata with
+  `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
 
 ### Deprecated
 

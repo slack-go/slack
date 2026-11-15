@@ -2,6 +2,7 @@ package slack
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -349,4 +350,34 @@ func ExampleDialog() {
 	fmt.Println(*dialog)
 	// Output:
 	// {trigger_xyz callback_xyz  Dialog_title Send false []}
+}
+
+func TestOpenDialogContextErrorMetadata(t *testing.T) {
+	api := newResponseMetadataTestClient(t, "/dialog.open", `{
+		"ok": false,
+		"error": "validation_errors",
+		"response_metadata": {
+			"messages": ["[ERROR] missing required field: title [json-pointer:/dialog/title]"]
+		}
+	}`)
+	err := api.OpenDialogContext(t.Context(), "TXXXXXXXX", Dialog{})
+	slackErr, ok := errors.AsType[SlackErrorResponse](err)
+	require.True(t, ok)
+	assert.Equal(t, "validation_errors\n[ERROR] missing required field: title [json-pointer:/dialog/title]", slackErr.Err)
+	assert.Equal(t, []string{"[ERROR] missing required field: title [json-pointer:/dialog/title]"}, slackErr.ResponseMetadata.Messages)
+}
+
+func TestOpenDialogContextWarnings(t *testing.T) {
+	var warnings []string
+	api := newResponseMetadataTestClient(t, "/dialog.open", `{
+		"ok": true,
+		"warning": "superfluous_charset",
+		"response_metadata": {
+			"warnings": ["superfluous_charset"]
+		}
+	}`, OptionOnWarning(func(_ string, _ any, w *Warning) {
+		warnings = w.Warnings
+	}))
+	require.NoError(t, api.OpenDialogContext(t.Context(), "TXXXXXXXX", Dialog{}))
+	assert.Equal(t, []string{"superfluous_charset"}, warnings)
 }

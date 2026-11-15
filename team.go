@@ -56,7 +56,6 @@ type TeamProfileField struct {
 type LoginResponse struct {
 	Logins []Login `json:"logins"`
 	SlackResponse
-	ResponseMetadata `json:"response_metadata"`
 }
 
 type Login struct {

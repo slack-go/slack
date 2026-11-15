@@ -117,8 +117,7 @@ type RoleAssignment struct {
 // AdminRolesListAssignmentsResponse represents the response from admin.roles.listAssignments.
 type AdminRolesListAssignmentsResponse struct {
 	SlackResponse
-	RoleAssignments  []RoleAssignment `json:"role_assignments"`
-	ResponseMetadata ResponseMetadata `json:"response_metadata"`
+	RoleAssignments []RoleAssignment `json:"role_assignments"`
 }
 
 // AdminRolesListAssignments lists assignments for roles.

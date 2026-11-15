@@ -165,3 +165,25 @@ func mockAdminRolesRemoveAssignmentsHandler(t *testing.T) func(rw http.ResponseW
 		_, _ = rw.Write(response)
 	}
 }
+
+var cursorAdminRoleCalls = []responseMetadataCall{
+	{
+		name: "AdminRolesListAssignments",
+		path: "/admin.roles.listAssignments",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			resp, err := api.AdminRolesListAssignments(ctx)
+			if err != nil {
+				return "", err
+			}
+			return resp.ResponseMetadata.Cursor, nil
+		},
+	},
+}
+
+func TestAdminRolesListAssignmentsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, cursorAdminRoleCalls)
+}
+
+func TestAdminRolesListAssignmentsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorAdminRoleCalls)
+}

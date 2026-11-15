@@ -65,12 +65,6 @@ type DialogSubmissionCallback struct {
 // DialogOpenResponse response from `dialog.open`
 type DialogOpenResponse struct {
 	SlackResponse
-	DialogResponseMetadata DialogResponseMetadata `json:"response_metadata"`
-}
-
-// DialogResponseMetadata lists the error messages
-type DialogResponseMetadata struct {
-	Messages []string `json:"messages"`
 }
 
 // DialogInputValidationError is an error when user inputs incorrect value to form from within a dialog
@@ -112,9 +106,9 @@ func (api *Client) OpenDialogContext(ctx context.Context, triggerID string, dial
 		return err
 	}
 
-	if len(response.DialogResponseMetadata.Messages) > 0 {
+	if len(response.ResponseMetadata.Messages) > 0 {
 		response.Ok = false
-		response.Error += "\n" + strings.Join(response.DialogResponseMetadata.Messages, "\n")
+		response.Error += "\n" + strings.Join(response.ResponseMetadata.Messages, "\n")
 	}
 
 	return response.Err()

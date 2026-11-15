@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -226,4 +227,23 @@ func TestGetAccessLogs(t *testing.T) {
 	if nextCursor != "dGVhbV9pZDo5MDAwMTcw" {
 		t.Fatalf("Expected cursor %q, got %q", "dGVhbV9pZDo5MDAwMTcw", nextCursor)
 	}
+}
+
+var cursorTeamCalls = []responseMetadataCall{
+	{
+		name: "GetAccessLogs",
+		path: "/team.accessLogs",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.GetAccessLogsContext(ctx, NewAccessLogParameters())
+			return cursor, err
+		},
+	},
+}
+
+func TestTeamMethodsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, cursorTeamCalls)
+}
+
+func TestTeamMethodsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorTeamCalls)
 }
