@@ -53,8 +53,8 @@ func main() {
 	printResults(resp)
 
 	// Paginate using cursor
-	if resp.ResponseMetadata.NextCursor != "" {
-		fmt.Printf("\nNext page cursor: %s\n", resp.ResponseMetadata.NextCursor)
+	if resp.ResponseMetadata.Cursor != "" {
+		fmt.Printf("\nNext page cursor: %s\n", resp.ResponseMetadata.Cursor)
 	}
 
 	// Advanced search: keyword-only, sorted by time, with context messages

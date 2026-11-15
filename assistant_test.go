@@ -101,7 +101,10 @@ func assistantSearchContextHandler(rw http.ResponseWriter, r *http.Request) {
 
 	if query != "" {
 		resp, _ := json.Marshal(&AssistantSearchContextResponse{
-			SlackResponse: SlackResponse{Ok: true},
+			SlackResponse: SlackResponse{
+				Ok:               true,
+				ResponseMetadata: ResponseMetadata{Cursor: "next_cursor_value"},
+			},
 			Results: AssistantSearchContextResults{
 				Messages: []AssistantSearchContextMessage{
 					{
@@ -114,11 +117,6 @@ func assistantSearchContextHandler(rw http.ResponseWriter, r *http.Request) {
 						Permalink:    "https://example.slack.com/archives/C1234567890/p1234567890123456",
 					},
 				},
-			},
-			ResponseMetadata: struct {
-				NextCursor string `json:"next_cursor"`
-			}{
-				NextCursor: "next_cursor_value",
 			},
 		})
 		rw.Write(resp)
@@ -181,8 +179,8 @@ func TestSearchAssistantContext(t *testing.T) {
 		t.Fatalf("Expected IsAuthorBot to be false, got %v", message.IsAuthorBot)
 	}
 
-	if response.ResponseMetadata.NextCursor != "next_cursor_value" {
-		t.Fatalf("Expected NextCursor to be 'next_cursor_value', got %s", response.ResponseMetadata.NextCursor)
+	if response.ResponseMetadata.Cursor != "next_cursor_value" {
+		t.Fatalf("Expected Cursor to be 'next_cursor_value', got %s", response.ResponseMetadata.Cursor)
 	}
 }
 
@@ -334,8 +332,8 @@ func TestSearchAssistantContextExpandedResponse(t *testing.T) {
 	}
 
 	// Verify cursor
-	if response.ResponseMetadata.NextCursor != "cursor123" {
-		t.Errorf("Expected NextCursor 'cursor123', got %q", response.ResponseMetadata.NextCursor)
+	if response.ResponseMetadata.Cursor != "cursor123" {
+		t.Errorf("Expected Cursor 'cursor123', got %q", response.ResponseMetadata.Cursor)
 	}
 }
 
@@ -388,4 +386,50 @@ func TestGetAssistantSearchInfoError(t *testing.T) {
 	assert.Equal(t, "missing_scope", slackErr.Err)
 	require.NotNil(t, response)
 	assert.False(t, response.IsAISearchEnabled)
+}
+
+func newAssistantSearchContextTestClient(t *testing.T, body string) *Client {
+	t.Helper()
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/assistant.search.context", r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(body))
+	}))
+	t.Cleanup(ts.Close)
+	return New("testing-token", OptionAPIURL(ts.URL+"/"))
+}
+
+func TestSearchAssistantContextErrorMetadata(t *testing.T) {
+	api := newAssistantSearchContextTestClient(t, `{
+		"ok": false,
+		"error": "invalid_arguments",
+		"response_metadata": {
+			"messages": ["[ERROR] must provide a valid sort value [json-pointer:/sort]"]
+		}
+	}`)
+
+	_, err := api.SearchAssistantContext(AssistantSearchContextParameters{Query: "test", Sort: "oldest"})
+	var slackErr SlackErrorResponse
+	require.ErrorAs(t, err, &slackErr)
+	assert.Equal(t, "invalid_arguments", slackErr.Err)
+	assert.Equal(t, []string{"[ERROR] must provide a valid sort value [json-pointer:/sort]"}, slackErr.ResponseMetadata.Messages)
+}
+
+func TestSearchAssistantContextResponseMetadata(t *testing.T) {
+	api := newAssistantSearchContextTestClient(t, `{
+		"ok": true,
+		"warning": "superfluous_charset",
+		"results": {"messages": []},
+		"response_metadata": {
+			"next_cursor": "Q1VSUkVOVF9QQUdFOjI=",
+			"warnings": ["superfluous_charset"]
+		}
+	}`)
+
+	response, err := api.SearchAssistantContext(AssistantSearchContextParameters{Query: "test"})
+	require.NoError(t, err)
+	assert.Equal(t, ResponseMetadata{
+		Cursor:   "Q1VSUkVOVF9QQUdFOjI=",
+		Warnings: []string{"superfluous_charset"},
+	}, response.ResponseMetadata)
 }

@@ -7,18 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+> [!WARNING]
+> **`slack.AssistantSearchContextResponse` changes how it exposes the next page cursor.**
+> `resp.ResponseMetadata.NextCursor` no longer compiles; use `resp.ResponseMetadata.Cursor`.
+>
+> See the **Breaking** entry under Changed for migration steps.
+
 ### Added
 
 - Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
 
+### Changed
+
+- **Breaking:** `slack.AssistantSearchContextResponse` drops its own `ResponseMetadata`
+  field and uses the one from `SlackResponse`. Errors now keep Slack's diagnostic
+  messages, and successful responses keep warnings. Replace
+  `resp.ResponseMetadata.NextCursor` with `resp.ResponseMetadata.Cursor`. In struct
+  literals, set the cursor with
+  `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
+  Marshaling now also writes the `messages` and `warnings` keys in `response_metadata`.
+
 ### Deprecated
 
 - `Search`, `SearchFiles`, and `SearchMessages`, with their `Context` variants.
   Slack marks `search.all`, `search.files`, and `search.messages` as legacy and
   recommends Real-time Search. Use `SearchAssistantContext` with `ContentTypes`
-  and page with `Cursor` and `ResponseMetadata.NextCursor`. The methods keep
+  and page with `Cursor` and `ResponseMetadata.Cursor`. The methods keep
   working.
 
 ### Fixed

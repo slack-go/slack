@@ -120,13 +120,11 @@ type AssistantSearchContextResults struct {
 	Channels []AssistantSearchContextChannel `json:"channels,omitempty"`
 }
 
-// AssistantSearchContextResponse is the response from assistant.search.context
+// AssistantSearchContextResponse is the response from assistant.search.context.
+// The next page cursor is in ResponseMetadata.Cursor.
 type AssistantSearchContextResponse struct {
 	SlackResponse
-	Results          AssistantSearchContextResults `json:"results"`
-	ResponseMetadata struct {
-		NextCursor string `json:"next_cursor"`
-	} `json:"response_metadata"`
+	Results AssistantSearchContextResults `json:"results"`
 }
 
 // AssistantThreadSetSuggestedPrompts sets the suggested prompts for a thread
@@ -275,14 +273,18 @@ func (api *Client) SetAssistantThreadsTitleContext(ctx context.Context, params A
 
 }
 
-// SearchAssistantContext searches messages across the Slack organization
-// @see https://api.slack.com/methods/assistant.search.context
+// SearchAssistantContext searches messages, files, and channels across the
+// Slack organization using Real-time Search.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/assistant.search.context
 func (api *Client) SearchAssistantContext(params AssistantSearchContextParameters) (*AssistantSearchContextResponse, error) {
 	return api.SearchAssistantContextContext(context.Background(), params)
 }
 
-// SearchAssistantContextContext searches messages across the Slack organization with a custom context
-// @see https://api.slack.com/methods/assistant.search.context
+// SearchAssistantContextContext searches with a custom context. Bot tokens
+// must set ActionToken; user tokens do not need it. Pass
+// ResponseMetadata.Cursor as Cursor to get the next page. An empty
+// cursor means there are no more pages.
 func (api *Client) SearchAssistantContextContext(ctx context.Context, params AssistantSearchContextParameters) (*AssistantSearchContextResponse, error) {
 	values := url.Values{
 		"token": {api.token},
