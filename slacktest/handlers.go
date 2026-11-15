@@ -343,7 +343,19 @@ func rtmStartHandler(w http.ResponseWriter, r *http.Request) {
 func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	Websocket(func(c *websocket.Conn) {
 		serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
-		go handlePendingMessages(c, serverAddr)
+		done := make(chan struct{})
+		writerDone := make(chan struct{})
+		go func() {
+			defer close(writerDone)
+			handlePendingMessages(c, serverAddr, done)
+		}()
+		// Stop the writer before returning so a reconnecting client gets the next
+		// message. Closing c unblocks a write in progress.
+		defer func() {
+			close(done)
+			_ = c.Close()
+			<-writerDone
+		}()
 		for {
 			var (
 				err   error
