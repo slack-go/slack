@@ -24,10 +24,22 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
-      - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
       - name: run test
         run: go test -v -race ./...
+
+  vulncheck:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        go:
+          - "1.26"
+          - "1.27"
+    name: govulncheck go-${{ matrix.go }}
+    steps:
+      - uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: ${{ matrix.go }}
+          go-package: ./...
 
   lint:
     runs-on: ubuntu-24.04
