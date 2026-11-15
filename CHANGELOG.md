@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
+  semantic search enabled, via
+  [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
+
 ## [0.36.0] - 2026-11-14
 
 ### Breaking changes

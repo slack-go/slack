@@ -375,3 +375,30 @@ func (api *Client) SearchAssistantContextContext(ctx context.Context, params Ass
 
 	return response, response.Err()
 }
+
+// AssistantSearchInfoResponse is the response from assistant.search.info.
+type AssistantSearchInfoResponse struct {
+	SlackResponse
+	// IsAISearchEnabled reports whether semantic search is available on the team.
+	IsAISearchEnabled bool `json:"is_ai_search_enabled"`
+}
+
+// GetAssistantSearchInfo gets the search capabilities of the token's team.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/assistant.search.info
+func (api *Client) GetAssistantSearchInfo() (*AssistantSearchInfoResponse, error) {
+	return api.GetAssistantSearchInfoContext(context.Background())
+}
+
+// GetAssistantSearchInfoContext gets search capabilities with a custom context.
+func (api *Client) GetAssistantSearchInfoContext(ctx context.Context) (*AssistantSearchInfoResponse, error) {
+	values := url.Values{
+		"token": {api.token},
+	}
+
+	response := &AssistantSearchInfoResponse{}
+	if err := api.postMethod(ctx, "assistant.search.info", values, response); err != nil {
+		return nil, err
+	}
+	return response, response.Err()
+}

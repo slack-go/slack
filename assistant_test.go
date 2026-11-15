@@ -1,9 +1,15 @@
 package slack
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAssistantThreadsSuggestedPrompts(t *testing.T) {
@@ -331,4 +337,55 @@ func TestSearchAssistantContextExpandedResponse(t *testing.T) {
 	if response.ResponseMetadata.NextCursor != "cursor123" {
 		t.Errorf("Expected NextCursor 'cursor123', got %q", response.ResponseMetadata.NextCursor)
 	}
+}
+
+func newAssistantSearchInfoTestClient(t *testing.T, body string) *Client {
+	t.Helper()
+	// The handler runs on the server goroutine, so it uses assert, not require.
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/assistant.search.info", r.URL.Path)
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, url.Values{"token": {"testing-token"}}, r.PostForm)
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(body))
+	}))
+	t.Cleanup(ts.Close)
+	return New("testing-token", OptionAPIURL(ts.URL+"/"))
+}
+
+func TestGetAssistantSearchInfo(t *testing.T) {
+	ctx := context.Background()
+	tests := []struct {
+		name string
+		call func(*Client) (*AssistantSearchInfoResponse, error)
+	}{
+		{"GetAssistantSearchInfo", func(api *Client) (*AssistantSearchInfoResponse, error) {
+			return api.GetAssistantSearchInfo()
+		}},
+		{"GetAssistantSearchInfoContext", func(api *Client) (*AssistantSearchInfoResponse, error) {
+			return api.GetAssistantSearchInfoContext(ctx)
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			api := newAssistantSearchInfoTestClient(t, `{"ok": true, "is_ai_search_enabled": true}`)
+
+			response, err := tt.call(api)
+			require.NoError(t, err)
+			assert.True(t, response.IsAISearchEnabled)
+		})
+	}
+}
+
+func TestGetAssistantSearchInfoError(t *testing.T) {
+	api := newAssistantSearchInfoTestClient(t, `{"ok": false, "error": "missing_scope"}`)
+
+	response, err := api.GetAssistantSearchInfo()
+	var slackErr SlackErrorResponse
+	require.ErrorAs(t, err, &slackErr)
+	assert.Equal(t, "missing_scope", slackErr.Err)
+	require.NotNil(t, response)
+	assert.False(t, response.IsAISearchEnabled)
 }
