@@ -20,17 +20,31 @@ func (sts *Server) queueForWebsocket(s, hubname string) {
 	}
 }
 
-func handlePendingMessages(c *websocket.Conn, hubname string) {
+// handlePendingMessages writes queued messages to c until done is closed. Every
+// connection's writer receives from the same channel, so a writer that outlives its
+// connection would take messages meant for a newer one.
+func handlePendingMessages(c *websocket.Conn, hubname string, done <-chan struct{}) {
 	channel, err := getHubForServer(hubname)
 	if err != nil {
 		log.Printf("Unable to get server's channels: %s", err.Error())
 		return
 	}
-	for m := range channel.sent {
-		err := c.WriteMessage(websocket.TextMessage, []byte(m))
-		if err != nil {
-			log.Printf("error writing message to websocket: %s", err.Error())
-			continue
+	for {
+		// select picks randomly among ready cases, so check done first to leave
+		// waiting messages for the next connection.
+		select {
+		case <-done:
+			return
+		default:
+		}
+		select {
+		case <-done:
+			return
+		case m := <-channel.sent:
+			if err := c.WriteMessage(websocket.TextMessage, []byte(m)); err != nil {
+				log.Printf("error writing message to websocket: %s", err.Error())
+				return
+			}
 		}
 	}
 }

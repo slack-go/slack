@@ -2,11 +2,58 @@ package slacktest
 
 import (
 	"context"
+	"net/http"
 	"testing"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestWebsocketReconnectReceivesNextMessage(t *testing.T) {
+	var s *Server
+	disconnected := make(chan struct{}, 2)
+	s = NewTestServer(func(c Customize) {
+		c.Handle("/ws", func(w http.ResponseWriter, r *http.Request) {
+			s.wsHandler(w, r)
+			disconnected <- struct{}{}
+		})
+	})
+	t.Cleanup(s.Stop)
+	s.Start()
+
+	first := dialTestWebsocket(t, s)
+	s.SendToWebsocket(`{"type":"hello"}`)
+	requireWebsocketMessage(t, first, `{"type":"hello"}`)
+	require.NoError(t, first.WriteMessage(websocket.CloseMessage,
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")))
+	select {
+	case <-disconnected:
+	case <-time.After(5 * time.Second):
+		t.Fatal("server did not close the first connection")
+	}
+
+	second := dialTestWebsocket(t, s)
+	s.SendToWebsocket(`{"type":"goodbye"}`)
+	requireWebsocketMessage(t, second, `{"type":"goodbye"}`)
+}
+
+func dialTestWebsocket(t *testing.T, s *Server) *websocket.Conn {
+	t.Helper()
+	c, _, err := websocket.DefaultDialer.Dial(s.GetWSURL(), nil)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = c.Close() })
+	return c
+}
+
+func requireWebsocketMessage(t *testing.T, c *websocket.Conn, want string) {
+	t.Helper()
+	require.NoError(t, c.SetReadDeadline(time.Now().Add(5*time.Second)))
+	_, got, err := c.ReadMessage()
+	require.NoError(t, err)
+	assert.Equal(t, want, string(got))
+}
 
 func TestGenerateDefaultRTMInfo(t *testing.T) {
 	wsurl := "ws://127.0.0.1:5555/ws"
