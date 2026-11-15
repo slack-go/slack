@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
 
+### Fixed
+
+- Preserve Slack response metadata in channel API errors, including diagnostic
+  messages returned by `conversations.create`.
+
 ## [0.36.0] - 2026-11-14
 
 ### Breaking changes

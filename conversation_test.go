@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -740,6 +741,55 @@ func TestCreateConversation(t *testing.T) {
 	if channel == nil {
 		t.Error("channel should not be nil")
 		return
+	}
+}
+
+func TestCreateConversationContextParameters(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		assert.Equal(t, "/conversations.create", r.URL.Path)
+		if !assert.NoError(t, r.ParseForm()) {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		assert.Equal(t, "testing-token", r.PostForm.Get("token"))
+		assert.Equal(t, "a-new-history-of-the-world", r.PostForm.Get("name"))
+		assert.Equal(t, "T0123456789", r.PostForm.Get("team_id"))
+		assert.Equal(t, "true", r.PostForm.Get("is_private"))
+		rw.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(rw, `{"ok":true,"channel":{"id":"C0123456789","name":"a-new-history-of-the-world","is_private":true}}`)
+	}))
+	t.Cleanup(server.Close)
+	api := New("testing-token", OptionAPIURL(server.URL+"/"))
+	channel, err := api.CreateConversationContext(t.Context(), CreateConversationParams{
+		ChannelName: "a-new-history-of-the-world",
+		IsPrivate:   true,
+		TeamID:      "T0123456789",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, channel)
+	assert.Equal(t, "C0123456789", channel.ID)
+	assert.Equal(t, "a-new-history-of-the-world", channel.Name)
+	assert.True(t, channel.IsPrivate)
+}
+
+func TestCreateConversationContextErrorMetadata(t *testing.T) {
+	for _, code := range []string{"missing_argument", "fatal_error"} {
+		t.Run(code, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+				rw.Header().Set("Content-Type", "application/json")
+				fmt.Fprintf(rw, `{"ok":false,"error":%q,"response_metadata":{"messages":["diagnostic detail"],"warnings":["diagnostic warning"]}}`, code)
+			}))
+			t.Cleanup(server.Close)
+			api := New("testing-token", OptionAPIURL(server.URL+"/"))
+			channel, err := api.CreateConversationContext(t.Context(), CreateConversationParams{ChannelName: "example"})
+			assert.Nil(t, channel)
+			require.EqualError(t, err, code)
+			slackErr, ok := errors.AsType[SlackErrorResponse](err)
+			require.True(t, ok)
+			assert.Equal(t, []string{"diagnostic detail"}, slackErr.ResponseMetadata.Messages)
+			assert.Equal(t, []string{"diagnostic warning"}, slackErr.ResponseMetadata.Warnings)
+		})
 	}
 }
 

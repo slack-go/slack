@@ -13,7 +13,6 @@ type channelResponseFull struct {
 	NotInChannel bool      `json:"not_in_channel"`
 	History
 	SlackResponse
-	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
 // Channel contains information about the channel
