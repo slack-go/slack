@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
 
+### Deprecated
+
+- `Search`, `SearchFiles`, and `SearchMessages`, with their `Context` variants.
+  Slack marks `search.all`, `search.files`, and `search.messages` as legacy and
+  recommends Real-time Search. Use `SearchAssistantContext` with `ContentTypes`
+  and page with `Cursor` and `ResponseMetadata.NextCursor`. The methods keep
+  working.
+
 ### Fixed
 
 - Preserve Slack response metadata in channel API errors, including diagnostic
