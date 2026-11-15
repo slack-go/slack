@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -486,12 +487,10 @@ func getUsersInConversation(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
-		Members          []string         `json:"members"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Members []string `json:"members"`
 	}{
-		SlackResponse:    SlackResponse{Ok: true},
-		Members:          getTestMembers(),
-		ResponseMetaData: responseMetaData{NextCursor: ""},
+		SlackResponse: SlackResponse{Ok: true},
+		Members:       getTestMembers(),
 	})
 	rw.Write(response)
 }
@@ -902,10 +901,7 @@ func getConversationRepliesHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
-		HasMore          bool `json:"has_more"`
-		ResponseMetaData struct {
-			NextCursor string `json:"next_cursor"`
-		} `json:"response_metadata"`
+		HasMore  bool      `json:"has_more"`
 		Messages []Message `json:"messages"`
 	}{
 		SlackResponse: SlackResponse{Ok: true},
@@ -932,9 +928,6 @@ func getConversationsHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
 		SlackResponse
-		ResponseMetaData struct {
-			NextCursor string `json:"next_cursor"`
-		} `json:"response_metadata"`
 		Channels []Channel `json:"channels"`
 	}{
 		SlackResponse: SlackResponse{Ok: true},
@@ -1013,11 +1006,7 @@ func TestOpenConversation(t *testing.T) {
 func joinConversationHandler(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(struct {
-		Channel          *Channel `json:"channel"`
-		Warning          string   `json:"warning"`
-		ResponseMetaData *struct {
-			Warnings []string `json:"warnings"`
-		} `json:"response_metadata"`
+		Channel *Channel `json:"channel"`
 		SlackResponse
 	}{
 		SlackResponse: SlackResponse{Ok: true}})
@@ -1197,16 +1186,13 @@ func getConversationPagesWithRateLimitErrors(pageCount int64) func(rw http.Respo
 			rw.Write(response)
 			return
 		}
+		sresp.ResponseMetadata.Cursor = strconv.Itoa(int(cpage))
 		response, _ := json.Marshal(struct {
 			SlackResponse
-			Channels         []Channel        `json:"channels"`
-			ResponseMetaData responseMetaData `json:"response_metadata"`
+			Channels []Channel `json:"channels"`
 		}{
 			SlackResponse: sresp,
 			Channels:      channels,
-			ResponseMetaData: responseMetaData{
-				NextCursor: strconv.Itoa(int(cpage)),
-			},
 		})
 		rw.Write(response)
 	}
@@ -1269,4 +1255,154 @@ func TestGetAllConversationsReturnsServerError(t *testing.T) {
 	if err.Error() != expectedErr {
 		t.Errorf("Expected: %s. Got: %s", expectedErr, err.Error())
 	}
+}
+
+func newResponseMetadataTestClient(t *testing.T, path, body string, options ...Option) *Client {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(rw, body)
+	}))
+	t.Cleanup(server.Close)
+	return New("testing-token", append([]Option{OptionAPIURL(server.URL + "/")}, options...)...)
+}
+
+type responseMetadataCall struct {
+	name string
+	path string
+	call func(context.Context, *Client) (nextCursor string, err error)
+}
+
+var cursorConversationCalls = []responseMetadataCall{
+	{
+		name: "GetUsersInConversation",
+		path: "/conversations.members",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.GetUsersInConversationContext(ctx, &GetUsersInConversationParameters{ChannelID: "C0123456789"})
+			return cursor, err
+		},
+	},
+	{
+		name: "GetConversationsForUser",
+		path: "/users.conversations",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.GetConversationsForUserContext(ctx, &GetConversationsForUserParameters{})
+			return cursor, err
+		},
+	},
+	{
+		name: "GetConversationReplies",
+		path: "/conversations.replies",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, _, cursor, err := api.GetConversationRepliesContext(ctx, &GetConversationRepliesParameters{ChannelID: "C0123456789", Timestamp: "1700000000.000100"})
+			return cursor, err
+		},
+	},
+	{
+		name: "GetConversations",
+		path: "/conversations.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.GetConversationsContext(ctx, &GetConversationsParameters{})
+			return cursor, err
+		},
+	},
+	{
+		name: "GetConversationsPaginated",
+		path: "/conversations.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			p, err := api.GetConversationsPaginated().Next(ctx)
+			if err != nil {
+				return "", err
+			}
+			return p.previousResp.Cursor, nil
+		},
+	},
+	{
+		name: "GetConversationHistory",
+		path: "/conversations.history",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			resp, err := api.GetConversationHistoryContext(ctx, &GetConversationHistoryParameters{ChannelID: "C0123456789"})
+			if err != nil {
+				return "", err
+			}
+			return resp.ResponseMetadata.Cursor, nil
+		},
+	},
+}
+
+func TestConversationMethodsErrorMetadata(t *testing.T) {
+	calls := append(slices.Clone(cursorConversationCalls),
+		responseMetadataCall{
+			name: "GetAllConversations",
+			path: "/conversations.list",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				_, err := api.GetAllConversationsContext(ctx)
+				return "", err
+			},
+		},
+		responseMetadataCall{
+			name: "JoinConversation",
+			path: "/conversations.join",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				_, _, _, err := api.JoinConversationContext(ctx, "C0123456789")
+				return "", err
+			},
+		},
+	)
+	for _, tc := range calls {
+		t.Run(tc.name, func(t *testing.T) {
+			api := newResponseMetadataTestClient(t, tc.path, `{
+				"ok": false,
+				"error": "invalid_arguments",
+				"response_metadata": {
+					"messages": ["[ERROR] invalid cursor [json-pointer:/cursor]"]
+				}
+			}`)
+			_, err := tc.call(t.Context(), api)
+			require.EqualError(t, err, "invalid_arguments")
+			slackErr, ok := errors.AsType[SlackErrorResponse](err)
+			require.True(t, ok)
+			assert.Equal(t, []string{"[ERROR] invalid cursor [json-pointer:/cursor]"}, slackErr.ResponseMetadata.Messages)
+		})
+	}
+}
+
+func TestConversationMethodsResponseMetadata(t *testing.T) {
+	for _, tc := range cursorConversationCalls {
+		t.Run(tc.name, func(t *testing.T) {
+			var warnings []string
+			api := newResponseMetadataTestClient(t, tc.path, `{
+				"ok": true,
+				"warning": "superfluous_charset",
+				"response_metadata": {
+					"next_cursor": "dGVhbTpDMDYxRkE1UEI=",
+					"warnings": ["superfluous_charset"]
+				}
+			}`, OptionOnWarning(func(_ string, _ any, w *Warning) {
+				warnings = w.Warnings
+			}))
+			cursor, err := tc.call(t.Context(), api)
+			require.NoError(t, err)
+			assert.Equal(t, "dGVhbTpDMDYxRkE1UEI=", cursor)
+			assert.Equal(t, []string{"superfluous_charset"}, warnings)
+		})
+	}
+}
+
+func TestJoinConversationContextWarnings(t *testing.T) {
+	api := newResponseMetadataTestClient(t, "/conversations.join", `{
+		"ok": true,
+		"channel": {"id": "C0123456789"},
+		"warning": "already_in_channel",
+		"response_metadata": {
+			"warnings": ["already_in_channel"]
+		}
+	}`)
+	channel, warning, warnings, err := api.JoinConversationContext(t.Context(), "C0123456789")
+	require.NoError(t, err)
+	require.NotNil(t, channel)
+	assert.Equal(t, "C0123456789", channel.ID)
+	assert.Equal(t, "already_in_channel", warning)
+	assert.Equal(t, []string{"already_in_channel"}, warnings)
 }

@@ -1122,8 +1122,7 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 		values.Add("oldest", params.Oldest)
 	}
 	response := struct {
-		Messages         []ScheduledMessage `json:"scheduled_messages"`
-		ResponseMetaData responseMetaData   `json:"response_metadata"`
+		Messages []ScheduledMessage `json:"scheduled_messages"`
 		SlackResponse
 	}{}
 
@@ -1132,7 +1131,7 @@ func (api *Client) GetScheduledMessagesContext(ctx context.Context, params *GetS
 		return nil, "", err
 	}
 
-	return response.Messages, response.ResponseMetaData.NextCursor, response.Err()
+	return response.Messages, response.ResponseMetadata.Cursor, response.Err()
 }
 
 type DeleteScheduledMessageParameters struct {

@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking changes
 
 > [!WARNING]
-> **`slack.AssistantSearchContextResponse` changes how it exposes the next page cursor.**
-> `resp.ResponseMetadata.NextCursor` no longer compiles; use `resp.ResponseMetadata.Cursor`.
+> **`slack.AssistantSearchContextResponse` and `slack.GetConversationHistoryResponse`
+> change how they expose the next page cursor.** `resp.ResponseMetadata.NextCursor` and
+> `resp.ResponseMetaData.NextCursor` no longer compile; use `resp.ResponseMetadata.Cursor`.
 >
-> See the **Breaking** entry under Changed for migration steps.
+> See the **Breaking** entries under Changed for migration steps.
 
 ### Added
 
@@ -30,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   literals, set the cursor with
   `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
   Marshaling now also writes the `messages` and `warnings` keys in `response_metadata`.
+- **Breaking:** `slack.GetConversationHistoryResponse` drops its `ResponseMetaData` field
+  and uses `ResponseMetadata` from `SlackResponse`. Errors from `GetConversationHistory`
+  now keep Slack's diagnostic messages, and successful responses keep warnings. Replace
+  `resp.ResponseMetaData.NextCursor` with `resp.ResponseMetadata.Cursor`. In struct
+  literals, set the cursor with
+  `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
+  Marshaling now also writes the `messages` and `warnings` keys in `response_metadata`.
 
 ### Deprecated
 
@@ -43,6 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Preserve Slack response metadata in channel API errors, including diagnostic
   messages returned by `conversations.create`.
+- Preserve Slack response metadata in `GetConversationReplies`, `GetConversations`,
+  `GetConversationsPaginated`, `GetAllConversations`, `GetConversationsForUser`,
+  `GetUsersInConversation`, `JoinConversation`, and `GetScheduledMessages`. Errors now
+  keep Slack's diagnostic messages, and `OptionOnWarning` now receives
+  `response_metadata.warnings`.
 
 ## [0.36.0] - 2026-11-14
 

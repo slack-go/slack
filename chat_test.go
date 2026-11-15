@@ -3,6 +3,7 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -1029,4 +1030,40 @@ func TestRedactToken(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetScheduledMessagesContextErrorMetadata(t *testing.T) {
+	api := newResponseMetadataTestClient(t, "/chat.scheduledMessages.list", `{
+		"ok": false,
+		"error": "invalid_arguments",
+		"response_metadata": {
+			"messages": ["[ERROR] invalid cursor [json-pointer:/cursor]"]
+		}
+	}`)
+	_, _, err := api.GetScheduledMessagesContext(t.Context(), &GetScheduledMessagesParameters{})
+	require.EqualError(t, err, "invalid_arguments")
+	slackErr, ok := errors.AsType[SlackErrorResponse](err)
+	require.True(t, ok)
+	require.Equal(t, []string{"[ERROR] invalid cursor [json-pointer:/cursor]"}, slackErr.ResponseMetadata.Messages)
+}
+
+func TestGetScheduledMessagesContextResponseMetadata(t *testing.T) {
+	var warnings []string
+	api := newResponseMetadataTestClient(t, "/chat.scheduledMessages.list", `{
+		"ok": true,
+		"scheduled_messages": [{"id": "Q1298393284", "channel_id": "C1H9RESGL", "post_at": 1551991428, "date_created": 1551891734, "text": "Here's a message for you in the future"}],
+		"warning": "superfluous_charset",
+		"response_metadata": {
+			"next_cursor": "dGVhbTpDMDYxRkE1UEI=",
+			"warnings": ["superfluous_charset"]
+		}
+	}`, OptionOnWarning(func(_ string, _ any, w *Warning) {
+		warnings = w.Warnings
+	}))
+	messages, cursor, err := api.GetScheduledMessagesContext(t.Context(), &GetScheduledMessagesParameters{})
+	require.NoError(t, err)
+	require.Len(t, messages, 1)
+	require.Equal(t, "Q1298393284", messages[0].ID)
+	require.Equal(t, "dGVhbTpDMDYxRkE1UEI=", cursor)
+	require.Equal(t, []string{"superfluous_charset"}, warnings)
 }

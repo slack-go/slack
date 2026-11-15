@@ -126,10 +126,6 @@ type GetConversationsForUserParameters struct {
 	TeamID          string
 }
 
-type responseMetaData struct {
-	NextCursor string `json:"next_cursor"`
-}
-
 // GetUsersInConversation returns the list of users in a conversation.
 // For more details, see GetUsersInConversationContext documentation.
 func (api *Client) GetUsersInConversation(params *GetUsersInConversationParameters) ([]string, string, error) {
@@ -150,8 +146,7 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 		values.Add("limit", strconv.Itoa(params.Limit))
 	}
 	response := struct {
-		Members          []string         `json:"members"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Members []string `json:"members"`
 		SlackResponse
 	}{}
 
@@ -164,7 +159,7 @@ func (api *Client) GetUsersInConversationContext(ctx context.Context, params *Ge
 		return nil, "", err
 	}
 
-	return response.Members, response.ResponseMetaData.NextCursor, nil
+	return response.Members, response.ResponseMetadata.Cursor, nil
 }
 
 // GetConversationsForUser returns the list conversations for a given user.
@@ -199,8 +194,7 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 	}
 
 	response := struct {
-		Channels         []Channel        `json:"channels"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Channels []Channel `json:"channels"`
 		SlackResponse
 	}{}
 	err = api.postMethod(ctx, "users.conversations", values, &response)
@@ -208,7 +202,7 @@ func (api *Client) GetConversationsForUserContext(ctx context.Context, params *G
 		return nil, "", err
 	}
 
-	return response.Channels, response.ResponseMetaData.NextCursor, response.Err()
+	return response.Channels, response.ResponseMetadata.Cursor, response.Err()
 }
 
 // ArchiveConversation archives a conversation.
@@ -675,10 +669,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 	}
 	response := struct {
 		SlackResponse
-		HasMore          bool `json:"has_more"`
-		ResponseMetaData struct {
-			NextCursor string `json:"next_cursor"`
-		} `json:"response_metadata"`
+		HasMore  bool      `json:"has_more"`
 		Messages []Message `json:"messages"`
 	}{}
 
@@ -687,7 +678,7 @@ func (api *Client) GetConversationRepliesContext(ctx context.Context, params *Ge
 		return nil, false, "", err
 	}
 
-	return response.Messages, response.HasMore, response.ResponseMetaData.NextCursor, response.Err()
+	return response.Messages, response.HasMore, response.ResponseMetadata.Cursor, response.Err()
 }
 
 type GetConversationsParameters struct {
@@ -790,8 +781,7 @@ func (t ConversationPagination) Next(ctx context.Context) (_ ConversationPaginat
 	}
 
 	response := struct {
-		Channels         []Channel        `json:"channels"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Channels []Channel `json:"channels"`
 		SlackResponse
 	}{}
 
@@ -804,9 +794,9 @@ func (t ConversationPagination) Next(ctx context.Context) (_ ConversationPaginat
 		return t, err
 	}
 
-	t.c.Debugf("GetAllConversationsContext: got %d conversations; cursor %s", len(response.Channels), response.ResponseMetaData.NextCursor)
+	t.c.Debugf("GetAllConversationsContext: got %d conversations; cursor %s", len(response.Channels), response.ResponseMetadata.Cursor)
 	t.Conversations = response.Channels
-	t.previousResp = &ResponseMetadata{Cursor: response.ResponseMetaData.NextCursor}
+	t.previousResp = &ResponseMetadata{Cursor: response.ResponseMetadata.Cursor}
 
 	return t, nil
 }
@@ -871,8 +861,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 	}
 
 	response := struct {
-		Channels         []Channel        `json:"channels"`
-		ResponseMetaData responseMetaData `json:"response_metadata"`
+		Channels []Channel `json:"channels"`
 		SlackResponse
 	}{}
 
@@ -881,7 +870,7 @@ func (api *Client) GetConversationsContext(ctx context.Context, params *GetConve
 		return nil, "", err
 	}
 
-	return response.Channels, response.ResponseMetaData.NextCursor, response.Err()
+	return response.Channels, response.ResponseMetadata.Cursor, response.Err()
 }
 
 type OpenConversationParameters struct {
@@ -935,11 +924,7 @@ func (api *Client) JoinConversation(channelID string) (*Channel, string, []strin
 func (api *Client) JoinConversationContext(ctx context.Context, channelID string) (*Channel, string, []string, error) {
 	values := url.Values{"token": {api.token}, "channel": {channelID}}
 	response := struct {
-		Channel          *Channel `json:"channel"`
-		Warning          string   `json:"warning"`
-		ResponseMetaData *struct {
-			Warnings []string `json:"warnings"`
-		} `json:"response_metadata"`
+		Channel *Channel `json:"channel"`
 		SlackResponse
 	}{}
 
@@ -950,11 +935,7 @@ func (api *Client) JoinConversationContext(ctx context.Context, channelID string
 	if response.Err() != nil {
 		return nil, "", nil, response.Err()
 	}
-	var warnings []string
-	if response.ResponseMetaData != nil {
-		warnings = response.ResponseMetaData.Warnings
-	}
-	return response.Channel, response.Warning, warnings, nil
+	return response.Channel, response.Warning, response.ResponseMetadata.Warnings, nil
 }
 
 type GetConversationHistoryParameters struct {
@@ -969,12 +950,9 @@ type GetConversationHistoryParameters struct {
 
 type GetConversationHistoryResponse struct {
 	SlackResponse
-	HasMore          bool   `json:"has_more"`
-	PinCount         int    `json:"pin_count"`
-	Latest           string `json:"latest"`
-	ResponseMetaData struct {
-		NextCursor string `json:"next_cursor"`
-	} `json:"response_metadata"`
+	HasMore  bool      `json:"has_more"`
+	PinCount int       `json:"pin_count"`
+	Latest   string    `json:"latest"`
 	Messages []Message `json:"messages"`
 }
 
