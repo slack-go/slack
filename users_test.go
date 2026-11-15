@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -614,10 +615,10 @@ func getUserPage(pageCount int64) func(rw http.ResponseWriter, r *http.Request) 
 			return
 		}
 
+		sresp.ResponseMetadata.Cursor = strconv.Itoa(int(nextPage))
 		response, _ := json.Marshal(userResponseFull{
 			SlackResponse: sresp,
 			Members:       members,
-			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(nextPage))},
 		})
 		rw.Write(response)
 	}
@@ -652,10 +653,10 @@ func getUserPagesWithRateLimitErrors(pageCount int64) func(rw http.ResponseWrite
 			rw.Write(response)
 			return
 		}
+		sresp.ResponseMetadata.Cursor = strconv.Itoa(int(cpage))
 		response, _ := json.Marshal(userResponseFull{
 			SlackResponse: sresp,
 			Members:       members,
-			Metadata:      ResponseMetadata{Cursor: strconv.Itoa(int(cpage))},
 		})
 		rw.Write(response)
 	}
@@ -1145,4 +1146,42 @@ func TestGetUserInfoIncludeLocale(t *testing.T) {
 			}
 		})
 	}
+}
+
+var cursorUserCalls = []responseMetadataCall{
+	{
+		name: "GetUsersPaginated",
+		path: "/users.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			p, err := api.GetUsersPaginated().Next(ctx)
+			if err != nil {
+				return "", err
+			}
+			return p.Cursor, nil
+		},
+	},
+}
+
+func TestUserMethodsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, append(slices.Clone(cursorUserCalls),
+		responseMetadataCall{
+			name: "GetUserInfo",
+			path: "/users.info",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				_, err := api.GetUserInfoContext(ctx, "U0123456789")
+				return "", err
+			},
+		},
+		responseMetadataCall{
+			name: "SetUserRealName",
+			path: "/users.profile.set",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				return "", api.SetUserRealNameContextWithUser(ctx, "U0123456789", "Ada Lovelace")
+			},
+		},
+	))
+}
+
+func TestUserMethodsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorUserCalls)
 }

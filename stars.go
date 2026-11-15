@@ -24,7 +24,6 @@ type StarredItem Item
 type listResponseFull struct {
 	Items []Item `json:"items"`
 	SlackResponse
-	ResponseMetadata `json:"response_metadata"`
 }
 
 // NewStarsParameters initialises StarsParameters with default values
@@ -167,12 +166,6 @@ func (api *Client) GetStarredContext(ctx context.Context, params StarsParameters
 	return starredItems, nextCursor, nil
 }
 
-type listResponsePaginated struct {
-	Items []Item `json:"items"`
-	SlackResponse
-	Metadata ResponseMetadata `json:"response_metadata"`
-}
-
 // StarredItemPagination allows for paginating over the starred items
 type StarredItemPagination struct {
 	Items        []Item
@@ -243,7 +236,7 @@ func (t StarredItemPagination) failure(err error) error {
 
 // next gets the next list of starred items based on the cursor value
 func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPagination, err error) {
-	var resp listResponsePaginated
+	var resp listResponseFull
 
 	if t.c == nil || (t.previousResp != nil && t.previousResp.Cursor == "") {
 		return t, errPaginationComplete
@@ -264,7 +257,7 @@ func (t StarredItemPagination) next(ctx context.Context) (_ StarredItemPaginatio
 		return t, err
 	}
 
-	t.previousResp = &resp.Metadata
+	t.previousResp = &resp.ResponseMetadata
 	t.Items = resp.Items
 
 	return t, nil

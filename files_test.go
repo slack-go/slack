@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -762,4 +763,42 @@ func TestFileVideoFields(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("got %+v, want %+v", got, want)
 	}
+}
+
+var cursorFileCalls = []responseMetadataCall{
+	{
+		name: "ListFiles",
+		path: "/files.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, params, err := api.ListFilesContext(ctx, ListFilesParameters{})
+			if err != nil {
+				return "", err
+			}
+			return params.Cursor, nil
+		},
+	},
+}
+
+func TestFileMethodsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, append(slices.Clone(cursorFileCalls),
+		responseMetadataCall{
+			name: "GetFileInfo",
+			path: "/files.info",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				_, _, _, err := api.GetFileInfoContext(ctx, "F0123456789", 0, 0)
+				return "", err
+			},
+		},
+		responseMetadataCall{
+			name: "DeleteFile",
+			path: "/files.delete",
+			call: func(ctx context.Context, api *Client) (string, error) {
+				return "", api.DeleteFileContext(ctx, "F0123456789")
+			},
+		},
+	))
+}
+
+func TestFileMethodsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorFileCalls)
 }

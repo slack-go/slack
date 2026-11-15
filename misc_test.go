@@ -3,8 +3,11 @@ package slack
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"sync"
 	"testing"
@@ -13,6 +16,74 @@ import (
 
 	"github.com/slack-go/slack/slackutilsx"
 )
+
+// responseMetadataCall calls one API method. It returns the next cursor when the
+// method pages with one.
+type responseMetadataCall struct {
+	name string
+	path string
+	call func(context.Context, *Client) (nextCursor string, err error)
+}
+
+func newResponseMetadataTestClient(t *testing.T, path, body string, options ...Option) *Client {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != path {
+			t.Errorf("unexpected path %q, want %q", r.URL.Path, path)
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(rw, body)
+	}))
+	t.Cleanup(server.Close)
+	return New("testing-token", append([]Option{OptionAPIURL(server.URL + "/")}, options...)...)
+}
+
+// testErrorMetadata checks that each call keeps Slack's response_metadata.messages
+// in the returned SlackErrorResponse.
+func testErrorMetadata(t *testing.T, calls []responseMetadataCall) {
+	t.Helper()
+	for _, tc := range calls {
+		t.Run(tc.name, func(t *testing.T) {
+			api := newResponseMetadataTestClient(t, tc.path, `{
+				"ok": false,
+				"error": "invalid_arguments",
+				"response_metadata": {
+					"messages": ["[ERROR] invalid cursor [json-pointer:/cursor]"]
+				}
+			}`)
+			_, err := tc.call(t.Context(), api)
+			require.EqualError(t, err, "invalid_arguments")
+			slackErr, ok := errors.AsType[SlackErrorResponse](err)
+			require.True(t, ok)
+			require.Equal(t, []string{"[ERROR] invalid cursor [json-pointer:/cursor]"}, slackErr.ResponseMetadata.Messages)
+		})
+	}
+}
+
+// testCursorMetadata checks that each call returns Slack's next_cursor and reports
+// response_metadata.warnings to OptionOnWarning.
+func testCursorMetadata(t *testing.T, calls []responseMetadataCall) {
+	t.Helper()
+	for _, tc := range calls {
+		t.Run(tc.name, func(t *testing.T) {
+			var warnings []string
+			api := newResponseMetadataTestClient(t, tc.path, `{
+				"ok": true,
+				"warning": "superfluous_charset",
+				"response_metadata": {
+					"next_cursor": "dGVhbTpDMDYxRkE1UEI=",
+					"warnings": ["superfluous_charset"]
+				}
+			}`, OptionOnWarning(func(_ string, _ any, w *Warning) {
+				warnings = w.Warnings
+			}))
+			cursor, err := tc.call(t.Context(), api)
+			require.NoError(t, err)
+			require.Equal(t, "dGVhbTpDMDYxRkE1UEI=", cursor)
+			require.Equal(t, []string{"superfluous_charset"}, warnings)
+		})
+	}
+}
 
 func TestKickResponseNullDoesNotPanic(t *testing.T) {
 	response := KickUserFromConversationSlackResponse{Ok: true}

@@ -1257,23 +1257,6 @@ func TestGetAllConversationsReturnsServerError(t *testing.T) {
 	}
 }
 
-func newResponseMetadataTestClient(t *testing.T, path, body string, options ...Option) *Client {
-	t.Helper()
-	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, path, r.URL.Path)
-		rw.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(rw, body)
-	}))
-	t.Cleanup(server.Close)
-	return New("testing-token", append([]Option{OptionAPIURL(server.URL + "/")}, options...)...)
-}
-
-type responseMetadataCall struct {
-	name string
-	path string
-	call func(context.Context, *Client) (nextCursor string, err error)
-}
-
 var cursorConversationCalls = []responseMetadataCall{
 	{
 		name: "GetUsersInConversation",
@@ -1332,7 +1315,7 @@ var cursorConversationCalls = []responseMetadataCall{
 }
 
 func TestConversationMethodsErrorMetadata(t *testing.T) {
-	calls := append(slices.Clone(cursorConversationCalls),
+	testErrorMetadata(t, append(slices.Clone(cursorConversationCalls),
 		responseMetadataCall{
 			name: "GetAllConversations",
 			path: "/conversations.list",
@@ -1349,45 +1332,11 @@ func TestConversationMethodsErrorMetadata(t *testing.T) {
 				return "", err
 			},
 		},
-	)
-	for _, tc := range calls {
-		t.Run(tc.name, func(t *testing.T) {
-			api := newResponseMetadataTestClient(t, tc.path, `{
-				"ok": false,
-				"error": "invalid_arguments",
-				"response_metadata": {
-					"messages": ["[ERROR] invalid cursor [json-pointer:/cursor]"]
-				}
-			}`)
-			_, err := tc.call(t.Context(), api)
-			require.EqualError(t, err, "invalid_arguments")
-			slackErr, ok := errors.AsType[SlackErrorResponse](err)
-			require.True(t, ok)
-			assert.Equal(t, []string{"[ERROR] invalid cursor [json-pointer:/cursor]"}, slackErr.ResponseMetadata.Messages)
-		})
-	}
+	))
 }
 
 func TestConversationMethodsResponseMetadata(t *testing.T) {
-	for _, tc := range cursorConversationCalls {
-		t.Run(tc.name, func(t *testing.T) {
-			var warnings []string
-			api := newResponseMetadataTestClient(t, tc.path, `{
-				"ok": true,
-				"warning": "superfluous_charset",
-				"response_metadata": {
-					"next_cursor": "dGVhbTpDMDYxRkE1UEI=",
-					"warnings": ["superfluous_charset"]
-				}
-			}`, OptionOnWarning(func(_ string, _ any, w *Warning) {
-				warnings = w.Warnings
-			}))
-			cursor, err := tc.call(t.Context(), api)
-			require.NoError(t, err)
-			assert.Equal(t, "dGVhbTpDMDYxRkE1UEI=", cursor)
-			assert.Equal(t, []string{"superfluous_charset"}, warnings)
-		})
-	}
+	testCursorMetadata(t, cursorConversationCalls)
 }
 
 func TestJoinConversationContextWarnings(t *testing.T) {

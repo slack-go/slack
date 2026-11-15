@@ -56,6 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `GetUsersInConversation`, `JoinConversation`, and `GetScheduledMessages`. Errors now
   keep Slack's diagnostic messages, and `OptionOnWarning` now receives
   `response_metadata.warnings`.
+- Preserve Slack response metadata in responses from `users.info`, `users.list`,
+  `users.lookupByEmail`, `users.getPresence`, `users.setPresence`, `users.profile.set`,
+  `files.info`, `files.list`, `files.delete`, `files.comments.delete`,
+  `files.revokePublicURL`, `files.sharedPublicURL`, `reactions.list`, and `stars.list`.
+  Errors now keep Slack's diagnostic messages, and `OptionOnWarning` now receives
+  `response_metadata.warnings`.
 
 ## [0.36.0] - 2026-11-14
 

@@ -99,7 +99,6 @@ func NewListReactionsParameters() ListReactionsParameters {
 type listReactionsResponseFull struct {
 	Items []reactedItemResponse
 	SlackResponse
-	ResponseMetadata `json:"response_metadata"`
 }
 
 func (res listReactionsResponseFull) extractReactedItems() []ReactedItem {

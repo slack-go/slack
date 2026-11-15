@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -491,4 +492,23 @@ func TestSlack_ListReactions(t *testing.T) {
 	if nextCursor != wantCursor {
 		t.Errorf("Got cursor %q, want %q", nextCursor, wantCursor)
 	}
+}
+
+var cursorReactionCalls = []responseMetadataCall{
+	{
+		name: "ListReactions",
+		path: "/reactions.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.ListReactionsContext(ctx, NewListReactionsParameters())
+			return cursor, err
+		},
+	},
+}
+
+func TestReactionMethodsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, cursorReactionCalls)
+}
+
+func TestReactionMethodsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorReactionCalls)
 }

@@ -298,9 +298,8 @@ type CompleteUploadExternalResponse struct {
 type fileResponseFull struct {
 	File     `json:"file"`
 	Paging   `json:"paging"`
-	Comments []Comment        `json:"comments"`
-	Files    []File           `json:"files"`
-	Metadata ResponseMetadata `json:"response_metadata"`
+	Comments []Comment `json:"comments"`
+	Files    []File    `json:"files"`
 
 	SlackResponse
 }
@@ -456,7 +455,7 @@ func (api *Client) ListFilesContext(ctx context.Context, params ListFilesParamet
 		return nil, nil, err
 	}
 
-	params.Cursor = response.Metadata.Cursor
+	params.Cursor = response.ResponseMetadata.Cursor
 
 	return response.Files, &params, nil
 }

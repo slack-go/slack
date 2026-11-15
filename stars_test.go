@@ -1,6 +1,7 @@
 package slack
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -253,4 +254,34 @@ func TestSlack_ListStars(t *testing.T) {
 	if nextCursor != wantCursor {
 		t.Errorf("Got cursor %q, want %q", nextCursor, wantCursor)
 	}
+}
+
+var cursorStarCalls = []responseMetadataCall{
+	{
+		name: "ListStars",
+		path: "/stars.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			_, cursor, err := api.ListStarsContext(ctx, NewStarsParameters())
+			return cursor, err
+		},
+	},
+	{
+		name: "ListStarsPaginated",
+		path: "/stars.list",
+		call: func(ctx context.Context, api *Client) (string, error) {
+			p, err := api.ListStarsPaginated().next(ctx)
+			if err != nil {
+				return "", err
+			}
+			return p.previousResp.Cursor, nil
+		},
+	},
+}
+
+func TestStarMethodsErrorMetadata(t *testing.T) {
+	testErrorMetadata(t, cursorStarCalls)
+}
+
+func TestStarMethodsResponseMetadata(t *testing.T) {
+	testCursorMetadata(t, cursorStarCalls)
 }

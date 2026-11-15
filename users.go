@@ -215,7 +215,6 @@ type userResponseFull struct {
 	Users   []User `json:"users,omitempty"`
 	UserPresence
 	SlackResponse
-	Metadata ResponseMetadata `json:"response_metadata"`
 }
 
 type UserSetPhotoParams struct {
@@ -420,9 +419,9 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 		return t, err
 	}
 
-	t.c.Debugf("GetUsersContext: got %d users; metadata %v", len(resp.Members), resp.Metadata)
+	t.c.Debugf("GetUsersContext: got %d users; metadata %v", len(resp.Members), resp.ResponseMetadata)
 	t.Users = resp.Members
-	t.Cursor = resp.Metadata.Cursor
+	t.Cursor = resp.ResponseMetadata.Cursor
 	t.complete = t.Cursor == ""
 
 	return t, nil
