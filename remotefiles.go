@@ -81,7 +81,7 @@ type RemoteFileParameters struct {
 
 // ListRemoteFilesParameters contains arguments for the ListRemoteFiles method.
 // For more details:
-// https://api.slack.com/methods/files.remote.list
+// https://docs.slack.dev/reference/methods/files.remote.list
 type ListRemoteFilesParameters struct {
 	Channel       string
 	Cursor        string
@@ -149,15 +149,18 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 	return &response.RemoteFile, response.Err()
 }
 
-// ListRemoteFiles retrieves all remote files according to the parameters given. Uses cursor based pagination.
-// For more details see the ListRemoteFilesContext documentation.
-func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) ([]RemoteFile, error) {
+// ListRemoteFiles retrieves one page of remote files.
+// For pagination, see [Client.ListRemoteFilesContext].
+func (api *Client) ListRemoteFiles(params ListRemoteFilesParameters) (files []RemoteFile, nextCursor string, err error) {
 	return api.ListRemoteFilesContext(context.Background(), params)
 }
 
-// ListRemoteFilesContext retrieves all remote files according to the parameters given with a custom context. Uses cursor based pagination.
-// Slack API docs: https://api.slack.com/methods/files.remote.list
-func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) ([]RemoteFile, error) {
+// ListRemoteFilesContext retrieves one page of remote files with a custom context.
+// To fetch the next page, pass nextCursor as params.Cursor; nextCursor is empty after
+// the last page.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/files.remote.list
+func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemoteFilesParameters) (files []RemoteFile, nextCursor string, err error) {
 	values := url.Values{
 		"token": {api.token},
 	}
@@ -179,12 +182,10 @@ func (api *Client) ListRemoteFilesContext(ctx context.Context, params ListRemote
 
 	response, err := api.remoteFileRequest(ctx, "files.remote.list", values)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	params.Cursor = response.SlackResponse.ResponseMetadata.Cursor
-
-	return response.Files, nil
+	return response.Files, response.ResponseMetadata.Cursor, nil
 }
 
 // GetRemoteFileInfo retrieves the complete remote file information.

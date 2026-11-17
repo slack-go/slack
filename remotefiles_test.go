@@ -3,12 +3,16 @@ package slack
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"maps"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func addRemoteFileHandler(rw http.ResponseWriter, r *http.Request) {
@@ -71,10 +75,10 @@ func TestListRemoteFile(t *testing.T) {
 	}
 	methods := []struct {
 		name string
-		call func(*Client, ListRemoteFilesParameters) ([]RemoteFile, error)
+		call func(*Client, ListRemoteFilesParameters) ([]RemoteFile, string, error)
 	}{
 		{"ListRemoteFiles", (*Client).ListRemoteFiles},
-		{"ListRemoteFilesContext", func(api *Client, params ListRemoteFilesParameters) ([]RemoteFile, error) {
+		{"ListRemoteFilesContext", func(api *Client, params ListRemoteFilesParameters) ([]RemoteFile, string, error) {
 			return api.ListRemoteFilesContext(t.Context(), params)
 		}},
 	}
@@ -99,13 +103,87 @@ func TestListRemoteFile(t *testing.T) {
 					defer server.Close()
 
 					api := New("testing-token", OptionAPIURL(server.URL+"/"))
-					if _, err := method.call(api, tt.params); err != nil {
-						t.Fatal(err)
-					}
+					_, nextCursor, err := method.call(api, tt.params)
+					require.NoError(t, err)
+					assert.Empty(t, nextCursor)
 				})
 			}
 		})
 	}
+}
+
+func TestListRemoteFilesPagination(t *testing.T) {
+	methods := []struct {
+		name string
+		call func(*Client, ListRemoteFilesParameters) ([]RemoteFile, string, error)
+	}{
+		{"ListRemoteFiles", (*Client).ListRemoteFiles},
+		{"ListRemoteFilesContext", func(api *Client, params ListRemoteFilesParameters) ([]RemoteFile, string, error) {
+			return api.ListRemoteFilesContext(t.Context(), params)
+		}},
+	}
+	for _, method := range methods {
+		t.Run(method.name, func(t *testing.T) {
+			for _, initialCursor := range []string{"", "start+/="} {
+				t.Run("cursor="+initialCursor, func(t *testing.T) {
+					// Request i sends cursors[i] and returns cursors[i+1].
+					cursors := []string{initialCursor, "next+/=", "last+/=", ""}
+					responses := []string{
+						`{"ok":true,"files":[{"id":"F1"}],"response_metadata":{"next_cursor":"next+/="}}`,
+						`{"ok":true,"files":[],"response_metadata":{"next_cursor":"last+/="}}`,
+						`{"ok":true,"files":[{"id":"F2"},{"id":"F3"}],"response_metadata":{"next_cursor":""}}`,
+					}
+					var requests int
+					api := New("testing-token", OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
+						if requests >= len(responses) {
+							return nil, errors.New("unexpected extra remote-file list request")
+						}
+						if err := r.ParseForm(); err != nil {
+							return nil, err
+						}
+						want := url.Values{
+							"token": {"testing-token"}, "channel": {"C123"}, "limit": {"2"}, "ts_from": {"12"}, "ts_to": {"34"},
+						}
+						if cursors[requests] != "" {
+							want.Set("cursor", cursors[requests])
+						}
+						assert.Equal(t, "/api/files.remote.list", r.URL.Path)
+						assert.Equal(t, want, r.PostForm)
+						body := responses[requests]
+						requests++
+						return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(body))}, nil
+					})))
+					params := ListRemoteFilesParameters{
+						Channel: "C123", Cursor: initialCursor, Limit: 2, TimestampFrom: 12, TimestampTo: 34,
+					}
+					var ids []string
+					for page := range responses {
+						files, nextCursor, err := method.call(api, params)
+						require.NoError(t, err)
+						assert.Equal(t, page+1, requests, "each call makes one request")
+						assert.Equal(t, cursors[page+1], nextCursor)
+						for _, file := range files {
+							ids = append(ids, file.ID)
+						}
+						params.Cursor = nextCursor
+					}
+					assert.Equal(t, []string{"F1", "F2", "F3"}, ids)
+				})
+			}
+		})
+	}
+}
+
+func TestListRemoteFilesError(t *testing.T) {
+	api := New("testing-token", OptionHTTPClient(httpClientFunc(func(*http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(
+			`{"ok":false,"error":"invalid_cursor","response_metadata":{"next_cursor":"next"}}`,
+		))}, nil
+	})))
+	files, nextCursor, err := api.ListRemoteFilesContext(t.Context(), ListRemoteFilesParameters{Cursor: "stale"})
+	require.ErrorContains(t, err, "invalid_cursor")
+	assert.Nil(t, files)
+	assert.Empty(t, nextCursor)
 }
 
 func getRemoteFileInfoHandler(rw http.ResponseWriter, r *http.Request) {

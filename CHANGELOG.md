@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > that set `ResponseMetadata`, and promoted fields such as `LoginResponse.Cursor`, no
 > longer compile.
 >
+> `ListRemoteFiles` and `ListRemoteFilesContext` now also return the next page's cursor,
+> so calls that assign two results no longer compile.
+>
 > See the **Breaking** entries under Changed for migration steps.
 
 ### Added
@@ -61,6 +64,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `resp.ResponseMetadata.Cursor`, `resp.ResponseMetadata.Messages`, and
   `resp.ResponseMetadata.Warnings`. In struct literals of either type, set metadata with
   `SlackResponse: slack.SlackResponse{ResponseMetadata: slack.ResponseMetadata{Cursor: c}}`.
+- **Breaking:** `ListRemoteFiles` and `ListRemoteFilesContext` return the cursor for the
+  next page as a second result; it is empty after the last page. They previously
+  dropped `response_metadata.next_cursor`, so callers could not get past the first page.
+  Each call still makes one request and returns at most `Limit` files. Replace
+  `files, err := api.ListRemoteFiles(params)` with
+  `files, nextCursor, err := api.ListRemoteFiles(params)`, and pass `nextCursor` as
+  `params.Cursor` to fetch the next page.
 
 ### Deprecated
 
