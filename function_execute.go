@@ -33,9 +33,10 @@ func (api *Client) FunctionCompleteSuccess(functionExecutionId string, options .
 	return api.FunctionCompleteSuccessContext(context.Background(), functionExecutionId, options...)
 }
 
-// FunctionCompleteSuccess indicates function is completed
+// FunctionCompleteSuccessContext indicates successful function completion with a custom context.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/functions.completeSuccess
 func (api *Client) FunctionCompleteSuccessContext(ctx context.Context, functionExecutionId string, options ...FunctionCompleteSuccessRequestOption) error {
-	// More information: https://api.slack.com/methods/functions.completeSuccess
 	r := &FunctionCompleteSuccessRequest{
 		FunctionExecutionID: functionExecutionId,
 	}
@@ -43,6 +44,9 @@ func (api *Client) FunctionCompleteSuccessContext(ctx context.Context, functionE
 		if err := option(r); err != nil {
 			return err
 		}
+	}
+	if r.Outputs == nil {
+		r.Outputs = map[string]string{}
 	}
 
 	jsonData, err := json.Marshal(r)
