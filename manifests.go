@@ -444,6 +444,10 @@ type AppHome struct {
 	HomeTabEnabled             bool `json:"home_tab_enabled,omitempty" yaml:"home_tab_enabled,omitempty"`
 	MessagesTabEnabled         bool `json:"messages_tab_enabled,omitempty" yaml:"messages_tab_enabled,omitempty"`
 	MessagesTabReadOnlyEnabled bool `json:"messages_tab_read_only_enabled,omitempty" yaml:"messages_tab_read_only_enabled,omitempty"`
+	// AgentTasksEnabled controls the Tasks tab for apps using agent_view. A
+	// pointer because Slack keeps the tab on when the key is missing, so false
+	// must be sent explicitly. Turning it off pauses existing tasks for all users.
+	AgentTasksEnabled *bool `json:"agent_tasks_enabled,omitempty" yaml:"agent_tasks_enabled,omitempty"`
 }
 
 // BotUser is a group of settings that describe bot user configuration

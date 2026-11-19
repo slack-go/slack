@@ -456,6 +456,32 @@ func TestManifestKeepsFeatureKeys(t *testing.T) {
 	assert.JSONEq(t, `["api.example.com"]`, string(sent["outgoing_domains"]))
 }
 
+// TestAppHomeAgentTasksEnabled checks that agent_tasks_enabled is omitted when
+// unset (Slack keeps the Tasks tab on) and sent when explicitly false.
+func TestAppHomeAgentTasksEnabled(t *testing.T) {
+	tests := []struct {
+		name    string
+		payload string
+		want    *bool
+		sent    string
+	}{
+		{"unset", `{}`, nil, `{}`},
+		{"false", `{"agent_tasks_enabled": false}`, new(false), `{"agent_tasks_enabled": false}`},
+		{"true", `{"agent_tasks_enabled": true}`, new(true), `{"agent_tasks_enabled": true}`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var appHome AppHome
+			require.NoError(t, json.Unmarshal([]byte(tt.payload), &appHome))
+			assert.Equal(t, tt.want, appHome.AgentTasksEnabled)
+
+			out, err := json.Marshal(appHome)
+			require.NoError(t, err)
+			assert.JSONEq(t, tt.sent, string(out))
+		})
+	}
+}
+
 func getTestCreateManifestResponse() *ManifestResponse {
 	return &ManifestResponse{
 		AppId: "A012ABCD0A0",
