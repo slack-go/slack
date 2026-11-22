@@ -465,47 +465,48 @@ func TestRetryRespectsContextCancelation(t *testing.T) {
 // sleeping the full duration, and we do not perform a second request.
 func TestRetryContextCanceledDuringSleep(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		mock := &countAndRespondClient{code: http.StatusTooManyRequests}
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = 60 * time.Second // long sleep; cancel during this
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	mock := &countAndRespondClient{code: http.StatusTooManyRequests}
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = 60 * time.Second // long sleep; cancel during this
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
+		ctx, cancel := context.WithCancel(t.Context())
+		defer cancel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+		body := "body"
+		rc := &retryClient{client: mock, config: cfg, debug: nil}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://localhost/", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.GetBody = func() (io.ReadCloser, error) {
+			return io.NopCloser(strings.NewReader(body)), nil
+		}
 
-	body := "body"
-	rc := &retryClient{client: mock, config: cfg, debug: nil}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://localhost/", strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.GetBody = func() (io.ReadCloser, error) {
-		return io.NopCloser(strings.NewReader(body)), nil
-	}
+		// Wait until Do is blocked on the retry timer before canceling.
+		go func() {
+			synctest.Wait()
+			cancel()
+		}()
 
-	// Cancel context shortly after first attempt returns 429, so we exit during sleep.
-	go func() {
-		time.Sleep(20 * time.Millisecond)
-		cancel()
-	}()
-
-	resp, err := rc.Do(req)
-	if err == nil {
-		t.Fatal("expected error when context is cancelled during sleep")
-	}
-	if resp != nil {
-		resp.Body.Close()
-		t.Errorf("expected nil response when context cancelled, got %v", resp)
-	}
-	if !errors.Is(err, context.Canceled) {
-		t.Errorf("expected context.Canceled, got %v", err)
-	}
-	if got := mock.count.Load(); got != 1 {
-		t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
-	}
+		resp, err := rc.Do(req)
+		if err == nil {
+			t.Fatal("expected error when context is cancelled during sleep")
+		}
+		if resp != nil {
+			resp.Body.Close()
+			t.Errorf("expected nil response when context cancelled, got %v", resp)
+		}
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected context.Canceled, got %v", err)
+		}
+		if got := mock.count.Load(); got != 1 {
+			t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
+		}
+	})
 }
 
 func TestRateLimitRetryWithLargeJitter(t *testing.T) {
