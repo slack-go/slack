@@ -15,7 +15,7 @@ func main() {
 	botToken := os.Getenv("SLACK_BOT_TOKEN")
 	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
 
-	api := slack.New(botToken, slack.OptionDebug(true), slack.OptionLog(nil))
+	api := slack.New(botToken, slack.OptionDebug(true))
 
 	http.HandleFunc("/events-endpoint", func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
