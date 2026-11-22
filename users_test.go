@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -866,26 +867,20 @@ func TestUserProfileCustomFieldsSetMap(t *testing.T) {
 }
 
 func TestGetUsersHandlesRateLimit(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/users.list", getUserPagesWithRateLimitErrors(4))
+	synctest.Test(t, func(t *testing.T) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/users.list", getUserPagesWithRateLimitErrors(4))
+		api := New(validToken, OptionHTTPClient(handlerTestClient(mux.ServeHTTP)))
 
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-
-	users, err := api.GetUsers()
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if !reflect.DeepEqual([]User{
-		getTestUserWithId("U000"),
-		getTestUserWithId("U001"),
-		getTestUserWithId("U002"),
-		getTestUserWithId("U003"),
-	}, users) {
-		t.Fatal(ErrIncorrectResponse)
-	}
+		users, err := api.GetUsers()
+		require.NoError(t, err)
+		assert.Equal(t, []User{
+			getTestUserWithId("U000"),
+			getTestUserWithId("U001"),
+			getTestUserWithId("U002"),
+			getTestUserWithId("U003"),
+		}, users)
+	})
 }
 
 func TestUserUnmarshalJSON(t *testing.T) {
