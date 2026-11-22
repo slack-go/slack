@@ -642,34 +642,24 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 // with cfg.Handlers == nil defaults to DefaultRetryHandlers (429 only); 429 is retried until success.
 func TestOptionRetryConfigWithNilHandlersDefaultsTo429Only(t *testing.T) {
 	t.Parallel()
-
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := callCount.Add(1)
-		if n <= 2 {
-			w.Header().Set("Retry-After", "0")
-			w.WriteHeader(http.StatusTooManyRequests)
-			return
+	synctest.Test(t, func(t *testing.T) {
+		client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		// Handlers explicitly nil; OptionRetryConfig sets DefaultRetryHandlers(cfg) (429 only).
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err != nil {
+			t.Fatalf("postMethod: %v", err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"ok":true}`))
-	}))
-	defer srv.Close()
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	// Handlers explicitly nil; OptionRetryConfig sets DefaultRetryHandlers(cfg) (429 only).
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err != nil {
-		t.Fatalf("postMethod: %v", err)
-	}
-	if !out.Ok {
-		t.Errorf("want ok=true, got ok=%v", out.Ok)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("with nil Handlers default is DefaultRetryHandlers (429 only), 429 should retry; want 3 calls, got %d", got)
-	}
+		if !out.Ok {
+			t.Errorf("want ok=true, got ok=%v", out.Ok)
+		}
+		if got := client.calls.Load(); got != 3 {
+			t.Errorf("with nil Handlers default is DefaultRetryHandlers (429 only), 429 should retry; want 3 calls, got %d", got)
+		}
+	})
 }
 
 // TestOptionRetryConfigWithNilHandlersDoesNotRetryConnection verifies that with default (429 only)
