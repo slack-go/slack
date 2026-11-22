@@ -604,27 +604,18 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 
 	t.Run("429_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount atomic.Int32
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			n := callCount.Add(1)
-			if n <= 2 {
-				w.Header().Set("Retry-After", "0")
-				w.WriteHeader(http.StatusTooManyRequests)
-				return
+		synctest.Test(t, func(t *testing.T) {
+			client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
+			api := New("token", OptionHTTPClient(client), OptionRetry(3))
+			var out SlackResponse
+			err := api.postMethod(context.Background(), "auth.test", nil, &out)
+			if err != nil {
+				t.Fatalf("postMethod: %v", err)
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"ok":true}`))
-		}))
-		defer srv.Close()
-		api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetry(3))
-		var out SlackResponse
-		err := api.postMethod(context.Background(), "auth.test", nil, &out)
-		if err != nil {
-			t.Fatalf("postMethod: %v", err)
-		}
-		if got := callCount.Load(); got != 3 {
-			t.Errorf("OptionRetry should retry 429, want 3 calls, got %d", got)
-		}
+			if got := client.calls.Load(); got != 3 {
+				t.Errorf("OptionRetry should retry 429, want 3 calls, got %d", got)
+			}
+		})
 	})
 
 	t.Run("5xx_not_retried", func(t *testing.T) {
