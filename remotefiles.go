@@ -134,10 +134,10 @@ func (api *Client) AddRemoteFileContext(ctx context.Context, params RemoteFilePa
 	}
 	switch {
 	case params.PreviewImage != "":
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", params.PreviewImage, "preview_image", api.token, values, response, api)
+		err = api.postLocalMultipartMethod(ctx, "files.remote.add", params.PreviewImage, "preview_image", values, response)
 	case params.PreviewImageReader != nil:
 		name := cmp.Or(params.PreviewImageName, "preview.png")
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.add", name, "preview_image", api.token, values, params.PreviewImageReader, response, api)
+		err = api.postMultipartMethod(ctx, "files.remote.add", name, "preview_image", api.token, values, params.PreviewImageReader, response)
 	default:
 		response, err = api.remoteFileRequest(ctx, "files.remote.add", values)
 	}
@@ -282,10 +282,10 @@ func (api *Client) UpdateRemoteFileContext(ctx context.Context, fileID string, p
 	}
 	switch {
 	case params.PreviewImage != "":
-		err = postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", params.PreviewImage, "preview_image", api.token, values, response, api)
+		err = api.postLocalMultipartMethod(ctx, "files.remote.update", params.PreviewImage, "preview_image", values, response)
 	case params.PreviewImageReader != nil:
 		name := cmp.Or(params.PreviewImageName, "preview.png")
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"files.remote.update", name, "preview_image", api.token, values, params.PreviewImageReader, response, api)
+		err = api.postMultipartMethod(ctx, "files.remote.update", name, "preview_image", api.token, values, params.PreviewImageReader, response)
 	default:
 		values.Add("token", api.token)
 		response, err = api.remoteFileRequest(ctx, "files.remote.update", values)

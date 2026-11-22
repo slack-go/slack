@@ -289,14 +289,12 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 // It returns a nil response if the request could not be built or sent;
 // otherwise the returned error is the response's error, if any.
 func (api *Client) sendResponseFull(ctx context.Context, channelID string, options ...MsgOption) (*chatResponseFull, error) {
-	var (
-		req      *http.Request
-		parser   func(*chatResponseFull) responseParser
-		response chatResponseFull
-		err      error
-	)
-
-	if req, parser, err = buildSender(api.endpoint, options...).BuildRequestContext(ctx, api.token, channelID); err != nil {
+	config, err := applyMsgOptions(api.token, channelID, api.endpoint, options...)
+	if err != nil {
+		return nil, err
+	}
+	req, parser, err := config.buildRequest(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -309,7 +307,14 @@ func (api *Client) sendResponseFull(ctx context.Context, channelID string, optio
 		api.Debugf("Sending request: %s", redactToken(reqBody))
 	}
 
-	if _, err = doPost(api.httpclient, req, parser(&response), api); err != nil {
+	var response chatResponseFull
+	headers, err := doPost(api.httpclient, req, parser(&response), api)
+	if config.apiMethod != "" && config.mode != chatResponse {
+		path := string(config.apiMethod)
+		api.checkWarnings(&response, path, config.values)
+		api.fireResponseHeaders(path, headers)
+	}
+	if err != nil {
 		return nil, err
 	}
 
@@ -335,13 +340,13 @@ func UnsafeApplyMsgOptions(token, channel, apiurl string, options ...MsgOption) 
 
 func applyMsgOptions(token, channel, apiurl string, options ...MsgOption) (sendConfig, error) {
 	config := sendConfig{
-		apiurl:   apiurl,
-		endpoint: apiurl + string(chatPostMessage),
+		apiurl: apiurl,
 		values: url.Values{
 			"token":   {token},
 			"channel": {channel},
 		},
 	}
+	config.setAPIMethod(chatPostMessage)
 
 	for _, opt := range options {
 		if err := opt(&config); err != nil {
@@ -350,13 +355,6 @@ func applyMsgOptions(token, channel, apiurl string, options ...MsgOption) (sendC
 	}
 
 	return config, nil
-}
-
-func buildSender(apiurl string, options ...MsgOption) sendConfig {
-	return sendConfig{
-		apiurl:  apiurl,
-		options: options,
-	}
 }
 
 type sendMode string
@@ -377,7 +375,7 @@ const (
 
 type sendConfig struct {
 	apiurl          string
-	options         []MsgOption
+	apiMethod       sendMode
 	mode            sendMode
 	endpoint        string
 	values          url.Values
@@ -389,15 +387,12 @@ type sendConfig struct {
 	deleteOriginal  bool
 }
 
-func (t sendConfig) BuildRequest(token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
-	return t.BuildRequestContext(context.Background(), token, channelID)
+func (t *sendConfig) setAPIMethod(method sendMode) {
+	t.apiMethod = method
+	t.endpoint = t.apiurl + string(method)
 }
 
-func (t sendConfig) BuildRequestContext(ctx context.Context, token, channelID string) (req *http.Request, _ func(*chatResponseFull) responseParser, err error) {
-	if t, err = applyMsgOptions(token, channelID, t.apiurl, t.options...); err != nil {
-		return nil, nil, err
-	}
-
+func (t sendConfig) buildRequest(ctx context.Context) (*http.Request, func(*chatResponseFull) responseParser, error) {
 	switch t.mode {
 	case chatResponse:
 		return responseURLSender{
@@ -487,7 +482,7 @@ type MsgOption func(*sendConfig) error
 // MsgOptionSchedule schedules a messages.
 func MsgOptionSchedule(postAt string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatScheduleMessage)
+		config.setAPIMethod(chatScheduleMessage)
 		config.values.Add("post_at", postAt)
 		return nil
 	}
@@ -496,7 +491,7 @@ func MsgOptionSchedule(postAt string) MsgOption {
 // MsgOptionPost posts a messages, this is the default.
 func MsgOptionPost() MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatPostMessage)
+		config.setAPIMethod(chatPostMessage)
 		config.values.Del("ts")
 		return nil
 	}
@@ -505,7 +500,7 @@ func MsgOptionPost() MsgOption {
 // MsgOptionPostEphemeral - posts an ephemeral message to the provided user.
 func MsgOptionPostEphemeral(userID string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatPostEphemeral)
+		config.setAPIMethod(chatPostEphemeral)
 		_ = MsgOptionUser(userID)(config)
 		config.values.Del("ts")
 
@@ -516,7 +511,7 @@ func MsgOptionPostEphemeral(userID string) MsgOption {
 // MsgOptionMeMessage posts a "me message" type from the calling user
 func MsgOptionMeMessage() MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatMeMessage)
+		config.setAPIMethod(chatMeMessage)
 		return nil
 	}
 }
@@ -524,7 +519,7 @@ func MsgOptionMeMessage() MsgOption {
 // MsgOptionUpdate updates a message based on the timestamp.
 func MsgOptionUpdate(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUpdate)
+		config.setAPIMethod(chatUpdate)
 		config.values.Add("ts", timestamp)
 		return nil
 	}
@@ -533,7 +528,7 @@ func MsgOptionUpdate(timestamp string) MsgOption {
 // MsgOptionDelete deletes a message based on the timestamp.
 func MsgOptionDelete(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatDelete)
+		config.setAPIMethod(chatDelete)
 		config.values.Add("ts", timestamp)
 		return nil
 	}
@@ -542,7 +537,7 @@ func MsgOptionDelete(timestamp string) MsgOption {
 // MsgOptionUnfurl unfurls a message based on the timestamp.
 func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Add("ts", timestamp)
 		unfurlsStr, err := json.Marshal(unfurls)
 		if err == nil {
@@ -557,7 +552,7 @@ func MsgOptionUnfurl(timestamp string, unfurls map[string]Attachment) MsgOption 
 // unfurls may be nil; the API expects a JSON object so nil is sent as {}.
 func MsgOptionUnfurlByID(unfurlID, source string, unfurls map[string]Attachment) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Del("channel")
 		config.values.Del("ts")
 		config.values.Set("unfurl_id", unfurlID)
@@ -577,7 +572,7 @@ func MsgOptionUnfurlByID(unfurlID, source string, unfurls map[string]Attachment)
 func MsgOptionUnfurlMetadataOnly(timestamp string, metadata WorkObjectMetadata) MsgOption {
 	return MsgOptionCompose(
 		func(config *sendConfig) error {
-			config.endpoint = config.apiurl + string(chatUnfurl)
+			config.setAPIMethod(chatUnfurl)
 			config.values.Add("ts", timestamp)
 			return nil
 		},
@@ -600,7 +595,7 @@ func MsgOptionUnfurlWorkObject(timestamp string, unfurls map[string]Attachment, 
 // MsgOptionUnfurlAuthURL unfurls a message using an auth url based on the timestamp.
 func MsgOptionUnfurlAuthURL(timestamp string, userAuthURL string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Add("ts", timestamp)
 		config.values.Add("user_auth_url", userAuthURL)
 		return nil
@@ -611,7 +606,7 @@ func MsgOptionUnfurlAuthURL(timestamp string, userAuthURL string) MsgOption {
 // Slack app for unfurling.
 func MsgOptionUnfurlAuthRequired(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Add("ts", timestamp)
 		config.values.Add("user_auth_required", "true")
 		return nil
@@ -622,7 +617,7 @@ func MsgOptionUnfurlAuthRequired(timestamp string) MsgOption {
 // authenticate.
 func MsgOptionUnfurlAuthMessage(timestamp string, msg string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Add("ts", timestamp)
 		config.values.Add("user_auth_message", msg)
 		return nil
@@ -633,7 +628,7 @@ func MsgOptionUnfurlAuthMessage(timestamp string, msg string) MsgOption {
 // See https://docs.slack.com/methods/chat.unfurl for user_auth_blocks.
 func MsgOptionUnfurlAuthBlocks(timestamp string, blocks ...Block) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatUnfurl)
+		config.setAPIMethod(chatUnfurl)
 		config.values.Add("ts", timestamp)
 		if len(blocks) == 0 {
 			return nil
@@ -901,7 +896,7 @@ func MsgOptionFileIDs(fileIDs []string) MsgOption {
 // MsgOptionStartStream starts a streaming message.
 func MsgOptionStartStream() MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatStartStream)
+		config.setAPIMethod(chatStartStream)
 		return nil
 	}
 }
@@ -909,7 +904,7 @@ func MsgOptionStartStream() MsgOption {
 // MsgOptionAppendStream appends to a streaming message.
 func MsgOptionAppendStream(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatAppendStream)
+		config.setAPIMethod(chatAppendStream)
 		config.values.Add("ts", timestamp)
 		return nil
 	}
@@ -918,7 +913,7 @@ func MsgOptionAppendStream(timestamp string) MsgOption {
 // MsgOptionStopStream stops a streaming message.
 func MsgOptionStopStream(timestamp string) MsgOption {
 	return func(config *sendConfig) error {
-		config.endpoint = config.apiurl + string(chatStopStream)
+		config.setAPIMethod(chatStopStream)
 		config.values.Add("ts", timestamp)
 		return nil
 	}
@@ -973,6 +968,7 @@ func MsgOptionTaskDisplayMode(mode TaskDisplayMode) MsgOption {
 func UnsafeMsgOptionEndpoint(endpoint string, update func(url.Values)) MsgOption {
 	return func(config *sendConfig) error {
 		config.endpoint = endpoint
+		config.apiMethod = ""
 		update(config.values)
 		return nil
 	}

@@ -379,21 +379,21 @@ func jsonReq(ctx context.Context, endpoint string, body any) (req *http.Request,
 	return req, nil
 }
 
-func postLocalWithMultipartResponse(ctx context.Context, client httpClient, method, fpath, fieldname, token string, values url.Values, intf any, d Debug) error {
+func postLocalWithMultipartResponse(ctx context.Context, client httpClient, method, fpath, fieldname, token string, values url.Values, intf any, d Debug) (http.Header, error) {
 	fullpath, err := filepath.Abs(fpath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	file, err := os.Open(fullpath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	return postWithMultipartResponse(ctx, client, method, filepath.Base(fpath), fieldname, token, values, file, intf, d)
 }
 
-func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname, token string, values url.Values, r io.Reader, intf any, d Debug) error {
+func postWithMultipartResponse(ctx context.Context, client httpClient, path, name, fieldname, token string, values url.Values, r io.Reader, intf any, d Debug) (http.Header, error) {
 	pipeReader, pipeWriter := io.Pipe()
 	// Unblock multipart writes if the request returns before consuming the body.
 	defer pipeReader.Close()
@@ -427,27 +427,27 @@ func postWithMultipartResponse(ctx context.Context, client httpClient, path, nam
 
 	req, err := fileUploadReq(ctx, path, pipeReader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Add("Content-Type", wr.FormDataContentType())
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	err = checkStatusCode(resp, d)
 	if err != nil {
-		return err
+		return resp.Header, err
 	}
 
 	select {
 	case err = <-errc:
-		return err
+		return resp.Header, err
 	default:
-		return newJSONParser(intf)(resp)
+		return resp.Header, newJSONParser(intf)(resp)
 	}
 }
 

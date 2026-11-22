@@ -3,6 +3,7 @@ package slack
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"maps"
 	"net/http"
@@ -260,6 +261,20 @@ func (api *Client) getMethod(ctx context.Context, path string, token string, val
 func (api *Client) postJSONMethod(ctx context.Context, path string, token string, jsonBody []byte, intf any) error {
 	headers, err := postJSON(ctx, api.httpclient, api.endpoint+path, token, jsonBody, intf, api)
 	api.checkWarnings(intf, path, jsonBody)
+	api.fireResponseHeaders(path, headers)
+	return err
+}
+
+func (api *Client) postMultipartMethod(ctx context.Context, path, name, fieldname, token string, values url.Values, file io.Reader, intf any) error {
+	headers, err := postWithMultipartResponse(ctx, api.httpclient, api.endpoint+path, name, fieldname, token, values, file, intf, api)
+	api.checkWarnings(intf, path, values)
+	api.fireResponseHeaders(path, headers)
+	return err
+}
+
+func (api *Client) postLocalMultipartMethod(ctx context.Context, path, filename, fieldname string, values url.Values, intf any) error {
+	headers, err := postLocalWithMultipartResponse(ctx, api.httpclient, api.endpoint+path, filename, fieldname, api.token, values, intf, api)
+	api.checkWarnings(intf, path, values)
 	api.fireResponseHeaders(path, headers)
 	return err
 }

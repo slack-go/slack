@@ -45,7 +45,7 @@ func (api *Client) SetAppIconContext(ctx context.Context, token, appID string, i
 	} else {
 		filename := cmp.Or(icon.Filename, "icon.png")
 		values := url.Values{"app_id": {appID}}
-		err = postWithMultipartResponse(ctx, api.httpclient, api.endpoint+"apps.icon.set", filename, "file", token, values, icon.File, response, api)
+		err = api.postMultipartMethod(ctx, "apps.icon.set", filename, "file", token, values, icon.File, response)
 	}
 	if err != nil {
 		return err
