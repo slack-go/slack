@@ -53,6 +53,7 @@ func waitForRTMEvent[E any](t *testing.T, rtm *slack.RTM) E {
 
 func TestRTMInfo(t *testing.T) {
 	s := NewTestServer()
+	s.BotID = "U1234567890"
 	t.Cleanup(s.Stop)
 	s.Start()
 	rtm := startTestRTM(t, s)

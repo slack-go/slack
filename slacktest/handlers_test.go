@@ -155,6 +155,7 @@ func TestUserLookUpByEmailHandler(t *testing.T) {
 
 func TestBotInfoHandler(t *testing.T) {
 	s := NewTestServer()
+	s.BotID = "U1234567890"
 	t.Cleanup(s.Stop)
 	s.Start()
 
