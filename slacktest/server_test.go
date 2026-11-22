@@ -27,6 +27,18 @@ func TestCustomNewServer(t *testing.T) {
 	assert.Equal(t, "BobsBot", s.BotName)
 }
 
+func TestServerStopUnregistersMessageQueues(t *testing.T) {
+	s := NewTestServer()
+	t.Cleanup(s.Stop)
+
+	_, err := getHubForServer(s.ServerAddr)
+	require.NoError(t, err)
+
+	s.Stop()
+	_, err = getHubForServer(s.ServerAddr)
+	require.ErrorIs(t, err, ErrNoQueuesRegisteredForServer)
+}
+
 func TestServerSendMessageToChannel(t *testing.T) {
 	s := NewTestServer()
 	t.Cleanup(s.Stop)
