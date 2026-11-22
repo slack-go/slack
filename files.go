@@ -582,6 +582,7 @@ func (api *Client) GetUploadURLExternalContext(ctx context.Context, params GetUp
 // UploadToURL uploads the file to the provided URL using post method
 // This is not a Slack API method, but a helper function to upload files to the URL
 //
+// Set Content, File, or Reader to provide the upload data.
 // The request carries the token, so the URL must pass the same check as in GetFile.
 func (api *Client) UploadToURL(ctx context.Context, params UploadToURLParameters) (err error) {
 	if err := ensureURLMayReceiveToken(api.endpoint, params.UploadURL); err != nil {
@@ -596,6 +597,8 @@ func (api *Client) UploadToURL(ctx context.Context, params UploadToURLParameters
 		err = postLocalWithMultipartResponse(ctx, api.httpclient, params.UploadURL, params.File, "file", api.token, values, nil, api)
 	case params.Reader != nil:
 		err = postWithMultipartResponse(ctx, api.httpclient, params.UploadURL, params.Filename, "file", api.token, values, params.Reader, nil, api)
+	default:
+		return fmt.Errorf("upload source is required (Content, File, or Reader)")
 	}
 	return err
 }
