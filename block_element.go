@@ -93,7 +93,12 @@ func NewAccessory(element BlockElement) *Accessory {
 	case *WorkflowButtonBlockElement:
 		return &Accessory{WorkflowButtonElement: element}
 	default:
-		return &Accessory{UnknownElement: element.(*UnknownBlockElement)}
+		if unknown, ok := element.(*UnknownBlockElement); ok {
+			return &Accessory{UnknownElement: unknown}
+		}
+		// UnknownBlockElement has a value receiver, so a value form also
+		// satisfies BlockElement. Keep it instead of panicking on the cast.
+		return &Accessory{UnknownElement: &UnknownBlockElement{Type: element.ElementType()}}
 	}
 }
 
