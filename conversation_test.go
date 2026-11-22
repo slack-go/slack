@@ -756,10 +756,20 @@ func TestCreateConversationContextParameters(t *testing.T) {
 		assert.Equal(t, "T0123456789", r.PostForm.Get("team_id"))
 		assert.Equal(t, "true", r.PostForm.Get("is_private"))
 		rw.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(rw, `{"ok":true,"channel":{"id":"C0123456789","name":"a-new-history-of-the-world","is_private":true}}`)
+		rw.Header().Set("X-Slack-Req-Id", "request-id")
+		fmt.Fprint(rw, `{"ok":true,"warning":"missing_charset","channel":{"id":"C0123456789","name":"a-new-history-of-the-world","is_private":true}}`)
 	}))
 	t.Cleanup(server.Close)
-	api := New("testing-token", OptionAPIURL(server.URL+"/"))
+	var gotWarning *Warning
+	var gotRequestID string
+	api := New("testing-token", OptionAPIURL(server.URL+"/"),
+		OptionOnWarning(func(_ string, _ any, warning *Warning) {
+			gotWarning = warning
+		}),
+		OptionOnResponseHeaders(func(_ string, headers http.Header) {
+			gotRequestID = headers.Get("X-Slack-Req-Id")
+		}),
+	)
 	channel, err := api.CreateConversationContext(t.Context(), CreateConversationParams{
 		ChannelName: "a-new-history-of-the-world",
 		IsPrivate:   true,
@@ -770,6 +780,9 @@ func TestCreateConversationContextParameters(t *testing.T) {
 	assert.Equal(t, "C0123456789", channel.ID)
 	assert.Equal(t, "a-new-history-of-the-world", channel.Name)
 	assert.True(t, channel.IsPrivate)
+	assert.Equal(t, "request-id", gotRequestID)
+	require.NotNil(t, gotWarning)
+	assert.Equal(t, []string{"missing_charset"}, gotWarning.Codes)
 }
 
 func TestCreateConversationContextErrorMetadata(t *testing.T) {
