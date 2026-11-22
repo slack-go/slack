@@ -800,9 +800,10 @@ func TestSetFieldsMap(t *testing.T) {
 
 func TestUserProfileCustomFieldsUnmarshalJSON(t *testing.T) {
 	fields := &UserProfileCustomFields{}
-	if err := json.Unmarshal([]byte(`[]`), fields); err != nil {
-		t.Fatal(err)
+	for _, input := range []string{"[]", "[ ]", "[\t\r\n]"} {
+		require.NoError(t, json.Unmarshal([]byte(input), fields), "decoding %q", input)
 	}
+	require.Error(t, json.Unmarshal([]byte(`[{}]`), fields))
 	if err := json.Unmarshal([]byte(`{
 	  "Xxxxxx": {
 		"value": "test value",

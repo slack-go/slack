@@ -72,11 +72,15 @@ type UserProfileCustomFields struct {
 
 // UnmarshalJSON is the implementation of the json.Unmarshaler interface.
 func (fields *UserProfileCustomFields) UnmarshalJSON(b []byte) error {
-	// https://github.com/slack-go/slack/pull/298#discussion_r185159233
-	if string(b) == "[]" {
-		return nil
+	err := json.Unmarshal(b, &fields.fields)
+	if err != nil {
+		// Slack can send an empty array for profiles without custom fields.
+		var array []json.RawMessage
+		if json.Unmarshal(b, &array) == nil && len(array) == 0 {
+			return nil
+		}
 	}
-	return json.Unmarshal(b, &fields.fields)
+	return err
 }
 
 // MarshalJSON is the implementation of the json.Marshaler interface.
