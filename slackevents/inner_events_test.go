@@ -3095,6 +3095,100 @@ func TestSharedChannelInviteRequested_UnmarshalJSON(t *testing.T) {
 	if len(event.TeamsInChannel) != 2 || event.TeamsInChannel[1].Name != "another_enterprise" {
 		t.Errorf("Expected second team to have name 'another_enterprise', got '%v'", event.TeamsInChannel)
 	}
+	encoded, err := json.Marshal(event)
+	require.NoError(t, err)
+	assert.JSONEq(t, jsonData, string(encoded))
+}
+
+func TestSharedChannelInviteRequestedEventsAPI(t *testing.T) {
+	// Slack API docs: https://docs.slack.dev/reference/events/shared_channel_invite_requested/
+	payload := []byte(`{
+		"token":"XXYYZZ","team_id":"T123ABC456","api_app_id":"A123ABC456",
+		"event":{
+			"type":"shared_channel_invite_requested",
+			"channel":{
+				"id":"C0123ABCDEF","is_im":false,"is_private":false,
+				"date_created":1564642828,"message_latest_counted_timestamp":1564642836000009,
+				"name":"host-team12345678999"
+			},
+			"actor":{
+				"id":"U012345ABCD","team_id":"E01234ABC","name":"username-012345ABCD",
+				"updated":1564642800,"who_can_share_contact_card":"EVERYONE",
+				"profile":{
+					"real_name":"User Name","display_name":"Username",
+					"real_name_normalized":"User Name","display_name_normalized":"Username",
+					"team":"E01234ABC","avatar_hash":"g12345678910","email":"mock-user@some-corp.com",
+					"image_24":"https://secure.gravatar.com/avatar/5efa915c16f10de52e23f4a8b8da612e.jpg?s=24&d=https%3A%2F%2Fdev.slack.com%2Fdev-cdn%2Fv1718734113%2Fimg%2Favatars%2Fuser_shapes%2Fava_0010-24.png"
+				}
+			},
+			"is_external_limited":true,
+			"target_users":[{"invite_id":"I01234ABC","email":"mock-user@some-corp.com"}],
+			"teams_in_channel":[
+				{
+					"id":"E01234ABC","name":"Team Name",
+					"icon":{"image_34":"https://some-corp.com/v123/img/avatars-teams/ava_123.png","image_default":true},
+					"avatar_base_url":"https://some-corp.com","is_verified":false,"domain":"domain-10000000000",
+					"date_created":1564642800,"requires_sponsorship":false
+				},
+				{
+					"id":"E56789DEF","name":"Team Name",
+					"icon":{"image_34":"https://some-corp.com/v456/img/avatars-teams/ava_456.png","image_default":true},
+					"avatar_base_url":"https://some-corp.com","is_verified":false,"domain":"domain-10000000123",
+					"date_created":1564642800,"requires_sponsorship":false
+				}
+			]
+		},
+		"type":"event_callback",
+		"authorizations":[{"team_id":"T123ABC456","is_bot":false,"is_enterprise_install":false}],
+		"event_id":"Ev123ABC456","event_time":123456789
+	}`)
+	parsed, err := ParseEvent(payload, OptionNoVerifyToken())
+	require.NoError(t, err)
+	assert.Equal(t, "shared_channel_invite_requested", parsed.InnerEvent.Type)
+	event, ok := parsed.InnerEvent.Data.(*SharedChannelInviteRequestedEvent)
+	require.True(t, ok)
+	assert.Equal(t, "shared_channel_invite_requested", event.Type)
+	require.NotNil(t, event.Channel)
+	assert.Equal(t, "C0123ABCDEF", event.Channel.ID)
+	assert.Equal(t, "host-team12345678999", event.Channel.Name)
+	assert.Equal(t, int64(1564642828), event.Channel.DateCreated)
+	assert.Equal(t, int64(1564642836000009), event.Channel.MessageLatestCountedTimestamp)
+	assert.Equal(t, int64(1564642800), event.Actor.Updated)
+	require.NotNil(t, event.Actor.Profile)
+	assert.Equal(t, "mock-user@some-corp.com", event.Actor.Profile.Email)
+	encoded, err := json.Marshal(event)
+	require.NoError(t, err)
+	var got map[string]any
+	require.NoError(t, json.Unmarshal(encoded, &got))
+	require.Contains(t, got, "channel", "documented nested channel was discarded")
+
+	var original struct {
+		Event map[string]any `json:"event"`
+	}
+	require.NoError(t, json.Unmarshal(payload, &original))
+	// Existing models emit some extra zero fields; every original field must survive.
+	var checkFields func(any, any)
+	checkFields = func(want, got any) {
+		switch want := want.(type) {
+		case map[string]any:
+			actual, ok := got.(map[string]any)
+			require.True(t, ok)
+			for key, value := range want {
+				require.Contains(t, actual, key)
+				checkFields(value, actual[key])
+			}
+		case []any:
+			actual, ok := got.([]any)
+			require.True(t, ok)
+			require.Len(t, actual, len(want))
+			for i, value := range want {
+				checkFields(value, actual[i])
+			}
+		default:
+			assert.Equal(t, want, got)
+		}
+	}
+	checkFields(original.Event, got)
 }
 
 func TestAppHomeOpenedEvent_WithView(t *testing.T) {
