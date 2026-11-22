@@ -61,6 +61,10 @@ func (sts *Server) conversationsInfoHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	ch := values.Get("channel")
+	if ch == "" {
+		_, _ = w.Write([]byte(`{"ok":false,"error":"missing_argument","arg":"channel"}`))
+		return
+	}
 
 	response := GroupConversationResponse{
 		Ok: true,
