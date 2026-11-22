@@ -2,14 +2,96 @@ package slacktest
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/slack-go/slack"
 )
+
+func TestWebsocketConcurrentPongAndMessages(t *testing.T) {
+	s := NewTestServer()
+	t.Cleanup(s.Stop)
+	s.Start()
+	c := dialTestWebsocket(t, s)
+	require.NoError(t, c.SetReadDeadline(time.Now().Add(10*time.Second)))
+	require.NoError(t, c.SetWriteDeadline(time.Now().Add(10*time.Second)))
+	channels, err := getHubForServer(s.ServerAddr)
+	require.NoError(t, err)
+
+	const count = 100
+	text := strings.Repeat("x", 8192)
+	start := make(chan struct{})
+	done := make(chan struct{})
+	messagesDone := make(chan struct{})
+	pingsDone := make(chan struct{})
+	var pingErr error
+	go func() {
+		defer close(messagesDone)
+		<-start
+		for i := 1; i <= count; i++ {
+			message := fmt.Sprintf(`{"type":"message","seq":%d,"text":%q}`, i, text)
+			select {
+			case channels.sent <- message:
+			case <-done:
+				return
+			}
+		}
+	}()
+	go func() {
+		defer close(pingsDone)
+		<-start
+		for i := 1; i <= count; i++ {
+			if pingErr = c.WriteJSON(slack.Ping{Type: "ping", ID: i}); pingErr != nil {
+				return
+			}
+		}
+	}()
+	defer func() {
+		close(done)
+		_ = c.Close()
+		<-messagesDone
+		<-pingsDone
+	}()
+	close(start)
+
+	remainingMessages := make(map[int]bool)
+	remainingPongs := make(map[int]bool)
+	for i := 1; i <= count; i++ {
+		remainingMessages[i] = true
+		remainingPongs[i] = true
+	}
+	for range 2 * count {
+		var event struct {
+			Type    string `json:"type"`
+			Seq     int    `json:"seq"`
+			Text    string `json:"text"`
+			ReplyTo int    `json:"reply_to"`
+		}
+		require.NoError(t, c.ReadJSON(&event))
+		switch event.Type {
+		case "message":
+			require.True(t, remainingMessages[event.Seq], "unexpected or duplicate message %d", event.Seq)
+			assert.Equal(t, text, event.Text)
+			delete(remainingMessages, event.Seq)
+		case "pong":
+			require.True(t, remainingPongs[event.ReplyTo], "unexpected or duplicate pong %d", event.ReplyTo)
+			delete(remainingPongs, event.ReplyTo)
+		default:
+			t.Fatalf("unexpected event type %q", event.Type)
+		}
+	}
+	<-pingsDone
+	require.NoError(t, pingErr)
+	assert.Empty(t, remainingMessages)
+	assert.Empty(t, remainingPongs)
+}
 
 func TestWebsocketReconnectReceivesNextMessage(t *testing.T) {
 	var s *Server

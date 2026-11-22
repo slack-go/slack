@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -23,7 +24,8 @@ func (sts *Server) queueForWebsocket(s, hubname string) {
 // handlePendingMessages writes queued messages to c until done is closed. Every
 // connection's writer receives from the same channel, so a writer that outlives its
 // connection would take messages meant for a newer one.
-func handlePendingMessages(c *websocket.Conn, hubname string, done <-chan struct{}) {
+// writeMu also guards JSON pong writes from the connection's reader goroutine.
+func handlePendingMessages(c *websocket.Conn, hubname string, done <-chan struct{}, writeMu *sync.Mutex) {
 	channel, err := getHubForServer(hubname)
 	if err != nil {
 		log.Printf("Unable to get server's channels: %s", err.Error())
@@ -41,7 +43,10 @@ func handlePendingMessages(c *websocket.Conn, hubname string, done <-chan struct
 		case <-done:
 			return
 		case m := <-channel.sent:
-			if err := c.WriteMessage(websocket.TextMessage, []byte(m)); err != nil {
+			writeMu.Lock()
+			err := c.WriteMessage(websocket.TextMessage, []byte(m))
+			writeMu.Unlock()
+			if err != nil {
 				log.Printf("error writing message to websocket: %s", err.Error())
 				return
 			}

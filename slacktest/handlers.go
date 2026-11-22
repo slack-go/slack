@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -343,11 +344,12 @@ func rtmStartHandler(w http.ResponseWriter, r *http.Request) {
 func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 	Websocket(func(c *websocket.Conn) {
 		serverAddr := r.Context().Value(ServerBotHubNameContextKey).(string)
+		var writeMu sync.Mutex
 		done := make(chan struct{})
 		writerDone := make(chan struct{})
 		go func() {
 			defer close(writerDone)
-			handlePendingMessages(c, serverAddr, done)
+			handlePendingMessages(c, serverAddr, done, &writeMu)
 		}()
 		// Stop the writer before returning so a reconnecting client gets the next
 		// message. Closing c unblocks a write in progress.
@@ -374,7 +376,10 @@ func (sts *Server) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			switch mtype {
 			case "ping":
-				if err = RTMRespPong(c, m); err != nil {
+				writeMu.Lock()
+				err = RTMRespPong(c, m)
+				writeMu.Unlock()
+				if err != nil {
 					log.Println("ping error:", err)
 				}
 			default:
