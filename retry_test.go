@@ -198,33 +198,33 @@ func TestRetryExhausted429ResponseBodyReadable(t *testing.T) {
 // set) we return *RateLimitedError and the server was called MaxRetries+1 times.
 func TestRetryExhausted429ReturnsError(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		var callCount atomic.Int32
+		client := handlerTestClient(func(w http.ResponseWriter, r *http.Request) {
+			callCount.Add(1)
+			w.Header().Set("Retry-After", "1")
+			w.WriteHeader(http.StatusTooManyRequests)
+		})
 
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount.Add(1)
-		w.Header().Set("Retry-After", "1")
-		w.WriteHeader(http.StatusTooManyRequests)
-	}))
-	defer srv.Close()
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err == nil {
-		t.Fatal("expected error after exhausting 429 retries")
-	}
-	if _, ok := errors.AsType[*RateLimitedError](err); !ok {
-		t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("want 3 calls (all 429), got %d", got)
-	}
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err == nil {
+			t.Fatal("expected error after exhausting 429 retries")
+		}
+		if _, ok := errors.AsType[*RateLimitedError](err); !ok {
+			t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
+		}
+		if got := callCount.Load(); got != 3 {
+			t.Errorf("want 3 calls (all 429), got %d", got)
+		}
+	})
 }
 
 // TestOptionRetryZeroDisablesRetry verifies OptionRetryConfig(RetryConfig{MaxRetries: 0}) does not
