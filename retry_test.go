@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/require"
@@ -21,39 +22,29 @@ import (
 // until success; call count = 2×429 + 1×200 = 3.
 func TestRetryOn429ThenSuccess(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
 
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := callCount.Add(1)
-		if n <= 2 {
-			w.Header().Set("Retry-After", "0")
-			w.WriteHeader(http.StatusTooManyRequests)
-			return
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		cfg.RetryAfterDuration = 1 * time.Millisecond
+		cfg.BackoffInitial = time.Millisecond
+		cfg.BackoffMax = 5 * time.Millisecond
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
+
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err != nil {
+			t.Fatalf("postMethod: %v", err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"ok":true}`))
-	}))
-	defer srv.Close()
-
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	cfg.RetryAfterDuration = 1 * time.Millisecond
-	cfg.BackoffInitial = time.Millisecond
-	cfg.BackoffMax = 5 * time.Millisecond
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err != nil {
-		t.Fatalf("postMethod: %v", err)
-	}
-	if !out.Ok {
-		t.Errorf("want ok=true, got ok=%v", out.Ok)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("want 3 calls (2x 429 + 1x 200), got %d", got)
-	}
+		if !out.Ok {
+			t.Errorf("want ok=true, got ok=%v", out.Ok)
+		}
+		if got := client.calls.Load(); got != 3 {
+			t.Errorf("want 3 calls (2x 429 + 1x 200), got %d", got)
+		}
+	})
 }
 
 // TestRetryOn500ThenSuccess verifies that 5xx responses are retried with backoff until success.
@@ -812,20 +803,26 @@ func (c *countAndRespondClient) Do(req *http.Request) (*http.Response, error) {
 
 // retryCountThenSuccessClient returns 429 for the first needFail Do calls, then 200.
 type retryCountThenSuccessClient struct {
-	needFail int32
-	calls    atomic.Int32
+	needFail   int32
+	retryAfter string
+	calls      atomic.Int32
 }
 
 func (c *retryCountThenSuccessClient) Do(req *http.Request) (*http.Response, error) {
-	n := c.calls.Add(1)
-	code := http.StatusTooManyRequests
-	if n > c.needFail {
-		code = http.StatusOK
+	if req.Body != nil {
+		defer req.Body.Close()
+	}
+	if c.calls.Add(1) <= c.needFail {
+		header := make(http.Header)
+		if c.retryAfter != "" {
+			header.Set("Retry-After", c.retryAfter)
+		}
+		return &http.Response{StatusCode: http.StatusTooManyRequests, Body: http.NoBody, Header: header}, nil
 	}
 	return &http.Response{
-		StatusCode: code,
+		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(strings.NewReader(`{"ok":true}`)),
-		Header:     make(http.Header),
+		Header:     http.Header{"Content-Type": {"application/json"}},
 	}, nil
 }
 
