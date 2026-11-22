@@ -19,32 +19,41 @@ type EventAuthorization struct {
 	IsEnterpriseInstall bool   `json:"is_enterprise_install"`
 }
 
-// ListEventAuthorizations lists authed users and teams for the given event_context.
+// ListEventAuthorizations lists all authorized users and teams for the given event context.
 // You must provide an app-level token to the client using OptionAppLevelToken.
 // For more details, see ListEventAuthorizationsContext documentation.
 func (api *Client) ListEventAuthorizations(eventContext string) ([]EventAuthorization, error) {
 	return api.ListEventAuthorizationsContext(context.Background(), eventContext)
 }
 
-// ListEventAuthorizationsContext lists authed users and teams for the given event_context with a custom context.
-// Slack API docs: https://api.slack.com/methods/apps.event.authorizations.list
+// ListEventAuthorizationsContext lists all authorized users and teams for the given event context.
+// It follows Slack's pagination cursors using ctx for every request.
+//
+// Slack API docs: https://docs.slack.dev/reference/methods/apps.event.authorizations.list/
 func (api *Client) ListEventAuthorizationsContext(ctx context.Context, eventContext string) ([]EventAuthorization, error) {
-	resp := &listEventAuthorizationsResponse{}
+	params := map[string]string{"event_context": eventContext}
+	var authorizations []EventAuthorization
+	for {
+		resp := &listEventAuthorizationsResponse{}
+		request, _ := json.Marshal(params)
+		if err := api.postJSONMethod(ctx, "apps.event.authorizations.list", api.appLevelToken, request, resp); err != nil {
+			return nil, err
+		}
+		if !resp.Ok {
+			return nil, resp.Err()
+		}
 
-	request, _ := json.Marshal(map[string]string{
-		"event_context": eventContext,
-	})
-
-	err := api.postJSONMethod(ctx, "apps.event.authorizations.list", api.appLevelToken, request, resp)
-
-	if err != nil {
-		return nil, err
+		if authorizations == nil {
+			authorizations = resp.Authorizations
+		} else {
+			authorizations = append(authorizations, resp.Authorizations...)
+		}
+		cursor := resp.ResponseMetadata.Cursor
+		if cursor == "" {
+			return authorizations, nil
+		}
+		params["cursor"] = cursor
 	}
-	if !resp.Ok {
-		return nil, resp.Err()
-	}
-
-	return resp.Authorizations, nil
 }
 
 // UninstallApp uninstalls your app from a workspace.
