@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestResponseHeaders(t *testing.T) {
@@ -134,4 +136,29 @@ func TestOptionOnResponseHeaders(t *testing.T) {
 			t.Fatalf("expected X-OAuth-Scopes=users:read, got %q", got)
 		}
 	})
+}
+
+func TestOptionOnResponseHeadersHTTPError(t *testing.T) {
+	for _, status := range []int{http.StatusTooManyRequests, http.StatusInternalServerError, http.StatusServiceUnavailable} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			client := httpClientFunc(func(req *http.Request) (*http.Response, error) {
+				defer req.Body.Close()
+				response := httptest.NewRecorder()
+				response.Header().Set("Retry-After", "1")
+				response.Header().Set("X-Slack-Req-Id", "request-id")
+				response.WriteHeader(status)
+				return response.Result(), nil
+			})
+
+			var gotHeaders http.Header
+			api := New("test-token", OptionHTTPClient(client), OptionOnResponseHeaders(func(_ string, headers http.Header) {
+				gotHeaders = headers
+			}))
+
+			_, err := api.AuthTestContext(t.Context())
+			require.Error(t, err)
+			require.Equal(t, "request-id", gotHeaders.Get("X-Slack-Req-Id"))
+			require.Equal(t, "1", gotHeaders.Get("Retry-After"))
+		})
+	}
 }

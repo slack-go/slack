@@ -473,7 +473,7 @@ func doPost(client httpClient, req *http.Request, parser responseParser, d Debug
 	defer resp.Body.Close()
 
 	if err = checkStatusCode(resp, d); err != nil {
-		return nil, err
+		return resp.Header, err
 	}
 
 	return resp.Header, parser(resp)
