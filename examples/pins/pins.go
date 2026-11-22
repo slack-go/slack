@@ -8,7 +8,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// WARNING: This example is destructive in the sense that it create a channel called testpinning
+// This example creates and archives a channel named testpinning if the channel does not exist.
 func main() {
 	debug := flag.Bool("debug", false, "Show JSON output")
 	flag.Parse()
@@ -70,6 +70,12 @@ func main() {
 				return
 			}
 		}
+	} else {
+		defer func() {
+			if err := api.ArchiveConversation(channel.ID); err != nil {
+				fmt.Printf("Error archiving test channel: %s\n", err)
+			}
+		}()
 	}
 	postToChannelID = channel.ID
 
@@ -109,10 +115,4 @@ func main() {
 		fmt.Printf("Error remove pin: %s\n", err)
 		return
 	}
-
-	if err = api.UnArchiveConversation(channelID); err != nil {
-		fmt.Printf("Error archiving channel: %s\n", err)
-		return
-	}
-
 }
