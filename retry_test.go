@@ -379,29 +379,30 @@ func TestNoRetryWhenGetBodyNil(t *testing.T) {
 // no GetBody, as created by getResource) are retried on 429 when using AllBuiltinRetryHandlers.
 func TestRetryGetRequestWithNilBody(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	// Return 429 twice then 200 on third call.
-	wrapped := &retryCountThenSuccessClient{needFail: 2}
-	rc := &retryClient{client: wrapped, config: cfg, debug: nil}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Body and GetBody are both nil, as with getResource — should still retry.
-	resp, err := rc.Do(req)
-	if err != nil {
-		t.Fatalf("Do: %v", err)
-	}
-	resp.Body.Close()
-	if got := wrapped.calls.Load(); got != 3 {
-		t.Errorf("GET with nil body should retry on 429 (2x 429 + 1x 200), got %d calls", got)
-	}
+		// Return 429 twice then 200 on third call.
+		wrapped := &retryCountThenSuccessClient{needFail: 2}
+		rc := &retryClient{client: wrapped, config: cfg, debug: nil}
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost/", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Body and GetBody are both nil, as with getResource — should still retry.
+		resp, err := rc.Do(req)
+		if err != nil {
+			t.Fatalf("Do: %v", err)
+		}
+		resp.Body.Close()
+		if got := wrapped.calls.Load(); got != 3 {
+			t.Errorf("GET with nil body should retry on 429 (2x 429 + 1x 200), got %d calls", got)
+		}
+	})
 }
 
 // contextCancelClient returns context.Canceled when the request context is already cancelled.
