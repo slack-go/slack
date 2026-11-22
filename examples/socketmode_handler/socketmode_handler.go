@@ -72,7 +72,7 @@ func main() {
 	socketmodeHandler.Handle(socketmode.EventTypeConnected, middlewareConnected)
 	socketmodeHandler.Handle(socketmode.EventTypeHello, middlewareHello)
 
-	// EventTypeEventsAPI: handle all EventsAPI
+	// Acknowledge all Events API events here. Specific handlers also run.
 	socketmodeHandler.Handle(socketmode.EventTypeEventsAPI, middlewareEventsAPI)
 
 	// Handle a specific event from EventsAPI
@@ -126,12 +126,6 @@ func middlewareEventsAPI(evt *socketmode.Event, client *socketmode.Client) {
 	case slackevents.CallbackEvent:
 		innerEvent := eventsAPIEvent.InnerEvent
 		switch ev := innerEvent.Data.(type) {
-		case *slackevents.AppMentionEvent:
-			fmt.Printf("We have been mentioned in %v", ev.Channel)
-			_, _, err := client.Client.PostMessage(ev.Channel, slack.MsgOptionText("Yes, hello.", false))
-			if err != nil {
-				fmt.Printf("failed posting message: %v", err)
-			}
 		case *slackevents.MemberJoinedChannelEvent:
 			fmt.Printf("user %q joined to channel %q", ev.User, ev.Channel)
 		}
@@ -147,8 +141,6 @@ func middlewareAppMentionEvent(evt *socketmode.Event, client *socketmode.Client)
 		fmt.Printf("Ignored %+v\n", evt)
 		return
 	}
-
-	client.Ack(*evt.Request)
 
 	ev, ok := eventsAPIEvent.InnerEvent.Data.(*slackevents.AppMentionEvent)
 	if !ok {
