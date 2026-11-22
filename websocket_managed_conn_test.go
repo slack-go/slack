@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -217,50 +218,35 @@ func TestRTMDisconnect(t *testing.T) {
 }
 
 func TestRTMConnectRateLimit(t *testing.T) {
-	// Set up the test server.
-	testServer := slacktest.NewTestServer(
-		func(c slacktest.Customize) {
-			c.Handle("/rtm.connect", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Add("Retry-After", "1")
-				w.WriteHeader(http.StatusTooManyRequests)
-			}))
-		},
-	)
-	go testServer.Start()
+	synctest.Test(t, func(t *testing.T) {
+		client := rtmConnectTestClient(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "/api/rtm.connect", r.URL.Path)
+			w.Header().Set("Retry-After", "1")
+			w.WriteHeader(http.StatusTooManyRequests)
+		})
+		rtm := slack.New(testToken, slack.OptionHTTPClient(client)).NewRTM()
+		start := time.Now()
+		startRTMTestConnection(t, rtm)
 
-	// Setup and start the RTM.
-	api := slack.New(testToken, slack.OptionAPIURL(testServer.GetAPIURL()))
-	rtm := api.NewRTM()
-	go rtm.ManageConnection()
-
-	// Observe incoming failures
-	connectionFailure := make(chan *slack.ConnectionErrorEvent)
-	go func() {
-		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.ConnectingEvent:
-			case *slack.ConnectionErrorEvent:
-				connectionFailure <- ev
-				if ev.Attempt > 5 {
-					rtm.Disconnect()
+		timeout := time.NewTimer(30 * time.Second)
+		defer timeout.Stop()
+		var previous, elapsed time.Duration
+		for attempt := 1; attempt <= 6; {
+			select {
+			case msg := <-rtm.IncomingEvents:
+				if ev, ok := msg.Data.(*slack.ConnectionErrorEvent); ok {
+					require.Equal(t, attempt, ev.Attempt)
+					require.GreaterOrEqual(t, ev.Backoff, max(previous, time.Second))
+					require.Equal(t, elapsed, time.Since(start))
+					previous = ev.Backoff
+					elapsed += ev.Backoff
+					attempt++
 				}
-			case *slack.DisconnectedEvent:
-				if ev.Intentional {
-					close(connectionFailure)
-					return
-				}
-			default:
-				t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+			case <-timeout.C:
+				t.Fatalf("timed out waiting for rate-limited attempt %d", attempt)
 			}
 		}
-	}()
-
-	previous := time.Duration(0)
-	for ev := range connectionFailure {
-		assert.LessOrEqual(t, previous, ev.Backoff, "backoff should increase during rate limits: %v <= %v", previous, ev.Backoff)
-		previous = ev.Backoff
-	}
-	testServer.Stop()
+	})
 }
 
 func TestRTMSingleConnect(t *testing.T) {
