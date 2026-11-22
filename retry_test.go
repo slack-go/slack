@@ -158,40 +158,40 @@ func TestRetryExhausted5xxResponseBodyReadable(t *testing.T) {
 // without Retry-After, the response body is left readable so logResponse can dump it for debug.
 func TestRetryExhausted429ResponseBodyReadable(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		const bodyContent = "rate limit message from server"
+		client := handlerTestClient(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusTooManyRequests)
+			w.Write([]byte(bodyContent))
+		})
 
-	const bodyContent = "rate limit message from server"
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte(bodyContent))
-	}))
-	defer srv.Close()
+		buf := bytes.NewBuffer(nil)
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	buf := bytes.NewBuffer(nil)
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token",
-		OptionAPIURL(srv.URL+"/"),
-		OptionRetryConfig(cfg),
-		OptionDebug(true),
-		OptionLog(log.New(buf, "", 0)),
-	)
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err == nil {
-		t.Fatal("expected error after exhausting 429 retries")
-	}
-	// 429 without Retry-After returns StatusCodeError and calls logResponse
-	if _, ok := errors.AsType[StatusCodeError](err); !ok {
-		t.Errorf("expected StatusCodeError (429 without Retry-After), got %T: %v", err, err)
-	}
-	logged := buf.String()
-	if !strings.Contains(logged, bodyContent) {
-		t.Errorf("debug log should contain response body %q; got: %s", bodyContent, logged)
-	}
+		api := New("token",
+			OptionHTTPClient(client),
+			OptionRetryConfig(cfg),
+			OptionDebug(true),
+			OptionLog(log.New(buf, "", 0)),
+		)
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err == nil {
+			t.Fatal("expected error after exhausting 429 retries")
+		}
+		// 429 without Retry-After returns StatusCodeError and calls logResponse
+		if _, ok := errors.AsType[StatusCodeError](err); !ok {
+			t.Errorf("expected StatusCodeError (429 without Retry-After), got %T: %v", err, err)
+		}
+		logged := buf.String()
+		if !strings.Contains(logged, bodyContent) {
+			t.Errorf("debug log should contain response body %q; got: %s", bodyContent, logged)
+		}
+	})
 }
 
 // TestRetryExhausted429ReturnsError verifies that when 429 retries are exhausted (with Retry-After
