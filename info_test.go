@@ -105,6 +105,12 @@ func TestJSONTime_UnmarshalJSON(t *testing.T) {
 			false,
 		},
 		{
+			"escaped string timestamp",
+			args{[]byte(`"\u0031"`)},
+			JSONTime(1),
+			false,
+		},
+		{
 			"timestamp beyond int32 range",
 			args{[]byte(`2147483648`)},
 			JSONTime(2147483648),
