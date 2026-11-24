@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `features.app_home.agent_tasks_enabled` key, which controls the Tasks tab for apps using
   `agent_view`. It's a `*bool` because Slack keeps the tab on when the key is missing: leave
   it nil for Slack's default, or set it to false to turn the tab off.
+- Add `Settings.AppLevelTokenRotationEnabled` for the
+  [app manifest](https://docs.slack.dev/reference/app-manifest)
+  `settings.app_level_token_rotation_enabled` key.
 
 ### Changed
 
