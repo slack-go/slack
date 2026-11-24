@@ -25,6 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 >
 > See the **Breaking** entries under Changed for migration steps.
 
+### Security
+
+- Pin `github.com/gorilla/websocket` to `v1.5.4-0.20240701034025-d67f41855da4` so
+  Socket Mode and RTM clients generate WebSocket mask keys with `crypto/rand` instead of
+  `math/rand` ([GO-2026-6278](https://pkg.go.dev/vuln/GO-2026-6278)). No tagged
+  gorilla/websocket release includes the fix yet. The pinned commit imports
+  `golang.org/x/net/proxy`, which v1.5.3 bundled, so `golang.org/x/net` is now an indirect
+  dependency. It's at v0.62.0, not the v0.26.0 the commit asks for, which has known
+  advisories. x/net v0.62.0 needs `go 1.26.0`, so the `go` directive moves from `1.26`.
+
 ### Added
 
 - Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
