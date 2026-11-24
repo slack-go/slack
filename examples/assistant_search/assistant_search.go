@@ -10,7 +10,7 @@ import (
 
 // This example demonstrates how to use the assistant.search.context API
 // to search across a Slack workspace. This API is designed for AI/LLM
-// consumption and returns messages, files, and channels matching a query.
+// consumption and returns messages, files, channels, and users matching a query.
 //
 // Usage: go run assistant_search.go <query>
 //
@@ -38,11 +38,11 @@ func main() {
 	query := strings.Join(os.Args[1:], " ")
 	api := slack.New(token)
 
-	// Search across public channels for messages, files, and channels
+	// Search across public channels for messages, files, channels, and users
 	resp, err := api.SearchAssistantContext(slack.AssistantSearchContextParameters{
 		Query:        query,
 		ChannelTypes: []string{"public_channel"},
-		ContentTypes: []string{"messages", "files", "channels"},
+		ContentTypes: []string{"messages", "files", "channels", "users"},
 		Limit:        10,
 	})
 	if err != nil {
@@ -109,5 +109,10 @@ func printResults(resp *slack.AssistantSearchContextResponse) {
 	for _, ch := range resp.Results.Channels {
 		fmt.Printf("  #%s — %s\n    %s\n",
 			ch.Name, ch.Purpose, ch.Permalink)
+	}
+
+	fmt.Printf("\n=== Users (%d) ===\n", len(resp.Results.Users))
+	for _, u := range resp.Results.Users {
+		fmt.Printf("  %s — %s (%s)\n", u.FullName, u.Title, u.UserID)
 	}
 }

@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
+- Add `AssistantSearchContextResults.Users` (`slack.AssistantSearchContextUser`) to decode
+  results for the `users` content type of
+  [`assistant.search.context`](https://docs.slack.dev/reference/methods/assistant.search.context),
+  and `IsArchived` and `ChannelType` to `slack.AssistantSearchContextChannel`. Slack's
+  reference doesn't document the user result fields; they come from live responses and
+  the Java SDK model.
 
 ### Changed
 

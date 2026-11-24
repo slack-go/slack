@@ -121,6 +121,20 @@ type AssistantSearchContextChannel struct {
 	Topic         string `json:"topic"`
 	Purpose       string `json:"purpose"`
 	Permalink     string `json:"permalink"`
+	IsArchived    bool   `json:"is_archived"`
+	ChannelType   string `json:"channel_type"`
+}
+
+// AssistantSearchContextUser represents a search result user, returned when
+// ContentTypes includes users.
+type AssistantSearchContextUser struct {
+	UserID              string `json:"user_id"`
+	FullName            string `json:"full_name"`
+	Title               string `json:"title"`
+	Timezone            string `json:"timezone"`
+	Email               string `json:"email"`
+	Permalink           string `json:"permalink"`
+	ProfilePicPermalink string `json:"profile_pic_permalink"`
 }
 
 // AssistantSearchContextResults contains the search results
@@ -128,6 +142,7 @@ type AssistantSearchContextResults struct {
 	Messages []AssistantSearchContextMessage `json:"messages,omitempty"`
 	Files    []AssistantSearchContextFile    `json:"files,omitempty"`
 	Channels []AssistantSearchContextChannel `json:"channels,omitempty"`
+	Users    []AssistantSearchContextUser    `json:"users,omitempty"`
 }
 
 // AssistantSearchContextResponse is the response from assistant.search.context.
@@ -283,8 +298,8 @@ func (api *Client) SetAssistantThreadsTitleContext(ctx context.Context, params A
 
 }
 
-// SearchAssistantContext searches messages, files, and channels across the
-// Slack organization using Real-time Search.
+// SearchAssistantContext searches messages, files, channels, and users across
+// the Slack organization using Real-time Search.
 //
 // Slack API docs: https://docs.slack.dev/reference/methods/assistant.search.context
 func (api *Client) SearchAssistantContext(params AssistantSearchContextParameters) (*AssistantSearchContextResponse, error) {

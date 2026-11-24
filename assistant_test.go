@@ -494,3 +494,62 @@ func TestSearchAssistantContextResponseMetadata(t *testing.T) {
 		Warnings: []string{"superfluous_charset"},
 	}, response.ResponseMetadata)
 }
+
+func TestSearchAssistantContextUsersAndChannels(t *testing.T) {
+	users := `[
+		{
+			"user_id": "U012AB3CD",
+			"full_name": "Jane Doe",
+			"title": "Staff Engineer",
+			"timezone": "Europe/London",
+			"email": "jane.doe@example.com",
+			"permalink": "https://example.slack.com/team/U012AB3CD",
+			"profile_pic_permalink": "https://avatars.slack-edge.com/2024-01-15/1234567890123_0123456789abcdef0123_192.png"
+		}
+	]`
+	channels := `[
+		{
+			"team_id": "T012AB3CD",
+			"creator_user_id": "U012AB3CD",
+			"creator_name": "Jane Doe",
+			"date_created": 1700000000,
+			"date_updated": 1710000000,
+			"name": "project-gizmo",
+			"topic": "Launch date: Q4 2025",
+			"purpose": "Coordinate the Gizmo launch",
+			"permalink": "https://example.slack.com/archives/C012AB3CD",
+			"is_archived": false,
+			"channel_type": "public_channel"
+		}
+	]`
+	// The handler runs on the server goroutine, so it uses assert, not require.
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/assistant.search.context", r.URL.Path)
+		assert.NoError(t, r.ParseForm())
+		assert.Equal(t, "users,channels", r.PostForm.Get("content_types"))
+
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{"ok": true, "results": {"users": ` + users + `, "channels": ` + channels + `}}`))
+	}))
+	t.Cleanup(ts.Close)
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+
+	response, err := api.SearchAssistantContext(AssistantSearchContextParameters{
+		Query:        "gizmo",
+		ContentTypes: []string{"users", "channels"},
+	})
+	require.NoError(t, err)
+
+	require.Len(t, response.Results.Users, 1)
+	assert.Equal(t, "jane.doe@example.com", response.Results.Users[0].Email)
+	require.Len(t, response.Results.Channels, 1)
+	assert.Equal(t, "public_channel", response.Results.Channels[0].ChannelType)
+
+	gotUsers, err := json.Marshal(response.Results.Users)
+	require.NoError(t, err)
+	assert.JSONEq(t, users, string(gotUsers))
+
+	gotChannels, err := json.Marshal(response.Results.Channels)
+	require.NoError(t, err)
+	assert.JSONEq(t, channels, string(gotChannels))
+}
