@@ -202,24 +202,18 @@ func TestSearchAssistantContextExpandedResponse(t *testing.T) {
 					"context_messages": {
 						"before": [
 							{
-								"author_user_id": "U222",
-								"team_id": "T111",
-								"channel_id": "C111",
-								"message_ts": "1234567889.000000",
-								"content": "Before message",
-								"is_author_bot": false,
-								"permalink": "https://example.slack.com/archives/C111/p1234567889000000"
+								"author_name": "Before User",
+								"text": "Before message",
+								"ts": "1234567889.000000",
+								"user_id": "U222"
 							}
 						],
 						"after": [
 							{
-								"author_user_id": "U333",
-								"team_id": "T111",
-								"channel_id": "C111",
-								"message_ts": "1234567891.000000",
-								"content": "After message",
-								"is_author_bot": true,
-								"permalink": "https://example.slack.com/archives/C111/p1234567891000000"
+								"author_name": "After User",
+								"text": "After message",
+								"ts": "1234567891.000000",
+								"user_id": "U333"
 							}
 						]
 					}
@@ -288,14 +282,20 @@ func TestSearchAssistantContextExpandedResponse(t *testing.T) {
 	if len(msg.ContextMessages.Before) != 1 {
 		t.Fatalf("Expected 1 before context message, got %d", len(msg.ContextMessages.Before))
 	}
-	if msg.ContextMessages.Before[0].Content != "Before message" {
-		t.Errorf("Expected before content 'Before message', got %q", msg.ContextMessages.Before[0].Content)
+	if msg.ContextMessages.Before[0].Text != "Before message" {
+		t.Errorf("Expected before text 'Before message', got %q", msg.ContextMessages.Before[0].Text)
+	}
+	if msg.ContextMessages.Before[0].UserID != "U222" {
+		t.Errorf("Expected before UserID 'U222', got %q", msg.ContextMessages.Before[0].UserID)
 	}
 	if len(msg.ContextMessages.After) != 1 {
 		t.Fatalf("Expected 1 after context message, got %d", len(msg.ContextMessages.After))
 	}
-	if !msg.ContextMessages.After[0].IsAuthorBot {
-		t.Errorf("Expected after message IsAuthorBot true")
+	if msg.ContextMessages.After[0].TS != "1234567891.000000" {
+		t.Errorf("Expected after TS '1234567891.000000', got %q", msg.ContextMessages.After[0].TS)
+	}
+	if msg.ContextMessages.After[0].AuthorName != "After User" {
+		t.Errorf("Expected after AuthorName 'After User', got %q", msg.ContextMessages.After[0].AuthorName)
 	}
 
 	// Verify files
@@ -335,6 +335,67 @@ func TestSearchAssistantContextExpandedResponse(t *testing.T) {
 	if response.ResponseMetadata.Cursor != "cursor123" {
 		t.Errorf("Expected Cursor 'cursor123', got %q", response.ResponseMetadata.Cursor)
 	}
+}
+
+// TestSearchAssistantContextKeepsContextMessages checks that context messages
+// survive decoding. They use text, user_id and ts, unlike top-level results.
+func TestSearchAssistantContextKeepsContextMessages(t *testing.T) {
+	// Keys from a live response and
+	// https://docs.slack.dev/reference/methods/assistant.search.context
+	const contextMessages = `{
+		"before": [
+			{"author_name": "Ada", "text": "before the match", "ts": "1763900000.000100", "user_id": "U012AB3CD"}
+		],
+		"after": [
+			{"author_name": "Grace", "text": "after the match", "ts": "1763900000.000300", "user_id": "U045EF6GH"}
+		]
+	}`
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = rw.Write([]byte(`{
+			"ok": true,
+			"results": {
+				"messages": [
+					{
+						"author_name": "Ada",
+						"author_user_id": "U012AB3CD",
+						"channel_id": "C012AB3CD",
+						"channel_name": "general",
+						"content": "the match",
+						"context_messages": ` + contextMessages + `,
+						"is_author_bot": false,
+						"message_ts": "1763900000.000200",
+						"permalink": "https://example.slack.com/archives/C012AB3CD/p1763900000000200",
+						"team_id": "T012AB3CD"
+					}
+				]
+			}
+		}`))
+	}))
+	t.Cleanup(ts.Close)
+	api := New("testing-token", OptionAPIURL(ts.URL+"/"))
+
+	response, err := api.SearchAssistantContext(AssistantSearchContextParameters{
+		Query:                  "match",
+		IncludeContextMessages: true,
+	})
+	require.NoError(t, err)
+	require.Len(t, response.Results.Messages, 1)
+
+	got, err := json.Marshal(response.Results.Messages[0].ContextMessages)
+	require.NoError(t, err)
+	assert.JSONEq(t, contextMessages, string(got))
+
+	surrounding := response.Results.Messages[0].ContextMessages
+	require.Len(t, surrounding.Before, 1)
+	require.Len(t, surrounding.After, 1)
+	assert.Equal(t, "U012AB3CD", surrounding.Before[0].UserID)
+	assert.Equal(t, "Ada", surrounding.Before[0].AuthorName)
+	assert.Equal(t, "before the match", surrounding.Before[0].Text)
+	assert.Equal(t, "1763900000.000100", surrounding.Before[0].TS)
+	assert.Equal(t, "U045EF6GH", surrounding.After[0].UserID)
+	assert.Equal(t, "after the match", surrounding.After[0].Text)
+	assert.Equal(t, "1763900000.000300", surrounding.After[0].TS)
 }
 
 func newAssistantSearchInfoTestClient(t *testing.T, body string) *Client {

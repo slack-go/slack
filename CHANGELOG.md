@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > `ListRemoteFiles` and `ListRemoteFilesContext` now also return the next page's cursor,
 > so calls that assign two results no longer compile.
 >
+> `slack.AssistantSearchContextMessageContext.Before` and `.After` now hold
+> `slack.AssistantSearchContextSurroundingMessage`.
+>
 > See the **Breaking** entries under Changed for migration steps.
 
 ### Added
@@ -71,6 +74,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `files, err := api.ListRemoteFiles(params)` with
   `files, nextCursor, err := api.ListRemoteFiles(params)`, and pass `nextCursor` as
   `params.Cursor` to fetch the next page.
+- **Breaking:** `slack.AssistantSearchContextMessageContext.Before` and `.After` now hold
+  `slack.AssistantSearchContextSurroundingMessage` instead of
+  `slack.AssistantSearchContextMessage`. Context messages from `SearchAssistantContext`
+  decoded with empty text, user ID, and timestamp because the type didn't match
+  Slack's payload. Replace `Content` with `Text`, `AuthorUserID` with `UserID`, and
+  `MessageTS` with `TS`; `AuthorName` and `Blocks` are unchanged. `TeamID`, `ChannelID`,
+  `ChannelName`, `IsAuthorBot`, `Permalink`, and `ContextMessages` are gone from context
+  entries because Slack never sent them there.
 
 ### Deprecated
 
