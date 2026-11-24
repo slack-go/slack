@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
+- Add `SetManagedAppPermissions` and its `Context` variant to set who can interact
+  with a managed app before it is installed, via
+  [`apps.managed.permissions.set`](https://docs.slack.dev/reference/methods/apps.managed.permissions.set).
+  The response's `PermissionType`, `ChannelRestrictionMode`, and `UserIDs` aren't in
+  Slack's reference; they come from Slack's
+  [recorded API samples](https://github.com/slackapi/java-slack-sdk/blob/main/json-logs/samples/api/apps.managed.permissions.set.json).
 
 ### Changed
 
