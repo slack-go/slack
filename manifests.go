@@ -321,16 +321,17 @@ type Display struct {
 
 // Settings is a group of settings corresponding to the Settings section of the app config pages.
 type Settings struct {
-	AllowedIPAddressRanges []string                  `json:"allowed_ip_address_ranges,omitempty" yaml:"allowed_ip_address_ranges,omitempty"`
-	EventSubscriptions     *EventSubscriptions       `json:"event_subscriptions,omitempty" yaml:"event_subscriptions,omitempty"`
-	FunctionRuntime        ManifestFunctionRuntime   `json:"function_runtime,omitempty" yaml:"function_runtime,omitempty"`
-	IncomingWebhooks       *ManifestIncomingWebhooks `json:"incoming_webhooks,omitempty" yaml:"incoming_webhooks,omitempty"`
-	Interactivity          *Interactivity            `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
-	IsMCPEnabled           bool                      `json:"is_mcp_enabled,omitempty" yaml:"is_mcp_enabled,omitempty"`
-	OrgDeployEnabled       bool                      `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
-	SIWSLinks              *ManifestSIWSLinks        `json:"siws_links,omitempty" yaml:"siws_links,omitempty"`
-	SocketModeEnabled      bool                      `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
-	TokenRotationEnabled   bool                      `json:"token_rotation_enabled,omitempty" yaml:"token_rotation_enabled,omitempty"`
+	AllowedIPAddressRanges       []string                  `json:"allowed_ip_address_ranges,omitempty" yaml:"allowed_ip_address_ranges,omitempty"`
+	AppLevelTokenRotationEnabled bool                      `json:"app_level_token_rotation_enabled,omitempty" yaml:"app_level_token_rotation_enabled,omitempty"`
+	EventSubscriptions           *EventSubscriptions       `json:"event_subscriptions,omitempty" yaml:"event_subscriptions,omitempty"`
+	FunctionRuntime              ManifestFunctionRuntime   `json:"function_runtime,omitempty" yaml:"function_runtime,omitempty"`
+	IncomingWebhooks             *ManifestIncomingWebhooks `json:"incoming_webhooks,omitempty" yaml:"incoming_webhooks,omitempty"`
+	Interactivity                *Interactivity            `json:"interactivity,omitempty" yaml:"interactivity,omitempty"`
+	IsMCPEnabled                 bool                      `json:"is_mcp_enabled,omitempty" yaml:"is_mcp_enabled,omitempty"`
+	OrgDeployEnabled             bool                      `json:"org_deploy_enabled,omitempty" yaml:"org_deploy_enabled,omitempty"`
+	SIWSLinks                    *ManifestSIWSLinks        `json:"siws_links,omitempty" yaml:"siws_links,omitempty"`
+	SocketModeEnabled            bool                      `json:"socket_mode_enabled,omitempty" yaml:"socket_mode_enabled,omitempty"`
+	TokenRotationEnabled         bool                      `json:"token_rotation_enabled,omitempty" yaml:"token_rotation_enabled,omitempty"`
 }
 
 // EventSubscriptions is a group of settings that describe the Events API configuration

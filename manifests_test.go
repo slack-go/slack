@@ -366,6 +366,7 @@ func TestManifestCodeChannels(t *testing.T) {
 func TestManifestKeepsSettingsKeys(t *testing.T) {
 	// Shape from https://docs.slack.dev/reference/app-manifest
 	const settings = `{
+		"app_level_token_rotation_enabled": true,
 		"event_subscriptions": {
 			"metadata_subscriptions": [
 				{"app_id": "A012ABCD0A0", "event_type": "task_created"}
@@ -392,6 +393,7 @@ func TestManifestKeepsSettingsKeys(t *testing.T) {
 	require.NotNil(t, manifest.OAuthConfig.TokenManagementEnabled)
 	assert.False(t, *manifest.OAuthConfig.TokenManagementEnabled)
 	assert.True(t, manifest.OAuthConfig.PKCEEnabled)
+	assert.True(t, manifest.Settings.AppLevelTokenRotationEnabled)
 	assert.True(t, manifest.Settings.IsMCPEnabled)
 	assert.True(t, manifest.Settings.TokenRotationEnabled)
 	assert.Equal(t, ManifestFunctionRuntimeRemote, manifest.Settings.FunctionRuntime)
