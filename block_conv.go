@@ -88,6 +88,8 @@ func (b *Blocks) UnmarshalJSON(data []byte) error {
 			block = &ContainerBlock{}
 		case "layout":
 			block = &LayoutBlock{}
+		case "condition":
+			block = &ConditionBlock{}
 		default:
 			block = &UnknownBlock{raw: r}
 		}

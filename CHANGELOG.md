@@ -27,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Block Kit: Add the `condition` block through `ConditionBlock`, which renders the
+  first case whose conditions match the viewer's Slack client (`desktop`, `ios` or
+  `android`), or its default. Slack doesn't document this block yet; its shape matches
+  Block Kit Builder.
 - Add `GetAssistantSearchInfo` and its `Context` variant to check whether a team has
   semantic search enabled, via
   [`assistant.search.info`](https://docs.slack.dev/reference/methods/assistant.search.info).
