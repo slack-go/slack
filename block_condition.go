@@ -48,8 +48,11 @@ type ConditionCase struct {
 }
 
 // NewConditionCase returns a case that renders blocks when every condition matches.
-func NewConditionCase(conditions []Condition, blocks ...Block) ConditionCase {
-	return ConditionCase{Conditions: conditions, Blocks: Blocks{BlockSet: blocks}}
+func NewConditionCase(conditions []Condition, blocks ...Block) *ConditionCase {
+	return &ConditionCase{
+		Conditions: append([]Condition{}, conditions...),
+		Blocks:     Blocks{BlockSet: append([]Block{}, blocks...)},
+	}
 }
 
 // ConditionBlock renders the blocks of the first case whose conditions match the
@@ -60,7 +63,7 @@ func NewConditionCase(conditions []Condition, blocks ...Block) ConditionCase {
 type ConditionBlock struct {
 	Type    MessageBlockType `json:"type"`
 	BlockID string           `json:"block_id,omitempty"`
-	Cases   []ConditionCase  `json:"cases"`
+	Cases   []*ConditionCase `json:"cases"`
 	Default Blocks           `json:"default"`
 }
 
@@ -78,10 +81,12 @@ func (s ConditionBlock) ID() string {
 func (s ConditionBlock) MarshalJSON() ([]byte, error) {
 	type alias ConditionBlock
 	a := alias(s)
-	a.Cases = make([]ConditionCase, len(s.Cases))
+	a.Cases = make([]*ConditionCase, len(s.Cases))
 	for i, c := range s.Cases {
-		if c.Blocks.BlockSet == nil {
-			c.Blocks.BlockSet = []Block{}
+		if c != nil && c.Blocks.BlockSet == nil {
+			copied := *c
+			copied.Blocks.BlockSet = []Block{}
+			c = &copied
 		}
 		a.Cases[i] = c
 	}
@@ -101,6 +106,9 @@ func (s ConditionBlock) Validate() error {
 		return fmt.Errorf("cases must have at least 1 case")
 	}
 	for i, c := range s.Cases {
+		if c == nil {
+			return fmt.Errorf("case %d must not be nil", i)
+		}
 		if len(c.Conditions) == 0 {
 			return fmt.Errorf("case %d must have at least 1 condition", i)
 		}
@@ -110,10 +118,10 @@ func (s ConditionBlock) Validate() error {
 
 // NewConditionBlock returns a new condition block with the given cases and an empty
 // default.
-func NewConditionBlock(cases ...ConditionCase) *ConditionBlock {
+func NewConditionBlock(cases ...*ConditionCase) *ConditionBlock {
 	return &ConditionBlock{
 		Type:  MBTCondition,
-		Cases: cases,
+		Cases: append([]*ConditionCase{}, cases...),
 	}
 }
 
@@ -125,12 +133,12 @@ func (s *ConditionBlock) WithBlockID(blockID string) *ConditionBlock {
 
 // WithDefault sets the blocks rendered when no case matches.
 func (s *ConditionBlock) WithDefault(blocks ...Block) *ConditionBlock {
-	s.Default = Blocks{BlockSet: blocks}
+	s.Default = Blocks{BlockSet: append([]Block{}, blocks...)}
 	return s
 }
 
 // AddCase appends a case. Cases are checked in order.
-func (s *ConditionBlock) AddCase(c ConditionCase) *ConditionBlock {
+func (s *ConditionBlock) AddCase(c *ConditionCase) *ConditionBlock {
 	s.Cases = append(s.Cases, c)
 	return s
 }

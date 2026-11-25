@@ -28,6 +28,20 @@ func TestNewConditionBlock(t *testing.T) {
 	assert.NoError(t, block.Validate())
 }
 
+func TestConditionBlockCopiesInputSlices(t *testing.T) {
+	blocks := []Block{NewDividerBlock()}
+	conditions := []Condition{NewClientCondition(ConditionClientIOS)}
+
+	c := NewConditionCase(conditions, blocks...)
+	block := NewConditionBlock(c).WithDefault(blocks...)
+	blocks[0] = NewHeaderBlock(NewTextBlockObject(PlainTextType, "Changed", false, false))
+	conditions[0] = NewClientCondition(ConditionClientAndroid)
+
+	assert.IsType(t, &DividerBlock{}, c.Blocks.BlockSet[0])
+	assert.IsType(t, &DividerBlock{}, block.Default.BlockSet[0])
+	assert.Equal(t, "ios", c.Conditions[0].Value)
+}
+
 func TestConditionBlockMarshalJSON(t *testing.T) {
 	block := NewConditionBlock(NewConditionCase([]Condition{NewClientCondition(ConditionClientDesktop)}))
 
@@ -87,8 +101,13 @@ func TestConditionBlockValidate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "nil case",
+			block:   NewConditionBlock(nil),
+			wantErr: true,
+		},
+		{
 			name:    "wrong type",
-			block:   &ConditionBlock{Type: MBTContainer, Cases: []ConditionCase{NewConditionCase([]Condition{NewClientCondition(ConditionClientIOS)})}},
+			block:   &ConditionBlock{Type: MBTContainer, Cases: []*ConditionCase{NewConditionCase([]Condition{NewClientCondition(ConditionClientIOS)})}},
 			wantErr: true,
 		},
 	}
