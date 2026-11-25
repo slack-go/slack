@@ -91,10 +91,10 @@ func printResults(resp *slack.AssistantSearchContextResponse) {
 
 		if msg.ContextMessages != nil {
 			for _, before := range msg.ContextMessages.Before {
-				fmt.Printf("    [before] %s: %s\n", before.AuthorUserID, before.Content)
+				fmt.Printf("    [before] %s: %s\n", before.UserID, before.Text)
 			}
 			for _, after := range msg.ContextMessages.After {
-				fmt.Printf("    [after]  %s: %s\n", after.AuthorUserID, after.Content)
+				fmt.Printf("    [after]  %s: %s\n", after.UserID, after.Text)
 			}
 		}
 	}

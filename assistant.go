@@ -81,8 +81,18 @@ type AssistantSearchContextMessage struct {
 
 // AssistantSearchContextMessageContext contains context messages surrounding a search result
 type AssistantSearchContextMessageContext struct {
-	Before []AssistantSearchContextMessage `json:"before"`
-	After  []AssistantSearchContextMessage `json:"after"`
+	Before []AssistantSearchContextSurroundingMessage `json:"before"`
+	After  []AssistantSearchContextSurroundingMessage `json:"after"`
+}
+
+// AssistantSearchContextSurroundingMessage is a message before or after a
+// search result, returned when IncludeContextMessages is set.
+type AssistantSearchContextSurroundingMessage struct {
+	UserID     string `json:"user_id"`
+	AuthorName string `json:"author_name,omitempty"`
+	Text       string `json:"text"`
+	TS         string `json:"ts"`
+	Blocks     Blocks `json:"blocks,omitzero"`
 }
 
 // AssistantSearchContextFile represents a search result file
