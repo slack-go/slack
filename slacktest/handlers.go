@@ -20,6 +20,7 @@ func contextHandler(server *Server, next http.HandlerFunc) http.Handler {
 		ctx := context.WithValue(r.Context(), ServerURLContextKey, server.GetAPIURL())
 		ctx = context.WithValue(ctx, ServerWSContextKey, server.GetWSURL())
 		ctx = context.WithValue(ctx, ServerBotNameContextKey, server.BotName)
+		ctx = context.WithValue(ctx, ServerBotIDContextKey, server.BotID)
 		ctx = context.WithValue(ctx, ServerBotChannelsContextKey, server.GetChannels())
 		ctx = context.WithValue(ctx, ServerBotGroupsContextKey, server.GetGroups())
 		ctx = context.WithValue(ctx, ServerBotHubNameContextKey, server.ServerAddr)
