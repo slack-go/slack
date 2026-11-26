@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -201,10 +202,8 @@ func TestRichTextSectionUnknownElementRoundTrip(t *testing.T) {
 	assert.Equal(t, float64(42), elem["data"]) //nolint:testifylint // This JSON integer is exact; also verify its decoded type.
 }
 
-// TestAllAccessoryTypesRoundTrip ensures every Accessory field can survive a
-// marshal→unmarshal round trip. When a new field is added to the Accessory struct
-// and wired into NewAccessory but not into Accessory.UnmarshalJSON, this test
-// will fail.
+// TestAllAccessoryTypesRoundTrip checks value and pointer construction and JSON
+// round trips for the known accessory types.
 func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 	text := NewTextBlockObject("plain_text", "test", false, false)
 	workflow := &Workflow{Trigger: &WorkflowTrigger{URL: "https://example.com"}}
@@ -268,6 +267,9 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			accessory := NewAccessory(tc.element)
+			if value, ok := reflect.TypeAssert[BlockElement](reflect.ValueOf(tc.element).Elem()); ok {
+				require.Equal(t, accessory, NewAccessory(value))
+			}
 
 			data, err := json.Marshal(accessory)
 			require.NoError(t, err, "Marshal failed for %s", tc.name)
@@ -282,6 +284,11 @@ func TestAllAccessoryTypesRoundTrip(t *testing.T) {
 			require.JSONEq(t, string(data), string(encoded))
 		})
 	}
+}
+
+func TestNewAccessoryUnknownElementValue(t *testing.T) {
+	element := UnknownBlockElement{Type: "future"}
+	require.Equal(t, &Accessory{UnknownElement: &element}, NewAccessory(element))
 }
 
 func TestAccessoryUnmarshalInvalidInput(t *testing.T) {

@@ -65,33 +65,60 @@ type Accessory struct {
 	UnknownElement             *UnknownBlockElement
 }
 
-// NewAccessory returns a new Accessory for a given block element
+// NewAccessory returns an Accessory for a supported block element passed as a
+// value or pointer.
 func NewAccessory(element BlockElement) *Accessory {
 	switch element := element.(type) {
 	case *ImageBlockElement:
 		return &Accessory{ImageElement: element}
+	case ImageBlockElement:
+		return &Accessory{ImageElement: &element}
 	case *ButtonBlockElement:
 		return &Accessory{ButtonElement: element}
+	case ButtonBlockElement:
+		return &Accessory{ButtonElement: &element}
 	case *OverflowBlockElement:
 		return &Accessory{OverflowElement: element}
+	case OverflowBlockElement:
+		return &Accessory{OverflowElement: &element}
 	case *DatePickerBlockElement:
 		return &Accessory{DatePickerElement: element}
+	case DatePickerBlockElement:
+		return &Accessory{DatePickerElement: &element}
 	case *TimePickerBlockElement:
 		return &Accessory{TimePickerElement: element}
+	case TimePickerBlockElement:
+		return &Accessory{TimePickerElement: &element}
 	case *PlainTextInputBlockElement:
 		return &Accessory{PlainTextInputElement: element}
+	case PlainTextInputBlockElement:
+		return &Accessory{PlainTextInputElement: &element}
 	case *RichTextInputBlockElement:
 		return &Accessory{RichTextInputElement: element}
+	case RichTextInputBlockElement:
+		return &Accessory{RichTextInputElement: &element}
 	case *RadioButtonsBlockElement:
 		return &Accessory{RadioButtonsElement: element}
+	case RadioButtonsBlockElement:
+		return &Accessory{RadioButtonsElement: &element}
 	case *SelectBlockElement:
 		return &Accessory{SelectElement: element}
+	case SelectBlockElement:
+		return &Accessory{SelectElement: &element}
 	case *MultiSelectBlockElement:
 		return &Accessory{MultiSelectElement: element}
+	case MultiSelectBlockElement:
+		return &Accessory{MultiSelectElement: &element}
 	case *CheckboxGroupsBlockElement:
 		return &Accessory{CheckboxGroupsBlockElement: element}
+	case CheckboxGroupsBlockElement:
+		return &Accessory{CheckboxGroupsBlockElement: &element}
 	case *WorkflowButtonBlockElement:
 		return &Accessory{WorkflowButtonElement: element}
+	case WorkflowButtonBlockElement:
+		return &Accessory{WorkflowButtonElement: &element}
+	case UnknownBlockElement:
+		return &Accessory{UnknownElement: &element}
 	default:
 		return &Accessory{UnknownElement: element.(*UnknownBlockElement)}
 	}
