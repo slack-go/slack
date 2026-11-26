@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -1199,40 +1200,21 @@ func getConversationPagesWithRateLimitErrors(pageCount int64) func(rw http.Respo
 }
 
 func TestGetAllConversationsHandlesRateLimit(t *testing.T) {
-	http.DefaultServeMux = new(http.ServeMux)
-	http.HandleFunc("/conversations.list", getConversationPagesWithRateLimitErrors(3))
+	synctest.Test(t, func(t *testing.T) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/conversations.list", getConversationPagesWithRateLimitErrors(3))
+		api := New(validToken, OptionHTTPClient(handlerTestClient(mux.ServeHTTP)))
 
-	once.Do(startServer)
-	api := New("testing-token", OptionAPIURL("http://"+serverAddr+"/"))
-
-	start := time.Now()
-	conversations, err := api.GetAllConversations()
-	elapsed := time.Since(start)
-
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	// Should have 3 conversations (one per page)
-	if len(conversations) != 3 {
-		t.Errorf("Expected 3 conversations, got %d", len(conversations))
-		return
-	}
-
-	// Should have taken at least 2 seconds due to rate limiting (2 rate limit delays)
-	if elapsed < 2*time.Second {
-		t.Errorf("Expected at least 2 seconds due to rate limiting, took %v", elapsed)
-		return
-	}
-
-	// Verify conversation IDs
-	expectedIDs := []string{"C000", "C001", "C002"}
-	for i, conv := range conversations {
-		if conv.ID != expectedIDs[i] {
-			t.Errorf("Expected conversation ID %s, got %s", expectedIDs[i], conv.ID)
+		start := time.Now()
+		conversations, err := api.GetAllConversations()
+		require.NoError(t, err)
+		require.Len(t, conversations, 3)
+		// The API waits for Retry-After twice between the three pages.
+		assert.Equal(t, 2*time.Second, time.Since(start))
+		for i, want := range []string{"C000", "C001", "C002"} {
+			assert.Equal(t, want, conversations[i].ID)
 		}
-	}
+	})
 }
 
 func TestGetAllConversationsReturnsServerError(t *testing.T) {

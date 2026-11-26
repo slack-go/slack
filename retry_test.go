@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/require"
@@ -21,39 +22,29 @@ import (
 // until success; call count = 2×429 + 1×200 = 3.
 func TestRetryOn429ThenSuccess(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
 
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := callCount.Add(1)
-		if n <= 2 {
-			w.Header().Set("Retry-After", "0")
-			w.WriteHeader(http.StatusTooManyRequests)
-			return
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		cfg.RetryAfterDuration = 1 * time.Millisecond
+		cfg.BackoffInitial = time.Millisecond
+		cfg.BackoffMax = 5 * time.Millisecond
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
+
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err != nil {
+			t.Fatalf("postMethod: %v", err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"ok":true}`))
-	}))
-	defer srv.Close()
-
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	cfg.RetryAfterDuration = 1 * time.Millisecond
-	cfg.BackoffInitial = time.Millisecond
-	cfg.BackoffMax = 5 * time.Millisecond
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err != nil {
-		t.Fatalf("postMethod: %v", err)
-	}
-	if !out.Ok {
-		t.Errorf("want ok=true, got ok=%v", out.Ok)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("want 3 calls (2x 429 + 1x 200), got %d", got)
-	}
+		if !out.Ok {
+			t.Errorf("want ok=true, got ok=%v", out.Ok)
+		}
+		if got := client.calls.Load(); got != 3 {
+			t.Errorf("want 3 calls (2x 429 + 1x 200), got %d", got)
+		}
+	})
 }
 
 // TestRetryOn500ThenSuccess verifies that 5xx responses are retried with backoff until success.
@@ -167,73 +158,73 @@ func TestRetryExhausted5xxResponseBodyReadable(t *testing.T) {
 // without Retry-After, the response body is left readable so logResponse can dump it for debug.
 func TestRetryExhausted429ResponseBodyReadable(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		const bodyContent = "rate limit message from server"
+		client := handlerTestClient(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusTooManyRequests)
+			w.Write([]byte(bodyContent))
+		})
 
-	const bodyContent = "rate limit message from server"
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusTooManyRequests)
-		w.Write([]byte(bodyContent))
-	}))
-	defer srv.Close()
+		buf := bytes.NewBuffer(nil)
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	buf := bytes.NewBuffer(nil)
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token",
-		OptionAPIURL(srv.URL+"/"),
-		OptionRetryConfig(cfg),
-		OptionDebug(true),
-		OptionLog(log.New(buf, "", 0)),
-	)
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err == nil {
-		t.Fatal("expected error after exhausting 429 retries")
-	}
-	// 429 without Retry-After returns StatusCodeError and calls logResponse
-	if _, ok := errors.AsType[StatusCodeError](err); !ok {
-		t.Errorf("expected StatusCodeError (429 without Retry-After), got %T: %v", err, err)
-	}
-	logged := buf.String()
-	if !strings.Contains(logged, bodyContent) {
-		t.Errorf("debug log should contain response body %q; got: %s", bodyContent, logged)
-	}
+		api := New("token",
+			OptionHTTPClient(client),
+			OptionRetryConfig(cfg),
+			OptionDebug(true),
+			OptionLog(log.New(buf, "", 0)),
+		)
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err == nil {
+			t.Fatal("expected error after exhausting 429 retries")
+		}
+		// 429 without Retry-After returns StatusCodeError and calls logResponse
+		if _, ok := errors.AsType[StatusCodeError](err); !ok {
+			t.Errorf("expected StatusCodeError (429 without Retry-After), got %T: %v", err, err)
+		}
+		logged := buf.String()
+		if !strings.Contains(logged, bodyContent) {
+			t.Errorf("debug log should contain response body %q; got: %s", bodyContent, logged)
+		}
+	})
 }
 
 // TestRetryExhausted429ReturnsError verifies that when 429 retries are exhausted (with Retry-After
 // set) we return *RateLimitedError and the server was called MaxRetries+1 times.
 func TestRetryExhausted429ReturnsError(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		var callCount atomic.Int32
+		client := handlerTestClient(func(w http.ResponseWriter, r *http.Request) {
+			callCount.Add(1)
+			w.Header().Set("Retry-After", "1")
+			w.WriteHeader(http.StatusTooManyRequests)
+		})
 
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount.Add(1)
-		w.Header().Set("Retry-After", "1")
-		w.WriteHeader(http.StatusTooManyRequests)
-	}))
-	defer srv.Close()
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err == nil {
-		t.Fatal("expected error after exhausting 429 retries")
-	}
-	if _, ok := errors.AsType[*RateLimitedError](err); !ok {
-		t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("want 3 calls (all 429), got %d", got)
-	}
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err == nil {
+			t.Fatal("expected error after exhausting 429 retries")
+		}
+		if _, ok := errors.AsType[*RateLimitedError](err); !ok {
+			t.Errorf("expected *RateLimitedError, got %T: %v", err, err)
+		}
+		if got := callCount.Load(); got != 3 {
+			t.Errorf("want 3 calls (all 429), got %d", got)
+		}
+	})
 }
 
 // TestOptionRetryZeroDisablesRetry verifies OptionRetryConfig(RetryConfig{MaxRetries: 0}) does not
@@ -388,29 +379,30 @@ func TestNoRetryWhenGetBodyNil(t *testing.T) {
 // no GetBody, as created by getResource) are retried on 429 when using AllBuiltinRetryHandlers.
 func TestRetryGetRequestWithNilBody(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		cfg.RetryAfterDuration = time.Millisecond
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	cfg.RetryAfterDuration = time.Millisecond
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
-
-	// Return 429 twice then 200 on third call.
-	wrapped := &retryCountThenSuccessClient{needFail: 2}
-	rc := &retryClient{client: wrapped, config: cfg, debug: nil}
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// Body and GetBody are both nil, as with getResource — should still retry.
-	resp, err := rc.Do(req)
-	if err != nil {
-		t.Fatalf("Do: %v", err)
-	}
-	resp.Body.Close()
-	if got := wrapped.calls.Load(); got != 3 {
-		t.Errorf("GET with nil body should retry on 429 (2x 429 + 1x 200), got %d calls", got)
-	}
+		// Return 429 twice then 200 on third call.
+		wrapped := &retryCountThenSuccessClient{needFail: 2}
+		rc := &retryClient{client: wrapped, config: cfg, debug: nil}
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "http://localhost/", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Body and GetBody are both nil, as with getResource — should still retry.
+		resp, err := rc.Do(req)
+		if err != nil {
+			t.Fatalf("Do: %v", err)
+		}
+		resp.Body.Close()
+		if got := wrapped.calls.Load(); got != 3 {
+			t.Errorf("GET with nil body should retry on 429 (2x 429 + 1x 200), got %d calls", got)
+		}
+	})
 }
 
 // contextCancelClient returns context.Canceled when the request context is already cancelled.
@@ -473,47 +465,48 @@ func TestRetryRespectsContextCancelation(t *testing.T) {
 // sleeping the full duration, and we do not perform a second request.
 func TestRetryContextCanceledDuringSleep(t *testing.T) {
 	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		mock := &countAndRespondClient{code: http.StatusTooManyRequests}
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 2
+		cfg.RetryAfterDuration = 60 * time.Second // long sleep; cancel during this
+		cfg.RetryAfterJitter = 0
+		cfg.Handlers = AllBuiltinRetryHandlers(cfg)
 
-	mock := &countAndRespondClient{code: http.StatusTooManyRequests}
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 2
-	cfg.RetryAfterDuration = 60 * time.Second // long sleep; cancel during this
-	cfg.RetryAfterJitter = 0
-	cfg.Handlers = AllBuiltinRetryHandlers(cfg)
+		ctx, cancel := context.WithCancel(t.Context())
+		defer cancel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+		body := "body"
+		rc := &retryClient{client: mock, config: cfg, debug: nil}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://localhost/", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.GetBody = func() (io.ReadCloser, error) {
+			return io.NopCloser(strings.NewReader(body)), nil
+		}
 
-	body := "body"
-	rc := &retryClient{client: mock, config: cfg, debug: nil}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://localhost/", strings.NewReader(body))
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.GetBody = func() (io.ReadCloser, error) {
-		return io.NopCloser(strings.NewReader(body)), nil
-	}
+		// Wait until Do is blocked on the retry timer before canceling.
+		go func() {
+			synctest.Wait()
+			cancel()
+		}()
 
-	// Cancel context shortly after first attempt returns 429, so we exit during sleep.
-	go func() {
-		time.Sleep(20 * time.Millisecond)
-		cancel()
-	}()
-
-	resp, err := rc.Do(req)
-	if err == nil {
-		t.Fatal("expected error when context is cancelled during sleep")
-	}
-	if resp != nil {
-		resp.Body.Close()
-		t.Errorf("expected nil response when context cancelled, got %v", resp)
-	}
-	if !errors.Is(err, context.Canceled) {
-		t.Errorf("expected context.Canceled, got %v", err)
-	}
-	if got := mock.count.Load(); got != 1 {
-		t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
-	}
+		resp, err := rc.Do(req)
+		if err == nil {
+			t.Fatal("expected error when context is cancelled during sleep")
+		}
+		if resp != nil {
+			resp.Body.Close()
+			t.Errorf("expected nil response when context cancelled, got %v", resp)
+		}
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("expected context.Canceled, got %v", err)
+		}
+		if got := mock.count.Load(); got != 1 {
+			t.Errorf("expected 1 call (cancel during sleep before retry), got %d", got)
+		}
+	})
 }
 
 func TestRateLimitRetryWithLargeJitter(t *testing.T) {
@@ -611,27 +604,18 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 
 	t.Run("429_retried", func(t *testing.T) {
 		t.Parallel()
-		var callCount atomic.Int32
-		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			n := callCount.Add(1)
-			if n <= 2 {
-				w.Header().Set("Retry-After", "0")
-				w.WriteHeader(http.StatusTooManyRequests)
-				return
+		synctest.Test(t, func(t *testing.T) {
+			client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
+			api := New("token", OptionHTTPClient(client), OptionRetry(3))
+			var out SlackResponse
+			err := api.postMethod(context.Background(), "auth.test", nil, &out)
+			if err != nil {
+				t.Fatalf("postMethod: %v", err)
 			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"ok":true}`))
-		}))
-		defer srv.Close()
-		api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetry(3))
-		var out SlackResponse
-		err := api.postMethod(context.Background(), "auth.test", nil, &out)
-		if err != nil {
-			t.Fatalf("postMethod: %v", err)
-		}
-		if got := callCount.Load(); got != 3 {
-			t.Errorf("OptionRetry should retry 429, want 3 calls, got %d", got)
-		}
+			if got := client.calls.Load(); got != 3 {
+				t.Errorf("OptionRetry should retry 429, want 3 calls, got %d", got)
+			}
+		})
 	})
 
 	t.Run("5xx_not_retried", func(t *testing.T) {
@@ -658,34 +642,24 @@ func TestOptionRetryRetries429Not5xx(t *testing.T) {
 // with cfg.Handlers == nil defaults to DefaultRetryHandlers (429 only); 429 is retried until success.
 func TestOptionRetryConfigWithNilHandlersDefaultsTo429Only(t *testing.T) {
 	t.Parallel()
-
-	var callCount atomic.Int32
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		n := callCount.Add(1)
-		if n <= 2 {
-			w.Header().Set("Retry-After", "0")
-			w.WriteHeader(http.StatusTooManyRequests)
-			return
+	synctest.Test(t, func(t *testing.T) {
+		client := &retryCountThenSuccessClient{needFail: 2, retryAfter: "0"}
+		cfg := DefaultRetryConfig()
+		cfg.MaxRetries = 3
+		// Handlers explicitly nil; OptionRetryConfig sets DefaultRetryHandlers(cfg) (429 only).
+		api := New("token", OptionHTTPClient(client), OptionRetryConfig(cfg))
+		var out SlackResponse
+		err := api.postMethod(context.Background(), "auth.test", nil, &out)
+		if err != nil {
+			t.Fatalf("postMethod: %v", err)
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"ok":true}`))
-	}))
-	defer srv.Close()
-	cfg := DefaultRetryConfig()
-	cfg.MaxRetries = 3
-	// Handlers explicitly nil; OptionRetryConfig sets DefaultRetryHandlers(cfg) (429 only).
-	api := New("token", OptionAPIURL(srv.URL+"/"), OptionRetryConfig(cfg))
-	var out SlackResponse
-	err := api.postMethod(context.Background(), "auth.test", nil, &out)
-	if err != nil {
-		t.Fatalf("postMethod: %v", err)
-	}
-	if !out.Ok {
-		t.Errorf("want ok=true, got ok=%v", out.Ok)
-	}
-	if got := callCount.Load(); got != 3 {
-		t.Errorf("with nil Handlers default is DefaultRetryHandlers (429 only), 429 should retry; want 3 calls, got %d", got)
-	}
+		if !out.Ok {
+			t.Errorf("want ok=true, got ok=%v", out.Ok)
+		}
+		if got := client.calls.Load(); got != 3 {
+			t.Errorf("with nil Handlers default is DefaultRetryHandlers (429 only), 429 should retry; want 3 calls, got %d", got)
+		}
+	})
 }
 
 // TestOptionRetryConfigWithNilHandlersDoesNotRetryConnection verifies that with default (429 only)
@@ -812,20 +786,26 @@ func (c *countAndRespondClient) Do(req *http.Request) (*http.Response, error) {
 
 // retryCountThenSuccessClient returns 429 for the first needFail Do calls, then 200.
 type retryCountThenSuccessClient struct {
-	needFail int32
-	calls    atomic.Int32
+	needFail   int32
+	retryAfter string
+	calls      atomic.Int32
 }
 
 func (c *retryCountThenSuccessClient) Do(req *http.Request) (*http.Response, error) {
-	n := c.calls.Add(1)
-	code := http.StatusTooManyRequests
-	if n > c.needFail {
-		code = http.StatusOK
+	if req.Body != nil {
+		defer req.Body.Close()
+	}
+	if c.calls.Add(1) <= c.needFail {
+		header := make(http.Header)
+		if c.retryAfter != "" {
+			header.Set("Retry-After", c.retryAfter)
+		}
+		return &http.Response{StatusCode: http.StatusTooManyRequests, Body: http.NoBody, Header: header}, nil
 	}
 	return &http.Response{
-		StatusCode: code,
+		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(strings.NewReader(`{"ok":true}`)),
-		Header:     make(http.Header),
+		Header:     http.Header{"Content-Type": {"application/json"}},
 	}, nil
 }
 
