@@ -32,6 +32,44 @@ func TestListEventAuthorizationsDeliversWarnings(t *testing.T) {
 	require.Equal(t, 1, warnings)
 }
 
+func TestListEventAuthorizationsFollowsCursor(t *testing.T) {
+	pages := []struct {
+		request  map[string]string
+		response string
+	}{
+		{
+			request:  map[string]string{"event_context": "event-context"},
+			response: `{"ok":true,"authorizations":[{"team_id":"T1","user_id":"U1"}],"response_metadata":{"next_cursor":"page-2="}}`,
+		},
+		{
+			request:  map[string]string{"event_context": "event-context", "cursor": "page-2="},
+			response: `{"ok":true,"authorizations":[{"team_id":"T2","user_id":"U2"}]}`,
+		},
+	}
+	var calls int
+	api := New("test-token", OptionAppLevelToken("test-app-token"),
+		OptionHTTPClient(httpClientFunc(func(r *http.Request) (*http.Response, error) {
+			defer r.Body.Close()
+			require.Less(t, calls, len(pages))
+			page := pages[calls]
+			calls++
+			var request map[string]string
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&request))
+			require.Equal(t, page.request, request)
+			require.Equal(t, "Bearer test-app-token", r.Header.Get("Authorization"))
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(strings.NewReader(page.response)),
+			}, nil
+		})),
+	)
+
+	authorizations, err := api.ListEventAuthorizationsContext(t.Context(), "event-context")
+	require.NoError(t, err)
+	require.Equal(t, []EventAuthorization{{TeamID: "T1", UserID: "U1"}, {TeamID: "T2", UserID: "U2"}}, authorizations)
+	require.Equal(t, len(pages), calls)
+}
+
 func TestListEventAuthorizations(t *testing.T) {
 	http.HandleFunc("/apps.event.authorizations.list", testListEventAuthorizationsHandler)
 	once.Do(startServer)
