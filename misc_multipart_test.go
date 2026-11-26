@@ -42,7 +42,7 @@ func TestMultipartUploadRequestFailure(t *testing.T) {
 					cancel()
 				}
 
-				err := postWithMultipartResponse(ctx, &http.Client{Transport: transport}, tt.path,
+				_, err := postWithMultipartResponse(ctx, &http.Client{Transport: transport}, tt.path,
 					"file.txt", "file", "test-token", url.Values{"title": {"test"}}, strings.NewReader("contents"), nil, discard{})
 				if err == nil {
 					t.Fatal("expected the upload to fail")
@@ -72,7 +72,7 @@ func TestMultipartUploadReaderError(t *testing.T) {
 			return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("OK"))}, nil
 		})
 
-		err := postWithMultipartResponse(t.Context(), client, "https://example.test/upload",
+		_, err := postWithMultipartResponse(t.Context(), client, "https://example.test/upload",
 			"file.txt", "file", "test-token", nil, iotest.ErrReader(readErr), nil, discard{})
 		if !errors.Is(err, readErr) {
 			t.Fatalf("got %v, want the source reader error %v", err, readErr)
