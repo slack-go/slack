@@ -174,6 +174,19 @@ func (c *recordingHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("OK")), Request: req}, nil
 }
 
+func TestUploadToURLRequiresSource(t *testing.T) {
+	client := &recordingHTTPClient{}
+	api := New("test-token", OptionHTTPClient(client))
+
+	err := api.UploadToURL(t.Context(), UploadToURLParameters{
+		UploadURL: "https://files.slack.com/upload",
+		Filename:  "test.txt",
+	})
+
+	require.ErrorContains(t, err, "upload source")
+	require.Empty(t, client.requests)
+}
+
 // TestTokenOnlySentToSlack covers GHSA-3q3v-34v2-g88f: GetFile and UploadToURL attach
 // the token to the URL they are given, and a remote file's url_private is the
 // external_url its creator chose. Only https Slack URLs and the API endpoint may get it.
