@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -116,60 +118,75 @@ func TestRTMGoodbye(t *testing.T) {
 }
 
 func TestRTMDeadConnection(t *testing.T) {
-	// Set up the test server.
-	testServer := slacktest.NewTestServer(
-		func(c slacktest.Customize) {
-			c.Handle("/ws", slacktest.Websocket(func(conn *websocket.Conn) {
-				// closes immediately
-			}))
-		},
-	)
-	go testServer.Start()
+	var connections atomic.Int32
+	server := slacktest.NewTestServer(func(c slacktest.Customize) {
+		c.Handle("/ws", slacktest.Websocket(func(conn *websocket.Conn) {
+			if connections.Add(1) == 1 {
+				return // Close the first connection immediately after the handshake.
+			}
+			// Keep the replacement open until the client disconnects.
+			_, _, _ = conn.ReadMessage()
+		}))
+	})
+	server.Start()
+	t.Cleanup(server.Stop)
 
-	// Setup and start the RTM.
-	api := slack.New(
-		testToken,
-		slack.OptionAPIURL(testServer.GetAPIURL()),
-	)
-
-	rtm := api.NewRTM(
-		slack.RTMOptionPingInterval(100 * time.Millisecond),
-	)
-
-	go rtm.ManageConnection()
+	api := slack.New(testToken, slack.OptionAPIURL(server.GetAPIURL()))
+	rtm := api.NewRTM(slack.RTMOptionPingInterval(time.Minute))
 	done := make(chan struct{})
-	connected := 0
-	disconnected := 0
-	func() {
-		for msg := range rtm.IncomingEvents {
-			switch ev := msg.Data.(type) {
-			case *slack.ConnectedEvent:
-				connected += 1
-				if connected > 5 {
-					rtm.Disconnect()
-				}
-			case *slack.DisconnectedEvent:
-				// t.Log("disconnect event received", ev.Intentional, ev.Cause)
-				if ev.Intentional {
-					close(done)
-					return
-				}
-				disconnected += 1
-			default:
-				// t.Logf("Discarded event of type '%s' with content '%#v'", msg.Type, ev)
+	go func() {
+		defer close(done)
+		rtm.ManageConnection()
+	}()
+	stop := sync.OnceFunc(func() {
+		go func() { _ = rtm.Disconnect() }()
+	})
+	t.Cleanup(func() {
+		stop()
+		timeout := time.NewTimer(5 * time.Second)
+		defer timeout.Stop()
+		for {
+			select {
+			case <-rtm.IncomingEvents:
+			case <-done:
+				return
+			case <-timeout.C:
+				t.Error("RTM manager did not stop after Disconnect")
+				return
 			}
 		}
-	}()
+	})
 
-	select {
-	case <-done:
-		// magic numbers from empirical testing.
-		assert.LessOrEqual(t, connected, 7)
-		assert.LessOrEqual(t, disconnected, 7)
-	case <-time.After(5 * time.Second):
-		t.Error("timed out waiting for disconnect")
-		t.Fail()
+	timeout := time.NewTimer(5 * time.Second)
+	defer timeout.Stop()
+	nextLifecycleEvent := func() any {
+		t.Helper()
+		for {
+			select {
+			case event := <-rtm.IncomingEvents:
+				switch event.Data.(type) {
+				case *slack.ConnectedEvent, *slack.DisconnectedEvent:
+					return event.Data
+				}
+			case <-timeout.C:
+				t.Fatal("timed out waiting for an RTM connection event")
+			}
+		}
 	}
+
+	require.IsType(t, &slack.ConnectedEvent{}, nextLifecycleEvent())
+	lost := nextLifecycleEvent()
+	require.IsType(t, &slack.DisconnectedEvent{}, lost)
+	require.False(t, lost.(*slack.DisconnectedEvent).Intentional)
+	replacement := nextLifecycleEvent()
+	require.IsType(t, &slack.ConnectedEvent{}, replacement)
+	require.Equal(t, 1, replacement.(*slack.ConnectedEvent).ConnectionCount)
+
+	stop()
+	stopped := nextLifecycleEvent()
+	require.IsType(t, &slack.DisconnectedEvent{}, stopped)
+	require.True(t, stopped.(*slack.DisconnectedEvent).Intentional)
+	require.Equal(t, int32(2), connections.Load())
 }
 
 func TestRTMDisconnect(t *testing.T) {
