@@ -1,9 +1,12 @@
+// Set SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET, configure the app's Interactivity
+// Request URL to point to /actions, and run go run ./examples/buttons -channel C123.
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -18,6 +21,11 @@ func main() {
 	token := os.Getenv("SLACK_BOT_TOKEN")
 	if token == "" {
 		fmt.Println("SLACK_BOT_TOKEN environment variable is required")
+		os.Exit(1)
+	}
+	signingSecret := os.Getenv("SLACK_SIGNING_SECRET")
+	if signingSecret == "" {
+		fmt.Fprintln(os.Stderr, "SLACK_SIGNING_SECRET environment variable is required")
 		os.Exit(1)
 	}
 
@@ -56,15 +64,36 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Printf("Message with buttons successfully sent to channel %s at %s", respChannelID, timestamp)
-	http.HandleFunc("/actions", actionHandler)
+	http.HandleFunc("POST /actions", func(w http.ResponseWriter, r *http.Request) {
+		actionHandler(w, r, signingSecret)
+	})
 	http.ListenAndServe(":3000", nil)
 }
 
-func actionHandler(w http.ResponseWriter, r *http.Request) {
-	var payload slack.InteractionCallback
-	err := json.Unmarshal([]byte(r.FormValue("payload")), &payload)
+func actionHandler(w http.ResponseWriter, r *http.Request, signingSecret string) {
+	verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 	if err != nil {
-		fmt.Printf("Could not parse action response JSON: %v", err)
+		http.Error(w, "invalid Slack signature", http.StatusUnauthorized)
+		return
 	}
-	fmt.Printf("Message button pressed by user %s with value %s", payload.User.Name, payload.ActionCallback.AttachmentActions[0].Value)
+
+	// Verify the original bytes before parsing the form.
+	body, err := io.ReadAll(io.TeeReader(http.MaxBytesReader(w, r.Body, 1<<20), &verifier))
+	if err != nil {
+		http.Error(w, "could not read request body", http.StatusBadRequest)
+		return
+	}
+	if err := verifier.Ensure(); err != nil {
+		http.Error(w, "invalid Slack signature", http.StatusUnauthorized)
+		return
+	}
+
+	r.Body = io.NopCloser(bytes.NewReader(body))
+	payload, err := slack.InteractionCallbackParse(r)
+	actions := payload.ActionCallback.AttachmentActions
+	if err != nil || len(actions) == 0 || actions[0] == nil || actions[0].Type != "button" {
+		http.Error(w, "expected a button action", http.StatusBadRequest)
+		return
+	}
+	fmt.Printf("Message button pressed by user %s with value %s\n", payload.User.Name, actions[0].Value)
 }

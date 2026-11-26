@@ -8,7 +8,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// WARNING: This example is destructive in the sense that it create a channel called testpinning
+// This example creates and archives a channel named testpinning if the channel does not exist.
 func main() {
 	debug := flag.Bool("debug", false, "Show JSON output")
 	flag.Parse()
@@ -26,7 +26,6 @@ func main() {
 		postAsUserName  string
 		postAsUserID    string
 		postToChannelID string
-		channels        []slack.Channel
 	)
 
 	// Find the user to post as.
@@ -46,32 +45,37 @@ func main() {
 	channel, err := api.CreateConversation(slack.CreateConversationParams{ChannelName: channelName})
 
 	if err != nil {
-		// If the channel exists, that means we just need to unarchive it
-		if err.Error() == "name_taken" {
-			err = nil
-			params := &slack.GetConversationsParameters{ExcludeArchived: false}
-			if channels, _, err = api.GetConversations(params); err != nil {
-				fmt.Println("Could not retrieve channels")
-				return
-			}
-			for _, archivedChannel := range channels {
-				if archivedChannel.Name == channelName {
-					if archivedChannel.IsArchived {
-						err = api.UnArchiveConversation(archivedChannel.ID)
-						if err != nil {
-							fmt.Printf("Could not unarchive %s: %s\n", archivedChannel.ID, err)
-							return
-						}
-					}
-					channel = &archivedChannel
-					break
-				}
-			}
-		}
-		if err != nil {
-			fmt.Printf("Error setting test channel for pinning: %s\n", err)
+		if err.Error() != "name_taken" {
+			fmt.Printf("Error creating test channel: %s\n", err)
 			return
 		}
+		channels, err := api.GetAllConversations()
+		if err != nil {
+			fmt.Printf("Could not retrieve channels: %s\n", err)
+			return
+		}
+		for i := range channels {
+			if channels[i].Name == channelName {
+				channel = &channels[i]
+				break
+			}
+		}
+		if channel == nil {
+			fmt.Printf("Channel %q was not found\n", channelName)
+			return
+		}
+		if channel.IsArchived {
+			if err := api.UnArchiveConversation(channel.ID); err != nil {
+				fmt.Printf("Could not unarchive %s: %s\n", channel.ID, err)
+				return
+			}
+		}
+	} else {
+		defer func() {
+			if err := api.ArchiveConversation(channel.ID); err != nil {
+				fmt.Printf("Error archiving test channel: %s\n", err)
+			}
+		}()
 	}
 	postToChannelID = channel.ID
 
@@ -111,10 +115,4 @@ func main() {
 		fmt.Printf("Error remove pin: %s\n", err)
 		return
 	}
-
-	if err = api.UnArchiveConversation(channelID); err != nil {
-		fmt.Printf("Error archiving channel: %s\n", err)
-		return
-	}
-
 }

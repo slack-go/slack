@@ -16,6 +16,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -45,8 +46,11 @@ func main() {
 	for {
 		printMenu()
 		fmt.Print("\nChoice: ")
-		input, _ := reader.ReadString('\n')
+		input, err := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
+		if err != nil && (err != io.EOF || input == "") {
+			return
+		}
 
 		switch input {
 		case "1":
@@ -84,6 +88,9 @@ func main() {
 			return
 		default:
 			fmt.Println("Invalid choice")
+		}
+		if err != nil {
+			return
 		}
 		fmt.Println()
 	}
