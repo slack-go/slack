@@ -109,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `response_metadata.warnings`.
 - Stop slacktest from dropping queued WebSocket messages after a client reconnects. The
   writer for a closed connection no longer takes messages meant for the new one.
+- Decode JSON-escaped digits in `JSONTime` string timestamps.
 
 ## [0.36.0] - 2026-11-14
 

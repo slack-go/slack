@@ -1,8 +1,8 @@
 package slack
 
 import (
-	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"slices"
@@ -423,14 +423,19 @@ func (t JSONTime) Time() time.Time {
 
 // UnmarshalJSON will unmarshal both string and int JSON values
 func (t *JSONTime) UnmarshalJSON(buf []byte) error {
-	s := bytes.Trim(buf, `"`)
+	s := string(buf)
+	if strings.HasPrefix(s, `"`) {
+		if err := json.Unmarshal(buf, &s); err != nil {
+			return err
+		}
+	}
 
-	if bytes.EqualFold(s, []byte("null")) {
+	if strings.EqualFold(s, "null") {
 		*t = JSONTime(0)
 		return nil
 	}
 
-	v, err := strconv.ParseInt(string(s), 10, 64)
+	v, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return err
 	}
