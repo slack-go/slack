@@ -38,6 +38,7 @@ func NewTestServer(custom ...Binder) *Server {
 	s := &Server{
 		registered:           map[string]struct{}{},
 		mux:                  http.NewServeMux(),
+		messageQueues:        serverChans,
 		seenInboundMessages:  &messageCollection{},
 		seenOutboundMessages: &messageCollection{},
 	}
@@ -146,6 +147,14 @@ func (sts *Server) GetWSURL() string {
 // Stop stops the test server
 func (sts *Server) Stop() {
 	sts.server.Close()
+
+	addr := sts.server.Listener.Addr().String()
+	masterHub.Lock()
+	// The address may have been reused by a new server after Close.
+	if masterHub.serverChannels[addr] == sts.messageQueues {
+		delete(masterHub.serverChannels, addr)
+	}
+	masterHub.Unlock()
 }
 
 // Start starts the test server

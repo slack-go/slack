@@ -83,6 +83,7 @@ type Server struct {
 	BotID                string
 	ServerAddr           string
 	SeenFeed             chan string
+	messageQueues        *messageChannels
 	channels             *serverChannels
 	groups               *serverGroups
 	seenInboundMessages  *messageCollection
