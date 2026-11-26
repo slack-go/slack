@@ -37,11 +37,12 @@ func (api *Client) StartSocketModeContext(ctx context.Context) (info *SocketMode
 	// can add a query parameter `debug_reconnects=true` to the URL to make the connection
 	// time significantly shorter (360 seconds).
 	if api.debug {
-		u, _ := url.Parse(response.SocketModeConnection.URL)
-		q := u.Query()
-		q.Set("debug_reconnects", "true")
-		u.RawQuery = q.Encode()
-		response.SocketModeConnection.URL = u.String()
+		if u, err := url.Parse(response.SocketModeConnection.URL); err == nil {
+			q := u.Query()
+			q.Set("debug_reconnects", "true")
+			u.RawQuery = q.Encode()
+			response.SocketModeConnection.URL = u.String()
+		}
 	}
 	return &response.SocketModeConnection, response.SocketModeConnection.URL, response.Err()
 }
