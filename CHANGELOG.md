@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Serialize slacktest JSON pong replies with queued WebSocket messages to prevent concurrent writes.
 - Preserve Slack response metadata in channel API errors, including diagnostic
   messages returned by `conversations.create`.
 - Preserve Slack response metadata in `GetConversationReplies`, `GetConversations`,
