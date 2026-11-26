@@ -1,6 +1,8 @@
 package slacktest
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,6 +73,15 @@ func TestServerCreateConversationHandler(t *testing.T) {
 	assert.Equal(t, "C0EAQDV4Z", conversation.ID)
 	assert.Equal(t, "U023BECGF", conversation.Creator)
 	assert.Equal(t, "endeavor", conversation.Name)
+}
+
+func TestConversationsInfoHandlerMissingChannel(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, "/conversations.info", http.NoBody)
+	recorder := httptest.NewRecorder()
+	(&Server{}).conversationsInfoHandler(recorder, req)
+
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.JSONEq(t, `{"ok":false,"error":"missing_argument","arg":"channel"}`, recorder.Body.String())
 }
 
 func TestServerSetConversationTopicHandler(t *testing.T) {
