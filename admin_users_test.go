@@ -112,7 +112,7 @@ func TestAdminUsersListMultipleWorkspaces(t *testing.T) {
 	assert.Equal(t, "alex", user.Username)
 	assert.Equal(t, "Alex Example", user.FullName)
 	assert.True(t, user.IsActive)
-	assert.Equal(t, int64(1566922090), user.DateCreated)
+	assert.Equal(t, JSONTime(1566922090), user.DateCreated)
 	assert.Zero(t, user.DeactivatedTimestamp)
 	assert.Zero(t, user.ExpirationTimestamp)
 	assert.Equal(t, int64(1700000000), user.LastActiveTimestamp)

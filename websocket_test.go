@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -47,9 +48,10 @@ func TestRTMGroupRenameCreated(t *testing.T) {
 	for _, test := range []struct {
 		name    string
 		created string
-		want    int64
+		want    JSONTime
 	}{
 		{"documented timestamp", `1360782804`, 1360782804},
+		{"quoted timestamp", `"1360782804"`, 1360782804},
 		{"observed live timestamp", `1794131905`, 1794131905},
 		{"beyond int32", `2147483648`, 2147483648},
 	} {
@@ -69,7 +71,8 @@ func TestRTMGroupRenameCreated(t *testing.T) {
 
 			encoded, err := json.Marshal(rename.Group)
 			require.NoError(t, err)
-			require.JSONEq(t, channelJSON, string(encoded))
+			wantChannelJSON := `{"id":"G02ELGNBH","name":"new_name","created":` + fmt.Sprintf("%d", test.want) + `}`
+			require.JSONEq(t, wantChannelJSON, string(encoded))
 		})
 	}
 }

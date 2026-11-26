@@ -26,7 +26,7 @@ type SlackbotSkill struct {
 	UsageCount    int                      `json:"usage_count"`
 	LibraryCount  int                      `json:"library_count"`
 	CreatorID     string                   `json:"creator_id"`
-	DateCreated   int64                    `json:"date_created"`
+	DateCreated   JSONTime                 `json:"date_created"`
 	DateUpdated   *int64                   `json:"date_updated"`
 	Permalink     string                   `json:"permalink"`
 }
