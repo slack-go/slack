@@ -45,6 +45,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** Preserve the nested channel and actor profile in
+  [`shared_channel_invite_requested`](https://docs.slack.dev/reference/events/shared_channel_invite_requested/)
+  Events API callbacks. Existing workflow-trigger fields and their JSON output remain
+  supported. New fields on `slackevents.SharedChannelInviteRequestedEvent` and
+  `slackevents.Actor` require positional literals to use field names instead, such as
+  `slackevents.SharedChannelInviteRequestedEvent{Actor: actor}` and
+  `slackevents.Actor{ID: userID}`.
 - **Breaking:** `slack.AssistantSearchContextResponse` drops its own `ResponseMetadata`
   field and uses the one from `SlackResponse`. Errors now keep Slack's diagnostic
   messages, and successful responses keep warnings. Replace

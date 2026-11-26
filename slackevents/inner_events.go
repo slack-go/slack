@@ -1341,6 +1341,7 @@ type EntityDetailsRequestedLink struct {
 	Domain string `json:"domain"`
 }
 
+// Actor describes the user requesting a shared-channel invitation.
 type Actor struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -1349,6 +1350,10 @@ type Actor struct {
 	Timezone    string `json:"timezone"`
 	RealName    string `json:"real_name"`
 	DisplayName string `json:"display_name"`
+
+	Updated                int64              `json:"updated,omitempty"`
+	Profile                *slack.UserProfile `json:"profile,omitempty"`
+	WhoCanShareContactCard string             `json:"who_can_share_contact_card,omitempty"`
 }
 
 type TargetUser struct {
@@ -1372,6 +1377,21 @@ type Team struct {
 	RequiresSponsorship bool     `json:"requires_sponsorship"`
 }
 
+// SharedChannelInviteRequestedChannel describes the channel in an Events API invite request.
+type SharedChannelInviteRequestedChannel struct {
+	ID                            string `json:"id"`
+	Name                          string `json:"name"`
+	IsIM                          bool   `json:"is_im"`
+	IsPrivate                     bool   `json:"is_private"`
+	DateCreated                   int64  `json:"date_created"`
+	MessageLatestCountedTimestamp int64  `json:"message_latest_counted_timestamp"`
+}
+
+// SharedChannelInviteRequestedEvent represents an Events API event or workflow trigger.
+// Events API payloads use Type and Channel; workflow triggers use EventType and the
+// flat ChannelID, ChannelName, ChannelType, and channel timestamp fields.
+//
+// Slack API docs: https://docs.slack.dev/reference/events/shared_channel_invite_requested/
 type SharedChannelInviteRequestedEvent struct {
 	Actor                       Actor        `json:"actor"`
 	ChannelID                   string       `json:"channel_id"`
@@ -1383,6 +1403,9 @@ type SharedChannelInviteRequestedEvent struct {
 	IsExternalLimited           bool         `json:"is_external_limited"`
 	ChannelDateCreated          int64        `json:"channel_date_created"`
 	ChannelMessageLatestCounted int64        `json:"channel_message_latest_counted_timestamp"`
+
+	Type    string                               `json:"type,omitempty"`
+	Channel *SharedChannelInviteRequestedChannel `json:"channel,omitempty"`
 }
 
 type EventsAPIType string
