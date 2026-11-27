@@ -72,6 +72,9 @@ type UserProfileCustomFields struct {
 
 // UnmarshalJSON is the implementation of the json.Unmarshaler interface.
 func (fields *UserProfileCustomFields) UnmarshalJSON(b []byte) error {
+	// Replace, don't merge: encoding/json reuses a non-nil map, which would
+	// leave fields from a previously decoded user in place.
+	fields.fields = nil
 	// https://github.com/slack-go/slack/pull/298#discussion_r185159233
 	if string(b) == "[]" {
 		return nil
