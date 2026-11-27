@@ -411,6 +411,9 @@ func toBlockElement(element *Accessory) BlockElement {
 	if element.WorkflowButtonElement != nil {
 		return element.WorkflowButtonElement
 	}
+	if element.UnknownElement != nil {
+		return element.UnknownElement
+	}
 
 	return nil
 }
