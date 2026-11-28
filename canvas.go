@@ -18,7 +18,7 @@ type DocumentContent struct {
 type CanvasChange struct {
 	Operation       string          `json:"operation"`
 	SectionID       string          `json:"section_id,omitempty"`
-	DocumentContent DocumentContent `json:"document_content"`
+	DocumentContent DocumentContent `json:"document_content,omitzero"`
 }
 
 type EditCanvasParams struct {
