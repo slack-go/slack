@@ -334,3 +334,32 @@ func TestGetCanvasContentErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestEditCanvasDeleteOmitsDocumentContent(t *testing.T) {
+	var changes []map[string]json.RawMessage
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if err := json.Unmarshal([]byte(r.FormValue("changes")), &changes); err != nil {
+			t.Errorf("decode changes: %v", err)
+		}
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Write([]byte(`{"ok": true}`))
+	}))
+	defer srv.Close()
+	api := New("testing-token", OptionAPIURL(srv.URL+"/"))
+
+	err := api.EditCanvas(EditCanvasParams{
+		CanvasID: "F1234ABCD",
+		Changes: []CanvasChange{
+			{Operation: "delete", SectionID: "S1234"},
+			{
+				Operation:       "insert_at_end",
+				DocumentContent: DocumentContent{Type: "markdown", Markdown: "hi"},
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.Len(t, changes, 2)
+
+	assert.NotContains(t, changes[0], "document_content", "delete must not send document_content")
+	assert.JSONEq(t, `{"type":"markdown","markdown":"hi"}`, string(changes[1]["document_content"]))
+}

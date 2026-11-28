@@ -94,6 +94,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `EditCanvas` no longer sends an empty `document_content` for changes that leave
+  `DocumentContent` unset, so `delete` changes are no longer rejected with
+  `invalid_arguments`.
 - Preserve Slack response metadata in channel API errors, including diagnostic
   messages returned by `conversations.create`.
 - Preserve Slack response metadata in `GetConversationReplies`, `GetConversations`,
